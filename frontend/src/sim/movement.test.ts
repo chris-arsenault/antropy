@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
 import { hasSupport, headingToDirection, isLegalPosition, stepCandidates } from "./movement";
-import { createWorld, mutateVoxel, populateDebugWalkers, stepWorld } from "./world";
+import { createWorld, mutateVoxel, populateForagers, stepWorld } from "./world";
 
 describe("headingToDirection", () => {
   it("maps the eight octants to unit horizontal directions", () => {
@@ -31,15 +31,22 @@ describe("walker population invariants", () => {
   function assertLegalPositions(world: ReturnType<typeof createWorld>): void {
     for (const ant of world.ants) {
       expect(getVoxel(world.grid, ant.x, ant.y, ant.z)).toBe(Material.AIR);
-      if (!ant.falling) {
-        expect(hasSupport(world.grid, ant.x, ant.y, ant.z)).toBe(true);
+      if (!ant.falling && !hasSupport(world.grid, ant.x, ant.y, ant.z)) {
+        // Terrain edits (eating, digging) can remove support mid-tick; the
+        // ant must register as falling on its next motor application.
+        const id = ant.id;
+        stepWorld(world);
+        const later = world.ants.find((a) => a.id === id);
+        expect(
+          later === undefined || later.falling || hasSupport(world.grid, later.x, later.y, later.z)
+        ).toBe(true);
       }
     }
   }
 
   it("keeps every ant in legal positions over a long walk", () => {
     const world = createWorld(555);
-    populateDebugWalkers(world, 40);
+    populateForagers(world, 40);
     expect(world.ants.length).toBeGreaterThan(30);
 
     for (let t = 0; t < 300; t++) {
@@ -51,8 +58,8 @@ describe("walker population invariants", () => {
   it("is deterministic across identically seeded worlds", () => {
     const a = createWorld(777);
     const b = createWorld(777);
-    populateDebugWalkers(a, 20);
-    populateDebugWalkers(b, 20);
+    populateForagers(a, 20);
+    populateForagers(b, 20);
     for (let t = 0; t < 100; t++) {
       stepWorld(a);
       stepWorld(b);
@@ -82,7 +89,7 @@ function hollowBox(
 describe("falling", () => {
   it("drops an ant when its support is dug away", () => {
     const world = createWorld(901);
-    populateDebugWalkers(world, 10);
+    populateForagers(world, 10);
     const ant = world.ants[0];
 
     // Hollow out a 26-neighborhood shell plus a drop column beneath the ant.

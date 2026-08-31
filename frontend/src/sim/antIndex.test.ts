@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { buildAntIndex, antsNear } from "./antIndex";
 import { createAnt } from "./ant";
+import { braitenbergController } from "./controller/braitenberg";
 import { createGrid } from "./grid";
+import { createRng } from "./rng";
 
 function antAt(id: number, x: number, y: number, z: number) {
   return createAnt(id, {
@@ -14,6 +16,8 @@ function antAt(id: number, x: number, y: number, z: number) {
     patrilineId: 0,
     motherId: 0,
     fatherId: 0,
+    genome: braitenbergController.seed(createRng(1)),
+    controllerState: braitenbergController.createState(),
   });
 }
 

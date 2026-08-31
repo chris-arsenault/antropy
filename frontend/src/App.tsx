@@ -1,13 +1,13 @@
-import { populateDebugWalkers } from "./sim/world";
+import { populateForagers, type World } from "./sim/world";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
-const DEBUG_WALKER_COUNT = 60;
+const FORAGER_COUNT = 60;
 
-function seedPopulation(world: Parameters<typeof populateDebugWalkers>[0]): void {
-  populateDebugWalkers(world, DEBUG_WALKER_COUNT);
+function seedPopulation(world: World): void {
+  populateForagers(world, FORAGER_COUNT);
 }
 
 export function App() {

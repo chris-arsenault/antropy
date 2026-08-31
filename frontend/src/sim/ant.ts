@@ -1,3 +1,4 @@
+import { type ControllerState, type Genome } from "./controller/contract";
 import { getVoxel, type VoxelGrid } from "./grid";
 import { Material } from "./materials";
 import { hasSupport } from "./movement";
@@ -31,6 +32,10 @@ export interface Ant {
   motherId: number;
   fatherId: number;
   deliveries: number;
+  /** Opaque behavioral genome — only the controller reads it (spec §2.3). */
+  genome: Genome;
+  /** Opaque recurrent controller state — the ant's only memory. */
+  controllerState: ControllerState;
 }
 
 export interface AntSpawn {
@@ -43,6 +48,8 @@ export interface AntSpawn {
   patrilineId: number;
   motherId: number;
   fatherId: number;
+  genome: Genome;
+  controllerState: ControllerState;
 }
 
 export function createAnt(id: number, spawn: AntSpawn): Ant {
@@ -68,6 +75,8 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     motherId: spawn.motherId,
     fatherId: spawn.fatherId,
     deliveries: 0,
+    genome: spawn.genome,
+    controllerState: spawn.controllerState,
   };
 }
 
