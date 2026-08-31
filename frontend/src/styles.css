@@ -47,6 +47,13 @@ body {
   gap: 0.4rem;
 }
 
+.app-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 0.75rem;
+}
+
 .world-view {
   flex: 1;
   min-height: 0;
@@ -55,6 +62,138 @@ body {
   border: 1px solid #3a3128;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.charts-panel {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+}
+
+.chart {
+  margin: 0;
+  padding: 0.4rem;
+  background: #1a1a19;
+  border: 1px solid #2c2c2a;
+  border-radius: 6px;
+}
+
+.chart-title {
+  font-size: 0.7rem;
+  color: #c3c2b7;
+  margin-bottom: 0.3rem;
+}
+
+.chart-canvas {
+  width: 100%;
+  display: block;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.25rem;
+  font-size: 0.65rem;
+  color: #c3c2b7;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.legend-chip {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.chip-s1 {
+  background: #3987e5;
+}
+
+.chip-s2 {
+  background: #d95926;
+}
+
+.chip-s3 {
+  background: #199e70;
+}
+
+.chip-s4 {
+  background: #c98500;
+}
+
+.sparkline-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sparkline {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  color: #898781;
+}
+
+.sparkline-canvas {
+  width: 100%;
+  display: block;
+}
+
+.sparkline-value {
+  text-align: right;
+  color: #c3c2b7;
+  font-variant-numeric: tabular-nums;
+}
+
+.inspector {
+  width: 190px;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  background: #1a1a19;
+  border: 1px solid #2c2c2a;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  overflow-y: auto;
+}
+
+.inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.inspector-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.08rem 0;
+}
+
+.inspector-key {
+  color: #898781;
+}
+
+.inspector-value {
+  color: #c3c2b7;
+  font-variant-numeric: tabular-nums;
+}
+
+.inspector-block {
+  margin-top: 0.4rem;
+}
+
+.inspector-block summary {
+  cursor: pointer;
+  color: #c3c2b7;
 }
 
 .world-canvas {

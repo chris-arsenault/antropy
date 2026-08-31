@@ -171,6 +171,10 @@ export const rnnController: Controller = {
     return { hidden: new Float32Array(HIDDEN_COUNT) } as unknown as ControllerState;
   },
 
+  inspectState(state) {
+    return Array.from((state as unknown as RnnState).hidden);
+  },
+
   physical(genome): PhysicalTraits {
     const g = asRnn(genome);
     return {

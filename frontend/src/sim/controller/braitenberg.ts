@@ -66,6 +66,10 @@ export const braitenbergController: Controller = {
     return { phase: 0 } as unknown as ControllerState;
   },
 
+  inspectState(state) {
+    return [(state as unknown as WanderState).phase];
+  },
+
   physical(): PhysicalTraits {
     return {
       bodyScale: 1,

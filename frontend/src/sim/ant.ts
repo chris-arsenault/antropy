@@ -38,6 +38,10 @@ export interface Ant {
   controllerState: ControllerState;
   /** Expressed physical traits, fixed at spawn (spec §3.2). */
   traits: PhysicalTraits;
+  /** Last sensory vector, kept for the inspector (spec §11.4). */
+  lastInputs: Float32Array;
+  /** Last motor outputs, kept for the inspector. */
+  lastOutputs: Float32Array;
 }
 
 export interface AntSpawn {
@@ -81,6 +85,8 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     genome: spawn.genome,
     controllerState: spawn.controllerState,
     traits: spawn.traits,
+    lastInputs: new Float32Array(0),
+    lastOutputs: new Float32Array(0),
   };
 }
 

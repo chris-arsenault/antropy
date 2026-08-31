@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createWorldRenderer } from "../render/worldRenderer";
+import { createWorldRenderer, type WorldRenderer } from "../render/worldRenderer";
 import { type World } from "../sim/world";
 
 interface WorldViewProps {
@@ -8,14 +8,16 @@ interface WorldViewProps {
   chartsOnly: boolean;
   /** Fractional-tick interpolation factor owned by the simulation host. */
   alphaRef: { readonly current: number };
+  onPickAnt(antId: number | null): void;
 }
 
 function supportsWebgl(canvas: HTMLCanvasElement): boolean {
   return canvas.getContext("webgl2") !== null;
 }
 
-export function WorldView({ world, chartsOnly, alphaRef }: WorldViewProps) {
+export function WorldView({ world, chartsOnly, alphaRef, onPickAnt }: WorldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rendererRef = useRef<WorldRenderer | null>(null);
   const [webglAvailable, setWebglAvailable] = useState(true);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export function WorldView({ world, chartsOnly, alphaRef }: WorldViewProps) {
     }
 
     const renderer = createWorldRenderer(canvas, world);
+    rendererRef.current = renderer;
     const resize = () => {
       renderer.resize(canvas.clientWidth, canvas.clientHeight);
     };
@@ -46,9 +49,22 @@ export function WorldView({ world, chartsOnly, alphaRef }: WorldViewProps) {
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
+      rendererRef.current = null;
       renderer.dispose();
     };
   }, [world, chartsOnly, alphaRef]);
+
+  const onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    const renderer = rendererRef.current;
+    if (!canvas || !renderer) {
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+    onPickAnt(renderer.pickAnt(ndcX, ndcY));
+  };
 
   if (chartsOnly) {
     return (
@@ -65,7 +81,7 @@ export function WorldView({ world, chartsOnly, alphaRef }: WorldViewProps) {
           WebGL2 is unavailable in this browser; the 3D view cannot render.
         </p>
       )}
-      <canvas ref={canvasRef} className="world-canvas" />
+      <canvas ref={canvasRef} className="world-canvas" onClick={onClick} />
     </section>
   );
 }

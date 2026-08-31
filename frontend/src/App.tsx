@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { foundColony } from "./sim/colony";
 import { type World } from "./sim/world";
+import { ChartsPanel } from "./ui/ChartsPanel";
+import { InspectorPanel } from "./ui/InspectorPanel";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
@@ -12,13 +15,17 @@ function seedPopulation(world: World): void {
 
 export function App() {
   const sim = useSimulation(DEFAULT_SEED, seedPopulation);
+  const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
+
+  const selectedAnt = sim.world.ants.find((ant) => ant.id === selectedAntId) ?? null;
 
   return (
     <main className="app-shell">
       <header className="app-header">
         <h1>Antropy</h1>
         <p className="status-line">
-          Tick <span data-testid="tick">{sim.tick}</span> · seed {sim.world.seed}
+          Tick <span data-testid="tick">{sim.tick}</span> · seed {sim.world.seed} · ants{" "}
+          {sim.stats?.population ?? 0}
         </p>
         <div className="controls">
           <button type="button" onClick={sim.running ? sim.pause : sim.start}>
@@ -39,7 +46,20 @@ export function App() {
           </label>
         </div>
       </header>
-      <WorldView world={sim.world} chartsOnly={isChartsOnly(sim.speed)} alphaRef={sim.alphaRef} />
+      <div className="app-body">
+        <WorldView
+          world={sim.world}
+          chartsOnly={isChartsOnly(sim.speed)}
+          alphaRef={sim.alphaRef}
+          onPickAnt={setSelectedAntId}
+        />
+        <ChartsPanel history={sim.history} stats={sim.stats} version={sim.tick} />
+        <InspectorPanel
+          ant={selectedAnt}
+          controller={sim.world.controller}
+          onClose={() => setSelectedAntId(null)}
+        />
+      </div>
     </main>
   );
 }

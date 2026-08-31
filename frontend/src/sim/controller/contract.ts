@@ -20,6 +20,11 @@ export interface Controller {
    * the trait values.
    */
   physical(genome: Genome): PhysicalTraits;
+  /**
+   * Read-only view of the recurrent state for the ant inspector (design
+   * spec §11.4) — activations, not genome internals.
+   */
+  inspectState(state: ControllerState): readonly number[];
 }
 
 /** Expressed physical trait values consumed by the simulation systems. */
