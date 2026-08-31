@@ -13,6 +13,7 @@ export interface SenseContext {
   pheromoneB: ScentField;
   foodScent: ScentField;
   antIndex: AntIndex;
+  eggIndex: Map<number, unknown>;
 }
 
 /** Antenna sample positions: one voxel ahead-left and ahead-right. */
@@ -74,7 +75,16 @@ function contactFlags(ctx: SenseContext, ant: Ant, inputs: Float32Array): void {
   const faced = getVoxelSafe(ctx.grid, ant.x + dx, ant.y, ant.z + dz);
   const below = getVoxelSafe(ctx.grid, ant.x, ant.y - 1, ant.z);
   inputs[Input.CONTACT_FOOD] = faced === Material.FOOD || below === Material.FOOD ? 1 : 0;
-  inputs[Input.CONTACT_EGG] = 0; // Eggs arrive in M6.
+  const facedInBounds =
+    ant.x + dx >= 0 &&
+    ant.x + dx < ctx.grid.sizeX &&
+    ant.z + dz >= 0 &&
+    ant.z + dz < ctx.grid.sizeZ;
+  inputs[Input.CONTACT_EGG] =
+    (facedInBounds && ctx.eggIndex.has(voxelIndex(ctx.grid, ant.x + dx, ant.y, ant.z + dz))) ||
+    ctx.eggIndex.has(voxelIndex(ctx.grid, ant.x, ant.y - 1, ant.z))
+      ? 1
+      : 0;
   const near = antsNear(ctx.antIndex, ctx.grid, ant.x, ant.y, ant.z, 1);
   inputs[Input.CONTACT_ANT] = near.some((other) => other.id !== ant.id) ? 1 : 0;
   inputs[Input.CROWDING] = Math.min(1, (near.length - 1) / 8);

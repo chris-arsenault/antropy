@@ -91,3 +91,27 @@ export const FOOD_GOVERNOR = {
 
 /** Pheromone deposit amount when the output fires at full intensity. */
 export const PHEROMONE_DEPOSIT_MAX = 1;
+
+// Colony and reproduction (M6, design spec §7).
+export const COLONY = {
+  /** Stored sperm from polyandrous founding. */
+  spermCount: 6,
+  /** First brood spawned as adults at founding (fast-forwarded eggs). */
+  initialWorkers: 40,
+  /** Chamber depth below the surface. */
+  chamberDepth: 6,
+  /** Minimum ticks between eggs. */
+  eggIntervalMin: 200,
+  /** Stockpile cost of laying beyond the egg's energy endowment. */
+  eggLayCost: 0.1,
+  /** Fraction of every meal credited to the colony stockpile (MVP delivery). */
+  deliveryTax: 0.2,
+  /** Queen lifespan before merit-weighted succession. */
+  queenLifespanTicks: 30_000,
+  /** Egg incubation time. */
+  incubationTicks: 600,
+  /** Hatchling body scale as a fraction of the genetic target. */
+  juvenileFraction: 0.5,
+  /** Body-scale growth per meal while juvenile. */
+  growthPerMeal: 0.1,
+} as const;

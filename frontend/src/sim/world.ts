@@ -2,8 +2,10 @@ import { createAnt, surfaceSpawnY, type Ant, type AntSpawn } from "./ant";
 import { buildAntIndex } from "./antIndex";
 import { tryDig, tryEat, depositPheromones } from "./actions";
 import { affectedChunkKeys } from "./chunks";
+import { stepColonies, type Colony } from "./colony";
 import { type Controller } from "./controller/contract";
 import { rnnController } from "./controller/rnn";
+import { stepEggs, type Egg } from "./eggs";
 import { applyBasalDrain, applyStepCost, checkDeath, reapDead } from "./energy";
 import { stepFoodGovernor } from "./foodSpawner";
 import { getVoxel, setVoxel, voxelIndex, type VoxelGrid } from "./grid";
@@ -23,6 +25,10 @@ export interface World {
   grid: VoxelGrid;
   ants: Ant[];
   nextAntId: number;
+  eggs: Egg[];
+  /** Voxel-keyed egg lookup, maintained on lay/hatch/eat. */
+  eggIndex: Map<number, Egg>;
+  colonies: Colony[];
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
@@ -54,6 +60,9 @@ export function createWorld(seed: number, controller: Controller = rnnController
     grid,
     ants: [],
     nextAntId: 1,
+    eggs: [],
+    eggIndex: new Map(),
+    colonies: [],
     pheromoneA: createScentField(grid),
     pheromoneB: createScentField(grid),
     foodScent: createScentField(grid),
@@ -127,8 +136,8 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
 
 /**
  * Advance the world by exactly one fixed timestep. System order is fixed and
- * load-bearing for determinism: scents, food governor, then ants in array
- * order, then reaping.
+ * load-bearing for determinism: scents, food governor, colonies, eggs, then
+ * ants in array order, then reaping.
  */
 export function stepWorld(world: World): void {
   world.tick += 1;
@@ -138,6 +147,8 @@ export function stepWorld(world: World): void {
   if (world.tick % FOOD_GOVERNOR.interval === 0) {
     stepFoodGovernor(world);
   }
+  stepColonies(world);
+  stepEggs(world);
 
   const ctx: SenseContext = {
     grid: world.grid,
@@ -145,6 +156,7 @@ export function stepWorld(world: World): void {
     pheromoneB: world.pheromoneB,
     foodScent: world.foodScent,
     antIndex: buildAntIndex(world.grid, world.ants),
+    eggIndex: world.eggIndex,
   };
   const inputs = createInputBuffer();
   for (const ant of world.ants) {

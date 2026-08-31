@@ -1,13 +1,13 @@
-import { populateForagers, type World } from "./sim/world";
+import { foundColony } from "./sim/colony";
+import { type World } from "./sim/world";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
-const FORAGER_COUNT = 60;
 
 function seedPopulation(world: World): void {
-  populateForagers(world, FORAGER_COUNT);
+  foundColony(world);
 }
 
 export function App() {

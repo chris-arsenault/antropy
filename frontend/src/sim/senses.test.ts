@@ -15,6 +15,7 @@ function contextFor(world: World): SenseContext {
     pheromoneB: world.pheromoneB,
     foodScent: world.foodScent,
     antIndex: buildAntIndex(world.grid, world.ants),
+    eggIndex: world.eggIndex,
   };
 }
 
