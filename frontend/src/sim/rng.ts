@@ -27,6 +27,13 @@ function splitmix32(seed: number): () => number {
  * sfc32 PRNG (ADR-0002): the only randomness source inside the simulation.
  * State is four 32-bit words, fully serializable for checkpointing.
  */
+/** Standard normal draw via Box-Muller, consuming two uniforms. */
+export function randNormal(rng: Rng): number {
+  const u = Math.max(rng.next(), 1e-12);
+  const v = rng.next();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
 export function createRng(seed: number): Rng {
   const mix = splitmix32(seed);
   let a = mix();

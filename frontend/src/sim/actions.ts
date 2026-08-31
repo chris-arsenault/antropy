@@ -1,4 +1,5 @@
 import { type Ant } from "./ant";
+import { maxEnergy } from "./energy";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
 import { Material, type MaterialId } from "./materials";
 import { headingToDirection } from "./movement";
@@ -21,7 +22,7 @@ export function tryEat(world: World, ant: Ant): void {
       getVoxelSafe(world.grid, pos.x, pos.y, pos.z) === Material.FOOD
     ) {
       mutateVoxel(world, pos.x, pos.y, pos.z, Material.AIR);
-      ant.energy = Math.min(ENERGY.max, ant.energy + ENERGY.foodEnergy);
+      ant.energy = Math.min(maxEnergy(ant), ant.energy + ENERGY.foodEnergy);
       return;
     }
   }

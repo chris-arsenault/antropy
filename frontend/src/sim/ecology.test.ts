@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { tryDig, tryEat } from "./actions";
+import { braitenbergController } from "./controller/braitenberg";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
 import { ENERGY, FOOD_GOVERNOR } from "./tunables";
 import { createWorld, mutateVoxel, populateForagers, stepWorld, type World } from "./world";
+
+// Ecology behavior is calibrated against the reference controller (spec §13
+// phase 2 — "ants whose behavior is known"), independent of RNN evolution.
+function createReferenceWorld(seed: number): World {
+  return createWorld(seed, braitenbergController);
+}
 
 function firstAnt(world: World) {
   const ant = world.ants[0];
@@ -25,7 +32,7 @@ function countSolidAndCarried(world: World): number {
 
 describe("digging and spoil conservation", () => {
   it("digs the faced voxel, loads spoil, and deposits it as LOOSE_FILL", () => {
-    const world = createWorld(31);
+    const world = createReferenceWorld(31);
     populateForagers(world, 5);
     const ant = firstAnt(world);
     ant.heading = 0;
@@ -47,7 +54,7 @@ describe("digging and spoil conservation", () => {
   });
 
   it("refuses to dig rock", () => {
-    const world = createWorld(32);
+    const world = createReferenceWorld(32);
     populateForagers(world, 5);
     const ant = firstAnt(world);
     ant.heading = 0;
@@ -61,7 +68,7 @@ describe("digging and spoil conservation", () => {
 
 describe("eating and death", () => {
   it("consumes a faced FOOD voxel and gains energy", () => {
-    const world = createWorld(33);
+    const world = createReferenceWorld(33);
     populateForagers(world, 5);
     const ant = firstAnt(world);
     ant.heading = 0;
@@ -75,7 +82,7 @@ describe("eating and death", () => {
   });
 
   it("kills a starved ant and leaves a corpse as FOOD", () => {
-    const world = createWorld(34);
+    const world = createReferenceWorld(34);
     populateForagers(world, 3);
     const ant = firstAnt(world);
     ant.energy = 0.0001;
@@ -91,7 +98,7 @@ describe("eating and death", () => {
 
 describe("food governor", () => {
   it("builds the food supply toward the target", { timeout: 60_000 }, () => {
-    const world = createWorld(35);
+    const world = createReferenceWorld(35);
     for (let t = 0; t < FOOD_GOVERNOR.interval * 30; t++) {
       stepWorld(world);
     }
@@ -102,7 +109,7 @@ describe("food governor", () => {
 
 describe("ecology calibration (M4 gate)", () => {
   it("keeps most Braitenberg foragers alive with food regenerating", { timeout: 120_000 }, () => {
-    const world = createWorld(2001);
+    const world = createReferenceWorld(2001);
     for (let t = 0; t < FOOD_GOVERNOR.interval * 10; t++) {
       stepWorld(world); // pre-stock the larder
     }
@@ -116,7 +123,7 @@ describe("ecology calibration (M4 gate)", () => {
   });
 
   it("starves the population without food", { timeout: 120_000 }, () => {
-    const world = createWorld(2002);
+    const world = createReferenceWorld(2002);
     populateForagers(world, 20);
     world.foodTarget = 0;
     for (let t = 0; t < 4000; t++) {

@@ -57,7 +57,8 @@ export function applyMotor(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
   ant.falling = false;
 
   ant.heading += motor.turn * TURN_RADIANS_PER_TICK;
-  ant.moveCharge += Math.max(0, Math.min(1, motor.forward));
+  // Leg length buys speed (spec §3.2); the energy side is in applyStepCost.
+  ant.moveCharge += Math.max(0, Math.min(1, motor.forward)) * ant.traits.legLength;
 
   let steps = 0;
   while (ant.moveCharge >= 1 && steps < MAX_STEPS_PER_TICK) {

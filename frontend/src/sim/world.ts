@@ -2,8 +2,8 @@ import { createAnt, surfaceSpawnY, type Ant, type AntSpawn } from "./ant";
 import { buildAntIndex } from "./antIndex";
 import { tryDig, tryEat, depositPheromones } from "./actions";
 import { affectedChunkKeys } from "./chunks";
-import { braitenbergController } from "./controller/braitenberg";
 import { type Controller } from "./controller/contract";
+import { rnnController } from "./controller/rnn";
 import { applyBasalDrain, applyStepCost, checkDeath, reapDead } from "./energy";
 import { stepFoodGovernor } from "./foodSpawner";
 import { getVoxel, setVoxel, voxelIndex, type VoxelGrid } from "./grid";
@@ -45,7 +45,7 @@ export interface WorldSnapshot {
   rngState: RngState;
 }
 
-export function createWorld(seed: number, controller: Controller = braitenbergController): World {
+export function createWorld(seed: number, controller: Controller = rnnController): World {
   const grid = generateTerrain(seed);
   return {
     seed,
@@ -80,6 +80,7 @@ export function populateForagers(world: World, count: number): void {
     if (y === null) {
       continue;
     }
+    const genome = world.controller.seed(world.rng);
     spawnAnt(world, {
       x,
       y,
@@ -90,8 +91,9 @@ export function populateForagers(world: World, count: number): void {
       patrilineId: 0,
       motherId: 0,
       fatherId: 0,
-      genome: world.controller.seed(world.rng),
+      genome,
       controllerState: world.controller.createState(),
+      traits: world.controller.physical(genome),
     });
   }
 }

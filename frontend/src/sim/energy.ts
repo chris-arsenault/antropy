@@ -4,27 +4,42 @@ import { Material } from "./materials";
 import { ENERGY } from "./tunables";
 import { mutateVoxel, type World } from "./world";
 
-/** Per-tick fixed drains (design spec §6): basal metabolism + sensor upkeep. */
-export function applyBasalDrain(ant: Ant, thinkCost: number): void {
-  const basal = ENERGY.basalPerTick * Math.pow(ant.bodyScale, ENERGY.basalScaleExponent);
-  ant.energy -= basal + ENERGY.sensorUpkeep + thinkCost;
+export function maxEnergy(ant: Ant): number {
+  return ENERGY.max * ant.traits.storage;
 }
 
-/** Movement cost for the distance moved this tick. */
+/**
+ * Per-tick fixed drains (design spec §6): size-scaled basal metabolism,
+ * sensor upkeep scaling with the square of sensor gain, and think cost.
+ */
+export function applyBasalDrain(ant: Ant, thinkCost: number): void {
+  const basal = ENERGY.basalPerTick * Math.pow(ant.bodyScale, ENERGY.basalScaleExponent);
+  const upkeep = ENERGY.sensorUpkeep * ant.traits.sensorGain * ant.traits.sensorGain;
+  ant.energy -= basal + upkeep + thinkCost;
+}
+
+/**
+ * Movement cost for the distance moved this tick: leg length buys speed but
+ * raises per-step cost; a fuller, larger store slows movement (spec §3.2).
+ */
 export function applyStepCost(ant: Ant): void {
   const moved = ant.x !== ant.prevX || ant.y !== ant.prevY || ant.z !== ant.prevZ;
   if (!moved) {
     return;
   }
-  ant.energy -= ENERGY.stepCost + (ant.carrying !== null ? ENERGY.carryStepCost : 0);
+  const fullness = Math.max(0, ant.energy) / maxEnergy(ant);
+  const storagePenalty = 1 + 0.3 * fullness * Math.max(0, ant.traits.storage - 1);
+  const base = ENERGY.stepCost * ant.traits.legLength * storagePenalty;
+  ant.energy -= base + (ant.carrying !== null ? ENERGY.carryStepCost : 0);
 }
 
 /**
- * Death check (design spec §6): energy exhaustion or age-out. The corpse
- * persists as edible energy — a FOOD voxel at the death site when it is air.
+ * Death check (design spec §6): energy exhaustion or age past the genetic
+ * lifespan cap. The corpse persists as edible energy — a FOOD voxel at the
+ * death site when it is air.
  */
 export function checkDeath(world: World, ant: Ant): void {
-  if (ant.energy > 0 && ant.age <= ENERGY.ageCap) {
+  if (ant.energy > 0 && ant.age <= ant.traits.lifespanTicks) {
     return;
   }
   ant.alive = false;

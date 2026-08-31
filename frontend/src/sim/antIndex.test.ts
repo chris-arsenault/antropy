@@ -18,6 +18,7 @@ function antAt(id: number, x: number, y: number, z: number) {
     fatherId: 0,
     genome: braitenbergController.seed(createRng(1)),
     controllerState: braitenbergController.createState(),
+    traits: braitenbergController.physical(braitenbergController.seed(createRng(1))),
   });
 }
 

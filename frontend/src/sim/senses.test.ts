@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildAntIndex } from "./antIndex";
+import { braitenbergController } from "./controller/braitenberg";
 import { Input } from "./controller/contract";
 import { voxelIndex } from "./grid";
 import { Material } from "./materials";
@@ -19,7 +20,7 @@ function contextFor(world: World): SenseContext {
 
 describe("sense", () => {
   it("reads a stereo food-scent difference across the antennae", () => {
-    const world = createWorld(71);
+    const world = createWorld(71, braitenbergController);
     populateForagers(world, 1);
     const ant = world.ants[0];
     ant.heading = 0; // facing +x; left antenna samples +z side
@@ -31,7 +32,7 @@ describe("sense", () => {
   });
 
   it("flags food contact and reports internal state", () => {
-    const world = createWorld(72);
+    const world = createWorld(72, braitenbergController);
     populateForagers(world, 1);
     const ant = world.ants[0];
     ant.heading = 0;
@@ -46,7 +47,7 @@ describe("sense", () => {
   });
 
   it("reports crowding when another ant is adjacent", () => {
-    const world = createWorld(73);
+    const world = createWorld(73, braitenbergController);
     populateForagers(world, 1);
     const ant = world.ants[0];
     populateForagers(world, 0);

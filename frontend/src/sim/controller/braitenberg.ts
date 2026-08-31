@@ -1,3 +1,4 @@
+import { ENERGY } from "../tunables";
 import {
   Input,
   Output,
@@ -6,6 +7,7 @@ import {
   type Controller,
   type ControllerState,
   type Genome,
+  type PhysicalTraits,
 } from "./contract";
 
 const THINK_COST = 0.00005;
@@ -62,5 +64,17 @@ export const braitenbergController: Controller = {
 
   createState(): ControllerState {
     return { phase: 0 } as unknown as ControllerState;
+  },
+
+  physical(): PhysicalTraits {
+    return {
+      bodyScale: 1,
+      legLength: 1,
+      sensorGain: 1,
+      storage: 1,
+      eggEndowment: 0.3,
+      lifespanTicks: ENERGY.ageCap,
+      mutationSigma: 0,
+    };
   },
 };

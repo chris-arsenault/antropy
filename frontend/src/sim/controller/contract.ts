@@ -14,6 +14,30 @@ export interface Controller {
   /** A structured-init founder genome (design spec §2.1). */
   seed(rng: Rng): Genome;
   createState(): ControllerState;
+  /**
+   * Expressed physical traits (design spec §3.2). Expression (ploidy,
+   * dominance, squashing) is the controller's business; consumers see only
+   * the trait values.
+   */
+  physical(genome: Genome): PhysicalTraits;
+}
+
+/** Expressed physical trait values consumed by the simulation systems. */
+export interface PhysicalTraits {
+  /** Target adult body scale; drives metabolism and dig strength. */
+  bodyScale: number;
+  /** Step-speed factor; also scales per-step energy cost. */
+  legLength: number;
+  /** Scent acuity multiplier; upkeep scales with its square. */
+  sensorGain: number;
+  /** Energy storage capacity multiplier. */
+  storage: number;
+  /** Energy endowed to each egg (M6). */
+  eggEndowment: number;
+  /** Lifespan cap in ticks. */
+  lifespanTicks: number;
+  /** Normalized mutation-rate gene in [0, 1]. */
+  mutationSigma: number;
 }
 
 /** Opaque behavioral genome. Only controller implementations look inside. */

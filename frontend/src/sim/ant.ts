@@ -1,4 +1,4 @@
-import { type ControllerState, type Genome } from "./controller/contract";
+import { type ControllerState, type Genome, type PhysicalTraits } from "./controller/contract";
 import { getVoxel, type VoxelGrid } from "./grid";
 import { Material } from "./materials";
 import { hasSupport } from "./movement";
@@ -36,6 +36,8 @@ export interface Ant {
   genome: Genome;
   /** Opaque recurrent controller state — the ant's only memory. */
   controllerState: ControllerState;
+  /** Expressed physical traits, fixed at spawn (spec §3.2). */
+  traits: PhysicalTraits;
 }
 
 export interface AntSpawn {
@@ -50,6 +52,7 @@ export interface AntSpawn {
   fatherId: number;
   genome: Genome;
   controllerState: ControllerState;
+  traits: PhysicalTraits;
 }
 
 export function createAnt(id: number, spawn: AntSpawn): Ant {
@@ -66,7 +69,7 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     falling: false,
     energy: spawn.energy,
     age: 0,
-    bodyScale: 1,
+    bodyScale: spawn.traits.bodyScale,
     carrying: null,
     carryLoad: 0,
     alive: true,
@@ -77,6 +80,7 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     deliveries: 0,
     genome: spawn.genome,
     controllerState: spawn.controllerState,
+    traits: spawn.traits,
   };
 }
 

@@ -28,7 +28,12 @@ function antennaPositions(ant: Ant): {
   };
 }
 
-function scentAt(ctx: SenseContext, field: ScentField, pos: [number, number, number]): number {
+function scentAt(
+  ctx: SenseContext,
+  field: ScentField,
+  pos: [number, number, number],
+  gain: number
+): number {
   const [x, y, z] = pos;
   if (
     x < 0 ||
@@ -40,7 +45,7 @@ function scentAt(ctx: SenseContext, field: ScentField, pos: [number, number, num
   ) {
     return 0;
   }
-  return Math.min(1, sampleScent(field, voxelIndex(ctx.grid, x, y, z)));
+  return Math.min(1, sampleScent(field, voxelIndex(ctx.grid, x, y, z)) * gain);
 }
 
 function localSolidity(grid: VoxelGrid, ant: Ant): number {
@@ -78,13 +83,14 @@ function contactFlags(ctx: SenseContext, ant: Ant, inputs: Float32Array): void {
 /** Build the ~20-input sensory vector (design spec §4). */
 export function sense(ctx: SenseContext, ant: Ant, inputs: Float32Array): Float32Array {
   const { left, right } = antennaPositions(ant);
-  inputs[Input.PHEROMONE_A_LEFT] = scentAt(ctx, ctx.pheromoneA, left);
-  inputs[Input.PHEROMONE_A_RIGHT] = scentAt(ctx, ctx.pheromoneA, right);
-  inputs[Input.PHEROMONE_B_LEFT] = scentAt(ctx, ctx.pheromoneB, left);
-  inputs[Input.PHEROMONE_B_RIGHT] = scentAt(ctx, ctx.pheromoneB, right);
-  inputs[Input.FOOD_SCENT_LEFT] = scentAt(ctx, ctx.foodScent, left);
-  inputs[Input.FOOD_SCENT_RIGHT] = scentAt(ctx, ctx.foodScent, right);
-  inputs[Input.ENERGY] = Math.max(0, Math.min(1, ant.energy / ENERGY.max));
+  const gain = ant.traits.sensorGain;
+  inputs[Input.PHEROMONE_A_LEFT] = scentAt(ctx, ctx.pheromoneA, left, gain);
+  inputs[Input.PHEROMONE_A_RIGHT] = scentAt(ctx, ctx.pheromoneA, right, gain);
+  inputs[Input.PHEROMONE_B_LEFT] = scentAt(ctx, ctx.pheromoneB, left, gain);
+  inputs[Input.PHEROMONE_B_RIGHT] = scentAt(ctx, ctx.pheromoneB, right, gain);
+  inputs[Input.FOOD_SCENT_LEFT] = scentAt(ctx, ctx.foodScent, left, gain);
+  inputs[Input.FOOD_SCENT_RIGHT] = scentAt(ctx, ctx.foodScent, right, gain);
+  inputs[Input.ENERGY] = Math.max(0, Math.min(1, ant.energy / (ENERGY.max * ant.traits.storage)));
   inputs[Input.AGE_FRACTION] = Math.min(1, ant.age / ENERGY.ageCap);
   inputs[Input.CARRY_LOAD] = ant.carryLoad;
   inputs[Input.CARRIED_MATERIAL] = ant.carrying === null ? 0 : ant.carrying / 8;
