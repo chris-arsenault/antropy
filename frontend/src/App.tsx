@@ -1,11 +1,17 @@
+import { populateDebugWalkers } from "./sim/world";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
+const DEBUG_WALKER_COUNT = 60;
+
+function seedPopulation(world: Parameters<typeof populateDebugWalkers>[0]): void {
+  populateDebugWalkers(world, DEBUG_WALKER_COUNT);
+}
 
 export function App() {
-  const sim = useSimulation(DEFAULT_SEED);
+  const sim = useSimulation(DEFAULT_SEED, seedPopulation);
 
   return (
     <main className="app-shell">
@@ -33,7 +39,7 @@ export function App() {
           </label>
         </div>
       </header>
-      <WorldView world={sim.world} chartsOnly={isChartsOnly(sim.speed)} />
+      <WorldView world={sim.world} chartsOnly={isChartsOnly(sim.speed)} alphaRef={sim.alphaRef} />
     </main>
   );
 }

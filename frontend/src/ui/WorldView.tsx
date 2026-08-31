@@ -6,13 +6,15 @@ interface WorldViewProps {
   world: World;
   /** When true (charts-only speed), the 3D viewport is not drawn. */
   chartsOnly: boolean;
+  /** Fractional-tick interpolation factor owned by the simulation host. */
+  alphaRef: { readonly current: number };
 }
 
 function supportsWebgl(canvas: HTMLCanvasElement): boolean {
   return canvas.getContext("webgl2") !== null;
 }
 
-export function WorldView({ world, chartsOnly }: WorldViewProps) {
+export function WorldView({ world, chartsOnly, alphaRef }: WorldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [webglAvailable, setWebglAvailable] = useState(true);
 
@@ -36,7 +38,7 @@ export function WorldView({ world, chartsOnly }: WorldViewProps) {
     let frame = 0;
     const draw = () => {
       renderer.updateDirtyChunks();
-      renderer.render(0);
+      renderer.render(alphaRef.current);
       frame = requestAnimationFrame(draw);
     };
     frame = requestAnimationFrame(draw);
@@ -46,7 +48,7 @@ export function WorldView({ world, chartsOnly }: WorldViewProps) {
       window.removeEventListener("resize", resize);
       renderer.dispose();
     };
-  }, [world, chartsOnly]);
+  }, [world, chartsOnly, alphaRef]);
 
   if (chartsOnly) {
     return (

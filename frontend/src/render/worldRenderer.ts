@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { chunkCount, chunkKey } from "../sim/chunks";
 import { type World } from "../sim/world";
+import { createAntRenderer } from "./antRenderer";
 import { buildChunkGeometry, type ChunkGeometry } from "./meshing";
 
 export interface WorldRenderer {
@@ -73,6 +74,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
     }
   }
 
+  const ants = createAntRenderer(scene);
+
   return {
     updateDirtyChunks() {
       for (const key of world.dirtyChunks) {
@@ -83,7 +86,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
       }
       world.dirtyChunks.clear();
     },
-    render(_alpha: number) {
+    render(alpha: number) {
+      ants.update(world, alpha);
       controls.update();
       renderer.render(scene, camera);
     },
@@ -93,6 +97,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
       camera.updateProjectionMatrix();
     },
     dispose() {
+      ants.dispose();
       controls.dispose();
       for (const mesh of meshes.values()) {
         mesh.geometry.dispose();

@@ -7,6 +7,8 @@ export interface SimulationHandle {
   tick: number;
   running: boolean;
   speed: SpeedPreset;
+  /** Fractional-tick interpolation factor for the renderer, updated per frame. */
+  alphaRef: { readonly current: number };
   start(): void;
   pause(): void;
   setSpeed(speed: SpeedPreset): void;
@@ -19,13 +21,20 @@ const UI_REFRESH_MS = 100;
  * advances it inside a requestAnimationFrame budget, and republishes the tick
  * counter to React at a throttled cadence so high speeds don't flood renders.
  */
-export function useSimulation(seed: number): SimulationHandle {
-  const [world] = useState(() => createWorld(seed));
+export function useSimulation(seed: number, init?: (world: World) => void): SimulationHandle {
+  // The initializer runs exactly once per mount; later identity changes of
+  // `init` are irrelevant by design.
+  const [world] = useState(() => {
+    const created = createWorld(seed);
+    init?.(created);
+    return created;
+  });
   const [running, setRunning] = useState(false);
   const [speed, setSpeed] = useState<SpeedPreset>(1);
   const [tick, setTick] = useState(world.tick);
 
   const frameRef = useRef(0);
+  const alphaRef = useRef(0);
 
   useEffect(() => {
     if (!running) {
@@ -42,6 +51,7 @@ export function useSimulation(seed: number): SimulationHandle {
       for (let i = 0; i < budgeted.ticks; i++) {
         stepWorld(world);
       }
+      alphaRef.current = carry;
       if (now - lastPublish >= UI_REFRESH_MS) {
         lastPublish = now;
         setTick(world.tick);
@@ -59,5 +69,5 @@ export function useSimulation(seed: number): SimulationHandle {
   const start = useCallback(() => setRunning(true), []);
   const pause = useCallback(() => setRunning(false), []);
 
-  return { world, tick, running, speed, start, pause, setSpeed };
+  return { world, tick, running, speed, alphaRef, start, pause, setSpeed };
 }
