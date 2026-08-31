@@ -1,0 +1,13 @@
+.env
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+.idea/
+target/
+.DS_Store
+.sulion-paste/

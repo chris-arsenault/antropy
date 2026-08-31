@@ -1,0 +1,5 @@
+project: antropy
+prefix: antropy
+stack:
+  - typescript
+  - terraform
