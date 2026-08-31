@@ -173,6 +173,27 @@ export default tseslint.config(
     },
   },
 
+  {
+    files: ["src/render/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "react", message: "src/render draws; React lives in src/ui (ADR-0001)." },
+            { name: "react-dom", message: "src/render draws; React lives in src/ui (ADR-0001)." },
+          ],
+          patterns: [
+            {
+              group: ["**/ui/**", "**/persist/**"],
+              message: "src/render must not import ui or persist layers (ADR-0001).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   sonarjs.configs.recommended,
 
   {

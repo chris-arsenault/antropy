@@ -36,6 +36,34 @@ describe("App", () => {
     await cleanup(container, root);
   });
 
+  it("shows the viewport with an explicit notice when WebGL2 is unavailable", async () => {
+    const { container, root } = await renderApp();
+
+    const view = container.querySelector('[data-testid="world-view"]');
+    expect(view).not.toBeNull();
+    expect(view?.textContent).toContain("WebGL2 is unavailable");
+
+    await cleanup(container, root);
+  });
+
+  it("replaces the viewport with a notice at charts-only speed", async () => {
+    const { container, root } = await renderApp();
+
+    const select = container.querySelector("select");
+    if (!select) {
+      throw new Error("missing speed select");
+    }
+    await act(async () => {
+      select.value = "1000";
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    const view = container.querySelector('[data-testid="world-view"]');
+    expect(view?.textContent).toContain("rendering disabled");
+    expect(view?.querySelector("canvas")).toBeNull();
+
+    await cleanup(container, root);
+  });
+
   it("toggles between run and pause", async () => {
     const { container, root } = await renderApp();
 
