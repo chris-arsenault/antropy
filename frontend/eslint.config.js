@@ -126,6 +126,53 @@ export default tseslint.config(
     },
   },
 
+  {
+    files: ["src/sim/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "react", message: "src/sim is pure: no React (ADR-0001)." },
+            { name: "react-dom", message: "src/sim is pure: no React (ADR-0001)." },
+            { name: "three", message: "src/sim is pure: no three.js (ADR-0001)." },
+          ],
+          patterns: [
+            {
+              group: ["**/render/**", "**/ui/**", "**/persist/**"],
+              message: "src/sim must not import outer layers (ADR-0001).",
+            },
+          ],
+        },
+      ],
+      "no-restricted-globals": [
+        "error",
+        { name: "window", message: "src/sim is DOM-free (ADR-0001)." },
+        { name: "document", message: "src/sim is DOM-free (ADR-0001)." },
+      ],
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "Math",
+          property: "random",
+          message: "Use the world's seeded rng (ADR-0002).",
+        },
+        {
+          object: "Date",
+          property: "now",
+          message: "src/sim is deterministic: no wall clock (ADR-0002).",
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "NewExpression[callee.name='Date']",
+          message: "src/sim is deterministic: no wall clock (ADR-0002).",
+        },
+      ],
+    },
+  },
+
   sonarjs.configs.recommended,
 
   {
