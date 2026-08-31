@@ -1,9 +1,12 @@
+import { type VoxelGrid } from "./grid";
 import { createRng, type Rng, type RngState } from "./rng";
+import { generateTerrain } from "./terrain";
 
 export interface World {
   readonly seed: number;
   tick: number;
   rng: Rng;
+  grid: VoxelGrid;
 }
 
 export interface WorldSnapshot {
@@ -17,6 +20,7 @@ export function createWorld(seed: number): World {
     seed,
     tick: 0,
     rng: createRng(seed),
+    grid: generateTerrain(seed),
   };
 }
 

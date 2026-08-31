@@ -16,6 +16,7 @@ describe("world", () => {
       stepWorld(b);
     }
     expect(snapshotWorld(a)).toEqual(snapshotWorld(b));
+    expect(Buffer.from(a.grid.data).equals(Buffer.from(b.grid.data))).toBe(true);
   });
 
   it("counts ticks per step", () => {
