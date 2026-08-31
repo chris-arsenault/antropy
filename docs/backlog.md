@@ -6,63 +6,15 @@ references point there. Every release honors the binding constraint of §9: no a
 decision may preclude colony mortality/refounding, nest decay, or oscillating carrying
 capacity, even before the release that implements them.
 
-## MVP — selection visible in one session
-
-Goal: a browser simulation in which a genetically diverse colony forages, digs, and turns
-over under continuous selection, with instrumentation proving selection is operating within
-the first session (Act One of §10 — the wide prior being pruned, chart-legible). Single
-colony, small map, stable population; no founding flights, seasons, or castes yet.
-
-### World core (§5)
-
-- Implement the voxel grid on a small single map (flat typed material array, scalable
-  without structural change) with `AIR`, `TOPSOIL`, `CLAY`, `ROCK`, `FOOD`, `LOOSE_FILL`.
-- Generate terrain with fBm noise over depth-layered materials with noise-warped boundaries.
-- Implement chunked (16³) meshing with dirty-chunk remeshing and instanced ant rendering.
-- Implement voxel-lattice movement (cling to solid, fall when unsupported) with render-side
-  interpolation.
-- Implement fixed-timestep simulation with speed control from 1× through charts-only mode
-  (individual rendering disabled at high multipliers).
-
-### Ecology (§5.4, §5.5, §6)
-
-- Implement the energy economy: eating, size-scaled basal metabolism, movement, dig,
-  deposition, sensor upkeep, think-cost, egg endowment, and spoil-carriage sinks; death at
-  zero energy or age-out.
-- Implement digging with conserved spoil: dig loads the ant, deposits stack as `LOOSE_FILL`.
-- Implement the two-channel pheromone volume: sparse per-air-voxel storage, air-adjacency
-  diffusion, multiplicative evaporation, energy-costed deposition, no assigned meaning.
-- Persist corpses as edible energy.
-- Implement food spawn with a static density-dependent governor (carrying-capacity
-  oscillation arrives in the metapopulation release).
-
-### Genetics and colony (§2, §3, §4, §7)
-
-- Implement the fixed-topology RNN controller behind the pluggable
-  `act`/`mutate`/`recombine`/`seed` contract; nothing outside the controller inspects
-  genome internals.
-- Seed founders with the structured chemotaxis initialization plus wide-σ noise on all
-  other weights and physical genes ("instinct in erasable ink").
-- Implement the physical genome (~10 tradeoff genes including evolvable mutation σ) and
-  the ~20-input / ~8-output sensory-motor interface, including eat-anything (food or egg).
-- Implement mutation at egg creation and haplodiploid recombination behind `recombine`.
-- Implement one colony with a scripted polyandrous queen (mixed stored sperm, per-egg
-  father draw), the egg lifecycle (world objects, incubation, edible), juvenile growth
-  toward genetic target size, and per-patriline delivery bookkeeping.
-- Implement queen aging with in-place merit-weighted royal succession (§7.1 channel 3), so
-  worker success routes into the germ line and evolution accumulates without
-  multi-colony refounding.
-
-### Instrumentation and persistence (§11)
-
-- Implement the live selection-differential readout (per-gene correlation with
-  survival/food delivery among living ants) as the first chart online.
-- Implement per-gene mean/variance tracks, population counts, and lineage/patriline
-  coloring backed by day-one lineage bookkeeping in the ant record.
-- Implement the selected-ant inspector (live inputs, outputs, hidden state).
-- Implement checkpoint save/load via IndexedDB plus file export/import.
+The MVP ("selection visible in one session") shipped in v0.1.0 — see
+[../CHANGELOG.md](../CHANGELOG.md) and [architecture.md](architecture.md).
 
 ## Release 2 — metapopulation and recurrent regimes (§7.2, §9)
+
+- Replace the meal-tax delivery abstraction with physical food transport to the nest,
+  keeping per-patriline merit tracking.
+- Implement expressed haploid males behind the controller contract (removing the MVP
+  all-diploid simplification).
 
 - Implement colony founding: stockpile-triggered winged queens, dispersal flight, scripted
   founding chamber, and colony death on queen death.

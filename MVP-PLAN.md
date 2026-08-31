@@ -1,5 +1,9 @@
 # Antropy MVP — Implementation Plan
 
+> **Status: complete (2026-08-31).** All phases M0–M8 landed with green exit gates;
+> the in-browser visual smoke (terrain/ants/charts rendering, camera) awaits user
+> review. See CHANGELOG v0.1.0.
+
 Build the MVP defined in [docs/backlog.md](docs/backlog.md) ("selection visible in one
 session"): a single-colony, small-map, browser voxel ant simulation in which a genetically
 diverse population forages, digs, and turns over under continuous selection, with

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { computeStats, TRAIT_KEYS, type WorldStats } from "../sim/stats";
-import { createWorld, stepWorld, type World } from "../sim/world";
+import { stepWorld, type World } from "../sim/world";
 import { createTimeSeries, pushSample, type TimeSeries } from "./charts/timeSeries";
 import { ticksForFrame, type SpeedPreset } from "./pacing";
 
@@ -49,16 +49,16 @@ function recordSample(history: StatsHistory, stats: WorldStats): void {
 }
 
 /**
- * Hosts the simulation loop on the main thread (ADR-0001): owns the World,
- * advances it inside a requestAnimationFrame budget, samples instrumentation
- * on a tick cadence, and republishes to React at a throttled rate.
+ * Hosts the simulation loop on the main thread (ADR-0001): owns the World
+ * produced by the factory (fresh or checkpoint-restored — remount with a new
+ * key to switch), advances it inside a requestAnimationFrame budget, samples
+ * instrumentation on a tick cadence, and republishes at a throttled rate.
  */
-export function useSimulation(seed: number, init?: (world: World) => void): SimulationHandle {
+export function useSimulation(worldFactory: () => World): SimulationHandle {
   // The initializer runs exactly once per mount; later identity changes of
-  // `init` are irrelevant by design.
+  // `worldFactory` are irrelevant by design.
   const [initial] = useState(() => {
-    const world = createWorld(seed);
-    init?.(world);
+    const world = worldFactory();
     const history = createHistory();
     const stats = computeStats(world);
     recordSample(history, stats);

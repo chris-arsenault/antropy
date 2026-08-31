@@ -1,22 +1,66 @@
 import { useState } from "react";
 import { foundColony } from "./sim/colony";
-import { type World } from "./sim/world";
+import { createWorld, type World } from "./sim/world";
 import { ChartsPanel } from "./ui/ChartsPanel";
 import { InspectorPanel } from "./ui/InspectorPanel";
+import { PersistenceControls } from "./ui/PersistenceControls";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
 
-function seedPopulation(world: World): void {
-  foundColony(world);
+function freshWorldFactory(seed: number): () => World {
+  return () => {
+    const world = createWorld(seed);
+    foundColony(world);
+    return world;
+  };
+}
+
+interface Run {
+  id: number;
+  factory: () => World;
 }
 
 export function App() {
-  const sim = useSimulation(DEFAULT_SEED, seedPopulation);
-  const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
+  const [seedInput, setSeedInput] = useState(String(DEFAULT_SEED));
+  const [run, setRun] = useState<Run>({ id: 0, factory: freshWorldFactory(DEFAULT_SEED) });
 
+  const restart = (factory: () => World) => {
+    setRun((previous) => ({ id: previous.id + 1, factory }));
+  };
+
+  const newWorld = () => {
+    const seed = Number.parseInt(seedInput, 10);
+    if (Number.isFinite(seed)) {
+      restart(freshWorldFactory(seed));
+    }
+  };
+
+  return (
+    <SimRun
+      key={run.id}
+      factory={run.factory}
+      seedInput={seedInput}
+      onSeedInput={setSeedInput}
+      onNewWorld={newWorld}
+      onRestore={restart}
+    />
+  );
+}
+
+interface SimRunProps {
+  factory: () => World;
+  seedInput: string;
+  onSeedInput(value: string): void;
+  onNewWorld(): void;
+  onRestore(factory: () => World): void;
+}
+
+function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimRunProps) {
+  const sim = useSimulation(factory);
+  const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
   const selectedAnt = sim.world.ants.find((ant) => ant.id === selectedAntId) ?? null;
 
   return (
@@ -44,6 +88,18 @@ export function App() {
               ))}
             </select>
           </label>
+          <label className="speed-label">
+            Seed
+            <input
+              className="seed-input"
+              value={seedInput}
+              onChange={(event) => onSeedInput(event.target.value)}
+            />
+          </label>
+          <button type="button" onClick={onNewWorld}>
+            New world
+          </button>
+          <PersistenceControls world={sim.world} onRestore={onRestore} />
         </div>
       </header>
       <div className="app-body">

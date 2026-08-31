@@ -70,6 +70,22 @@ export const braitenbergController: Controller = {
     return [(state as unknown as WanderState).phase];
   },
 
+  serializeGenome() {
+    return new Float32Array(0);
+  },
+
+  deserializeGenome() {
+    return BRAITENBERG_GENOME;
+  },
+
+  serializeState(state) {
+    return Float32Array.of((state as unknown as WanderState).phase);
+  },
+
+  deserializeState(data) {
+    return { phase: data[0] ?? 0 } as unknown as ControllerState;
+  },
+
   physical(): PhysicalTraits {
     return {
       bodyScale: 1,

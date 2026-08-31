@@ -25,6 +25,11 @@ export interface Controller {
    * spec §11.4) — activations, not genome internals.
    */
   inspectState(state: ControllerState): readonly number[];
+  /** Checkpoint codec: genomes cross the boundary only as opaque arrays. */
+  serializeGenome(genome: Genome): Float32Array;
+  deserializeGenome(data: Float32Array): Genome;
+  serializeState(state: ControllerState): Float32Array;
+  deserializeState(data: Float32Array): ControllerState;
 }
 
 /** Expressed physical trait values consumed by the simulation systems. */

@@ -196,6 +196,25 @@ body {
   color: #c3c2b7;
 }
 
+.persistence-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.persistence-status {
+  font-size: 0.7rem;
+  color: #898781;
+}
+
+.file-input {
+  display: none;
+}
+
+.seed-input {
+  width: 5rem;
+}
+
 .world-canvas {
   width: 100%;
   height: 100%;

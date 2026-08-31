@@ -175,6 +175,36 @@ export const rnnController: Controller = {
     return Array.from((state as unknown as RnnState).hidden);
   },
 
+  serializeGenome(genome) {
+    const g = asRnn(genome);
+    const out = new Float32Array(GENOME_LENGTH * 2);
+    out.set(g.copies[0], 0);
+    out.set(g.copies[1], GENOME_LENGTH);
+    return out;
+  },
+
+  deserializeGenome(data) {
+    if (data.length !== GENOME_LENGTH * 2) {
+      throw new Error(
+        `rnn genome payload has length ${data.length}, expected ${GENOME_LENGTH * 2}`
+      );
+    }
+    return {
+      copies: [data.slice(0, GENOME_LENGTH), data.slice(GENOME_LENGTH)],
+    } as unknown as Genome;
+  },
+
+  serializeState(state) {
+    return Float32Array.from((state as unknown as RnnState).hidden);
+  },
+
+  deserializeState(data) {
+    if (data.length !== HIDDEN_COUNT) {
+      throw new Error(`rnn state payload has length ${data.length}, expected ${HIDDEN_COUNT}`);
+    }
+    return { hidden: Float32Array.from(data) } as unknown as ControllerState;
+  },
+
   physical(genome): PhysicalTraits {
     const g = asRnn(genome);
     return {
