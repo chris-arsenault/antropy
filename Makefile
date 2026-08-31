@@ -1,6 +1,8 @@
-.PHONY: ci lint lint-fix fmt format typecheck test docs-check terraform-fmt-check build deploy
+.PHONY: ci ci-full lint lint-fix fmt format typecheck test test-slow docs-check terraform-fmt-check build deploy
 
 ci: lint fmt typecheck test docs-check terraform-fmt-check
+
+ci-full: ci test-slow
 
 lint:
 	cd frontend && pnpm exec eslint .
@@ -18,7 +20,10 @@ typecheck:
 	cd frontend && pnpm exec tsc -b
 
 test:
-	cd frontend && pnpm exec vitest run
+	cd frontend && pnpm exec vitest run --exclude "**/*.slow.test.ts"
+
+test-slow:
+	cd frontend && pnpm exec vitest run slow.test
 
 docs-check:
 	test -f README.md

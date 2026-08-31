@@ -46,7 +46,9 @@ on the Ahara platform.
 
 | Command                    | Purpose                                                |
 | -------------------------- | ------------------------------------------------------ |
-| `make ci`                  | Lint, format-check, typecheck, test, docs and tf checks |
+| `make ci`                  | Lint, format-check, typecheck, fast tests, docs and tf checks |
+| `make test-slow`           | Long-run simulation gates (`*.slow.test.ts`, ~1min)    |
+| `make ci-full`             | `make ci` plus the slow gates — run after changing simulation dynamics, reproduction, or persistence |
 | `make build`               | Production frontend build                              |
 | `make deploy`              | Run the parameterless local deploy script              |
 | `cd frontend && pnpm run dev` | Local dev server (only when explicitly requested)   |

@@ -21,16 +21,23 @@ From the repo root:
 
 | Target                    | What it runs                                             |
 | ------------------------- | -------------------------------------------------------- |
-| `make ci`                 | All checks below — run before every commit               |
+| `make ci`                 | All checks below with the fast test tier — run before every commit |
+| `make ci-full`            | `make ci` plus the slow test tier                        |
 | `make lint`               | `eslint .` in `frontend/`                                |
 | `make fmt`                | `prettier --check .` in `frontend/`                      |
 | `make format`             | `prettier --write .` in `frontend/`                      |
 | `make typecheck`          | `tsc -b` project references                              |
-| `make test`               | `vitest run`                                             |
+| `make test`               | Fast tier: `vitest run` excluding `*.slow.test.ts` (~6s) |
+| `make test-slow`          | Slow tier: the long-run simulation gates (~1min)         |
 | `make docs-check`         | Required documentation files exist                       |
 | `make terraform-fmt-check`| `terraform fmt -check -recursive infrastructure/terraform/` |
 | `make build`              | Production frontend build                                |
 | `make deploy`             | `scripts/deploy.sh`                                      |
+
+Long-running simulation gates (ecology calibration, multi-generation evolution, checkpoint
+determinism, MVP acceptance) live in `*.slow.test.ts` files. The shared cloud CI workflow
+invokes vitest with the default config and runs both tiers; locally, run `make test-slow`
+(or `make ci-full`) after changes to simulation dynamics, reproduction, or persistence.
 
 ## Lint and quality rules
 

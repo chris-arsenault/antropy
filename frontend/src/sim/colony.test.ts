@@ -4,17 +4,7 @@ import { tryEat } from "./actions";
 import { addEgg } from "./eggs";
 import { rnnController } from "./controller/rnn";
 import { COLONY } from "./tunables";
-import { createWorld, stepWorld, type World } from "./world";
-
-function meanTraits(world: World): number[] {
-  const sums = [0, 0, 0];
-  for (const ant of world.ants) {
-    sums[0] += ant.traits.bodyScale;
-    sums[1] += ant.traits.sensorGain;
-    sums[2] += ant.traits.mutationSigma;
-  }
-  return sums.map((s) => s / world.ants.length);
-}
+import { createWorld, stepWorld } from "./world";
 
 describe("colony founding", () => {
   it("creates a polyandrous queen with distinct patrilines in the first brood", () => {
@@ -94,25 +84,5 @@ describe("merit-weighted succession (M6 gate)", () => {
     for (const sperm of colony.sperm) {
       expect(beforePatrilines).not.toContain(sperm.patrilineId);
     }
-  });
-
-  it("evolves through generations without collapse", { timeout: 240_000 }, () => {
-    const world = createWorld(4005);
-    const colony = foundColony(world);
-    colony.queenLifespanTicks = 2500;
-    const founderTraits = meanTraits(world);
-
-    for (let t = 0; t < 12_000; t++) {
-      stepWorld(world);
-    }
-
-    expect(colony.successions).toBeGreaterThanOrEqual(3);
-    expect(world.ants.length).toBeGreaterThan(5);
-    const laterTraits = meanTraits(world);
-    const drift = founderTraits.reduce(
-      (sum, value, i) => sum + Math.abs(value - laterTraits[i]),
-      0
-    );
-    expect(drift).toBeGreaterThan(0.01);
   });
 });
