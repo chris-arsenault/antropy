@@ -3,8 +3,8 @@ import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
 import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
-import { COLONY } from "./tunables";
-import { spawnAnt, type World } from "./world";
+import { COLONY, EGG_EXPOSURE } from "./tunables";
+import { mutateVoxel, spawnAnt, type World } from "./world";
 
 /**
  * An egg is a physical world object (design spec §7.3): it sits in an air
@@ -91,13 +91,28 @@ function hatch(world: World, egg: Egg): void {
   ant.bodyScale = traits.bodyScale * COLONY.juvenileFraction;
 }
 
-/** Advance incubation; hatch ripe eggs in insertion order. */
+/**
+ * Advance incubation; exposed eggs (above the original surface, spec §7.3)
+ * suffer a death hazard and perish into FOOD; ripe eggs hatch in order.
+ */
 export function stepEggs(world: World): void {
   const ripe: Egg[] = [];
+  const perished: Egg[] = [];
   for (const egg of world.eggs) {
     egg.incubationRemaining -= 1;
+    const exposed = egg.y > world.surfaceMap[egg.z * world.grid.sizeX + egg.x];
+    if (exposed && world.rng.next() < EGG_EXPOSURE.deathChancePerTick) {
+      perished.push(egg);
+      continue;
+    }
     if (egg.incubationRemaining <= 0) {
       ripe.push(egg);
+    }
+  }
+  for (const egg of perished) {
+    removeEgg(world, egg);
+    if (getVoxel(world.grid, egg.x, egg.y, egg.z) === Material.AIR) {
+      mutateVoxel(world, egg.x, egg.y, egg.z, Material.FOOD);
     }
   }
   for (const egg of ripe) {

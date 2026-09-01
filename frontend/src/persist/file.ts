@@ -27,6 +27,11 @@ function encodeValue(value: unknown): unknown {
   if (value instanceof Uint8Array) {
     return { __u8: bytesToBase64(value) };
   }
+  if (value instanceof Uint32Array) {
+    return {
+      __u32: bytesToBase64(new Uint8Array(value.buffer, value.byteOffset, value.byteLength)),
+    };
+  }
   if (value instanceof Float32Array) {
     return {
       __f32: bytesToBase64(new Uint8Array(value.buffer, value.byteOffset, value.byteLength)),
@@ -46,6 +51,10 @@ function decodeValue(value: unknown): unknown {
     const record = value as Record<string, unknown>;
     if (typeof record.__u8 === "string") {
       return base64ToBytes(record.__u8);
+    }
+    if (typeof record.__u32 === "string") {
+      const bytes = base64ToBytes(record.__u32);
+      return new Uint32Array(bytes.buffer, 0, bytes.byteLength / 4);
     }
     if (typeof record.__f32 === "string") {
       const bytes = base64ToBytes(record.__f32);

@@ -4,6 +4,7 @@ import { tryDig, tryEat, tryLayEgg, depositPheromones } from "./actions";
 import { affectedChunkKeys } from "./chunks";
 import { stepColonies, type Colony } from "./colony";
 import { type Controller } from "./controller/contract";
+import { stampVisit, stepDecay } from "./decay";
 import { rnnController } from "./controller/rnn";
 import { stepEggs, type Egg } from "./eggs";
 import { applyBasalDrain, applyStepCost, checkDeath, reapDead } from "./energy";
@@ -22,7 +23,7 @@ import {
 } from "./scent";
 import { createInputBuffer, sense, type SenseContext } from "./senses";
 import { generateTerrain, surfaceHeight } from "./terrain";
-import { FOOD_GOVERNOR, SCENT } from "./tunables";
+import { DECAY, FOOD_GOVERNOR, SCENT } from "./tunables";
 
 export interface World {
   readonly seed: number;
@@ -53,6 +54,10 @@ export interface World {
   foodTarget: number;
   /** Initial terrain surface per column (x-fastest), for decay/exposure/render. */
   surfaceMap: Int16Array;
+  /** Subsurface air voxels (tunnels/chambers), maintained by mutateVoxel. */
+  cavities: Set<number>;
+  /** Last tick an ant (or the queen) occupied each voxel — decay's clock. */
+  lastVisit: Uint32Array;
   /** The behavioral controller for every ant (design spec §2.3). */
   controller: Controller;
   /**
@@ -102,6 +107,8 @@ export function createWorld(seed: number, controller: Controller = rnnController
     foodBase: FOOD_GOVERNOR.targetCount,
     foodTarget: FOOD_GOVERNOR.targetCount,
     surfaceMap: buildSurfaceMap(seed, grid),
+    cavities: new Set(),
+    lastVisit: new Uint32Array(grid.data.length),
     controller,
     dirtyChunks: new Set(),
   };
@@ -159,6 +166,7 @@ function stepScents(world: World): void {
 
 function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
   ant.age += 1;
+  stampVisit(world, ant.x, ant.y, ant.z);
   sense(ctx, ant, inputs);
   const { outputs, thinkCost } = world.controller.act(ant.genome, inputs, ant.controllerState);
   ant.lastInputs.set(inputs);
@@ -196,7 +204,13 @@ export function stepWorld(world: World): void {
     stepFoodGovernor(world);
   }
   stepColonies(world);
+  for (const colony of world.colonies) {
+    stampVisit(world, colony.x, colony.y, colony.z);
+  }
   stepEggs(world);
+  if (world.tick % DECAY.interval === 0) {
+    stepDecay(world);
+  }
 
   const ctx: SenseContext = {
     grid: world.grid,
@@ -232,6 +246,13 @@ export function mutateVoxel(
   }
   if (material === Material.FOOD) {
     world.foodSources.add(index);
+  }
+  if (y <= world.surfaceMap[z * world.grid.sizeX + x]) {
+    if (material === Material.AIR) {
+      world.cavities.add(index);
+    } else {
+      world.cavities.delete(index);
+    }
   }
   for (const key of affectedChunkKeys(x, y, z)) {
     world.dirtyChunks.add(key);

@@ -146,6 +146,22 @@ export const QUEEN = {
   flightMargin: 10,
 } as const;
 
+// Nest decay (design spec §9.2): abandonment is punished, not existence.
+export const DECAY = {
+  /** Ticks between decay passes. */
+  interval: 25,
+  /** Untrafficked time before a subsurface air voxel may collapse. */
+  ttlTicks: 6000,
+  /** Collapse chance per pass once overdue. */
+  collapseChance: 0.05,
+} as const;
+
+// Egg exposure (design spec §7.3): surface brood is hazardous.
+export const EGG_EXPOSURE = {
+  /** Death chance per tick for an egg above the original surface. */
+  deathChancePerTick: 0.002,
+} as const;
+
 // Haploid males (design spec §7.1 channel 2).
 export const MALE = {
   /** Male lifespan as a fraction of the genetic lifespan cap. */

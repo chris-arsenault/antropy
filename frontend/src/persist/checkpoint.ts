@@ -50,6 +50,8 @@ export interface Checkpoint {
   foodTarget: number;
   grid: Uint8Array;
   foodSources: number[];
+  cavities: number[];
+  lastVisit: Uint32Array;
   ants: AntRecord[];
   eggs: EggRecord[];
   colonies: ColonyRecord[];
@@ -195,6 +197,8 @@ export function serializeWorld(world: World): Checkpoint {
     foodTarget: world.foodTarget,
     grid: Uint8Array.from(world.grid.data),
     foodSources: Array.from(world.foodSources),
+    cavities: Array.from(world.cavities),
+    lastVisit: Uint32Array.from(world.lastVisit),
     ants: world.ants.map((ant) => serializeAnt(world, ant)),
     eggs: world.eggs.map((egg) => ({
       scalars: Object.fromEntries(EGG_SCALARS.map((key) => [key, egg[key] as number])),
@@ -229,6 +233,8 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.foodTarget = checkpoint.foodTarget;
   world.grid.data.set(checkpoint.grid);
   world.foodSources = new Set(checkpoint.foodSources);
+  world.cavities = new Set(checkpoint.cavities);
+  world.lastVisit.set(checkpoint.lastVisit);
   world.ants = checkpoint.ants.map((record) => restoreAnt(world, record));
   world.eggs = checkpoint.eggs.map((record) => ({
     ...(record.scalars as unknown as Egg),
