@@ -1,7 +1,7 @@
-import { type Ant } from "./ant";
+import { SEX_MALE, type Ant } from "./ant";
 import { getVoxelSafe } from "./grid";
 import { Material } from "./materials";
-import { ENERGY } from "./tunables";
+import { ENERGY, MALE } from "./tunables";
 import { mutateVoxel, type World } from "./world";
 
 export function maxEnergy(ant: Ant): number {
@@ -39,7 +39,11 @@ export function applyStepCost(ant: Ant): void {
  * death site when it is air.
  */
 export function checkDeath(world: World, ant: Ant): void {
-  if (ant.energy > 0 && ant.age <= ant.traits.lifespanTicks) {
+  const lifespan =
+    ant.sex === SEX_MALE
+      ? Math.round(ant.traits.lifespanTicks * MALE.lifespanFraction)
+      : ant.traits.lifespanTicks;
+  if (ant.energy > 0 && ant.age <= lifespan) {
     return;
   }
   ant.alive = false;

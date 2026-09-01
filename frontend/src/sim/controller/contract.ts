@@ -13,6 +13,11 @@ export interface Controller {
   recombine(a: Genome, b: Genome, rng: Rng): Genome | null;
   /** A structured-init founder genome (design spec §2.1). */
   seed(rng: Rng): Genome;
+  /**
+   * A haploid offspring genome from an unfertilized mother (design spec
+   * §7.1 channel 2 — worker-laid males). Ploidy stays behind the boundary.
+   */
+  haploidOffspring(genome: Genome, rng: Rng): Genome;
   createState(): ControllerState;
   /**
    * Expressed physical traits (design spec §3.2). Expression (ploidy,

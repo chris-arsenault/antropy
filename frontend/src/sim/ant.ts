@@ -9,6 +9,10 @@ import { getVoxel, type VoxelGrid } from "./grid";
 import { Material } from "./materials";
 import { hasSupport } from "./movement";
 
+/** Numeric sex flags (no runtime strings in sim state). */
+export const SEX_FEMALE = 0;
+export const SEX_MALE = 1;
+
 /**
  * Per-ant record. Lineage and delivery bookkeeping live here from day one
  * (design spec §11.4) even though reproduction lands in M6.
@@ -36,6 +40,8 @@ export interface Ant {
   /** Spoil loads carried; capacity scales with body size (spec §3.2). */
   spoilLoads: number;
   alive: boolean;
+  /** SEX_FEMALE (diploid worker/queen line) or SEX_MALE (haploid). */
+  sex: number;
   lineageId: number;
   patrilineId: number;
   motherId: number;
@@ -59,6 +65,8 @@ export interface AntSpawn {
   z: number;
   heading: number;
   energy: number;
+  /** Defaults to SEX_FEMALE when omitted. */
+  sex?: number;
   lineageId: number;
   patrilineId: number;
   motherId: number;
@@ -87,6 +95,7 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     carryLoad: 0,
     spoilLoads: 0,
     alive: true,
+    sex: spawn.sex ?? SEX_FEMALE,
     lineageId: spawn.lineageId,
     patrilineId: spawn.patrilineId,
     motherId: spawn.motherId,

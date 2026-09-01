@@ -1,7 +1,7 @@
-import { surfaceSpawnY } from "./ant";
+import { SEX_FEMALE, surfaceSpawnY } from "./ant";
 import { type Genome } from "./controller/contract";
-import { addEgg } from "./eggs";
-import { getVoxel, voxelIndex } from "./grid";
+import { addEgg, findEggSpot } from "./eggs";
+import { getVoxel } from "./grid";
 import { Material } from "./materials";
 import { COLONY } from "./tunables";
 import { mutateVoxel, spawnAnt, type World } from "./world";
@@ -119,23 +119,9 @@ export function foundColony(world: World): Colony {
   return colony;
 }
 
-function eggSpot(world: World, colony: Colony): { x: number; y: number; z: number } | null {
-  for (let dz = -1; dz <= 1; dz++) {
-    for (let dx = -1; dx <= 1; dx++) {
-      const x = colony.x + dx;
-      const z = colony.z + dz;
-      const key = voxelIndex(world.grid, x, colony.y, z);
-      if (getVoxel(world.grid, x, colony.y, z) === Material.AIR && !world.eggIndex.has(key)) {
-        return { x, y: colony.y, z };
-      }
-    }
-  }
-  return null;
-}
-
 function layEgg(world: World, colony: Colony): void {
   const controller = world.controller;
-  const spot = eggSpot(world, colony);
+  const spot = findEggSpot(world, colony.x, colony.y, colony.z);
   if (spot === null) {
     return;
   }
@@ -152,6 +138,7 @@ function layEgg(world: World, colony: Colony): void {
     genome,
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,
+    sex: SEX_FEMALE,
     lineageId: colony.id,
     patrilineId: colony.sperm[spermIndex].patrilineId,
     motherId: 0,

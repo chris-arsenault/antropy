@@ -1,12 +1,12 @@
-import { type Ant } from "./ant";
+import { SEX_FEMALE, SEX_MALE, type Ant } from "./ant";
 import { creditDelivery } from "./colony";
-import { removeEgg } from "./eggs";
+import { addEgg, findEggSpot, removeEgg } from "./eggs";
 import { maxEnergy } from "./energy";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
 import { Material, type MaterialId } from "./materials";
 import { headingToDirection } from "./movement";
 import { depositScent } from "./scent";
-import { COLONY, DIG, ENERGY, PHEROMONE_DEPOSIT_MAX } from "./tunables";
+import { COLONY, DIG, ENERGY, MALE, PHEROMONE_DEPOSIT_MAX } from "./tunables";
 import { mutateVoxel, type World } from "./world";
 
 function facedVoxel(ant: Ant): { x: number; y: number; z: number } {
@@ -210,6 +210,39 @@ export function tryDig(world: World, ant: Ant, verticalBias: number): void {
     }
   }
   tryDeposit(world, ant);
+}
+
+/**
+ * A worker laying unmated (design spec §7.1 channel 2): a haploid male egg
+ * paid from her own energy. Egg-policing is the eat-egg mechanic, not a rule.
+ */
+export function tryLayEgg(world: World, ant: Ant): void {
+  if (ant.sex !== SEX_FEMALE) {
+    return;
+  }
+  const endowment = ant.traits.eggEndowment;
+  if (ant.energy < endowment + COLONY.eggLayCost + MALE.layReserve) {
+    return;
+  }
+  const spot = findEggSpot(world, ant.x, ant.y, ant.z);
+  if (spot === null) {
+    return;
+  }
+  ant.energy -= endowment + COLONY.eggLayCost;
+  addEgg(world, {
+    id: world.nextAntId * 1_000_000 + world.tick,
+    x: spot.x,
+    y: spot.y,
+    z: spot.z,
+    genome: world.controller.haploidOffspring(ant.genome, world.rng),
+    energy: endowment,
+    incubationRemaining: COLONY.incubationTicks,
+    sex: SEX_MALE,
+    lineageId: ant.lineageId,
+    patrilineId: ant.patrilineId,
+    motherId: ant.id,
+    fatherId: 0,
+  });
 }
 
 /** Energy-costed, colony-tagged pheromone deposition at the ant's voxel. */

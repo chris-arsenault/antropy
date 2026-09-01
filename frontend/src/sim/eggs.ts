@@ -1,5 +1,7 @@
+import { SEX_FEMALE } from "./ant";
 import { type Genome } from "./controller/contract";
-import { voxelIndex } from "./grid";
+import { getVoxel, voxelIndex } from "./grid";
+import { Material } from "./materials";
 import { COLONY } from "./tunables";
 import { spawnAnt, type World } from "./world";
 
@@ -17,6 +19,8 @@ export interface Egg {
   /** Maternal energy transferred at lay time; the hatchling's start energy. */
   energy: number;
   incubationRemaining: number;
+  /** SEX_FEMALE (fertilized) or SEX_MALE (unfertilized, haploid). */
+  sex: number;
   lineageId: number;
   patrilineId: number;
   motherId: number;
@@ -37,6 +41,26 @@ export function removeEgg(world: World, egg: Egg): void {
   world.eggIndex.delete(eggKey(world, egg));
 }
 
+/** First egg-free air voxel adjacent to (x, y, z), or null. */
+export function findEggSpot(
+  world: World,
+  cx: number,
+  cy: number,
+  cz: number
+): { x: number; y: number; z: number } | null {
+  for (let dz = -1; dz <= 1; dz++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const x = cx + dx;
+      const z = cz + dz;
+      const key = voxelIndex(world.grid, x, cy, z);
+      if (getVoxel(world.grid, x, cy, z) === Material.AIR && !world.eggIndex.has(key)) {
+        return { x, y: cy, z };
+      }
+    }
+  }
+  return null;
+}
+
 function hatch(world: World, egg: Egg): void {
   removeEgg(world, egg);
   const traits = world.controller.physical(egg.genome);
@@ -46,6 +70,7 @@ function hatch(world: World, egg: Egg): void {
     z: egg.z,
     heading: world.rng.next() * Math.PI * 2,
     energy: egg.energy,
+    sex: egg.sex ?? SEX_FEMALE,
     lineageId: egg.lineageId,
     patrilineId: egg.patrilineId,
     motherId: egg.motherId,

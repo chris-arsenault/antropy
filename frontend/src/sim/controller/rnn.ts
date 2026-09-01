@@ -49,9 +49,12 @@ const BACKBONE_GAIN = 2.5;
 const MUTATION_SCALE = 0.12;
 const STRUCTURAL_KICK_PROBABILITY = 0.03;
 
-/** Diploid genome: two full copies, expressed as their average (spec §7.1). */
+/**
+ * Haplodiploid genome (spec §7.1): females carry two copies expressed as
+ * their average; males carry one copy expressed raw.
+ */
 interface RnnGenome {
-  copies: [Float32Array, Float32Array];
+  copies: Float32Array[];
 }
 
 interface RnnState {
@@ -63,7 +66,11 @@ function asRnn(genome: Genome): RnnGenome {
 }
 
 function expressed(genome: RnnGenome, locus: number): number {
-  return (genome.copies[0][locus] + genome.copies[1][locus]) / 2;
+  const copies = genome.copies;
+  if (copies.length === 1) {
+    return copies[0][locus];
+  }
+  return (copies[0][locus] + copies[1][locus]) / 2;
 }
 
 /**
@@ -120,8 +127,15 @@ function seedCopy(rng: Rng): Float32Array {
   return copy;
 }
 
-/** Per-locus random pick from the parent's two copies — one gamete. */
+/**
+ * One gamete: a per-locus random pick from a diploid parent's copies, or a
+ * haploid father's entire single copy (real haplodiploidy — males pass
+ * everything).
+ */
 function gamete(genome: RnnGenome, rng: Rng): Float32Array {
+  if (genome.copies.length === 1) {
+    return Float32Array.from(genome.copies[0]);
+  }
   const out = new Float32Array(GENOME_LENGTH);
   for (let i = 0; i < GENOME_LENGTH; i++) {
     out[i] = genome.copies[rng.next() < 0.5 ? 0 : 1][i];
@@ -192,23 +206,24 @@ export const rnnController: Controller = {
   },
 
   mutate(genome, sigma, rng) {
-    const source = asRnn(genome);
-    const copies: [Float32Array, Float32Array] = [
-      new Float32Array(source.copies[0]),
-      new Float32Array(source.copies[1]),
-    ];
-    mutateCopy(copies[0], sigma, rng);
-    mutateCopy(copies[1], sigma, rng);
+    const copies = asRnn(genome).copies.map((copy) => Float32Array.from(copy));
+    for (const copy of copies) {
+      mutateCopy(copy, sigma, rng);
+    }
     return { copies } as unknown as Genome;
   },
 
   recombine(a, b, rng) {
-    const copies: [Float32Array, Float32Array] = [gamete(asRnn(a), rng), gamete(asRnn(b), rng)];
+    const copies = [gamete(asRnn(a), rng), gamete(asRnn(b), rng)];
     return { copies } as unknown as Genome;
   },
 
   seed(rng) {
     return { copies: [seedCopy(rng), seedCopy(rng)] } as unknown as Genome;
+  },
+
+  haploidOffspring(genome, rng) {
+    return { copies: [gamete(asRnn(genome), rng)] } as unknown as Genome;
   },
 
   createState(): ControllerState {
@@ -221,21 +236,24 @@ export const rnnController: Controller = {
 
   serializeGenome(genome) {
     const g = asRnn(genome);
-    const out = new Float32Array(GENOME_LENGTH * 2);
-    out.set(g.copies[0], 0);
-    out.set(g.copies[1], GENOME_LENGTH);
+    const out = new Float32Array(GENOME_LENGTH * g.copies.length);
+    for (let c = 0; c < g.copies.length; c++) {
+      out.set(g.copies[c], c * GENOME_LENGTH);
+    }
     return out;
   },
 
   deserializeGenome(data) {
-    if (data.length !== GENOME_LENGTH * 2) {
+    if (data.length !== GENOME_LENGTH && data.length !== GENOME_LENGTH * 2) {
       throw new Error(
-        `rnn genome payload has length ${data.length}, expected ${GENOME_LENGTH * 2}`
+        `rnn genome payload has length ${data.length}, expected ${GENOME_LENGTH} or ${GENOME_LENGTH * 2}`
       );
     }
-    return {
-      copies: [data.slice(0, GENOME_LENGTH), data.slice(GENOME_LENGTH)],
-    } as unknown as Genome;
+    const copies: Float32Array[] = [];
+    for (let offset = 0; offset < data.length; offset += GENOME_LENGTH) {
+      copies.push(data.slice(offset, offset + GENOME_LENGTH));
+    }
+    return { copies } as unknown as Genome;
   },
 
   serializeState(state) {

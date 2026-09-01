@@ -68,6 +68,10 @@ export const braitenbergController: Controller = {
     return BRAITENBERG_GENOME;
   },
 
+  haploidOffspring() {
+    return BRAITENBERG_GENOME;
+  },
+
   createState(): ControllerState {
     return { phase: 0 } as unknown as ControllerState;
   },

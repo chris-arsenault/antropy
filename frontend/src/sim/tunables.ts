@@ -131,3 +131,11 @@ export const COLONY = {
   /** Body-scale growth per meal while juvenile. */
   growthPerMeal: 0.1,
 } as const;
+
+// Haploid males (design spec §7.1 channel 2).
+export const MALE = {
+  /** Male lifespan as a fraction of the genetic lifespan cap. */
+  lifespanFraction: 0.25,
+  /** Energy margin a worker must keep after laying a male egg. */
+  layReserve: 0.2,
+} as const;
