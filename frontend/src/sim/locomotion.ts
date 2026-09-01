@@ -1,5 +1,6 @@
 import { type Ant } from "./ant";
-import { type VoxelGrid } from "./grid";
+import { getVoxelSafe, type VoxelGrid } from "./grid";
+import { Material } from "./materials";
 import {
   MAX_STEPS_PER_TICK,
   TURN_RADIANS_PER_TICK,
@@ -21,7 +22,10 @@ function fall(grid: VoxelGrid, ant: Ant): void {
     ant.falling = false;
     return;
   }
-  if (isLegalPosition(grid, ant.x, below, ant.z) || !hasSupport(grid, ant.x, below, ant.z)) {
+  // An ant can only ever fall into AIR — a solid below (even an
+  // unsupported floating one, e.g. dropped biomass) arrests the fall.
+  const belowIsAir = getVoxelSafe(grid, ant.x, below, ant.z) === Material.AIR;
+  if (belowIsAir && (isLegalPosition(grid, ant.x, below, ant.z) || !hasSupport(grid, ant.x, below, ant.z))) {
     ant.y = below;
   }
   ant.falling = !hasSupport(grid, ant.x, ant.y, ant.z);

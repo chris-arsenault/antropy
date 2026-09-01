@@ -115,10 +115,49 @@ function applyBackbone(copy: Float32Array): void {
 
   // Pickup drive (ADR-0006, first link of the transport chain): a satiated
   // ant at food fires the terrain channel to load it instead of walking by.
-  copy[W_IN + 5 * INPUT_COUNT + Input.CONTACT_FOOD] += 1.5;
+  // Contact-dominated and one-sided (see the heat-escape note): without
+  // food contact the unit saturates at a near-constant negative that the
+  // paired DIG bias cancels, so at contact the pickup actually fires
+  // through the deposit unit's resting negative.
+  copy[W_IN + 5 * INPUT_COUNT + Input.CONTACT_FOOD] += 4.0;
   copy[W_IN + 5 * INPUT_COUNT + Input.ENERGY] += 2.0;
-  copy[W_IN + 5 * INPUT_COUNT + Input.BIAS] -= 2.5;
-  copy[W_OUT + Output.DIG * HIDDEN_COUNT + 5] += 1.4;
+  copy[W_IN + 5 * INPUT_COUNT + Input.BIAS] -= 4.2;
+  copy[W_OUT + Output.DIG * HIDDEN_COUNT + 5] += 3.4;
+  copy[B_OUT + Output.DIG] += 3.4 * Math.tanh(3.0);
+
+  // Heat-escape reflex (§B.9.1 "exposed + thermal stress → dig downward"):
+  // hidden 6 reads the thermoreceptor and drives digging with a downward
+  // bias while damping forward drive — a personal burrow against middays,
+  // no navigation required. The bias keeps it silent below TEMPERATURE
+  // ~0.45 (multiplier ~5, past the shoulder of a lush midday).
+  copy[W_IN + 6 * INPUT_COUNT + Input.TEMPERATURE] += 4.0;
+  copy[W_IN + 6 * INPUT_COUNT + Input.BIAS] -= 1.8;
+  // One-sided on the shared DIG channel: the output weight is paired with
+  // a bias cancelling the unit's cool-side tanh saturation, so the reflex
+  // adds ~0 when cool (pickup/deposit balance untouched) and dominates
+  // the resting negatives when hot.
+  copy[W_OUT + Output.DIG * HIDDEN_COUNT + 6] += 5.5;
+  copy[B_OUT + Output.DIG] += 5.5 * Math.tanh(1.8);
+  copy[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + 6] -= 1.6;
+  copy[W_OUT + Output.FORWARD * HIDDEN_COUNT + 6] -= 1.2;
+
+  // Carry-gated homing (delivery loop): a MIRRORED PAIR of units —
+  // opposite nest-stereo signs, identical gating — projects ±W onto
+  // TURN, so their even parts cancel exactly (no constant turn, §B.6
+  // item 1), leaving an antisymmetric homeward steer. The gate is
+  // CARRY_LOAD: carrying is the forage/deliver mode bit stored in the
+  // body (App. B memory hierarchy) — founders carry nothing, so homing
+  // is silent through bootstrap and switches on with the first pickup.
+  for (const [unit, sign] of [
+    [7, 1],
+    [8, -1],
+  ] as const) {
+    copy[W_IN + unit * INPUT_COUNT + Input.NEST_SCENT_LEFT] += sign * 2.5;
+    copy[W_IN + unit * INPUT_COUNT + Input.NEST_SCENT_RIGHT] -= sign * 2.5;
+    copy[W_IN + unit * INPUT_COUNT + Input.CARRY_LOAD] += 2.5;
+    copy[W_IN + unit * INPUT_COUNT + Input.BIAS] -= 2.5;
+    copy[W_OUT + Output.TURN * HIDDEN_COUNT + unit] += sign * 2.2;
+  }
 }
 
 const ACTION_BIAS_LOCI = [

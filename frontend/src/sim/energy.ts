@@ -1,5 +1,5 @@
 import { SEX_MALE, type Ant } from "./ant";
-import { getVoxelSafe } from "./grid";
+import { getVoxelSafe, voxelIndex } from "./grid";
 import { Material } from "./materials";
 import { ENERGY, MALE } from "./tunables";
 import { mutateVoxel, type World } from "./world";
@@ -40,12 +40,43 @@ export function applyStepCost(ant: Ant): void {
  * lifespan cap. The corpse persists as edible energy — a FOOD voxel at the
  * death site when it is air.
  */
+const DROP_OFFSETS = [
+  [0, 0, 0],
+  [1, 0, 0],
+  [-1, 0, 0],
+  [0, 0, 1],
+  [0, 0, -1],
+  [0, -1, 0],
+  [0, 1, 0],
+] as const;
+
+/**
+ * Place dropped biomass (corpse, perished brood) as a FOOD voxel at the
+ * first unoccupied AIR spot at or beside the site — never entombing a
+ * living ant or an egg inside solid matter.
+ */
+export function dropFoodAt(world: World, x: number, y: number, z: number): void {
+  for (const [dx, dy, dz] of DROP_OFFSETS) {
+    const tx = x + dx;
+    const ty = y + dy;
+    const tz = z + dz;
+    if (getVoxelSafe(world.grid, tx, ty, tz) !== Material.AIR) {
+      continue;
+    }
+    const occupied =
+      world.eggIndex.has(voxelIndex(world.grid, tx, ty, tz)) ||
+      world.ants.some((a) => a.alive && a.x === tx && a.y === ty && a.z === tz);
+    if (!occupied) {
+      mutateVoxel(world, tx, ty, tz, Material.FOOD);
+      return;
+    }
+  }
+}
+
 /** Kill an ant in place: the corpse persists as edible energy (spec §6). */
 export function killAnt(world: World, ant: Ant): void {
   ant.alive = false;
-  if (getVoxelSafe(world.grid, ant.x, ant.y, ant.z) === Material.AIR) {
-    mutateVoxel(world, ant.x, ant.y, ant.z, Material.FOOD);
-  }
+  dropFoodAt(world, ant.x, ant.y, ant.z);
 }
 
 export function checkDeath(world: World, ant: Ant): void {

@@ -1,11 +1,12 @@
 import { SEX_FEMALE } from "./ant";
 import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
+import { dropFoodAt } from "./energy";
 import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
 import { COLONY, EGG_EXPOSURE, LARVA, RAIN } from "./tunables";
 import { microclimateMultiplier } from "./weather";
-import { mutateVoxel, spawnAnt, type World } from "./world";
+import { spawnAnt, type World } from "./world";
 
 export const STAGE_EGG = 0;
 export const STAGE_LARVA = 1;
@@ -187,9 +188,7 @@ export function stepEggs(world: World): void {
   for (const egg of perished) {
     world.eggsPerished += 1;
     removeEgg(world, egg);
-    if (getVoxel(world.grid, egg.x, egg.y, egg.z) === Material.AIR) {
-      mutateVoxel(world, egg.x, egg.y, egg.z, Material.FOOD);
-    }
+    dropFoodAt(world, egg.x, egg.y, egg.z);
   }
   for (const egg of ripe) {
     hatch(world, egg);

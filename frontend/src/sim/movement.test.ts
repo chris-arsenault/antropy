@@ -29,19 +29,34 @@ describe("stepCandidates", () => {
 
 describe("walker population invariants", () => {
   function assertLegalPositions(world: ReturnType<typeof createWorld>): void {
+    // Assert positions first; never step the world mid-iteration (stepping
+    // reaps dead ants and mutates the array being walked).
     for (const ant of world.ants) {
-      expect(getVoxel(world.grid, ant.x, ant.y, ant.z)).toBe(Material.AIR);
-      if (!ant.falling && !hasSupport(world.grid, ant.x, ant.y, ant.z)) {
-        // Terrain edits (eating, digging) can remove support mid-tick; the
-        // ant must register as falling on its next motor application.
-        const id = ant.id;
-        stepWorld(world);
-        const later = world.ants.find((a) => a.id === id);
-        expect(
-          later === undefined || later.falling || hasSupport(world.grid, later.x, later.y, later.z)
-        ).toBe(true);
+      if (!ant.alive) {
+        continue;
       }
+      expect(getVoxel(world.grid, ant.x, ant.y, ant.z)).toBe(Material.AIR);
     }
+    // Terrain edits (eating, digging) can remove support mid-tick; such
+    // ants must register as falling within a few motor applications. One
+    // step is not enough under concurrent digging: a suspect can regain
+    // support before its own motor and lose it again to a later ant's dig
+    // in the same tick — the property is eventually-flagged, bounded here.
+    let suspects = world.ants
+      .filter((a) => a.alive && !a.falling && !hasSupport(world.grid, a.x, a.y, a.z))
+      .map((a) => a.id);
+    for (let attempt = 0; attempt < 3 && suspects.length > 0; attempt++) {
+      stepWorld(world);
+      suspects = suspects.filter((id) => {
+        const later = world.ants.find((a) => a.id === id);
+        return (
+          later !== undefined &&
+          !later.falling &&
+          !hasSupport(world.grid, later.x, later.y, later.z)
+        );
+      });
+    }
+    expect(suspects).toEqual([]);
   }
 
   it("keeps every ant in legal positions over a long walk", { timeout: 30_000 }, () => {
