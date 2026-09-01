@@ -8,7 +8,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 1;
+export const CHECKPOINT_VERSION = 2;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -31,6 +31,7 @@ interface ColonyRecord {
 
 interface ScentRecord {
   values: Float32Array;
+  owners: Uint8Array;
   active: number[];
 }
 
@@ -48,7 +49,7 @@ export interface Checkpoint {
   ants: AntRecord[];
   eggs: EggRecord[];
   colonies: ColonyRecord[];
-  scents: { a: ScentRecord; b: ScentRecord; food: ScentRecord };
+  scents: { a: ScentRecord; b: ScentRecord; food: ScentRecord; nest: ScentRecord };
 }
 
 const ANT_SCALARS = [
@@ -101,11 +102,15 @@ const COLONY_SCALARS = [
 ] as const;
 
 function serializeScent(field: ScentField): ScentRecord {
-  return { values: Float32Array.from(field.values), active: scentActiveIndices(field) };
+  return {
+    values: Float32Array.from(field.values),
+    owners: Uint8Array.from(field.owners),
+    active: scentActiveIndices(field),
+  };
 }
 
 function restoreScent(field: ScentField, record: ScentRecord): void {
-  restoreScentField(field, record.values, record.active);
+  restoreScentField(field, record.values, record.owners, record.active);
 }
 
 function serializeAnt(world: World, ant: Ant): AntRecord {
@@ -189,6 +194,7 @@ export function serializeWorld(world: World): Checkpoint {
       a: serializeScent(world.pheromoneA),
       b: serializeScent(world.pheromoneB),
       food: serializeScent(world.foodScent),
+      nest: serializeScent(world.nestScent),
     },
   };
 }
@@ -221,6 +227,7 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   restoreScent(world.pheromoneA, checkpoint.scents.a);
   restoreScent(world.pheromoneB, checkpoint.scents.b);
   restoreScent(world.foodScent, checkpoint.scents.food);
+  restoreScent(world.nestScent, checkpoint.scents.nest);
   world.dirtyChunks.clear();
   return world;
 }

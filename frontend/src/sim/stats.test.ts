@@ -22,10 +22,13 @@ describe("computeStats", () => {
     const world = createWorld(5001);
     foundColony(world);
 
-    // Contrive fitness correlated with body scale.
+    // Contrive fitness correlated with body scale, split at the median so
+    // both fitness classes exist regardless of the seed's trait spread.
+    const scales = world.ants.map((ant) => ant.traits.bodyScale).sort((a, b) => a - b);
+    const median = scales[Math.floor(scales.length / 2)];
     for (const ant of world.ants) {
       ant.age = 100;
-      ant.deliveries = ant.traits.bodyScale > 1 ? 20 : 1;
+      ant.deliveries = ant.traits.bodyScale > median ? 20 : 1;
     }
 
     const stats = computeStats(world);

@@ -85,6 +85,19 @@ function applyBackbone(copy: Float32Array): void {
   copy[W_IN + 1 * INPUT_COUNT + Input.BIAS] += 0.2;
   copy[W_OUT + Output.DIG * HIDDEN_COUNT + 1] += 1.2;
   copy[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + 1] -= 1.0;
+
+  // Transport instinct (ADR-0006): hidden 2 steers up the nest-scent
+  // gradient (picking up food removes its scent source, so homing wins once
+  // laden); hidden 3 fires the terrain channel to deposit when carrying near
+  // strong nest scent.
+  copy[W_IN + 2 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += 2.5;
+  copy[W_IN + 2 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] -= 2.5;
+  copy[W_OUT + Output.TURN * HIDDEN_COUNT + 2] += 1.2;
+  copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += 1.0;
+  copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] += 1.0;
+  copy[W_IN + 3 * INPUT_COUNT + Input.CARRY_LOAD] += 2.0;
+  copy[W_IN + 3 * INPUT_COUNT + Input.BIAS] -= 1.5;
+  copy[W_OUT + Output.DIG * HIDDEN_COUNT + 3] += 1.5;
 }
 
 const ACTION_BIAS_LOCI = [

@@ -67,6 +67,31 @@ describe("scent fields", () => {
     expect(Array.from(a.values)).toEqual(Array.from(b.values));
   });
 
+  it("filters samples by colony owner (ADR-0005)", () => {
+    const grid = createGrid(8, 8, 8);
+    const field = createScentField(grid);
+    const index = voxelIndex(grid, 4, 4, 4);
+    depositScent(field, index, 0.8, 3);
+
+    expect(sampleScent(field, index, 3)).toBeCloseTo(0.8);
+    expect(sampleScent(field, index, 5)).toBe(0);
+    expect(sampleScent(field, index, 0)).toBe(0);
+
+    // Last writer claims the voxel.
+    depositScent(field, index, 0.2, 5);
+    expect(sampleScent(field, index, 5)).toBeCloseTo(1.0);
+    expect(sampleScent(field, index, 3)).toBe(0);
+  });
+
+  it("carries the owner along diffusion into empty voxels", () => {
+    const grid = createGrid(8, 8, 8);
+    const field = createScentField(grid);
+    depositScent(field, voxelIndex(grid, 4, 4, 4), 1, 7);
+    stepScentField(grid, field);
+    expect(sampleScent(field, voxelIndex(grid, 5, 4, 4), 7)).toBeGreaterThan(0);
+    expect(sampleScent(field, voxelIndex(grid, 5, 4, 4), 0)).toBe(0);
+  });
+
   it("emits scent around FOOD voxels", () => {
     const grid = createGrid(8, 8, 8);
     setVoxel(grid, 4, 4, 4, Material.FOOD);

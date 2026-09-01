@@ -44,6 +44,8 @@ export const SCENT = {
   epsilon: 5e-3,
   /** Scent injected next to each FOOD voxel per pass. */
   foodSourceStrength: 0.5,
+  /** Nest scent injected at each queen per pass (ADR-0006). */
+  nestSourceStrength: 0.8,
 } as const;
 
 // Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.

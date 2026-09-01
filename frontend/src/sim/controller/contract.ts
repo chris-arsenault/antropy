@@ -88,9 +88,11 @@ export const Input = {
   CONTACT_ANT: 17,
   FALLING: 18,
   BIAS: 19,
+  NEST_SCENT_LEFT: 20,
+  NEST_SCENT_RIGHT: 21,
 } as const;
 
-export const INPUT_COUNT = 20;
+export const INPUT_COUNT = 22;
 
 /**
  * Motor output layout (design spec §4). DIG manipulates terrain: it digs the

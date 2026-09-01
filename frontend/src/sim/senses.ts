@@ -12,6 +12,7 @@ export interface SenseContext {
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
+  nestScent: ScentField;
   antIndex: AntIndex;
   eggIndex: Map<number, unknown>;
 }
@@ -22,7 +23,8 @@ function scentAt(
   x: number,
   y: number,
   z: number,
-  gain: number
+  gain: number,
+  owner: number
 ): number {
   if (
     x < 0 ||
@@ -34,7 +36,7 @@ function scentAt(
   ) {
     return 0;
   }
-  return Math.min(1, sampleScent(field, voxelIndex(ctx.grid, x, y, z)) * gain);
+  return Math.min(1, sampleScent(field, voxelIndex(ctx.grid, x, y, z), owner) * gain);
 }
 
 function localSolidity(grid: VoxelGrid, ant: Ant): number {
@@ -88,12 +90,15 @@ export function sense(ctx: SenseContext, ant: Ant, inputs: Float32Array): Float3
   const rz = ant.z + rightDir.dz;
   const y = ant.y;
   const gain = ant.traits.sensorGain;
-  inputs[Input.PHEROMONE_A_LEFT] = scentAt(ctx, ctx.pheromoneA, lx, y, lz, gain);
-  inputs[Input.PHEROMONE_A_RIGHT] = scentAt(ctx, ctx.pheromoneA, rx, y, rz, gain);
-  inputs[Input.PHEROMONE_B_LEFT] = scentAt(ctx, ctx.pheromoneB, lx, y, lz, gain);
-  inputs[Input.PHEROMONE_B_RIGHT] = scentAt(ctx, ctx.pheromoneB, rx, y, rz, gain);
-  inputs[Input.FOOD_SCENT_LEFT] = scentAt(ctx, ctx.foodScent, lx, y, lz, gain);
-  inputs[Input.FOOD_SCENT_RIGHT] = scentAt(ctx, ctx.foodScent, rx, y, rz, gain);
+  const colony = ant.lineageId;
+  inputs[Input.PHEROMONE_A_LEFT] = scentAt(ctx, ctx.pheromoneA, lx, y, lz, gain, colony);
+  inputs[Input.PHEROMONE_A_RIGHT] = scentAt(ctx, ctx.pheromoneA, rx, y, rz, gain, colony);
+  inputs[Input.PHEROMONE_B_LEFT] = scentAt(ctx, ctx.pheromoneB, lx, y, lz, gain, colony);
+  inputs[Input.PHEROMONE_B_RIGHT] = scentAt(ctx, ctx.pheromoneB, rx, y, rz, gain, colony);
+  inputs[Input.FOOD_SCENT_LEFT] = scentAt(ctx, ctx.foodScent, lx, y, lz, gain, 0);
+  inputs[Input.FOOD_SCENT_RIGHT] = scentAt(ctx, ctx.foodScent, rx, y, rz, gain, 0);
+  inputs[Input.NEST_SCENT_LEFT] = scentAt(ctx, ctx.nestScent, lx, y, lz, gain, colony);
+  inputs[Input.NEST_SCENT_RIGHT] = scentAt(ctx, ctx.nestScent, rx, y, rz, gain, colony);
   inputs[Input.ENERGY] = Math.max(0, Math.min(1, ant.energy / (ENERGY.max * ant.traits.storage)));
   inputs[Input.AGE_FRACTION] = Math.min(1, ant.age / ENERGY.ageCap);
   inputs[Input.CARRY_LOAD] = ant.carryLoad;

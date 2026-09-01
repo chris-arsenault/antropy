@@ -29,6 +29,8 @@ const INPUT_LABELS = [
   "c.ant",
   "fall",
   "bias",
+  "nest L",
+  "nest R",
 ];
 
 const OUTPUT_LABELS = ["turn", "fwd", "vert", "eat", "dig", "phA", "phB", "egg"];

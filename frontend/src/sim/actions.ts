@@ -176,15 +176,15 @@ export function tryDig(world: World, ant: Ant, verticalBias: number): void {
   tryDeposit(world, ant);
 }
 
-/** Energy-costed pheromone deposition at the ant's own voxel. */
+/** Energy-costed, colony-tagged pheromone deposition at the ant's voxel. */
 export function depositPheromones(world: World, ant: Ant, amountA: number, amountB: number): void {
   const index = voxelIndex(world.grid, ant.x, ant.y, ant.z);
   if (amountA > 0) {
-    depositScent(world.pheromoneA, index, amountA * PHEROMONE_DEPOSIT_MAX);
+    depositScent(world.pheromoneA, index, amountA * PHEROMONE_DEPOSIT_MAX, ant.lineageId);
     ant.energy -= amountA * ENERGY.depositCostPerUnit;
   }
   if (amountB > 0) {
-    depositScent(world.pheromoneB, index, amountB * PHEROMONE_DEPOSIT_MAX);
+    depositScent(world.pheromoneB, index, amountB * PHEROMONE_DEPOSIT_MAX, ant.lineageId);
     ant.energy -= amountB * ENERGY.depositCostPerUnit;
   }
 }

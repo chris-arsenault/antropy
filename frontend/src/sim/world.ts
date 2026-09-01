@@ -13,7 +13,13 @@ import { applyMotor } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
 import { decodeOutputs } from "./motors";
 import { createRng, type Rng, type RngState } from "./rng";
-import { createScentField, emitFoodScent, stepScentField, type ScentField } from "./scent";
+import {
+  createScentField,
+  emitFoodScent,
+  emitNestScent,
+  stepScentField,
+  type ScentField,
+} from "./scent";
 import { createInputBuffer, sense, type SenseContext } from "./senses";
 import { generateTerrain, surfaceHeight } from "./terrain";
 import { FOOD_GOVERNOR, SCENT } from "./tunables";
@@ -32,6 +38,8 @@ export interface World {
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
+  /** Colony-tagged homing signal emitted at each living queen (ADR-0006). */
+  nestScent: ScentField;
   /** Voxel indices currently holding FOOD, maintained by mutateVoxel. */
   foodSources: Set<number>;
   /** Seasonal baseline for the food governor; 0 disables food entirely. */
@@ -80,6 +88,7 @@ export function createWorld(seed: number, controller: Controller = rnnController
     pheromoneA: createScentField(grid),
     pheromoneB: createScentField(grid),
     foodScent: createScentField(grid),
+    nestScent: createScentField(grid),
     foodSources: new Set(),
     foodBase: FOOD_GOVERNOR.targetCount,
     foodTarget: FOOD_GOVERNOR.targetCount,
@@ -125,9 +134,18 @@ export function populateForagers(world: World, count: number): void {
 
 function stepScents(world: World): void {
   emitFoodScent(world.grid, world.foodScent, world.foodSources);
+  for (const colony of world.colonies) {
+    emitNestScent(
+      world.grid,
+      world.nestScent,
+      voxelIndex(world.grid, colony.x, colony.y, colony.z),
+      colony.id
+    );
+  }
   stepScentField(world.grid, world.pheromoneA);
   stepScentField(world.grid, world.pheromoneB);
   stepScentField(world.grid, world.foodScent);
+  stepScentField(world.grid, world.nestScent);
 }
 
 function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
@@ -173,6 +191,7 @@ export function stepWorld(world: World): void {
     pheromoneA: world.pheromoneA,
     pheromoneB: world.pheromoneB,
     foodScent: world.foodScent,
+    nestScent: world.nestScent,
     antIndex: buildAntIndex(world.grid, world.ants),
     eggIndex: world.eggIndex,
   };

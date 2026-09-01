@@ -4,37 +4,48 @@ import { SCENT } from "./tunables";
 
 /**
  * A diffusing scent field over air voxels (design spec §5.5), held in flat
- * fixed-shape arrays with no hot-path allocation: dense values, an insertion-
- * ordered active list with membership flags, and a full-grid gain scratch.
- * Iteration order is the active list order — deterministic for identical
- * histories.
+ * fixed-shape arrays with no hot-path allocation. Deposits are owner-tagged
+ * (ADR-0005): each voxel carries the colony id of its last depositor and
+ * sampling filters by owner, so colonies never read each other's signals.
+ * Owner 0 is the neutral channel (food scent, colony-less ants).
+ * Iteration order is the active list order — deterministic.
  */
 export interface ScentField {
   values: Float32Array;
+  /** Colony id owning each voxel's scent (0 = neutral). */
+  owners: Uint8Array;
   /** Active voxel indices, insertion-ordered; only [0, activeCount) is live. */
   activeList: Int32Array;
   activeCount: number;
   /** 1 where the voxel is in the active list. */
   activeFlags: Uint8Array;
-  /** Diffusion gain scratch, zeroed outside a pass. */
-  gained: Float32Array;
-  /** Indices with nonzero gain this pass; only [0, touchedCount) is live. */
-  touchedList: Int32Array;
-  touchedCount: number;
 }
 
 const INITIAL_ACTIVE_CAPACITY = 4096;
 
+// Diffusion scratch shared across fields (passes run sequentially on one
+// thread): per-voxel gain, gain owner, and the touched-index list.
+let gainScratch = new Float32Array(0);
+let gainOwnerScratch = new Uint8Array(0);
+let touchedScratch = new Int32Array(INITIAL_ACTIVE_CAPACITY);
+let touchedCount = 0;
+
+function ensureScratch(size: number): void {
+  if (gainScratch.length < size) {
+    gainScratch = new Float32Array(size);
+    gainOwnerScratch = new Uint8Array(size);
+  }
+}
+
 export function createScentField(grid: VoxelGrid): ScentField {
   const size = grid.data.length;
+  ensureScratch(size);
   return {
     values: new Float32Array(size),
+    owners: new Uint8Array(size),
     activeList: new Int32Array(INITIAL_ACTIVE_CAPACITY),
     activeCount: 0,
     activeFlags: new Uint8Array(size),
-    gained: new Float32Array(size),
-    touchedList: new Int32Array(INITIAL_ACTIVE_CAPACITY),
-    touchedCount: 0,
   };
 }
 
@@ -55,13 +66,21 @@ function addActive(field: ScentField, voxelIndex: number): void {
   field.activeList[field.activeCount++] = voxelIndex;
 }
 
-export function depositScent(field: ScentField, voxelIndex: number, amount: number): void {
+/** Deposit stamps the owner: last writer claims the voxel (ADR-0005). */
+export function depositScent(
+  field: ScentField,
+  voxelIndex: number,
+  amount: number,
+  owner = 0
+): void {
   field.values[voxelIndex] += amount;
+  field.owners[voxelIndex] = owner;
   addActive(field, voxelIndex);
 }
 
-export function sampleScent(field: ScentField, voxelIndex: number): number {
-  return field.values[voxelIndex];
+/** Sampling filters by owner: foreign scent reads as zero. */
+export function sampleScent(field: ScentField, voxelIndex: number, owner = 0): number {
+  return field.owners[voxelIndex] === owner ? field.values[voxelIndex] : 0;
 }
 
 export function scentActiveCount(field: ScentField): number {
@@ -73,9 +92,15 @@ export function scentActiveIndices(field: ScentField): number[] {
   return Array.from(field.activeList.subarray(0, field.activeCount));
 }
 
-/** Restore a field from checkpoint data (values + ordered active list). */
-export function restoreScentField(field: ScentField, values: Float32Array, active: number[]): void {
+/** Restore a field from checkpoint data (values + owners + active order). */
+export function restoreScentField(
+  field: ScentField,
+  values: Float32Array,
+  owners: Uint8Array,
+  active: number[]
+): void {
   field.values.set(values);
+  field.owners.set(owners);
   field.activeFlags.fill(0);
   field.activeCount = 0;
   for (const index of active) {
@@ -108,14 +133,15 @@ function airNeighbors(grid: VoxelGrid, index: number): number {
   return write;
 }
 
-function recordGain(field: ScentField, voxelIndex: number, amount: number): void {
-  if (field.gained[voxelIndex] === 0) {
-    if (field.touchedCount === field.touchedList.length) {
-      field.touchedList = grow(field.touchedList);
+function recordGain(voxelIndex: number, amount: number, owner: number): void {
+  if (gainScratch[voxelIndex] === 0) {
+    if (touchedCount === touchedScratch.length) {
+      touchedScratch = grow(touchedScratch);
     }
-    field.touchedList[field.touchedCount++] = voxelIndex;
+    touchedScratch[touchedCount++] = voxelIndex;
+    gainOwnerScratch[voxelIndex] = owner;
   }
-  field.gained[voxelIndex] += amount;
+  gainScratch[voxelIndex] += amount;
 }
 
 function diffuse(grid: VoxelGrid, field: ScentField): void {
@@ -126,18 +152,24 @@ function diffuse(grid: VoxelGrid, field: ScentField): void {
       continue;
     }
     const share = (field.values[index] * SCENT.diffusionRate) / 6;
+    const owner = field.owners[index];
     for (let n = 0; n < neighborCount; n++) {
-      recordGain(field, NEIGHBOR_SCRATCH[n], share);
+      recordGain(NEIGHBOR_SCRATCH[n], share, owner);
     }
     field.values[index] -= share * neighborCount;
   }
-  for (let j = 0; j < field.touchedCount; j++) {
-    const index = field.touchedList[j];
-    field.values[index] += field.gained[index];
-    field.gained[index] = 0;
+  for (let j = 0; j < touchedCount; j++) {
+    const index = touchedScratch[j];
+    // A voxel with no standing scent takes the gain's owner; an owned voxel
+    // keeps its owner (first-writer-per-pass, then last-depositor).
+    if (field.values[index] === 0) {
+      field.owners[index] = gainOwnerScratch[index];
+    }
+    field.values[index] += gainScratch[index];
+    gainScratch[index] = 0;
     addActive(field, index);
   }
-  field.touchedCount = 0;
+  touchedCount = 0;
 }
 
 function evaporateAndCompact(field: ScentField): void {
@@ -165,13 +197,27 @@ export function stepScentField(grid: VoxelGrid, field: ScentField): void {
   evaporateAndCompact(field);
 }
 
-/** Continuous emission from FOOD voxels into the food-scent field. */
+/** Continuous neutral emission from FOOD voxels into the food-scent field. */
 export function emitFoodScent(grid: VoxelGrid, field: ScentField, foodSources: Set<number>): void {
   for (const source of foodSources) {
     const neighborCount = airNeighbors(grid, source);
     for (let n = 0; n < neighborCount; n++) {
-      depositScent(field, NEIGHBOR_SCRATCH[n], SCENT.foodSourceStrength);
+      depositScent(field, NEIGHBOR_SCRATCH[n], SCENT.foodSourceStrength, 0);
     }
+  }
+}
+
+/** Colony-tagged emission from a queen's position (ADR-0006 nest scent). */
+export function emitNestScent(
+  grid: VoxelGrid,
+  field: ScentField,
+  voxelIndex: number,
+  owner: number
+): void {
+  depositScent(field, voxelIndex, SCENT.nestSourceStrength, owner);
+  const neighborCount = airNeighbors(grid, voxelIndex);
+  for (let n = 0; n < neighborCount; n++) {
+    depositScent(field, NEIGHBOR_SCRATCH[n], SCENT.nestSourceStrength, owner);
   }
 }
 
