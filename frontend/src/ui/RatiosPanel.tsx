@@ -44,6 +44,10 @@ export function RatiosPanel({ stats }: { stats: WorldStats | null }) {
           <span className="ratio-label">gradient visible</span>
           <span className="ratio-value">{(stats.gradientVisibility * 100).toFixed(0)}%</span>
         </div>
+        <div className="layer-row">
+          <span className="ratio-label">continuations</span>
+          <span className="ratio-value">{stats.continuations}</span>
+        </div>
       </div>
     </figure>
   );

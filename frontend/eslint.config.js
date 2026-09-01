@@ -50,7 +50,8 @@ const withEslint9ContextCompat = (rule) => ({
 
 export default tseslint.config(
   {
-    ignores: ["dist/", "node_modules/", "coverage/"],
+    // seeds/ holds generated weight artifacts (ADR-0010) — data, not code.
+    ignores: ["dist/", "node_modules/", "coverage/", "src/sim/controller/seeds/"],
   },
 
   {

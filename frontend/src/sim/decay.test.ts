@@ -18,6 +18,7 @@ function carveTestTunnel(world: World): { x: number; y: number; z: number } {
 describe("nest decay (spec §9.2)", () => {
   it("collapses an untrafficked subsurface cavity after the TTL", () => {
     const world = createWorld(5101);
+    world.autoContinue = false; // isolate decay from refounding carves
     const spot = carveTestTunnel(world);
 
     world.tick = DECAY.ttlTicks + 1; // the cavity is long overdue

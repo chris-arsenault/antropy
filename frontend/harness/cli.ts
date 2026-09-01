@@ -4,6 +4,7 @@ import { flag, intFlag, parseFlags, seedsOf, type Flags } from "./lib/flags";
 import { openLedger, recordRun } from "./lib/ledger";
 import { applyPatches } from "./lib/patch";
 import { runCalibrate } from "./experiments/calibrate";
+import { runDerive } from "./experiments/derive";
 import { runDeterminism } from "./determinism";
 
 /**
@@ -150,6 +151,8 @@ function main(): void {
       return cmdLadder(parseFlags(rest));
     case "calibrate":
       return runCalibrate(parseFlags(rest));
+    case "derive":
+      return runDerive(parseFlags(rest));
     case "determinism":
       return runDeterminism(parseFlags(rest));
     case "recent":
@@ -158,7 +161,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|derive|determinism|recent|sql> [flags]"
       );
   }
 }

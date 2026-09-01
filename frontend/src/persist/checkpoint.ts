@@ -8,7 +8,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 7;
+export const CHECKPOINT_VERSION = 8;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -52,6 +52,9 @@ export interface Checkpoint {
   queenEggsEaten: number;
   eggsLaid: number;
   eggsPerished: number;
+  autoContinue: boolean;
+  continuations: number;
+  lastContinueTick: number;
   foodBase: number;
   foodTarget: number;
   grid: Uint8Array;
@@ -208,6 +211,9 @@ export function serializeWorld(world: World): Checkpoint {
     queenEggsEaten: world.queenEggsEaten,
     eggsLaid: world.eggsLaid,
     eggsPerished: world.eggsPerished,
+    autoContinue: world.autoContinue,
+    continuations: world.continuations,
+    lastContinueTick: world.lastContinueTick,
     foodBase: world.foodBase,
     foodTarget: world.foodTarget,
     grid: Uint8Array.from(world.grid.data),
@@ -250,6 +256,9 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.queenEggsEaten = checkpoint.queenEggsEaten;
   world.eggsLaid = checkpoint.eggsLaid;
   world.eggsPerished = checkpoint.eggsPerished;
+  world.autoContinue = checkpoint.autoContinue;
+  world.continuations = checkpoint.continuations;
+  world.lastContinueTick = checkpoint.lastContinueTick;
   world.foodBase = checkpoint.foodBase;
   world.foodTarget = checkpoint.foodTarget;
   world.grid.data.set(checkpoint.grid);

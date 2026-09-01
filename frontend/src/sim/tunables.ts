@@ -206,6 +206,16 @@ export const QUEEN = {
   flightMargin: 10,
 } as const;
 
+// Automatic continue (R3): the world is never left dead — below the
+// population floor (or with no colony at all), a new colony is force-
+// founded from the survivor genome pool.
+export const CONTINUITY = {
+  /** Total living ants below which a continuation triggers. */
+  minPopulation: 4,
+  /** Minimum ticks between continuations (no thrash while one recovers). */
+  cooldownTicks: 3000,
+} as const;
+
 // Nest decay (design spec §9.2): abandonment is punished, not existence.
 export const DECAY = {
   /** Ticks between decay passes. */

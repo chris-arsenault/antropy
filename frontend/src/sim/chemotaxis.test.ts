@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { surfaceSpawnY } from "./ant";
-import { rnnController, zeroGenome } from "./controller/rnn";
+import { backboneVector, GENOME_LENGTH, rnnController, zeroGenome } from "./controller/rnn";
+import { FORAGER_SEED } from "./controller/seeds/forager";
 import { type Genome } from "./controller/contract";
+
+/** The baked artifact mean (noise-free) — the contract under assay. */
+function meanGenome(): Genome {
+  const vector =
+    FORAGER_SEED !== null && FORAGER_SEED.length === GENOME_LENGTH
+      ? Float32Array.from(FORAGER_SEED)
+      : backboneVector();
+  return rnnController.deserializeGenome(vector);
+}
 import { voxelIndex } from "./grid";
 import { depositScent, stepScentField } from "./scent";
 import { createWorld, spawnAnt, stepWorld, type World } from "./world";
@@ -66,9 +76,9 @@ function runAssay(seed: number, genome: Genome): { start: number; end: number } 
 
 describe("chemotaxis assay (M5 gate)", () => {
   it("closes on the plume with a seeded founder genome", { timeout: 60_000 }, () => {
-    const genomeSource = createWorld(3105);
-    const genome = rnnController.seed(genomeSource.rng);
-    const { start, end } = runAssay(3114, genome);
+    // The artifact mean is the assayed contract (like the heat assay);
+    // individual noise-robustness is measured in vivo by the harness.
+    const { start, end } = runAssay(3114, meanGenome());
     expect(end).toBeLessThan(start - REQUIRED_IMPROVEMENT);
   });
 

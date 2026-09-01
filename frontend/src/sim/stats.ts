@@ -36,6 +36,8 @@ export interface WorldStats {
   colonyCount: number;
   foundings: number;
   collapses: number;
+  /** Auto-continue force-foundings (R3): the world was never left dead. */
+  continuations: number;
   /** Live §B.3 viability ratios. */
   ratios: ViabilityRatios;
   /** Mean absolute activation per sensory input (circling checklist §B.6). */
@@ -158,6 +160,7 @@ export function computeStats(world: World): WorldStats {
     colonyCount: world.colonies.length,
     foundings: world.foundings,
     collapses: world.collapses,
+    continuations: world.continuations,
     ratios: computeRatios(world),
     inputActivity: inputActivity(world),
     gradientVisibility: gradientVisibility(world),

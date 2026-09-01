@@ -136,6 +136,8 @@ function followAnt(world: World, antId: number | null, tick: number, out: TraceS
 export function runColony(config: ColonyRunConfig): ColonyRunResult {
   resetOracleState();
   const world = createWorld(config.seed);
+  // Continuation would mask the collapse ledgers this harness measures.
+  world.autoContinue = false;
   const colony = foundColony(world);
   if (config.driver.queenOnSurface) {
     colony.y = world.surfaceMap[colony.z * world.grid.sizeX + colony.x];

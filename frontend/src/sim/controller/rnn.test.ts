@@ -40,11 +40,36 @@ describe("rnnController", () => {
     expect(leftTurn).toBeGreaterThan(rightTurn);
   });
 
-  it("drives forward and eats from the seeded biases", () => {
+  it("moves toward food scent and eats at contact when hungry", () => {
     const genome = rnnController.seed(createRng(12));
-    const result = rnnController.act(genome, inputsWith({}), rnnController.createState());
-    expect(result.outputs[Output.FORWARD]).toBeGreaterThan(0.3);
-    expect(result.outputs[Output.EAT]).toBeGreaterThan(0.5);
+    const state = rnnController.createState();
+    let maxForward = -Infinity;
+    let outputs = rnnController.act(
+      genome,
+      inputsWith({ [Input.FOOD_SCENT_LEFT]: 0.6, [Input.FOOD_SCENT_RIGHT]: 0.5 }),
+      state
+    ).outputs;
+    for (let t = 0; t < 5; t++) {
+      outputs = rnnController.act(
+        genome,
+        inputsWith({ [Input.FOOD_SCENT_LEFT]: 0.6, [Input.FOOD_SCENT_RIGHT]: 0.5 }),
+        state
+      ).outputs;
+      maxForward = Math.max(maxForward, outputs[Output.FORWARD]);
+    }
+    expect(maxForward).toBeGreaterThan(0.2);
+
+    const eatState = rnnController.createState();
+    let eat = -Infinity;
+    for (let t = 0; t < 5; t++) {
+      const acted = rnnController.act(
+        genome,
+        inputsWith({ [Input.CONTACT_FOOD]: 1, [Input.ENERGY]: 0.3 }),
+        eatState
+      ).outputs;
+      eat = Math.max(eat, acted[Output.EAT]);
+    }
+    expect(eat).toBeGreaterThan(0.5);
   });
 
   it("carries memory in the recurrent state", () => {

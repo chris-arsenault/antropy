@@ -175,15 +175,19 @@ describe("real founding and collapse (spec §9.1)", () => {
     expect(world.collapses).toBe(1);
   });
 
-  it("collapses the colony after sustained starvation past the grace", () => {
+  it("collapses the starved colony, then auto-continue refounds", () => {
     const world = createWorld(4009);
     const colony = foundColony(world);
     colony.stockpile = 0;
     colony.starvingSince = 0;
     world.tick = QUEEN.starvationGraceTicks + 1;
     stepWorld(world);
-    expect(world.colonies.length).toBe(0);
     expect(world.collapses).toBe(1);
+    // The shipped world is never left dead (R3 auto-continue): a new
+    // colony is force-founded from the survivor pool in the same tick.
+    expect(world.continuations).toBe(1);
+    expect(world.colonies.length).toBe(1);
+    expect(world.colonies[0].id).not.toBe(colony.id);
   });
 
   it("survives a brief empty stockpile within the grace", () => {

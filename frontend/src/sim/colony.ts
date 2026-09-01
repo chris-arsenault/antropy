@@ -140,7 +140,8 @@ function createColonyAt(
 /**
  * The t=0 bootstrap colony (spec §10 curriculum): independent wide-prior
  * draws for queen and sperm, and a fast-forwarded adult first brood. All
- * later colonies are founded raw through foundFromQueenEgg.
+ * later colonies are founded raw through foundFromQueenEgg, or force-
+ * founded by auto-continue through foundColonyFromPool.
  */
 export function foundColony(world: World): Colony {
   const x = Math.floor(world.grid.sizeX / 2);
@@ -153,15 +154,21 @@ export function foundColony(world: World): Colony {
   if (!colony) {
     throw new Error("no surface for colony founding");
   }
+  spawnFirstBrood(world, colony, sperm);
+  return colony;
+}
+
+/** Fast-forwarded adult first brood on the open surface around the
+ * entrance, never down the shaft column (whose surface scan reaches the
+ * chamber floor). */
+function spawnFirstBrood(world: World, colony: Colony, sperm: Sperm[]): void {
   for (let i = 0; i < COLONY.initialWorkers; i++) {
     const spermIndex = Math.floor(world.rng.next() * sperm.length);
     const genome = makeOffspring(world, colony, spermIndex);
-    // Founders start on the open surface around the entrance, never down
-    // the shaft column (whose surface scan reaches the chamber floor).
     const dx = 2 + Math.floor(world.rng.next() * 4);
     const dz = 2 + Math.floor(world.rng.next() * 4);
-    const sx = x + (world.rng.next() < 0.5 ? dx : -dx);
-    const sz = z + (world.rng.next() < 0.5 ? dz : -dz);
+    const sx = colony.x + (world.rng.next() < 0.5 ? dx : -dx);
+    const sz = colony.z + (world.rng.next() < 0.5 ? dz : -dz);
     const spawnY = surfaceSpawnY(world.grid, sx, sz);
     if (spawnY === null) {
       continue;
@@ -181,6 +188,35 @@ export function foundColony(world: World): Colony {
       traits: world.controller.physical(genome),
     });
   }
+}
+
+/**
+ * Force-founding from a survivor genome pool (auto-continue, R3): the new
+ * queen and sperm are recombined and mutated draws from the pre-collapse
+ * population, so the continuation carries its genetics forward; an empty
+ * pool falls back to fresh wide-prior draws.
+ */
+export function foundColonyFromPool(world: World, pool: Genome[]): Colony | null {
+  const draw = (): Genome =>
+    pool.length > 0
+      ? pool[Math.floor(world.rng.next() * pool.length)]
+      : world.controller.seed(world.rng);
+  const mix = (): Genome => {
+    const combined = world.controller.recombine(draw(), draw(), world.rng) ?? draw();
+    const sigma = world.controller.physical(combined).mutationSigma;
+    return world.controller.mutate(combined, sigma, world.rng);
+  };
+  const sperm: Sperm[] = [];
+  for (let i = 0; i < COLONY.spermCount; i++) {
+    sperm.push({ genome: world.controller.haploidOffspring(draw(), world.rng), patrilineId: i + 1 });
+  }
+  const cx = Math.floor(world.grid.sizeX / 2) + Math.floor(world.rng.next() * 41) - 20;
+  const cz = Math.floor(world.grid.sizeZ / 2) + Math.floor(world.rng.next() * 41) - 20;
+  const colony = createColonyAt(world, cx, cz, mix(), sperm);
+  if (!colony) {
+    return null;
+  }
+  spawnFirstBrood(world, colony, sperm);
   return colony;
 }
 

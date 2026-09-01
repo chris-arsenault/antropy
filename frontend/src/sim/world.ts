@@ -24,6 +24,7 @@ import {
 } from "./scent";
 import { createInputBuffer, sense, type SenseContext } from "./senses";
 import { generateTerrain, surfaceHeight } from "./terrain";
+import { stepAutoContinue } from "./continuity";
 import { microclimateMultiplier, stepWeather } from "./weather";
 import {
   BEACON_PHYSICS,
@@ -64,6 +65,11 @@ export interface World {
    * those lost to exposure. */
   eggsLaid: number;
   eggsPerished: number;
+  /** Auto-continue: force-foundings from the survivor pool (R3). The
+   * flag lets harnesses and isolation tests run dead worlds honestly. */
+  autoContinue: boolean;
+  continuations: number;
+  lastContinueTick: number;
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
@@ -134,6 +140,9 @@ export function createWorld(seed: number, controller: Controller = rnnController
     queenEggsEaten: 0,
     eggsLaid: 0,
     eggsPerished: 0,
+    autoContinue: true,
+    continuations: 0,
+    lastContinueTick: 0,
     pheromoneA: createScentField(grid, TRAIL_PHYSICS),
     pheromoneB: createScentField(grid, TRAIL_PHYSICS),
     foodScent: createScentField(grid, BEACON_PHYSICS),
@@ -279,6 +288,7 @@ export function stepWorld(world: World): void {
     }
   }
   reapDead(world);
+  stepAutoContinue(world);
 }
 
 /** The canonical voxel mutation path: writes the grid and feeds the renderer. */

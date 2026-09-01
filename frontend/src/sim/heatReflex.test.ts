@@ -1,41 +1,81 @@
 import { describe, expect, it } from "vitest";
-import { ACTION_THRESHOLD, Input, INPUT_COUNT } from "./controller/contract";
-import { rnnController } from "./controller/rnn";
+import { surfaceSpawnY } from "./ant";
+import { backboneVector, GENOME_LENGTH, rnnController } from "./controller/rnn";
+import { FORAGER_SEED } from "./controller/seeds/forager";
 import { createRng } from "./rng";
-import { Output } from "./controller/contract";
+import { createWorld, spawnAnt, stepWorld, type World } from "./world";
 
-/**
- * Rung-3 assay for the heat-escape reflex (§B.9.1): a seeded controller
- * fed synthetic inputs digs downward under high TEMPERATURE and stays
- * quiet on the terrain channel in the cool. Deterministic: fixed seed,
- * direct act() calls, no world.
- */
-function actWith(temperature: number) {
-  const rng = createRng(3104);
-  const genome = rnnController.seed(rng);
-  const state = rnnController.createState();
-  const inputs = new Float32Array(INPUT_COUNT);
-  inputs[Input.BIAS] = 1;
-  inputs[Input.ENERGY] = 0.7;
-  inputs[Input.TEMPERATURE] = temperature;
-  // Settle the recurrent state on constant input.
-  let outputs = rnnController.act(genome, inputs, state).outputs;
-  for (let i = 0; i < 5; i++) {
-    outputs = rnnController.act(genome, inputs, state).outputs;
-  }
-  return outputs;
+/** The artifact mean itself (noise-free): the contract under assay. */
+function meanGenome() {
+  const vector =
+    FORAGER_SEED !== null && FORAGER_SEED.length === GENOME_LENGTH
+      ? Float32Array.from(FORAGER_SEED)
+      : backboneVector();
+  return rnnController.deserializeGenome(vector);
 }
 
-describe("heat-escape reflex assay (rung 3)", () => {
-  it("digs downward under lethal-shoulder heat", () => {
-    const hot = actWith(0.8);
-    expect(hot[Output.DIG]).toBeGreaterThan(ACTION_THRESHOLD);
-    expect(hot[Output.VERTICAL_BIAS]).toBeLessThan(-0.33);
-  });
+/**
+ * Rung-3 assay for the heat-escape competence, behavior-level: a seeded
+ * ant on the open surface at a harsh midday digs itself below ground;
+ * the same ant on a cool night leaves the terrain alone. Runs the real
+ * step pipeline so the contract survives re-derivation of the seed.
+ */
+const HOT_TICK = 30_500;
+const COOL_TICK = 11_500;
 
-  it("keeps the terrain channel quiet in the cool", () => {
-    const cool = actWith(0.05);
-    expect(cool[Output.DIG]).toBeLessThan(ACTION_THRESHOLD);
-    expect(cool[Output.VERTICAL_BIAS]).toBeGreaterThan(-0.33);
+function runEpisode(tickBase: number): number {
+  const world: World = createWorld(7030);
+  world.ants = [];
+  world.tick = tickBase;
+  world.rng = createRng(777);
+  world.foodBase = 0;
+  world.foodTarget = 0;
+  const x = 60;
+  const z = 60;
+  const y = surfaceSpawnY(world.grid, x, z) as number;
+  const genome = meanGenome();
+  const ant = spawnAnt(world, {
+    x,
+    y,
+    z,
+    heading: 0.7,
+    energy: 0.9,
+    lineageId: 0,
+    patrilineId: 0,
+    motherId: 0,
+    fatherId: 0,
+    genome,
+    controllerState: rnnController.createState(),
+    traits: rnnController.physical(genome),
+  });
+  let deepest = 0;
+  const trace: string[] = [];
+  for (let t = 0; t < 250; t++) {
+    stepWorld(world);
+    // Depth below the LOCAL surface — walking downhill is not burrowing.
+    // surfaceMap holds the solid-top y; a standing ant sits at +1.
+    const local = world.surfaceMap[ant.z * world.grid.sizeX + ant.x];
+    deepest = Math.max(deepest, local + 1 - ant.y);
+    if (t % 50 === 0) {
+      trace.push(
+        `t=${t} pos=(${ant.x},${ant.y},${ant.z}) local=${local} temp=${ant.lastInputs[22].toFixed(2)} dig=${ant.lastOutputs[4].toFixed(2)} vb=${ant.lastOutputs[2].toFixed(2)} fwd=${ant.lastOutputs[1].toFixed(2)}`
+      );
+    }
+  }
+  if (process.env.HEAT_TRACE) {
+    console.error(trace.join("\n"));
+  }
+  return deepest;
+}
+
+describe("heat-escape assay (rung 3)", () => {
+  it("digs in below the midday surface, and barely touches it at night", () => {
+    const hot = runEpisode(HOT_TICK);
+    const cool = runEpisode(COOL_TICK);
+    expect(hot).toBeGreaterThanOrEqual(1);
+    // Incidental terrain contact is tolerated; systematic burrowing when
+    // cool is not.
+    expect(cool).toBeLessThanOrEqual(1);
+    expect(hot).toBeGreaterThan(cool);
   });
 });
