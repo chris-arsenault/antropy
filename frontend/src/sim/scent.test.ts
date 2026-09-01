@@ -10,6 +10,7 @@ import {
   scentActiveCount,
   stepScentField,
 } from "./scent";
+import { BEACON_PHYSICS, TRAIL_PHYSICS } from "./tunables";
 
 describe("scent fields", () => {
   it("diffuses into adjacent air voxels", () => {
@@ -65,6 +66,31 @@ describe("scent fields", () => {
       stepScentField(grid, b);
     }
     expect(Array.from(a.values)).toEqual(Array.from(b.values));
+  });
+});
+
+describe("trail physics", () => {
+  it("keeps a reinforced trail alive across hundreds of ticks", () => {
+    const grid = createGrid(8, 8, 8);
+    const trail = createScentField(grid, TRAIL_PHYSICS);
+    const beacon = createScentField(grid, BEACON_PHYSICS);
+    const index = voxelIndex(grid, 4, 4, 4);
+    depositScent(trail, index, 1);
+    depositScent(beacon, index, 1);
+
+    // 100 passes = 500 ticks at the step cadence.
+    for (let i = 0; i < 100; i++) {
+      stepScentField(grid, trail);
+      stepScentField(grid, beacon);
+    }
+    // Longevity is mass retention: diffusion blurs but does not destroy.
+    let trailMass = 0;
+    for (const v of trail.values) {
+      trailMass += v;
+    }
+    expect(trailMass).toBeGreaterThan(0.4);
+    expect(sampleScent(trail, index)).toBeGreaterThan(0.02);
+    expect(sampleScent(beacon, index)).toBe(0);
   });
 });
 

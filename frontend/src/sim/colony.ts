@@ -44,7 +44,11 @@ function carveIfSoft(world: World, x: number, y: number, z: number): void {
   }
 }
 
-/** Founding chamber plus the entrance shaft the queen digs (spec §7.2). */
+/**
+ * Founding chamber, entrance shaft, and a shallow surface depression around
+ * the shaft mouth so ants walk in and out instead of needing a vertical
+ * climb (spec §7.2 scripted founding).
+ */
 function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY: number): void {
   for (let dy = 0; dy <= 1; dy++) {
     for (let dz = -1; dz <= 1; dz++) {
@@ -55,6 +59,12 @@ function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY
   }
   for (let y = cy + 2; y <= surfaceY; y++) {
     carveIfSoft(world, cx, y, cz);
+  }
+  for (let dz = -1; dz <= 1; dz++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const surface = world.surfaceMap[(cz + dz) * world.grid.sizeX + (cx + dx)];
+      carveIfSoft(world, cx + dx, surface, cz + dz);
+    }
   }
 }
 
@@ -143,14 +153,20 @@ export function foundColony(world: World): Colony {
   for (let i = 0; i < COLONY.initialWorkers; i++) {
     const spermIndex = Math.floor(world.rng.next() * sperm.length);
     const genome = makeOffspring(world, colony, spermIndex);
-    const spawnY = surfaceSpawnY(world.grid, x, z);
+    // Founders start on the open surface around the entrance, never down
+    // the shaft column (whose surface scan reaches the chamber floor).
+    const dx = 2 + Math.floor(world.rng.next() * 4);
+    const dz = 2 + Math.floor(world.rng.next() * 4);
+    const sx = x + (world.rng.next() < 0.5 ? dx : -dx);
+    const sz = z + (world.rng.next() < 0.5 ? dz : -dz);
+    const spawnY = surfaceSpawnY(world.grid, sx, sz);
     if (spawnY === null) {
       continue;
     }
     spawnAnt(world, {
-      x,
+      x: sx,
       y: spawnY,
-      z,
+      z: sz,
       heading: world.rng.next() * Math.PI * 2,
       energy: 1,
       lineageId: colony.id,

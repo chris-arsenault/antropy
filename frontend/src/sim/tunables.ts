@@ -32,20 +32,35 @@ export const TERRAIN = {
   basementRows: 2,
 } as const;
 
-// Scent fields (M4): pheromone A/B and food scent share this machinery.
+// Scent machinery shared across fields; physics differ per field role.
 export const SCENT = {
   /** Ticks between diffusion/evaporation passes. */
   stepInterval: 5,
-  /** Fraction of a voxel's scent offered to neighbors per pass. */
-  diffusionRate: 0.5,
-  /** Multiplicative retention per pass. */
-  evaporation: 0.9,
-  /** Values below this are zeroed and deactivated (caps the active set). */
-  epsilon: 5e-3,
   /** Scent injected next to each FOOD voxel per pass. */
   foodSourceStrength: 0.5,
   /** Nest scent injected at each queen per pass (ADR-0006). */
   nestSourceStrength: 0.8,
+} as const;
+
+/**
+ * Trail physics (pheromone A/B): slow evaporation so reinforced deposits
+ * accumulate into long-lived trails (~575-tick mass half-life), low
+ * diffusion so trails stay narrow with usable local gradients.
+ */
+export const TRAIL_PHYSICS = {
+  diffusionRate: 0.06,
+  evaporation: 0.994,
+  epsilon: 2e-3,
+} as const;
+
+/**
+ * Beacon physics (food and nest scent): fast turnover keeps continuously
+ * re-emitted source clouds compact, bounding the active set.
+ */
+export const BEACON_PHYSICS = {
+  diffusionRate: 0.5,
+  evaporation: 0.9,
+  epsilon: 5e-3,
 } as const;
 
 // Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.

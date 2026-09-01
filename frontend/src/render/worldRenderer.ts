@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { type World } from "../sim/world";
 import { createAntRenderer } from "./antRenderer";
 import { createChunkMeshes } from "./chunkMeshes";
+import { createScentRenderer, type ScentLayerKey } from "./scentRenderer";
 
 export interface WorldRenderer {
   /** Rebuild meshes for chunks in the world's dirty feed, then clear it. */
@@ -13,6 +14,8 @@ export interface WorldRenderer {
   pickAnt(ndcX: number, ndcY: number): number | null;
   /** Ground opacity: 1 = solid, below 1 = x-ray view of tunnel networks. */
   setTerrainOpacity(opacity: number): void;
+  /** Toggle a scent map layer. */
+  setLayerVisible(layer: ScentLayerKey, visible: boolean): void;
   resize(width: number, height: number): void;
   dispose(): void;
 }
@@ -40,6 +43,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
 
   const chunks = createChunkMeshes(scene, world);
   const ants = createAntRenderer(scene);
+  const scents = createScentRenderer(scene);
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
 
@@ -49,6 +53,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
     },
     render(alpha: number) {
       ants.update(world, alpha);
+      scents.update(world);
       controls.update();
       renderer.render(scene, camera);
     },
@@ -69,6 +74,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
     setTerrainOpacity(opacity: number) {
       chunks.setOpacity(opacity);
     },
+    setLayerVisible(layer: ScentLayerKey, visible: boolean) {
+      scents.setVisible(layer, visible);
+    },
     resize(width: number, height: number) {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
@@ -76,6 +84,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
     },
     dispose() {
       ants.dispose();
+      scents.dispose();
       controls.dispose();
       chunks.dispose();
       renderer.dispose();

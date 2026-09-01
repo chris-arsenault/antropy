@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createWorldRenderer, type WorldRenderer } from "../render/worldRenderer";
 import { type World } from "../sim/world";
+import { type LayerVisibility } from "./MapLayersPanel";
 
 interface WorldViewProps {
   world: World;
@@ -8,6 +9,8 @@ interface WorldViewProps {
   chartsOnly: boolean;
   /** Ground opacity in [0.05, 1]; below 1 the terrain is x-ray. */
   groundOpacity: number;
+  /** Scent map-layer visibility. */
+  layers: LayerVisibility;
   /** Fractional-tick interpolation factor owned by the simulation host. */
   alphaRef: { readonly current: number };
   onPickAnt(antId: number | null): void;
@@ -17,10 +20,39 @@ function supportsWebgl(canvas: HTMLCanvasElement): boolean {
   return canvas.getContext("webgl2") !== null;
 }
 
+/** Run the renderer's draw loop with element-size observation; returns cleanup. */
+function runRenderLoop(
+  canvas: HTMLCanvasElement,
+  renderer: WorldRenderer,
+  alphaRef: { readonly current: number }
+): () => void {
+  const resize = () => {
+    renderer.resize(canvas.clientWidth, canvas.clientHeight);
+  };
+  resize();
+  // Observe the element, not the window: sibling panels change our size.
+  const observer = new ResizeObserver(resize);
+  observer.observe(canvas);
+
+  let frame = 0;
+  const draw = () => {
+    renderer.updateDirtyChunks();
+    renderer.render(alphaRef.current);
+    frame = requestAnimationFrame(draw);
+  };
+  frame = requestAnimationFrame(draw);
+
+  return () => {
+    cancelAnimationFrame(frame);
+    observer.disconnect();
+  };
+}
+
 export function WorldView({
   world,
   chartsOnly,
   groundOpacity,
+  layers,
   alphaRef,
   onPickAnt,
 }: WorldViewProps) {
@@ -40,33 +72,30 @@ export function WorldView({
 
     const renderer = createWorldRenderer(canvas, world);
     rendererRef.current = renderer;
-    const resize = () => {
-      renderer.resize(canvas.clientWidth, canvas.clientHeight);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    let frame = 0;
-    const draw = () => {
-      renderer.updateDirtyChunks();
-      renderer.render(alphaRef.current);
-      frame = requestAnimationFrame(draw);
-    };
-    frame = requestAnimationFrame(draw);
+    const stopLoop = runRenderLoop(canvas, renderer, alphaRef);
 
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", resize);
+      stopLoop();
       rendererRef.current = null;
       renderer.dispose();
     };
   }, [world, chartsOnly, alphaRef]);
 
-  // Runs after the creation effect (declaration order), so a fresh renderer
-  // always receives the current opacity.
+  // These run after the creation effect (declaration order), so a fresh
+  // renderer always receives the current opacity and layer visibility.
   useEffect(() => {
     rendererRef.current?.setTerrainOpacity(groundOpacity);
   }, [groundOpacity, world, chartsOnly]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) {
+      return;
+    }
+    for (const key of Object.keys(layers) as (keyof LayerVisibility)[]) {
+      renderer.setLayerVisible(key, layers[key]);
+    }
+  }, [layers, world, chartsOnly]);
 
   const onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

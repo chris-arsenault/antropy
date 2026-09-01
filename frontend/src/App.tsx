@@ -3,6 +3,7 @@ import { foundColony } from "./sim/colony";
 import { createWorld, type World } from "./sim/world";
 import { ChartsPanel } from "./ui/ChartsPanel";
 import { InspectorPanel } from "./ui/InspectorPanel";
+import { DEFAULT_LAYERS, MapLayersPanel, type LayerVisibility } from "./ui/MapLayersPanel";
 import { PersistenceControls } from "./ui/PersistenceControls";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
@@ -64,6 +65,7 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
   const sim = useSimulation(factory);
   const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
   const [groundOpacity, setGroundOpacity] = useState(DEFAULT_GROUND_OPACITY);
+  const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const selectedAnt = sim.world.ants.find((ant) => ant.id === selectedAntId) ?? null;
 
   return (
@@ -102,17 +104,6 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
           <button type="button" onClick={onNewWorld}>
             New world
           </button>
-          <label className="speed-label">
-            Ground
-            <input
-              type="range"
-              min={5}
-              max={100}
-              value={Math.round(groundOpacity * 100)}
-              onChange={(event) => setGroundOpacity(Number(event.target.value) / 100)}
-            />
-            {Math.round(groundOpacity * 100)}%
-          </label>
           <PersistenceControls world={sim.world} onRestore={onRestore} />
         </div>
       </header>
@@ -121,10 +112,19 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
           world={sim.world}
           chartsOnly={isChartsOnly(sim.speed)}
           groundOpacity={groundOpacity}
+          layers={layers}
           alphaRef={sim.alphaRef}
           onPickAnt={setSelectedAntId}
         />
-        <ChartsPanel history={sim.history} stats={sim.stats} version={sim.tick} />
+        <section className="charts-panel">
+          <ChartsPanel history={sim.history} stats={sim.stats} version={sim.tick} />
+          <MapLayersPanel
+            layers={layers}
+            onToggle={(layer, visible) => setLayers((prev) => ({ ...prev, [layer]: visible }))}
+            groundOpacity={groundOpacity}
+            onGroundOpacity={setGroundOpacity}
+          />
+        </section>
         <InspectorPanel
           ant={selectedAnt}
           controller={sim.world.controller}

@@ -23,7 +23,7 @@ import {
 } from "./scent";
 import { createInputBuffer, sense, type SenseContext } from "./senses";
 import { generateTerrain, surfaceHeight } from "./terrain";
-import { DECAY, FOOD_GOVERNOR, SCENT } from "./tunables";
+import { BEACON_PHYSICS, DECAY, FOOD_GOVERNOR, SCENT, TRAIL_PHYSICS } from "./tunables";
 
 export interface World {
   readonly seed: number;
@@ -99,10 +99,10 @@ export function createWorld(seed: number, controller: Controller = rnnController
     foundings: 0,
     foundingFailures: 0,
     collapses: 0,
-    pheromoneA: createScentField(grid),
-    pheromoneB: createScentField(grid),
-    foodScent: createScentField(grid),
-    nestScent: createScentField(grid),
+    pheromoneA: createScentField(grid, TRAIL_PHYSICS),
+    pheromoneB: createScentField(grid, TRAIL_PHYSICS),
+    foodScent: createScentField(grid, BEACON_PHYSICS),
+    nestScent: createScentField(grid, BEACON_PHYSICS),
     foodSources: new Set(),
     foodBase: FOOD_GOVERNOR.targetCount,
     foodTarget: FOOD_GOVERNOR.targetCount,

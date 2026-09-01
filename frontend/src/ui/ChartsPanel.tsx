@@ -15,7 +15,7 @@ interface ChartsPanelProps {
 /** The Act One dashboard (spec §11.4): selection differential first. */
 export function ChartsPanel({ history, stats, version }: ChartsPanelProps) {
   return (
-    <section className="charts-panel" data-testid="charts-panel">
+    <div data-testid="charts-panel">
       <DivergingBars
         title="Selection differential (trait ↔ delivery rate)"
         labels={TRAIT_LABELS}
@@ -49,6 +49,6 @@ export function ChartsPanel({ history, stats, version }: ChartsPanelProps) {
           ))}
         </div>
       </figure>
-    </section>
+    </div>
   );
 }

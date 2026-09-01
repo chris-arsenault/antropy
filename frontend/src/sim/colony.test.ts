@@ -17,6 +17,18 @@ describe("colony founding", () => {
     const patrilines = new Set(world.ants.map((ant) => ant.patrilineId));
     expect(patrilines.size).toBeGreaterThan(1);
   });
+
+  it("spawns every founder on the surface, never down the shaft", () => {
+    for (const seed of [4001, 4002, 4003]) {
+      const world = createWorld(seed);
+      const colony = foundColony(world);
+      for (const ant of world.ants) {
+        const surface = world.surfaceMap[ant.z * world.grid.sizeX + ant.x];
+        expect(ant.y).toBeGreaterThanOrEqual(surface - 1);
+        expect(ant.y).toBeGreaterThan(colony.y + 1);
+      }
+    }
+  });
 });
 
 describe("eggs", () => {

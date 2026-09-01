@@ -11,11 +11,12 @@ body {
 
 .app-shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   flex-direction: column;
   gap: 0.75rem;
   padding: 1rem;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .app-header {
@@ -56,9 +57,10 @@ body {
 
 .world-view {
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  position: relative;
   display: flex;
-  flex-direction: column;
   border: 1px solid #3a3128;
   border-radius: 6px;
   overflow: hidden;
@@ -71,6 +73,45 @@ body {
   flex-direction: column;
   gap: 0.6rem;
   overflow-y: auto;
+  min-height: 0;
+}
+
+.charts-panel > div {
+  display: contents;
+}
+
+.layer-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.layer-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: #c3c2b7;
+}
+
+.layer-slider-label {
+  color: #898781;
+}
+
+.chip-layer-a {
+  background: #26ccff;
+}
+
+.chip-layer-b {
+  background: #ff40d9;
+}
+
+.chip-layer-food {
+  background: #59ff4d;
+}
+
+.chip-layer-nest {
+  background: #ffb326;
 }
 
 .chart {
@@ -216,9 +257,10 @@ body {
 }
 
 .world-canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  flex: 1;
   display: block;
 }
 

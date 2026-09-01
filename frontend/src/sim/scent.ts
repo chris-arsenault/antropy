@@ -1,6 +1,13 @@
 import { type VoxelGrid } from "./grid";
 import { Material } from "./materials";
-import { SCENT } from "./tunables";
+import { BEACON_PHYSICS, SCENT } from "./tunables";
+
+/** Per-field diffusion/evaporation parameters (trail vs beacon roles). */
+export interface ScentPhysics {
+  readonly diffusionRate: number;
+  readonly evaporation: number;
+  readonly epsilon: number;
+}
 
 /**
  * A diffusing scent field over air voxels (design spec §5.5), held in flat
@@ -19,6 +26,7 @@ export interface ScentField {
   activeCount: number;
   /** 1 where the voxel is in the active list. */
   activeFlags: Uint8Array;
+  physics: ScentPhysics;
 }
 
 const INITIAL_ACTIVE_CAPACITY = 4096;
@@ -37,7 +45,10 @@ function ensureScratch(size: number): void {
   }
 }
 
-export function createScentField(grid: VoxelGrid): ScentField {
+export function createScentField(
+  grid: VoxelGrid,
+  physics: ScentPhysics = BEACON_PHYSICS
+): ScentField {
   const size = grid.data.length;
   ensureScratch(size);
   return {
@@ -46,6 +57,7 @@ export function createScentField(grid: VoxelGrid): ScentField {
     activeList: new Int32Array(INITIAL_ACTIVE_CAPACITY),
     activeCount: 0,
     activeFlags: new Uint8Array(size),
+    physics,
   };
 }
 
@@ -151,7 +163,12 @@ function diffuse(grid: VoxelGrid, field: ScentField): void {
     if (neighborCount === 0) {
       continue;
     }
-    const share = (field.values[index] * SCENT.diffusionRate) / 6;
+    const share = (field.values[index] * field.physics.diffusionRate) / 6;
+    // Mass conservation at the fringe: shares too small to survive the
+    // epsilon cull stay put instead of bleeding away tick by tick.
+    if (share < field.physics.epsilon) {
+      continue;
+    }
     const owner = field.owners[index];
     for (let n = 0; n < neighborCount; n++) {
       recordGain(NEIGHBOR_SCRATCH[n], share, owner);
@@ -176,8 +193,8 @@ function evaporateAndCompact(field: ScentField): void {
   let write = 0;
   for (let i = 0; i < field.activeCount; i++) {
     const index = field.activeList[i];
-    const next = field.values[index] * SCENT.evaporation;
-    if (next < SCENT.epsilon) {
+    const next = field.values[index] * field.physics.evaporation;
+    if (next < field.physics.epsilon) {
       field.values[index] = 0;
       field.activeFlags[index] = 0;
     } else {
