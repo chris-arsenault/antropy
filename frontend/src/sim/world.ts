@@ -68,6 +68,12 @@ export interface World {
    * last drain. Transient — rebuilt, never checkpointed.
    */
   dirtyChunks: Set<number>;
+  /**
+   * Diagnostic policy override (ADR-0009): when set, drives ants instead of
+   * the controller. Harness-only; transient, never checkpointed. Returning
+   * null for an ant falls through to the controller.
+   */
+  policyOverride?: (world: World, ant: Ant, inputs: Float32Array) => Float32Array | null;
 }
 
 export interface WorldSnapshot {
@@ -170,11 +176,20 @@ function stepScents(world: World): void {
   stepScentField(world.grid, world.nestScent);
 }
 
+/** Oracles pay the controller-comparable think cost (ADR-0009). */
+const ORACLE_THINK_COST = 0.00008;
+
 function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
   ant.age += 1;
   stampVisit(world, ant.x, ant.y, ant.z);
   sense(ctx, ant, inputs);
-  const { outputs, thinkCost } = world.controller.act(ant.genome, inputs, ant.controllerState);
+  let outputs = world.policyOverride?.(world, ant, inputs) ?? null;
+  let thinkCost = ORACLE_THINK_COST;
+  if (outputs === null) {
+    const acted = world.controller.act(ant.genome, inputs, ant.controllerState);
+    outputs = acted.outputs;
+    thinkCost = acted.thinkCost;
+  }
   ant.lastInputs.set(inputs);
   ant.lastOutputs.set(outputs);
   const actions = decodeOutputs(outputs);

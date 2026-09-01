@@ -1,0 +1,151 @@
+import { SEX_MALE, type Ant } from "../ant";
+import { Input, Output, OUTPUT_COUNT } from "../controller/contract";
+import { type World } from "../world";
+
+/**
+ * Appendix B §B.4 oracle ladder (ADR-0009): scripted cheat-agents driving
+ * the real body. Rung 1 reads the world; rung 2 reads only the shipped
+ * sensor vector; rung 4 degrades any policy with noise and lag.
+ */
+export type OraclePolicy = (world: World, ant: Ant, inputs: Float32Array) => Float32Array;
+
+// Single-threaded output scratch, consumed immediately by stepAnt.
+const OUT = new Float32Array(OUTPUT_COUNT);
+
+function steer(turn: number, forward: number): Float32Array {
+  OUT.fill(0);
+  OUT[Output.TURN] = Math.max(-1, Math.min(1, turn));
+  OUT[Output.FORWARD] = forward;
+  return OUT;
+}
+
+function turnToward(ant: Ant, x: number, z: number): number {
+  let relative = Math.atan2(z - ant.z, x - ant.x) - ant.heading;
+  relative = ((relative + Math.PI) % (2 * Math.PI)) - Math.PI;
+  if (relative < -Math.PI) {
+    relative += 2 * Math.PI;
+  }
+  return (relative / Math.PI) * 3;
+}
+
+function nearestFood(world: World, ant: Ant): { x: number; z: number } | null {
+  let best: { x: number; z: number } | null = null;
+  let bestDist = Infinity;
+  for (const index of world.foodSources) {
+    const x = index % world.grid.sizeX;
+    const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
+    const d = Math.max(Math.abs(x - ant.x), Math.abs(z - ant.z));
+    if (d < bestDist) {
+      bestDist = d;
+      best = { x, z };
+    }
+  }
+  return best;
+}
+
+const SATED = 0.85;
+const HUNGRY = 0.6;
+
+/**
+ * Rung 1 — omniscient: beeline to the nearest food, eat when hungry, carry
+ * when sated, beeline home and unload. Answers "is the world generous
+ * enough for any behavior?"
+ */
+export function omniscientOracle(world: World, ant: Ant, inputs: Float32Array): Float32Array {
+  if (ant.sex === SEX_MALE) {
+    return steer(0.2, 0.5);
+  }
+  const homeward = ant.spoilLoads > 0 || ant.energy > SATED;
+  if (homeward) {
+    const colony = world.colonies.find((c) => c.id === ant.lineageId);
+    if (colony) {
+      const outputs = steer(turnToward(ant, colony.x, colony.z), 1);
+      // Unload at the nest; trophallaxis handles the energy surplus.
+      if (ant.spoilLoads > 0 && inputs[Input.NEST_SCENT_LEFT] + inputs[Input.NEST_SCENT_RIGHT] > 0.1) {
+        outputs[Output.DIG] = 1;
+      }
+      return outputs;
+    }
+  }
+  const food = nearestFood(world, ant);
+  if (food === null) {
+    return steer(0.3, 0.6);
+  }
+  const outputs = steer(turnToward(ant, food.x, food.z), 1);
+  if (ant.energy < SATED) {
+    outputs[Output.EAT] = 1;
+  } else if (inputs[Input.CONTACT_FOOD] > 0) {
+    outputs[Output.DIG] = 1; // pick up for transport
+  }
+  return outputs;
+}
+
+// Per-ant wander phase for the sensor-limited oracle (diagnostic state).
+const wanderPhase = new Map<number, number>();
+
+/**
+ * Rung 2 — sensor-limited: the same strategy through the shipped sensors
+ * only (food-scent stereo, home angle, nest scent, contacts). Answers "is
+ * the sensory interface sufficient?" — if this starves, no controller can
+ * succeed.
+ */
+export function sensorOracle(_world: World, ant: Ant, inputs: Float32Array): Float32Array {
+  if (ant.sex === SEX_MALE) {
+    return steer(0.2, 0.5);
+  }
+  const phase = (wanderPhase.get(ant.id) ?? 0) + 0.05;
+  wanderPhase.set(ant.id, phase);
+
+  const homeward = ant.spoilLoads > 0 || ant.energy > SATED;
+  if (homeward) {
+    const outputs = steer(2.5 * inputs[Input.HOME_ANGLE], 1);
+    if (
+      ant.spoilLoads > 0 &&
+      inputs[Input.NEST_SCENT_LEFT] + inputs[Input.NEST_SCENT_RIGHT] > 0.1
+    ) {
+      outputs[Output.DIG] = 1;
+    }
+    return outputs;
+  }
+  const left = inputs[Input.FOOD_SCENT_LEFT];
+  const right = inputs[Input.FOOD_SCENT_RIGHT];
+  const blind = left + right < 0.01;
+  const turn = blind ? 0.5 * Math.sin(phase) : 6 * (left - right);
+  const outputs = steer(turn, blind ? 0.7 : 1);
+  if (ant.energy < HUNGRY || inputs[Input.CONTACT_FOOD] > 0) {
+    outputs[Output.EAT] = 1;
+  }
+  if (ant.energy > SATED && inputs[Input.CONTACT_FOOD] > 0) {
+    outputs[Output.DIG] = 1;
+  }
+  return outputs;
+}
+
+/**
+ * Rung 4 — degradation wrapper: sensor noise and actuation lag measure the
+ * margin the world leaves for the sloppy behavior early evolution produces.
+ */
+export function degraded(policy: OraclePolicy, noiseSigma: number, lagTicks: number): OraclePolicy {
+  const buffers = new Map<number, Float32Array[]>();
+  const noisy = new Float32Array(0);
+  void noisy;
+  return (world, ant, inputs) => {
+    for (let i = 0; i < inputs.length; i++) {
+      // Deterministic noise from the world stream (diagnostic runs only).
+      inputs[i] += (world.rng.next() - 0.5) * 2 * noiseSigma;
+    }
+    const fresh = Float32Array.from(policy(world, ant, inputs));
+    const queue = buffers.get(ant.id) ?? [];
+    queue.push(fresh);
+    buffers.set(ant.id, queue);
+    if (queue.length > lagTicks) {
+      return queue.shift() as Float32Array;
+    }
+    return fresh;
+  };
+}
+
+/** Reset diagnostic per-ant state between harness runs. */
+export function resetOracleState(): void {
+  wanderPhase.clear();
+}
