@@ -67,9 +67,16 @@ Measured after interface legalization (Appendix C: the nest-bearing
 inputs removed; homing rides the nest-scent plume). Legalization fixed
 the master ledger: under the compass, O-surface out-earned every
 sheltering strategy on worker-days — the illegal sense was subsidizing
-surface foraging. With homing on a physical carrier, surface living is
-strictly inferior on worker-days (284 vs 633) and brood survival, and
-the exposure ablation collapses exactly the brood edge (surface 56% →
-100% with the hazard off). The vault still buys only brood protection
-(100% vs 88%) at a worker-day cost; making deep architecture pay on the
-master ledger is the brood-as-capital milestone (R3-PLAN M4.75).
+surface foraging.
+
+Under the brood-as-capital economy (M4.75 — larvae reared on stockpile
+feedings; ledger runs 5–10, 28k ticks, seed 4200): O-surface 208
+worker-days / 42% brood and its colony collapses by season's end;
+O-shelter 435 / 87% and survives; O-architect 278 / 58% with a
+9-layer vault. Underground chamber life strictly dominates surface
+living on the master ledger. Construction now competes with larval
+rearing for the same stockpile, and at current prices the deep vault is
+a net-negative purchase — an honest tradeoff surface, left for future
+climate/raid pressure to reprice. The ladder re-certifies world and
+interface with the brood pipeline in place (rung-2: 28 ants, 94% brood
+at 8k ticks).

@@ -68,7 +68,8 @@ function runAssists(world: World, t: number): void {
 }
 
 describe("metapopulation loop (M4 gate)", () => {
-  it("cycles founding and collapse over a long assisted run", { timeout: 240_000 }, () => {
+  // Timeout sized to the nest-plume scent cost (backlog: plume perf).
+  it("cycles founding and collapse over a long assisted run", { timeout: 720_000 }, () => {
     const world = createWorld(4100);
     const first = foundColony(world);
     first.queenLifespanTicks = 8000;

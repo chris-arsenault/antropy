@@ -88,6 +88,10 @@ The depth work that makes long-run evolution real once colonies are worth watchi
   and hot eggs (~1% of eggs at hot σ).
 - Implement invasion events (§A.5.3): periodic founding queens carrying fresh portfolio
   draws or mutated historical-checkpoint genomes.
+- Reduce the nest-plume scent cost (measured ~3x on long runs: the slow-evaporation
+  plume holds a large active set per colony and multiplies with founded colonies) —
+  e.g. a coarser plume lattice or a lower step cadence with adjusted physics, validated
+  against the homing detect-radius inequality.
 - Emit colony-state scents as carriers if not landed in Release 3 M5 (Appendix C §C.8:
   stockpile-fullness at the queen, brood scent from eggs).
 - Make worker-laid-male gene flux material and tune the succession weighting exponent
