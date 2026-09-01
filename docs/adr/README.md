@@ -13,3 +13,4 @@ channels, recurrent regimes — are recorded with their alternatives and rationa
 | [0005](0005-owner-tagged-scent-channels.md) | Owner-tagged scent channels for multiple colonies | Accepted | 2026-09-02 |
 | [0006](0006-nest-scent-and-transport-instinct.md) | Nest scent signal and food-transport instinct | Accepted | 2026-09-02 |
 | [0007](0007-global-mating-pool.md) | Global mating pool abstracts the nuptial flight | Accepted | 2026-09-02 |
+| [0008](0008-brood-care-instinct.md) | Brood-care instinct in the structured initialization | Accepted | 2026-09-02 |

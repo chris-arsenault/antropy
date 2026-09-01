@@ -238,6 +238,7 @@ export function tryLayEgg(world: World, ant: Ant): void {
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,
     sex: SEX_MALE,
+    queenDestined: 0,
     lineageId: ant.lineageId,
     patrilineId: ant.patrilineId,
     motherId: ant.id,

@@ -1,4 +1,5 @@
 import { SEX_FEMALE } from "./ant";
+import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
 import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
@@ -21,6 +22,8 @@ export interface Egg {
   incubationRemaining: number;
   /** SEX_FEMALE (fertilized) or SEX_MALE (unfertilized, haploid). */
   sex: number;
+  /** 1 for a queen-destined egg (founds on hatch), else 0. */
+  queenDestined: number;
   lineageId: number;
   patrilineId: number;
   motherId: number;
@@ -41,15 +44,16 @@ export function removeEgg(world: World, egg: Egg): void {
   world.eggIndex.delete(eggKey(world, egg));
 }
 
-/** First egg-free air voxel adjacent to (x, y, z), or null. */
+/** First egg-free air voxel within the radius at (·, y, ·), or null. */
 export function findEggSpot(
   world: World,
   cx: number,
   cy: number,
-  cz: number
+  cz: number,
+  radius = 1
 ): { x: number; y: number; z: number } | null {
-  for (let dz = -1; dz <= 1; dz++) {
-    for (let dx = -1; dx <= 1; dx++) {
+  for (let dz = -radius; dz <= radius; dz++) {
+    for (let dx = -radius; dx <= radius; dx++) {
       const x = cx + dx;
       const z = cz + dz;
       const key = voxelIndex(world.grid, x, cy, z);
@@ -63,6 +67,10 @@ export function findEggSpot(
 
 function hatch(world: World, egg: Egg): void {
   removeEgg(world, egg);
+  if (egg.queenDestined === 1) {
+    foundFromQueenEgg(world, egg);
+    return;
+  }
   const traits = world.controller.physical(egg.genome);
   const ant = spawnAnt(world, {
     x: egg.x,

@@ -132,6 +132,20 @@ export const COLONY = {
   growthPerMeal: 0.1,
 } as const;
 
+// Queen lifecycle and real founding (design spec §7.2, §9.1).
+export const QUEEN = {
+  /** Stockpile drain keeping the queen alive; starvation collapses the colony. */
+  upkeepPerTick: 0.0004,
+  /** Stockpile level that triggers a queen-destined egg. */
+  eggThreshold: 4,
+  /** Energy endowment of a queen egg (claustral flight reserves seed). */
+  eggEndowment: 1,
+  /** Minimum ticks between queen eggs. */
+  eggIntervalMin: 4000,
+  /** Margin from map edges for flight landing sites. */
+  flightMargin: 10,
+} as const;
+
 // Haploid males (design spec §7.1 channel 2).
 export const MALE = {
   /** Male lifespan as a fraction of the genetic lifespan cap. */

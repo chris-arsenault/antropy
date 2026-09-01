@@ -30,6 +30,9 @@ export interface WorldStats {
   /** Share of the population belonging to the largest patriline. */
   dominantPatrilineShare: number;
   stockpile: number;
+  colonyCount: number;
+  foundings: number;
+  collapses: number;
 }
 
 export function pearson(xs: number[], ys: number[]): number {
@@ -109,5 +112,8 @@ export function computeStats(world: World): WorldStats {
     selectionDifferential,
     dominantPatrilineShare: dominantShare(world),
     stockpile: world.colonies.reduce((sum, colony) => sum + colony.stockpile, 0),
+    colonyCount: world.colonies.length,
+    foundings: world.foundings,
+    collapses: world.collapses,
   };
 }

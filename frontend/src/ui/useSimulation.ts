@@ -7,6 +7,7 @@ import { FRAME_TIME_BUDGET_MS, ticksForFrame, type SpeedPreset } from "./pacing"
 export interface StatsHistory {
   population: TimeSeries;
   eggs: TimeSeries;
+  colonies: TimeSeries;
   dominantShare: TimeSeries;
   traitMeans: TimeSeries[];
 }
@@ -34,6 +35,7 @@ function createHistory(): StatsHistory {
   return {
     population: createTimeSeries(),
     eggs: createTimeSeries(),
+    colonies: createTimeSeries(),
     dominantShare: createTimeSeries(),
     traitMeans: TRAIT_KEYS.map(() => createTimeSeries()),
   };
@@ -42,6 +44,7 @@ function createHistory(): StatsHistory {
 function recordSample(history: StatsHistory, stats: WorldStats): void {
   pushSample(history.population, stats.tick, stats.population);
   pushSample(history.eggs, stats.tick, stats.eggCount);
+  pushSample(history.colonies, stats.tick, stats.colonyCount);
   pushSample(history.dominantShare, stats.tick, stats.dominantPatrilineShare);
   for (let i = 0; i < history.traitMeans.length; i++) {
     pushSample(history.traitMeans[i], stats.tick, stats.traitMeans[i]);

@@ -1,9 +1,10 @@
-import { SEX_FEMALE, surfaceSpawnY } from "./ant";
+import { SEX_FEMALE, SEX_MALE, surfaceSpawnY, type Ant } from "./ant";
 import { type Genome } from "./controller/contract";
-import { addEgg, findEggSpot } from "./eggs";
+import { addEgg, findEggSpot, type Egg } from "./eggs";
+import { killAnt } from "./energy";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
-import { COLONY } from "./tunables";
+import { COLONY, QUEEN } from "./tunables";
 import { mutateVoxel, spawnAnt, type World } from "./world";
 
 export interface Sperm {
@@ -14,7 +15,8 @@ export interface Sperm {
 /**
  * A colony is deliberately lightweight (design spec §7.2): a scripted queen
  * (egg factory), home position, stored sperm, and bookkeeping. The queen is
- * not a walking ant.
+ * not a walking ant. The stockpile is the queen's larder: deliveries fill
+ * it, upkeep and eggs drain it, and exhaustion starves her.
  */
 export interface Colony {
   id: number;
@@ -28,9 +30,9 @@ export interface Colony {
   stockpile: number;
   /** Food-delivery credit per patriline — the merit signal (spec §7.1). */
   patrilineDeliveries: Map<number, number>;
-  successions: number;
   nextPatrilineId: number;
   lastEggTick: number;
+  lastQueenEggTick: number;
   nextEggId: number;
 }
 
@@ -57,43 +59,76 @@ function makeOffspring(world: World, colony: Colony, spermIndex: number): Genome
   return controller.mutate(recombined, sigma, world.rng);
 }
 
-/**
- * Found the single MVP colony: independent wide-prior draws for the queen
- * and each stored sperm (spec §10), a scripted chamber below the surface,
- * and the first brood fast-forwarded to adult workers.
- */
-export function foundColony(world: World): Colony {
-  const x = Math.floor(world.grid.sizeX / 2);
-  const z = Math.floor(world.grid.sizeZ / 2);
+/** Delivery-weighted sperm pick — the merit signal selecting the father line. */
+function meritSperm(colony: Colony): Sperm {
+  let best = colony.sperm[0];
+  let bestScore = -1;
+  for (const sperm of colony.sperm) {
+    const score = colony.patrilineDeliveries.get(sperm.patrilineId) ?? 0;
+    if (score > bestScore) {
+      best = sperm;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+/** Colony ids double as scent owner tags (Uint8), so they cycle in 1..250. */
+function nextColonyId(world: World): number {
+  const id = ((world.nextColonyId - 1) % 250) + 1;
+  world.nextColonyId += 1;
+  return id;
+}
+
+function createColonyAt(
+  world: World,
+  x: number,
+  z: number,
+  queenGenome: Genome,
+  sperm: Sperm[]
+): Colony | null {
   const surfaceY = surfaceSpawnY(world.grid, x, z);
   if (surfaceY === null) {
-    throw new Error("no surface for colony founding");
+    return null;
   }
   const y = Math.max(3, surfaceY - COLONY.chamberDepth);
   carveChamber(world, x, y, z);
-
-  const sperm: Sperm[] = [];
-  for (let i = 0; i < COLONY.spermCount; i++) {
-    sperm.push({ genome: world.controller.seed(world.rng), patrilineId: i + 1 });
-  }
   const colony: Colony = {
-    id: world.colonies.length + 1,
+    id: nextColonyId(world),
     x,
     y,
     z,
-    queenGenome: world.controller.seed(world.rng),
+    queenGenome,
     queenAge: 0,
     queenLifespanTicks: COLONY.queenLifespanTicks,
     sperm,
     stockpile: COLONY.foundingStockpile,
     patrilineDeliveries: new Map(),
-    successions: 0,
-    nextPatrilineId: COLONY.spermCount + 1,
+    nextPatrilineId: sperm.length + 1,
     lastEggTick: 0,
+    lastQueenEggTick: 0,
     nextEggId: 1,
   };
   world.colonies.push(colony);
+  return colony;
+}
 
+/**
+ * The t=0 bootstrap colony (spec §10 curriculum): independent wide-prior
+ * draws for queen and sperm, and a fast-forwarded adult first brood. All
+ * later colonies are founded raw through foundFromQueenEgg.
+ */
+export function foundColony(world: World): Colony {
+  const x = Math.floor(world.grid.sizeX / 2);
+  const z = Math.floor(world.grid.sizeZ / 2);
+  const sperm: Sperm[] = [];
+  for (let i = 0; i < COLONY.spermCount; i++) {
+    sperm.push({ genome: world.controller.seed(world.rng), patrilineId: i + 1 });
+  }
+  const colony = createColonyAt(world, x, z, world.controller.seed(world.rng), sperm);
+  if (!colony) {
+    throw new Error("no surface for colony founding");
+  }
   for (let i = 0; i < COLONY.initialWorkers; i++) {
     const spermIndex = Math.floor(world.rng.next() * sperm.length);
     const genome = makeOffspring(world, colony, spermIndex);
@@ -119,17 +154,19 @@ export function foundColony(world: World): Colony {
   return colony;
 }
 
-function layEgg(world: World, colony: Colony): void {
-  const controller = world.controller;
-  const spot = findEggSpot(world, colony.x, colony.y, colony.z);
+function layColonyEgg(
+  world: World,
+  colony: Colony,
+  genome: Genome,
+  endowment: number,
+  queenDestined: number,
+  patrilineId: number
+): boolean {
+  const spot = findEggSpot(world, colony.x, colony.y, colony.z, queenDestined === 1 ? 2 : 1);
   if (spot === null) {
-    return;
+    return false;
   }
-  const spermIndex = Math.floor(world.rng.next() * colony.sperm.length);
-  const genome = makeOffspring(world, colony, spermIndex);
-  const endowment = controller.physical(colony.queenGenome).eggEndowment;
   colony.stockpile -= endowment + COLONY.eggLayCost;
-  colony.lastEggTick = world.tick;
   addEgg(world, {
     id: colony.id * 1_000_000 + colony.nextEggId++,
     x: spot.x,
@@ -139,70 +176,109 @@ function layEgg(world: World, colony: Colony): void {
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,
     sex: SEX_FEMALE,
+    queenDestined,
     lineageId: colony.id,
-    patrilineId: colony.sperm[spermIndex].patrilineId,
+    patrilineId,
     motherId: 0,
-    fatherId: colony.sperm[spermIndex].patrilineId,
+    fatherId: patrilineId,
   });
+  return true;
 }
 
-/** Delivery-weighted sperm pick — the merit signal selecting the father line. */
-function topPatrilineSperm(colony: Colony): Sperm {
-  let best = colony.sperm[0];
-  let bestScore = -1;
-  for (const sperm of colony.sperm) {
-    const score = colony.patrilineDeliveries.get(sperm.patrilineId) ?? 0;
-    if (score > bestScore) {
-      best = sperm;
-      bestScore = score;
-    }
+function layWorkerEgg(world: World, colony: Colony): void {
+  const spermIndex = Math.floor(world.rng.next() * colony.sperm.length);
+  const genome = makeOffspring(world, colony, spermIndex);
+  const endowment = world.controller.physical(colony.queenGenome).eggEndowment;
+  if (layColonyEgg(world, colony, genome, endowment, 0, colony.sperm[spermIndex].patrilineId)) {
+    colony.lastEggTick = world.tick;
   }
-  return best;
 }
 
 /**
- * In-place merit-weighted royal succession (design spec §7.1 channel 3): the
- * successor queen recombines the queen line with the top-delivering
- * patriline, then re-mates from the colony gene pool so worker success
- * enters both the queen line and the sperm stock.
+ * A queen-destined egg: merit weighting applies at egg creation (spec §7.1
+ * channel 3) — the father line is the top-delivering patriline.
  */
-function succeed(world: World, colony: Colony): void {
+function layQueenEgg(world: World, colony: Colony): void {
+  const father = meritSperm(colony);
   const controller = world.controller;
-  const meritSperm = topPatrilineSperm(colony);
-  const recombined = controller.recombine(colony.queenGenome, meritSperm.genome, world.rng);
+  const recombined = controller.recombine(colony.queenGenome, father.genome, world.rng);
   if (recombined === null) {
-    throw new Error(`controller ${controller.id} cannot recombine — succession impossible`);
+    throw new Error(`controller ${controller.id} cannot recombine — queen eggs impossible`);
   }
-  const sigma = controller.physical(recombined).mutationSigma;
-  colony.queenGenome = controller.mutate(recombined, sigma, world.rng);
-
-  const newSperm: Sperm[] = [];
-  for (let i = 0; i < COLONY.spermCount; i++) {
-    const spermIndex = Math.floor(world.rng.next() * colony.sperm.length);
-    newSperm.push({
-      genome: makeOffspring(world, colony, spermIndex),
-      patrilineId: colony.nextPatrilineId++,
-    });
+  const genome = controller.mutate(
+    recombined,
+    controller.physical(recombined).mutationSigma,
+    world.rng
+  );
+  if (layColonyEgg(world, colony, genome, QUEEN.eggEndowment, 1, father.patrilineId)) {
+    colony.lastQueenEggTick = world.tick;
   }
-  colony.sperm = newSperm;
-  colony.patrilineDeliveries = new Map();
-  colony.queenAge = 0;
-  colony.successions += 1;
 }
 
-/** One tick of scripted queen behavior: age, lay when provisioned, succeed. */
+/** Living males available for nuptial mating (ADR-0007). */
+function livingMales(world: World): Ant[] {
+  return world.ants.filter((ant) => ant.alive && ant.sex === SEX_MALE);
+}
+
+/**
+ * A hatched winged queen (ADR-0007): fly to a random distant site, mate with
+ * up to spermCount living males (each dies), and found claustrally. With no
+ * males the founding fails.
+ */
+export function foundFromQueenEgg(world: World, egg: Egg): void {
+  const males = livingMales(world);
+  if (males.length === 0) {
+    world.foundingFailures += 1;
+    return;
+  }
+  const sperm: Sperm[] = [];
+  const pool = males.slice();
+  const matings = Math.min(COLONY.spermCount, pool.length);
+  for (let i = 0; i < matings; i++) {
+    const pick = Math.floor(world.rng.next() * pool.length);
+    const male = pool.splice(pick, 1)[0];
+    sperm.push({ genome: male.genome, patrilineId: i + 1 });
+    killAnt(world, male);
+  }
+  const x = QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeX - 2 * QUEEN.flightMargin));
+  const z = QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeZ - 2 * QUEEN.flightMargin));
+  const colony = createColonyAt(world, x, z, egg.genome, sperm);
+  if (colony) {
+    world.foundings += 1;
+  } else {
+    world.foundingFailures += 1;
+  }
+}
+
+function collapseColony(world: World, colony: Colony): void {
+  world.colonies = world.colonies.filter((c) => c.id !== colony.id);
+  world.collapses += 1;
+}
+
+/**
+ * One tick of scripted queen behavior per colony: upkeep from the stockpile,
+ * death by age or starvation (colony collapse, spec §9.1), then queen or
+ * worker egg laying as provisioning allows.
+ */
 export function stepColonies(world: World): void {
-  for (const colony of world.colonies) {
+  for (const colony of world.colonies.slice()) {
     colony.queenAge += 1;
-    if (colony.queenAge >= colony.queenLifespanTicks) {
-      succeed(world, colony);
+    colony.stockpile -= QUEEN.upkeepPerTick;
+    if (colony.queenAge >= colony.queenLifespanTicks || colony.stockpile < 0) {
+      collapseColony(world, colony);
+      continue;
+    }
+    const queenEggReady =
+      colony.stockpile >= QUEEN.eggThreshold &&
+      world.tick - colony.lastQueenEggTick >= QUEEN.eggIntervalMin;
+    if (queenEggReady) {
+      layQueenEgg(world, colony);
       continue;
     }
     const endowment = world.controller.physical(colony.queenGenome).eggEndowment;
-    const canAfford = colony.stockpile >= endowment + COLONY.eggLayCost;
-    const intervalOk = world.tick - colony.lastEggTick >= COLONY.eggIntervalMin;
-    if (canAfford && intervalOk) {
-      layEgg(world, colony);
+    const canAfford = colony.stockpile >= endowment + COLONY.eggLayCost + 0.5;
+    if (canAfford && world.tick - colony.lastEggTick >= COLONY.eggIntervalMin) {
+      layWorkerEgg(world, colony);
     }
   }
 }

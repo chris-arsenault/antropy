@@ -31,6 +31,12 @@ export function ChartsPanel({ history, stats, version }: ChartsPanelProps) {
         ]}
       />
       <LineChart
+        title="Colonies"
+        version={version}
+        height={60}
+        series={[{ name: "colonies", series: history.colonies, color: CHART.series[3] }]}
+      />
+      <LineChart
         title="Dominant patriline share"
         version={version}
         series={[{ name: "share", series: history.dominantShare, color: CHART.series[2] }]}

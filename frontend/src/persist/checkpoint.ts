@@ -42,6 +42,10 @@ export interface Checkpoint {
   tick: number;
   rngState: RngState;
   nextAntId: number;
+  nextColonyId: number;
+  foundings: number;
+  foundingFailures: number;
+  collapses: number;
   foodBase: number;
   foodTarget: number;
   grid: Uint8Array;
@@ -83,6 +87,7 @@ const EGG_SCALARS = [
   "energy",
   "incubationRemaining",
   "sex",
+  "queenDestined",
   "lineageId",
   "patrilineId",
   "motherId",
@@ -97,9 +102,9 @@ const COLONY_SCALARS = [
   "queenAge",
   "queenLifespanTicks",
   "stockpile",
-  "successions",
   "nextPatrilineId",
   "lastEggTick",
+  "lastQueenEggTick",
   "nextEggId",
 ] as const;
 
@@ -182,6 +187,10 @@ export function serializeWorld(world: World): Checkpoint {
     tick: world.tick,
     rngState: world.rng.getState(),
     nextAntId: world.nextAntId,
+    nextColonyId: world.nextColonyId,
+    foundings: world.foundings,
+    foundingFailures: world.foundingFailures,
+    collapses: world.collapses,
     foodBase: world.foodBase,
     foodTarget: world.foodTarget,
     grid: Uint8Array.from(world.grid.data),
@@ -212,6 +221,10 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.tick = checkpoint.tick;
   world.rng.setState(checkpoint.rngState);
   world.nextAntId = checkpoint.nextAntId;
+  world.nextColonyId = checkpoint.nextColonyId;
+  world.foundings = checkpoint.foundings;
+  world.foundingFailures = checkpoint.foundingFailures;
+  world.collapses = checkpoint.collapses;
   world.foodBase = checkpoint.foodBase;
   world.foodTarget = checkpoint.foodTarget;
   world.grid.data.set(checkpoint.grid);

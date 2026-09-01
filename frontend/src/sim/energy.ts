@@ -38,6 +38,14 @@ export function applyStepCost(ant: Ant): void {
  * lifespan cap. The corpse persists as edible energy — a FOOD voxel at the
  * death site when it is air.
  */
+/** Kill an ant in place: the corpse persists as edible energy (spec §6). */
+export function killAnt(world: World, ant: Ant): void {
+  ant.alive = false;
+  if (getVoxelSafe(world.grid, ant.x, ant.y, ant.z) === Material.AIR) {
+    mutateVoxel(world, ant.x, ant.y, ant.z, Material.FOOD);
+  }
+}
+
 export function checkDeath(world: World, ant: Ant): void {
   const lifespan =
     ant.sex === SEX_MALE
@@ -46,10 +54,7 @@ export function checkDeath(world: World, ant: Ant): void {
   if (ant.energy > 0 && ant.age <= lifespan) {
     return;
   }
-  ant.alive = false;
-  if (getVoxelSafe(world.grid, ant.x, ant.y, ant.z) === Material.AIR) {
-    mutateVoxel(world, ant.x, ant.y, ant.z, Material.FOOD);
-  }
+  killAnt(world, ant);
 }
 
 /** Remove dead ants from the active array (corpses already dropped). */

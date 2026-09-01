@@ -35,6 +35,11 @@ export interface World {
   /** Voxel-keyed egg lookup, maintained on lay/hatch/eat. */
   eggIndex: Map<number, Egg>;
   colonies: Colony[];
+  nextColonyId: number;
+  /** Metapopulation counters (spec §9.1): real foundings and collapses. */
+  foundings: number;
+  foundingFailures: number;
+  collapses: number;
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
@@ -85,6 +90,10 @@ export function createWorld(seed: number, controller: Controller = rnnController
     eggs: [],
     eggIndex: new Map(),
     colonies: [],
+    nextColonyId: 1,
+    foundings: 0,
+    foundingFailures: 0,
+    collapses: 0,
     pheromoneA: createScentField(grid),
     pheromoneB: createScentField(grid),
     foodScent: createScentField(grid),

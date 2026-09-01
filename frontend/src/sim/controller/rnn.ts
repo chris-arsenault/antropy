@@ -105,6 +105,12 @@ function applyBackbone(copy: Float32Array): void {
   copy[W_IN + 3 * INPUT_COUNT + Input.CARRY_LOAD] += 2.0;
   copy[W_IN + 3 * INPUT_COUNT + Input.BIAS] -= 1.5;
   copy[W_OUT + Output.DIG * HIDDEN_COUNT + 3] += 1.5;
+
+  // Brood-care instinct (ADR-0008): egg contact inhibits eating, so brood
+  // survives incubation by default while policing and cannibalism remain
+  // reachable by erasing these weights.
+  copy[W_IN + 4 * INPUT_COUNT + Input.CONTACT_EGG] += 2.0;
+  copy[W_OUT + Output.EAT * HIDDEN_COUNT + 4] -= 1.8;
 }
 
 const ACTION_BIAS_LOCI = [

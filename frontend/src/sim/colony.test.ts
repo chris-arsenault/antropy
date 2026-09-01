@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { SEX_MALE } from "./ant";
 import { foundColony } from "./colony";
 import { tryEat } from "./actions";
 import { addEgg } from "./eggs";
 import { rnnController } from "./controller/rnn";
-import { COLONY } from "./tunables";
-import { createWorld, stepWorld } from "./world";
+import { COLONY, QUEEN } from "./tunables";
+import { createWorld, spawnAnt, stepWorld } from "./world";
 
 describe("colony founding", () => {
   it("creates a polyandrous queen with distinct patrilines in the first brood", () => {
@@ -55,6 +56,8 @@ describe("eggs", () => {
       genome,
       energy: 0.3,
       incubationRemaining: 500,
+      sex: 0,
+      queenDestined: 0,
       lineageId: 1,
       patrilineId: 1,
       motherId: 0,
@@ -68,21 +71,90 @@ describe("eggs", () => {
   });
 });
 
-describe("merit-weighted succession (M6 gate)", () => {
-  it("replaces the queen from the top patriline and refreshes sperm", () => {
+describe("real founding and collapse (spec §9.1)", () => {
+  it("lays a merit-fathered queen egg from a provisioned stockpile", () => {
     const world = createWorld(4004);
     const colony = foundColony(world);
-    const beforeQueenTraits = rnnController.physical(colony.queenGenome);
-    const beforePatrilines = colony.sperm.map((s) => s.patrilineId);
-    colony.patrilineDeliveries.set(beforePatrilines[2], 50);
-    colony.queenAge = colony.queenLifespanTicks;
+    colony.stockpile = QUEEN.eggThreshold + 2;
+    colony.lastQueenEggTick = -QUEEN.eggIntervalMin;
+    colony.patrilineDeliveries.set(colony.sperm[2].patrilineId, 50);
 
     stepWorld(world);
-    expect(colony.successions).toBe(1);
-    expect(colony.queenAge).toBe(0);
-    expect(rnnController.physical(colony.queenGenome)).not.toEqual(beforeQueenTraits);
-    for (const sperm of colony.sperm) {
-      expect(beforePatrilines).not.toContain(sperm.patrilineId);
+    const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
+    expect(queenEgg).toBeDefined();
+    const egg = queenEgg as NonNullable<typeof queenEgg>;
+    expect(egg.fatherId).toBe(colony.sperm[2].patrilineId);
+    expect(egg.energy).toBeCloseTo(QUEEN.eggEndowment);
+  });
+
+  it("founds a new colony through flight and mating, killing the mates", () => {
+    const world = createWorld(4006);
+    const colony = foundColony(world);
+    // Inject living males for the nuptial pool.
+    const maleCount = 3;
+    for (let i = 0; i < maleCount; i++) {
+      const mother = world.ants[i];
+      const genome = rnnController.haploidOffspring(mother.genome, world.rng);
+      spawnAnt(world, {
+        x: mother.x,
+        y: mother.y,
+        z: mother.z,
+        heading: 0,
+        energy: 1,
+        sex: SEX_MALE,
+        lineageId: colony.id,
+        patrilineId: mother.patrilineId,
+        motherId: mother.id,
+        fatherId: 0,
+        genome,
+        controllerState: rnnController.createState(),
+        traits: rnnController.physical(genome),
+      });
     }
+    colony.stockpile = QUEEN.eggThreshold + 2;
+    colony.lastQueenEggTick = -QUEEN.eggIntervalMin;
+    stepWorld(world);
+    const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
+    expect(queenEgg).toBeDefined();
+    (queenEgg as NonNullable<typeof queenEgg>).incubationRemaining = 1;
+
+    stepWorld(world);
+    expect(world.foundings).toBe(1);
+    expect(world.colonies.length).toBe(2);
+    const daughter = world.colonies[1];
+    expect(daughter.sperm.length).toBe(maleCount);
+    expect(world.ants.filter((ant) => ant.sex === SEX_MALE && ant.alive).length).toBe(0);
+  });
+
+  it("fails founding loudly when no males exist", () => {
+    const world = createWorld(4007);
+    const colony = foundColony(world);
+    colony.stockpile = QUEEN.eggThreshold + 2;
+    colony.lastQueenEggTick = -QUEEN.eggIntervalMin;
+    stepWorld(world);
+    const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
+    (queenEgg as NonNullable<typeof queenEgg>).incubationRemaining = 1;
+
+    stepWorld(world);
+    expect(world.foundingFailures).toBe(1);
+    expect(world.colonies.length).toBe(1);
+  });
+
+  it("collapses the colony when the queen ages out", () => {
+    const world = createWorld(4008);
+    const colony = foundColony(world);
+    colony.queenAge = colony.queenLifespanTicks;
+    stepWorld(world);
+    expect(world.colonies.length).toBe(0);
+    expect(world.collapses).toBe(1);
+  });
+
+  it("collapses the colony when the stockpile starves", () => {
+    const world = createWorld(4009);
+    const colony = foundColony(world);
+    colony.stockpile = 0.00001;
+    stepWorld(world);
+    expect(world.colonies.length).toBe(0);
+    expect(world.collapses).toBe(1);
   });
 });
