@@ -88,12 +88,6 @@ The depth work that makes long-run evolution real once colonies are worth watchi
   and hot eggs (~1% of eggs at hot σ).
 - Implement invasion events (§A.5.3): periodic founding queens carrying fresh portfolio
   draws or mutated historical-checkpoint genomes.
-- Make brood costly capital so construction is evolutionarily stable without seed support
-  (ADR-0011, the standing structural finding's minimal fix — W-layer lifecycle): long
-  tended juvenile phases (hatchlings fed, not self-provisioning), so brood losses and
-  famine deaths bind on the master ledger (worker-days / lineage persistence, Appendix C
-  §C.4.1) and the r-selected inversion closes; recalibrate the ecology gates and re-pin
-  the provisional tournament gates with it.
 - Emit colony-state scents as carriers if not landed in Release 3 M5 (Appendix C §C.8:
   stockpile-fullness at the queen, brood scent from eggs).
 - Make worker-laid-male gene flux material and tune the succession weighting exponent

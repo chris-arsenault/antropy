@@ -33,7 +33,6 @@ export interface Colony {
   nextPatrilineId: number;
   lastEggTick: number;
   lastQueenEggTick: number;
-  nextEggId: number;
   /** Tick the stockpile hit empty, or -1 while provisioned (queen reserves). */
   starvingSince: number;
 }
@@ -132,7 +131,6 @@ function createColonyAt(
     nextPatrilineId: sperm.length + 1,
     lastEggTick: 0,
     lastQueenEggTick: 0,
-    nextEggId: 1,
     starvingSince: -1,
   };
   world.colonies.push(colony);
@@ -200,7 +198,7 @@ function layColonyEgg(
   }
   colony.stockpile -= endowment + COLONY.eggLayCost;
   addEgg(world, {
-    id: colony.id * 1_000_000 + colony.nextEggId++,
+    id: world.nextEggId++,
     x: spot.x,
     y: spot.y,
     z: spot.z,

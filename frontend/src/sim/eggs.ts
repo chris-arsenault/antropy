@@ -41,9 +41,14 @@ export function addEgg(world: World, egg: Egg): void {
   world.eggsLaid += 1;
 }
 
+/** Removal is by object identity, and the index entry is deleted only if
+ * it maps to this egg — a shared-id or shared-voxel mixup must never
+ * orphan a ghost index entry (that once fed ants phantom energy). */
 export function removeEgg(world: World, egg: Egg): void {
-  world.eggs = world.eggs.filter((e) => e.id !== egg.id);
-  world.eggIndex.delete(eggKey(world, egg));
+  world.eggs = world.eggs.filter((e) => e !== egg);
+  if (world.eggIndex.get(eggKey(world, egg)) === egg) {
+    world.eggIndex.delete(eggKey(world, egg));
+  }
 }
 
 /** First egg-free air voxel within the radius at (·, y, ·), or null. */

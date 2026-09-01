@@ -308,7 +308,7 @@ export function tryLayEgg(world: World, ant: Ant): void {
   }
   ant.energy -= endowment + COLONY.eggLayCost;
   addEgg(world, {
-    id: world.nextAntId * 1_000_000 + world.tick,
+    id: world.nextEggId++,
     x: spot.x,
     y: spot.y,
     z: spot.z,

@@ -40,6 +40,9 @@ export interface World {
   ants: Ant[];
   nextAntId: number;
   eggs: Egg[];
+  /** Single world-wide egg id counter: every lay path draws from it, so
+   * ids are unique (composite per-colony/per-tick schemes collided). */
+  nextEggId: number;
   /** Voxel-keyed egg lookup, maintained on lay/hatch/eat. */
   eggIndex: Map<number, Egg>;
   colonies: Colony[];
@@ -114,6 +117,7 @@ export function createWorld(seed: number, controller: Controller = rnnController
     ants: [],
     nextAntId: 1,
     eggs: [],
+    nextEggId: 1,
     eggIndex: new Map(),
     colonies: [],
     nextColonyId: 1,

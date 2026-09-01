@@ -44,6 +44,7 @@ export interface Checkpoint {
   weatherRngState: RngState;
   rainRemaining: number;
   nextAntId: number;
+  nextEggId: number;
   nextColonyId: number;
   foundings: number;
   foundingFailures: number;
@@ -112,7 +113,6 @@ const COLONY_SCALARS = [
   "nextPatrilineId",
   "lastEggTick",
   "lastQueenEggTick",
-  "nextEggId",
   "starvingSince",
 ] as const;
 
@@ -197,6 +197,7 @@ export function serializeWorld(world: World): Checkpoint {
     weatherRngState: world.weatherRng.getState(),
     rainRemaining: world.rainRemaining,
     nextAntId: world.nextAntId,
+    nextEggId: world.nextEggId,
     nextColonyId: world.nextColonyId,
     foundings: world.foundings,
     foundingFailures: world.foundingFailures,
@@ -238,6 +239,7 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.weatherRng.setState(checkpoint.weatherRngState);
   world.rainRemaining = checkpoint.rainRemaining;
   world.nextAntId = checkpoint.nextAntId;
+  world.nextEggId = checkpoint.nextEggId;
   world.nextColonyId = checkpoint.nextColonyId;
   world.foundings = checkpoint.foundings;
   world.foundingFailures = checkpoint.foundingFailures;

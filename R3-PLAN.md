@@ -123,7 +123,21 @@ The interface passes Appendix C's litmus tests.
 - Exit: `make test` green; rung-2 oracle homes and delivers via the scent carrier alone;
   ladder + ecology gates recalibrated; checkpoint gate green.
 
-### M5 — Derived seed portfolio and colony-state carriers [depends on M2, M4.5]
+### M4.75 — Brood as capital [depends on M4.5]
+The master ledger starts favoring underground living (ADR-0011 minimal fix; W-layer
+lifecycle). Governing inequality (Rule 11): replacement cost of a worker (egg endowment +
+larval feedings + rearing time) must exceed the insurance cost of shelter and stores, so
+famine and exposure losses bind on worker-days.
+- Larval stage between egg and adult: immobile at the nest, consumes stockpile feedings
+  over a rearing period, dies (into FOOD, at a loss) if starved past a grace window;
+  climate-keyed exposure applies to larvae as to eggs. Checkpoint bump.
+- Recalibrate: R7/ecology gates, metapopulation assists, calibration sweep re-measured.
+- Re-pin the tournament on the master ledger: worker-days ordering surface ≺ shelter with
+  the sub-ledger gates retained; increment series re-measured.
+- Exit: `make test` + slow tier green; tournament master-ledger gate holds;
+  docs/calibration.md updated with the new economy.
+
+### M5 — Derived seed portfolio and colony-state carriers [depends on M2, M4.75]
 Initialization gets smart (ADR-0010); all authored behavior lives in seeds (S-layer).
 - ES optimizer + probe tasks (gradient-follow, scent-homing, satiation-gated pickup,
   reflexive dig on temperature, trail deposit/follow); derivation harness baking the
@@ -148,5 +162,5 @@ Initialization gets smart (ADR-0010); all authored behavior lives in seeds (S-la
 
 | Where | Decision you own |
 | ----- | ---------------- |
-| Brood-as-capital timing | The recorded structural fix for the r-selection finding (ADR-0011, backlog): pull into R3 now, or open Release 4 with it. |
+| Brood-as-capital timing | Decided: pulled into R3 as M4.75 (user, 2026-09-02). |
 | — | Resolved by Appendix C: HOME_ANGLE/HOME_DISTANCE are removed (nest-bearing ruled illegal, §C.8); O-fortress recorded as deferred. The M4 tournament gates are provisional sub-ledger gates (§C.4.1 sig. 4) until brood-as-capital lands. |
