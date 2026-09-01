@@ -40,6 +40,29 @@ export const DEFAULT_ECONOMY: EconomyPoint = {
   maxSpawnPerPass: FOOD_GOVERNOR.maxSpawnPerPass,
 };
 
+/**
+ * Generic scoped tunable patch for harness ablations: applies the patch,
+ * restores the prior values on exit (throw included).
+ */
+export function withPatched<O extends Record<string, number>, T>(
+  target: O,
+  patch: Partial<O>,
+  fn: () => T
+): T {
+  const prior: Partial<O> = {};
+  for (const key of Object.keys(patch) as (keyof O)[]) {
+    prior[key] = target[key];
+    target[key] = patch[key] as O[keyof O];
+  }
+  try {
+    return fn();
+  } finally {
+    for (const key of Object.keys(patch) as (keyof O)[]) {
+      target[key] = prior[key] as O[keyof O];
+    }
+  }
+}
+
 /** Scoped tunable override: applies the point, restores on exit. */
 export function withEconomy<T>(point: EconomyPoint, fn: () => T): T {
   const prior = {

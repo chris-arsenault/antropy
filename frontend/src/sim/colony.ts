@@ -4,7 +4,7 @@ import { addEgg, findEggSpot, type Egg } from "./eggs";
 import { killAnt } from "./energy";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
-import { COLONY, QUEEN } from "./tunables";
+import { COLONY, ENERGY, QUEEN } from "./tunables";
 import { mutateVoxel, spawnAnt, type World } from "./world";
 
 export interface Sperm {
@@ -46,8 +46,10 @@ function carveIfSoft(world: World, x: number, y: number, z: number): void {
 
 /**
  * Founding chamber, entrance shaft, and a shallow surface depression around
- * the shaft mouth so ants walk in and out instead of needing a vertical
- * climb (spec §7.2 scripted founding).
+ * the shaft mouth (spec §7.2 scripted founding). The shaft is 2x2: a 1x1
+ * vertical shaft cannot be descended under the movement primitives
+ * (forward-level steps outrank the stationary climb at an open mouth), so
+ * anything narrower leaves the chamber decorative.
  */
 function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY: number): void {
   for (let dy = 0; dy <= 1; dy++) {
@@ -59,6 +61,9 @@ function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY
   }
   for (let y = cy + 2; y <= surfaceY; y++) {
     carveIfSoft(world, cx, y, cz);
+    carveIfSoft(world, cx + 1, y, cz);
+    carveIfSoft(world, cx, y, cz + 1);
+    carveIfSoft(world, cx + 1, y, cz + 1);
   }
   for (let dz = -1; dz <= 1; dz++) {
     for (let dx = -1; dx <= 1; dx++) {
@@ -321,12 +326,42 @@ function layEggs(world: World, colony: Colony): void {
  * death by age or starvation (colony collapse, spec §9.1), then queen or
  * worker egg laying as provisioning allows.
  */
+/**
+ * Attendants refill a low crop from the physical larder: the nearest
+ * hoarded FOOD voxel within restock reach (underground galleries count,
+ * surface piles beyond the nest do too) is consumed into the stockpile.
+ * Scripted colony logistics at the same abstraction level as
+ * trophallaxis; where the hoard physically survives weather is what the
+ * liabilities price.
+ */
+function restockFromLarder(world: World, colony: Colony): void {
+  if (colony.stockpile >= COLONY.restockBelow) {
+    return;
+  }
+  const surface = world.surfaceMap[colony.z * world.grid.sizeX + colony.x];
+  for (const index of world.foodSources) {
+    const x = index % world.grid.sizeX;
+    const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
+    const y = Math.floor(index / (world.grid.sizeX * world.grid.sizeZ));
+    if (
+      Math.abs(x - colony.x) <= COLONY.restockRadius &&
+      Math.abs(z - colony.z) <= COLONY.restockRadius &&
+      y <= surface + 1
+    ) {
+      mutateVoxel(world, x, y, z, Material.AIR);
+      colony.stockpile += ENERGY.foodEnergy;
+      return;
+    }
+  }
+}
+
 export function stepColonies(world: World): void {
   for (const colony of world.colonies.slice()) {
     if (queenDies(world, colony)) {
       collapseColony(world, colony);
       continue;
     }
+    restockFromLarder(world, colony);
     layEggs(world, colony);
   }
 }

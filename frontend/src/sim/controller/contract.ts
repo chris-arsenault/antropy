@@ -100,9 +100,13 @@ export const Input = {
   HOME_ANGLE: 22,
   /** Chebyshev distance to the own queen, normalized; 1 when colony-less. */
   HOME_DISTANCE: 23,
+  /** Local heat stress (thermoreception, innate in real ants): the
+   * microclimate multiplier normalized so the desiccation threshold sits
+   * mid-scale. A liability must be sensable to be avoidable (Rule 4/5). */
+  STRESS: 24,
 } as const;
 
-export const INPUT_COUNT = 24;
+export const INPUT_COUNT = 25;
 
 /**
  * Motor output layout (design spec §4). DIG manipulates terrain: it digs the

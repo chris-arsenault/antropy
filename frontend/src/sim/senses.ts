@@ -16,6 +16,8 @@ export interface SenseContext {
   colonies: readonly { id: number; x: number; y: number; z: number }[];
   antIndex: AntIndex;
   eggIndex: Map<number, unknown>;
+  /** Local heat multiplier at an ant's position (weather.ts). */
+  climate: (ant: Ant) => number;
 }
 
 function scentAt(
@@ -111,6 +113,8 @@ export function sense(ctx: SenseContext, ant: Ant, inputs: Float32Array): Float3
   contactFlags(ctx, ant, inputs);
   inputs[Input.FALLING] = ant.falling ? 1 : 0;
   inputs[Input.BIAS] = 1;
+  // Multiplier 1 → 0; the desiccation threshold (4.5) lands at ~0.39.
+  inputs[Input.STRESS] = Math.min(1, (ctx.climate(ant) - 1) / 9);
   homeVector(ctx, ant, inputs);
   return inputs;
 }

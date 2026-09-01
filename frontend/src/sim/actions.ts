@@ -230,10 +230,18 @@ function isOccupied(world: World, x: number, y: number, z: number): boolean {
   return false;
 }
 
+function cropHasRoom(world: World, ant: Ant): boolean {
+  const colony = world.colonies.find((c) => c.id === ant.lineageId);
+  return colony !== undefined && colony.stockpile < COLONY.stockpileSatiation;
+}
+
 function tryDeposit(world: World, ant: Ant): void {
-  // Food deposited at the queen becomes stockpile + patriline merit; this is
-  // the delivery event (design spec §7.1 merit signal).
-  if (ant.carrying === Material.FOOD && inNestReach(world, ant)) {
+  // Food deposited at the queen becomes stockpile + patriline merit; this
+  // is the delivery event (design spec §7.1 merit signal). A full crop
+  // absorbs nothing (§B.3 R2 colony sink): surplus falls through to
+  // physical placement, so hoards beyond the crop are FOOD voxels whose
+  // location the rain liability prices (§B.7.3 storage insurance).
+  if (ant.carrying === Material.FOOD && inNestReach(world, ant) && cropHasRoom(world, ant)) {
     creditDelivery(world, ant.lineageId, ant.patrilineId, ENERGY.foodEnergy);
     ant.deliveries += 1;
     unload(ant);

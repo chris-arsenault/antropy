@@ -50,6 +50,10 @@ export interface World {
   collapses: number;
   /** Queen-destined eggs lost to predation — visible, never silent. */
   queenEggsEaten: number;
+  /** Brood ledger (§B.8.2 egg-survival fraction): all eggs ever laid and
+   * those lost to exposure. */
+  eggsLaid: number;
+  eggsPerished: number;
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
@@ -117,6 +121,8 @@ export function createWorld(seed: number, controller: Controller = rnnController
     foundingFailures: 0,
     collapses: 0,
     queenEggsEaten: 0,
+    eggsLaid: 0,
+    eggsPerished: 0,
     pheromoneA: createScentField(grid, TRAIL_PHYSICS),
     pheromoneB: createScentField(grid, TRAIL_PHYSICS),
     foodScent: createScentField(grid, BEACON_PHYSICS),
@@ -190,6 +196,7 @@ const ORACLE_THINK_COST = 0.00008;
 function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
   ant.age += 1;
   stampVisit(world, ant.x, ant.y, ant.z);
+  const climate = microclimateMultiplier(world, ant);
   sense(ctx, ant, inputs);
   let outputs = world.policyOverride?.(world, ant, inputs) ?? null;
   let thinkCost = ORACLE_THINK_COST;
@@ -215,7 +222,7 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
   }
   tryTrophallaxis(world, ant);
 
-  applyBasalDrain(ant, thinkCost, microclimateMultiplier(world, ant));
+  applyBasalDrain(ant, thinkCost, climate);
   applyStepCost(ant);
   checkDeath(world, ant);
 }
@@ -252,6 +259,7 @@ export function stepWorld(world: World): void {
     colonies: world.colonies,
     antIndex: buildAntIndex(world.grid, world.ants),
     eggIndex: world.eggIndex,
+    climate: (ant) => microclimateMultiplier(world, ant),
   };
   const inputs = createInputBuffer();
   for (const ant of world.ants) {

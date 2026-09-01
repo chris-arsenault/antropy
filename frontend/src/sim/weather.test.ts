@@ -21,8 +21,8 @@ describe("microclimate (Rule 5)", () => {
     const atSurface = microclimateMultiplier(world, shallow);
     const atDepth = microclimateMultiplier(world, deep);
     expect(atSurface).toBeGreaterThan(1);
-    expect(atDepth).toBeLessThan(atSurface);
-    expect(atDepth).toBeCloseTo(1, 1);
+    // 12 voxels = 4 half-depths: stress above baseline attenuates 16x.
+    expect(atDepth - 1).toBeCloseTo((atSurface - 1) / 16, 5);
   });
 
   it("stress oscillates with the diurnal cycle", () => {

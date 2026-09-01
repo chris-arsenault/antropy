@@ -88,6 +88,10 @@ The depth work that makes long-run evolution real once colonies are worth watchi
   and hot eggs (~1% of eggs at hot σ).
 - Implement invasion events (§A.5.3): periodic founding queens carrying fresh portfolio
   draws or mutated historical-checkpoint genomes.
+- Make brood costly capital so construction is evolutionarily stable without seed support
+  (ADR-0011): long tended juvenile phases (hatchlings fed, not self-provisioning), so
+  brood losses and famine deaths bind at the population level and the r-selected
+  worker-days inversion closes; recalibrate the ecology gates with it.
 - Make worker-laid-male gene flux material and tune the succession weighting exponent
   against the N_e alarm (§A.3.5).
 - Extend the assay protocol to naive-vs-experienced clone pairs (§A.8.3), decomposing

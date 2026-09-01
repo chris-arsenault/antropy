@@ -11,13 +11,14 @@ import { mutateVoxel, type World } from "./world";
  * behavioral rng sequence.
  */
 
-/** Surface metabolic stress multiplier: seasonal trough + midday peaks. */
+/** Surface metabolic stress multiplier: seasonal × diurnal factors, peaking
+ * at (1+seasonalStress)(1+diurnalStress) in a harsh-season midday. */
 export function surfaceStress(tick: number): number {
   const seasonPhase = (2 * Math.PI * tick) / SEASON.periodTicks;
   const dayPhase = (2 * Math.PI * tick) / MICROCLIMATE.dayTicks;
-  const seasonal = MICROCLIMATE.seasonalStress * (0.5 - 0.5 * Math.sin(seasonPhase));
-  const diurnal = MICROCLIMATE.diurnalStress * (0.5 + 0.5 * Math.sin(dayPhase));
-  return 1 + seasonal + diurnal;
+  const seasonal = 1 + MICROCLIMATE.seasonalStress * (0.5 - 0.5 * Math.sin(seasonPhase));
+  const diurnal = 1 + MICROCLIMATE.diurnalStress * (0.5 + 0.5 * Math.sin(dayPhase));
+  return seasonal * diurnal;
 }
 
 /** Depth-attenuated stress at an ant's position (halves every halfDepth). */
@@ -64,8 +65,11 @@ function washSurfacePheromone(world: World, field: ScentField): void {
 }
 
 function tryStartStorm(world: World): void {
+  // Storms strike year-round (wetter in the lush half): surface hoards
+  // must be insurable-against in every season, or above-ground storage
+  // is only priced when it happens not to matter (§B.7.3).
   const phase = (2 * Math.PI * world.tick) / SEASON.periodTicks;
-  const chance = RAIN.chanceAtPeak * (0.5 + 0.5 * Math.sin(phase));
+  const chance = RAIN.chanceAtPeak * (0.75 + 0.25 * Math.sin(phase));
   if (world.weatherRng.next() < chance) {
     world.rainRemaining = RAIN.durationTicks;
   }

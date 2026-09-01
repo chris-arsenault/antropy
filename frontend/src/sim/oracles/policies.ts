@@ -12,14 +12,14 @@ export type OraclePolicy = (world: World, ant: Ant, inputs: Float32Array) => Flo
 // Single-threaded output scratch, consumed immediately by stepAnt.
 const OUT = new Float32Array(OUTPUT_COUNT);
 
-function steer(turn: number, forward: number): Float32Array {
+export function steer(turn: number, forward: number): Float32Array {
   OUT.fill(0);
   OUT[Output.TURN] = Math.max(-1, Math.min(1, turn));
   OUT[Output.FORWARD] = forward;
   return OUT;
 }
 
-function turnToward(ant: Ant, x: number, z: number): number {
+export function turnToward(ant: Ant, x: number, z: number): number {
   let relative = Math.atan2(z - ant.z, x - ant.x) - ant.heading;
   relative = ((relative + Math.PI) % (2 * Math.PI)) - Math.PI;
   if (relative < -Math.PI) {
@@ -63,6 +63,19 @@ function isHomeward(ant: Ant): boolean {
   return ant.spoilLoads > 0 || ant.energy > SATED;
 }
 
+/** Script-level brood care, mirroring the backbone instinct: never eat
+ * where an egg (and no food) is in contact. */
+export function guardBrood(inputs: Float32Array, outputs: Float32Array): Float32Array {
+  if (
+    outputs[Output.EAT] > 0 &&
+    inputs[Input.CONTACT_EGG] > 0 &&
+    inputs[Input.CONTACT_FOOD] === 0
+  ) {
+    outputs[Output.EAT] = 0;
+  }
+  return outputs;
+}
+
 export function omniscientOracle(world: World, ant: Ant, inputs: Float32Array): Float32Array {
   if (ant.sex === SEX_MALE) {
     return steer(0.2, 0.5);
@@ -83,7 +96,7 @@ export function omniscientOracle(world: World, ant: Ant, inputs: Float32Array): 
   } else if (inputs[Input.CONTACT_FOOD] > 0) {
     outputs[Output.DIG] = 1; // pick up for transport
   }
-  return outputs;
+  return guardBrood(inputs, outputs);
 }
 
 // Per-ant wander phase for the sensor-limited oracle (diagnostic state).
@@ -116,7 +129,7 @@ export function sensorOracle(_world: World, ant: Ant, inputs: Float32Array): Flo
   if (ant.energy > SATED && inputs[Input.CONTACT_FOOD] > 0) {
     outputs[Output.DIG] = 1;
   }
-  return outputs;
+  return guardBrood(inputs, outputs);
 }
 
 /**

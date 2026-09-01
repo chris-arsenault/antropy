@@ -16,3 +16,4 @@ channels, recurrent regimes — are recorded with their alternatives and rationa
 | [0008](0008-brood-care-instinct.md) | Brood-care instinct in the structured initialization | Accepted | 2026-09-02 |
 | [0009](0009-oracles-outside-the-contract.md) | Diagnostic oracles live outside the controller contract | Accepted | 2026-09-02 |
 | [0010](0010-derived-seed-portfolio.md) | Seed portfolio derived by direct optimization, baked as artifacts | Accepted | 2026-09-02 |
+| [0011](0011-liability-shapes-and-bootstrap-tournament.md) | Liability shapes price asset placement; dominance de-scoped to asset ledgers | Accepted | 2026-09-02 |

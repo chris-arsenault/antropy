@@ -119,8 +119,11 @@ export const FOOD_GOVERNOR = {
 export const SEASON = {
   /** Ticks per full sinusoid cycle. */
   periodTicks: 40_000,
-  /** Peak-to-midpoint amplitude as a fraction of the base. */
-  amplitude: 0.5,
+  /** Peak-to-midpoint amplitude as a fraction of the base. Deep troughs
+   * (~5x food collapse) make the harsh season a genuine famine
+   * bottleneck: stores and shelter decide who comes out of it, which is
+   * what prices underground living (§B.8). */
+  amplitude: 0.8,
   /** Gaussian noise on each governor pass, as a fraction of the base. */
   noise: 0.05,
 } as const;
@@ -146,7 +149,10 @@ export const COLONY = {
   trophallaxisThreshold: 0.5,
   /** Maximum energy transferred to the stockpile per tick per worker. */
   trophallaxisRate: 0.02,
-  /** Stockpile level at which the queen stops receiving. */
+  /** Stockpile level at which the queen stops receiving — a small crop,
+   * not a granary. Large hoards must be physical FOOD caches, whose
+   * placement (surface vs excavated gallery) the rain liability prices
+   * (§B.7.3 storage insurance). */
   stockpileSatiation: 8,
   /** Workers below this are fed from the stockpile when near the queen. */
   feedThreshold: 0.3,
@@ -154,6 +160,11 @@ export const COLONY = {
   feedRate: 0.02,
   /** Stockpile floor the queen keeps for herself while feeding workers. */
   queenReserve: 1,
+  /** Attendants refill a crop below this from the physical larder. */
+  restockBelow: 2,
+  /** Horizontal reach of larder restocking around the queen (any depth
+   * down to the workings; scripted logistics like trophallaxis). */
+  restockRadius: 6,
   /** Claustral body reserves a colony starts with (bridges to delivery). */
   foundingStockpile: 3,
   /** Queen lifespan before merit-weighted succession. */
@@ -193,17 +204,25 @@ export const DECAY = {
 } as const;
 
 // Microclimate (Appendix B Rule 5): the surface is metabolically hostile;
-// depth shelters. Charges colonies for the absence of a nest.
+// depth shelters. Charges colonies for the absence of a nest. Mutable for
+// harness ablations only (calibration.ts withPatched), like ENERGY.
 export const MICROCLIMATE = {
-  /** Peak seasonal surface stress (added basal multiplier at the trough). */
-  seasonalStress: 0.6,
-  /** Peak diurnal surface stress (added basal multiplier at midday). */
-  diurnalStress: 0.4,
+  /** Peak seasonal surface-stress factor − 1 (harsh-season trough). The
+   * seasonal and diurnal factors compose multiplicatively so peak surface
+   * exposure is survival-scale, not marginal-cost-scale — otherwise trip
+   * profitability (R1 ≫ 1) makes foraging through stress always win and
+   * shelter can never dominate on the idle ledger (Rule 6). Surface life
+   * stays survivable-but-inferior (never lethal, §B.8.2): extremes price
+   * idling on the surface — lush midday ~3.5x, harsh midday ~10.5x — and
+   * depth is stable. */
+  seasonalStress: 2,
+  /** Peak diurnal surface-stress factor − 1 (midday). */
+  diurnalStress: 2.5,
   /** Ticks per day-night cycle. */
   dayTicks: 2000,
   /** Depth in voxels at which surface stress halves. */
   halfDepth: 3,
-} as const;
+};
 
 // Rain (Appendix B Rule 5): storms punish surface food caches and surface
 // trail networks; sheltered stores and tunnels ride them out.
@@ -222,12 +241,21 @@ export const RAIN = {
   pheromoneRetention: 0.2,
   /** Egg exposure hazard multiplier while raining. */
   eggExposureMultiplier: 5,
-} as const;
+};
 
-// Egg exposure (design spec §7.3): surface brood is hazardous.
+// Egg exposure (design spec §7.3, Appendix B §B.7.3): brood dies where
+// the microclimate is unstable — the same stress field that prices adult
+// idling prices incubation, so brood placement depth is a real
+// reproductive asset (surface: lethal middays; chamber: lethal only at
+// harsh peaks; deep vault: stable year-round).
 export const EGG_EXPOSURE = {
-  /** Death chance per tick for an egg above the original surface. */
+  /** Death chance per tick per unit of local stress multiplier above the
+   * safe threshold. */
   deathChancePerTick: 0.002,
+  /** Local multiplier at or below which incubation is safe. The founding
+   * chamber (~2.5 at spring middays) sits exactly at the edge: safe in
+   * lush, hazarded at harsh peaks — deeper vaults buy the difference. */
+  safeMultiplier: 2.5,
 } as const;
 
 // Haploid males (design spec §7.1 channel 2).

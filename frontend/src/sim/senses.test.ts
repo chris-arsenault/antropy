@@ -18,6 +18,7 @@ function contextFor(world: World): SenseContext {
     colonies: world.colonies,
     antIndex: buildAntIndex(world.grid, world.ants),
     eggIndex: world.eggIndex,
+    climate: () => 1,
   };
 }
 

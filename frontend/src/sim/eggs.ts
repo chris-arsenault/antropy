@@ -4,6 +4,7 @@ import { type Genome } from "./controller/contract";
 import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
 import { COLONY, EGG_EXPOSURE, RAIN } from "./tunables";
+import { microclimateMultiplier } from "./weather";
 import { mutateVoxel, spawnAnt, type World } from "./world";
 
 /**
@@ -37,6 +38,7 @@ export function eggKey(world: World, egg: Egg): number {
 export function addEgg(world: World, egg: Egg): void {
   world.eggs.push(egg);
   world.eggIndex.set(eggKey(world, egg), egg);
+  world.eggsLaid += 1;
 }
 
 export function removeEgg(world: World, egg: Egg): void {
@@ -95,20 +97,28 @@ function hatch(world: World, egg: Egg): void {
  * Advance incubation; exposed eggs (above the original surface, spec §7.3)
  * suffer a death hazard and perish into FOOD; ripe eggs hatch in order.
  */
-/** Per-tick death chance for an exposed egg; storms multiply it (Rule 5). */
-function exposureHazard(world: World): number {
+/**
+ * Per-tick death chance for an egg: scales with how far the local stress
+ * multiplier exceeds the safe band (climate-keyed — depth shelters brood
+ * exactly as it shelters adults); storms multiply it (Rule 5). Zero in a
+ * stable microclimate, and no rng draw is spent there.
+ */
+function exposureHazard(world: World, egg: Egg): number {
+  const excess = microclimateMultiplier(world, egg) - EGG_EXPOSURE.safeMultiplier;
+  if (excess <= 0) {
+    return 0;
+  }
   const rainFactor = world.rainRemaining > 0 ? RAIN.eggExposureMultiplier : 1;
-  return EGG_EXPOSURE.deathChancePerTick * rainFactor;
+  return EGG_EXPOSURE.deathChancePerTick * excess * rainFactor;
 }
 
 export function stepEggs(world: World): void {
   const ripe: Egg[] = [];
   const perished: Egg[] = [];
-  const hazard = exposureHazard(world);
   for (const egg of world.eggs) {
     egg.incubationRemaining -= 1;
-    const exposed = egg.y > world.surfaceMap[egg.z * world.grid.sizeX + egg.x];
-    if (exposed && world.rng.next() < hazard) {
+    const hazard = exposureHazard(world, egg);
+    if (hazard > 0 && world.rng.next() < hazard) {
       perished.push(egg);
       continue;
     }
@@ -117,6 +127,7 @@ export function stepEggs(world: World): void {
     }
   }
   for (const egg of perished) {
+    world.eggsPerished += 1;
     removeEgg(world, egg);
     if (getVoxel(world.grid, egg.x, egg.y, egg.z) === Material.AIR) {
       mutateVoxel(world, egg.x, egg.y, egg.z, Material.FOOD);
