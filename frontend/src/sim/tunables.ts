@@ -69,15 +69,17 @@ export const ENERGY = {
   ageCap: 20_000,
 } as const;
 
-// Digging (M4, design spec §5.4).
+// Digging and carrying (design spec §5.4).
 export const DIG = {
   /** Energy cost by material. */
   cost: {
     topsoil: 0.004,
     clay: 0.012,
     looseFill: 0.002,
+    /** Picking up a FOOD voxel for transport (ADR-0006). */
+    foodPickup: 0.001,
   },
-  /** Cost to place carried spoil. */
+  /** Cost to place a carried load. */
   depositCost: 0.001,
 } as const;
 
@@ -116,8 +118,10 @@ export const COLONY = {
   eggIntervalMin: 200,
   /** Stockpile cost of laying beyond the egg's energy endowment. */
   eggLayCost: 0.1,
-  /** Fraction of every meal credited to the colony stockpile (MVP delivery). */
-  deliveryTax: 0.2,
+  /** Chebyshev distance to the queen within which food deposit = delivery. */
+  deliveryRadius: 2,
+  /** Claustral body reserves a colony starts with (bridges to delivery). */
+  foundingStockpile: 3,
   /** Queen lifespan before merit-weighted succession. */
   queenLifespanTicks: 30_000,
   /** Egg incubation time. */

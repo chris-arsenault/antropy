@@ -14,24 +14,25 @@ function facedVoxel(ant: Ant): { x: number; y: number; z: number } {
   return { x: ant.x + dx, y: ant.y, z: ant.z + dz };
 }
 
-/**
- * A meal: colony tax first (the MVP delivery mechanic — merit and stockpile
- * credit for the eater's patriline), juvenile growth, then energy.
- */
-function consume(world: World, ant: Ant, amount: number): void {
-  const tax = creditDelivery(world, ant.lineageId, ant.patrilineId, amount);
-  ant.deliveries += 1;
+/** A meal: juvenile growth, then energy. Delivery credit comes only from
+ * physically depositing food at the queen (ADR-0006). */
+function consume(_world: World, ant: Ant, amount: number): void {
   if (ant.bodyScale < ant.traits.bodyScale) {
     ant.bodyScale = Math.min(ant.traits.bodyScale, ant.bodyScale + COLONY.growthPerMeal);
   }
-  ant.energy = Math.min(maxEnergy(ant), ant.energy + (amount - tax));
+  ant.energy = Math.min(maxEnergy(ant), ant.energy + amount);
 }
 
 /**
  * Eat whatever is at the mandibles (design spec §4: food or egg — cannibalism
- * and egg-policing are in the possibility space by construction).
+ * and egg-policing are in the possibility space by construction). Satiation
+ * gates ingestion physically: a nearly full ant cannot absorb a meal, so the
+ * food stays in the world for pickup and transport instead of vanishing.
  */
 export function tryEat(world: World, ant: Ant): void {
+  if (ant.energy > maxEnergy(ant) - ENERGY.foodEnergy / 2) {
+    return;
+  }
   const faced = facedVoxel(ant);
   const candidates = [faced, { x: ant.x, y: ant.y - 1, z: ant.z }];
   for (const pos of candidates) {
@@ -125,12 +126,21 @@ function depositTargets(ant: Ant): number {
   return 3;
 }
 
-function digAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
-  const cost = digCost(getVoxelSafe(world.grid, x, y, z));
+/**
+ * Load one unit from the target voxel. Loads are type-exclusive: spoil and
+ * food never mix in one carry. FOOD pickup is the transport path (ADR-0006).
+ */
+function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
+  const material = getVoxelSafe(world.grid, x, y, z);
+  const isFood = material === Material.FOOD;
+  const cost = isFood ? DIG.cost.foodPickup : digCost(material);
   if (cost === null) {
     return false;
   }
-  ant.carrying = getVoxelSafe(world.grid, x, y, z);
+  if (ant.carrying !== null && (ant.carrying === Material.FOOD) !== isFood) {
+    return false;
+  }
+  ant.carrying = material;
   ant.spoilLoads += 1;
   ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
   ant.energy -= cost;
@@ -138,34 +148,60 @@ function digAt(world: World, ant: Ant, x: number, y: number, z: number): boolean
   return true;
 }
 
+/** Chebyshev distance from the ant to its own colony's queen, or Infinity. */
+function distanceToOwnQueen(world: World, ant: Ant): number {
+  const colony = world.colonies.find((c) => c.id === ant.lineageId);
+  if (!colony) {
+    return Infinity;
+  }
+  return Math.max(
+    Math.abs(ant.x - colony.x),
+    Math.abs(ant.y - colony.y),
+    Math.abs(ant.z - colony.z)
+  );
+}
+
+function unload(ant: Ant): void {
+  ant.spoilLoads -= 1;
+  ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
+  if (ant.spoilLoads === 0) {
+    ant.carrying = null;
+  }
+  ant.energy -= DIG.depositCost;
+}
+
 function tryDeposit(world: World, ant: Ant): void {
+  // Food deposited at the queen becomes stockpile + patriline merit; this is
+  // the delivery event (design spec §7.1 merit signal).
+  if (ant.carrying === Material.FOOD && distanceToOwnQueen(world, ant) <= COLONY.deliveryRadius) {
+    creditDelivery(world, ant.lineageId, ant.patrilineId, ENERGY.foodEnergy);
+    ant.deliveries += 1;
+    unload(ant);
+    return;
+  }
   const count = depositTargets(ant);
   for (let i = 0; i < count; i++) {
     const { x, y, z } = DIG_TARGET_SCRATCH[i];
     if (inBounds(world.grid, x, y, z) && getVoxelSafe(world.grid, x, y, z) === Material.AIR) {
-      mutateVoxel(world, x, y, z, Material.LOOSE_FILL);
-      ant.spoilLoads -= 1;
-      ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
-      if (ant.spoilLoads === 0) {
-        ant.carrying = null;
-      }
-      ant.energy -= DIG.depositCost;
+      mutateVoxel(world, x, y, z, ant.carrying === Material.FOOD ? Material.FOOD : Material.LOOSE_FILL);
+      unload(ant);
       return;
     }
   }
 }
 
 /**
- * One terrain channel (design spec §5.4): below capacity, dig the first
- * diggable candidate; at capacity (or with nothing diggable while loaded),
- * deposit one spoil load as LOOSE_FILL. Spoil is conserved.
+ * One terrain channel (design spec §5.4): below capacity, dig or pick up the
+ * first workable candidate; at capacity (or with nothing workable while
+ * loaded), deposit one load — spoil as LOOSE_FILL, food as a FOOD voxel or,
+ * at the queen, as a delivery. Matter is conserved.
  */
 export function tryDig(world: World, ant: Ant, verticalBias: number): void {
   if (ant.spoilLoads < spoilCapacity(ant)) {
     const count = digTargets(ant, verticalBias);
     for (let i = 0; i < count; i++) {
       const { x, y, z } = DIG_TARGET_SCRATCH[i];
-      if (inBounds(world.grid, x, y, z) && digAt(world, ant, x, y, z)) {
+      if (inBounds(world.grid, x, y, z) && pickUpAt(world, ant, x, y, z)) {
         return;
       }
     }

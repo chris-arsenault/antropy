@@ -85,7 +85,7 @@ export function foundColony(world: World): Colony {
     queenAge: 0,
     queenLifespanTicks: COLONY.queenLifespanTicks,
     sperm,
-    stockpile: 0,
+    stockpile: COLONY.foundingStockpile,
     patrilineDeliveries: new Map(),
     successions: 0,
     nextPatrilineId: COLONY.spermCount + 1,
@@ -220,22 +220,20 @@ export function stepColonies(world: World): void {
   }
 }
 
-/** Credit a meal to the ant's colony: stockpile tax plus patriline merit. */
+/** Credit a physical food delivery: full value to the stockpile + merit. */
 export function creditDelivery(
   world: World,
   lineageId: number,
   patrilineId: number,
   amount: number
-): number {
+): void {
   const colony = world.colonies.find((c) => c.id === lineageId);
   if (!colony) {
-    return 0;
+    return;
   }
-  const tax = amount * COLONY.deliveryTax;
-  colony.stockpile += tax;
+  colony.stockpile += amount;
   colony.patrilineDeliveries.set(
     patrilineId,
     (colony.patrilineDeliveries.get(patrilineId) ?? 0) + 1
   );
-  return tax;
 }
