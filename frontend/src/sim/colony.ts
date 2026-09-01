@@ -1,6 +1,6 @@
 import { SEX_FEMALE, SEX_MALE, surfaceSpawnY, type Ant } from "./ant";
 import { type Genome } from "./controller/contract";
-import { addEgg, findEggSpot, type Egg } from "./eggs";
+import { addEgg, findEggSpot, STAGE_EGG, type Egg } from "./eggs";
 import { killAnt } from "./energy";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
@@ -205,6 +205,9 @@ function layColonyEgg(
     genome,
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,
+    stage: STAGE_EGG,
+    fedProgress: 0,
+    hungerTicks: 0,
     sex: SEX_FEMALE,
     queenDestined,
     lineageId: colony.id,

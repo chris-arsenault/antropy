@@ -8,7 +8,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 6;
+export const CHECKPOINT_VERSION = 7;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -94,6 +94,9 @@ const EGG_SCALARS = [
   "z",
   "energy",
   "incubationRemaining",
+  "stage",
+  "fedProgress",
+  "hungerTicks",
   "sex",
   "queenDestined",
   "lineageId",

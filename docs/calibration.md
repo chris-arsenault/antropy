@@ -1,10 +1,12 @@
 # Calibration
 
 The economy is tuned by measurement, not by knob-turning (Appendix B §B.6).
-The harness lives in `frontend/src/sim/calibration.ts`; `pnpm calibrate`
-(the slow test `calibration.slow.test.ts`) runs the axis sweep and the
-oracle-vs-seeded comparison and writes raw ledgers to
-`frontend/test-results/calibration.txt`.
+Measurements run through the harness (ADR-0012): `pnpm harness calibrate`
+for the axis sweep and oracle-vs-seeded gap, `pnpm harness tournament` for
+the strategy ledgers, `pnpm harness ladder` for the certification rungs.
+Every run lands in `frontend/harness/ledger.db` with its parameters and
+git commit; the tables below are interpreted snapshots of specific runs
+and are superseded by the ledger when the world changes.
 
 ## Method
 

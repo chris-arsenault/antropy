@@ -2,10 +2,17 @@ import { describe, expect, it } from "vitest";
 import { SEX_MALE } from "./ant";
 import { foundColony } from "./colony";
 import { tryEat } from "./actions";
-import { addEgg } from "./eggs";
+import { addEgg, STAGE_LARVA, type Egg } from "./eggs";
 import { rnnController } from "./controller/rnn";
-import { COLONY, QUEEN } from "./tunables";
+import { COLONY, LARVA, QUEEN } from "./tunables";
 import { createWorld, spawnAnt, stepWorld } from "./world";
+
+/** Fast-forward brood to the pupation threshold (rearing is unit-gated). */
+function ripen(egg: Egg): void {
+  egg.stage = STAGE_LARVA;
+  egg.incubationRemaining = 0;
+  egg.fedProgress = LARVA.rearingCost;
+}
 
 describe("colony founding", () => {
   it("creates a polyandrous queen with distinct patrilines in the first brood", () => {
@@ -48,6 +55,10 @@ describe("eggs", () => {
     for (let t = 0; t < COLONY.incubationTicks + 1; t++) {
       stepWorld(world);
     }
+    // Incubated into a larva; fast-forward rearing and pupate.
+    expect(egg.stage).toBe(STAGE_LARVA);
+    ripen(egg);
+    stepWorld(world);
     const hatched = world.ants.find((ant) => ant.patrilineId === egg.patrilineId);
     expect(hatched).toBeDefined();
     const juvenile = hatched as NonNullable<typeof hatched>;
@@ -131,7 +142,7 @@ describe("real founding and collapse (spec §9.1)", () => {
     stepWorld(world);
     const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
     expect(queenEgg).toBeDefined();
-    (queenEgg as NonNullable<typeof queenEgg>).incubationRemaining = 1;
+    ripen(queenEgg as NonNullable<typeof queenEgg>);
 
     stepWorld(world);
     expect(world.foundings).toBe(1);
@@ -148,7 +159,7 @@ describe("real founding and collapse (spec §9.1)", () => {
     colony.lastQueenEggTick = -QUEEN.eggIntervalMin;
     stepWorld(world);
     const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
-    (queenEgg as NonNullable<typeof queenEgg>).incubationRemaining = 1;
+    ripen(queenEgg as NonNullable<typeof queenEgg>);
 
     stepWorld(world);
     expect(world.foundingFailures).toBe(1);

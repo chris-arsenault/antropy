@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SEX_MALE } from "./ant";
 import { foundColony } from "./colony";
 import { rnnController } from "./controller/rnn";
-import { QUEEN } from "./tunables";
+import { LARVA, QUEEN } from "./tunables";
 import { createWorld, spawnAnt, stepWorld, type World } from "./world";
 
 /** Keep a nuptial pool alive — the lay pathway itself is unit-gated. */
@@ -44,6 +44,11 @@ function runAssists(world: World, t: number): void {
   for (const egg of world.eggs) {
     if (egg.queenDestined === 1 && egg.incubationRemaining > 10) {
       egg.incubationRemaining = 10;
+    }
+    if (egg.queenDestined === 1) {
+      // Rearing compression, matching the incubation assist: the gate
+      // tests founding machinery, not the brood economy (larva.test does).
+      egg.fedProgress = LARVA.rearingCost;
     }
   }
   if (t % 500 === 0) {

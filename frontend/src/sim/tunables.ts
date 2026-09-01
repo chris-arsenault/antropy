@@ -256,6 +256,21 @@ export const RAIN = {
   eggExposureMultiplier: 5,
 };
 
+// Larval rearing (ADR-0011 brood-as-capital, R3-PLAN M4.75): hatchlings
+// are not free — a larva is immobile brood that consumes stockpile
+// feedings over a rearing period before becoming a worker. Replacement
+// cost (endowment + lay cost + rearing energy + rearing time) is the
+// capital that makes brood protection and famine stores bind on the
+// master ledger.
+export const LARVA = {
+  /** Stockpile energy a larva must absorb before pupating into an adult. */
+  rearingCost: 0.6,
+  /** Maximum stockpile draw per larva per tick while being fed. */
+  feedPerTick: 0.0005,
+  /** Unfed ticks a larva survives before perishing into FOOD. */
+  starvationGraceTicks: 600,
+} as const;
+
 // Egg exposure (design spec §7.3, Appendix B §B.7.3): brood dies where
 // the microclimate is unstable — the same stress field that prices adult
 // idling prices incubation, so brood placement depth is a real

@@ -3,14 +3,19 @@ import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
 import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
-import { COLONY, EGG_EXPOSURE, RAIN } from "./tunables";
+import { COLONY, EGG_EXPOSURE, LARVA, RAIN } from "./tunables";
 import { microclimateMultiplier } from "./weather";
 import { mutateVoxel, spawnAnt, type World } from "./world";
 
+export const STAGE_EGG = 0;
+export const STAGE_LARVA = 1;
+
 /**
- * An egg is a physical world object (design spec §7.3): it sits in an air
- * voxel, ticks an incubation timer, carries its genome from lay time, and is
- * edible by any ant.
+ * Brood is a physical world object (design spec §7.3): it sits in an air
+ * voxel, carries its genome from lay time, and is edible by any ant. An
+ * egg incubates into a larva; the larva is reared on stockpile feedings
+ * (brood-as-capital, ADR-0011) and pupates into an adult — or perishes
+ * into FOOD when starved or exposed.
  */
 export interface Egg {
   id: number;
@@ -21,6 +26,12 @@ export interface Egg {
   /** Maternal energy transferred at lay time; the hatchling's start energy. */
   energy: number;
   incubationRemaining: number;
+  /** STAGE_EGG until incubation completes, then STAGE_LARVA. */
+  stage: number;
+  /** Stockpile energy absorbed while a larva (pupates at rearingCost). */
+  fedProgress: number;
+  /** Consecutive unfed larva ticks (perishes past the grace window). */
+  hungerTicks: number;
   /** SEX_FEMALE (fertilized) or SEX_MALE (unfertilized, haploid). */
   sex: number;
   /** 1 for a queen-destined egg (founds on hatch), else 0. */
@@ -99,10 +110,6 @@ function hatch(world: World, egg: Egg): void {
 }
 
 /**
- * Advance incubation; exposed eggs (above the original surface, spec §7.3)
- * suffer a death hazard and perish into FOOD; ripe eggs hatch in order.
- */
-/**
  * Per-tick death chance for an egg: scales with how far the local stress
  * multiplier exceeds the safe band (climate-keyed — depth shelters brood
  * exactly as it shelters adults); storms multiply it (Rule 5). Zero in a
@@ -117,17 +124,63 @@ function exposureHazard(world: World, egg: Egg): number {
   return EGG_EXPOSURE.deathChancePerTick * excess * rainFactor;
 }
 
+/** Rear a larva from its colony's stockpile; true while it is being fed. */
+function feedLarva(world: World, larva: Egg): boolean {
+  const colony = world.colonies.find((c) => c.id === larva.lineageId);
+  if (!colony || colony.stockpile <= COLONY.queenReserve) {
+    return false;
+  }
+  const draw = Math.min(LARVA.feedPerTick, colony.stockpile - COLONY.queenReserve);
+  colony.stockpile -= draw;
+  larva.fedProgress += draw;
+  return true;
+}
+
+/** A larva's tick: rearing, starvation, pupation-readiness. */
+function stepLarva(world: World, larva: Egg): "alive" | "ripe" | "perished" {
+  if (feedLarva(world, larva)) {
+    larva.hungerTicks = 0;
+  } else {
+    larva.hungerTicks += 1;
+    if (larva.hungerTicks > LARVA.starvationGraceTicks) {
+      return "perished";
+    }
+  }
+  return larva.fedProgress >= LARVA.rearingCost ? "ripe" : "alive";
+}
+
+/**
+ * Advance the brood pipeline (brood-as-capital, ADR-0011): eggs incubate
+ * into larvae; larvae are reared on stockpile feedings and pupate at
+ * rearingCost, or perish when starved past the grace window. The climate
+ * exposure hazard applies to both stages; casualties become FOOD — a
+ * partial, lossy recycle of the invested capital. Ripe brood hatches in
+ * order.
+ */
+/** One brood tick: hazard roll, then incubation or rearing. */
+function stepBroodOne(world: World, egg: Egg): "alive" | "ripe" | "perished" {
+  const hazard = exposureHazard(world, egg);
+  if (hazard > 0 && world.rng.next() < hazard) {
+    return "perished";
+  }
+  if (egg.stage === STAGE_EGG) {
+    egg.incubationRemaining -= 1;
+    if (egg.incubationRemaining <= 0) {
+      egg.stage = STAGE_LARVA;
+    }
+    return "alive";
+  }
+  return stepLarva(world, egg);
+}
+
 export function stepEggs(world: World): void {
   const ripe: Egg[] = [];
   const perished: Egg[] = [];
   for (const egg of world.eggs) {
-    egg.incubationRemaining -= 1;
-    const hazard = exposureHazard(world, egg);
-    if (hazard > 0 && world.rng.next() < hazard) {
+    const outcome = stepBroodOne(world, egg);
+    if (outcome === "perished") {
       perished.push(egg);
-      continue;
-    }
-    if (egg.incubationRemaining <= 0) {
+    } else if (outcome === "ripe") {
       ripe.push(egg);
     }
   }

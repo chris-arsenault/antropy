@@ -1,6 +1,6 @@
 import { SEX_FEMALE, SEX_MALE, type Ant } from "./ant";
 import { creditDelivery } from "./colony";
-import { addEgg, findEggSpot, removeEgg } from "./eggs";
+import { addEgg, findEggSpot, removeEgg, STAGE_EGG } from "./eggs";
 import { maxEnergy } from "./energy";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
 import { Material, type MaterialId } from "./materials";
@@ -315,6 +315,9 @@ export function tryLayEgg(world: World, ant: Ant): void {
     genome: world.controller.haploidOffspring(ant.genome, world.rng),
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,
+    stage: STAGE_EGG,
+    fedProgress: 0,
+    hungerTicks: 0,
     sex: SEX_MALE,
     queenDestined: 0,
     lineageId: ant.lineageId,

@@ -5,6 +5,7 @@ import {
   DIG,
   ENERGY,
   FOOD_GOVERNOR,
+  LARVA,
   SCENT,
   SEASON,
   TRAIL_PHYSICS,
@@ -158,7 +159,8 @@ export function assertWorldViability(world: World): void {
       `ecosystem closure R7=${ratios.ecosystemClosure.toFixed(1)} below minimum viable colony (${RATIO_BANDS.ecosystemClosure.min})`
     );
   }
-  const generationProxy = COLONY.incubationTicks + COLONY.eggIntervalMin;
+  const rearingTicks = LARVA.rearingCost / LARVA.feedPerTick;
+  const generationProxy = COLONY.incubationTicks + rearingTicks + COLONY.eggIntervalMin;
   if (SEASON.periodTicks < 10 * generationProxy) {
     throw new Error(
       `season period ${SEASON.periodTicks} violates Design Rule 1 (< 10 × generation ${generationProxy})`

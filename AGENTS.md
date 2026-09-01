@@ -56,4 +56,5 @@ on the Ahara platform.
 | `make ci-full`             | `make ci` plus the slow gates — run after changing simulation dynamics, reproduction, or persistence |
 | `make build`               | Production frontend build                              |
 | `make deploy`              | Run the parameterless local deploy script              |
+| `cd frontend && pnpm harness <cmd>` | Measurement harness (ADR-0012): parameterized simulation runs into `harness/ledger.db` — `run`, `tournament`, `ladder`, `calibrate`, `determinism`, `recent`, `sql` |
 | `cd frontend && pnpm run dev` | Local dev server (only when explicitly requested)   |
