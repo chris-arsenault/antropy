@@ -18,6 +18,10 @@ const BLOCKED_TURN = 0.6;
 
 const BRAITENBERG_GENOME = Object.freeze({}) as unknown as Genome;
 
+// Reused act() buffers per the contract's transient-result rule.
+const OUTPUT_SCRATCH = new Float32Array(OUTPUT_COUNT);
+const ACT_RESULT: ActResult = { outputs: OUTPUT_SCRATCH, thinkCost: THINK_COST };
+
 interface WanderState {
   phase: number;
 }
@@ -36,7 +40,8 @@ export const braitenbergController: Controller = {
     const wander = state as unknown as WanderState;
     wander.phase += WANDER_STEP;
 
-    const outputs = new Float32Array(OUTPUT_COUNT);
+    const outputs = OUTPUT_SCRATCH;
+    outputs.fill(0);
     const left = inputs[Input.FOOD_SCENT_LEFT];
     const right = inputs[Input.FOOD_SCENT_RIGHT];
     const scentTurn = (left - right) * TURN_GAIN;
@@ -47,7 +52,8 @@ export const braitenbergController: Controller = {
     outputs[Output.FORWARD] = 0.7;
     outputs[Output.VERTICAL_BIAS] = 0;
     outputs[Output.EAT] = 1;
-    return { outputs, thinkCost: THINK_COST };
+    ACT_RESULT.outputs = outputs;
+    return ACT_RESULT;
   },
 
   mutate(genome) {

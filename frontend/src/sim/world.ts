@@ -118,8 +118,8 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
   ant.age += 1;
   sense(ctx, ant, inputs);
   const { outputs, thinkCost } = world.controller.act(ant.genome, inputs, ant.controllerState);
-  ant.lastInputs = Float32Array.from(inputs);
-  ant.lastOutputs = Float32Array.from(outputs);
+  ant.lastInputs.set(inputs);
+  ant.lastOutputs.set(outputs);
   const actions = decodeOutputs(outputs);
 
   applyMotor(world.grid, ant, actions.motor);
@@ -127,7 +127,7 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
     tryEat(world, ant);
   }
   if (actions.dig) {
-    tryDig(world, ant);
+    tryDig(world, ant, actions.motor.verticalBias);
   }
   depositPheromones(world, ant, actions.pheromoneA, actions.pheromoneB);
 

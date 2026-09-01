@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tryDig, tryEat } from "./actions";
+import { spoilCapacity, tryDig, tryEat } from "./actions";
 import { braitenbergController } from "./controller/braitenberg";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
@@ -27,7 +27,7 @@ function countSolidAndCarried(world: World): number {
       solid += 1;
     }
   }
-  return solid + world.ants.reduce((sum, ant) => sum + ant.carryLoad, 0);
+  return solid + world.ants.reduce((sum, ant) => sum + ant.spoilLoads, 0);
 }
 
 describe("digging and spoil conservation", () => {
@@ -40,17 +40,56 @@ describe("digging and spoil conservation", () => {
 
     const before = countSolidAndCarried(world);
     const energyBefore = ant.energy;
-    tryDig(world, ant);
+    tryDig(world, ant, 0);
     expect(ant.carrying).toBe(Material.TOPSOIL);
-    expect(ant.carryLoad).toBe(1);
+    expect(ant.spoilLoads).toBe(1);
+    expect(ant.carryLoad).toBeGreaterThan(0);
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.AIR);
     expect(ant.energy).toBeLessThan(energyBefore);
     expect(countSolidAndCarried(world)).toBe(before);
 
-    tryDig(world, ant);
-    expect(ant.carrying).toBeNull();
+    // At capacity the same channel deposits one load into the faced air.
+    ant.spoilLoads = spoilCapacity(ant);
+    const atCapacity = countSolidAndCarried(world);
+    tryDig(world, ant, 0);
+    expect(ant.spoilLoads).toBe(spoilCapacity(ant) - 1);
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.LOOSE_FILL);
-    expect(countSolidAndCarried(world)).toBe(before);
+    expect(countSolidAndCarried(world)).toBe(atCapacity);
+  });
+
+  it("digs downward from flat ground and keeps digging until capacity", () => {
+    const world = createReferenceWorld(36);
+    populateForagers(world, 3);
+    const ant = firstAnt(world);
+    ant.heading = 0;
+
+    tryDig(world, ant, -1);
+    expect(ant.spoilLoads).toBe(1);
+    const dugForwardDown = getVoxel(world.grid, ant.x + 1, ant.y - 1, ant.z) === Material.AIR;
+    const dugBelow = getVoxel(world.grid, ant.x, ant.y - 1, ant.z) === Material.AIR;
+    expect(dugForwardDown || dugBelow).toBe(true);
+
+    // Below capacity, digging continues instead of refilling the hole.
+    if (spoilCapacity(ant) > 1) {
+      tryDig(world, ant, -1);
+      expect(ant.spoilLoads).toBe(2);
+    }
+  });
+
+  it("deposits spoil level or upward, never straight back down first", () => {
+    const world = createReferenceWorld(37);
+    populateForagers(world, 3);
+    const ant = firstAnt(world);
+    ant.heading = 0;
+    ant.carrying = Material.TOPSOIL;
+    ant.spoilLoads = spoilCapacity(ant);
+    // Faced level voxel is air on open ground: the deposit lands there.
+    mutateVoxel(world, ant.x + 1, ant.y, ant.z, Material.AIR);
+    mutateVoxel(world, ant.x + 1, ant.y - 1, ant.z, Material.AIR);
+
+    tryDig(world, ant, -1);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.LOOSE_FILL);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y - 1, ant.z)).toBe(Material.AIR);
   });
 
   it("refuses to dig rock", () => {
@@ -59,8 +98,9 @@ describe("digging and spoil conservation", () => {
     const ant = firstAnt(world);
     ant.heading = 0;
     mutateVoxel(world, ant.x + 1, ant.y, ant.z, Material.ROCK);
+    mutateVoxel(world, ant.x + 1, ant.y - 1, ant.z, Material.ROCK);
 
-    tryDig(world, ant);
+    tryDig(world, ant, 0);
     expect(ant.carrying).toBeNull();
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.ROCK);
   });

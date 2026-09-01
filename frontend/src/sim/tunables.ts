@@ -49,12 +49,12 @@ export const SCENT = {
 // Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.
 export const ENERGY = {
   /** Basal metabolic drain per tick at bodyScale 1 (superlinear in scale). */
-  basalPerTick: 0.0002,
+  basalPerTick: 0.00012,
   basalScaleExponent: 1.5,
   /** Cost per lattice step. */
-  stepCost: 0.0005,
-  /** Extra per-step cost while carrying spoil. */
-  carryStepCost: 0.0004,
+  stepCost: 0.0003,
+  /** Extra per-step cost while carrying spoil (per load). */
+  carryStepCost: 0.0003,
   /** Sensor upkeep per tick. */
   sensorUpkeep: 0.0001,
   /** Cost per unit of pheromone deposited. */

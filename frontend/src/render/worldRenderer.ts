@@ -11,6 +11,8 @@ export interface WorldRenderer {
   render(alpha: number): void;
   /** Ant id under normalized device coordinates, or null. */
   pickAnt(ndcX: number, ndcY: number): number | null;
+  /** Ground opacity: 1 = solid, below 1 = x-ray view of tunnel networks. */
+  setTerrainOpacity(opacity: number): void;
   resize(width: number, height: number): void;
   dispose(): void;
 }
@@ -63,6 +65,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
         }
       }
       return null;
+    },
+    setTerrainOpacity(opacity: number) {
+      chunks.setOpacity(opacity);
     },
     resize(width: number, height: number) {
       renderer.setSize(width, height, false);

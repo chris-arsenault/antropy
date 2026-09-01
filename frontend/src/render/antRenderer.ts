@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { type Ant } from "../sim/ant";
 import { type World } from "../sim/world";
+import { createAntGeometry } from "./antGeometry";
 
 const INITIAL_CAPACITY = 256;
 
@@ -24,7 +25,7 @@ export function patrilineColor(patrilineId: number, out: THREE.Color): THREE.Col
 }
 
 export function createAntRenderer(scene: THREE.Scene): AntRenderer {
-  const geometry = new THREE.BoxGeometry(0.8, 0.5, 0.8);
+  const geometry = createAntGeometry();
   const material = new THREE.MeshLambertMaterial({ color: 0xffffff });
   let capacity = INITIAL_CAPACITY;
   let mesh = new THREE.InstancedMesh(geometry, material, capacity);
@@ -32,7 +33,8 @@ export function createAntRenderer(scene: THREE.Scene): AntRenderer {
 
   const matrix = new THREE.Matrix4();
   const color = new THREE.Color();
-  let drawn: Ant[] = [];
+  const scale = new THREE.Vector3();
+  const drawn: Ant[] = [];
 
   const grow = (needed: number) => {
     while (capacity < needed) {
@@ -46,14 +48,17 @@ export function createAntRenderer(scene: THREE.Scene): AntRenderer {
 
   return {
     update(world, alpha) {
-      const alive = world.ants.filter((ant) => ant.alive);
-      if (alive.length > capacity) {
-        grow(alive.length);
+      if (world.ants.length > capacity) {
+        grow(world.ants.length);
       }
-      for (let i = 0; i < alive.length; i++) {
-        const ant = alive[i];
+      drawn.length = 0;
+      for (const ant of world.ants) {
+        if (!ant.alive) {
+          continue;
+        }
+        const i = drawn.length;
         matrix.makeRotationY(-ant.heading);
-        matrix.scale(new THREE.Vector3(ant.bodyScale, ant.bodyScale, ant.bodyScale));
+        matrix.scale(scale.set(ant.bodyScale, ant.bodyScale, ant.bodyScale));
         matrix.setPosition(
           lerp(ant.prevX, ant.x, alpha) + 0.5,
           lerp(ant.prevY, ant.y, alpha) + 0.25,
@@ -61,13 +66,13 @@ export function createAntRenderer(scene: THREE.Scene): AntRenderer {
         );
         mesh.setMatrixAt(i, matrix);
         mesh.setColorAt(i, patrilineColor(ant.patrilineId, color));
+        drawn.push(ant);
       }
-      mesh.count = alive.length;
+      mesh.count = drawn.length;
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) {
         mesh.instanceColor.needsUpdate = true;
       }
-      drawn = alive;
     },
     antAt(instanceId) {
       return drawn[instanceId] ?? null;

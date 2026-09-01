@@ -95,11 +95,23 @@ function emitFace(
   }
 }
 
+interface GeometrySink {
+  positions: number[];
+  normals: number[];
+  colors: number[];
+}
+
+/** Both halves of a chunk: the surface skin and subsurface tunnel walls. */
+export interface ChunkGeometries {
+  surface: ChunkGeometry;
+  tunnel: ChunkGeometry;
+}
+
 function emitVoxel(
   grid: VoxelGrid,
-  positions: number[],
-  normals: number[],
-  colors: number[],
+  surfaceMap: Int16Array,
+  surfaceSink: GeometrySink,
+  tunnelSink: GeometrySink,
   x: number,
   y: number,
   z: number
@@ -110,27 +122,46 @@ function emitVoxel(
   }
   const color = MATERIAL_COLORS[material];
   for (const face of FACES) {
-    const neighbor = getVoxelSafe(grid, x + face.normal[0], y + face.normal[1], z + face.normal[2]);
-    if (!isSolid(neighbor)) {
-      emitFace(positions, normals, colors, x, y, z, face, color);
+    const nx = x + face.normal[0];
+    const ny = y + face.normal[1];
+    const nz = z + face.normal[2];
+    if (isSolid(getVoxelSafe(grid, nx, ny, nz))) {
+      continue;
     }
+    // A face against air below that air column's original surface is a
+    // tunnel wall — rendered at full opacity in the x-ray view.
+    const inBounds = nx >= 0 && nx < grid.sizeX && nz >= 0 && nz < grid.sizeZ && ny >= 0;
+    const isTunnel = inBounds && ny <= surfaceMap[nz * grid.sizeX + nx];
+    const sink = isTunnel ? tunnelSink : surfaceSink;
+    emitFace(sink.positions, sink.normals, sink.colors, x, y, z, face, color);
   }
 }
 
+function toChunkGeometry(sink: GeometrySink): ChunkGeometry {
+  return {
+    positions: new Float32Array(sink.positions),
+    normals: new Float32Array(sink.normals),
+    colors: new Float32Array(sink.colors),
+    vertexCount: sink.positions.length / 3,
+  };
+}
+
 /**
- * Culled-face geometry for one 16-cubed chunk. Neighbor reads span chunk
- * borders via the whole grid, so faces between chunks are culled correctly.
- * Pure: no three.js — the renderer wraps the arrays into a BufferGeometry.
+ * Culled-face geometry for one 16-cubed chunk, split into the surface skin
+ * and subsurface tunnel walls (classified against the initial surface
+ * heightmap). Neighbor reads span chunk borders via the whole grid, so faces
+ * between chunks are culled correctly. Pure: no three.js — the renderer
+ * wraps the arrays into BufferGeometries.
  */
-export function buildChunkGeometry(
+export function buildChunkGeometries(
   grid: VoxelGrid,
+  surfaceMap: Int16Array,
   cx: number,
   cy: number,
   cz: number
-): ChunkGeometry {
-  const positions: number[] = [];
-  const normals: number[] = [];
-  const colors: number[] = [];
+): ChunkGeometries {
+  const surfaceSink: GeometrySink = { positions: [], normals: [], colors: [] };
+  const tunnelSink: GeometrySink = { positions: [], normals: [], colors: [] };
 
   const x0 = cx * CHUNK_SIZE;
   const y0 = cy * CHUNK_SIZE;
@@ -142,15 +173,10 @@ export function buildChunkGeometry(
   for (let y = y0; y < y1; y++) {
     for (let z = z0; z < z1; z++) {
       for (let x = x0; x < x1; x++) {
-        emitVoxel(grid, positions, normals, colors, x, y, z);
+        emitVoxel(grid, surfaceMap, surfaceSink, tunnelSink, x, y, z);
       }
     }
   }
 
-  return {
-    positions: new Float32Array(positions),
-    normals: new Float32Array(normals),
-    colors: new Float32Array(colors),
-    vertexCount: positions.length / 3,
-  };
+  return { surface: toChunkGeometry(surfaceSink), tunnel: toChunkGeometry(tunnelSink) };
 }

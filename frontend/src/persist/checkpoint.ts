@@ -1,10 +1,11 @@
 import { type Ant } from "../sim/ant";
 import { type Colony } from "../sim/colony";
+import { INPUT_COUNT, OUTPUT_COUNT } from "../sim/controller/contract";
 import { controllerById } from "../sim/controller/registry";
 import { type Egg } from "../sim/eggs";
 import { voxelIndex } from "../sim/grid";
 import { type RngState } from "../sim/rng";
-import { type ScentField } from "../sim/scent";
+import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
 export const CHECKPOINT_VERSION = 1;
@@ -63,6 +64,7 @@ const ANT_SCALARS = [
   "age",
   "bodyScale",
   "carryLoad",
+  "spoilLoads",
   "lineageId",
   "patrilineId",
   "motherId",
@@ -98,12 +100,11 @@ const COLONY_SCALARS = [
 ] as const;
 
 function serializeScent(field: ScentField): ScentRecord {
-  return { values: Float32Array.from(field.values), active: Array.from(field.active) };
+  return { values: Float32Array.from(field.values), active: scentActiveIndices(field) };
 }
 
 function restoreScent(field: ScentField, record: ScentRecord): void {
-  field.values.set(record.values);
-  field.active = new Set(record.active);
+  restoreScentField(field, record.values, record.active);
 }
 
 function serializeAnt(world: World, ant: Ant): AntRecord {
@@ -130,8 +131,8 @@ function restoreAnt(world: World, record: AntRecord): Ant {
     genome,
     controllerState: world.controller.deserializeState(record.state),
     traits: world.controller.physical(genome),
-    lastInputs: new Float32Array(0),
-    lastOutputs: new Float32Array(0),
+    lastInputs: new Float32Array(INPUT_COUNT),
+    lastOutputs: new Float32Array(OUTPUT_COUNT),
   };
   return ant;
 }

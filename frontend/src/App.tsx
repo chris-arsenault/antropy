@@ -58,9 +58,12 @@ interface SimRunProps {
   onRestore(factory: () => World): void;
 }
 
+const DEFAULT_GROUND_OPACITY = 0.25;
+
 function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimRunProps) {
   const sim = useSimulation(factory);
   const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
+  const [groundOpacity, setGroundOpacity] = useState(DEFAULT_GROUND_OPACITY);
   const selectedAnt = sim.world.ants.find((ant) => ant.id === selectedAntId) ?? null;
 
   return (
@@ -99,6 +102,17 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
           <button type="button" onClick={onNewWorld}>
             New world
           </button>
+          <label className="speed-label">
+            Ground
+            <input
+              type="range"
+              min={5}
+              max={100}
+              value={Math.round(groundOpacity * 100)}
+              onChange={(event) => setGroundOpacity(Number(event.target.value) / 100)}
+            />
+            {Math.round(groundOpacity * 100)}%
+          </label>
           <PersistenceControls world={sim.world} onRestore={onRestore} />
         </div>
       </header>
@@ -106,6 +120,7 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
         <WorldView
           world={sim.world}
           chartsOnly={isChartsOnly(sim.speed)}
+          groundOpacity={groundOpacity}
           alphaRef={sim.alphaRef}
           onPickAnt={setSelectedAntId}
         />

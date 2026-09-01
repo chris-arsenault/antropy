@@ -14,6 +14,13 @@ export interface FrameBudget {
 export const DEFAULT_FRAME_BUDGET: FrameBudget = { maxTicksPerFrame: 2000 };
 
 /**
+ * Wall-clock cap on simulation work per frame. When ticks cost more than the
+ * budget allows, the host runs fewer ticks (effective speed drops) instead of
+ * blocking the frame — the UI stays responsive at every speed setting.
+ */
+export const FRAME_TIME_BUDGET_MS = 12;
+
+/**
  * Number of whole ticks to run for an animation frame. Fractional ticks are
  * carried by the caller via the returned remainder so slow speeds still
  * accumulate correctly.

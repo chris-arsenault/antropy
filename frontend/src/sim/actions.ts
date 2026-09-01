@@ -65,36 +65,115 @@ function digCost(material: MaterialId): number | null {
   }
 }
 
-/**
- * One terrain channel (design spec §5.4): dig the faced solid voxel when
- * unburdened; deposit carried spoil as LOOSE_FILL into the faced air voxel
- * when carrying. Spoil is conserved.
- */
-export function tryDig(world: World, ant: Ant): void {
-  const target = facedVoxel(ant);
-  if (!inBounds(world.grid, target.x, target.y, target.z)) {
-    return;
-  }
-  const material = getVoxelSafe(world.grid, target.x, target.y, target.z);
+// Single-threaded scratch — valid until the next digTargets call.
+const DIG_TARGET_SCRATCH = [
+  { x: 0, y: 0, z: 0 },
+  { x: 0, y: 0, z: 0 },
+  { x: 0, y: 0, z: 0 },
+];
 
-  if (ant.carrying === null) {
-    const cost = digCost(material);
-    if (cost === null) {
+/**
+ * Dig target candidates in preference order, steered by vertical bias like
+ * movement: biased down digs forward-down then straight down (shafts are
+ * possible from flat ground), biased up digs forward-up first, neutral digs
+ * the faced voxel then the forward step-down.
+ */
+function digTargets(ant: Ant, verticalBias: number): number {
+  const { dx, dz } = headingToDirection(ant.heading);
+  const set = (i: number, x: number, y: number, z: number) => {
+    DIG_TARGET_SCRATCH[i].x = x;
+    DIG_TARGET_SCRATCH[i].y = y;
+    DIG_TARGET_SCRATCH[i].z = z;
+  };
+  if (verticalBias < -0.33) {
+    set(0, ant.x + dx, ant.y - 1, ant.z + dz);
+    set(1, ant.x, ant.y - 1, ant.z);
+    set(2, ant.x + dx, ant.y, ant.z + dz);
+    return 3;
+  }
+  if (verticalBias > 0.33) {
+    set(0, ant.x + dx, ant.y + 1, ant.z + dz);
+    set(1, ant.x + dx, ant.y, ant.z + dz);
+    return 2;
+  }
+  set(0, ant.x + dx, ant.y, ant.z + dz);
+  set(1, ant.x + dx, ant.y - 1, ant.z + dz);
+  return 2;
+}
+
+/** Spoil loads an ant can hold — body size buys carry capacity (spec §3.2). */
+export function spoilCapacity(ant: Ant): number {
+  return Math.max(1, Math.round(ant.traits.bodyScale * 2));
+}
+
+/**
+ * Deposit target candidates, deliberately ordered differently from dig
+ * targets: level and upward-forward first, downward last — so spoil is
+ * pushed aside or up, never straight back into a freshly dug hole.
+ */
+function depositTargets(ant: Ant): number {
+  const { dx, dz } = headingToDirection(ant.heading);
+  DIG_TARGET_SCRATCH[0].x = ant.x + dx;
+  DIG_TARGET_SCRATCH[0].y = ant.y;
+  DIG_TARGET_SCRATCH[0].z = ant.z + dz;
+  DIG_TARGET_SCRATCH[1].x = ant.x + dx;
+  DIG_TARGET_SCRATCH[1].y = ant.y + 1;
+  DIG_TARGET_SCRATCH[1].z = ant.z + dz;
+  DIG_TARGET_SCRATCH[2].x = ant.x + dx;
+  DIG_TARGET_SCRATCH[2].y = ant.y - 1;
+  DIG_TARGET_SCRATCH[2].z = ant.z + dz;
+  return 3;
+}
+
+function digAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
+  const cost = digCost(getVoxelSafe(world.grid, x, y, z));
+  if (cost === null) {
+    return false;
+  }
+  ant.carrying = getVoxelSafe(world.grid, x, y, z);
+  ant.spoilLoads += 1;
+  ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
+  ant.energy -= cost;
+  mutateVoxel(world, x, y, z, Material.AIR);
+  return true;
+}
+
+function tryDeposit(world: World, ant: Ant): void {
+  const count = depositTargets(ant);
+  for (let i = 0; i < count; i++) {
+    const { x, y, z } = DIG_TARGET_SCRATCH[i];
+    if (inBounds(world.grid, x, y, z) && getVoxelSafe(world.grid, x, y, z) === Material.AIR) {
+      mutateVoxel(world, x, y, z, Material.LOOSE_FILL);
+      ant.spoilLoads -= 1;
+      ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
+      if (ant.spoilLoads === 0) {
+        ant.carrying = null;
+      }
+      ant.energy -= DIG.depositCost;
       return;
     }
-    mutateVoxel(world, target.x, target.y, target.z, Material.AIR);
-    ant.carrying = material;
-    ant.carryLoad = 1;
-    ant.energy -= cost;
-    return;
   }
+}
 
-  if (material === Material.AIR) {
-    mutateVoxel(world, target.x, target.y, target.z, Material.LOOSE_FILL);
-    ant.carrying = null;
-    ant.carryLoad = 0;
-    ant.energy -= DIG.depositCost;
+/**
+ * One terrain channel (design spec §5.4): below capacity, dig the first
+ * diggable candidate; at capacity (or with nothing diggable while loaded),
+ * deposit one spoil load as LOOSE_FILL. Spoil is conserved.
+ */
+export function tryDig(world: World, ant: Ant, verticalBias: number): void {
+  if (ant.spoilLoads < spoilCapacity(ant)) {
+    const count = digTargets(ant, verticalBias);
+    for (let i = 0; i < count; i++) {
+      const { x, y, z } = DIG_TARGET_SCRATCH[i];
+      if (inBounds(world.grid, x, y, z) && digAt(world, ant, x, y, z)) {
+        return;
+      }
+    }
+    if (ant.spoilLoads === 0) {
+      return;
+    }
   }
+  tryDeposit(world, ant);
 }
 
 /** Energy-costed pheromone deposition at the ant's own voxel. */

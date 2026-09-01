@@ -45,35 +45,61 @@ export function isLegalPosition(grid: VoxelGrid, x: number, y: number, z: number
   );
 }
 
-/** Heading quantized to one of 8 horizontal directions. */
+const DIRECTIONS: readonly { dx: number; dz: number }[] = [
+  { dx: 1, dz: 0 },
+  { dx: 1, dz: 1 },
+  { dx: 0, dz: 1 },
+  { dx: -1, dz: 1 },
+  { dx: -1, dz: 0 },
+  { dx: -1, dz: -1 },
+  { dx: 0, dz: -1 },
+  { dx: 1, dz: -1 },
+].map(Object.freeze) as { dx: number; dz: number }[];
+
+/** Heading quantized to one of 8 horizontal directions. Allocation-free. */
 export function headingToDirection(heading: number): { dx: number; dz: number } {
   const octant = Math.round((heading / (Math.PI / 4)) % 8);
-  const index = ((octant % 8) + 8) % 8;
-  const dxTable = [1, 1, 0, -1, -1, -1, 0, 1];
-  const dzTable = [0, 1, 1, 1, 0, -1, -1, -1];
-  return { dx: dxTable[index], dz: dzTable[index] };
+  return DIRECTIONS[((octant % 8) + 8) % 8];
 }
+
+const LEVELS_UP = [1, 0, -1] as const;
+const LEVELS_DOWN = [-1, 0, 1] as const;
+const LEVELS_FLAT = [0, 1, -1] as const;
+
+// Single-threaded scratch — contents valid until the next stepCandidates call.
+const CANDIDATE_SCRATCH = [
+  { dx: 0, dy: 0, dz: 0 },
+  { dx: 0, dy: 0, dz: 0 },
+  { dx: 0, dy: 0, dz: 0 },
+  { dx: 0, dy: 0, dz: 0 },
+];
 
 /**
  * Forward step candidates in preference order: the facing direction at the
  * vertical level the bias prefers, then the other levels, then a stationary
- * climb (straight up/down) as the last resort.
+ * climb (straight up/down) as the last resort. Returns a reused scratch
+ * array — do not retain across calls.
  */
 export function stepCandidates(
   heading: number,
   verticalBias: number
 ): { dx: number; dy: number; dz: number }[] {
   const { dx, dz } = headingToDirection(heading);
-  let levels: number[];
+  let levels: readonly number[];
   if (verticalBias > 0.33) {
-    levels = [1, 0, -1];
+    levels = LEVELS_UP;
   } else if (verticalBias < -0.33) {
-    levels = [-1, 0, 1];
+    levels = LEVELS_DOWN;
   } else {
-    levels = [0, 1, -1];
+    levels = LEVELS_FLAT;
   }
-  const candidates = levels.map((dy) => ({ dx, dy, dz }));
-  const climb = verticalBias >= 0 ? 1 : -1;
-  candidates.push({ dx: 0, dy: climb, dz: 0 });
-  return candidates;
+  for (let i = 0; i < 3; i++) {
+    CANDIDATE_SCRATCH[i].dx = dx;
+    CANDIDATE_SCRATCH[i].dy = levels[i];
+    CANDIDATE_SCRATCH[i].dz = dz;
+  }
+  CANDIDATE_SCRATCH[3].dx = 0;
+  CANDIDATE_SCRATCH[3].dy = verticalBias >= 0 ? 1 : -1;
+  CANDIDATE_SCRATCH[3].dz = 0;
+  return CANDIDATE_SCRATCH;
 }

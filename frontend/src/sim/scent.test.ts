@@ -7,6 +7,7 @@ import {
   emitFoodScent,
   sampleScent,
   scanFoodSources,
+  scentActiveCount,
   stepScentField,
 } from "./scent";
 
@@ -50,7 +51,7 @@ describe("scent fields", () => {
     for (let i = 0; i < 200; i++) {
       stepScentField(grid, field);
     }
-    expect(field.active.size).toBe(0);
+    expect(scentActiveCount(field)).toBe(0);
   });
 
   it("is deterministic", () => {

@@ -1,4 +1,10 @@
-import { type ControllerState, type Genome, type PhysicalTraits } from "./controller/contract";
+import {
+  INPUT_COUNT,
+  OUTPUT_COUNT,
+  type ControllerState,
+  type Genome,
+  type PhysicalTraits,
+} from "./controller/contract";
 import { getVoxel, type VoxelGrid } from "./grid";
 import { Material } from "./materials";
 import { hasSupport } from "./movement";
@@ -25,7 +31,10 @@ export interface Ant {
   bodyScale: number;
   /** Carried material id, or null when unburdened. */
   carrying: number | null;
+  /** Fraction of spoil capacity in use (the sensor input). */
   carryLoad: number;
+  /** Spoil loads carried; capacity scales with body size (spec §3.2). */
+  spoilLoads: number;
   alive: boolean;
   lineageId: number;
   patrilineId: number;
@@ -76,6 +85,7 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     bodyScale: spawn.traits.bodyScale,
     carrying: null,
     carryLoad: 0,
+    spoilLoads: 0,
     alive: true,
     lineageId: spawn.lineageId,
     patrilineId: spawn.patrilineId,
@@ -85,8 +95,8 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     genome: spawn.genome,
     controllerState: spawn.controllerState,
     traits: spawn.traits,
-    lastInputs: new Float32Array(0),
-    lastOutputs: new Float32Array(0),
+    lastInputs: new Float32Array(INPUT_COUNT),
+    lastOutputs: new Float32Array(OUTPUT_COUNT),
   };
 }
 

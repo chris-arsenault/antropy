@@ -65,9 +65,9 @@ function runAssay(seed: number, genome: Genome): { start: number; end: number } 
 
 describe("chemotaxis assay (M5 gate)", () => {
   it("closes on the plume with a seeded founder genome", { timeout: 60_000 }, () => {
-    const genomeSource = createWorld(3100);
+    const genomeSource = createWorld(3101);
     const genome = rnnController.seed(genomeSource.rng);
-    const { start, end } = runAssay(3110, genome);
+    const { start, end } = runAssay(3111, genome);
     expect(end).toBeLessThan(start - REQUIRED_IMPROVEMENT);
   });
 

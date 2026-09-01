@@ -16,25 +16,28 @@ describe("rnnController", () => {
   it("is deterministic for identical genome, state, and inputs", () => {
     const rng = createRng(5);
     const genome = rnnController.seed(rng);
-    const a = rnnController.act(genome, inputsWith({}), rnnController.createState());
-    const b = rnnController.act(genome, inputsWith({}), rnnController.createState());
-    expect(Array.from(a.outputs)).toEqual(Array.from(b.outputs));
-    expect(a.thinkCost).toBeGreaterThan(0);
+    // act() results are transient (contract): snapshot before the next call.
+    const a = Array.from(
+      rnnController.act(genome, inputsWith({}), rnnController.createState()).outputs
+    );
+    const result = rnnController.act(genome, inputsWith({}), rnnController.createState());
+    expect(a).toEqual(Array.from(result.outputs));
+    expect(result.thinkCost).toBeGreaterThan(0);
   });
 
   it("steers toward the stronger food-scent side from the seeded backbone", () => {
     const genome = rnnController.seed(createRng(11));
-    const leftStronger = rnnController.act(
+    const leftTurn = rnnController.act(
       genome,
       inputsWith({ [Input.FOOD_SCENT_LEFT]: 0.8, [Input.FOOD_SCENT_RIGHT]: 0.1 }),
       rnnController.createState()
-    );
-    const rightStronger = rnnController.act(
+    ).outputs[Output.TURN];
+    const rightTurn = rnnController.act(
       genome,
       inputsWith({ [Input.FOOD_SCENT_LEFT]: 0.1, [Input.FOOD_SCENT_RIGHT]: 0.8 }),
       rnnController.createState()
-    );
-    expect(leftStronger.outputs[Output.TURN]).toBeGreaterThan(rightStronger.outputs[Output.TURN]);
+    ).outputs[Output.TURN];
+    expect(leftTurn).toBeGreaterThan(rightTurn);
   });
 
   it("drives forward and eats from the seeded biases", () => {
@@ -47,11 +50,12 @@ describe("rnnController", () => {
   it("carries memory in the recurrent state", () => {
     const genome = rnnController.seed(createRng(13));
     const state = rnnController.createState();
-    const first = rnnController.act(genome, inputsWith({ [Input.FOOD_SCENT_LEFT]: 1 }), state);
-    const second = rnnController.act(genome, inputsWith({}), state);
-    const fresh = rnnController.act(genome, inputsWith({}), rnnController.createState());
-    expect(Array.from(second.outputs)).not.toEqual(Array.from(fresh.outputs));
-    expect(first.outputs.length).toBe(second.outputs.length);
+    rnnController.act(genome, inputsWith({ [Input.FOOD_SCENT_LEFT]: 1 }), state);
+    const second = Array.from(rnnController.act(genome, inputsWith({}), state).outputs);
+    const fresh = Array.from(
+      rnnController.act(genome, inputsWith({}), rnnController.createState()).outputs
+    );
+    expect(second).not.toEqual(fresh);
   });
 });
 

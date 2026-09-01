@@ -16,26 +16,14 @@ export interface SenseContext {
   eggIndex: Map<number, unknown>;
 }
 
-/** Antenna sample positions: one voxel ahead-left and ahead-right. */
-function antennaPositions(ant: Ant): {
-  left: [number, number, number];
-  right: [number, number, number];
-} {
-  const leftDir = headingToDirection(ant.heading + Math.PI / 4);
-  const rightDir = headingToDirection(ant.heading - Math.PI / 4);
-  return {
-    left: [ant.x + leftDir.dx, ant.y, ant.z + leftDir.dz],
-    right: [ant.x + rightDir.dx, ant.y, ant.z + rightDir.dz],
-  };
-}
-
 function scentAt(
   ctx: SenseContext,
   field: ScentField,
-  pos: [number, number, number],
+  x: number,
+  y: number,
+  z: number,
   gain: number
 ): number {
-  const [x, y, z] = pos;
   if (
     x < 0 ||
     x >= ctx.grid.sizeX ||
@@ -90,16 +78,22 @@ function contactFlags(ctx: SenseContext, ant: Ant, inputs: Float32Array): void {
   inputs[Input.CROWDING] = Math.min(1, (near.length - 1) / 8);
 }
 
-/** Build the ~20-input sensory vector (design spec §4). */
+/** Build the ~20-input sensory vector (design spec §4). Allocation-free. */
 export function sense(ctx: SenseContext, ant: Ant, inputs: Float32Array): Float32Array {
-  const { left, right } = antennaPositions(ant);
+  const leftDir = headingToDirection(ant.heading + Math.PI / 4);
+  const lx = ant.x + leftDir.dx;
+  const lz = ant.z + leftDir.dz;
+  const rightDir = headingToDirection(ant.heading - Math.PI / 4);
+  const rx = ant.x + rightDir.dx;
+  const rz = ant.z + rightDir.dz;
+  const y = ant.y;
   const gain = ant.traits.sensorGain;
-  inputs[Input.PHEROMONE_A_LEFT] = scentAt(ctx, ctx.pheromoneA, left, gain);
-  inputs[Input.PHEROMONE_A_RIGHT] = scentAt(ctx, ctx.pheromoneA, right, gain);
-  inputs[Input.PHEROMONE_B_LEFT] = scentAt(ctx, ctx.pheromoneB, left, gain);
-  inputs[Input.PHEROMONE_B_RIGHT] = scentAt(ctx, ctx.pheromoneB, right, gain);
-  inputs[Input.FOOD_SCENT_LEFT] = scentAt(ctx, ctx.foodScent, left, gain);
-  inputs[Input.FOOD_SCENT_RIGHT] = scentAt(ctx, ctx.foodScent, right, gain);
+  inputs[Input.PHEROMONE_A_LEFT] = scentAt(ctx, ctx.pheromoneA, lx, y, lz, gain);
+  inputs[Input.PHEROMONE_A_RIGHT] = scentAt(ctx, ctx.pheromoneA, rx, y, rz, gain);
+  inputs[Input.PHEROMONE_B_LEFT] = scentAt(ctx, ctx.pheromoneB, lx, y, lz, gain);
+  inputs[Input.PHEROMONE_B_RIGHT] = scentAt(ctx, ctx.pheromoneB, rx, y, rz, gain);
+  inputs[Input.FOOD_SCENT_LEFT] = scentAt(ctx, ctx.foodScent, lx, y, lz, gain);
+  inputs[Input.FOOD_SCENT_RIGHT] = scentAt(ctx, ctx.foodScent, rx, y, rz, gain);
   inputs[Input.ENERGY] = Math.max(0, Math.min(1, ant.energy / (ENERGY.max * ant.traits.storage)));
   inputs[Input.AGE_FRACTION] = Math.min(1, ant.age / ENERGY.ageCap);
   inputs[Input.CARRY_LOAD] = ant.carryLoad;

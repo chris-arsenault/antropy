@@ -6,6 +6,8 @@ interface WorldViewProps {
   world: World;
   /** When true (charts-only speed), the 3D viewport is not drawn. */
   chartsOnly: boolean;
+  /** Ground opacity in [0.05, 1]; below 1 the terrain is x-ray. */
+  groundOpacity: number;
   /** Fractional-tick interpolation factor owned by the simulation host. */
   alphaRef: { readonly current: number };
   onPickAnt(antId: number | null): void;
@@ -15,7 +17,13 @@ function supportsWebgl(canvas: HTMLCanvasElement): boolean {
   return canvas.getContext("webgl2") !== null;
 }
 
-export function WorldView({ world, chartsOnly, alphaRef, onPickAnt }: WorldViewProps) {
+export function WorldView({
+  world,
+  chartsOnly,
+  groundOpacity,
+  alphaRef,
+  onPickAnt,
+}: WorldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<WorldRenderer | null>(null);
   const [webglAvailable, setWebglAvailable] = useState(true);
@@ -53,6 +61,12 @@ export function WorldView({ world, chartsOnly, alphaRef, onPickAnt }: WorldViewP
       renderer.dispose();
     };
   }, [world, chartsOnly, alphaRef]);
+
+  // Runs after the creation effect (declaration order), so a fresh renderer
+  // always receives the current opacity.
+  useEffect(() => {
+    rendererRef.current?.setTerrainOpacity(groundOpacity);
+  }, [groundOpacity, world, chartsOnly]);
 
   const onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

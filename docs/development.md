@@ -11,7 +11,7 @@
 ```bash
 cd frontend
 pnpm install
-pnpm run dev        # dev server with HMR
+pnpm run dev        # dev server with HMR on 0.0.0.0:26000 (LAN-reachable dev port; strict — fails loudly if taken)
 pnpm run build      # typecheck (tsc -b) + production build to dist/
 pnpm run test       # vitest
 pnpm run lint       # eslint

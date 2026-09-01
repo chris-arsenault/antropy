@@ -30,7 +30,7 @@ export function applyStepCost(ant: Ant): void {
   const fullness = Math.max(0, ant.energy) / maxEnergy(ant);
   const storagePenalty = 1 + 0.3 * fullness * Math.max(0, ant.traits.storage - 1);
   const base = ENERGY.stepCost * ant.traits.legLength * storagePenalty;
-  ant.energy -= base + (ant.carrying !== null ? ENERGY.carryStepCost : 0);
+  ant.energy -= base + ENERGY.carryStepCost * ant.spoilLoads;
 }
 
 /**

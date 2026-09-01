@@ -15,6 +15,9 @@ The MVP ("selection visible in one session") shipped in v0.1.0 — see
   keeping per-patriline merit tracking.
 - Implement expressed haploid males behind the controller contract (removing the MVP
   all-diploid simplification).
+- Replace in-place queen succession and colony-pool re-mating with real founding: new
+  queens mate with flying males, and merit weighting (spec §7.1 channel 3) applies at
+  queen-egg creation rather than in-place re-mating.
 
 - Implement colony founding: stockpile-triggered winged queens, dispersal flight, scripted
   founding chamber, and colony death on queen death.

@@ -56,6 +56,11 @@ export type Genome = { readonly __brand: "genome" };
 /** Opaque recurrent state (the ant's only memory). */
 export type ControllerState = { __brand: "controllerState" };
 
+/**
+ * Transient result of act(): controllers may reuse the result object and the
+ * outputs buffer across calls (no hot-path allocation). Consume or copy
+ * before the next act() call; never retain.
+ */
 export interface ActResult {
   outputs: Float32Array;
   thinkCost: number;

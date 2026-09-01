@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { computeStats, TRAIT_KEYS, type WorldStats } from "../sim/stats";
 import { stepWorld, type World } from "../sim/world";
 import { createTimeSeries, pushSample, type TimeSeries } from "./charts/timeSeries";
-import { ticksForFrame, type SpeedPreset } from "./pacing";
+import { FRAME_TIME_BUDGET_MS, ticksForFrame, type SpeedPreset } from "./pacing";
 
 export interface StatsHistory {
   population: TimeSeries;
@@ -88,12 +88,18 @@ export function useSimulation(worldFactory: () => World): SimulationHandle {
       const budgeted = ticksForFrame(speed, now - last, carry);
       carry = budgeted.carry;
       last = now;
+      const deadline = performance.now() + FRAME_TIME_BUDGET_MS;
       for (let i = 0; i < budgeted.ticks; i++) {
         stepWorld(world);
         if (world.tick - lastSampleRef.current >= STATS_SAMPLE_INTERVAL_TICKS) {
           lastSampleRef.current = world.tick;
           latest = computeStats(world);
           recordSample(history, latest);
+        }
+        // Over-budget ticks are dropped, not deferred — effective speed
+        // degrades but the frame never blocks (FRAME_TIME_BUDGET_MS).
+        if (performance.now() > deadline) {
+          break;
         }
       }
       alphaRef.current = carry;

@@ -38,6 +38,13 @@ const PhysGene = {
 const THINK_COST = 0.00008;
 const SEED_WEIGHT_NOISE = 0.15;
 const SEED_PHYS_NOISE = 0.7;
+/**
+ * Wider prior on the action-output biases (dig, pheromones, lay-egg) so a
+ * real fraction of founders express those behaviors for selection to prune
+ * (design spec §10 — diversity is free at t=0). Not a behavioral backbone:
+ * signs are random, evolution decides what survives.
+ */
+const SEED_ACTION_BIAS_NOISE = 0.6;
 const BACKBONE_GAIN = 2.5;
 const MUTATION_SCALE = 0.12;
 const STRUCTURAL_KICK_PROBABILITY = 0.03;
@@ -60,9 +67,12 @@ function expressed(genome: RnnGenome, locus: number): number {
 }
 
 /**
- * The chemotaxis backbone ("instinct in erasable ink", spec §2.1): hidden
- * unit 0 computes the stereo food-scent difference and steers TURN; forward
- * drive and eating are biased on. Everything else starts near zero.
+ * The structured-init backbone ("instinct in erasable ink", spec §2.1):
+ * hidden unit 0 computes the stereo food-scent difference and steers TURN;
+ * forward drive and eating are biased on. Hidden unit 1 is a weak
+ * excavation instinct — crowding drives DIG and a downward vertical bias,
+ * so digging starts where ants bunch (the nest) and radiates. Both are just
+ * weights; lineages may strengthen, repurpose, or abandon them.
  */
 function applyBackbone(copy: Float32Array): void {
   copy[W_IN + 0 * INPUT_COUNT + Input.FOOD_SCENT_LEFT] += BACKBONE_GAIN;
@@ -70,12 +80,28 @@ function applyBackbone(copy: Float32Array): void {
   copy[W_OUT + Output.TURN * HIDDEN_COUNT + 0] += BACKBONE_GAIN;
   copy[B_OUT + Output.FORWARD] += 1.2;
   copy[B_OUT + Output.EAT] += 1.2;
+
+  copy[W_IN + 1 * INPUT_COUNT + Input.CROWDING] += 1.0;
+  copy[W_IN + 1 * INPUT_COUNT + Input.BIAS] += 0.2;
+  copy[W_OUT + Output.DIG * HIDDEN_COUNT + 1] += 1.2;
+  copy[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + 1] -= 1.0;
 }
+
+const ACTION_BIAS_LOCI = [
+  B_OUT + Output.EAT,
+  B_OUT + Output.DIG,
+  B_OUT + Output.PHEROMONE_A,
+  B_OUT + Output.PHEROMONE_B,
+  B_OUT + Output.LAY_EGG,
+];
 
 function seedCopy(rng: Rng): Float32Array {
   const copy = new Float32Array(GENOME_LENGTH);
   for (let i = 0; i < GENOME_LENGTH; i++) {
     copy[i] = randNormal(rng) * (i >= PHYS ? SEED_PHYS_NOISE : SEED_WEIGHT_NOISE);
+  }
+  for (const locus of ACTION_BIAS_LOCI) {
+    copy[locus] = randNormal(rng) * SEED_ACTION_BIAS_NOISE;
   }
   applyBackbone(copy);
   return copy;
@@ -101,8 +127,12 @@ function mutateCopy(copy: Float32Array, sigma: number, rng: Rng): void {
   }
 }
 
+// Single-threaded scratch buffers — valid until the next forward call.
+const HIDDEN_SCRATCH = new Float32Array(HIDDEN_COUNT);
+const OUTPUT_SCRATCH = new Float32Array(OUTPUT_COUNT);
+
 function forward(genome: RnnGenome, inputs: Float32Array, hidden: Float32Array): Float32Array {
-  const nextHidden = new Float32Array(HIDDEN_COUNT);
+  const nextHidden = HIDDEN_SCRATCH;
   for (let h = 0; h < HIDDEN_COUNT; h++) {
     let sum = expressed(genome, B_H + h);
     for (let i = 0; i < INPUT_COUNT; i++) {
@@ -115,7 +145,7 @@ function forward(genome: RnnGenome, inputs: Float32Array, hidden: Float32Array):
   }
   hidden.set(nextHidden);
 
-  const outputs = new Float32Array(OUTPUT_COUNT);
+  const outputs = OUTPUT_SCRATCH;
   for (let o = 0; o < OUTPUT_COUNT; o++) {
     let sum = expressed(genome, B_OUT + o);
     for (let h = 0; h < HIDDEN_COUNT; h++) {
@@ -130,6 +160,9 @@ function physGene(genome: RnnGenome, gene: number): number {
   return expressed(genome, PHYS + gene);
 }
 
+// Reused act() result per the contract's transient-result rule.
+const ACT_RESULT: ActResult = { outputs: OUTPUT_SCRATCH, thinkCost: THINK_COST };
+
 /**
  * The MVP behavioral controller (design spec §2.1): fixed-topology recurrent
  * network whose weights and physical genes are the genome. MVP ploidy
@@ -141,10 +174,8 @@ export const rnnController: Controller = {
 
   act(genome, inputs, state): ActResult {
     const rnnState = state as unknown as RnnState;
-    return {
-      outputs: forward(asRnn(genome), inputs, rnnState.hidden),
-      thinkCost: THINK_COST,
-    };
+    ACT_RESULT.outputs = forward(asRnn(genome), inputs, rnnState.hidden);
+    return ACT_RESULT;
   },
 
   mutate(genome, sigma, rng) {
