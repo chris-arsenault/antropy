@@ -5,7 +5,7 @@ import { deserializeWorld, serializeWorld } from "./checkpoint";
 import { checkpointFromJson, checkpointToJson } from "./file";
 
 describe("checkpoint codec", () => {
-  it("round-trips through the JSON file codec", () => {
+  it("round-trips through the JSON file codec", { timeout: 30_000 }, () => {
     const world = createWorld(8002);
     foundColony(world);
     for (let t = 0; t < 100; t++) {

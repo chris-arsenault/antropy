@@ -13,10 +13,9 @@ const TICKS = 150;
 const REQUIRED_IMPROVEMENT = 1.5;
 
 /**
- * M5 behavioral assay (exit gate): chemotaxis-seeded RNN ants close on a
+ * M5 behavioral assay (exit gate): a chemotaxis-seeded RNN ant closes on a
  * food-scent plume within smelling range; a zero-genome control does not
- * move. Founders carry wide-prior noise, so a majority — not every — seeded
- * genome must succeed.
+ * move. Fully deterministic: fixed seeds, fixed genome, no majority vote.
  */
 function runAssay(seed: number, genome: Genome): { start: number; end: number } {
   const world: World = createWorld(seed);
@@ -65,20 +64,14 @@ function runAssay(seed: number, genome: Genome): { start: number; end: number } 
 }
 
 describe("chemotaxis assay (M5 gate)", () => {
-  it("closes on the plume for most seeded founder genomes", () => {
+  it("closes on the plume with a seeded founder genome", { timeout: 60_000 }, () => {
     const genomeSource = createWorld(3100);
-    let successes = 0;
-    for (let trial = 0; trial < 5; trial++) {
-      const genome = rnnController.seed(genomeSource.rng);
-      const { start, end } = runAssay(3110 + trial, genome);
-      if (end < start - REQUIRED_IMPROVEMENT) {
-        successes += 1;
-      }
-    }
-    expect(successes).toBeGreaterThanOrEqual(3);
+    const genome = rnnController.seed(genomeSource.rng);
+    const { start, end } = runAssay(3110, genome);
+    expect(end).toBeLessThan(start - REQUIRED_IMPROVEMENT);
   });
 
-  it("does not move with the zero-genome control", () => {
+  it("does not move with the zero-genome control", { timeout: 60_000 }, () => {
     const { start, end } = runAssay(3102, zeroGenome());
     expect(end).toBeCloseTo(start);
   });

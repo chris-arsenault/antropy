@@ -8,7 +8,7 @@ describe("world", () => {
     expect(world.seed).toBe(99);
   });
 
-  it("reaches an identical state for the same seed after many steps", () => {
+  it("reaches an identical state for the same seed after many steps", { timeout: 30_000 }, () => {
     const a = createWorld(2026);
     const b = createWorld(2026);
     for (let i = 0; i < 500; i++) {

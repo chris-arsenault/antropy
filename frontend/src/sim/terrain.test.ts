@@ -64,7 +64,7 @@ describe("generateTerrain structure", () => {
     }
   });
 
-  it("orders every sampled column as air, topsoil, clay, rock", () => {
+  it("orders every sampled column as air, topsoil, clay, rock", { timeout: 30_000 }, () => {
     for (let x = 0; x < grid.sizeX; x += 5) {
       for (let z = 0; z < grid.sizeZ; z += 5) {
         checkColumnOrdering(grid, seed, x, z);

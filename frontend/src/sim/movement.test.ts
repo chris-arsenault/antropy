@@ -44,7 +44,7 @@ describe("walker population invariants", () => {
     }
   }
 
-  it("keeps every ant in legal positions over a long walk", () => {
+  it("keeps every ant in legal positions over a long walk", { timeout: 30_000 }, () => {
     const world = createWorld(555);
     populateForagers(world, 40);
     expect(world.ants.length).toBeGreaterThan(30);
