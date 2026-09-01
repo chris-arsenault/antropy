@@ -11,11 +11,13 @@ export function maxEnergy(ant: Ant): number {
 /**
  * Per-tick fixed drains (design spec §6): size-scaled basal metabolism,
  * sensor upkeep scaling with the square of sensor gain, and think cost.
+ * The climate multiplier (Rule 5 microclimate) scales basal maintenance;
+ * sensing and thinking are climate-indifferent.
  */
-export function applyBasalDrain(ant: Ant, thinkCost: number): void {
+export function applyBasalDrain(ant: Ant, thinkCost: number, climate = 1): void {
   const basal = ENERGY.basalPerTick * Math.pow(ant.bodyScale, ENERGY.basalScaleExponent);
   const upkeep = ENERGY.sensorUpkeep * ant.traits.sensorGain * ant.traits.sensorGain;
-  ant.energy -= basal + upkeep + thinkCost;
+  ant.energy -= basal * climate + upkeep + thinkCost;
 }
 
 /**

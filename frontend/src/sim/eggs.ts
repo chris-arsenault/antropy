@@ -3,7 +3,7 @@ import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
 import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
-import { COLONY, EGG_EXPOSURE } from "./tunables";
+import { COLONY, EGG_EXPOSURE, RAIN } from "./tunables";
 import { mutateVoxel, spawnAnt, type World } from "./world";
 
 /**
@@ -95,13 +95,20 @@ function hatch(world: World, egg: Egg): void {
  * Advance incubation; exposed eggs (above the original surface, spec §7.3)
  * suffer a death hazard and perish into FOOD; ripe eggs hatch in order.
  */
+/** Per-tick death chance for an exposed egg; storms multiply it (Rule 5). */
+function exposureHazard(world: World): number {
+  const rainFactor = world.rainRemaining > 0 ? RAIN.eggExposureMultiplier : 1;
+  return EGG_EXPOSURE.deathChancePerTick * rainFactor;
+}
+
 export function stepEggs(world: World): void {
   const ripe: Egg[] = [];
   const perished: Egg[] = [];
+  const hazard = exposureHazard(world);
   for (const egg of world.eggs) {
     egg.incubationRemaining -= 1;
     const exposed = egg.y > world.surfaceMap[egg.z * world.grid.sizeX + egg.x];
-    if (exposed && world.rng.next() < EGG_EXPOSURE.deathChancePerTick) {
+    if (exposed && world.rng.next() < hazard) {
       perished.push(egg);
       continue;
     }

@@ -24,12 +24,18 @@ import {
 } from "./scent";
 import { createInputBuffer, sense, type SenseContext } from "./senses";
 import { generateTerrain, surfaceHeight } from "./terrain";
+import { microclimateMultiplier, stepWeather } from "./weather";
 import { BEACON_PHYSICS, DECAY, FOOD_GOVERNOR, SCENT, TRAIL_PHYSICS } from "./tunables";
 
 export interface World {
   readonly seed: number;
   tick: number;
   rng: Rng;
+  /** Dedicated stream for storm scheduling/washes: weather never perturbs
+   * the behavioral rng sequence. */
+  weatherRng: Rng;
+  /** Ticks of active rain left; 0 = clear skies. */
+  rainRemaining: number;
   grid: VoxelGrid;
   ants: Ant[];
   nextAntId: number;
@@ -98,6 +104,8 @@ export function createWorld(seed: number, controller: Controller = rnnController
     seed,
     tick: 0,
     rng: createRng(seed),
+    weatherRng: createRng(seed ^ 0x5eed0c1d),
+    rainRemaining: 0,
     grid,
     ants: [],
     nextAntId: 1,
@@ -207,7 +215,7 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
   }
   tryTrophallaxis(world, ant);
 
-  applyBasalDrain(ant, thinkCost);
+  applyBasalDrain(ant, thinkCost, microclimateMultiplier(world, ant));
   applyStepCost(ant);
   checkDeath(world, ant);
 }
@@ -219,6 +227,7 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
  */
 export function stepWorld(world: World): void {
   world.tick += 1;
+  stepWeather(world);
   if (world.tick % SCENT.stepInterval === 0) {
     stepScents(world);
   }

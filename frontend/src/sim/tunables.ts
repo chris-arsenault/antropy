@@ -192,6 +192,38 @@ export const DECAY = {
   collapseChance: 0.05,
 } as const;
 
+// Microclimate (Appendix B Rule 5): the surface is metabolically hostile;
+// depth shelters. Charges colonies for the absence of a nest.
+export const MICROCLIMATE = {
+  /** Peak seasonal surface stress (added basal multiplier at the trough). */
+  seasonalStress: 0.6,
+  /** Peak diurnal surface stress (added basal multiplier at midday). */
+  diurnalStress: 0.4,
+  /** Ticks per day-night cycle. */
+  dayTicks: 2000,
+  /** Depth in voxels at which surface stress halves. */
+  halfDepth: 3,
+} as const;
+
+// Rain (Appendix B Rule 5): storms punish surface food caches and surface
+// trail networks; sheltered stores and tunnels ride them out.
+export const RAIN = {
+  /** Ticks between storm-scheduling draws (own rng stream). */
+  checkInterval: 500,
+  /** Storm chance per check at the wet-season (food-peak) phase. */
+  chanceAtPeak: 0.25,
+  /** Storm length in ticks. */
+  durationTicks: 300,
+  /** Chance each exposed surface FOOD voxel is destroyed per wash pass. */
+  foodDestroyFraction: 0.15,
+  /** Ticks between wash passes while raining. */
+  washInterval: 25,
+  /** Fraction of above-surface pheromone surviving each wash pass. */
+  pheromoneRetention: 0.2,
+  /** Egg exposure hazard multiplier while raining. */
+  eggExposureMultiplier: 5,
+} as const;
+
 // Egg exposure (design spec §7.3): surface brood is hazardous.
 export const EGG_EXPOSURE = {
   /** Death chance per tick for an egg above the original surface. */

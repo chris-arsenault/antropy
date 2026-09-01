@@ -8,7 +8,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 3;
+export const CHECKPOINT_VERSION = 4;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -41,6 +41,8 @@ export interface Checkpoint {
   seed: number;
   tick: number;
   rngState: RngState;
+  weatherRngState: RngState;
+  rainRemaining: number;
   nextAntId: number;
   nextColonyId: number;
   foundings: number;
@@ -190,6 +192,8 @@ export function serializeWorld(world: World): Checkpoint {
     seed: world.seed,
     tick: world.tick,
     rngState: world.rng.getState(),
+    weatherRngState: world.weatherRng.getState(),
+    rainRemaining: world.rainRemaining,
     nextAntId: world.nextAntId,
     nextColonyId: world.nextColonyId,
     foundings: world.foundings,
@@ -227,6 +231,8 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
 
   world.tick = checkpoint.tick;
   world.rng.setState(checkpoint.rngState);
+  world.weatherRng.setState(checkpoint.weatherRngState);
+  world.rainRemaining = checkpoint.rainRemaining;
   world.nextAntId = checkpoint.nextAntId;
   world.nextColonyId = checkpoint.nextColonyId;
   world.foundings = checkpoint.foundings;
