@@ -97,10 +97,11 @@ function applyBackbone(copy: Float32Array): void {
   // home bearing — the weak tether that brings foragers back in range of the
   // nest, where trophallaxis and deposit happen. Local food scent (unit 0,
   // stronger gain) wins nearby, so ants oscillate between food and home.
-  // Deliberately weak: a wide foraging orbit that drifts homeward, not a
-  // leash. Strong tethers overgraze the nest zone and starve the colony.
+  // Homing tether sized to the R3-recentered food density: dense food makes
+  // a close orbit affordable, and the orbit must cross the nest so surplus
+  // routes into the colony sink (§B.3 R2 note).
   copy[W_IN + 2 * INPUT_COUNT + Input.HOME_ANGLE] += 1.5;
-  copy[W_OUT + Output.TURN * HIDDEN_COUNT + 2] += 0.4;
+  copy[W_OUT + Output.TURN * HIDDEN_COUNT + 2] += 0.9;
   copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += 1.0;
   copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] += 1.0;
   copy[W_IN + 3 * INPUT_COUNT + Input.CARRY_LOAD] += 2.0;

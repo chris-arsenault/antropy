@@ -13,6 +13,7 @@ import { getVoxel, setVoxel, voxelIndex, type VoxelGrid } from "./grid";
 import { applyMotor } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
 import { decodeOutputs } from "./motors";
+import { assertWorldViability } from "./ratios";
 import { createRng, type Rng, type RngState } from "./rng";
 import {
   createScentField,
@@ -41,6 +42,8 @@ export interface World {
   foundings: number;
   foundingFailures: number;
   collapses: number;
+  /** Queen-destined eggs lost to predation — visible, never silent. */
+  queenEggsEaten: number;
   pheromoneA: ScentField;
   pheromoneB: ScentField;
   foodScent: ScentField;
@@ -85,7 +88,7 @@ function buildSurfaceMap(seed: number, grid: VoxelGrid): Int16Array {
 
 export function createWorld(seed: number, controller: Controller = rnnController): World {
   const grid = generateTerrain(seed);
-  return {
+  const world: World = {
     seed,
     tick: 0,
     rng: createRng(seed),
@@ -99,6 +102,7 @@ export function createWorld(seed: number, controller: Controller = rnnController
     foundings: 0,
     foundingFailures: 0,
     collapses: 0,
+    queenEggsEaten: 0,
     pheromoneA: createScentField(grid, TRAIL_PHYSICS),
     pheromoneB: createScentField(grid, TRAIL_PHYSICS),
     foodScent: createScentField(grid, BEACON_PHYSICS),
@@ -112,6 +116,8 @@ export function createWorld(seed: number, controller: Controller = rnnController
     controller,
     dirtyChunks: new Set(),
   };
+  assertWorldViability(world);
+  return world;
 }
 
 export function spawnAnt(world: World, spawn: AntSpawn): Ant {

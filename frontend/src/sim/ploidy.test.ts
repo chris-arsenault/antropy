@@ -63,8 +63,12 @@ describe("haplodiploidy (spec §7.1)", () => {
 describe("worker-laid males (spec §7.1 channel 2)", () => {
   it("lays a haploid male egg from the worker's own energy", () => {
     const world = createWorld(44);
-    foundColony(world);
+    const colony = foundColony(world);
     const worker = world.ants[0];
+    // Lay in the chamber: surface eggs face the exposure hazard (§7.3).
+    worker.x = colony.x + 1;
+    worker.y = colony.y;
+    worker.z = colony.z;
     worker.energy = 1;
     const before = worker.energy;
 

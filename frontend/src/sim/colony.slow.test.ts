@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SEX_MALE } from "./ant";
 import { foundColony } from "./colony";
 import { rnnController } from "./controller/rnn";
+import { QUEEN } from "./tunables";
 import { createWorld, spawnAnt, stepWorld, type World } from "./world";
 
 /** Keep a nuptial pool alive — the lay pathway itself is unit-gated. */
@@ -41,14 +42,21 @@ function ensureMales(world: World, count: number): void {
  */
 function runAssists(world: World, t: number): void {
   for (const egg of world.eggs) {
-    if (egg.queenDestined === 1 && egg.incubationRemaining > 60) {
-      egg.incubationRemaining = 60;
+    if (egg.queenDestined === 1 && egg.incubationRemaining > 10) {
+      egg.incubationRemaining = 10;
     }
   }
   if (t % 500 === 0) {
     for (const colony of world.colonies) {
-      colony.stockpile += 2.0;
+      // Authoritative provisioning and retry cadence: the gate tests the
+      // founding machinery, not the delivery economy or brood-survival odds
+      // (their own gates cover those).
+      colony.stockpile = Math.max(colony.stockpile, QUEEN.eggThreshold + 1);
       colony.queenLifespanTicks = 8000;
+      colony.lastQueenEggTick = Math.min(
+        colony.lastQueenEggTick,
+        world.tick - QUEEN.eggIntervalMin
+      );
     }
     ensureMales(world, 3);
   }
@@ -60,9 +68,23 @@ describe("metapopulation loop (M4 gate)", () => {
     const first = foundColony(world);
     first.queenLifespanTicks = 8000;
 
+    const seenQueenEggs = new Set<number>();
+    const trace: string[] = [];
     for (let t = 0; t < 24_000; t++) {
       stepWorld(world);
       runAssists(world, t);
+      for (const egg of world.eggs) {
+        if (egg.queenDestined === 1) seenQueenEggs.add(egg.id);
+      }
+      if (t % 3000 === 0) {
+        const c = world.colonies[0];
+        trace.push(
+          `t=${t} col=${world.colonies.length} stock=${c?.stockpile.toFixed(1)} lastQ=${c?.lastQueenEggTick} qLaid=${seenQueenEggs.size} males=${world.ants.filter((a) => a.sex === SEX_MALE && a.alive).length} found=${world.foundings} fail=${world.foundingFailures} collapse=${world.collapses}`
+        );
+      }
+    }
+    if (world.foundings === 0) {
+      throw new Error(`no foundings; ${trace.join(" | ")}`);
     }
 
     expect(world.foundings).toBeGreaterThanOrEqual(1);

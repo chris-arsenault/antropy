@@ -4,6 +4,7 @@ import { createWorld, type World } from "./sim/world";
 import { ChartsPanel } from "./ui/ChartsPanel";
 import { InspectorPanel } from "./ui/InspectorPanel";
 import { DEFAULT_LAYERS, MapLayersPanel, type LayerVisibility } from "./ui/MapLayersPanel";
+import { RatiosPanel } from "./ui/RatiosPanel";
 import { PersistenceControls } from "./ui/PersistenceControls";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
 import { useSimulation } from "./ui/useSimulation";
@@ -124,6 +125,7 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
             groundOpacity={groundOpacity}
             onGroundOpacity={setGroundOpacity}
           />
+          <RatiosPanel stats={sim.stats} />
         </section>
         <InspectorPanel
           ant={selectedAnt}

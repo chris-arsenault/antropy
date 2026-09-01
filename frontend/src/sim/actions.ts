@@ -29,6 +29,24 @@ function consume(_world: World, ant: Ant, amount: number): void {
  * gates ingestion physically: a nearly full ant cannot absorb a meal, so the
  * food stays in the world for pickup and transport instead of vanishing.
  */
+function eatAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
+  if (getVoxelSafe(world.grid, x, y, z) === Material.FOOD) {
+    mutateVoxel(world, x, y, z, Material.AIR);
+    consume(world, ant, ENERGY.foodEnergy);
+    return true;
+  }
+  const egg = world.eggIndex.get(voxelIndex(world.grid, x, y, z));
+  if (egg) {
+    if (egg.queenDestined === 1) {
+      world.queenEggsEaten += 1;
+    }
+    removeEgg(world, egg);
+    consume(world, ant, egg.energy);
+    return true;
+  }
+  return false;
+}
+
 export function tryEat(world: World, ant: Ant): void {
   if (ant.energy > maxEnergy(ant) - ENERGY.foodEnergy / 2) {
     return;
@@ -36,18 +54,7 @@ export function tryEat(world: World, ant: Ant): void {
   const faced = facedVoxel(ant);
   const candidates = [faced, { x: ant.x, y: ant.y - 1, z: ant.z }];
   for (const pos of candidates) {
-    if (!inBounds(world.grid, pos.x, pos.y, pos.z)) {
-      continue;
-    }
-    if (getVoxelSafe(world.grid, pos.x, pos.y, pos.z) === Material.FOOD) {
-      mutateVoxel(world, pos.x, pos.y, pos.z, Material.AIR);
-      consume(world, ant, ENERGY.foodEnergy);
-      return;
-    }
-    const egg = world.eggIndex.get(voxelIndex(world.grid, pos.x, pos.y, pos.z));
-    if (egg) {
-      removeEgg(world, egg);
-      consume(world, ant, egg.energy);
+    if (inBounds(world.grid, pos.x, pos.y, pos.z) && eatAt(world, ant, pos.x, pos.y, pos.z)) {
       return;
     }
   }
@@ -148,17 +155,25 @@ function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): bool
   return true;
 }
 
-/** Chebyshev distance from the ant to its own colony's queen, or Infinity. */
-function distanceToOwnQueen(world: World, ant: Ant): number {
+/**
+ * Whether the ant stands within its own colony's nest reach: the chamber,
+ * the shaft, and the entrance depression. The scripted queen's receiving
+ * surface is the nest structure (trophallaxis chains abstracted, ADR-0006) —
+ * a forager crossing the entrance can unload without descending.
+ */
+function inNestReach(world: World, ant: Ant): boolean {
   const colony = world.colonies.find((c) => c.id === ant.lineageId);
   if (!colony) {
-    return Infinity;
+    return false;
   }
-  return Math.max(
-    Math.abs(ant.x - colony.x),
-    Math.abs(ant.y - colony.y),
-    Math.abs(ant.z - colony.z)
-  );
+  if (Math.abs(ant.x - colony.x) > COLONY.deliveryRadius) {
+    return false;
+  }
+  if (Math.abs(ant.z - colony.z) > COLONY.deliveryRadius) {
+    return false;
+  }
+  const surface = world.surfaceMap[colony.z * world.grid.sizeX + colony.x];
+  return ant.y >= colony.y - 1 && ant.y <= surface + 1;
 }
 
 /**
@@ -172,7 +187,7 @@ export function tryTrophallaxis(world: World, ant: Ant): void {
     return;
   }
   const colony = world.colonies.find((c) => c.id === ant.lineageId);
-  if (!colony || distanceToOwnQueen(world, ant) > COLONY.deliveryRadius) {
+  if (!colony || !inNestReach(world, ant)) {
     return;
   }
   if (ant.energy > COLONY.trophallaxisThreshold && colony.stockpile < COLONY.stockpileSatiation) {
@@ -218,7 +233,7 @@ function isOccupied(world: World, x: number, y: number, z: number): boolean {
 function tryDeposit(world: World, ant: Ant): void {
   // Food deposited at the queen becomes stockpile + patriline merit; this is
   // the delivery event (design spec §7.1 merit signal).
-  if (ant.carrying === Material.FOOD && distanceToOwnQueen(world, ant) <= COLONY.deliveryRadius) {
+  if (ant.carrying === Material.FOOD && inNestReach(world, ant)) {
     creditDelivery(world, ant.lineageId, ant.patrilineId, ENERGY.foodEnergy);
     ant.deliveries += 1;
     unload(ant);

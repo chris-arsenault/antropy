@@ -1,4 +1,7 @@
-import { type PhysicalTraits } from "./controller/contract";
+import { INPUT_COUNT, type PhysicalTraits } from "./controller/contract";
+import { voxelIndex } from "./grid";
+import { computeRatios, type ViabilityRatios } from "./ratios";
+import { sampleScent } from "./scent";
 import { type World } from "./world";
 
 /** Trait keys tracked by the instrumentation, in display order. */
@@ -33,6 +36,12 @@ export interface WorldStats {
   colonyCount: number;
   foundings: number;
   collapses: number;
+  /** Live §B.3 viability ratios. */
+  ratios: ViabilityRatios;
+  /** Mean absolute activation per sensory input (circling checklist §B.6). */
+  inputActivity: number[];
+  /** Fraction of sampled surface positions with a resolvable food gradient. */
+  gradientVisibility: number;
 }
 
 export function pearson(xs: number[], ys: number[]): number {
@@ -88,6 +97,40 @@ function dominantShare(world: World): number {
   return max / world.ants.length;
 }
 
+function inputActivity(world: World): number[] {
+  const sums = new Array<number>(INPUT_COUNT).fill(0);
+  if (world.ants.length === 0) {
+    return sums;
+  }
+  for (const ant of world.ants) {
+    for (let i = 0; i < INPUT_COUNT && i < ant.lastInputs.length; i++) {
+      sums[i] += Math.abs(ant.lastInputs[i]);
+    }
+  }
+  return sums.map((s) => s / world.ants.length);
+}
+
+const GRADIENT_SAMPLE_STRIDE = 12;
+const GRADIENT_RESOLUTION = 0.02;
+
+/** Strided (rng-free) surface sweep: where can an ant smell food at all? */
+function gradientVisibility(world: World): number {
+  const { sizeX, sizeZ } = world.grid;
+  let sampled = 0;
+  let visible = 0;
+  for (let z = 1; z < sizeZ - 1; z += GRADIENT_SAMPLE_STRIDE) {
+    for (let x = 1; x < sizeX - 1; x += GRADIENT_SAMPLE_STRIDE) {
+      const surface = world.surfaceMap[z * sizeX + x];
+      const y = Math.min(world.grid.sizeY - 1, surface + 1);
+      sampled += 1;
+      if (sampleScent(world.foodScent, voxelIndex(world.grid, x, y, z), 0) >= GRADIENT_RESOLUTION) {
+        visible += 1;
+      }
+    }
+  }
+  return sampled === 0 ? 0 : visible / sampled;
+}
+
 /** One instrumentation sample over the living population. */
 export function computeStats(world: World): WorldStats {
   const fitness = world.ants.map((ant) => ant.deliveries / (ant.age + 1));
@@ -115,5 +158,8 @@ export function computeStats(world: World): WorldStats {
     colonyCount: world.colonies.length,
     foundings: world.foundings,
     collapses: world.collapses,
+    ratios: computeRatios(world),
+    inputActivity: inputActivity(world),
+    gradientVisibility: gradientVisibility(world),
   };
 }

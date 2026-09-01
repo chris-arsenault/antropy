@@ -114,6 +114,25 @@ body {
   background: #ffb326;
 }
 
+.ratio-label {
+  flex: 1;
+  color: #898781;
+}
+
+.ratio-value {
+  color: #c3c2b7;
+  font-variant-numeric: tabular-nums;
+}
+
+.ratio-out-of-band .ratio-value {
+  color: #e66767;
+}
+
+.ratio-flag {
+  color: #e66767;
+  font-size: 0.65rem;
+}
+
 .chart {
   margin: 0;
   padding: 0.4rem;

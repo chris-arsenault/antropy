@@ -36,8 +36,8 @@ export const TERRAIN = {
 export const SCENT = {
   /** Ticks between diffusion/evaporation passes. */
   stepInterval: 5,
-  /** Scent injected next to each FOOD voxel per pass. */
-  foodSourceStrength: 0.5,
+  /** Scent injected next to each FOOD voxel per pass (drives R3 reach). */
+  foodSourceStrength: 0.8,
   /** Nest scent injected at each queen per pass (ADR-0006). */
   nestSourceStrength: 0.8,
 } as const;
@@ -76,8 +76,9 @@ export const ENERGY = {
   sensorUpkeep: 0.0001,
   /** Cost per unit of pheromone deposited. */
   depositCostPerUnit: 0.002,
-  /** Energy granted by eating one FOOD voxel (corpses are FOOD voxels too). */
-  foodEnergy: 0.8,
+  /** Energy granted by eating one FOOD voxel (corpses are FOOD voxels too).
+   * Sized for satiation ratio R2 in its 0.1–0.3 band (§B.3). */
+  foodEnergy: 0.2,
   /** Maximum stored energy. */
   max: 1,
   /** Age cap in ticks (pre-genome default; the lifespan gene refines it). */
@@ -102,9 +103,12 @@ export const DIG = {
 export const FOOD_GOVERNOR = {
   /** Ticks between governor passes. */
   interval: 50,
-  /** Baseline FOOD voxels at season midpoint (scaled to the 192² map). */
-  targetCount: 500,
-  /** Maximum voxels spawned per pass. */
+  /** Baseline FOOD voxels at season midpoint — dense enough that the scent
+   * horizon R3 exceeds 1 (§B.3): mean nearest-food distance under the
+   * beacon's measured detection radius. */
+  targetCount: 800,
+  /** Maximum voxels spawned per pass (kept low enough that patch turnover
+   * clears the trail half-life, R5b). */
   maxSpawnPerPass: 20,
 } as const;
 
