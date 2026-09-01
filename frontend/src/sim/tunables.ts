@@ -4,9 +4,9 @@
  */
 
 // World dimensions in voxels. Y is up, matching the renderer's axis.
-export const WORLD_SIZE_X = 128;
+export const WORLD_SIZE_X = 192;
 export const WORLD_SIZE_Y = 64;
-export const WORLD_SIZE_Z = 128;
+export const WORLD_SIZE_Z = 192;
 
 // Terrain generation (M1).
 export const TERRAIN = {
@@ -79,14 +79,24 @@ export const DIG = {
   depositCost: 0.001,
 } as const;
 
-// Food spawn governor (M4): static density-dependent target.
+// Food spawn governor: density-dependent target around a seasonal base.
 export const FOOD_GOVERNOR = {
   /** Ticks between governor passes. */
   interval: 50,
-  /** FOOD voxels the governor tries to keep in the world. */
-  targetCount: 220,
+  /** Baseline FOOD voxels at season midpoint (scaled to the 192² map). */
+  targetCount: 500,
   /** Maximum voxels spawned per pass. */
-  maxSpawnPerPass: 10,
+  maxSpawnPerPass: 20,
+} as const;
+
+// Oscillating carrying capacity (design spec §9.3): K breathes forever.
+export const SEASON = {
+  /** Ticks per full sinusoid cycle. */
+  periodTicks: 40_000,
+  /** Peak-to-midpoint amplitude as a fraction of the base. */
+  amplitude: 0.5,
+  /** Gaussian noise on each governor pass, as a fraction of the base. */
+  noise: 0.05,
 } as const;
 
 /** Pheromone deposit amount when the output fires at full intensity. */

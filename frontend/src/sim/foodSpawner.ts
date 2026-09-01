@@ -1,15 +1,21 @@
 import { surfaceSpawnY } from "./ant";
 import { getVoxelSafe } from "./grid";
 import { Material } from "./materials";
-import { FOOD_GOVERNOR } from "./tunables";
+import { randNormal } from "./rng";
+import { FOOD_GOVERNOR, SEASON } from "./tunables";
 import { mutateVoxel, type World } from "./world";
 
 /**
- * Static density-dependent food governor (design spec §6): spawns FOOD at
- * random surface positions toward a fixed target count. Oscillating carrying
- * capacity replaces the static target in Release 2.
+ * Density-dependent food governor under an oscillating carrying capacity
+ * (design spec §6, §9.3): the target breathes around world.foodBase on a slow
+ * sinusoid plus noise, and FOOD spawns at random surface positions toward it.
  */
 export function stepFoodGovernor(world: World): void {
+  const phase = (2 * Math.PI * world.tick) / SEASON.periodTicks;
+  const seasonal = world.foodBase * (1 + SEASON.amplitude * Math.sin(phase));
+  const jitter = world.foodBase * SEASON.noise * randNormal(world.rng);
+  world.foodTarget = Math.max(0, Math.round(seasonal + jitter));
+
   const deficit = world.foodTarget - world.foodSources.size;
   const toSpawn = Math.min(deficit, FOOD_GOVERNOR.maxSpawnPerPass);
   for (let i = 0; i < toSpawn; i++) {

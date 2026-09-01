@@ -143,6 +143,7 @@ describe("food governor", () => {
       stepWorld(world);
     }
     expect(world.foodSources.size).toBeGreaterThan(FOOD_GOVERNOR.targetCount / 2);
-    expect(world.foodSources.size).toBeLessThanOrEqual(FOOD_GOVERNOR.targetCount);
+    // The seasonal target breathes above the base (§9.3); bound by its ceiling.
+    expect(world.foodSources.size).toBeLessThanOrEqual(FOOD_GOVERNOR.targetCount * 1.6);
   });
 });

@@ -27,6 +27,7 @@ describe("ecology calibration (M4 gate)", () => {
   it("starves the population without food", { timeout: 120_000 }, () => {
     const world = createReferenceWorld(2002);
     populateForagers(world, 20);
+    world.foodBase = 0;
     world.foodTarget = 0;
     for (let t = 0; t < 4000; t++) {
       stepWorld(world);

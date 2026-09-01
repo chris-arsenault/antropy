@@ -19,7 +19,8 @@ const REQUIRED_IMPROVEMENT = 1.5;
  */
 function runAssay(seed: number, genome: Genome): { start: number; end: number } {
   const world: World = createWorld(seed);
-  world.foodTarget = 0; // no distracting food
+  world.foodBase = 0; // no distracting food (governor recomputes foodTarget)
+  world.foodTarget = 0;
 
   const x = 40;
   const z = 40;

@@ -41,6 +41,7 @@ export interface Checkpoint {
   tick: number;
   rngState: RngState;
   nextAntId: number;
+  foodBase: number;
   foodTarget: number;
   grid: Uint8Array;
   foodSources: number[];
@@ -174,6 +175,7 @@ export function serializeWorld(world: World): Checkpoint {
     tick: world.tick,
     rngState: world.rng.getState(),
     nextAntId: world.nextAntId,
+    foodBase: world.foodBase,
     foodTarget: world.foodTarget,
     grid: Uint8Array.from(world.grid.data),
     foodSources: Array.from(world.foodSources),
@@ -202,6 +204,7 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.tick = checkpoint.tick;
   world.rng.setState(checkpoint.rngState);
   world.nextAntId = checkpoint.nextAntId;
+  world.foodBase = checkpoint.foodBase;
   world.foodTarget = checkpoint.foodTarget;
   world.grid.data.set(checkpoint.grid);
   world.foodSources = new Set(checkpoint.foodSources);

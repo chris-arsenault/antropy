@@ -15,7 +15,7 @@ import { decodeOutputs } from "./motors";
 import { createRng, type Rng, type RngState } from "./rng";
 import { createScentField, emitFoodScent, stepScentField, type ScentField } from "./scent";
 import { createInputBuffer, sense, type SenseContext } from "./senses";
-import { generateTerrain } from "./terrain";
+import { generateTerrain, surfaceHeight } from "./terrain";
 import { FOOD_GOVERNOR, SCENT } from "./tunables";
 
 export interface World {
@@ -34,8 +34,12 @@ export interface World {
   foodScent: ScentField;
   /** Voxel indices currently holding FOOD, maintained by mutateVoxel. */
   foodSources: Set<number>;
-  /** FOOD voxels the governor sustains; a slow oscillation in Release 2. */
+  /** Seasonal baseline for the food governor; 0 disables food entirely. */
+  foodBase: number;
+  /** Current FOOD-voxel target, recomputed each governor pass (§9.3). */
   foodTarget: number;
+  /** Initial terrain surface per column (x-fastest), for decay/exposure/render. */
+  surfaceMap: Int16Array;
   /** The behavioral controller for every ant (design spec §2.3). */
   controller: Controller;
   /**
@@ -49,6 +53,16 @@ export interface WorldSnapshot {
   seed: number;
   tick: number;
   rngState: RngState;
+}
+
+function buildSurfaceMap(seed: number, grid: VoxelGrid): Int16Array {
+  const map = new Int16Array(grid.sizeX * grid.sizeZ);
+  for (let z = 0; z < grid.sizeZ; z++) {
+    for (let x = 0; x < grid.sizeX; x++) {
+      map[z * grid.sizeX + x] = surfaceHeight(seed, x, z);
+    }
+  }
+  return map;
 }
 
 export function createWorld(seed: number, controller: Controller = rnnController): World {
@@ -67,7 +81,9 @@ export function createWorld(seed: number, controller: Controller = rnnController
     pheromoneB: createScentField(grid),
     foodScent: createScentField(grid),
     foodSources: new Set(),
+    foodBase: FOOD_GOVERNOR.targetCount,
     foodTarget: FOOD_GOVERNOR.targetCount,
+    surfaceMap: buildSurfaceMap(seed, grid),
     controller,
     dirtyChunks: new Set(),
   };

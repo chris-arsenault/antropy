@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { chunkCount, chunkKey } from "../sim/chunks";
-import { surfaceHeight } from "../sim/terrain";
 import { type World } from "../sim/world";
 import { buildChunkGeometries, type ChunkGeometry } from "./meshing";
 
@@ -29,22 +28,11 @@ function toBufferGeometry(chunk: ChunkGeometry): THREE.BufferGeometry {
   return geometry;
 }
 
-/** The initial terrain surface per column — the tunnel/skin classifier. */
-function buildSurfaceMap(world: World): Int16Array {
-  const map = new Int16Array(world.grid.sizeX * world.grid.sizeZ);
-  for (let z = 0; z < world.grid.sizeZ; z++) {
-    for (let x = 0; x < world.grid.sizeX; x++) {
-      map[z * world.grid.sizeX + x] = surfaceHeight(world.seed, x, z);
-    }
-  }
-  return map;
-}
-
 /** Terrain chunk meshes: full build at creation, dirty-chunk rebuild after. */
 export function createChunkMeshes(scene: THREE.Scene, world: World): ChunkMeshes {
   const surfaceMaterial = new THREE.MeshLambertMaterial({ vertexColors: true });
   const tunnelMaterial = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const surfaceMap = buildSurfaceMap(world);
+  const surfaceMap = world.surfaceMap;
   const meshes = new Map<number, ChunkPair>();
   const keyToCoord = new Map<number, [number, number, number]>();
 
