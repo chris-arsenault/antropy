@@ -51,20 +51,26 @@ const HUNGRY = 0.6;
  * when sated, beeline home and unload. Answers "is the world generous
  * enough for any behavior?"
  */
+function unloadAtNest(ant: Ant, inputs: Float32Array, outputs: Float32Array): Float32Array {
+  // Unload at the nest; trophallaxis handles the energy surplus.
+  if (ant.spoilLoads > 0 && inputs[Input.NEST_SCENT_LEFT] + inputs[Input.NEST_SCENT_RIGHT] > 0.1) {
+    outputs[Output.DIG] = 1;
+  }
+  return outputs;
+}
+
+function isHomeward(ant: Ant): boolean {
+  return ant.spoilLoads > 0 || ant.energy > SATED;
+}
+
 export function omniscientOracle(world: World, ant: Ant, inputs: Float32Array): Float32Array {
   if (ant.sex === SEX_MALE) {
     return steer(0.2, 0.5);
   }
-  const homeward = ant.spoilLoads > 0 || ant.energy > SATED;
-  if (homeward) {
+  if (isHomeward(ant)) {
     const colony = world.colonies.find((c) => c.id === ant.lineageId);
     if (colony) {
-      const outputs = steer(turnToward(ant, colony.x, colony.z), 1);
-      // Unload at the nest; trophallaxis handles the energy surplus.
-      if (ant.spoilLoads > 0 && inputs[Input.NEST_SCENT_LEFT] + inputs[Input.NEST_SCENT_RIGHT] > 0.1) {
-        outputs[Output.DIG] = 1;
-      }
-      return outputs;
+      return unloadAtNest(ant, inputs, steer(turnToward(ant, colony.x, colony.z), 1));
     }
   }
   const food = nearestFood(world, ant);
@@ -96,16 +102,8 @@ export function sensorOracle(_world: World, ant: Ant, inputs: Float32Array): Flo
   const phase = (wanderPhase.get(ant.id) ?? 0) + 0.05;
   wanderPhase.set(ant.id, phase);
 
-  const homeward = ant.spoilLoads > 0 || ant.energy > SATED;
-  if (homeward) {
-    const outputs = steer(2.5 * inputs[Input.HOME_ANGLE], 1);
-    if (
-      ant.spoilLoads > 0 &&
-      inputs[Input.NEST_SCENT_LEFT] + inputs[Input.NEST_SCENT_RIGHT] > 0.1
-    ) {
-      outputs[Output.DIG] = 1;
-    }
-    return outputs;
+  if (isHomeward(ant)) {
+    return unloadAtNest(ant, inputs, steer(2.5 * inputs[Input.HOME_ANGLE], 1));
   }
   const left = inputs[Input.FOOD_SCENT_LEFT];
   const right = inputs[Input.FOOD_SCENT_RIGHT];
@@ -127,8 +125,6 @@ export function sensorOracle(_world: World, ant: Ant, inputs: Float32Array): Flo
  */
 export function degraded(policy: OraclePolicy, noiseSigma: number, lagTicks: number): OraclePolicy {
   const buffers = new Map<number, Float32Array[]>();
-  const noisy = new Float32Array(0);
-  void noisy;
   return (world, ant, inputs) => {
     for (let i = 0; i < inputs.length; i++) {
       // Deterministic noise from the world stream (diagnostic runs only).

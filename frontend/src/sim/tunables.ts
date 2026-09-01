@@ -64,6 +64,8 @@ export const BEACON_PHYSICS = {
 } as const;
 
 // Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.
+// Mutable (no `as const`) solely for the calibration harness's scoped,
+// restoring overrides (calibration.ts); production code never writes it.
 export const ENERGY = {
   /** Basal metabolic drain per tick at bodyScale 1 (superlinear in scale). */
   basalPerTick: 0.00012,
@@ -83,7 +85,7 @@ export const ENERGY = {
   max: 1,
   /** Age cap in ticks (pre-genome default; the lifespan gene refines it). */
   ageCap: 20_000,
-} as const;
+};
 
 // Digging and carrying (design spec §5.4).
 export const DIG = {
@@ -100,6 +102,7 @@ export const DIG = {
 } as const;
 
 // Food spawn governor: density-dependent target around a seasonal base.
+// Mutable for calibration harness overrides only, like ENERGY above.
 export const FOOD_GOVERNOR = {
   /** Ticks between governor passes. */
   interval: 50,
@@ -110,7 +113,7 @@ export const FOOD_GOVERNOR = {
   /** Maximum voxels spawned per pass (kept low enough that patch turnover
    * clears the trail half-life, R5b). */
   maxSpawnPerPass: 20,
-} as const;
+};
 
 // Oscillating carrying capacity (design spec §9.3): K breathes forever.
 export const SEASON = {
