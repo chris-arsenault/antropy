@@ -31,6 +31,8 @@ const INPUT_LABELS = [
   "bias",
   "nest L",
   "nest R",
+  "home ∠",
+  "home d",
 ];
 
 const OUTPUT_LABELS = ["turn", "fwd", "vert", "eat", "dig", "phA", "phB", "egg"];

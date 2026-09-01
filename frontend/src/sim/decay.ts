@@ -12,29 +12,29 @@ const OCCUPIED = new Set<number>();
  * refreshes lastVisit, so a living colony's core never decays — the map is
  * rented, not owned. Occupied voxels (ant or egg) never collapse.
  */
+function collapseCavity(world: World, index: number): void {
+  const x = index % world.grid.sizeX;
+  const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
+  const y = Math.floor(index / (world.grid.sizeX * world.grid.sizeZ));
+  mutateVoxel(world, x, y, z, Material.LOOSE_FILL);
+}
+
 export function stepDecay(world: World): void {
+  const cutoff = world.tick > DECAY.ttlTicks ? world.tick - DECAY.ttlTicks : 0;
+  if (cutoff === 0) {
+    return;
+  }
   OCCUPIED.clear();
   for (const ant of world.ants) {
     if (ant.alive) {
       OCCUPIED.add(voxelIndex(world.grid, ant.x, ant.y, ant.z));
     }
   }
-  const cutoff = world.tick > DECAY.ttlTicks ? world.tick - DECAY.ttlTicks : 0;
-  if (cutoff === 0) {
-    return;
-  }
   for (const index of Array.from(world.cavities)) {
-    if (world.lastVisit[index] >= cutoff) {
-      continue;
-    }
-    if (OCCUPIED.has(index) || world.eggIndex.has(index)) {
-      continue;
-    }
-    if (world.rng.next() < DECAY.collapseChance) {
-      const x = index % world.grid.sizeX;
-      const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
-      const y = Math.floor(index / (world.grid.sizeX * world.grid.sizeZ));
-      mutateVoxel(world, x, y, z, Material.LOOSE_FILL);
+    const skip =
+      world.lastVisit[index] >= cutoff || OCCUPIED.has(index) || world.eggIndex.has(index);
+    if (!skip && world.rng.next() < DECAY.collapseChance) {
+      collapseCavity(world, index);
     }
   }
 }

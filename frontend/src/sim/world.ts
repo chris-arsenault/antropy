@@ -1,6 +1,6 @@
 import { createAnt, surfaceSpawnY, type Ant, type AntSpawn } from "./ant";
 import { buildAntIndex } from "./antIndex";
-import { tryDig, tryEat, tryLayEgg, depositPheromones } from "./actions";
+import { tryDig, tryEat, tryLayEgg, tryTrophallaxis, depositPheromones } from "./actions";
 import { affectedChunkKeys } from "./chunks";
 import { stepColonies, type Colony } from "./colony";
 import { type Controller } from "./controller/contract";
@@ -184,6 +184,7 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
   if (actions.layEgg) {
     tryLayEgg(world, ant);
   }
+  tryTrophallaxis(world, ant);
 
   applyBasalDrain(ant, thinkCost);
   applyStepCost(ant);
@@ -218,6 +219,7 @@ export function stepWorld(world: World): void {
     pheromoneB: world.pheromoneB,
     foodScent: world.foodScent,
     nestScent: world.nestScent,
+    colonies: world.colonies,
     antIndex: buildAntIndex(world.grid, world.ants),
     eggIndex: world.eggIndex,
   };

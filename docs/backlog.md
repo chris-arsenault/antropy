@@ -6,30 +6,19 @@ references point there. Every release honors the binding constraint of §9: no a
 decision may preclude colony mortality/refounding, nest decay, or oscillating carrying
 capacity, even before the release that implements them.
 
-The MVP ("selection visible in one session") shipped in v0.1.0 — see
+The MVP ("selection visible in one session") shipped in v0.1.0 and Release 2
+(metapopulation and recurrent regimes) in v0.2.0 — see
 [../CHANGELOG.md](../CHANGELOG.md) and [architecture.md](architecture.md).
 
-## Release 2 — metapopulation and recurrent regimes (§7.2, §9)
+## Ecology calibration
 
-- Replace the meal-tax delivery abstraction with physical food transport to the nest,
-  keeping per-patriline merit tracking.
-- Implement expressed haploid males behind the controller contract (removing the MVP
-  all-diploid simplification).
-- Replace in-place queen succession and colony-pool re-mating with real founding: new
-  queens mate with flying males, and merit weighting (spec §7.1 channel 3) applies at
-  queen-egg creation rather than in-place re-mating.
-
-- Implement colony founding: stockpile-triggered winged queens, dispersal flight, scripted
-  founding chamber, and colony death on queen death.
-- Implement worker-laid haploid males and mating at founding, completing gene channel 2.
-- Implement egg exposure rules (slope, depth).
-- Implement nest decay: untrafficked underground air collapses to cheap-digging
-  `LOOSE_FILL`, punishing abandonment while keeping healthy cores stable.
-- Implement oscillating carrying capacity (slow sinusoid plus noise on food spawn).
-- Widen the map, run multiple colonies at staggered life stages, and colony-tag pheromone
-  deposits to prevent trail cross-contamination.
-- Expose turnover (lifespan, aging, egg predation) as the first calibration dial for
-  stalls at capacity.
+- Calibrate long-horizon (30k+ tick) unassisted world persistence: the delivery economy,
+  trophallaxis budget policy, and instinct-drift rate currently sustain a colony for one
+  session but seed-dependently bleed out over several queen generations. Build a headless
+  parameter-sweep harness (multiple seeds × tunable grid) so this is measured, not probed
+  one knob at a time.
+- Tune founding cadence so provisioned colonies reach the queen-egg threshold in the wild
+  (the loop is machinery-gated; unassisted frequency is a calibration outcome).
 
 ## Release 3 — watching at scale (§11.2, §11.3, §11.4)
 

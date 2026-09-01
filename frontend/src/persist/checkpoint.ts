@@ -108,6 +108,7 @@ const COLONY_SCALARS = [
   "lastEggTick",
   "lastQueenEggTick",
   "nextEggId",
+  "starvingSince",
 ] as const;
 
 function serializeScent(field: ScentField): ScentRecord {

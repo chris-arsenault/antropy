@@ -66,8 +66,10 @@ describe("scent fields", () => {
     }
     expect(Array.from(a.values)).toEqual(Array.from(b.values));
   });
+});
 
-  it("filters samples by colony owner (ADR-0005)", () => {
+describe("owner tagging (ADR-0005)", () => {
+  it("filters samples by colony owner", () => {
     const grid = createGrid(8, 8, 8);
     const field = createScentField(grid);
     const index = voxelIndex(grid, 4, 4, 4);

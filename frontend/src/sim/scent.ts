@@ -27,7 +27,7 @@ const INITIAL_ACTIVE_CAPACITY = 4096;
 // thread): per-voxel gain, gain owner, and the touched-index list.
 let gainScratch = new Float32Array(0);
 let gainOwnerScratch = new Uint8Array(0);
-let touchedScratch = new Int32Array(INITIAL_ACTIVE_CAPACITY);
+let touchedScratch: Int32Array = new Int32Array(INITIAL_ACTIVE_CAPACITY);
 let touchedCount = 0;
 
 function ensureScratch(size: number): void {

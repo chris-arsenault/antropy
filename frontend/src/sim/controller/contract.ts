@@ -95,9 +95,14 @@ export const Input = {
   BIAS: 19,
   NEST_SCENT_LEFT: 20,
   NEST_SCENT_RIGHT: 21,
+  /** Path integration (innate in real ants): signed bearing to the own
+   * queen relative to heading, in [-1, 1]; 0 when colony-less. */
+  HOME_ANGLE: 22,
+  /** Chebyshev distance to the own queen, normalized; 1 when colony-less. */
+  HOME_DISTANCE: 23,
 } as const;
 
-export const INPUT_COUNT = 22;
+export const INPUT_COUNT = 24;
 
 /**
  * Motor output layout (design spec §4). DIG manipulates terrain: it digs the

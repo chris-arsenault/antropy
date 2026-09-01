@@ -41,7 +41,9 @@ describe("haplodiploidy (spec §7.1)", () => {
     const motherOut = Array.from(
       rnnController.act(homozygous, inputs(), rnnController.createState()).outputs
     );
-    const sonOut = Array.from(rnnController.act(son, inputs(), rnnController.createState()).outputs);
+    const sonOut = Array.from(
+      rnnController.act(son, inputs(), rnnController.createState()).outputs
+    );
     expect(sonOut).toEqual(motherOut);
   });
 

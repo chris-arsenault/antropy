@@ -161,6 +161,38 @@ function distanceToOwnQueen(world: World, ant: Ant): number {
   );
 }
 
+/**
+ * Scripted bidirectional trophallaxis (spec §7.2 — the queen is
+ * special-cased): a fed female worker beside her queen passes surplus energy
+ * to the stockpile (earning delivery merit); a hungry worker is fed from it.
+ * The stockpile is the colony's energy buffer, not a one-way sink.
+ */
+export function tryTrophallaxis(world: World, ant: Ant): void {
+  if (ant.sex !== SEX_FEMALE) {
+    return;
+  }
+  const colony = world.colonies.find((c) => c.id === ant.lineageId);
+  if (!colony || distanceToOwnQueen(world, ant) > COLONY.deliveryRadius) {
+    return;
+  }
+  if (ant.energy > COLONY.trophallaxisThreshold && colony.stockpile < COLONY.stockpileSatiation) {
+    const amount = Math.min(COLONY.trophallaxisRate, ant.energy - COLONY.trophallaxisThreshold);
+    ant.energy -= amount;
+    creditDelivery(world, ant.lineageId, ant.patrilineId, amount);
+    ant.deliveries += amount;
+    return;
+  }
+  if (ant.energy < COLONY.feedThreshold && colony.stockpile > COLONY.queenReserve) {
+    const amount = Math.min(
+      COLONY.feedRate,
+      COLONY.feedThreshold - ant.energy,
+      colony.stockpile - COLONY.queenReserve
+    );
+    colony.stockpile -= amount;
+    ant.energy += amount;
+  }
+}
+
 function unload(ant: Ant): void {
   ant.spoilLoads -= 1;
   ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
@@ -168,6 +200,19 @@ function unload(ant: Ant): void {
     ant.carrying = null;
   }
   ant.energy -= DIG.depositCost;
+}
+
+function isOccupied(world: World, x: number, y: number, z: number): boolean {
+  const index = voxelIndex(world.grid, x, y, z);
+  if (world.eggIndex.has(index)) {
+    return true;
+  }
+  for (const other of world.ants) {
+    if (other.alive && other.x === x && other.y === y && other.z === z) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function tryDeposit(world: World, ant: Ant): void {
@@ -182,8 +227,18 @@ function tryDeposit(world: World, ant: Ant): void {
   const count = depositTargets(ant);
   for (let i = 0; i < count; i++) {
     const { x, y, z } = DIG_TARGET_SCRATCH[i];
-    if (inBounds(world.grid, x, y, z) && getVoxelSafe(world.grid, x, y, z) === Material.AIR) {
-      mutateVoxel(world, x, y, z, ant.carrying === Material.FOOD ? Material.FOOD : Material.LOOSE_FILL);
+    if (
+      inBounds(world.grid, x, y, z) &&
+      getVoxelSafe(world.grid, x, y, z) === Material.AIR &&
+      !isOccupied(world, x, y, z)
+    ) {
+      mutateVoxel(
+        world,
+        x,
+        y,
+        z,
+        ant.carrying === Material.FOOD ? Material.FOOD : Material.LOOSE_FILL
+      );
       unload(ant);
       return;
     }

@@ -71,6 +71,28 @@ describe("eggs", () => {
   });
 });
 
+function injectMales(world: ReturnType<typeof createWorld>, count: number): void {
+  for (let i = 0; i < count; i++) {
+    const mother = world.ants[i];
+    const genome = rnnController.haploidOffspring(mother.genome, world.rng);
+    spawnAnt(world, {
+      x: mother.x,
+      y: mother.y,
+      z: mother.z,
+      heading: 0,
+      energy: 1,
+      sex: SEX_MALE,
+      lineageId: mother.lineageId,
+      patrilineId: mother.patrilineId,
+      motherId: mother.id,
+      fatherId: 0,
+      genome,
+      controllerState: rnnController.createState(),
+      traits: rnnController.physical(genome),
+    });
+  }
+}
+
 describe("real founding and collapse (spec §9.1)", () => {
   it("lays a merit-fathered queen egg from a provisioned stockpile", () => {
     const world = createWorld(4004);
@@ -90,27 +112,8 @@ describe("real founding and collapse (spec §9.1)", () => {
   it("founds a new colony through flight and mating, killing the mates", () => {
     const world = createWorld(4006);
     const colony = foundColony(world);
-    // Inject living males for the nuptial pool.
     const maleCount = 3;
-    for (let i = 0; i < maleCount; i++) {
-      const mother = world.ants[i];
-      const genome = rnnController.haploidOffspring(mother.genome, world.rng);
-      spawnAnt(world, {
-        x: mother.x,
-        y: mother.y,
-        z: mother.z,
-        heading: 0,
-        energy: 1,
-        sex: SEX_MALE,
-        lineageId: colony.id,
-        patrilineId: mother.patrilineId,
-        motherId: mother.id,
-        fatherId: 0,
-        genome,
-        controllerState: rnnController.createState(),
-        traits: rnnController.physical(genome),
-      });
-    }
+    injectMales(world, maleCount);
     colony.stockpile = QUEEN.eggThreshold + 2;
     colony.lastQueenEggTick = -QUEEN.eggIntervalMin;
     stepWorld(world);
@@ -149,12 +152,23 @@ describe("real founding and collapse (spec §9.1)", () => {
     expect(world.collapses).toBe(1);
   });
 
-  it("collapses the colony when the stockpile starves", () => {
+  it("collapses the colony after sustained starvation past the grace", () => {
     const world = createWorld(4009);
     const colony = foundColony(world);
-    colony.stockpile = 0.00001;
+    colony.stockpile = 0;
+    colony.starvingSince = 0;
+    world.tick = QUEEN.starvationGraceTicks + 1;
     stepWorld(world);
     expect(world.colonies.length).toBe(0);
     expect(world.collapses).toBe(1);
+  });
+
+  it("survives a brief empty stockpile within the grace", () => {
+    const world = createWorld(4010);
+    const colony = foundColony(world);
+    colony.stockpile = 0;
+    stepWorld(world);
+    expect(world.colonies.length).toBe(1);
+    expect(colony.starvingSince).toBeGreaterThanOrEqual(0);
   });
 });

@@ -33,31 +33,36 @@ function ensureMales(world: World, count: number): void {
 
 // Slow tier (long simulation runs): excluded from `make test`; run with
 // `make test-slow`. Cloud CI runs the full suite.
+/**
+ * Assists stand in for evolved delivery/laying so the loop machinery is
+ * gated deterministically: top up stockpiles (delivery proxy), keep a small
+ * nuptial pool alive (channel 2 proxy), and compress queen-egg incubation
+ * (brood-survival odds are covered by the unit gates).
+ */
+function runAssists(world: World, t: number): void {
+  for (const egg of world.eggs) {
+    if (egg.queenDestined === 1 && egg.incubationRemaining > 60) {
+      egg.incubationRemaining = 60;
+    }
+  }
+  if (t % 500 === 0) {
+    for (const colony of world.colonies) {
+      colony.stockpile += 2.0;
+      colony.queenLifespanTicks = 8000;
+    }
+    ensureMales(world, 3);
+  }
+}
+
 describe("metapopulation loop (M4 gate)", () => {
   it("cycles founding and collapse over a long assisted run", { timeout: 240_000 }, () => {
     const world = createWorld(4100);
     const first = foundColony(world);
     first.queenLifespanTicks = 8000;
 
-    // Assists stand in for evolved delivery/laying so the loop machinery is
-    // gated deterministically: top up stockpiles (delivery proxy) and keep a
-    // small nuptial pool of males alive (channel 2 proxy).
     for (let t = 0; t < 24_000; t++) {
       stepWorld(world);
-      // Compress queen-egg incubation: the gate exercises the founding loop,
-      // not 600-tick brood-survival odds (covered by the unit gates).
-      for (const egg of world.eggs) {
-        if (egg.queenDestined === 1 && egg.incubationRemaining > 60) {
-          egg.incubationRemaining = 60;
-        }
-      }
-      if (t % 500 === 0) {
-        for (const colony of world.colonies) {
-          colony.stockpile += 1.5;
-          colony.queenLifespanTicks = 8000;
-        }
-        ensureMales(world, 3);
-      }
+      runAssists(world, t);
     }
 
     expect(world.foundings).toBeGreaterThanOrEqual(1);

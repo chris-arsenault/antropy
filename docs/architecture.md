@@ -23,7 +23,13 @@ persistence all run in the browser; the deployed artifact is a static bundle.
   round-trips.
 
 The full simulation design — controller model, genome, world, energy economy, reproduction,
-regimes, and instrumentation — is specified in [design-spec.md](design-spec.md).
+regimes, and instrumentation — is specified in [design-spec.md](design-spec.md). As of
+v0.2.0 the world runs the metapopulation loop: colony-tagged scent channels (ADR-0005),
+scripted queen provisioning via bidirectional trophallaxis and food transport (ADR-0006),
+haploid males mating from a global pool (ADR-0007), a four-instinct structured
+initialization (chemotaxis, excavation, transport/homing with path integration, brood
+care — ADR-0004/0006/0008), nest decay, egg exposure, and seasonal carrying capacity on a
+192×64×192 map.
 
 ## Deployment
 

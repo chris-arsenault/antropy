@@ -13,6 +13,7 @@ export interface SenseContext {
   pheromoneB: ScentField;
   foodScent: ScentField;
   nestScent: ScentField;
+  colonies: readonly { id: number; x: number; y: number; z: number }[];
   antIndex: AntIndex;
   eggIndex: Map<number, unknown>;
 }
@@ -110,7 +111,27 @@ export function sense(ctx: SenseContext, ant: Ant, inputs: Float32Array): Float3
   contactFlags(ctx, ant, inputs);
   inputs[Input.FALLING] = ant.falling ? 1 : 0;
   inputs[Input.BIAS] = 1;
+  homeVector(ctx, ant, inputs);
   return inputs;
+}
+
+/** Path-integration inputs: bearing and distance to the ant's own queen. */
+function homeVector(ctx: SenseContext, ant: Ant, inputs: Float32Array): void {
+  const colony = ctx.colonies.find((c) => c.id === ant.lineageId);
+  if (!colony) {
+    inputs[Input.HOME_ANGLE] = 0;
+    inputs[Input.HOME_DISTANCE] = 1;
+    return;
+  }
+  const dx = colony.x - ant.x;
+  const dz = colony.z - ant.z;
+  let relative = Math.atan2(dz, dx) - ant.heading;
+  relative = ((relative + Math.PI) % (2 * Math.PI)) - Math.PI;
+  if (relative < -Math.PI) {
+    relative += 2 * Math.PI;
+  }
+  inputs[Input.HOME_ANGLE] = relative / Math.PI;
+  inputs[Input.HOME_DISTANCE] = Math.min(1, Math.max(Math.abs(dx), Math.abs(dz)) / 64);
 }
 
 export function createInputBuffer(): Float32Array {

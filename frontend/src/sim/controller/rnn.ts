@@ -93,13 +93,14 @@ function applyBackbone(copy: Float32Array): void {
   copy[W_OUT + Output.DIG * HIDDEN_COUNT + 1] += 1.2;
   copy[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + 1] -= 1.0;
 
-  // Transport instinct (ADR-0006): hidden 2 steers up the nest-scent
-  // gradient (picking up food removes its scent source, so homing wins once
-  // laden); hidden 3 fires the terrain channel to deposit when carrying near
-  // strong nest scent.
-  copy[W_IN + 2 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += 2.5;
-  copy[W_IN + 2 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] -= 2.5;
-  copy[W_OUT + Output.TURN * HIDDEN_COUNT + 2] += 1.2;
+  // Homing instinct (ADR-0006): hidden 2 turns toward the path-integrated
+  // home bearing — the weak tether that brings foragers back in range of the
+  // nest, where trophallaxis and deposit happen. Local food scent (unit 0,
+  // stronger gain) wins nearby, so ants oscillate between food and home.
+  // Deliberately weak: a wide foraging orbit that drifts homeward, not a
+  // leash. Strong tethers overgraze the nest zone and starve the colony.
+  copy[W_IN + 2 * INPUT_COUNT + Input.HOME_ANGLE] += 1.5;
+  copy[W_OUT + Output.TURN * HIDDEN_COUNT + 2] += 0.4;
   copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += 1.0;
   copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] += 1.0;
   copy[W_IN + 3 * INPUT_COUNT + Input.CARRY_LOAD] += 2.0;
@@ -110,7 +111,14 @@ function applyBackbone(copy: Float32Array): void {
   // survives incubation by default while policing and cannibalism remain
   // reachable by erasing these weights.
   copy[W_IN + 4 * INPUT_COUNT + Input.CONTACT_EGG] += 2.0;
-  copy[W_OUT + Output.EAT * HIDDEN_COUNT + 4] -= 1.8;
+  copy[W_OUT + Output.EAT * HIDDEN_COUNT + 4] -= 2.6;
+
+  // Pickup drive (ADR-0006, first link of the transport chain): a satiated
+  // ant at food fires the terrain channel to load it instead of walking by.
+  copy[W_IN + 5 * INPUT_COUNT + Input.CONTACT_FOOD] += 1.5;
+  copy[W_IN + 5 * INPUT_COUNT + Input.ENERGY] += 2.0;
+  copy[W_IN + 5 * INPUT_COUNT + Input.BIAS] -= 2.5;
+  copy[W_OUT + Output.DIG * HIDDEN_COUNT + 5] += 1.4;
 }
 
 const ACTION_BIAS_LOCI = [

@@ -1,5 +1,10 @@
 # Antropy Release 2 — Implementation Plan
 
+> **Status: complete (2026-09-02).** M0–M6 landed with green gates. Long-horizon
+> unassisted ecology persistence is open calibration work, tracked in the backlog
+> ("Ecology calibration") — the release stopped at the honest boundary between
+> machinery (gated) and balance (measured, not yet solved).
+
 Build Release 2 from [docs/backlog.md](docs/backlog.md) (metapopulation and recurrent
 regimes, spec §7/§9): real colony founding with flying males, expressed haploid males,
 physical food transport, nest decay, oscillating carrying capacity, and multiple colonies

@@ -62,7 +62,7 @@ export const ENERGY = {
   /** Cost per unit of pheromone deposited. */
   depositCostPerUnit: 0.002,
   /** Energy granted by eating one FOOD voxel (corpses are FOOD voxels too). */
-  foodEnergy: 0.5,
+  foodEnergy: 0.8,
   /** Maximum stored energy. */
   max: 1,
   /** Age cap in ticks (pre-genome default; the lifespan gene refines it). */
@@ -115,11 +115,23 @@ export const COLONY = {
   /** Chamber depth below the surface. */
   chamberDepth: 6,
   /** Minimum ticks between eggs. */
-  eggIntervalMin: 200,
+  eggIntervalMin: 300,
   /** Stockpile cost of laying beyond the egg's energy endowment. */
   eggLayCost: 0.1,
   /** Chebyshev distance to the queen within which food deposit = delivery. */
   deliveryRadius: 2,
+  /** Trophallaxis: energy above this transfers to the queen when nearby. */
+  trophallaxisThreshold: 0.5,
+  /** Maximum energy transferred to the stockpile per tick per worker. */
+  trophallaxisRate: 0.02,
+  /** Stockpile level at which the queen stops receiving. */
+  stockpileSatiation: 8,
+  /** Workers below this are fed from the stockpile when near the queen. */
+  feedThreshold: 0.3,
+  /** Maximum energy fed to a hungry worker per tick. */
+  feedRate: 0.02,
+  /** Stockpile floor the queen keeps for herself while feeding workers. */
+  queenReserve: 1,
   /** Claustral body reserves a colony starts with (bridges to delivery). */
   foundingStockpile: 3,
   /** Queen lifespan before merit-weighted succession. */
@@ -135,9 +147,11 @@ export const COLONY = {
 // Queen lifecycle and real founding (design spec §7.2, §9.1).
 export const QUEEN = {
   /** Stockpile drain keeping the queen alive; starvation collapses the colony. */
-  upkeepPerTick: 0.0004,
+  upkeepPerTick: 0.0002,
+  /** Sustained empty-stockpile ticks before the queen starves (body reserves). */
+  starvationGraceTicks: 3000,
   /** Stockpile level that triggers a queen-destined egg. */
-  eggThreshold: 4,
+  eggThreshold: 2.5,
   /** Energy endowment of a queen egg (claustral flight reserves seed). */
   eggEndowment: 1,
   /** Minimum ticks between queen eggs. */

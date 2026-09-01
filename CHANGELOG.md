@@ -2,6 +2,25 @@
 
 All notable user-visible changes are recorded here.
 
+## v0.2.0 - 2026-09-02
+
+### Release 2 — metapopulation and recurrent regimes
+
+- Added real colony founding: provisioned queens lay merit-fathered queen eggs; hatched
+  queens fly, mate with living males (who die), and found claustrally with an entrance
+  shaft; queens age and starve, collapsing their colonies. In-place succession removed.
+- Added expressed haploid males: workers lay unfertilized male eggs from their own energy;
+  males walk, live short, and carry whole-genome gametes into new colonies.
+- Replaced the meal tax with physical provisioning: food-voxel transport plus scripted
+  bidirectional trophallaxis at the queen — the stockpile is a real energy buffer and
+  delivery merit is earned, not imputed.
+- Added path-integration home sense, nest scent, and colony-tagged pheromone channels so
+  multiple colonies coexist without cross-reading signals.
+- Added nest decay (untrafficked tunnels collapse to loose fill), egg exposure hazards,
+  and an oscillating seasonal carrying capacity on a widened 192×64×192 map.
+- Added colony-count chart and metapopulation counters; checkpoints bumped to version 2
+  (older saves are refused).
+
 ## v0.1.0 - 2026-08-31
 
 ### MVP — selection visible in one session

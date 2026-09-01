@@ -19,10 +19,11 @@ Two additions:
    exactly as FOOD voxels emit food scent. It is an environmental signal from a
    special-cased entity (like food scent), not a third meaning-free pheromone channel; the
    sensory interface gains stereo nest-scent inputs (INPUT_COUNT 20 → 22).
-2. **Transport instinct in the structured init** — a third erasable backbone entry: when
-   carrying food, steer up the nest-scent gradient and deposit where nest scent is strong.
-   Ordinary weights, mutable like the chemotaxis (unit 0) and excavation (unit 1,
-   ADR-0004) instincts.
+2. **Transport instinct in the structured init** — erasable backbone entries forming the
+   full chain: a satiated ant at food loads it (pickup drive), steers up the nest-scent
+   gradient while carrying (picking food up removes its scent source, so homing wins), and
+   fires the terrain channel to deposit where nest scent is strong. Ordinary weights,
+   mutable like the chemotaxis (unit 0) and excavation (unit 1, ADR-0004) instincts.
 
 ## Alternatives considered
 

@@ -34,17 +34,27 @@ export interface Colony {
   lastEggTick: number;
   lastQueenEggTick: number;
   nextEggId: number;
+  /** Tick the stockpile hit empty, or -1 while provisioned (queen reserves). */
+  starvingSince: number;
 }
 
-function carveChamber(world: World, cx: number, cy: number, cz: number): void {
+function carveIfSoft(world: World, x: number, y: number, z: number): void {
+  if (getVoxel(world.grid, x, y, z) !== Material.ROCK) {
+    mutateVoxel(world, x, y, z, Material.AIR);
+  }
+}
+
+/** Founding chamber plus the entrance shaft the queen digs (spec §7.2). */
+function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY: number): void {
   for (let dy = 0; dy <= 1; dy++) {
     for (let dz = -1; dz <= 1; dz++) {
       for (let dx = -1; dx <= 1; dx++) {
-        if (getVoxel(world.grid, cx + dx, cy + dy, cz + dz) !== Material.ROCK) {
-          mutateVoxel(world, cx + dx, cy + dy, cz + dz, Material.AIR);
-        }
+        carveIfSoft(world, cx + dx, cy + dy, cz + dz);
       }
     }
+  }
+  for (let y = cy + 2; y <= surfaceY; y++) {
+    carveIfSoft(world, cx, y, cz);
   }
 }
 
@@ -92,7 +102,7 @@ function createColonyAt(
     return null;
   }
   const y = Math.max(3, surfaceY - COLONY.chamberDepth);
-  carveChamber(world, x, y, z);
+  carveChamber(world, x, y, z, surfaceY);
   const colony: Colony = {
     id: nextColonyId(world),
     x,
@@ -108,6 +118,7 @@ function createColonyAt(
     lastEggTick: 0,
     lastQueenEggTick: 0,
     nextEggId: 1,
+    starvingSince: -1,
   };
   world.colonies.push(colony);
   return colony;
@@ -240,8 +251,10 @@ export function foundFromQueenEgg(world: World, egg: Egg): void {
     sperm.push({ genome: male.genome, patrilineId: i + 1 });
     killAnt(world, male);
   }
-  const x = QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeX - 2 * QUEEN.flightMargin));
-  const z = QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeZ - 2 * QUEEN.flightMargin));
+  const x =
+    QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeX - 2 * QUEEN.flightMargin));
+  const z =
+    QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeZ - 2 * QUEEN.flightMargin));
   const colony = createColonyAt(world, x, z, egg.genome, sperm);
   if (colony) {
     world.foundings += 1;
@@ -255,6 +268,38 @@ function collapseColony(world: World, colony: Colony): void {
   world.collapses += 1;
 }
 
+/** Upkeep and the starvation clock; true when the queen has died. */
+function queenDies(world: World, colony: Colony): boolean {
+  colony.queenAge += 1;
+  colony.stockpile -= QUEEN.upkeepPerTick;
+  if (colony.stockpile <= 0) {
+    colony.stockpile = 0;
+    if (colony.starvingSince < 0) {
+      colony.starvingSince = world.tick;
+    }
+  } else {
+    colony.starvingSince = -1;
+  }
+  const starved =
+    colony.starvingSince >= 0 && world.tick - colony.starvingSince > QUEEN.starvationGraceTicks;
+  return colony.queenAge >= colony.queenLifespanTicks || starved;
+}
+
+function layEggs(world: World, colony: Colony): void {
+  const queenEggReady =
+    colony.stockpile >= QUEEN.eggThreshold &&
+    world.tick - colony.lastQueenEggTick >= QUEEN.eggIntervalMin;
+  if (queenEggReady) {
+    layQueenEgg(world, colony);
+    return;
+  }
+  const endowment = world.controller.physical(colony.queenGenome).eggEndowment;
+  const canAfford = colony.stockpile >= endowment + COLONY.eggLayCost + 1.0;
+  if (canAfford && world.tick - colony.lastEggTick >= COLONY.eggIntervalMin) {
+    layWorkerEgg(world, colony);
+  }
+}
+
 /**
  * One tick of scripted queen behavior per colony: upkeep from the stockpile,
  * death by age or starvation (colony collapse, spec §9.1), then queen or
@@ -262,24 +307,11 @@ function collapseColony(world: World, colony: Colony): void {
  */
 export function stepColonies(world: World): void {
   for (const colony of world.colonies.slice()) {
-    colony.queenAge += 1;
-    colony.stockpile -= QUEEN.upkeepPerTick;
-    if (colony.queenAge >= colony.queenLifespanTicks || colony.stockpile < 0) {
+    if (queenDies(world, colony)) {
       collapseColony(world, colony);
       continue;
     }
-    const queenEggReady =
-      colony.stockpile >= QUEEN.eggThreshold &&
-      world.tick - colony.lastQueenEggTick >= QUEEN.eggIntervalMin;
-    if (queenEggReady) {
-      layQueenEgg(world, colony);
-      continue;
-    }
-    const endowment = world.controller.physical(colony.queenGenome).eggEndowment;
-    const canAfford = colony.stockpile >= endowment + COLONY.eggLayCost + 0.5;
-    if (canAfford && world.tick - colony.lastEggTick >= COLONY.eggIntervalMin) {
-      layWorkerEgg(world, colony);
-    }
+    layEggs(world, colony);
   }
 }
 
