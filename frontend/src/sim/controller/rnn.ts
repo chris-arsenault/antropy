@@ -93,14 +93,13 @@ function applyBackbone(copy: Float32Array): void {
   copy[W_OUT + Output.DIG * HIDDEN_COUNT + 1] += 1.2;
   copy[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + 1] -= 1.0;
 
-  // Homing instinct (ADR-0006): hidden 2 turns toward the path-integrated
-  // home bearing — the weak tether that brings foragers back in range of the
-  // nest, where trophallaxis and deposit happen. Local food scent (unit 0,
-  // stronger gain) wins nearby, so ants oscillate between food and home.
-  // Homing tether sized to the R3-recentered food density: dense food makes
-  // a close orbit affordable, and the orbit must cross the nest so surplus
-  // routes into the colony sink (§B.3 R2 note).
-  copy[W_IN + 2 * INPUT_COUNT + Input.HOME_ANGLE] += 1.5;
+  // Homing instinct (ADR-0006, legalized per §C.8): hidden 2 climbs the
+  // nest-scent plume — chemotaxis toward home on a world carrier, the
+  // same reflex shape as food chemotaxis on unit 0. Local food scent
+  // (stronger TURN weight) wins nearby, so ants oscillate between food
+  // and home and the orbit crosses the nest (§B.3 R2 colony sink).
+  copy[W_IN + 2 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += BACKBONE_GAIN;
+  copy[W_IN + 2 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] -= BACKBONE_GAIN;
   copy[W_OUT + Output.TURN * HIDDEN_COUNT + 2] += 0.9;
   copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_LEFT] += 1.0;
   copy[W_IN + 3 * INPUT_COUNT + Input.NEST_SCENT_RIGHT] += 1.0;

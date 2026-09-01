@@ -33,7 +33,7 @@ describe("colony founding", () => {
 
 describe("eggs", () => {
   it("lays from the stockpile, incubates, and hatches a juvenile", { timeout: 30_000 }, () => {
-    const world = createWorld(4002);
+    const world = createWorld(4003);
     const colony = foundColony(world);
     world.ants = []; // isolate the egg lifecycle
     colony.stockpile = 5;

@@ -99,6 +99,18 @@ export function omniscientOracle(world: World, ant: Ant, inputs: Float32Array): 
   return guardBrood(inputs, outputs);
 }
 
+/** Home by climbing the nest-scent plume (stereo difference); circle
+ * gently when outside it — the plume radius is gated to cover the forage
+ * range (ladder rung 2 certifies this end to end). */
+function plumeTurn(inputs: Float32Array): number {
+  const nestLeft = inputs[Input.NEST_SCENT_LEFT];
+  const nestRight = inputs[Input.NEST_SCENT_RIGHT];
+  if (nestLeft + nestRight < 0.01) {
+    return 0.4;
+  }
+  return 6 * (nestLeft - nestRight);
+}
+
 // Per-ant wander phase for the sensor-limited oracle (diagnostic state).
 const wanderPhase = new Map<number, number>();
 
@@ -116,7 +128,7 @@ export function sensorOracle(_world: World, ant: Ant, inputs: Float32Array): Flo
   wanderPhase.set(ant.id, phase);
 
   if (isHomeward(ant)) {
-    return unloadAtNest(ant, inputs, steer(2.5 * inputs[Input.HOME_ANGLE], 1));
+    return unloadAtNest(ant, inputs, steer(plumeTurn(inputs), 1));
   }
   const left = inputs[Input.FOOD_SCENT_LEFT];
   const right = inputs[Input.FOOD_SCENT_RIGHT];

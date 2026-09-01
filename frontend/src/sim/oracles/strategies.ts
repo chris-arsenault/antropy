@@ -159,7 +159,7 @@ export function makeStrategy(opts: StrategyOptions): OraclePolicy {
       return hoarding;
     }
     const blindAndHot =
-      inputs[Input.STRESS] > RETREAT_ABOVE &&
+      inputs[Input.TEMPERATURE] > RETREAT_ABOVE &&
       inputs[Input.FOOD_SCENT_LEFT] + inputs[Input.FOOD_SCENT_RIGHT] < 0.05;
     if (opts.retreat && blindAndHot) {
       return retreatMove(world, ant, colony, inputs);

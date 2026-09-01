@@ -38,8 +38,9 @@ export const SCENT = {
   stepInterval: 5,
   /** Scent injected next to each FOOD voxel per pass (drives R3 reach). */
   foodSourceStrength: 0.8,
-  /** Nest scent injected at each queen per pass (ADR-0006). */
-  nestSourceStrength: 0.8,
+  /** Nest scent injected at each queen per pass (ADR-0006): sized with
+   * NEST_PHYSICS so the plume's detect radius covers the forage range. */
+  nestSourceStrength: 1.2,
 } as const;
 
 /**
@@ -54,13 +55,25 @@ export const TRAIL_PHYSICS = {
 } as const;
 
 /**
- * Beacon physics (food and nest scent): fast turnover keeps continuously
+ * Beacon physics (food scent): fast turnover keeps continuously
  * re-emitted source clouds compact, bounding the active set.
  */
 export const BEACON_PHYSICS = {
   diffusionRate: 0.5,
   evaporation: 0.9,
   epsilon: 5e-3,
+} as const;
+
+/**
+ * Nest plume physics: the homing carrier (§C.8 world-side resolution —
+ * there is no bearing sensor). Slow evaporation builds a wide standing
+ * plume; measured detect radius 24 voxels at the queen's emission
+ * (~6x mean food distance, clearing the homing inequality).
+ */
+export const NEST_PHYSICS = {
+  diffusionRate: 0.5,
+  evaporation: 0.999,
+  epsilon: 2e-4,
 } as const;
 
 // Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.

@@ -9,7 +9,13 @@ import {
   SEASON,
   TRAIL_PHYSICS,
 } from "./tunables";
-import { createScentField, depositScent, sampleScent, stepScentField } from "./scent";
+import {
+  createScentField,
+  depositScent,
+  sampleScent,
+  stepScentField,
+  type ScentPhysics,
+} from "./scent";
 import { voxelIndex } from "./grid";
 import { type World } from "./world";
 
@@ -59,17 +65,24 @@ export function typicalMetabolicRate(): number {
 const MEAN_SPEED = 0.7; // voxels/tick at the seeded forward drive
 
 /**
- * Beacon detection radius, measured once by running the real scent physics
- * to steady state around a single source on a small open grid.
+ * Beacon detection radius, measured by running the real scent physics to
+ * steady state around a single source on a small open grid. Pass a physics
+ * and emission strength to size a field (the nest plume needs a measured
+ * radius, §C Rule 11); passes scale with the field's half-life.
  */
-export function measureDetectRadius(sensoryResolution = 0.02): number {
-  const size = 33;
+export function measureDetectRadius(
+  sensoryResolution = 0.02,
+  physics = BEACON_PHYSICS as ScentPhysics,
+  strength = SCENT.foodSourceStrength * 5, // ~5 emitting faces
+  size = 33
+): number {
   const grid = createGrid(size, size, size);
-  const field = createScentField(grid, BEACON_PHYSICS);
+  const field = createScentField(grid, physics);
   const center = Math.floor(size / 2);
   const source = voxelIndex(grid, center, center, center);
-  for (let pass = 0; pass < 60; pass++) {
-    depositScent(field, source, SCENT.foodSourceStrength * 5); // ~5 emitting faces
+  const passes = Math.max(60, Math.round((6 * Math.log(0.5)) / Math.log(physics.evaporation)));
+  for (let pass = 0; pass < passes; pass++) {
+    depositScent(field, source, strength);
     stepScentField(grid, field);
   }
   let radius = 0;

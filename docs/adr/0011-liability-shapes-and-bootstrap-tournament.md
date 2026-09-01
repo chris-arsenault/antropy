@@ -47,6 +47,16 @@ long tended juvenile phases) is deferred to the evolution releases via the backl
   instead a harness-side dig plan billed to the stockpile (ADR-0009 cheat surface), with the
   scripted queen descending into the vault she pays for.
 
+## Addendum (post-Appendix-C legalization)
+
+Removing the nest-bearing inputs (illegal per §C.8) and replacing them with a
+nest-scent plume carrier inverted the recorded worker-days finding: the compass
+had been subsidizing O-surface's forage efficiency. On the legal interface,
+O-surface ≺ O-shelter holds strictly on the master ledger, and the tournament
+gates are pinned there (no longer sub-ledger-provisional for that inequality).
+O-shelter ≺ O-architect on worker-days remains open pending brood-as-capital
+(R3-PLAN M4.75).
+
 ## Consequences
 
 - Rule 6 is satisfied in spirit on the reproductive and storage channels; anyone reading

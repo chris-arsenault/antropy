@@ -8,7 +8,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 5;
+export const CHECKPOINT_VERSION = 6;
 
 interface AntRecord {
   scalars: Record<string, number>;

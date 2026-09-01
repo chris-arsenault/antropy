@@ -57,17 +57,17 @@ harness digs the architect's vault and the queen descends with it
 
 | Strategy | Worker-days | Merit | Egg survival | Vault |
 | -------- | ----------- | ----- | ------------ | ----- |
-| O-surface (queen and hoard in the open) | 346 | 1743 | 50% | 0 |
-| O-shelter (founding chamber) | 478 | 4496 | 98% | 0 |
-| O-architect (vault target 10) | 301 | 1690 | 100% | 6 |
-| O-dig1 (vault 1) | 519 | 4427 | 96% | 1 |
-| O-dig4 (vault 4) | 418 | 2942 | 100% | 4 |
+| O-surface (queen and hoard in the open) | 284 | 2027 | 56% | 0 |
+| O-shelter (founding chamber) | 633 | 1979 | 88% | 0 |
+| O-architect (vault target 10) | 333 | 1657 | 100% | 10 |
 
-Surface living is survivable but strictly inferior on every ledger, and
-the edge collapses when egg exposure is ablated (surface 427 worker-days
-vs shelter 317 at 12k ticks with the hazard off) — the ordering rests on
-the intended liability. The Rule 7 increment series puts the measured
-optimal nest depth at roughly chamber+1: the first vault layer improves
-the ledger, deeper layers cost more than this climate returns (their brood
-protection is real — 96→100% — but small). Deeper architecture becoming
-worthwhile awaits harsher brood economics (backlog, brood-as-capital).
+Measured after interface legalization (Appendix C: the nest-bearing
+inputs removed; homing rides the nest-scent plume). Legalization fixed
+the master ledger: under the compass, O-surface out-earned every
+sheltering strategy on worker-days — the illegal sense was subsidizing
+surface foraging. With homing on a physical carrier, surface living is
+strictly inferior on worker-days (284 vs 633) and brood survival, and
+the exposure ablation collapses exactly the brood edge (surface 56% →
+100% with the hazard off). The vault still buys only brood protection
+(100% vs 88%) at a worker-day cost; making deep architecture pay on the
+master ledger is the brood-as-capital milestone (R3-PLAN M4.75).

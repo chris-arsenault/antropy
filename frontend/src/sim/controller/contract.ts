@@ -95,18 +95,15 @@ export const Input = {
   BIAS: 19,
   NEST_SCENT_LEFT: 20,
   NEST_SCENT_RIGHT: 21,
-  /** Path integration (innate in real ants): signed bearing to the own
-   * queen relative to heading, in [-1, 1]; 0 when colony-less. */
-  HOME_ANGLE: 22,
-  /** Chebyshev distance to the own queen, normalized; 1 when colony-less. */
-  HOME_DISTANCE: 23,
-  /** Local heat stress (thermoreception, innate in real ants): the
-   * microclimate multiplier normalized so the desiccation threshold sits
-   * mid-scale. A liability must be sensable to be avoidable (Rule 4/5). */
-  STRESS: 24,
+  /** Local temperature (thermoreception, innate in real ants): the
+   * microclimate multiplier normalized to [0, 1]. A world quantity with a
+   * physical carrier — a liability must be sensable to be avoidable
+   * (Rules 4/5); homing has no sensor (§C.8: the nest-scent plume is the
+   * carrier, chemotaxis the seeded use). */
+  TEMPERATURE: 22,
 } as const;
 
-export const INPUT_COUNT = 25;
+export const INPUT_COUNT = 23;
 
 /**
  * Motor output layout (design spec §4). DIG manipulates terrain: it digs the
