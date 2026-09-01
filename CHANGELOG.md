@@ -2,6 +2,36 @@
 
 All notable user-visible changes are recorded here.
 
+## v0.3.0 - 2026-09-02
+
+### Release 3 — bootstrap viability and the living colony
+
+- Added the liability world (Appendix B): multiplicative seasonal × diurnal microclimate
+  stress with depth attenuation, climate-keyed egg exposure, year-round storms that wash
+  exposed food and surface pheromone, and deep seasonal food troughs. Surface life is
+  survivable but strictly inferior on the measured ledgers.
+- Added brood as capital: eggs incubate into larvae reared on stockpile feedings over a
+  real rearing period; starved larvae perish into food. Worker replacement costs energy
+  and time, so famine and brood losses bind.
+- Added physical hoarding: the queen's crop is small and overflow deliveries become food
+  voxels whose placement matters (rain reaches surface piles, not buried larders);
+  attendants restock the crop from the larder.
+- Added automatic continue: when the population collapses, a new colony is force-founded
+  from the survivor genome pool — the world is never left dead, and selection operates
+  across continuations (visible in the readouts).
+- Legalized the sensory interface (Appendix C): the nest-bearing inputs were removed;
+  homing rides a real nest-scent plume (measured detect radius 24), and a thermoreceptor
+  input plus a heat-escape instinct give ants midday burrows. Founding nests carve a
+  descendable 2×2 entrance shaft.
+- Added viability-ratio and continuation readouts to the UI; live ratios R1–R7 with
+  out-of-band flags.
+- Added the measurement harness (`pnpm harness`): parameterized simulation runs into a
+  committed SQLite ledger (tournaments, oracle ladder, calibration, seed derivation,
+  determinism bisect). Measurements left the test tiers.
+- Fixed a checkpoint-corrupting egg-id collision (ghost brood granting phantom energy),
+  entombment of ants by dropped biomass, and falling into solid voxels. Checkpoints
+  bumped to version 8 (older saves are refused).
+
 ## v0.2.0 - 2026-09-02
 
 ### Release 2 — metapopulation and recurrent regimes

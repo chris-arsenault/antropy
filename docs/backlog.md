@@ -11,68 +11,27 @@ The MVP ("selection visible in one session") shipped in v0.1.0 and Release 2
 (metapopulation and recurrent regimes) in v0.2.0 — see
 [../CHANGELOG.md](../CHANGELOG.md) and [architecture.md](architecture.md).
 
-## Release 3 — bootstrap viability and the living colony (Appendix B)
+## Release 3 — shipped residuals
 
-Goal: a colony that boots, persists, and looks like a colony — trunk trails, role
-differentiation, brood tended in chambers, digging that pays — built bottom-up through
-Appendix B's diagnostic order (world → interface → seed → incentives) rather than by
-hand-tuned instinct weights. This subsumes the earlier ad-hoc calibration/sweep items.
-Evolutionary-machinery depth is deliberately deferred to Release 4.
+Release 3 shipped (v0.3.0): viability ratios and diagnostics, the oracle ladder,
+calibration and tournament measurement (harness + ledger, ADR-0012), the liability world
+(microclimate, climate-keyed egg exposure, storms, famine troughs), brood-as-capital
+larval rearing, physical hoarding with larder restock, interface legalization
+(nest-plume homing, thermoreceptor), the heat-escape instinct, and automatic continue
+with survivor genetics. Residuals carried forward:
 
-### Viability ratios and diagnostics (§B.3, §B.6)
-
-- Express the world economy as the seven viability ratios (trip profitability, satiation,
-  scent horizon, foraging radius, trail persistence, dig economics, ecosystem closure),
-  derive their bands, set defaults at band centers, and log every ratio live so
-  out-of-band drift is glance-visible. (Known violations to fix on arrival: satiation
-  R2 is ~0.8 against a 0.1–0.3 band; scent horizon R3 is far below 1.)
-- Add the circling-checklist instruments (§B.6): sensor histograms and the
-  gradient-visibility map (fraction of map area with a resolvable scent gradient).
-
-### Oracle ladder and calibration harness (§B.4, §B.5)
-
-- Implement the oracle ladder: omniscient, sensor-limited, seed-assay, and degraded
-  scripted cheat-agents driving the real body/world API, so faults bisect between world,
-  interface, seed, and evolvability.
-- Build the headless calibration harness: Latin-hypercube batches over ratio vectors with
-  rung-2 oracle colonies, viability-polytope characterization, defaults at its Chebyshev
-  center — then the identical harness with seeded-RNN ants, so the oracle-vs-seeded gap
-  quantifies the behavioral shortfall (subsumes long-horizon persistence calibration).
-
-### Liabilities and construction economics (§B.7, §B.8)
-
-- Add microclimate stratification (metabolic cost by depth × season/diurnal phase) and
-  weather events (rain destroys surface stockpiles and washes surface pheromone); egg
-  exposure exists. Raid pressure stays staged with inter-colony contact (Release 6).
-- Convert the succession/merit counter to net-new-nest-energy, conservation-accounted
-  (anti-Goodhart, §B.7.2).
-- Implement the strategy-spectrum oracle tournament (O-surface ≺ O-shelter ≺ O-architect,
-  every season phase, with margin; surface survivable-but-inferior — Design Rule 6),
-  with ablation worlds per liability and the increment series verifying concave
-  construction payoff from the first voxel (Design Rule 7).
-
-### Seeded-construction pipeline and portfolio (§B.9, §A.5.1)
-
-- Derive founder seeds by CMA-ES against the probe ladder and oracle-targeted assay
-  episodes instead of hand-written weights ("the run has no fitness function;
-  initialization is allowed to be smart"); validate every seed with the rung-3 assay.
-- Ship the seed portfolio from derived seeds: forager-forward, digger (reflexive dig
-  triggers + stigmergic dig-site bias), wander-heavy, pheromone-reactive
-  (trail-recruitment: deposit while homing fed, follow while seeking), plus a minority of
-  unstructured draws — behavioral-hypothesis diversity and visible division of labor.
-- Add colony-state sensory inputs (§A.9.2): stockpile scent, larval-hunger scent, and
-  congestion — the demand signals seeds and oracles condition on.
-
-### Run continuity and health
-
-- Add automatic-continue mode: when the last colony dies or the ant count drops below a
-  threshold, increment the seed and force-spawn a new colony whose queen and sperm draw
-  from the genome pool of the pre-trigger population (survivor genetics carry forward),
-  so long runs never end in a dead world.
-- Enforce Design Rule 1 (§A.3.3): season period at least 10× genome-generation time,
-  asserted at world creation.
+- Derive founder seeds against in-vivo colony fitness with parallel evaluation
+  (probe-suite derivation aced probes and failed in vivo five times — the recorded
+  proxy-gap finding; ledger runs 23–34).
+- Ship the seed portfolio (forager-forward, digger, wander-heavy, pheromone-reactive,
+  unstructured minority) once derivation transfers; validate each with rung-3 assays.
+- Reprice deep architecture: the vault currently buys brood protection at a net
+  worker-day loss (docs/calibration.md); harsher climates or raid pressure should make
+  depth pay on the master ledger.
 - Add the two cheap health instruments (§A.11): live parent–offspring heritability
   regression and realized effective-population-size estimate with an alarm below 10².
+- Convert the succession/merit counter to net-new-nest-energy accounting where it still
+  counts events rather than energy (anti-Goodhart, §B.7.2).
 
 ## Release 4 — evolutionary machinery (Appendix A core)
 

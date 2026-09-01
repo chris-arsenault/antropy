@@ -9,7 +9,8 @@ import { type World } from "./world";
  * colony is force-founded from the survivor genome pool — living ants
  * and unhatched brood carry their genetics across the continuation — and
  * the continuation counter increments. Deterministic: draws come from
- * world.rng in the fixed step order.
+ * world.rng in the fixed step order. Requires a sexual controller
+ * (recombine); reference-controller worlds set world.autoContinue false.
  */
 function survivorPool(world: World): Genome[] {
   const pool: Genome[] = [];

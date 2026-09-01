@@ -1,5 +1,13 @@
 # Antropy Release 3 — Implementation Plan
 
+> **Status: complete — shipped as v0.3.0 (2026-09-02).** M0–M4.75 delivered as amended
+> below; M5 closed on the recorded proxy-gap finding (seeds revert to the hand-derived
+> backbone + heat reflex; derivation against in-vivo fitness carried to the backlog);
+> M6 delivered auto-continue with survivor genetics (h²/N_e instruments carried to the
+> backlog). Rule 6 holds on the master ledger for surface ≺ shelter; the vault's
+> repricing is a recorded residual. See CHANGELOG v0.3.0, ADR-0011/0012, and
+> docs/calibration.md for the measured record.
+
 Build Release 3 from [docs/backlog.md](docs/backlog.md) ("bootstrap viability and the
 living colony", Appendix B normative): a colony that boots, persists, and looks like a
 colony — attacked bottom-up per §B.1 (world → interface → seed → incentives). Out of

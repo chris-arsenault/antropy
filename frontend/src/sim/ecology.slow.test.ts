@@ -7,7 +7,11 @@ import { FOOD_GOVERNOR } from "./tunables";
 // chain must causally matter. Absolute survival fractions are harness
 // measurements (pnpm harness run), not tests.
 function createReferenceWorld(seed: number): World {
-  return createWorld(seed, braitenbergController);
+  const world = createWorld(seed, braitenbergController);
+  // The asexual reference controller cannot found colonies; these worlds
+  // measure forager ecology only.
+  world.autoContinue = false;
+  return world;
 }
 
 describe("ecology mechanics (M4 gate)", () => {
