@@ -24,6 +24,11 @@ on the Ahara platform.
   module — a static SPA behind CloudFront.
 - Hand-code the sensory/motor interface, never ant behavior. Trail-following, castes,
   cannibalism, and architecture must emerge from evolved genomes ([design spec §1](docs/design-spec.md)).
+- Classify every change per the layer model before building it
+  ([Appendix C](docs/ant-sim-appendix-c.md)): world authoring is free; interface additions
+  pass the five litmus tests; authored behavior lives only in seeds; parameters tune only
+  non-genomic constants against a written inequality (three configurations or 10× per knob,
+  then a structural-finding report); oracles never execute in the evolving population.
 - Treat the behavioral controller as a pluggable module behind the `act`/`mutate`/
   `recombine`/`seed` contract. Nothing outside the controller inspects genome internals.
 - Use pnpm, TypeScript (`.ts`/`.tsx` only), and Vitest. ESLint enforces complexity 10, files

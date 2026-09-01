@@ -110,12 +110,26 @@ The world is tuned so building wins (Rules 6–7).
 - Exit: slow gates — strict O-surface ≺ O-shelter ≺ O-architect each season phase;
   monotone increment series; ablations collapse their edges.
 
-### M5 — Derived seed portfolio and colony senses [depends on M2, M4]
-Initialization gets smart (ADR-0010).
-- ES optimizer + probe tasks (gradient-follow, homing, satiation-gated pickup, reflexive
-  dig, trail deposit/follow); derivation harness baking the portfolio artifact
-  (forager, digger, pheromone-reactive, wander, minority unstructured).
-- Colony-state inputs (stockpile fullness, brood presence): INPUT_COUNT 26, checkpoint v3.
+### M4.5 — Interface legalization and homing carrier [depends on M4]
+The interface passes Appendix C's litmus tests.
+- Fix the checkpoint determinism gate (divergence probe committed; infrastructure, not
+  tuning).
+- Remove HOME_ANGLE/HOME_DISTANCE (§C.8: nest-bearing sensor is illegal — no carrier,
+  answer-shaped). Rename STRESS → TEMPERATURE (legal thermoreceptor, question-shaped name).
+- World-side homing (Rule 10): write the governing inequality first (nest-scent detect
+  radius ≥ typical forage trip distance), then author the nest field to satisfy it
+  (emission strength/physics); backbone homing tether returns to nest-scent chemotaxis
+  (ADR-0006 original form). Oracles keep cheating navigation (O-layer quarantine).
+- Exit: `make test` green; rung-2 oracle homes and delivers via the scent carrier alone;
+  ladder + ecology gates recalibrated; checkpoint gate green.
+
+### M5 — Derived seed portfolio and colony-state carriers [depends on M2, M4.5]
+Initialization gets smart (ADR-0010); all authored behavior lives in seeds (S-layer).
+- ES optimizer + probe tasks (gradient-follow, scent-homing, satiation-gated pickup,
+  reflexive dig on temperature, trail deposit/follow); derivation harness baking the
+  portfolio artifact (forager, digger, pheromone-reactive, wander, minority unstructured).
+- Colony state as carriers, not scalars (§C.8): stockpile-fullness scent emitted at the
+  queen, brood scent from eggs — world fields sensed like any scent; checkpoint bump.
 - `seed()` draws from the portfolio (queen and each sperm independently); rung-3 assays
   per seed; chemotaxis and transport assays re-pointed at portfolio members.
 - Exit: `make test` green; every portfolio seed passes its assay; in-world smoke shows
@@ -134,4 +148,5 @@ Initialization gets smart (ADR-0010).
 
 | Where | Decision you own |
 | ----- | ---------------- |
-| — | None open. Flagged for release review: whether the HOME_ANGLE path-integration input stays once nest-scent reach is properly tuned (stronger hand-holding than Rule 4 requires), and O-fortress inclusion if it proves non-cheap. |
+| Brood-as-capital timing | The recorded structural fix for the r-selection finding (ADR-0011, backlog): pull into R3 now, or open Release 4 with it. |
+| — | Resolved by Appendix C: HOME_ANGLE/HOME_DISTANCE are removed (nest-bearing ruled illegal, §C.8); O-fortress recorded as deferred. The M4 tournament gates are provisional sub-ledger gates (§C.4.1 sig. 4) until brood-as-capital lands. |
