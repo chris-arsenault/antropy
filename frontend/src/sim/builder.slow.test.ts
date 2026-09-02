@@ -61,6 +61,23 @@ function storedFood(world: World, cx: number, cz: number): number {
   return count;
 }
 
+/** A vertical x-y slice through the shaft column: '.'=air, '#'=solid,
+ * 'o'=stored food, drawn top-down for the eye. */
+function crossSection(world: World, cx: number, cz: number): string {
+  const rows: string[] = [];
+  const top = world.surfaceMap[cz * world.grid.sizeX + cx] + 1;
+  for (let y = top; y >= top - 12; y--) {
+    let row = "";
+    for (let x = cx - 4; x <= cx + 6; x++) {
+      const m = getVoxelSafe(world.grid, x, y, cz);
+      const glyph = m === Material.AIR ? "." : m === Material.FOOD ? "o" : "#"; // eslint-disable-line sonarjs/no-nested-conditional
+      row += glyph;
+    }
+    rows.push(`y=${y} ${row}`);
+  }
+  return rows.join("\n");
+}
+
 describe("Phase 2 builder base case (spec §13)", () => {
   mkdirSync("test-results", { recursive: true });
   it("one immortal ant digs a tunnel", { timeout: 120_000 }, () => {
@@ -75,6 +92,7 @@ describe("Phase 2 builder base case (spec §13)", () => {
     }
     const depth = tunnelDepth(world, ox, oz);
     appendFileSync("test-results/builder.txt", `one-ant tunnel depth=${depth}\n`);
+    appendFileSync("test-results/builder.txt", crossSection(world, ox, oz) + "\n");
     expect(depth, `tunnel depth ${depth}`).toBeGreaterThanOrEqual(4);
   });
 
