@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { type World } from "../sim/world";
 import { createAntRenderer } from "./antRenderer";
+import { createBroodRenderer } from "./broodRenderer";
 import { createChunkMeshes } from "./chunkMeshes";
 import { createScentRenderer, type ScentLayerKey } from "./scentRenderer";
+import { createWeatherTint } from "./weatherTint";
 
 export interface WorldRenderer {
   /** Rebuild meshes for chunks in the world's dirty feed, then clear it. */
@@ -20,18 +22,20 @@ export interface WorldRenderer {
   dispose(): void;
 }
 
-function addLights(scene: THREE.Scene): void {
+function addLights(scene: THREE.Scene): THREE.DirectionalLight {
   const sun = new THREE.DirectionalLight(0xfff4e0, 2.2);
   sun.position.set(80, 140, 60);
   scene.add(sun);
   scene.add(new THREE.AmbientLight(0x8899bb, 0.9));
+  return sun;
 }
 
 export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): WorldRenderer {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x14100c);
-  addLights(scene);
+  const sun = addLights(scene);
+  const weather = createWeatherTint(scene, sun);
 
   const { sizeX, sizeY, sizeZ } = world.grid;
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 1500);
@@ -43,6 +47,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
 
   const chunks = createChunkMeshes(scene, world);
   const ants = createAntRenderer(scene);
+  const brood = createBroodRenderer(scene);
   const scents = createScentRenderer(scene);
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -53,7 +58,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
     },
     render(alpha: number) {
       ants.update(world, alpha);
+      brood.update(world);
       scents.update(world);
+      weather.update(world);
       controls.update();
       renderer.render(scene, camera);
     },
@@ -84,6 +91,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
     },
     dispose() {
       ants.dispose();
+      brood.dispose();
       scents.dispose();
       controls.dispose();
       chunks.dispose();

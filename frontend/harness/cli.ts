@@ -5,6 +5,7 @@ import { openLedger, recordRun } from "./lib/ledger";
 import { applyPatches } from "./lib/patch";
 import { runCalibrate } from "./experiments/calibrate";
 import { runDerive } from "./experiments/derive";
+import { runDeriveVivo } from "./experiments/deriveVivo";
 import { runDeterminism } from "./determinism";
 
 /**
@@ -153,6 +154,9 @@ function main(): void {
       return runCalibrate(parseFlags(rest));
     case "derive":
       return runDerive(parseFlags(rest));
+    case "derive-vivo":
+      void runDeriveVivo(parseFlags(rest));
+      return;
     case "determinism":
       return runDeterminism(parseFlags(rest));
     case "recent":

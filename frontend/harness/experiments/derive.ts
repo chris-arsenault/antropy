@@ -39,7 +39,7 @@ function robustFitness(candidate: Float32Array, rng: Rng, offspring: number): nu
   return total / (offspring + 1);
 }
 
-function bake(mean: Float32Array): string {
+export function bake(mean: Float32Array): string {
   const artifact = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
     "..",

@@ -7,6 +7,7 @@ import { DECAY } from "./tunables";
 import { createWorld, mutateVoxel, stepWorld, type World } from "./world";
 
 function carveTestTunnel(world: World): { x: number; y: number; z: number } {
+  world.autoContinue = false; // isolate decay from refounding carves
   const x = 30;
   const z = 30;
   const y = world.surfaceMap[z * world.grid.sizeX + x] - 8;
@@ -18,7 +19,6 @@ function carveTestTunnel(world: World): { x: number; y: number; z: number } {
 describe("nest decay (spec §9.2)", () => {
   it("collapses an untrafficked subsurface cavity after the TTL", () => {
     const world = createWorld(5101);
-    world.autoContinue = false; // isolate decay from refounding carves
     const spot = carveTestTunnel(world);
 
     world.tick = DECAY.ttlTicks + 1; // the cavity is long overdue

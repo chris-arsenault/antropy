@@ -165,16 +165,27 @@ function seedCopy(rng: Rng): Float32Array {
   for (const locus of ACTION_BIAS_LOCI) {
     copy[locus] = randNormal(rng) * SEED_ACTION_BIAS_NOISE;
   }
-  if (FORAGER_SEED !== null && FORAGER_SEED.length === GENOME_LENGTH) {
-    // Derived founder weights (ADR-0010): the baked artifact replaces the
-    // hand-derived instincts as the mean; seed noise stays on top.
+  const base = runtimeSeedBase ?? FORAGER_SEED;
+  if (base !== null && base.length === GENOME_LENGTH) {
+    // Derived founder weights (ADR-0010): the baked artifact (or the
+    // derivation harness's runtime candidate) replaces the hand-derived
+    // instincts as the mean; seed noise stays on top.
     for (let i = 0; i < WEIGHT_COUNT; i++) {
-      copy[i] += FORAGER_SEED[i];
+      copy[i] += base[i];
     }
     return copy;
   }
   applyBackbone(copy);
   return copy;
+}
+
+// Runtime override of the seed base, used only by the derivation harness
+// to evaluate candidate vectors through the real seed() noise pipeline.
+let runtimeSeedBase: ArrayLike<number> | null = null;
+
+/** Harness hook (S-layer evaluation): null restores the baked artifact. */
+export function setRuntimeSeedBase(base: ArrayLike<number> | null): void {
+  runtimeSeedBase = base;
 }
 
 /**
