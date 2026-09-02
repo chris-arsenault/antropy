@@ -173,6 +173,39 @@ export function spawnAnt(world: World, spawn: AntSpawn): Ant {
 }
 
 /** Spawn surface foragers with founder genomes from the world's controller. */
+/**
+ * Spawn a digging crew clustered at the map centre. Clustering is the
+ * point: crowding is what turns the overflow reflex on, so a tight crew
+ * excavates a branched nest where a scattered one sinks separate holes.
+ */
+export function populateDiggers(world: World, count: number): void {
+  const cx = Math.floor(world.grid.sizeX / 2);
+  const cz = Math.floor(world.grid.sizeZ / 2);
+  for (let i = 0; i < count; i++) {
+    const x = cx + ((i % 3) - 1);
+    const z = cz + ((Math.floor(i / 3) % 3) - 1);
+    const y = surfaceSpawnY(world.grid, x, z);
+    if (y === null) {
+      continue;
+    }
+    const genome = world.controller.seed(world.rng);
+    spawnAnt(world, {
+      x,
+      y,
+      z,
+      heading: 0,
+      energy: 1,
+      lineageId: 0,
+      patrilineId: 0,
+      motherId: 0,
+      fatherId: 0,
+      genome,
+      controllerState: world.controller.createState(),
+      traits: world.controller.physical(genome),
+    });
+  }
+}
+
 export function populateForagers(world: World, count: number): void {
   for (let i = 0; i < count; i++) {
     const x = 8 + Math.floor(world.rng.next() * (world.grid.sizeX - 16));

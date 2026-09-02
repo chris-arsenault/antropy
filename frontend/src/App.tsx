@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { foundColony } from "./sim/colony";
-import { createWorld, type World } from "./sim/world";
+import { type World } from "./sim/world";
+import { SCENARIOS, scenarioById, type ScenarioId } from "./ui/scenarios";
 import { ChartsPanel } from "./ui/ChartsPanel";
 import { InspectorPanel } from "./ui/InspectorPanel";
 import { DEFAULT_LAYERS, MapLayersPanel, type LayerVisibility } from "./ui/MapLayersPanel";
@@ -11,13 +11,10 @@ import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
+const DEFAULT_SCENARIO: ScenarioId = "digging";
 
-function freshWorldFactory(seed: number): () => World {
-  return () => {
-    const world = createWorld(seed);
-    foundColony(world);
-    return world;
-  };
+function freshWorldFactory(scenario: ScenarioId, seed: number): () => World {
+  return () => scenarioById(scenario).build(seed);
 }
 
 interface Run {
@@ -27,17 +24,30 @@ interface Run {
 
 export function App() {
   const [seedInput, setSeedInput] = useState(String(DEFAULT_SEED));
-  const [run, setRun] = useState<Run>({ id: 0, factory: freshWorldFactory(DEFAULT_SEED) });
+  const [scenario, setScenario] = useState<ScenarioId>(DEFAULT_SCENARIO);
+  const [run, setRun] = useState<Run>({
+    id: 0,
+    factory: freshWorldFactory(DEFAULT_SCENARIO, DEFAULT_SEED),
+  });
 
   const restart = (factory: () => World) => {
     setRun((previous) => ({ id: previous.id + 1, factory }));
   };
 
-  const newWorld = () => {
+  const parsedSeed = () => {
     const seed = Number.parseInt(seedInput, 10);
-    if (Number.isFinite(seed)) {
-      restart(freshWorldFactory(seed));
-    }
+    return Number.isFinite(seed) ? seed : DEFAULT_SEED;
+  };
+
+  const newWorld = () => {
+    restart(freshWorldFactory(scenario, parsedSeed()));
+  };
+
+  // Switching scenario restarts immediately: the world it builds is the
+  // whole point of the choice.
+  const chooseScenario = (id: ScenarioId) => {
+    setScenario(id);
+    restart(freshWorldFactory(id, parsedSeed()));
   };
 
   return (
@@ -48,6 +58,8 @@ export function App() {
       onSeedInput={setSeedInput}
       onNewWorld={newWorld}
       onRestore={restart}
+      scenario={scenario}
+      onScenario={chooseScenario}
     />
   );
 }
@@ -58,11 +70,89 @@ interface SimRunProps {
   onSeedInput(value: string): void;
   onNewWorld(): void;
   onRestore(factory: () => World): void;
+  scenario: ScenarioId;
+  onScenario(id: ScenarioId): void;
 }
 
 const DEFAULT_GROUND_OPACITY = 0.25;
 
-function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimRunProps) {
+interface ControlBarProps {
+  sim: ReturnType<typeof useSimulation>;
+  scenario: ScenarioId;
+  onScenario(id: ScenarioId): void;
+  seedInput: string;
+  onSeedInput(value: string): void;
+  onNewWorld(): void;
+  onRestore(factory: () => World): void;
+}
+
+function ControlBar({
+  sim,
+  scenario,
+  onScenario,
+  seedInput,
+  onSeedInput,
+  onNewWorld,
+  onRestore,
+}: ControlBarProps) {
+  return (
+    <div className="controls">
+      <button type="button" onClick={sim.running ? sim.pause : sim.start}>
+        {sim.running ? "Pause" : "Run"}
+      </button>
+      <label className="speed-label">
+        Scenario
+        <select
+          data-testid="scenario-select"
+          value={scenario}
+          onChange={(event) => onScenario(event.target.value as ScenarioId)}
+        >
+          {SCENARIOS.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="speed-label">
+        Speed
+        <select
+          data-testid="speed-select"
+          value={sim.speed}
+          onChange={(event) => sim.setSpeed(Number(event.target.value) as SpeedPreset)}
+        >
+          {SPEED_PRESETS.map((preset) => (
+            <option key={preset} value={preset}>
+              {preset}×
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="speed-label">
+        Seed
+        <input
+          className="seed-input"
+          value={seedInput}
+          onChange={(event) => onSeedInput(event.target.value)}
+        />
+      </label>
+      <button type="button" onClick={onNewWorld}>
+        New world
+      </button>
+      <PersistenceControls world={sim.world} onRestore={onRestore} />
+    </div>
+  );
+}
+
+function SimRun({
+  factory,
+  seedInput,
+  onSeedInput,
+  onNewWorld,
+  onRestore,
+  scenario,
+  onScenario,
+}: SimRunProps) {
   const sim = useSimulation(factory);
   const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
   const [groundOpacity, setGroundOpacity] = useState(DEFAULT_GROUND_OPACITY);
@@ -77,36 +167,15 @@ function SimRun({ factory, seedInput, onSeedInput, onNewWorld, onRestore }: SimR
           Tick <span data-testid="tick">{sim.tick}</span> · seed {sim.world.seed} · ants{" "}
           {sim.stats?.population ?? 0}
         </p>
-        <div className="controls">
-          <button type="button" onClick={sim.running ? sim.pause : sim.start}>
-            {sim.running ? "Pause" : "Run"}
-          </button>
-          <label className="speed-label">
-            Speed
-            <select
-              value={sim.speed}
-              onChange={(event) => sim.setSpeed(Number(event.target.value) as SpeedPreset)}
-            >
-              {SPEED_PRESETS.map((preset) => (
-                <option key={preset} value={preset}>
-                  {preset}×
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="speed-label">
-            Seed
-            <input
-              className="seed-input"
-              value={seedInput}
-              onChange={(event) => onSeedInput(event.target.value)}
-            />
-          </label>
-          <button type="button" onClick={onNewWorld}>
-            New world
-          </button>
-          <PersistenceControls world={sim.world} onRestore={onRestore} />
-        </div>
+        <ControlBar
+          sim={sim}
+          scenario={scenario}
+          onScenario={onScenario}
+          seedInput={seedInput}
+          onSeedInput={onSeedInput}
+          onNewWorld={onNewWorld}
+          onRestore={onRestore}
+        />
       </header>
       <div className="app-body">
         <WorldView

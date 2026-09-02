@@ -49,7 +49,7 @@ describe("App", () => {
   it("replaces the viewport with a notice at charts-only speed", async () => {
     const { container, root } = await renderApp();
 
-    const select = container.querySelector("select");
+    const select = container.querySelector<HTMLSelectElement>('[data-testid="speed-select"]');
     if (!select) {
       throw new Error("missing speed select");
     }

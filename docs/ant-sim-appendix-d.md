@@ -6,8 +6,12 @@ numbering.*
 
 > **Abstract.** This appendix converts the open question — *"how do we get from a scripted oracle
 > digging a shaft to an RNN ant digging a colony?"* — into an ordered ladder of micro-steps, each
-> with one deliverable and one pass condition, using **only mechanisms that already exist**. It
-> then freezes the actuation contract the ladder depends on, headlined by the oracle-parity
+> with one deliverable, one pass condition, and an explicit **config-gate state**, using **only
+> mechanisms that already exist**. The ladder executes on the `SimConfig` gate system: every
+> later-phase system (mortality, decay, seasons, weather, microclimate, brood rearing…) is a
+> named gate, the ladder starts from the `PHASE2` preset (all gates off), and climbs toward
+> `FULL` by re-admitting **one gate at a time**, measuring what each costs. The appendix then
+> freezes the actuation contract the ladder depends on, headlined by the oracle-parity
 > requirement: oracles and RNN ants must drive the identical world resolution through the
 > identical output tuple, so that every oracle-hour hardens the exact pipeline the RNN inherits.
 > The full morphogenesis program (carrier audit, rule tournaments, morphometrics, function
@@ -16,18 +20,54 @@ numbering.*
 
 ---
 
-## D.1 Scope, Fence, and Current State
+## D.1 Scope, Fence, Gates, and Current State
 
-**Current state:** a scripted builder oracle digs a ragged straight shaft; immortal; economy off.
-**Ladder target:** an RNN ant, through the real controller and shipped sensors, digging a
-branched nest with widened spots, on a live energy economy.
+**Current state:** a scripted builder oracle digs a shaft under the `PHASE2` preset; the
+locomotion fix makes 1-wide shafts navigable; the config-gate system (§D.1.1) exists and has
+already produced two attributable findings. **Ladder target:** an RNN ant, through the real
+controller and shipped sensors, digging a branched nest with widened spots, on a live energy
+economy — reached by re-admitting gates one at a time from `PHASE2` toward `FULL`.
+
+### D.1.1 The config-gate system (the ladder's execution mechanism)
+
+The project was built in the wrong order — evolution and late-phase liabilities landed before
+the Phase 2 base case existed — which made failures unattributable: founding nests decayed onto
+queens, digging drowned under stochastic evolution, and "does an ant dig at all?" required
+editing source. `SimConfig` repairs this by making each later-phase system a **gate** checked at
+its own entry point. Its design rules are adopted here as binding on the ladder:
+
+- **A flag is never a magnitude.** Gates turn whole systems on/off; numeric constants live in
+  the tunables layer (P-layer, App. C) and are tuned via the harness, never via flags.
+- **Per-world config.** Each world clones its config; one run's flags cannot corrupt a preset.
+- **Checkpoints serialize the config.** A saved run reloads under the world it was actually run
+  in — without this, ledger comparisons across checkpoints are meaningless.
+- **`spoilCapacity: null` = genome-derived** is the template for every gene-adjacent override:
+  carry capacity belongs to evolution (Rule 9, genome territory); the override exists for
+  experiments, not as a global constant that outranks selection.
+
+Two findings the gate system has already produced — recorded because they validate the method:
+the founding nest "collapsing onto the queen" was `nestDecay` (a Phase-4 system running during a
+Phase-2 question), not broken nest mechanics; and `spoilHauling`'s choreography was consuming
+most ant-time, which is why digging *looked* nonexistent. Both are exactly the class of
+misattribution the spec's §13 phasing was designed to prevent, recovered after the fact.
+
+> **Design Rule 17 (One gate at a time).** The ladder starts at `PHASE2` (all gates off) and
+> climbs toward `FULL` by re-admitting **one named gate per step**, measuring its cost on the
+> step's ledger before the next is admitted. Two gates never turn on in the same step. During
+> all ladder measurement runs, `autoContinue` stays **off** — a refounding safety net masks
+> colony death, and colony death is data. `wideEntranceShaft` stays **off** (1×1 is navigable
+> since the locomotion fix; `FULL` retains 2×2 only to preserve Release 3 calibration, which
+> the ladder does not touch).
 
 > **Design Rule 14 (The fence).** For the duration of the ladder (§D.2): **no new fields,
 > sensors, materials, or mechanisms.** The deliverables are rules on existing machinery, shape
 > comparisons, and reports. An agent that believes something is missing from the world files a
 > finding report naming it (App. C §C.5) — it does not build the thing. Chambers and branches
 > are pursued with exactly two ingredients, both already shipped: the unlabeled pheromone
-> channels and the crowding sensor.
+> channels and the crowding sensor. **Re-admitting an existing gated system per Rule 17 is not a
+> fence violation; building a new one is.** The fence and the gates are complementary: gates
+> keep the already-built future out of the present; the fence keeps an unbuilt future from being
+> built early.
 
 Rationale (one paragraph, so the fence reads as reasoned rather than arbitrary): real nest
 morphogenesis is behavior × world feedback — no architect, no blueprint; local rules coupled to
@@ -41,24 +81,32 @@ tests whether those two suffice **before** any richer world is contemplated.
 
 ## D.2 The Micro-Step Ladder
 
-Each step: one deliverable, one pass condition, existing mechanisms only. A failure points at the
-step that owns it. Steps 1–9 reach the first RNN nest; steps 10–12 extend to the next reasonable
-goal — a nest that *earns* something — still inside the fence.
+Each step: one deliverable, one pass condition, one config state, existing mechanisms only. A
+failure points at the step that owns it. The **Gates** column gives the delta from `PHASE2`
+(everything off); per Rule 17, each step admits at most one new gate, and a gate once admitted
+stays on for all later steps unless noted. Steps 1–9 reach the first RNN nest; steps 10–12
+extend to the next reasonable goal — a nest that *earns* something — still inside the fence.
 
-| # | Step | Deliverable | Pass condition |
-|---|---|---|---|
-| 1 | **Fix the shaft** | Assertion suite on the existing oracle run | Dug voxels == intended column, exactly; spoil dumped == voxels dug (mass conservation, spec §5.4); materials dug ∈ {TOPSOIL, CLAY}, ROCK untouched. The 1-and-2-wide raggedness resolved and *locked by test*, not by eyeball |
-| 2 | **Energy on (oracle)** | Same scenario, mortal ant, dig costs + metabolism live | Shaft completes with energy to spare. If it starves, tune dig cost / tank via harness until it doesn't (this is R6: constants must *permit* digging before behavior can *choose* it). Note: spoil-haul round trips are where dig cost compounds — the loop is dig×capacity → climb → dump → descend |
-| 3 | **Amplify rule (oracle)** | Rule 1 added: mark channel A while digging; prefer the highest-A face | One ant still completes the shaft (the rule must not break solo digging) |
-| 4 | **Overflow rule + shape test (oracle)** | Rule 2 added: crowding > threshold → lateral preference. Run 5–10 ants, one config | **The shape gate: the air network is no longer a line.** Any branch or widening passes. Fail → tune the two rule constants within budget (Rule 12: 3 configs / 10×) → still a line ⇒ structural finding report, stop |
-| 5 | **Name the seed spec** | The passing oracle reduced to its reflex list | Exactly three reflexes: dig-down bias, amplify, overflow. No additions |
-| 6 | **Write the seed weights** | Hand-written weights per reflex (2–4 weights each) against existing sensors; hidden layer zero | Weights exist and are readable: vertical bias + dig as pinned constants; channel-A stereo → turn (chemotaxis pattern reused on a different input pair); crowding → vertical-bias shift |
-| 7 | **Assay each reflex (rung 3)** | Isolated synthetic-stimulus tests in the assay arena, plus the **loopback assertion**: raw input vector in a known world configuration == hand-computed expected values, every index, every normalization | Given an A-gradient, the seeded network prefers the correct face; given crowding, lateral bias fires; marshalling proven independent of behavior |
-| 8 | **One seeded ant, real pipeline** | Single RNN ant, real controller + sensors, energy on, step-2 scenario | Digs a shaft comparable to the step-2 oracle. Oracle could + seed can't ⇒ fault is provably in the sensor→network→output pipeline (everything else is shared and proven); steps 6–7 localize it |
-| 9 | **Seeded colony, shape test** | 5–10 seeded RNN ants, step-4 map | Same shape gate, now on the RNN: **a branched/widened nest dug by the actual controller.** Gap vs. the step-4 oracle shape = measured shortfall; if hand-written reflexes cannot close it, then and only then CMA-ES on those same three reflexes (App. B §B.9.3) — no new competences |
-| 10 | **Brood in the wide spots (oracle)** | Queen/egg placement uses widened voxels (existing egg mechanics; existing climate-keyed exposure); no new fields | Egg-survival ledger of the widened nest > the straight-shaft baseline, same config. This is Rule 7's increment logic applied to morphology: the widening must *earn* something already priced |
-| 11 | **Storage in the nest (oracle)** | Food stored in dug voids (existing hoarding/rain mechanics) | Store-retention ledger across one weather event > surface baseline |
-| 12 | **Seeded RNN vs. steps 10–11** | The step-9 colony re-run with brood + storage scoring | RNN nest's egg-survival and store-retention within tolerance of the oracle's. **This is the ladder's summit: a functional nest — shape that earns ledger — produced by the real controller.** Everything beyond (evolution on, templates, new carriers) is a separate authorization |
+| # | Step | Gates (Δ from PHASE2) | Deliverable | Pass condition |
+|---|---|---|---|---|
+| 1 | **Fix the shaft** | + `spoilHauling` | Assertion suite on the existing oracle run | Dug voxels == intended column, exactly; spoil dumped == voxels dug (mass conservation, spec §5.4 — only assertable with hauling on; the `PHASE2` vanishing-spoil default is for navigation debugging only); materials dug ∈ {TOPSOIL, CLAY}, ROCK untouched. Any raggedness resolved and *locked by test*, not by eyeball. The known haul-choreography time cost is measured here as ticks-per-voxel-dug — the baseline number every later step is compared against |
+| 2 | **Energy on (oracle)** | + `mortality` | Same scenario, mortal ant, dig costs + metabolism live | Shaft completes with energy to spare. If it starves, tune dig cost / tank via harness (P-layer, never flags) until it doesn't — R6: constants must *permit* digging before behavior can *choose* it. Spoil-haul round trips (dig×capacity → climb → dump → descend) are where dig cost compounds; `spoilCapacity` stays `null` (genome-derived) unless an experiment says otherwise, and any override is logged as an experiment, not committed as a constant |
+| 3 | **Amplify rule (oracle)** | — | Rule 1 added: mark channel A while digging; prefer the highest-A face | One ant still completes the shaft (the rule must not break solo digging) |
+| 4 | **Overflow rule + shape test (oracle)** | — | Rule 2 added: crowding > threshold → lateral preference. Run 5–10 ants, one config | **The shape gate: the air network is no longer a line.** Any branch or widening passes. Fail → tune the two rule constants within budget (Rule 12: 3 configs / 10×) → still a line ⇒ structural finding report, stop |
+| 5 | **Name the seed spec** | — | The passing oracle reduced to its reflex list | Exactly three reflexes: dig-down bias, amplify, overflow. No additions |
+| 6 | **Write the seed weights** | — | Hand-written weights per reflex (2–4 weights each) against existing sensors; hidden layer zero | Weights exist and are readable: vertical bias + dig as pinned constants; channel-A stereo → turn (chemotaxis pattern reused on a different input pair); crowding → vertical-bias shift |
+| 7 | **Assay each reflex (rung 3)** | assay arena (config-independent) | Isolated synthetic-stimulus tests, plus the **loopback assertion**: raw input vector in a known world configuration == hand-computed expected values, every index, every normalization | Given an A-gradient, the seeded network prefers the correct face; given crowding, lateral bias fires; marshalling proven independent of behavior |
+| 8 | **One seeded ant, real pipeline** | same as step 2 | Single RNN ant, real controller + sensors, step-2 config | Digs a shaft comparable to the step-2 oracle *under the identical config* (per-world clone guarantees this is checkable). Oracle could + seed can't ⇒ fault is provably in the sensor→network→output pipeline (everything else is shared and proven); steps 6–7 localize it |
+| 9 | **Seeded colony, shape test** | same as step 4 | 5–10 seeded RNN ants, step-4 map and config | Same shape gate, now on the RNN: **a branched/widened nest dug by the actual controller.** Gap vs. the step-4 oracle shape = measured shortfall; if hand-written reflexes cannot close it, then and only then CMA-ES on those same three reflexes (App. B §B.9.3) — no new competences |
+| 10 | **Brood in the wide spots (oracle)** | + `reproduction`, then + `eggExposure` (+ `microclimate` only if exposure is keyed to it — admit in two measured sub-steps, Rule 17) | Queen/egg placement uses widened voxels; existing egg mechanics and climate-keyed exposure; no new fields | Egg-survival ledger of the widened nest > straight-shaft baseline, same config. Rule 7's increment logic applied to morphology: the widening must *earn* something already priced. (`larvalRearing` stays **off** — the brood-capital recalibration is a separate authorized workstream, not a ladder step) |
+| 11 | **Storage in the nest (oracle)** | + `weather` | Food stored in dug voids (existing hoarding/rain mechanics) | Store-retention ledger across one weather event > surface baseline |
+| 12 | **Seeded RNN vs. steps 10–11** | same as steps 10–11 | The step-9 colony re-run with brood + storage scoring | RNN nest's egg-survival and store-retention within tolerance of the oracle's, identical config. **This is the ladder's summit: a functional nest — shape that earns ledger — produced by the real controller.** Everything beyond (evolution on, `nestDecay`, `seasons`, `larvalRearing`, `autoContinue`, templates, new carriers) is a separate authorization |
+
+Gates deliberately **never admitted by the ladder**: `nestDecay` and `seasons` (Phase-4 regime
+machinery — they answer questions the ladder doesn't ask, and `nestDecay` has already
+demonstrated its power to corrupt Phase-2 conclusions), `larvalRearing` (owned by the
+brood-capital recalibration), `autoContinue` (masks the data). Their re-admission is the *next*
+ladder, written when this one's summit passes.
 
 Standing instruction to the agent, verbatim: *No new fields, sensors, materials, or mechanisms
 for these tasks. The deliverable at each step is the listed artifact and a report. If you believe
@@ -82,8 +130,9 @@ path the RNN inherits — the substrate bug class that produced the historical d
 failures gets burned down by the agent whose intentions are readable; (ii) step 8's oracle-vs-seed
 comparison isolates faults *only if* both agents exercise the same pipeline — without parity the
 comparison proves nothing; (iii) any existing oracle code that bypasses the contract is
-re-expressed through it **before** ladder step 2 (its private movement logic is a prime suspect
-for several historical bugs, including the ragged shaft).
+re-expressed through it **before** ladder step 2 — i.e., before `mortality` is admitted — so the
+first economically real run already exercises the shared pipeline (the oracle's private movement
+logic is a prime suspect for several historical bugs, including the original ragged shaft).
 
 The RNN side has no procedural dig code to get wrong — the controller is a fixed forty lines of
 arithmetic regardless of behavior — so the residual RNN risk class is **marshalling** (input
@@ -205,7 +254,11 @@ measuring (post-step-4); thereafter they are the shape gate's quantitative form.
 
 | Quantity | Constraint | Source |
 |---|---|---|
-| Ladder discipline | one deliverable, one pass condition per step; failures point at the owning step | §D.2 |
+| Ladder discipline | one deliverable, one pass condition, one config state per step; failures point at the owning step | §D.2 |
+| Gate discipline | start at `PHASE2`; one gate re-admitted per step, cost measured; `autoContinue` off and `wideEntranceShaft` off throughout; `nestDecay`/`seasons`/`larvalRearing` never admitted by this ladder | Rule 17 |
+| Flags vs. magnitudes | a flag is never a magnitude; constants tuned in the tunables layer via harness | §D.1.1 |
+| Gene-adjacent overrides | `spoilCapacity: null` pattern: genome-derived by default; overrides are logged experiments, never committed constants | §D.1.1, Rule 9 |
+| Config provenance | per-world config clone; checkpoints serialize config; cross-run ledger comparisons valid only under identical config | §D.1.1 |
 | The fence | no new fields/sensors/materials/mechanisms during the ladder; findings instead of features | Rule 14 |
 | Shape gate | air network no longer a line (step 4 oracle; step 9 RNN) | §D.2 |
 | Tuning inside the ladder | Rule 12 budget applies (3 configs / 10×) | App. C |
