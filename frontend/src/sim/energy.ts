@@ -1,6 +1,6 @@
 import { SEX_MALE, type Ant } from "./ant";
 import { getVoxelSafe, voxelIndex } from "./grid";
-import { Material } from "./materials";
+import { Material, type MaterialId } from "./materials";
 import { ENERGY, MALE } from "./tunables";
 import { mutateVoxel, type World } from "./world";
 
@@ -51,11 +51,18 @@ const DROP_OFFSETS = [
 ] as const;
 
 /**
- * Place dropped biomass (corpse, perished brood) as a FOOD voxel at the
- * first unoccupied AIR spot at or beside the site — never entombing a
- * living ant or an egg inside solid matter.
+ * Place a dropped voxel (corpse, perished brood, a dead ant's carried
+ * load) at the first unoccupied AIR spot at or beside the site — never
+ * entombing a living ant or an egg inside solid matter. Returns false
+ * when there is nowhere to put it.
  */
-export function dropFoodAt(world: World, x: number, y: number, z: number): void {
+export function dropMaterialAt(
+  world: World,
+  x: number,
+  y: number,
+  z: number,
+  material: MaterialId
+): boolean {
   for (const [dx, dy, dz] of DROP_OFFSETS) {
     const tx = x + dx;
     const ty = y + dy;
@@ -67,15 +74,34 @@ export function dropFoodAt(world: World, x: number, y: number, z: number): void 
       world.eggIndex.has(voxelIndex(world.grid, tx, ty, tz)) ||
       world.ants.some((a) => a.alive && a.x === tx && a.y === ty && a.z === tz);
     if (!occupied) {
-      mutateVoxel(world, tx, ty, tz, Material.FOOD);
-      return;
+      mutateVoxel(world, tx, ty, tz, material);
+      return true;
     }
   }
+  return false;
 }
 
-/** Kill an ant in place: the corpse persists as edible energy (spec §6). */
+/** Place dropped biomass (corpse, perished brood) as a FOOD voxel. */
+export function dropFoodAt(world: World, x: number, y: number, z: number): void {
+  dropMaterialAt(world, x, y, z, Material.FOOD);
+}
+
+/**
+ * Kill an ant in place: the corpse persists as edible energy (spec §6),
+ * and anything it was carrying returns to the world — matter is conserved
+ * across death, not silently destroyed with the carrier.
+ */
 export function killAnt(world: World, ant: Ant): void {
   ant.alive = false;
+  const carried = ant.carrying;
+  if (carried !== null) {
+    for (let i = 0; i < ant.spoilLoads; i++) {
+      dropMaterialAt(world, ant.x, ant.y, ant.z, carried);
+    }
+    ant.spoilLoads = 0;
+    ant.carryLoad = 0;
+    ant.carrying = null;
+  }
   dropFoodAt(world, ant.x, ant.y, ant.z);
 }
 

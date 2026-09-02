@@ -95,10 +95,12 @@ function digTargets(ant: Ant, verticalBias: number): number {
     DIG_TARGET_SCRATCH[i].z = z;
   };
   if (verticalBias < -0.33) {
-    set(0, ant.x + dx, ant.y - 1, ant.z + dz);
-    set(1, ant.x, ant.y - 1, ant.z);
-    set(2, ant.x + dx, ant.y, ant.z + dz);
-    return 3;
+    // Dig down means dig down: the ONLY candidate is the voxel directly
+    // below. Falling through to a forward-down neighbour is what carved
+    // ragged 1-and-2-wide shafts (a second parallel column whenever the
+    // voxel below was already open). A sunk shaft is now exactly a column.
+    set(0, ant.x, ant.y - 1, ant.z);
+    return 1;
   }
   if (verticalBias > 0.33) {
     set(0, ant.x + dx, ant.y + 1, ant.z + dz);

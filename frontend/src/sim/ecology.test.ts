@@ -57,23 +57,31 @@ describe("digging and spoil conservation", () => {
     expect(countSolidAndCarried(world)).toBe(atCapacity);
   });
 
-  it("digs downward from flat ground and keeps digging until capacity", () => {
+  it("digs straight down from flat ground, one voxel per descent", () => {
     const world = createReferenceWorld(36);
     populateForagers(world, 3);
     const ant = firstAnt(world);
     ant.heading = 0;
 
+    // A strong down bias digs exactly the voxel below — never a
+    // forward-down neighbour, which used to widen shafts to two voxels.
     tryDig(world, ant, -1);
     expect(ant.spoilLoads).toBe(1);
-    const dugForwardDown = getVoxel(world.grid, ant.x + 1, ant.y - 1, ant.z) === Material.AIR;
-    const dugBelow = getVoxel(world.grid, ant.x, ant.y - 1, ant.z) === Material.AIR;
-    expect(dugForwardDown || dugBelow).toBe(true);
+    expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.AIR);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y - 1, ant.z)).not.toBe(Material.AIR);
 
-    // Below capacity, digging continues instead of refilling the hole.
-    if (spoilCapacity(ant) > 1) {
-      tryDig(world, ant, -1);
-      expect(ant.spoilLoads).toBe(2);
-    }
+    // Nothing left to dig below: the load is dropped to the side (the
+    // one terrain channel's deposit rule) and the shaft stays open — the
+    // spoil must never go back down the hole.
+    tryDig(world, ant, -1);
+    expect(ant.spoilLoads).toBe(0);
+    expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.AIR);
+
+    // After descending, the next voxel down is available again.
+    ant.y -= 1;
+    tryDig(world, ant, -1);
+    expect(ant.spoilLoads).toBe(1);
+    expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.AIR);
   });
 
   it("deposits spoil level or upward, never straight back down first", () => {
