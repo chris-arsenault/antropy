@@ -93,7 +93,7 @@ export function dropFoodAt(world: World, x: number, y: number, z: number): void 
  */
 export function killAnt(world: World, ant: Ant): void {
   ant.alive = false;
-  const carried = ant.carrying;
+  const carried = ant.carrying as MaterialId | null;
   if (carried !== null) {
     for (let i = 0; i < ant.spoilLoads; i++) {
       dropMaterialAt(world, ant.x, ant.y, ant.z, carried);
