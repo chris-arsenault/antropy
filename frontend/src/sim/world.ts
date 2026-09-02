@@ -26,6 +26,7 @@ import { createInputBuffer, sense, type SenseContext } from "./senses";
 import { generateTerrain, surfaceHeight } from "./terrain";
 import { stepAutoContinue } from "./continuity";
 import { microclimateMultiplier, stepWeather } from "./weather";
+import { FULL_CONFIG, type SimConfig } from "./config";
 import {
   BEACON_PHYSICS,
   DECAY,
@@ -36,6 +37,8 @@ import {
 } from "./tunables";
 
 export interface World {
+  /** Feature gates (design spec §13 build phases); see config.ts. */
+  config: SimConfig;
   readonly seed: number;
   tick: number;
   rng: Rng;
@@ -65,9 +68,7 @@ export interface World {
    * those lost to exposure. */
   eggsLaid: number;
   eggsPerished: number;
-  /** Auto-continue: force-foundings from the survivor pool (R3). The
-   * flag lets harnesses and isolation tests run dead worlds honestly. */
-  autoContinue: boolean;
+  /** Auto-continue counters (R3); the gate is config.autoContinue. */
   continuations: number;
   lastContinueTick: number;
   pheromoneA: ScentField;
@@ -118,9 +119,14 @@ function buildSurfaceMap(seed: number, grid: VoxelGrid): Int16Array {
   return map;
 }
 
-export function createWorld(seed: number, controller: Controller = rnnController): World {
+export function createWorld(
+  seed: number,
+  controller: Controller = rnnController,
+  config: SimConfig = FULL_CONFIG
+): World {
   const grid = generateTerrain(seed);
   const world: World = {
+    config: { ...config }, // per-world copy: presets stay immutable
     seed,
     tick: 0,
     rng: createRng(seed),
@@ -140,7 +146,6 @@ export function createWorld(seed: number, controller: Controller = rnnController
     queenEggsEaten: 0,
     eggsLaid: 0,
     eggsPerished: 0,
-    autoContinue: true,
     continuations: 0,
     lastContinueTick: 0,
     pheromoneA: createScentField(grid, TRAIL_PHYSICS),
@@ -216,7 +221,7 @@ const ORACLE_THINK_COST = 0.00008;
 function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
   ant.age += 1;
   stampVisit(world, ant.x, ant.y, ant.z);
-  const climate = microclimateMultiplier(world, ant);
+  const climate = world.config.microclimate ? microclimateMultiplier(world, ant) : 1;
   sense(ctx, ant, inputs);
   let outputs = world.policyOverride?.(world, ant, inputs) ?? null;
   let thinkCost = ORACLE_THINK_COST;
@@ -244,7 +249,9 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
 
   applyBasalDrain(ant, thinkCost, climate);
   applyStepCost(ant);
-  checkDeath(world, ant);
+  if (world.config.mortality) {
+    checkDeath(world, ant);
+  }
 }
 
 /**
@@ -254,7 +261,9 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
  */
 export function stepWorld(world: World): void {
   world.tick += 1;
-  stepWeather(world);
+  if (world.config.weather) {
+    stepWeather(world);
+  }
   if (world.tick % SCENT.stepInterval === 0) {
     stepScents(world);
   }
@@ -266,7 +275,7 @@ export function stepWorld(world: World): void {
     stampVisit(world, colony.x, colony.y, colony.z);
   }
   stepEggs(world);
-  if (world.tick % DECAY.interval === 0) {
+  if (world.config.nestDecay && world.tick % DECAY.interval === 0) {
     stepDecay(world);
   }
 
@@ -279,7 +288,7 @@ export function stepWorld(world: World): void {
     colonies: world.colonies,
     antIndex: buildAntIndex(world.grid, world.ants),
     eggIndex: world.eggIndex,
-    climate: (ant) => microclimateMultiplier(world, ant),
+    climate: (ant) => (world.config.microclimate ? microclimateMultiplier(world, ant) : 1),
   };
   const inputs = createInputBuffer();
   for (const ant of world.ants) {

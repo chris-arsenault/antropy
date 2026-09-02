@@ -50,6 +50,17 @@ function carveIfSoft(world: World, x: number, y: number, z: number): void {
  * (forward-level steps outrank the stationary climb at an open mouth), so
  * anything narrower leaves the chamber decorative.
  */
+function carveShaft(world: World, cx: number, cy: number, cz: number, surfaceY: number): void {
+  for (let y = cy + 2; y <= surfaceY; y++) {
+    carveIfSoft(world, cx, y, cz);
+    if (world.config.wideEntranceShaft) {
+      carveIfSoft(world, cx + 1, y, cz);
+      carveIfSoft(world, cx, y, cz + 1);
+      carveIfSoft(world, cx + 1, y, cz + 1);
+    }
+  }
+}
+
 function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY: number): void {
   for (let dy = 0; dy <= 1; dy++) {
     for (let dz = -1; dz <= 1; dz++) {
@@ -58,12 +69,7 @@ function carveChamber(world: World, cx: number, cy: number, cz: number, surfaceY
       }
     }
   }
-  for (let y = cy + 2; y <= surfaceY; y++) {
-    carveIfSoft(world, cx, y, cz);
-    carveIfSoft(world, cx + 1, y, cz);
-    carveIfSoft(world, cx, y, cz + 1);
-    carveIfSoft(world, cx + 1, y, cz + 1);
-  }
+  carveShaft(world, cx, cy, cz, surfaceY);
   for (let dz = -1; dz <= 1; dz++) {
     for (let dx = -1; dx <= 1; dx++) {
       const surface = world.surfaceMap[(cz + dz) * world.grid.sizeX + (cx + dx)];
@@ -394,12 +400,16 @@ function restockFromLarder(world: World, colony: Colony): void {
 
 export function stepColonies(world: World): void {
   for (const colony of world.colonies.slice()) {
-    if (queenDies(world, colony)) {
+    // Mortality gates queen death/collapse (Phase 3+); without it the
+    // scripted queen is immortal for the Phase 2 base case.
+    if (world.config.mortality && queenDies(world, colony)) {
       collapseColony(world, colony);
       continue;
     }
     restockFromLarder(world, colony);
-    layEggs(world, colony);
+    if (world.config.reproduction) {
+      layEggs(world, colony);
+    }
   }
 }
 

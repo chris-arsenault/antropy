@@ -11,10 +11,14 @@ import { mutateVoxel, type World } from "./world";
  * sinusoid plus noise, and FOOD spawns at random surface positions toward it.
  */
 export function stepFoodGovernor(world: World): void {
-  const phase = (2 * Math.PI * world.tick) / SEASON.periodTicks;
-  const seasonal = world.foodBase * (1 + SEASON.amplitude * Math.sin(phase));
-  const jitter = world.foodBase * SEASON.noise * randNormal(world.rng);
-  world.foodTarget = Math.max(0, Math.round(seasonal + jitter));
+  if (world.config.seasons) {
+    const phase = (2 * Math.PI * world.tick) / SEASON.periodTicks;
+    const seasonal = world.foodBase * (1 + SEASON.amplitude * Math.sin(phase));
+    const jitter = world.foodBase * SEASON.noise * randNormal(world.rng);
+    world.foodTarget = Math.max(0, Math.round(seasonal + jitter));
+  } else {
+    world.foodTarget = world.foodBase;
+  }
 
   const deficit = world.foodTarget - world.foodSources.size;
   const toSpawn = Math.min(deficit, FOOD_GOVERNOR.maxSpawnPerPass);

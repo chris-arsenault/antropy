@@ -18,7 +18,7 @@ interface Job {
 function fitnessOf(job: Job): Record<string, number> {
   setRuntimeSeedBase(job.vector);
   const world = createWorld(job.worldSeed);
-  world.autoContinue = false; // measure the colony, not the safety net
+  world.config.autoContinue = false; // measure the colony, not the safety net
   const colony = foundColony(world);
   let workerTicks = 0;
   for (let t = 0; t < job.ticks; t++) {

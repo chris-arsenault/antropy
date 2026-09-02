@@ -18,3 +18,4 @@ channels, recurrent regimes — are recorded with their alternatives and rationa
 | [0010](0010-derived-seed-portfolio.md) | Seed portfolio derived by direct optimization, baked as artifacts | Accepted | 2026-09-02 |
 | [0011](0011-liability-shapes-and-bootstrap-tournament.md) | Liability shapes price asset placement; dominance de-scoped to asset ledgers | Accepted | 2026-09-02 |
 | [0012](0012-harness-ledger.md) | Measurement harness with a SQLite ledger, outside the test tiers | Accepted | 2026-09-02 |
+| [0013](0013-feature-config-gates.md) | Feature gates so build phases are data, not code | Accepted | 2026-09-02 |

@@ -160,13 +160,20 @@ function stepLarva(world: World, larva: Egg): "alive" | "ripe" | "perished" {
  */
 /** One brood tick: hazard roll, then incubation or rearing. */
 function stepBroodOne(world: World, egg: Egg): "alive" | "ripe" | "perished" {
-  const hazard = exposureHazard(world, egg);
-  if (hazard > 0 && world.rng.next() < hazard) {
-    return "perished";
+  if (world.config.eggExposure) {
+    const hazard = exposureHazard(world, egg);
+    if (hazard > 0 && world.rng.next() < hazard) {
+      return "perished";
+    }
   }
   if (egg.stage === STAGE_EGG) {
     egg.incubationRemaining -= 1;
     if (egg.incubationRemaining <= 0) {
+      // Phase 5 rearing gates the larval stage; without it a ripe egg
+      // hatches straight to an adult (design spec §13 phase order).
+      if (!world.config.larvalRearing) {
+        return "ripe";
+      }
       egg.stage = STAGE_LARVA;
     }
     return "alive";

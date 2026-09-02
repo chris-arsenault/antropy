@@ -1,5 +1,6 @@
 import { surfaceSpawnY } from "../../src/sim/ant";
 import { foundColony, type Colony } from "../../src/sim/colony";
+import { FULL_CONFIG, type SimConfig } from "../../src/sim/config";
 import { voxelIndex } from "../../src/sim/grid";
 import { Material } from "../../src/sim/materials";
 import { resetOracleState } from "../../src/sim/oracles/policies";
@@ -22,6 +23,8 @@ export interface ColonyRunConfig {
   ticks: number;
   cadence: number;
   followAntId: number | null;
+  /** Feature gates for the run (design spec §13); defaults to full. */
+  simConfig?: SimConfig;
 }
 
 export interface ColonyRunResult {
@@ -135,9 +138,9 @@ function followAnt(world: World, antId: number | null, tick: number, out: TraceS
 
 export function runColony(config: ColonyRunConfig): ColonyRunResult {
   resetOracleState();
-  const world = createWorld(config.seed);
+  const world = createWorld(config.seed, undefined, config.simConfig ?? FULL_CONFIG);
   // Continuation would mask the collapse ledgers this harness measures.
-  world.autoContinue = false;
+  world.config.autoContinue = false;
   const colony = foundColony(world);
   if (config.driver.queenOnSurface) {
     colony.y = world.surfaceMap[colony.z * world.grid.sizeX + colony.x];

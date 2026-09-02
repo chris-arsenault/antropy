@@ -10,7 +10,7 @@ function createReferenceWorld(seed: number): World {
   const world = createWorld(seed, braitenbergController);
   // The asexual reference controller cannot found colonies; these worlds
   // measure forager ecology only.
-  world.autoContinue = false;
+  world.config.autoContinue = false;
   return world;
 }
 

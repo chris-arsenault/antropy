@@ -89,7 +89,7 @@ export interface EpisodeConfig {
 }
 
 function resetArena(w: World, config: EpisodeConfig): void {
-  w.autoContinue = false; // probe worlds must stay exactly as staged
+  w.config.autoContinue = false; // probe worlds must stay exactly as staged
   w.ants = [];
   w.eggs = [];
   w.eggIndex.clear();

@@ -1,3 +1,4 @@
+import { applyConfigOverrides, configPreset } from "../src/sim/config";
 import { formatSummary, runColony } from "./lib/colonyRun";
 import { DRIVER_NAMES, makeDriver } from "./lib/drivers";
 import { flag, intFlag, parseFlags, seedsOf, type Flags } from "./lib/flags";
@@ -13,6 +14,8 @@ import { runDeterminism } from "./determinism";
  * Runs land in harness/ledger.db; nothing here executes in a test tier.
  *
  *   pnpm harness run --driver shelter --seeds 4200,4201 --ticks 14000
+ *   pnpm harness run --driver rung1 --config phase2 --ticks 20000  (base case)
+ *   ... --config phase2 --flag nestDecay=true   (toggle one feature back on)
  *   pnpm harness tournament --seeds 4200 --ticks 28000
  *   pnpm harness ladder --ticks 8000
  *   pnpm harness calibrate --ticks 4000
@@ -36,6 +39,10 @@ export function executeRuns(flags: Flags, plans: RunPlan[]): void {
   const label = flag(flags, "label", "");
   const follow = flags.values.has("follow") ? intFlag(flags, "follow", 0) : null;
   const patches = flags.values.get("patch") ?? [];
+  const simConfig = applyConfigOverrides(
+    configPreset(flag(flags, "config", "full")),
+    flags.values.get("flag") ?? []
+  );
   const db = openLedger();
 
   const restore = applyPatches(patches);
@@ -43,7 +50,14 @@ export function executeRuns(flags: Flags, plans: RunPlan[]): void {
     for (const plan of plans) {
       const driver = makeDriver(plan.driverName, plan.overrides);
       const start = Date.now();
-      const result = runColony({ driver, seed: plan.seed, ticks, cadence, followAntId: follow });
+      const result = runColony({
+        driver,
+        seed: plan.seed,
+        ticks,
+        cadence,
+        followAntId: follow,
+        simConfig,
+      });
       const runId = recordRun(
         db,
         {

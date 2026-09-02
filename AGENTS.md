@@ -24,6 +24,10 @@ on the Ahara platform.
   module — a static SPA behind CloudFront.
 - Hand-code the sensory/motor interface, never ant behavior. Trail-following, castes,
   cannibalism, and architecture must emerge from evolved genomes ([design spec §1](docs/design-spec.md)).
+- Build in the spec's phase order ([§13](docs/design-spec.md)); later-phase systems
+  (decay, seasons, weather, microclimate, larval rearing) are feature gates in
+  `src/sim/config.ts` (ADR-0013), off in the `PHASE2` base-case preset. Isolate a phase by
+  config, not by editing systems.
 - Classify every change per the layer model before building it
   ([Appendix C](docs/ant-sim-appendix-c.md)): world authoring is free; interface additions
   pass the five litmus tests; authored behavior lives only in seeds; parameters tune only

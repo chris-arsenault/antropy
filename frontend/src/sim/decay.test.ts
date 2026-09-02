@@ -7,7 +7,7 @@ import { DECAY } from "./tunables";
 import { createWorld, mutateVoxel, stepWorld, type World } from "./world";
 
 function carveTestTunnel(world: World): { x: number; y: number; z: number } {
-  world.autoContinue = false; // isolate decay from refounding carves
+  world.config.autoContinue = false; // isolate decay from refounding carves
   const x = 30;
   const z = 30;
   const y = world.surfaceMap[z * world.grid.sizeX + x] - 8;

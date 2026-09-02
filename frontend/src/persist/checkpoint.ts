@@ -1,5 +1,6 @@
 import { type Ant } from "../sim/ant";
 import { type Colony } from "../sim/colony";
+import { type SimConfig } from "../sim/config";
 import { INPUT_COUNT, OUTPUT_COUNT } from "../sim/controller/contract";
 import { controllerById } from "../sim/controller/registry";
 import { type Egg } from "../sim/eggs";
@@ -8,7 +9,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 8;
+export const CHECKPOINT_VERSION = 9;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -52,7 +53,7 @@ export interface Checkpoint {
   queenEggsEaten: number;
   eggsLaid: number;
   eggsPerished: number;
-  autoContinue: boolean;
+  config: SimConfig;
   continuations: number;
   lastContinueTick: number;
   foodBase: number;
@@ -211,7 +212,7 @@ export function serializeWorld(world: World): Checkpoint {
     queenEggsEaten: world.queenEggsEaten,
     eggsLaid: world.eggsLaid,
     eggsPerished: world.eggsPerished,
-    autoContinue: world.autoContinue,
+    config: world.config,
     continuations: world.continuations,
     lastContinueTick: world.lastContinueTick,
     foodBase: world.foodBase,
@@ -256,7 +257,7 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.queenEggsEaten = checkpoint.queenEggsEaten;
   world.eggsLaid = checkpoint.eggsLaid;
   world.eggsPerished = checkpoint.eggsPerished;
-  world.autoContinue = checkpoint.autoContinue;
+  world.config = { ...checkpoint.config };
   world.continuations = checkpoint.continuations;
   world.lastContinueTick = checkpoint.lastContinueTick;
   world.foodBase = checkpoint.foodBase;

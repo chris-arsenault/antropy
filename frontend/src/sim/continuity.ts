@@ -26,7 +26,7 @@ function survivorPool(world: World): Genome[] {
 }
 
 export function stepAutoContinue(world: World): void {
-  if (!world.autoContinue) {
+  if (!world.config.autoContinue) {
     return;
   }
   if (world.tick - world.lastContinueTick < CONTINUITY.cooldownTicks) {
