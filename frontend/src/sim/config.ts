@@ -31,6 +31,19 @@ export interface SimConfig {
    * undescendable under the movement primitives — the real fix is
    * locomotion). Off = 1x1 shaft, for testing that fix. */
   wideEntranceShaft: boolean;
+  /**
+   * Excavated soil must be carried and deposited (matter is conserved,
+   * spoil piles are real). Off: digging clears the voxel outright and the
+   * soil vanishes — no load, no haul trip. Food transport is unaffected
+   * either way; this gates spoil only.
+   */
+  spoilHauling: boolean;
+  /**
+   * Loads an ant can carry. `null` uses the genome-derived capacity
+   * (body scale, spec §3.2 — evolution's territory, Appendix C Rule 9);
+   * a number overrides it globally for experiments.
+   */
+  spoilCapacity: number | null;
 }
 
 /** Everything on — the behavior the project shipped through Release 3. */
@@ -45,6 +58,8 @@ export const FULL_CONFIG: SimConfig = {
   larvalRearing: true,
   autoContinue: true,
   wideEntranceShaft: true,
+  spoilHauling: true,
+  spoilCapacity: null,
 };
 
 /**
@@ -65,6 +80,11 @@ export const PHASE2_CONFIG: SimConfig = {
   autoContinue: false,
   // 1-wide entrance: navigable since the locomotion fix (shaftnav.test).
   wideEntranceShaft: false,
+  // Base case: excavation clears soil outright. Hauling is Phase-4-style
+  // realism (conserved matter, spoil piles); it is not needed to answer
+  // "does an ant dig a tunnel and store food?"
+  spoilHauling: false,
+  spoilCapacity: null,
 };
 
 const PRESETS: Record<string, SimConfig> = {
@@ -81,14 +101,28 @@ export function configPreset(name: string): SimConfig {
   return { ...preset };
 }
 
-/** Apply "flag=true|false" overrides to a config in place. */
+function parseValue(raw: string): boolean | number | null {
+  if (raw === "true" || raw === "false") {
+    return raw === "true";
+  }
+  if (raw === "null") {
+    return null;
+  }
+  const numeric = Number(raw);
+  if (Number.isNaN(numeric)) {
+    throw new Error(`config value must be true|false|null|<number>, got "${raw}"`);
+  }
+  return numeric;
+}
+
+/** Apply "flag=true|false|null|<number>" overrides to a config in place. */
 export function applyConfigOverrides(config: SimConfig, specs: string[]): SimConfig {
   for (const spec of specs) {
     const [key, value] = spec.split("=");
     if (!(key in config)) {
       throw new Error(`unknown config flag "${key}"`);
     }
-    (config as unknown as Record<string, boolean>)[key] = value === "true";
+    (config as unknown as Record<string, boolean | number | null>)[key] = parseValue(value);
   }
   return config;
 }

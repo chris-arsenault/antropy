@@ -1,5 +1,6 @@
 import { SEX_FEMALE, SEX_MALE, type Ant } from "./ant";
 import { creditDelivery } from "./colony";
+import { type SimConfig } from "./config";
 import { addEgg, findEggSpot, removeEgg, STAGE_EGG } from "./eggs";
 import { maxEnergy } from "./energy";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
@@ -109,8 +110,14 @@ function digTargets(ant: Ant, verticalBias: number): number {
   return 2;
 }
 
-/** Spoil loads an ant can hold — body size buys carry capacity (spec §3.2). */
-export function spoilCapacity(ant: Ant): number {
+/**
+ * Loads an ant can hold — body size buys carry capacity (spec §3.2), or
+ * the config override when experiments need a fixed capacity.
+ */
+export function spoilCapacity(ant: Ant, config?: SimConfig): number {
+  if (config?.spoilCapacity != null) {
+    return Math.max(1, config.spoilCapacity);
+  }
   return Math.max(1, Math.round(ant.traits.bodyScale * 2));
 }
 
@@ -144,12 +151,20 @@ function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): bool
   if (cost === null) {
     return false;
   }
+  // Spoil hauling off: excavation clears the voxel outright and the soil
+  // vanishes — the ant pays the dig cost but carries nothing. Food
+  // transport is unaffected (it is how food reaches the nest).
+  if (!isFood && !world.config.spoilHauling) {
+    ant.energy -= cost;
+    mutateVoxel(world, x, y, z, Material.AIR);
+    return true;
+  }
   if (ant.carrying !== null && (ant.carrying === Material.FOOD) !== isFood) {
     return false;
   }
   ant.carrying = material;
   ant.spoilLoads += 1;
-  ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
+  ant.carryLoad = ant.spoilLoads / spoilCapacity(ant, world.config);
   ant.energy -= cost;
   mutateVoxel(world, x, y, z, Material.AIR);
   return true;
@@ -208,9 +223,9 @@ export function tryTrophallaxis(world: World, ant: Ant): void {
   }
 }
 
-function unload(ant: Ant): void {
+function unload(world: World, ant: Ant): void {
   ant.spoilLoads -= 1;
-  ant.carryLoad = ant.spoilLoads / spoilCapacity(ant);
+  ant.carryLoad = ant.spoilLoads / spoilCapacity(ant, world.config);
   if (ant.spoilLoads === 0) {
     ant.carrying = null;
   }
@@ -244,7 +259,7 @@ function tryDeposit(world: World, ant: Ant): void {
   if (ant.carrying === Material.FOOD && inNestReach(world, ant) && cropHasRoom(world, ant)) {
     creditDelivery(world, ant.lineageId, ant.patrilineId, ENERGY.foodEnergy);
     ant.deliveries += 1;
-    unload(ant);
+    unload(world, ant);
     return;
   }
   const count = depositTargets(ant);
@@ -262,7 +277,7 @@ function tryDeposit(world: World, ant: Ant): void {
         z,
         ant.carrying === Material.FOOD ? Material.FOOD : Material.LOOSE_FILL
       );
-      unload(ant);
+      unload(world, ant);
       return;
     }
   }
@@ -275,7 +290,7 @@ function tryDeposit(world: World, ant: Ant): void {
  * at the queen, as a delivery. Matter is conserved.
  */
 export function tryDig(world: World, ant: Ant, verticalBias: number): void {
-  if (ant.spoilLoads < spoilCapacity(ant)) {
+  if (ant.spoilLoads < spoilCapacity(ant, world.config)) {
     const count = digTargets(ant, verticalBias);
     for (let i = 0; i < count; i++) {
       const { x, y, z } = DIG_TARGET_SCRATCH[i];

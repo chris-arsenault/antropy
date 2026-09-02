@@ -155,7 +155,7 @@ function nextPhase(s: BuilderState, ant: Ant, full: boolean, deepEnough: boolean
 export function makeBuilder(opts: BuilderOptions): OraclePolicy {
   return (world, ant) => {
     const s = ensureState(ant);
-    const full = ant.spoilLoads >= spoilCapacity(ant);
+    const full = ant.spoilLoads >= spoilCapacity(ant, world.config);
     const deepEnough = s.surfaceY - s.deepestY >= opts.depth;
     s.phase = nextPhase(s, ant, full, deepEnough);
 
