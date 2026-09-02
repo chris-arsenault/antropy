@@ -1,24 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { surfaceSpawnY } from "./ant";
-import { backboneVector, GENOME_LENGTH, rnnController } from "./controller/rnn";
-import { FORAGER_SEED } from "./controller/seeds/forager";
+import { backboneVector, rnnController } from "./controller/rnn";
 import { createRng } from "./rng";
 import { createWorld, spawnAnt, stepWorld, type World } from "./world";
 
-/** The artifact mean itself (noise-free): the contract under assay. */
-function meanGenome() {
-  const vector =
-    FORAGER_SEED !== null && FORAGER_SEED.length === GENOME_LENGTH
-      ? Float32Array.from(FORAGER_SEED)
-      : backboneVector();
-  return rnnController.deserializeGenome(vector);
+/**
+ * The hand-derived backbone (§B.9.1): a seed-portfolio capability, not the
+ * shipped forager. Rung-3 assays verify a competence is *expressible*
+ * against the shipped sensors; whether a given derived seed chooses to use
+ * it is an S-layer outcome (the in-vivo forager drops it because foraging
+ * through middays beats burrowing in the current economy).
+ */
+function backboneGenome() {
+  return rnnController.deserializeGenome(backboneVector());
 }
 
 /**
- * Rung-3 assay for the heat-escape competence, behavior-level: a seeded
- * ant on the open surface at a harsh midday digs itself below ground;
- * the same ant on a cool night leaves the terrain alone. Runs the real
- * step pipeline so the contract survives re-derivation of the seed.
+ * Rung-3 assay for the heat-escape competence, behavior-level: a
+ * heat-instinct ant on the open surface at a harsh midday digs itself
+ * below ground; the same ant on a cool night leaves the terrain alone.
  */
 const HOT_TICK = 30_500;
 const COOL_TICK = 11_500;
@@ -33,7 +33,7 @@ function runEpisode(tickBase: number): number {
   const x = 60;
   const z = 60;
   const y = surfaceSpawnY(world.grid, x, z) as number;
-  const genome = meanGenome();
+  const genome = backboneGenome();
   const ant = spawnAnt(world, {
     x,
     y,
