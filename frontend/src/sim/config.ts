@@ -27,9 +27,13 @@ export interface SimConfig {
   larvalRearing: boolean;
   /** Release 3: force-refound from survivors when the population collapses. */
   autoContinue: boolean;
-  /** Founding carves a 2x2 descendable entrance shaft (1x1 is currently
-   * undescendable under the movement primitives — the real fix is
-   * locomotion). Off = 1x1 shaft, for testing that fix. */
+  /**
+   * Founding carves a 2x2 entrance shaft. Off = 1x1, which is navigable
+   * since the locomotion fix (shaftnav.test): a strong vertical bias now
+   * tries the straight up/down move first, so an ant descends a 1-wide
+   * shaft instead of stepping across its mouth. The 2x2 default only
+   * remains on in FULL to avoid disturbing Release 3's calibration.
+   */
   wideEntranceShaft: boolean;
   /**
    * Excavated soil must be carried and deposited (matter is conserved,
