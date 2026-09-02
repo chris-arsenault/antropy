@@ -63,7 +63,8 @@ export const PHASE2_CONFIG: SimConfig = {
   eggExposure: false,
   larvalRearing: false,
   autoContinue: false,
-  wideEntranceShaft: true,
+  // 1-wide entrance: navigable since the locomotion fix (shaftnav.test).
+  wideEntranceShaft: false,
 };
 
 const PRESETS: Record<string, SimConfig> = {

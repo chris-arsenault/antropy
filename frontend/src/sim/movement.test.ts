@@ -15,14 +15,16 @@ describe("headingToDirection", () => {
 });
 
 describe("stepCandidates", () => {
-  it("prefers the vertical level matching the bias", () => {
-    expect(stepCandidates(0, 0.9)[0]).toEqual({ dx: 1, dy: 1, dz: 0 });
-    expect(stepCandidates(0, -0.9)[0]).toEqual({ dx: 1, dy: -1, dz: 0 });
-    expect(stepCandidates(0, 0)[0]).toEqual({ dx: 1, dy: 0, dz: 0 });
+  it("tries the stationary vertical move first under a strong bias", () => {
+    // So a 1-wide shaft is navigable: straight down/up wins when the voxel
+    // there is air, and is skipped (solid) on flat ground.
+    expect(stepCandidates(0, -0.9)[0]).toEqual({ dx: 0, dy: -1, dz: 0 });
+    expect(stepCandidates(0, 0.9)[0]).toEqual({ dx: 0, dy: 1, dz: 0 });
   });
 
-  it("ends with a straight climb fallback", () => {
-    const candidates = stepCandidates(0, 0.5);
+  it("walks forward-level first under a neutral bias", () => {
+    const candidates = stepCandidates(0, 0);
+    expect(candidates[0]).toEqual({ dx: 1, dy: 0, dz: 0 });
     expect(candidates.at(-1)).toEqual({ dx: 0, dy: 1, dz: 0 });
   });
 });

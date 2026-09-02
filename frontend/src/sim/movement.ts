@@ -62,10 +62,6 @@ export function headingToDirection(heading: number): { dx: number; dz: number } 
   return DIRECTIONS[((octant % 8) + 8) % 8];
 }
 
-const LEVELS_UP = [1, 0, -1] as const;
-const LEVELS_DOWN = [-1, 0, 1] as const;
-const LEVELS_FLAT = [0, 1, -1] as const;
-
 // Single-threaded scratch — contents valid until the next stepCandidates call.
 const CANDIDATE_SCRATCH = [
   { dx: 0, dy: 0, dz: 0 },
@@ -74,32 +70,43 @@ const CANDIDATE_SCRATCH = [
   { dx: 0, dy: 0, dz: 0 },
 ];
 
+function setCandidate(i: number, dx: number, dy: number, dz: number): void {
+  CANDIDATE_SCRATCH[i].dx = dx;
+  CANDIDATE_SCRATCH[i].dy = dy;
+  CANDIDATE_SCRATCH[i].dz = dz;
+}
+
 /**
- * Forward step candidates in preference order: the facing direction at the
- * vertical level the bias prefers, then the other levels, then a stationary
- * climb (straight up/down) as the last resort. Returns a reused scratch
- * array — do not retain across calls.
+ * Step candidates in preference order. Under a strong vertical bias the
+ * *stationary* vertical move comes first: it only resolves to a legal step
+ * when the voxel directly above/below is air — i.e. a 1-wide shaft — so an
+ * ant that wants to descend a shaft does, while on flat ground that
+ * candidate is skipped (solid) and it walks forward. Neutral bias walks
+ * forward-first. Returns a reused scratch array — do not retain.
  */
 export function stepCandidates(
   heading: number,
   verticalBias: number
 ): { dx: number; dy: number; dz: number }[] {
   const { dx, dz } = headingToDirection(heading);
-  let levels: readonly number[];
-  if (verticalBias > 0.33) {
-    levels = LEVELS_UP;
-  } else if (verticalBias < -0.33) {
-    levels = LEVELS_DOWN;
+  if (verticalBias < -0.33) {
+    // Descend: straight down, then forward-down, forward-level, forward-up.
+    setCandidate(0, 0, -1, 0);
+    setCandidate(1, dx, -1, dz);
+    setCandidate(2, dx, 0, dz);
+    setCandidate(3, dx, 1, dz);
+  } else if (verticalBias > 0.33) {
+    // Climb: straight up, then forward-up, forward-level, forward-down.
+    setCandidate(0, 0, 1, 0);
+    setCandidate(1, dx, 1, dz);
+    setCandidate(2, dx, 0, dz);
+    setCandidate(3, dx, -1, dz);
   } else {
-    levels = LEVELS_FLAT;
+    // Walk: forward-level, forward-up, forward-down, then a last-resort climb.
+    setCandidate(0, dx, 0, dz);
+    setCandidate(1, dx, 1, dz);
+    setCandidate(2, dx, -1, dz);
+    setCandidate(3, 0, 1, 0);
   }
-  for (let i = 0; i < 3; i++) {
-    CANDIDATE_SCRATCH[i].dx = dx;
-    CANDIDATE_SCRATCH[i].dy = levels[i];
-    CANDIDATE_SCRATCH[i].dz = dz;
-  }
-  CANDIDATE_SCRATCH[3].dx = 0;
-  CANDIDATE_SCRATCH[3].dy = verticalBias >= 0 ? 1 : -1;
-  CANDIDATE_SCRATCH[3].dz = 0;
   return CANDIDATE_SCRATCH;
 }
