@@ -150,6 +150,64 @@ const ACTION_BIAS_LOCI = [
  * physical traits (Rule 9) that derivation must not optimize. */
 export const WEIGHT_COUNT = PHYS;
 
+// The Phase 2 digger seed (docs/seed-spec.md): three reflexes, eight
+// weights, two hidden relays, no recurrence. Hidden units are indices
+// into a layer that is otherwise all zero, so each relay is isolated.
+const H_AMPLIFY = 0;
+const H_CROWD = 1;
+/** Constant terrain drive; tanh(2) = 0.96, past the action threshold. */
+const DIG_DRIVE = 2;
+/** Constant down bias; tanh(-2) = -0.96, past the -0.33 dig-down band. */
+const DOWN_DRIVE = -2;
+/**
+ * Constant locomotion drive. Without it the ant digs the voxel below and
+ * never enters it: motion needs forward thrust even to descend, so a
+ * digger with no drive sinks exactly one voxel and then starves in place.
+ */
+const FORWARD_DRIVE = 0.7;
+/** Marking strength while working; tanh(1.5) = 0.9 of a full deposit. */
+const MARK_DRIVE = 1.5;
+/** Channel-A stereo gain into the amplify relay. */
+const AMPLIFY_GAIN = 4;
+/** Amplify relay to TURN: how hard the ant swings toward the mark. */
+const AMPLIFY_TURN = 2;
+/**
+ * Crowding gain and lift. Sized so one neighbour leaves the down bias
+ * intact (net -0.58, still digging down) and two or more cancel it into
+ * the neutral band (net ~-0.1), where the dig targets the faced voxel —
+ * an effective threshold of two, matching the oracle's overflowCrowding.
+ */
+const CROWD_GAIN = 6;
+const CROWD_LIFT = 2.1;
+
+/**
+ * Hand-written founder weights for the Phase 2 digger (docs/seed-spec.md).
+ * Reflex 1 sinks a shaft with no input; reflex 2 marks and steers toward
+ * the strongest mark; reflex 3 turns a crowded digger sideways.
+ */
+export function diggerSeedVector(): Float32Array {
+  const v = new Float32Array(GENOME_LENGTH);
+
+  // Reflex 1 — dig-down bias: fire the terrain channel, aim it down, and
+  // supply the thrust that carries the ant into the hole it makes.
+  v[B_OUT + Output.DIG] = DIG_DRIVE;
+  v[B_OUT + Output.VERTICAL_BIAS] = DOWN_DRIVE;
+  v[B_OUT + Output.FORWARD] = FORWARD_DRIVE;
+
+  // Reflex 2 — amplify: mark, and turn toward the stronger mark.
+  v[B_OUT + Output.PHEROMONE_A] = MARK_DRIVE;
+  v[W_IN + H_AMPLIFY * INPUT_COUNT + Input.PHEROMONE_A_LEFT] = AMPLIFY_GAIN;
+  v[W_IN + H_AMPLIFY * INPUT_COUNT + Input.PHEROMONE_A_RIGHT] = -AMPLIFY_GAIN;
+  v[W_OUT + Output.TURN * HIDDEN_COUNT + H_AMPLIFY] = AMPLIFY_TURN;
+
+  // Reflex 3 — overflow: crowding cancels the down bias into neutral,
+  // so the terrain channel takes the faced voxel instead of the floor.
+  v[W_IN + H_CROWD * INPUT_COUNT + Input.CROWDING] = CROWD_GAIN;
+  v[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + H_CROWD] = CROWD_LIFT;
+
+  return v;
+}
+
 /** The pure hand-derived instinct vector, noise-free (derivation start). */
 export function backboneVector(): Float32Array {
   const copy = new Float32Array(GENOME_LENGTH);
