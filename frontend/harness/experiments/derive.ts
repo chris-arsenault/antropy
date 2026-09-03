@@ -1,11 +1,7 @@
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  GENOME_LENGTH,
-  WEIGHT_COUNT,
-  backboneVector,
-} from "../../src/sim/controller/rnn";
+import { GENOME_LENGTH, WEIGHT_COUNT, backboneVector } from "../../src/sim/controller/rnn";
 import { createRng, randNormal, type Rng } from "../../src/sim/rng";
 import { flag, intFlag, type Flags } from "../lib/flags";
 import { openLedger, recordRun } from "../lib/ledger";

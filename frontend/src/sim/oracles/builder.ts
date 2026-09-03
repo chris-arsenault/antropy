@@ -3,6 +3,7 @@ import { spoilCapacity } from "../actions";
 import { Output } from "../controller/contract";
 import { getVoxelSafe, voxelIndex } from "../grid";
 import { Material } from "../materials";
+import { headingToDirection } from "../movement";
 import { sampleScent } from "../scent";
 import { type World } from "../world";
 import { steer, turnToward, type OraclePolicy } from "./policies";
@@ -53,6 +54,14 @@ function localSurface(world: World, x: number, z: number): number {
 
 function atColumn(ant: Ant, s: BuilderState): boolean {
   return ant.x === s.col.x && ant.z === s.col.z;
+}
+
+function shaftDepth(world: World, s: BuilderState): number {
+  let y = s.surfaceY;
+  while (y > 1 && getVoxelSafe(world.grid, s.col.x, y - 1, s.col.z) === Material.AIR) {
+    y -= 1;
+  }
+  return s.surfaceY - y;
 }
 
 function nearestFood(world: World, ant: Ant): { x: number; z: number } | null {
@@ -113,30 +122,16 @@ function bestMarkedLateral(world: World, ant: Ant): (typeof LATERALS)[number] | 
   return best;
 }
 
-/**
- * Rule 2 (overflow): when the downward face is unavailable — already
- * open, or bottomed out on rock — a crowded digger turns sideways, so the
- * queue spills into branches off the shaft instead of stalling. Gating on
- * "face taken" is what lets the shaft form at all: without it every ant
- * funnels onto one voxel, is maximally crowded, and the crew scrapes a
- * shallow pit instead of sinking a nest.
- */
+/** Rule 2 (overflow): a crowded digger works laterally in its current yaw. */
 function shouldOverflow(world: World, ant: Ant, opts: BuilderOptions): boolean {
   if (opts.overflowCrowding === undefined) {
     return false;
   }
-  const below = getVoxelSafe(world.grid, ant.x, ant.y - 1, ant.z);
-  const faceTaken = below === Material.AIR || below === Material.ROCK;
-  return faceTaken && crowding(world, ant) >= opts.overflowCrowding;
+  return crowding(world, ant) >= opts.overflowCrowding;
 }
 
 /** Sit on the shaft column and dig straight down, stepping into the hole. */
-function digPhase(
-  world: World,
-  ant: Ant,
-  s: BuilderState,
-  opts: BuilderOptions
-): Float32Array {
+function digPhase(world: World, ant: Ant, s: BuilderState, opts: BuilderOptions): Float32Array {
   const amplify = opts.amplify === true;
   if (!atColumn(ant, s)) {
     // Return to the column; drop down if a shaft voxel is beneath.
@@ -147,10 +142,12 @@ function digPhase(
   if (shouldOverflow(world, ant, opts)) {
     const sideways = steer(0, 0.3);
     sideways[Output.DIG] = 1;
+    sideways[Output.VERTICAL_BIAS] = 0;
     if (amplify) {
       sideways[Output.PHEROMONE_A] = 1;
     }
-    return withHeadingDig(sideways, ant, bestMarkedLateral(world, ant) ?? fanoutLateral(ant));
+    const marked = bestMarkedLateral(world, ant);
+    return marked ? withHeadingDig(sideways, ant, marked) : sideways;
   }
   if (amplify) {
     const lateral = bestMarkedLateral(world, ant);
@@ -162,7 +159,11 @@ function digPhase(
       return withHeadingDig(marked, ant, lateral);
     }
   }
-  const outputs = steer(0, 0.3); // no horizontal drive: stay on the column
+  // Half-speed sequencing is load-bearing under the shared deposit clause:
+  // tick 1 digs while the floor is solid; tick 2 spends the accumulated
+  // thrust to descend before DIG resolves again. A slower drive would aim
+  // the loaded terrain trigger at the new AIR floor and fill the shaft back.
+  const outputs = steer(0, 0.6);
   outputs[Output.VERTICAL_BIAS] = -1;
   outputs[Output.DIG] = 1;
   if (amplify) {
@@ -199,8 +200,22 @@ function haulPhase(world: World, ant: Ant, s: BuilderState): Float32Array {
   if (!clear) {
     return steer(turnToward(ant, s.col.x - 10, s.col.z), 1);
   }
-  const outputs = steer(0.2, 0.15);
-  outputs[Output.DIG] = 1; // at capacity → deposits spoil here
+  const { dx, dz } = headingToDirection(ant.heading);
+  const forwardUp = getVoxelSafe(world.grid, ant.x + dx, ant.y + 1, ant.z + dz);
+  const forwardLevel = getVoxelSafe(world.grid, ant.x + dx, ant.y, ant.z + dz);
+  if (forwardUp !== Material.AIR && forwardLevel !== Material.AIR) {
+    // The shared actuator now deposits only into an AIR target. Rotate the
+    // intention until the active up band contains one instead of relying on
+    // the legacy actuator to choose an unrelated deposit face.
+    const rotate = steer(1, 0.15);
+    rotate[Output.VERTICAL_BIAS] = 1;
+    return rotate;
+  }
+  const outputs = steer(0, 0);
+  // Aim above the terrain while unloading. Loaded + targeted AIR resolves
+  // the shared terrain channel as spoil deposit.
+  outputs[Output.VERTICAL_BIAS] = 1;
+  outputs[Output.DIG] = 1; // no diggable upward target → deposits one load
   return outputs;
 }
 
@@ -269,21 +284,21 @@ function crowding(world: World, ant: Ant): number {
   return near;
 }
 
-/** A deterministic lateral per ant, so crowded diggers fan out. */
-function fanoutLateral(ant: Ant): (typeof LATERALS)[number] {
-  return LATERALS[ant.id % LATERALS.length];
-}
-
 /** The idle behavior once not hauling or carrying: dig until deep, forage after. */
 function idlePhase(deepEnough: boolean): BuilderState["phase"] {
   return deepEnough ? "forage" : "dig";
 }
 
-function nextPhase(s: BuilderState, ant: Ant, full: boolean, deepEnough: boolean): BuilderState["phase"] {
+function nextPhase(
+  s: BuilderState,
+  ant: Ant,
+  full: boolean,
+  deepEnough: boolean
+): BuilderState["phase"] {
   if (ant.carrying === Material.FOOD) {
     return "store";
   }
-  if (full) {
+  if (full || (deepEnough && ant.spoilLoads > 0)) {
     return "haul";
   }
   if (s.phase === "haul" && ant.spoilLoads > 0) {
@@ -296,7 +311,7 @@ export function makeBuilder(opts: BuilderOptions): OraclePolicy {
   return (world, ant) => {
     const s = ensureState(ant, opts.column);
     const full = ant.spoilLoads >= spoilCapacity(ant, world.config);
-    const deepEnough = s.surfaceY - s.deepestY >= opts.depth;
+    const deepEnough = shaftDepth(world, s) >= opts.depth;
     s.phase = nextPhase(s, ant, full, deepEnough);
 
     switch (s.phase) {

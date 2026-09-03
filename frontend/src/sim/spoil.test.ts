@@ -42,6 +42,18 @@ function countSolid(world: World, cx: number, cy: number, cz: number): number {
 }
 
 describe("spoil hauling config", () => {
+  it("leaves terrain intact when digging is disabled", () => {
+    const world = createWorld(8799, rnnController, { ...PHASE2_CONFIG, terrainDigging: false });
+    const ant = diggerAt(world, 96, 96);
+    const solidBefore = countSolid(world, ant.x, ant.y, ant.z);
+
+    tryDig(world, ant, -1);
+
+    expect(countSolid(world, ant.x, ant.y, ant.z)).toBe(solidBefore);
+    expect(ant.spoilLoads).toBe(0);
+    expect(ant.carrying).toBeNull();
+  });
+
   it("with hauling off, digging clears a voxel and the soil vanishes", () => {
     const world = createWorld(8800, rnnController, PHASE2_CONFIG);
     const ant = diggerAt(world, 96, 96);

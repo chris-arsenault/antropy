@@ -214,7 +214,10 @@ export function foundColonyFromPool(world: World, pool: Genome[]): Colony | null
   };
   const sperm: Sperm[] = [];
   for (let i = 0; i < COLONY.spermCount; i++) {
-    sperm.push({ genome: world.controller.haploidOffspring(draw(), world.rng), patrilineId: i + 1 });
+    sperm.push({
+      genome: world.controller.haploidOffspring(draw(), world.rng),
+      patrilineId: i + 1,
+    });
   }
   const cx = Math.floor(world.grid.sizeX / 2) + Math.floor(world.rng.next() * 41) - 20;
   const cz = Math.floor(world.grid.sizeZ / 2) + Math.floor(world.rng.next() * 41) - 20;
@@ -244,6 +247,7 @@ function layColonyEgg(
     x: spot.x,
     y: spot.y,
     z: spot.z,
+    carrierId: null,
     genome,
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,

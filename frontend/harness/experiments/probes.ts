@@ -6,13 +6,7 @@ import { Material } from "../../src/sim/materials";
 import { createRng } from "../../src/sim/rng";
 import { createScentField, depositScent } from "../../src/sim/scent";
 import { BEACON_PHYSICS, NEST_PHYSICS } from "../../src/sim/tunables";
-import {
-  createWorld,
-  mutateVoxel,
-  spawnAnt,
-  stepWorld,
-  type World,
-} from "../../src/sim/world";
+import { createWorld, mutateVoxel, spawnAnt, stepWorld, type World } from "../../src/sim/world";
 
 /**
  * Probe episodes for seed derivation (§B.9.3): single ants on the real

@@ -26,36 +26,71 @@ function act(stimuli: Partial<Record<number, number>>): Float32Array {
 }
 
 describe("digger seed assays (Phase 2 step 7)", () => {
-  it("reflex 1: digs, and digs downward, with no sensory input", () => {
-    const out = act({});
-    expect(out[Output.DIG], "terrain channel fires").toBeGreaterThan(ACTION_THRESHOLD);
-    expect(out[Output.VERTICAL_BIAS], "targets straight down").toBeLessThan(-0.33);
+  const marked = {
+    [Input.PHEROMONE_A_LEFT]: 0.5,
+    [Input.PHEROMONE_A_RIGHT]: 0.5,
+  };
+
+  it("reflex 1: digs down at a marked site and stays quiet away from it", () => {
+    const atSite = act(marked);
+    const quiet = act({});
+
+    expect(atSite[Output.DIG], "marked terrain channel fires").toBeGreaterThan(ACTION_THRESHOLD);
+    expect(atSite[Output.VERTICAL_BIAS], "targets straight down").toBeLessThan(-0.33);
+    expect(quiet[Output.DIG], "quiet ground is not dug").toBeLessThanOrEqual(ACTION_THRESHOLD);
   });
 
-  it("reflex 2: marks channel A while working", () => {
-    const out = act({});
-    expect(out[Output.PHEROMONE_A], "deposits a mark").toBeGreaterThan(0.5);
+  it("reflex 2: load flips upward and suppresses digging in a marked shaft", () => {
+    const unloaded = act(marked);
+    const loaded = act({ ...marked, [Input.CARRY_LOAD]: 0.5 });
+
+    expect(unloaded[Output.VERTICAL_BIAS], "unloaded ant descends").toBeLessThan(-0.33);
+    expect(unloaded[Output.DIG], "unloaded ant digs").toBeGreaterThan(ACTION_THRESHOLD);
+    expect(loaded[Output.VERTICAL_BIAS], "loaded ant climbs").toBeGreaterThan(0.33);
+    expect(loaded[Output.DIG], "loaded ant does not dig the shaft wall").toBeLessThanOrEqual(
+      ACTION_THRESHOLD
+    );
   });
 
-  it("reflex 2: turns toward the stronger mark, and is inert when unmarked", () => {
+  it("reflex 2: a loaded ant deposits at low A but not high A", () => {
+    const quiet = act({ [Input.CARRY_LOAD]: 0.5 });
+    const markedLoaded = act({ ...marked, [Input.CARRY_LOAD]: 0.5 });
+
+    expect(quiet[Output.VERTICAL_BIAS], "loaded ant still aims upward").toBeGreaterThan(0.33);
+    expect(quiet[Output.DIG], "low-A air target triggers spoil deposit").toBeGreaterThan(
+      ACTION_THRESHOLD
+    );
+    expect(markedLoaded[Output.DIG], "high-A shaft mouth is not refilled").toBeLessThanOrEqual(
+      ACTION_THRESHOLD
+    );
+  });
+
+  it("reflex 3: reinforces channel A only at the marked work site", () => {
+    expect(act(marked)[Output.PHEROMONE_A], "reinforces a founded mark").toBeGreaterThan(0.35);
+    expect(act({})[Output.PHEROMONE_A], "does not mark quiet ground").toBe(0);
+  });
+
+  it("reflex 3: turns toward the stronger mark without a casting override", () => {
     const left = act({ [Input.PHEROMONE_A_LEFT]: 0.8, [Input.PHEROMONE_A_RIGHT]: 0.1 });
     const right = act({ [Input.PHEROMONE_A_LEFT]: 0.1, [Input.PHEROMONE_A_RIGHT]: 0.8 });
-    const even = act({ [Input.PHEROMONE_A_LEFT]: 0.5, [Input.PHEROMONE_A_RIGHT]: 0.5 });
+    const strongAhead = act({
+      [Input.PHEROMONE_A_LEFT]: 0.8,
+      [Input.PHEROMONE_A_RIGHT]: 0.8,
+    });
 
     expect(left[Output.TURN], "left mark turns left").toBeGreaterThan(0.3);
     expect(right[Output.TURN], "right mark turns right").toBeLessThan(-0.3);
-    // Symmetric marking must not bias the turn (§B.6 item 1: a constant
-    // turn rate is the classic circling bug).
-    expect(Math.abs(even[Output.TURN]), "balanced marks do not steer").toBeLessThan(0.05);
-    expect(Math.abs(act({})[Output.TURN]), "no marks do not steer").toBeLessThan(0.05);
+    expect(Math.abs(strongAhead[Output.TURN]), "strong balanced A cancels casting").toBeLessThan(
+      0.05
+    );
   });
 
-  it("reflex 3: two neighbours lift the dig out of down and into the faced voxel", () => {
+  it("reflex 4: two neighbours lift the dig out of down and into the faced voxel", () => {
     // CROWDING is (neighbours-1)/8 clamped: one neighbour is 0.125.
-    const alone = act({ [Input.CROWDING]: 0 });
-    const oneNeighbor = act({ [Input.CROWDING]: 0.125 });
-    const twoNeighbors = act({ [Input.CROWDING]: 0.25 });
-    const packed = act({ [Input.CROWDING]: 0.5 });
+    const alone = act({ ...marked, [Input.CROWDING]: 0 });
+    const oneNeighbor = act({ ...marked, [Input.CROWDING]: 0.125 });
+    const twoNeighbors = act({ ...marked, [Input.CROWDING]: 0.25 });
+    const packed = act({ ...marked, [Input.CROWDING]: 0.5 });
 
     expect(alone[Output.VERTICAL_BIAS], "alone: dig down").toBeLessThan(-0.33);
     expect(oneNeighbor[Output.VERTICAL_BIAS], "one neighbour: still down").toBeLessThan(-0.33);
@@ -67,5 +102,18 @@ describe("digger seed assays (Phase 2 step 7)", () => {
     expect(packed[Output.VERTICAL_BIAS], "packed: not upward").toBeLessThan(0.33);
     // Crowding must not switch off digging.
     expect(twoNeighbors[Output.DIG], "still digging").toBeGreaterThan(ACTION_THRESHOLD);
+  });
+
+  it("reflex 5: uniform low A casts until channel A is reacquired", () => {
+    const absent = act({});
+    const faint = act({
+      [Input.PHEROMONE_A_LEFT]: 0.02,
+      [Input.PHEROMONE_A_RIGHT]: 0.02,
+    });
+    const acquired = act(marked);
+
+    expect(absent[Output.TURN], "no A causes a constant turn").toBeGreaterThan(0.4);
+    expect(faint[Output.TURN], "faint total A still casts").toBeGreaterThan(0.35);
+    expect(Math.abs(acquired[Output.TURN]), "acquired A releases casting").toBeLessThan(0.05);
   });
 });

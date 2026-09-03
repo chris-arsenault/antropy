@@ -22,11 +22,12 @@ numbering.*
 
 ## D.1 Scope, Fence, Gates, and Current State
 
-**Current state:** a scripted builder oracle digs a shaft under the `PHASE2` preset; the
-locomotion fix makes 1-wide shafts navigable; the config-gate system (§D.1.1) exists and has
-already produced two attributable findings. **Ladder target:** an RNN ant, through the real
-controller and shipped sensors, digging a branched nest with widened spots, on a live energy
-economy — reached by re-admitting gates one at a time from `PHASE2` toward `FULL`.
+**Spec/status separation.** This document specifies; it does not track. Certification status
+(which steps are green, which findings are open) lives in a repo status ledger
+(`docs/certifications.md`), updated per run — embedding status here has already gone stale twice
+and will always. **Ladder target:** an RNN ant, through the real controller and shipped sensors,
+digging a branched nest with structure that earns ledgers, on a live energy economy — reached by
+re-admitting gates one at a time from `PHASE2` toward `FULL`.
 
 ### D.1.1 The config-gate system (the ladder's execution mechanism)
 
@@ -82,31 +83,88 @@ tests whether those two suffice **before** any richer world is contemplated.
 ## D.2 The Micro-Step Ladder
 
 Each step: one deliverable, one pass condition, one config state, existing mechanisms only. A
-failure points at the step that owns it. The **Gates** column gives the delta from `PHASE2`
+failure points at the step that owns it. **Grain-size test:** *if a step's failure report could
+name two different culprits, it is two steps* — apply this test when extending or reviewing the
+ladder; the original compound steps 10–11 failed it and were decomposed into 10a–10e and
+11a–11c below. The **Gates** column gives the delta from `PHASE2`
 (everything off); per Rule 17, each step admits at most one new gate, and a gate once admitted
-stays on for all later steps unless noted. Steps 1–9 reach the first RNN nest; steps 10–12
+stays on for all later steps unless noted. Steps 1–9 reach the first RNN nest; steps 10a–12
 extend to the next reasonable goal — a nest that *earns* something — still inside the fence.
+
+### D.2.1 Shape vocabulary (measurement, not targets)
+
+The word "widened" was doing two jobs — step 4's existence test and step 10's brood question —
+and agents correctly read the weaker meaning into both. Fixed vocabulary, computed by **one
+shared O-layer classifier** used by every step that references these terms. The definitions are
+mechanical; where a choice existed, it is made here:
+
+- **Corridor voxel:** an air voxel contained in **no** 2×2×1 all-air block **in any of the three
+  axis-aligned orientations** (xy, xz, yz). Transit-only by construction.
+- **Partition procedure (no overlaps by construction):** (1) classify every air voxel
+  corridor/non-corridor; (2) take 6-adjacency connected components of the non-corridor voxels —
+  these components are the **voids**, mutually disjoint; (3) each void is classified **chamber**
+  or **bulge** by the tests below.
+- **Chamber:** a void that (a) **contains at least one 2×2×2 all-air block** (this is the
+  volume condition — it subsumes any separate $V_{\min}$, and it is what excludes fat hallways,
+  which widen without vertical extent); (b) has **doorway count ≤ 2**, where a doorway is a
+  corridor voxel 6-adjacent to at least one voxel of the void (a two-doorway pass-through room
+  is still a room); (c) is **interior**: no voxel of the void is 6-adjacent to a surface voxel,
+  per the sim's existing surface/depth classification.
+- **Bulge:** any void that is not a chamber.
+- **Branch point:** an air voxel with degree ≥ 3 in the 6-adjacency air graph.
+
+Doorway threshold and the 2×2×2 block size are declared P-layer tunables with these defaults.
+These are **descriptive** terms. The classifier also logs full distributions (void volumes,
+doorway counts, depths, connectivity), so shapes the predicates don't name still appear in the
+data instead of being eaten by the taxonomy.
+
+> **Design Rule 18 (Shape predicates gate nothing; only ledgers gate).** Descriptive classifiers
+> may measure; pass/fail authority belongs exclusively to function ledgers. No step may require
+> that a specific **named shape** exist — a step may only require that the morphology the agents
+> actually produced *earns* on a priced liability. "Chamber" is the name given to what won,
+> never the spec for what must win. **Distinction, not exemption:** an *existence gate* — "any
+> structure beyond the trivial baseline exists" (steps 4/9: ≥ 1 non-corridor voxel or branch
+> point, i.e., *symmetry broke at all*) — is permitted, because it tests that a mechanism can
+> produce structure, not which structure. A *shape gate* — "a chamber/vault/gallery exists" —
+> is forbidden. Existence gates are scaffolding-phase instruments only (oracle and seed
+> certification); no evolution-facing measure may gate on either kind. (Extends App. C
+> doctrine: prescribing the geometry of the solution to an authored pressure is the
+> actuator-side of the nest-compass error, one level up. Applies to every future emergence
+> question — castes, trails, roles — not only nests.)
 
 | # | Step | Gates (Δ from PHASE2) | Deliverable | Pass condition |
 |---|---|---|---|---|
 | 1 | **Fix the shaft** | + `spoilHauling` | Assertion suite on the existing oracle run | Dug voxels == intended column, exactly; spoil dumped == voxels dug (mass conservation, spec §5.4 — only assertable with hauling on; the `PHASE2` vanishing-spoil default is for navigation debugging only); materials dug ∈ {TOPSOIL, CLAY}, ROCK untouched. Any raggedness resolved and *locked by test*, not by eyeball. The known haul-choreography time cost is measured here as ticks-per-voxel-dug — the baseline number every later step is compared against |
 | 2 | **Energy on (oracle)** | + `mortality` | Same scenario, mortal ant, dig costs + metabolism live | Shaft completes with energy to spare. If it starves, tune dig cost / tank via harness (P-layer, never flags) until it doesn't — R6: constants must *permit* digging before behavior can *choose* it. Spoil-haul round trips (dig×capacity → climb → dump → descend) are where dig cost compounds; `spoilCapacity` stays `null` (genome-derived) unless an experiment says otherwise, and any override is logged as an experiment, not committed as a constant |
 | 3 | **Amplify rule (oracle)** | — | Rule 1 added: mark channel A while digging; prefer the highest-A face | One ant still completes the shaft (the rule must not break solo digging) |
-| 4 | **Overflow rule + shape test (oracle)** | — | Rule 2 added: crowding > threshold → lateral preference. Run 5–10 ants, one config | **The shape gate: the air network is no longer a line.** Any branch or widening passes. Fail → tune the two rule constants within budget (Rule 12: 3 configs / 10×) → still a line ⇒ structural finding report, stop |
-| 5 | **Name the seed spec** | — | The passing oracle reduced to its reflex list | Exactly three reflexes: dig-down bias, amplify, overflow. No additions |
-| 6 | **Write the seed weights** | — | Hand-written weights per reflex (2–4 weights each) against existing sensors; hidden layer zero | Weights exist and are readable: vertical bias + dig as pinned constants; channel-A stereo → turn (chemotaxis pattern reused on a different input pair); crowding → vertical-bias shift |
-| 7 | **Assay each reflex (rung 3)** | assay arena (config-independent) | Isolated synthetic-stimulus tests, plus the **loopback assertion**: raw input vector in a known world configuration == hand-computed expected values, every index, every normalization | Given an A-gradient, the seeded network prefers the correct face; given crowding, lateral bias fires; marshalling proven independent of behavior |
-| 8 | **One seeded ant, real pipeline** | same as step 2 | Single RNN ant, real controller + sensors, step-2 config | Digs a shaft comparable to the step-2 oracle *under the identical config* (per-world clone guarantees this is checkable). Oracle could + seed can't ⇒ fault is provably in the sensor→network→output pipeline (everything else is shared and proven); steps 6–7 localize it |
-| 9 | **Seeded colony, shape test** | same as step 4 | 5–10 seeded RNN ants, step-4 map and config | Same shape gate, now on the RNN: **a branched/widened nest dug by the actual controller.** Gap vs. the step-4 oracle shape = measured shortfall; if hand-written reflexes cannot close it, then and only then CMA-ES on those same three reflexes (App. B §B.9.3) — no new competences |
-| 10 | **Brood in the wide spots (oracle)** | + `reproduction`, then + `eggExposure` (+ `microclimate` only if exposure is keyed to it — admit in two measured sub-steps, Rule 17) | Queen/egg placement uses widened voxels; existing egg mechanics and climate-keyed exposure; no new fields | Egg-survival ledger of the widened nest > straight-shaft baseline, same config. Rule 7's increment logic applied to morphology: the widening must *earn* something already priced. (`larvalRearing` stays **off** — the brood-capital recalibration is a separate authorized workstream, not a ladder step) |
-| 11 | **Storage in the nest (oracle)** | + `weather` | Food stored in dug voids (existing hoarding/rain mechanics) | Store-retention ledger across one weather event > surface baseline |
-| 12 | **Seeded RNN vs. steps 10–11** | same as steps 10–11 | The step-9 colony re-run with brood + storage scoring | RNN nest's egg-survival and store-retention within tolerance of the oracle's, identical config. **This is the ladder's summit: a functional nest — shape that earns ledger — produced by the real controller.** Everything beyond (evolution on, `nestDecay`, `seasons`, `larvalRearing`, `autoContinue`, templates, new carriers) is a separate authorization |
+| 4 | **Overflow rule + existence test (oracle)** | — | Rule 2 added: crowding > threshold → lateral preference. Run 5–10 ants, one config | **The existence gate: symmetry is broken — the air network contains at least one non-corridor voxel or branch point (§D.2.1 classifier).** This gate tests that the rules produce *any* structure beyond a line; it does **not** require a chamber or any named shape (Rule 18). Fail → tune the two rule constants within budget (Rule 12: 3 configs / 10×) → still a line ⇒ structural finding report, stop |
+| 5 | **Name the seed spec** | — | The passing oracle reduced to its reflex list | Exactly **five** reflexes: dig-down bias, spoil haul/deposit, amplify, overflow, **reacquisition-by-casting**. *(Second amendment, from the step-8 finding: the prior claim that "amplify doubles as return-to-shaft" was falsified by measurement — stereo differential steering reads only the cross-axis gradient component, so a source directly behind the ant yields equal forward samples and zero turn. Pure stereo taxis is structurally blind to "behind"; return requires its own reflex.)* The set carries three gating terms, all linear-threshold: **casting** = total-signal-low → constant turn (the lost ant orbits until its nose crosses the gradient; klinokinesis needs memory and is not seed-legal — if casting fails, escalation is CMA-ES per step 9, never a hand-written workaround); **dig gated by local A** (amplify's dig-face half made load-bearing — kills surface divot spam by an emptied ant); **deposit anti-gated by A** (loaded ∧ low-A → deposit: "dump where the trail isn't," the linear form of the oracle's dump-clear — kills shaft refilling). Bootstrap: A-gated digging requires the step-8 fixture to **pre-mark the intended column mouth with channel A** (O-layer scenario setup); at colony scale this becomes "founding marks the dig site," legal by the same fiat that scripts the founding chamber |
+| 6 | **Write the seed weights** | — | Hand-written weights per reflex against existing sensors; **zero hidden state, linear-threshold, hand-verifiable locus by locus** — the budget is readability, stated as 2–4 loci per relay and ~20 total, not a per-reflex cap | Weights exist and are readable: vertical bias + A-gated dig; load fraction → vertical-bias flip and loaded × low-A → deposit; channel-A stereo → turn (taxis); crowding → vertical-bias shift; low total-A → turn (casting) |
+| 7 | **Assay each reflex (rung 3)** | assay arena (config-independent) | Isolated synthetic-stimulus tests for **all five reflexes**, plus the **loopback assertion**: raw input vector in a known world configuration == hand-computed expected values, every index, every normalization | A-gradient → correct face preference (taxis); crowding → lateral bias (overflow); uniform-low A → turning (casting) and strong ahead-A → taxis overrides casting; load high → vertical flip; loaded × low-A → deposit fires, loaded × high-A → deposit held (anti-gate). Marshalling proven independent of behavior |
+| 8 | **One seeded ant, real pipeline** | same as step 2 | Single RNN ant, real controller + sensors, step-2 config | Digs **and hauls** a shaft comparable to the step-2 oracle *under the identical config* (per-world clone guarantees this is checkable) — the pass condition includes completed spoil round trips, since starving-at-two-voxels is the certified failure mode of a haul-less seed. Oracle could + seed can't ⇒ fault is provably in the sensor→network→output pipeline (everything else is shared and proven); steps 6–7 localize it |
+| 9 | **Seeded colony, existence test** | same as step 4 | 5–10 seeded RNN ants, step-4 map and config | Same existence gate, now on the RNN: **symmetry-broken structure dug by the actual controller.** Morphology described, not prescribed (§D.2.1, Rule 18). Gap vs. the step-4 oracle distributions = measured shortfall; if hand-written reflexes cannot close it, then and only then CMA-ES on those same reflexes (App. B §B.9.3) — no new competences |
+| 10a | **A queen exists** | — (step-9 gates) | Queen entity placed in the dug nest; nothing else | She persists; the sim is indifferent. Not trivial: queen-in-nest is exactly where the `nestDecay` misattribution lived |
+| 10b | **Reproduction mechanics** | + `reproduction` | Queen lays, eggs hatch, wherever they land by default. No transport, no exposure, no ledger | Egg-count and hatch-count assertions. Isolates the reproduction machinery itself — gated off since `SimConfig` landed, therefore unproven under the current world |
+| 10c | **Egg transport as oracle behavior** | + `broodTransport` | Builder gains the transport competence: pick up an egg, carry it, put it down. The oracle's *destination policy* is scripted (O-layer, legal) but the pass condition asserts **transport mechanics only** — pickup, carriage through a 1-wide shaft (a locomotion case with a bug history), putdown, death-while-carrying handled. Egg positions are *logged, not asserted* (Rule 18: no target voxel class). `eggCapacity` is a tunable following the `spoilCapacity` pattern: genome-adjacent, destined for the genome, overrides are experiments | Eggs demonstrably relocated from the lay site; mechanics assertions green; position distributions recorded. Exposure still off — transport is being *tested*, not rewarded |
+| 10d′ | **Microclimate admitted alone** | + `microclimate` | The recorded dependency finding made structural: `eggExposure` consumes microclimate calculations even when adult effects are off, so the field is admitted **first, by itself**, and its adult-side cost is measured under the current scenario | Colony completes the 10c scenario under live microclimate; energy deltas measured and sane. Per Rule 17 this is its own step, not a rider on 10d |
+| 10d | **Exposure live** | + `eggExposure` | Same scenario, exposure on, single config, inheriting 10d′ | Egg survival rate measured and sane |
+| 10e | **First comparison: brood ledger** | same as 10d | **Dug-nest colony vs. founding-chamber-only colony**, identical config (inheriting 10d′ + 10d). Brood distributed by the transporting colony's own behavior — wherever it puts them (Rule 18). **Ledger defined:** a fixed, equal-sized egg cohort per arm, followed for a fixed window $T$ (with $T$ ≥ one incubation period); metric = fraction of the cohort alive at $T$, where hatching counts as survival. No open-ended laying — a queen-fecundity difference must not masquerade as an exposure difference | Dug nest > founding-chamber-only on cohort survival at $T$. The question as measured: *did the ants' digging create brood-viable space beyond what scripted founding gave them for free?* **First comparative step** — minimal App. B §B.8 instance, two configs + one ledger. The §D.2.1 classifier then *describes* the winning morphology as a result, not a requirement. If the dug nest loses: a structural finding on the exposure liability's magnitude or geometry, decided by human, never patched by prescribing shapes. (`larvalRearing` stays **off**) |
+| 11a | **Hoard-down as oracle behavior** | — | Food carried into the dug nest; no weather. Positions logged, not asserted to a shape (Rule 18) | Food demonstrably relocated underground; mechanics assertions green |
+| 11b | **Weather live** | + `weather` | One storm over a nest-storing colony, single config | Retained fraction measured; sanity assertion: underground food did not wash |
+| 11c | **Second comparison: storage ledger** | same as 11b | Nest storage vs. surface storage across one storm, retention ledger | Nest > surface. Same comparative shape and same licensing as 10e |
+| 12 | **Seeded RNN summit** | same as 10e + 11c | The step-9 colony extended with the transport competences (egg-carry, food-carry-down) and scored on both ledgers | RNN colony's egg-survival and store-retention within tolerance of the oracle's, identical config. Transport enters the seed as a **sixth-reflex decision at step 5** (explicit amendment per the haul/casting template). Pickup has a defined cue (`CONTACT_EGG`); **putdown does not, and that gap is declared here as the step's sufficiency experiment**: candidate cues from existing inputs only (e.g., putdown anti-gated by A like spoil-deposit, or gated by depth/darkness), tried within the Rule-12 budget, judged by the ledger. The legality line: destination *tendencies written into seed weights are legal S-layer authoring* (erasable ink — evolution owns them from tick one); what Rule 18 forbids is a world-side carry-to-target mechanism or a shape-class pass assertion. If no existing-input cue suffices, that is a finding (likely naming a missing carrier), not a license to build one. **This is the ladder's summit: a functional nest — structure that earns ledgers — produced by the real controller.** Everything beyond (evolution on, `nestDecay`, `seasons`, `larvalRearing`, `autoContinue`, templates, new carriers) is a separate authorization |
 
 Gates deliberately **never admitted by the ladder**: `nestDecay` and `seasons` (Phase-4 regime
 machinery — they answer questions the ladder doesn't ask, and `nestDecay` has already
 demonstrated its power to corrupt Phase-2 conclusions), `larvalRearing` (owned by the
 brood-capital recalibration), `autoContinue` (masks the data). Their re-admission is the *next*
-ladder, written when this one's summit passes.
+ladder, written when this one's summit passes. One preview, because it answers "maintained to
+some degree," which this ladder deliberately cannot prove: decay is traffic-keyed, so
+maintenance is first *use* — the successor ladder admits `nestDecay` alone and its comparison is
+persistence (an occupied nest retains its structure over N cycles while an abandoned control
+collapses, with colony ledgers surviving the admission). Maintenance-as-behavior (re-digging
+collapsed sections) comes after maintenance-as-traffic is measured, and only if the ledgers say
+it is needed.
 
 Standing instruction to the agent, verbatim: *No new fields, sensors, materials, or mechanisms
 for these tasks. The deliverable at each step is the listed artifact and a report. If you believe
@@ -151,7 +209,39 @@ not posture.*
 
 ### D.3.3 The resolution function
 
-From two scalars — yaw θ and vertical bias $v \in [-1, 1]$ — a preference score over the six
+**Contract status — v1 (implemented) vs. v2 (specified).** Implementation review found this
+section partly aspirational: the build resolves movement/digging through **threshold bands**
+rather than the continuous preference function, sensing is **not** coupled to the acting band,
+and failed digs were free. Per the drift rule (a spec the code doesn't obey is worse than either
+alone), the contract is split:
+
+- **Contract v1 — governs the ladder.** Threshold-band resolution, uncoupled sensing. Legal
+  *provided oracle parity holds under v1*: both agents resolve through the same implemented
+  bands, so Rule 15 is satisfied by the implementation as built. Two items are **not**
+  deferrable and are promoted to immediate requirements: (i) **failed digs cost a token amount**
+  — a seed pins dig high, so every non-dig tick emits a dig intent, and free no-ops silently
+  distort the step-2/step-8 energy calibration; (ii) the **load-bearing clause is hereby
+  decided**: *the occupant drops one voxel on excavation* (falling exists; the undiggable
+  alternative can deadlock overflow widening in crowded shafts). Both land before step 8 is
+  certified.
+- **Contract v2 — the target below.** The continuous preference function, sensing coupled to
+  the acting band, and the ramp property. Migration is authorized either at the ladder's summit
+  or earlier if the shape gate (step 4/9) stalls in a way the morphogenesis analysis attributes
+  to band quantization — a finding, not a preference, triggers it. Seed weights are written
+  against the contract *as implemented*; a v1→v2 migration re-runs steps 7–9's assays and
+  comparisons, since weight semantics change with the resolution.
+
+**One output the tuple was missing: spoil deposit — and the same convention extends to brood.**
+The Rule 15 tuple has no drop action, yet the haul reflex requires one. Contract clause: **the
+dig trigger, when the ant is loaded and the targeted voxel is air, deposits the carried load
+there** — mandibles work both ways, one output, resolved by world preconditions exactly like the
+dig/descend alternation. The **same mandible convention governs brood** (carried-material-type
+distinguishes spoil/food/egg): dig trigger targeting an egg while unladen = pickup; dig trigger
+targeting air while carrying = putdown. If the implemented `broodTransport` mechanism differs,
+reconcile it to this clause or file a finding; what is not acceptable is a ninth output or an
+oracle-only carry path (parity).
+
+From two scalars — yaw θ and vertical bias $v \in [-1, 1]$ — the v2 preference score over the six
 adjacent voxels:
 
 $$\text{score}(\text{down}) = \max(0, -v), \qquad \text{score}(\text{up}) = \max(0, +v),$$
@@ -186,10 +276,9 @@ One function resolves all three couplings:
 
 **Two clauses that prevent known bug classes:**
 
-1. **Load-bearing voxel.** A voxel currently load-bearing for an occupant either cannot be dug,
-   or its occupant drops one voxel on excavation (falling already exists). **Pick one, write it
-   in this contract, before ladder step 4** — the multi-ant overflow run is where lateral digs
-   first remove another ant's floor, and the undecided case debugs as "ants teleporting."
+1. **Load-bearing voxel — decided above:** the occupant drops one voxel on excavation. (The
+   undecided case debugs as "ants teleporting"; the undiggable alternative deadlocks crowded
+   overflow.)
 2. **Tiebreak.** At $v \approx 0$ with uniform horizontal scores: inherit last tick's choice;
    random only on true ties. Deterministic, one line; prevents band-boundary dithering from
    reading as a movement bug.
@@ -219,6 +308,7 @@ The known morphogenesis ingredients from the biology, against implementation sta
 | Recruitment marking at dig sites | unlabeled pheromone channels A/B | **present** — the ladder uses it (amplify) |
 | Crowding-dependent digging | crowding sensor | **present** — the ladder uses it (overflow) |
 | Spoil deposition dynamics | conserved spoil / loose fill | **present** |
+| Brood transport | `broodTransport` gate: pickup, carriage, putdown, death handling | **present** — ladder steps 10c–12 |
 | Stop-condition templates (dig until local condition) | thermal field | present (climate-keyed exposure); *use as dig template deferred* |
 | Humidity / CO₂ gradients | none | **absent** — candidate W-additions; each passes carrier/locality/cost/question tests in principle; **not authorized**; enter only via finding report if the shape gate fails structurally |
 
@@ -231,14 +321,15 @@ morphometrics (§D.4.3). Output: the **minimal rule set over the shipped interfa
 nonzero chambers and branches; if none does, the tournament names the missing carrier — fault
 isolation for interface sufficiency at the morphogenesis level (rung 2, generalized).
 
-### D.4.3 Morphometrics ("looks like a colony" as a ledger)
+### D.4.3 Morphometrics ("looks like a colony" as description)
 
-From voxel data: skeletonize the air network into a graph; count **chambers** (connected air
-components wider than the 1-voxel bore), **branch points** (degree ≥ 3 nodes), chamber depth
-distribution, and **network efficiency** (entrance→chamber/stockpile path lengths). Qualitative
-target: the shaft-with-lateral-chambers, branching-with-size shape of real nest casts
-[[3]](#references), [[4]](#references). These metrics gate nothing until a shape exists worth
-measuring (post-step-4); thereafter they are the shape gate's quantitative form.
+Computed by the **§D.2.1 shared classifier** — no parallel vocabulary: chamber count, bulge and
+void-volume distributions, branch points, chamber depth distribution, and **network efficiency**
+(entrance→chamber/stockpile path lengths). Qualitative reference: the
+shaft-with-lateral-chambers, branching-with-size shape of real nest casts [[3]](#references),
+[[4]](#references) — a reference for *describing* results, never a target (Rule 18: these
+metrics gate nothing; any tournament or comparison gates on function ledgers, with morphometrics
+attached as the description of what won).
 
 ### D.4.4 Function coupling (the gate against decorative complexity)
 
@@ -246,7 +337,8 @@ measuring (post-step-4); thereafter they are the shape gate's quantitative form.
 > morphometric scores must **correlate with colony ledgers** through existing liabilities —
 > chambers as brood vaults (egg survival), chambers as larders (store retention), branches as
 > congestion relief. Uncorrelated complexity is free-floating, will be stripped by selection
-> regardless of seeding, and is not pursued. (Steps 10–12 are this rule's minimal instance.)
+> regardless of seeding, and is not pursued. (Steps 10a–12 are this rule's minimal instance;
+> 10e and 11c are its measurements.)
 
 ---
 
@@ -254,19 +346,36 @@ measuring (post-step-4); thereafter they are the shape gate's quantitative form.
 
 | Quantity | Constraint | Source |
 |---|---|---|
-| Ladder discipline | one deliverable, one pass condition, one config state per step; failures point at the owning step | §D.2 |
+| Ladder discipline | one deliverable, one pass condition, one config state per step; failures point at the owning step; **grain-size test**: a step whose failure could name two culprits is two steps | §D.2 |
+| Comparative steps | 10e and 11c are the ladder's only comparisons; each licenses exactly two configs + one ledger (minimal App. B §B.8 instances), never the full tournament | §D.2 |
+| Seed spec | five reflexes (dig-down, haul/deposit, amplify, overflow, casting); stereo taxis is blind to "behind" — return is casting's job, never assumed; amendments are explicit step-5 decisions | §D.2 step 5 |
+| Seed gating | dig gated by local A; deposit anti-gated by A; fixture pre-marks the column mouth (founding marks the dig site at colony scale) | §D.2 step 5 |
+| Seed budget | readability is the constraint: zero hidden state, linear-threshold, locus-by-locus verifiable, 2–4 loci per relay, ~20 total | §D.2 step 6 |
+| Seed-spec amendments | new oracle competences (egg placement, hoard-down) may force a sixth reflex — an explicit step-5 amendment decision at step 12, never absorbed silently | §D.2 |
+| Contract versioning | v1 (bands, uncoupled sensing) governs the ladder under parity; v2 migration by finding or at summit, re-running steps 7–9 | §D.3.3 |
+| Dig no-op | token cost, required before step-8 certification (spam not free; free no-ops distort energy calibration); ROCK undiggable | §D.3.3 |
+| Load-bearing clause | **decided**: occupant drops one voxel on excavation | §D.3.3 |
+| Spoil deposit | dig trigger + loaded + air target = deposit; no ninth output, no oracle-only drop path | §D.3.3 |
 | Gate discipline | start at `PHASE2`; one gate re-admitted per step, cost measured; `autoContinue` off and `wideEntranceShaft` off throughout; `nestDecay`/`seasons`/`larvalRearing` never admitted by this ladder | Rule 17 |
 | Flags vs. magnitudes | a flag is never a magnitude; constants tuned in the tunables layer via harness | §D.1.1 |
 | Gene-adjacent overrides | `spoilCapacity: null` pattern: genome-derived by default; overrides are logged experiments, never committed constants | §D.1.1, Rule 9 |
 | Config provenance | per-world config clone; checkpoints serialize config; cross-run ledger comparisons valid only under identical config | §D.1.1 |
 | The fence | no new fields/sensors/materials/mechanisms during the ladder; findings instead of features | Rule 14 |
-| Shape gate | air network no longer a line (step 4 oracle; step 9 RNN) | §D.2 |
+| Shape vocabulary | corridor/bulge/chamber/branch mechanically defined (§D.2.1 partition procedure); constants are P-layer tunables; full distributions logged | §D.2.1 |
+| Shape predicates | shape gates forbidden; existence gates (symmetry-broke-at-all) permitted in scaffolding phases only; no evolution-facing gate on either; ledgers alone gate | Rule 18 |
+| Existence gate | ≥ 1 non-corridor voxel or branch point (step 4 oracle; step 9 RNN); no named shape required | §D.2 |
+| Egg transport | behind `broodTransport` (admitted at 10c); pickup/carriage/putdown asserted; destination logged, never asserted; `eggCapacity` follows the `spoilCapacity` genome-adjacent pattern | §D.2 step 10c |
+| Microclimate dependency | `eggExposure` consumes microclimate → `microclimate` admitted alone at 10d′, measured, before 10d; 10e inherits both | §D.2 step 10d′ |
+| Brood ledger | fixed equal cohorts, fixed window $T$ ≥ incubation, fraction alive at $T$ (hatching = survival); fecundity differences excluded by construction | §D.2 step 10e |
+| Putdown cue | step-12 sufficiency experiment from existing inputs within Rule-12 budget; seed destination tendencies are legal S-layer ink; world-side carry-to-target and shape assertions are not; no cue sufficing ⇒ finding | §D.2 step 12 |
+| Mandible convention | dig trigger overloaded by preconditions: excavate solid / deposit load into air / pick up contacted egg — spoil, food, and brood alike; no ninth output | §D.3.3 |
+| Spec/status separation | certification status lives in `docs/certifications.md`, never in this document | §D.1 |
+| Maintenance | out of this ladder's scope by design; successor ladder admits `nestDecay` alone and gates on persistence (occupied vs. abandoned) | §D.2 |
 | Tuning inside the ladder | Rule 12 budget applies (3 configs / 10×) | App. C |
 | Oracle parity | identical output tuple, identical resolution; no privileged mutations; refactor before step 2 | Rule 15 |
 | Body model | yaw-only; vertical bias is attention, not posture; no pitch, ever | §D.3.2 |
 | Resolution | one preference function couples move/dig/sense; no-op semantics sequence the dig loop | §D.3.3 |
 | Dig no-op | token cost (spam not free); ROCK undiggable | §D.3.3 |
-| Load-bearing clause | decided and written before step 4 | §D.3.3 |
 | Actuator legality | actuators apply local intents, never decisions; no world-side target selection | §D.3.3 |
 | Marshalling | step-7 assays + loopback assertion mandatory before step 8 | §D.2 |
 | Escalation to CMA-ES | only after hand-written reflexes fail step 9, on the same three reflexes | §D.2 |

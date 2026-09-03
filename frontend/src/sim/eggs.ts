@@ -1,4 +1,4 @@
-import { SEX_FEMALE } from "./ant";
+import { SEX_FEMALE, type Ant } from "./ant";
 import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
 import { dropFoodAt } from "./energy";
@@ -23,6 +23,8 @@ export interface Egg {
   x: number;
   y: number;
   z: number;
+  /** Carrier ant id, or null while the brood occupies an indexed voxel. */
+  carrierId: number | null;
   genome: Genome;
   /** Maternal energy transferred at lay time; the hatchling's start energy. */
   energy: number;
@@ -48,6 +50,7 @@ export function eggKey(world: World, egg: Egg): number {
 }
 
 export function addEgg(world: World, egg: Egg): void {
+  egg.carrierId = null;
   world.eggs.push(egg);
   world.eggIndex.set(eggKey(world, egg), egg);
   world.eggsLaid += 1;
@@ -58,8 +61,80 @@ export function addEgg(world: World, egg: Egg): void {
  * orphan a ghost index entry (that once fed ants phantom energy). */
 export function removeEgg(world: World, egg: Egg): void {
   world.eggs = world.eggs.filter((e) => e !== egg);
+  if (egg.carrierId != null) {
+    const carrier = world.ants.find((ant) => ant.id === egg.carrierId);
+    if (carrier) {
+      carrier.carriedEggIds = carrier.carriedEggIds.filter((id) => id !== egg.id);
+    }
+    egg.carrierId = null;
+  }
   if (world.eggIndex.get(eggKey(world, egg)) === egg) {
     world.eggIndex.delete(eggKey(world, egg));
+  }
+}
+
+/** Remove a grounded egg from the voxel index and attach it to an ant. */
+export function carryEgg(world: World, ant: Ant, egg: Egg): boolean {
+  if (egg.carrierId != null || ant.carriedEggIds.includes(egg.id)) {
+    return false;
+  }
+  const key = eggKey(world, egg);
+  if (world.eggIndex.get(key) !== egg) {
+    return false;
+  }
+  world.eggIndex.delete(key);
+  egg.carrierId = ant.id;
+  egg.x = ant.x;
+  egg.y = ant.y;
+  egg.z = ant.z;
+  ant.carriedEggIds.push(egg.id);
+  return true;
+}
+
+/** Place one of an ant's carried eggs into an already-validated AIR voxel. */
+export function placeCarriedEgg(
+  world: World,
+  ant: Ant,
+  eggId: number,
+  x: number,
+  y: number,
+  z: number
+): boolean {
+  const carriedIndex = ant.carriedEggIds.indexOf(eggId);
+  const egg = world.eggs.find((candidate) => candidate.id === eggId);
+  if (carriedIndex < 0 || !egg || egg.carrierId !== ant.id) {
+    return false;
+  }
+  ant.carriedEggIds.splice(carriedIndex, 1);
+  egg.x = x;
+  egg.y = y;
+  egg.z = z;
+  egg.carrierId = null;
+  world.eggIndex.set(eggKey(world, egg), egg);
+  return true;
+}
+
+/** Keep live carried brood at each carrier's current microclimate position. */
+export function syncCarriedEggs(world: World): void {
+  if (!world.eggs.some((egg) => egg.carrierId !== null)) {
+    return;
+  }
+  const carriers = new Map(
+    world.ants
+      .filter((ant) => ant.alive && ant.carriedEggIds.length > 0)
+      .map((ant) => [ant.id, ant] as const)
+  );
+  for (const egg of world.eggs) {
+    if (egg.carrierId === null) {
+      continue;
+    }
+    const carrier = carriers.get(egg.carrierId);
+    if (!carrier) {
+      throw new Error(`egg ${egg.id} has missing live carrier ${egg.carrierId}`);
+    }
+    egg.x = carrier.x;
+    egg.y = carrier.y;
+    egg.z = carrier.z;
   }
 }
 
@@ -116,7 +191,7 @@ function hatch(world: World, egg: Egg): void {
  * exactly as it shelters adults); storms multiply it (Rule 5). Zero in a
  * stable microclimate, and no rng draw is spent there.
  */
-function exposureHazard(world: World, egg: Egg): number {
+export function eggExposureHazard(world: World, egg: Pick<Egg, "x" | "y" | "z">): number {
   const excess = microclimateMultiplier(world, egg) - EGG_EXPOSURE.safeMultiplier;
   if (excess <= 0) {
     return 0;
@@ -161,7 +236,7 @@ function stepLarva(world: World, larva: Egg): "alive" | "ripe" | "perished" {
 /** One brood tick: hazard roll, then incubation or rearing. */
 function stepBroodOne(world: World, egg: Egg): "alive" | "ripe" | "perished" {
   if (world.config.eggExposure) {
-    const hazard = exposureHazard(world, egg);
+    const hazard = eggExposureHazard(world, egg);
     if (hazard > 0 && world.rng.next() < hazard) {
       return "perished";
     }

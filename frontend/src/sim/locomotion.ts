@@ -25,10 +25,28 @@ function fall(grid: VoxelGrid, ant: Ant): void {
   // An ant can only ever fall into AIR — a solid below (even an
   // unsupported floating one, e.g. dropped biomass) arrests the fall.
   const belowIsAir = getVoxelSafe(grid, ant.x, below, ant.z) === Material.AIR;
-  if (belowIsAir && (isLegalPosition(grid, ant.x, below, ant.z) || !hasSupport(grid, ant.x, below, ant.z))) {
+  if (
+    belowIsAir &&
+    (isLegalPosition(grid, ant.x, below, ant.z) || !hasSupport(grid, ant.x, below, ant.z))
+  ) {
     ant.y = below;
   }
   ant.falling = !hasSupport(grid, ant.x, ant.y, ant.z);
+}
+
+/**
+ * Resolve loss of support immediately after terrain changes. Excavating a
+ * load-bearing voxel drops its occupant exactly one voxel; later ticks keep
+ * applying the ordinary falling rule until support is regained.
+ */
+export function dropUnsupportedOneVoxel(grid: VoxelGrid, ant: Ant): boolean {
+  if (hasSupport(grid, ant.x, ant.y, ant.z)) {
+    ant.falling = false;
+    return false;
+  }
+  ant.falling = true;
+  fall(grid, ant);
+  return true;
 }
 
 function tryStep(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
@@ -53,12 +71,9 @@ function tryStep(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
 export function applyMotor(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
   beginTick(ant);
 
-  if (!hasSupport(grid, ant.x, ant.y, ant.z)) {
-    ant.falling = true;
-    fall(grid, ant);
+  if (dropUnsupportedOneVoxel(grid, ant)) {
     return;
   }
-  ant.falling = false;
 
   ant.heading += motor.turn * TURN_RADIANS_PER_TICK;
   // Leg length buys speed (spec §3.2); the energy side is in applyStepCost.

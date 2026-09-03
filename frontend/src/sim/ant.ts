@@ -39,6 +39,8 @@ export interface Ant {
   carryLoad: number;
   /** Spoil loads carried; capacity scales with body size (spec §3.2). */
   spoilLoads: number;
+  /** IDs of live brood carried under the brood-transport feature gate. */
+  carriedEggIds: number[];
   alive: boolean;
   /** SEX_FEMALE (diploid worker/queen line) or SEX_MALE (haploid). */
   sex: number;
@@ -94,6 +96,7 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     carrying: null,
     carryLoad: 0,
     spoilLoads: 0,
+    carriedEggIds: [],
     alive: true,
     sex: spawn.sex ?? SEX_FEMALE,
     lineageId: spawn.lineageId,

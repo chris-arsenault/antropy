@@ -76,6 +76,15 @@ export const NEST_PHYSICS = {
   epsilon: 2e-4,
 } as const;
 
+/**
+ * Shared actuation noise. The sample is a pure hash of world seed, ant id,
+ * and tick, so it breaks lockstep without adding hidden or checkpoint state.
+ */
+export const MOTOR_JITTER = {
+  /** Maximum signed perturbation added to the normalized TURN output. */
+  turnAmplitude: 0.08,
+} as const;
+
 // Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.
 // Mutable (no `as const`) solely for the calibration harness's scoped,
 // restoring overrides (calibration.ts); production code never writes it.
@@ -110,9 +119,26 @@ export const DIG = {
     /** Picking up a FOOD voxel for transport (ADR-0006). */
     foodPickup: 0.001,
   },
-  /** Cost to place a carried load. */
+  /** Cost to place a carried load, also charged for a failed terrain intent. */
   depositCost: 0.001,
 } as const;
+
+// Live-brood transport. Mutable so experiments can scope and restore a
+// capacity override; the production default is one egg per ant.
+export const BROOD_TRANSPORT = {
+  /** Maximum live eggs carried at once; non-integers are rounded down. */
+  eggCapacity: 1,
+};
+
+// Appendix D descriptive nest classifier. These thresholds name observed
+// morphology; no evolving controller receives them and no function ledger is
+// allowed to target them.
+export const NEST_CLASSIFIER = {
+  /** Edge length of the all-air block required to describe a void as a chamber. */
+  chamberBlockSize: 2,
+  /** Maximum corridor voxels adjacent to a chamber void. */
+  maxDoorwayVoxels: 2,
+};
 
 // Food spawn governor: density-dependent target around a seasonal base.
 // Mutable for calibration harness overrides only, like ENERGY above.

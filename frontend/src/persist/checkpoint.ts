@@ -9,17 +9,19 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 10;
+export const CHECKPOINT_VERSION = 12;
 
 interface AntRecord {
   scalars: Record<string, number>;
   carrying: number | null;
+  carriedEggIds: number[];
   genome: Float32Array;
   state: Float32Array;
 }
 
 interface EggRecord {
   scalars: Record<string, number>;
+  carrierId: number | null;
   genome: Float32Array;
 }
 
@@ -144,6 +146,7 @@ function serializeAnt(world: World, ant: Ant): AntRecord {
   return {
     scalars,
     carrying: ant.carrying,
+    carriedEggIds: [...ant.carriedEggIds],
     genome: world.controller.serializeGenome(ant.genome),
     state: world.controller.serializeState(ant.controllerState),
   };
@@ -156,6 +159,7 @@ function restoreAnt(world: World, record: AntRecord): Ant {
     falling: record.scalars.falling === 1,
     alive: true,
     carrying: record.carrying,
+    carriedEggIds: [...record.carriedEggIds],
     genome,
     controllerState: world.controller.deserializeState(record.state),
     traits: world.controller.physical(genome),
@@ -224,6 +228,7 @@ export function serializeWorld(world: World): Checkpoint {
     ants: world.ants.map((ant) => serializeAnt(world, ant)),
     eggs: world.eggs.map((egg) => ({
       scalars: Object.fromEntries(EGG_SCALARS.map((key) => [key, egg[key] as number])),
+      carrierId: egg.carrierId,
       genome: world.controller.serializeGenome(egg.genome),
     })),
     colonies: world.colonies.map((colony) => serializeColony(world, colony)),
@@ -269,11 +274,14 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.ants = checkpoint.ants.map((record) => restoreAnt(world, record));
   world.eggs = checkpoint.eggs.map((record) => ({
     ...(record.scalars as unknown as Egg),
+    carrierId: record.carrierId,
     genome: controller.deserializeGenome(record.genome),
   }));
   world.eggIndex = new Map();
   for (const egg of world.eggs) {
-    world.eggIndex.set(voxelIndex(world.grid, egg.x, egg.y, egg.z), egg);
+    if (egg.carrierId === null) {
+      world.eggIndex.set(voxelIndex(world.grid, egg.x, egg.y, egg.z), egg);
+    }
   }
   world.colonies = checkpoint.colonies.map((record) => restoreColony(world, record));
   restoreScent(world.pheromoneA, checkpoint.scents.a);

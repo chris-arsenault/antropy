@@ -30,7 +30,11 @@ describe("App", () => {
 
     expect(container.querySelector("h1")?.textContent).toBe("Antropy");
     expect(container.querySelector('[data-testid="tick"]')?.textContent).toBe("0");
-    expect(container.querySelector("select")).not.toBeNull();
+    const scenario = container.querySelector<HTMLSelectElement>('[data-testid="scenario-select"]');
+    expect(scenario?.value).toBe("programmed");
+    expect(Array.from(scenario?.options ?? []).map((option) => option.textContent)).toContain(
+      "Programmed colony review"
+    );
     expect(container.querySelector("button")?.textContent).toBe("Run");
 
     await cleanup(container, root);

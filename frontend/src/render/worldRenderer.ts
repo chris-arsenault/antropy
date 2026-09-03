@@ -30,6 +30,32 @@ function addLights(scene: THREE.Scene): THREE.DirectionalLight {
   return sun;
 }
 
+function frameWorld(world: World): { position: THREE.Vector3; target: THREE.Vector3 } {
+  const { sizeX, sizeY, sizeZ } = world.grid;
+  const colony = world.colonies[0];
+  if (!colony) {
+    return {
+      position: new THREE.Vector3(sizeX * 1.1, sizeY * 1.8, sizeZ * 1.1),
+      target: new THREE.Vector3(sizeX / 2, sizeY * 0.6, sizeZ / 2),
+    };
+  }
+  const surfaceY = world.surfaceMap[colony.z * sizeX + colony.x];
+  const target = new THREE.Vector3(
+    (colony.x + sizeX / 2) / 2,
+    (colony.y + surfaceY) / 2,
+    (colony.z + sizeZ / 2) / 2
+  );
+  const distance = Math.max(42, (surfaceY - colony.y) * 2);
+  return {
+    position: new THREE.Vector3(
+      target.x + distance * 1.2,
+      target.y + distance * 0.8,
+      target.z + distance * 1.2
+    ),
+    target,
+  };
+}
+
 export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): WorldRenderer {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   const scene = new THREE.Scene();
@@ -37,12 +63,12 @@ export function createWorldRenderer(canvas: HTMLCanvasElement, world: World): Wo
   const sun = addLights(scene);
   const weather = createWeatherTint(scene, sun);
 
-  const { sizeX, sizeY, sizeZ } = world.grid;
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 1500);
-  camera.position.set(sizeX * 1.1, sizeY * 1.8, sizeZ * 1.1);
+  const view = frameWorld(world);
+  camera.position.copy(view.position);
 
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(sizeX / 2, sizeY * 0.6, sizeZ / 2);
+  controls.target.copy(view.target);
   controls.update();
 
   const chunks = createChunkMeshes(scene, world);

@@ -37,6 +37,8 @@ on the Ahara platform.
   `recombine`/`seed` contract. Nothing outside the controller inspects genome internals.
 - Use pnpm, TypeScript (`.ts`/`.tsx` only), and Vitest. ESLint enforces complexity 10, files
   under 400 lines, functions under 75 lines, plus the `@ahara/standards` custom rules.
+- Keep Vitest checks bounded to deterministic mechanics and integration invariants. Long-horizon
+  simulation measurements and comparisons belong in the harness ledger, never in timed test gates.
 - Run `make ci` before handoff after changing files.
 - Start local development servers only when the user explicitly asks.
 - Persistence is client-side (IndexedDB and file export). There is no backend, database, or
@@ -55,9 +57,7 @@ on the Ahara platform.
 
 | Command                    | Purpose                                                |
 | -------------------------- | ------------------------------------------------------ |
-| `make ci`                  | Lint, format-check, typecheck, fast tests, docs and tf checks |
-| `make test-slow`           | Long-run simulation gates (`*.slow.test.ts`, ~1min)    |
-| `make ci-full`             | `make ci` plus the slow gates — run after changing simulation dynamics, reproduction, or persistence |
+| `make ci`                  | Lint, format-check, typecheck, bounded tests, docs and tf checks |
 | `make build`               | Production frontend build                              |
 | `make deploy`              | Run the parameterless local deploy script              |
 | `cd frontend && pnpm harness <cmd>` | Measurement harness (ADR-0012): parameterized simulation runs into `harness/ledger.db` — `run`, `tournament`, `ladder`, `calibrate`, `determinism`, `recent`, `sql` |

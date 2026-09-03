@@ -1,19 +1,20 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { PHASE2_CONFIG } from "./config";
+import { LADDER_STEP2_CONFIG } from "./config";
 import { diggerSeedVector, rnnController, setRuntimeSeedBase } from "./controller/rnn";
 import { measureNest } from "./nestMetrics";
+import { premarkDigSite } from "./oracles/digSite";
 import { createWorld, populateDiggers, stepWorld } from "./world";
 
 /**
  * What a seeded digging crew actually costs when metabolism has
  * consequences. The crew has no foraging reflex by design (the seed spec
- * is three reflexes), so it digs on its starting energy: this measures
+ * is five digging reflexes), so it digs on its starting energy: this measures
  * how much nest that budget buys before the crew runs out.
  */
 describe("digging crew economy", () => {
   it("measures nest size against the crew's energy budget", { timeout: 120_000 }, () => {
-    const world = createWorld(1, rnnController, { ...PHASE2_CONFIG, mortality: true });
+    const world = createWorld(1, rnnController, LADDER_STEP2_CONFIG);
     world.foodBase = 0;
     world.foodTarget = 0;
     setRuntimeSeedBase(diggerSeedVector());
@@ -21,6 +22,7 @@ describe("digging crew economy", () => {
     setRuntimeSeedBase(null);
     const site = { x: Math.floor(world.grid.sizeX / 2), z: Math.floor(world.grid.sizeZ / 2) };
     const surfaceY = world.ants[0].y;
+    premarkDigSite(world, site.x, surfaceY, site.z, 0);
 
     const lines: string[] = [];
     for (let t = 1; t <= 6000; t++) {

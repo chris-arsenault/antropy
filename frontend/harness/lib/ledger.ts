@@ -124,13 +124,21 @@ export function recordRun(
     JSON.stringify(run.summary)
   );
   const runId = Number(result.lastInsertRowid);
-  const seriesInsert = db.prepare(
-    `INSERT INTO series VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  );
+  const seriesInsert = db.prepare(`INSERT INTO series VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   for (const s of series) {
     seriesInsert.run(
-      runId, s.tick, s.ants, s.eggs, s.stockpile, s.hoard, s.merit,
-      s.eggsLaid, s.eggsPerished, s.meanEnergy, s.rain, s.stress
+      runId,
+      s.tick,
+      s.ants,
+      s.eggs,
+      s.stockpile,
+      s.hoard,
+      s.merit,
+      s.eggsLaid,
+      s.eggsPerished,
+      s.meanEnergy,
+      s.rain,
+      s.stress
     );
   }
   const traceInsert = db.prepare(`INSERT INTO trace VALUES (?, ?, ?, ?, ?, ?, ?)`);

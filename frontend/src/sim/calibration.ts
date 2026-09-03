@@ -116,7 +116,15 @@ export function runEconomyPoint(
     try {
       world = createWorld(seed);
     } catch {
-      return { name: point.name, viable: false, survived: false, ants: 0, merit: 0, stockpile: 0, ratios: null };
+      return {
+        name: point.name,
+        viable: false,
+        survived: false,
+        ants: 0,
+        merit: 0,
+        stockpile: 0,
+        ratios: null,
+      };
     }
     const colony = foundColony(world);
     if (policy) {

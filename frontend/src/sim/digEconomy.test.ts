@@ -1,7 +1,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { surfaceSpawnY } from "./ant";
-import { PHASE2_CONFIG } from "./config";
+import { LADDER_STEP2_CONFIG } from "./config";
 import { rnnController } from "./controller/rnn";
 import { getVoxelSafe } from "./grid";
 import { Material } from "./materials";
@@ -26,7 +26,7 @@ function shaftDepth(world: World, x: number, z: number, surfaceY: number): numbe
 
 describe("dig economy with energy on (Phase 2 step 2)", () => {
   it("a mortal ant completes the shaft with energy to spare", () => {
-    const world = createWorld(9700, rnnController, { ...PHASE2_CONFIG, mortality: true });
+    const world = createWorld(9700, rnnController, LADDER_STEP2_CONFIG);
     world.foodBase = 0; // no foraging: the shaft must be affordable alone
     world.foodTarget = 0;
     const x = 96;

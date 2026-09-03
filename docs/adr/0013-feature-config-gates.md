@@ -18,12 +18,16 @@ way to answer "does an ant dig and store in this world at all" without editing c
 
 A `SimConfig` of boolean feature gates (`src/sim/config.ts`) is attached to each world
 and checked at every later-phase system's entry point: `mortality`, `reproduction`,
-`nestDecay`, `seasons`, `weather`, `microclimate`, `eggExposure`, `larvalRearing`,
-`autoContinue`, `wideEntranceShaft`. Numeric constants stay in `tunables.ts`; the gates
-turn whole systems on and off. Two presets ship: `FULL` (everything, the Release 3
+`terrainDigging`, `broodTransport`, `motorJitter`, `nestDecay`, `seasons`, `weather`,
+`microclimate`, `eggExposure`, `larvalRearing`, `autoContinue`, `wideEntranceShaft`, and
+`spoilHauling`. Numeric constants
+stay in `tunables.ts`; for example, `broodTransport` is the gate while
+`BROOD_TRANSPORT.eggCapacity` is the capacity magnitude, while `motorJitter` gates the generic
+per-ant turn perturbation whose amplitude lives in `MOTOR_JITTER`. Two presets ship: `FULL` (everything,
+the Release 3
 behavior) and `PHASE2` (the spec's base case — world core, ecology, and digging on;
 every later-phase liability off, ants immortal and non-reproducing). `createWorld` takes
-a config (default `FULL`) and stores a per-world copy; checkpoints serialize it (v9). The
+a config (default `FULL`) and stores a per-world copy; checkpoints serialize it. The
 harness selects a preset with `--config` and toggles single flags with `--flag key=bool`.
 
 ## Alternatives
@@ -36,11 +40,10 @@ harness selects a preset with `--config` and toggles single flags with `--flag k
 
 ## Consequences
 
-- The Phase 2 base case is now runnable and observable: `pnpm harness run --driver rung1
-  --config phase2`, and `src/sim/nestwatch.slow.test.ts` confirms immortal known-behavior
-  ants persist, forage, store, and leave the nest intact (decay off) — the collapse was
-  the Phase-4 decay liability, now a toggle.
+- The Phase 2 base case is runnable and observable with
+  `pnpm harness run --driver rung1 --config phase2`. Its long-horizon outcomes belong in the
+  harness ledger rather than a timed Vitest assertion; bounded mechanics remain unit-tested.
 - Later-phase features (microclimate, weather, larval rearing, brood-as-capital) are the
   designer-added complexity from earlier releases; they remain available but are no longer
   mandatory, so work can proceed bottom-up per §13.
-- Default `FULL` keeps existing tests and the shipped app unchanged.
+- Default `FULL` continues to mean every implemented system is enabled.

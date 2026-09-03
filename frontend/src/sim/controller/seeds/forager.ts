@@ -6,6 +6,7 @@
  * at 10k ticks (ledger 36-38): all seeds survive, 178-302 worker-days,
  * 100% brood survival. Do not edit by hand — regenerate.
  */
+// prettier-ignore
 export const FORAGER_SEED: number[] | null = [
   1.262300,
   -0.640462,

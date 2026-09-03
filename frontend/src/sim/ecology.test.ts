@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { spoilCapacity, tryDig, tryEat } from "./actions";
 import { braitenbergController } from "./controller/braitenberg";
+import { Output, OUTPUT_COUNT } from "./controller/contract";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
-import { ENERGY, FOOD_GOVERNOR } from "./tunables";
+import { DIG, ENERGY, FOOD_GOVERNOR } from "./tunables";
 import { createWorld, mutateVoxel, populateForagers, stepWorld, type World } from "./world";
 
 // Ecology behavior is calibrated against the reference controller (spec §13
@@ -70,34 +71,36 @@ describe("digging and spoil conservation", () => {
     expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.AIR);
     expect(getVoxel(world.grid, ant.x + 1, ant.y - 1, ant.z)).not.toBe(Material.AIR);
 
-    // Nothing left to dig below: the load is dropped to the side (the
-    // one terrain channel's deposit rule) and the shaft stays open — the
-    // spoil must never go back down the hole.
+    // The same down-targeted intent now sees air while loaded, so the one
+    // terrain channel deposits into that exact voxel.
     tryDig(world, ant, -1);
     expect(ant.spoilLoads).toBe(0);
-    expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.AIR);
+    expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.LOOSE_FILL);
 
-    // After descending, the next voxel down is available again.
+    // Unload the test voxel, descend, and expose the next dig target.
+    mutateVoxel(world, ant.x, ant.y - 1, ant.z, Material.AIR);
     ant.y -= 1;
     tryDig(world, ant, -1);
     expect(ant.spoilLoads).toBe(1);
     expect(getVoxel(world.grid, ant.x, ant.y - 1, ant.z)).toBe(Material.AIR);
   });
+});
 
-  it("deposits spoil level or upward, never straight back down first", () => {
+describe("terrain intent preconditions", () => {
+  it("deposits spoil into the air target selected by vertical bias", () => {
     const world = createReferenceWorld(37);
     populateForagers(world, 3);
     const ant = firstAnt(world);
     ant.heading = 0;
     ant.carrying = Material.TOPSOIL;
     ant.spoilLoads = spoilCapacity(ant);
-    // Faced level voxel is air on open ground: the deposit lands there.
+    // Strong up selects forward-up before the other target candidates.
+    mutateVoxel(world, ant.x + 1, ant.y + 1, ant.z, Material.AIR);
     mutateVoxel(world, ant.x + 1, ant.y, ant.z, Material.AIR);
-    mutateVoxel(world, ant.x + 1, ant.y - 1, ant.z, Material.AIR);
 
-    tryDig(world, ant, -1);
-    expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.LOOSE_FILL);
-    expect(getVoxel(world.grid, ant.x + 1, ant.y - 1, ant.z)).toBe(Material.AIR);
+    tryDig(world, ant, 1);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y + 1, ant.z)).toBe(Material.LOOSE_FILL);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.AIR);
   });
 
   it("refuses to dig rock", () => {
@@ -108,9 +111,43 @@ describe("digging and spoil conservation", () => {
     mutateVoxel(world, ant.x + 1, ant.y, ant.z, Material.ROCK);
     mutateVoxel(world, ant.x + 1, ant.y - 1, ant.z, Material.ROCK);
 
+    const energyBefore = ant.energy;
     tryDig(world, ant, 0);
     expect(ant.carrying).toBeNull();
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.ROCK);
+    expect(ant.energy).toBeCloseTo(energyBefore - DIG.depositCost);
+  });
+
+  it("drops an occupant one voxel when its last support is excavated", () => {
+    const world = createReferenceWorld(38);
+    populateForagers(world, 5);
+    const digger = firstAnt(world);
+    const occupant = world.ants[1];
+    expect(occupant).toBeDefined();
+
+    const x = 96;
+    const y = 40;
+    const z = 96;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = 0; dy <= 2; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          mutateVoxel(world, x + dx, y + dy, z + dz, Material.AIR);
+        }
+      }
+    }
+    mutateVoxel(world, x, y, z, Material.TOPSOIL);
+    digger.x = x - 1;
+    digger.y = y;
+    digger.z = z;
+    digger.heading = 0;
+    occupant.x = x;
+    occupant.y = y + 1;
+    occupant.z = z;
+
+    tryDig(world, digger, 0);
+
+    expect(getVoxel(world.grid, x, y, z)).toBe(Material.AIR);
+    expect(occupant.y).toBe(y);
   });
 });
 
@@ -141,6 +178,26 @@ describe("eating and death", () => {
     expect(ant.alive).toBe(false);
     expect(world.ants).not.toContain(ant);
     expect(getVoxel(world.grid, ant.x, ant.y, ant.z)).toBe(Material.FOOD);
+  });
+
+  it("resolves EAT at the contact pose sensed before translation", () => {
+    const world = createReferenceWorld(39);
+    populateForagers(world, 1);
+    const ant = firstAnt(world);
+    ant.heading = 0;
+    ant.energy = 0.2;
+    const foodX = ant.x + 2;
+    mutateVoxel(world, foodX, ant.y, ant.z, Material.FOOD);
+    const outputs = new Float32Array(OUTPUT_COUNT);
+    outputs[Output.FORWARD] = 1;
+    outputs[Output.EAT] = 1;
+    world.policyOverride = () => outputs;
+
+    stepWorld(world);
+    expect(getVoxel(world.grid, foodX, ant.y, ant.z)).toBe(Material.FOOD);
+
+    stepWorld(world);
+    expect(getVoxel(world.grid, foodX, ant.y, ant.z)).toBe(Material.AIR);
   });
 });
 

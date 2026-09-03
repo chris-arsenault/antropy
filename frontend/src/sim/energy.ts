@@ -1,5 +1,5 @@
 import { SEX_MALE, type Ant } from "./ant";
-import { getVoxelSafe, voxelIndex } from "./grid";
+import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
 import { Material, type MaterialId } from "./materials";
 import { ENERGY, MALE } from "./tunables";
 import { mutateVoxel, type World } from "./world";
@@ -32,7 +32,7 @@ export function applyStepCost(ant: Ant): void {
   const fullness = Math.max(0, ant.energy) / maxEnergy(ant);
   const storagePenalty = 1 + 0.3 * fullness * Math.max(0, ant.traits.storage - 1);
   const base = ENERGY.stepCost * ant.traits.legLength * storagePenalty;
-  ant.energy -= base + ENERGY.carryStepCost * ant.spoilLoads;
+  ant.energy -= base + ENERGY.carryStepCost * (ant.spoilLoads + ant.carriedEggIds.length);
 }
 
 /**
@@ -86,6 +86,86 @@ export function dropFoodAt(world: World, x: number, y: number, z: number): void 
   dropMaterialAt(world, x, y, z, Material.FOOD);
 }
 
+function isEggReleaseSpot(world: World, x: number, y: number, z: number): boolean {
+  if (!inBounds(world.grid, x, y, z) || getVoxelSafe(world.grid, x, y, z) !== Material.AIR) {
+    return false;
+  }
+  if (world.eggIndex.has(voxelIndex(world.grid, x, y, z))) {
+    return false;
+  }
+  return !world.ants.some((ant) => ant.alive && ant.x === x && ant.y === y && ant.z === z);
+}
+
+function isEggReleaseCandidate(
+  world: World,
+  spot: { x: number; y: number; z: number },
+  dx: number,
+  dy: number,
+  dz: number,
+  radius: number
+): boolean {
+  const onShell = Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz)) === radius;
+  return onShell && isEggReleaseSpot(world, spot.x, spot.y, spot.z);
+}
+
+function eggReleaseSpotAtRadius(
+  world: World,
+  ant: Ant,
+  radius: number
+): { x: number; y: number; z: number } | null {
+  for (let dy = -radius; dy <= radius; dy++) {
+    for (let dz = -radius; dz <= radius; dz++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const spot = { x: ant.x + dx, y: ant.y + dy, z: ant.z + dz };
+        if (isEggReleaseCandidate(world, spot, dx, dy, dz, radius)) {
+          return spot;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/** Find the nearest physical voxel for brood released by a dead carrier. */
+function eggReleaseSpot(world: World, ant: Ant): { x: number; y: number; z: number } | null {
+  if (isEggReleaseSpot(world, ant.x, ant.y, ant.z)) {
+    return { x: ant.x, y: ant.y, z: ant.z };
+  }
+  for (let radius = 1; radius <= 8; radius++) {
+    const spot = eggReleaseSpotAtRadius(world, ant, radius);
+    if (spot) {
+      return spot;
+    }
+  }
+  return null;
+}
+
+/** Ground every live egg carried by an ant before its corpse is placed. */
+function releaseCarriedEggs(world: World, ant: Ant): void {
+  const ids = new Set(ant.carriedEggIds);
+  ant.carriedEggIds.length = 0;
+  for (const egg of world.eggs) {
+    if (egg.carrierId !== ant.id) {
+      continue;
+    }
+    if (!ids.delete(egg.id)) {
+      throw new Error(`egg ${egg.id} names carrier ${ant.id} without a carrier-side link`);
+    }
+    const spot = eggReleaseSpot(world, ant);
+    if (!spot) {
+      throw new Error(`no AIR voxel can receive egg ${egg.id} from dead carrier ${ant.id}`);
+    }
+    egg.x = spot.x;
+    egg.y = spot.y;
+    egg.z = spot.z;
+    egg.carrierId = null;
+    world.eggIndex.set(voxelIndex(world.grid, egg.x, egg.y, egg.z), egg);
+  }
+  if (ids.size > 0) {
+    throw new Error(`carrier ${ant.id} names missing eggs: ${[...ids].join(",")}`);
+  }
+}
+
 /**
  * Kill an ant in place: the corpse persists as edible energy (spec §6),
  * and anything it was carrying returns to the world — matter is conserved
@@ -93,6 +173,7 @@ export function dropFoodAt(world: World, x: number, y: number, z: number): void 
  */
 export function killAnt(world: World, ant: Ant): void {
   ant.alive = false;
+  releaseCarriedEggs(world, ant);
   const carried = ant.carrying as MaterialId | null;
   if (carried !== null) {
     for (let i = 0; i < ant.spoilLoads; i++) {

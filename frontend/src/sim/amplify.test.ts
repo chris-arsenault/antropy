@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { surfaceSpawnY } from "./ant";
-import { PHASE2_CONFIG } from "./config";
+import { LADDER_STEP2_CONFIG } from "./config";
 import { rnnController } from "./controller/rnn";
 import { getVoxelSafe, voxelIndex } from "./grid";
 import { Material } from "./materials";
@@ -45,7 +45,7 @@ function digger(world: World, x: number, z: number) {
 
 describe("amplify rule (Phase 2 step 3)", () => {
   it("one ant still completes the shaft, and marks it while digging", () => {
-    const world = createWorld(9800, rnnController, { ...PHASE2_CONFIG, mortality: true });
+    const world = createWorld(9800, rnnController, LADDER_STEP2_CONFIG);
     world.foodBase = 0;
     world.foodTarget = 0;
     const x = 96;

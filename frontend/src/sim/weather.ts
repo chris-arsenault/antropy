@@ -38,7 +38,10 @@ function washSurfaceFood(world: World): void {
     const x = index % world.grid.sizeX;
     const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
     const y = Math.floor(index / slab);
-    if (y > world.surfaceMap[z * world.grid.sizeX + x] && world.weatherRng.next() < RAIN.foodDestroyFraction) {
+    if (
+      y > world.surfaceMap[z * world.grid.sizeX + x] &&
+      world.weatherRng.next() < RAIN.foodDestroyFraction
+    ) {
       washScratch.push(index);
     }
   }

@@ -53,9 +53,10 @@ describe("1x1 shaft navigation", () => {
       applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: -1 });
       if (t < 8) trace.push(`(${ant.x},${ant.y},${ant.z})`);
     }
-    expect(ant.y, `from ${startY}: ${trace.join(" ")} -> (${ant.x},${ant.y},${ant.z})`).toBeLessThanOrEqual(
-      mouthY - 4
-    );
+    expect(
+      ant.y,
+      `from ${startY}: ${trace.join(" ")} -> (${ant.x},${ant.y},${ant.z})`
+    ).toBeLessThanOrEqual(mouthY - 4);
     expect(ant.x).toBe(x);
     expect(ant.z).toBe(z);
   });

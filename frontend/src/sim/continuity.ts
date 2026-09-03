@@ -32,8 +32,7 @@ export function stepAutoContinue(world: World): void {
   if (world.tick - world.lastContinueTick < CONTINUITY.cooldownTicks) {
     return;
   }
-  const populationOk =
-    world.colonies.length > 0 && world.ants.length >= CONTINUITY.minPopulation;
+  const populationOk = world.colonies.length > 0 && world.ants.length >= CONTINUITY.minPopulation;
   if (populationOk) {
     return;
   }

@@ -79,9 +79,7 @@ export async function runDeriveVivo(flags: Flags): Promise<void> {
   let sigma = 0.2;
 
   const evaluate = async (vector: Float32Array): Promise<number> => {
-    const verdicts = await Promise.all(
-      worldSeeds.map((ws) => evalOnce(vector, ws, ticks))
-    );
+    const verdicts = await Promise.all(worldSeeds.map((ws) => evalOnce(vector, ws, ticks)));
     return verdicts.reduce((a, v) => a + v.fitness, 0) / verdicts.length;
   };
 

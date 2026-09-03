@@ -5,7 +5,7 @@ import { getVoxelSafe, voxelIndex, type VoxelGrid } from "./grid";
 import { Material, isSolid } from "./materials";
 import { headingToDirection } from "./movement";
 import { sampleScent, type ScentField } from "./scent";
-import { ENERGY } from "./tunables";
+import { BROOD_TRANSPORT, ENERGY } from "./tunables";
 
 export interface SenseContext {
   grid: VoxelGrid;
@@ -104,7 +104,11 @@ export function sense(ctx: SenseContext, ant: Ant, inputs: Float32Array): Float3
   inputs[Input.NEST_SCENT_RIGHT] = scentAt(ctx, ctx.nestScent, rx, y, rz, gain, colony);
   inputs[Input.ENERGY] = Math.max(0, Math.min(1, ant.energy / (ENERGY.max * ant.traits.storage)));
   inputs[Input.AGE_FRACTION] = Math.min(1, ant.age / ENERGY.ageCap);
-  inputs[Input.CARRY_LOAD] = ant.carryLoad;
+  const eggCapacity = Math.max(1, Math.floor(BROOD_TRANSPORT.eggCapacity));
+  inputs[Input.CARRY_LOAD] =
+    ant.carriedEggIds.length > 0
+      ? Math.min(1, ant.carriedEggIds.length / eggCapacity)
+      : ant.carryLoad;
   inputs[Input.CARRIED_MATERIAL] = ant.carrying === null ? 0 : ant.carrying / 8;
   inputs[Input.BODY_SCALE] = Math.min(1, ant.bodyScale / 2);
   inputs[Input.DEPTH] = 1 - ant.y / ctx.grid.sizeY;

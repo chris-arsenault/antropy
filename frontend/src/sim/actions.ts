@@ -1,13 +1,14 @@
 import { SEX_FEMALE, SEX_MALE, type Ant } from "./ant";
 import { creditDelivery } from "./colony";
 import { type SimConfig } from "./config";
-import { addEgg, findEggSpot, removeEgg, STAGE_EGG } from "./eggs";
+import { addEgg, carryEgg, findEggSpot, placeCarriedEgg, removeEgg, STAGE_EGG } from "./eggs";
 import { maxEnergy } from "./energy";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
+import { dropUnsupportedOneVoxel } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
 import { headingToDirection } from "./movement";
 import { depositScent } from "./scent";
-import { COLONY, DIG, ENERGY, MALE, PHEROMONE_DEPOSIT_MAX } from "./tunables";
+import { BROOD_TRANSPORT, COLONY, DIG, ENERGY, MALE, PHEROMONE_DEPOSIT_MAX } from "./tunables";
 import { mutateVoxel, type World } from "./world";
 
 function facedVoxel(ant: Ant): { x: number; y: number; z: number } {
@@ -123,6 +124,11 @@ export function spoilCapacity(ant: Ant, config?: SimConfig): number {
   return Math.max(1, Math.round(ant.traits.bodyScale * 2));
 }
 
+/** Live eggs an ant can carry under the brood-transport gate. */
+export function eggCarryCapacity(): number {
+  return Math.max(0, Math.floor(BROOD_TRANSPORT.eggCapacity));
+}
+
 /**
  * Deposit target candidates, deliberately ordered differently from dig
  * targets: level and upward-forward first, downward last — so spoil is
@@ -147,8 +153,14 @@ function depositTargets(ant: Ant): number {
  * food never mix in one carry. FOOD pickup is the transport path (ADR-0006).
  */
 function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
+  if (ant.carriedEggIds.length > 0) {
+    return false;
+  }
   const material = getVoxelSafe(world.grid, x, y, z);
   const isFood = material === Material.FOOD;
+  if (!isFood && !world.config.terrainDigging) {
+    return false;
+  }
   const cost = isFood ? DIG.cost.foodPickup : digCost(material);
   if (cost === null) {
     return false;
@@ -159,6 +171,7 @@ function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): bool
   if (!isFood && !world.config.spoilHauling) {
     ant.energy -= cost;
     mutateVoxel(world, x, y, z, Material.AIR);
+    dropLoadBearingOccupant(world, ant, x, y, z);
     return true;
   }
   if (ant.carrying !== null && (ant.carrying === Material.FOOD) !== isFood) {
@@ -169,7 +182,36 @@ function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): bool
   ant.carryLoad = ant.spoilLoads / spoilCapacity(ant, world.config);
   ant.energy -= cost;
   mutateVoxel(world, x, y, z, Material.AIR);
+  dropLoadBearingOccupant(world, ant, x, y, z);
   return true;
+}
+
+function standsOn(ant: Ant, x: number, y: number, z: number): boolean {
+  return ant.x === x && ant.y === y + 1 && ant.z === z;
+}
+
+/**
+ * Only an occupant directly above the excavated voxel bears on that voxel.
+ * The usual down-dig is the excavator's own floor and avoids a population
+ * scan; lateral excavation scans only for the exceptional other occupant.
+ */
+function dropLoadBearingOccupant(
+  world: World,
+  excavator: Ant,
+  x: number,
+  y: number,
+  z: number
+): void {
+  if (standsOn(excavator, x, y, z)) {
+    dropUnsupportedOneVoxel(world.grid, excavator);
+    return;
+  }
+  for (const occupant of world.ants) {
+    if (occupant.alive && standsOn(occupant, x, y, z)) {
+      dropUnsupportedOneVoxel(world.grid, occupant);
+      return;
+    }
+  }
 }
 
 /**
@@ -252,7 +294,20 @@ function cropHasRoom(world: World, ant: Ant): boolean {
   return colony !== undefined && colony.stockpile < COLONY.stockpileSatiation;
 }
 
-function tryDeposit(world: World, ant: Ant): void {
+function depositAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
+  if (
+    !inBounds(world.grid, x, y, z) ||
+    getVoxelSafe(world.grid, x, y, z) !== Material.AIR ||
+    isOccupied(world, x, y, z)
+  ) {
+    return false;
+  }
+  mutateVoxel(world, x, y, z, ant.carrying === Material.FOOD ? Material.FOOD : Material.LOOSE_FILL);
+  unload(world, ant);
+  return true;
+}
+
+function tryDeposit(world: World, ant: Ant): boolean {
   // Food deposited at the queen becomes stockpile + patriline merit; this
   // is the delivery event (design spec §7.1 merit signal). A full crop
   // absorbs nothing (§B.3 R2 colony sink): surplus falls through to
@@ -262,49 +317,120 @@ function tryDeposit(world: World, ant: Ant): void {
     creditDelivery(world, ant.lineageId, ant.patrilineId, ENERGY.foodEnergy);
     ant.deliveries += 1;
     unload(world, ant);
-    return;
+    return true;
   }
   const count = depositTargets(ant);
+  for (let i = 0; i < count; i++) {
+    const { x, y, z } = DIG_TARGET_SCRATCH[i];
+    if (depositAt(world, ant, x, y, z)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function depositSpoilInTargetBand(world: World, ant: Ant, count: number): boolean {
+  for (let i = 0; i < count; i++) {
+    const { x, y, z } = DIG_TARGET_SCRATCH[i];
+    if (depositAt(world, ant, x, y, z)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function pickUpEggInTargetBand(world: World, ant: Ant, count: number): boolean {
+  if (ant.carrying !== null || ant.carriedEggIds.length >= eggCarryCapacity()) {
+    return false;
+  }
+  for (let i = 0; i < count; i++) {
+    const { x, y, z } = DIG_TARGET_SCRATCH[i];
+    if (!inBounds(world.grid, x, y, z)) {
+      continue;
+    }
+    const egg = world.eggIndex.get(voxelIndex(world.grid, x, y, z));
+    if (egg && carryEgg(world, ant, egg)) {
+      ant.energy -= DIG.cost.foodPickup;
+      return true;
+    }
+  }
+  return false;
+}
+
+function placeEggInTargetBand(world: World, ant: Ant, count: number): boolean {
+  const eggId = ant.carriedEggIds[0];
+  if (eggId === undefined) {
+    return false;
+  }
   for (let i = 0; i < count; i++) {
     const { x, y, z } = DIG_TARGET_SCRATCH[i];
     if (
       inBounds(world.grid, x, y, z) &&
       getVoxelSafe(world.grid, x, y, z) === Material.AIR &&
-      !isOccupied(world, x, y, z)
+      !isOccupied(world, x, y, z) &&
+      placeCarriedEgg(world, ant, eggId, x, y, z)
     ) {
-      mutateVoxel(
-        world,
-        x,
-        y,
-        z,
-        ant.carrying === Material.FOOD ? Material.FOOD : Material.LOOSE_FILL
-      );
-      unload(world, ant);
-      return;
+      ant.energy -= DIG.depositCost;
+      return true;
     }
   }
+  return false;
+}
+
+/** Resolve the brood-specific DIG preconditions; true consumes the intent. */
+function tryBroodTransport(world: World, ant: Ant, count: number): boolean {
+  if (!world.config.broodTransport) {
+    return false;
+  }
+  if (pickUpEggInTargetBand(world, ant, count)) {
+    return true;
+  }
+  if (ant.carriedEggIds.length === 0) {
+    return false;
+  }
+  if (!placeEggInTargetBand(world, ant, count)) {
+    ant.energy -= DIG.depositCost;
+  }
+  return true;
+}
+
+function pickUpInTargetBand(world: World, ant: Ant, count: number): boolean {
+  for (let i = 0; i < count; i++) {
+    const { x, y, z } = DIG_TARGET_SCRATCH[i];
+    if (inBounds(world.grid, x, y, z) && pickUpAt(world, ant, x, y, z)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
- * One terrain channel (design spec §5.4): below capacity, dig or pick up the
- * first workable candidate; at capacity (or with nothing workable while
- * loaded), deposit one load — spoil as LOOSE_FILL, food as a FOOD voxel or,
- * at the queen, as a delivery. Matter is conserved.
+ * One terrain channel (design spec §5.4): resolve the vertical-bias target
+ * candidates in order. A loaded spoil carrier deposits into a targeted AIR
+ * voxel; otherwise an ant below capacity digs or picks up the first workable
+ * target. FOOD retains its queen-delivery path. An intent with no legal
+ * effect pays the same token cost as placing one load.
  */
 export function tryDig(world: World, ant: Ant, verticalBias: number): void {
-  if (ant.spoilLoads < spoilCapacity(ant, world.config)) {
-    const count = digTargets(ant, verticalBias);
-    for (let i = 0; i < count; i++) {
-      const { x, y, z } = DIG_TARGET_SCRATCH[i];
-      if (inBounds(world.grid, x, y, z) && pickUpAt(world, ant, x, y, z)) {
-        return;
-      }
-    }
-    if (ant.spoilLoads === 0) {
-      return;
-    }
+  const count = digTargets(ant, verticalBias);
+  if (tryBroodTransport(world, ant, count)) {
+    return;
   }
-  tryDeposit(world, ant);
+  const carryingSpoil = ant.carrying !== null && ant.carrying !== Material.FOOD;
+  const hasCapacity = ant.spoilLoads < spoilCapacity(ant, world.config);
+  if (carryingSpoil && depositSpoilInTargetBand(world, ant, count)) {
+    // Deposit mode is selected by the carried load plus an AIR target. Scan
+    // the active v1 band for air before considering further excavation, so
+    // a multi-load carrier does not immediately re-dig the pile it placed.
+    return;
+  }
+  if (hasCapacity && pickUpInTargetBand(world, ant, count)) {
+    return;
+  }
+  if (ant.carrying === Material.FOOD && tryDeposit(world, ant)) {
+    return;
+  }
+  ant.energy -= DIG.depositCost;
 }
 
 /**
@@ -329,6 +455,7 @@ export function tryLayEgg(world: World, ant: Ant): void {
     x: spot.x,
     y: spot.y,
     z: spot.z,
+    carrierId: null,
     genome: world.controller.haploidOffspring(ant.genome, world.rng),
     energy: endowment,
     incubationRemaining: COLONY.incubationTicks,

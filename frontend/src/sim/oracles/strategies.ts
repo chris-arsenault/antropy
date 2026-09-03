@@ -53,8 +53,7 @@ function approach(ant: Ant, x: number, z: number): Float32Array {
 
 function airBelow(world: World, ant: Ant): boolean {
   return (
-    ant.y > 1 &&
-    world.grid.data[voxelIndex(world.grid, ant.x, ant.y - 1, ant.z)] === Material.AIR
+    ant.y > 1 && world.grid.data[voxelIndex(world.grid, ant.x, ant.y - 1, ant.z)] === Material.AIR
   );
 }
 
@@ -104,12 +103,7 @@ function hoardTrip(world: World, ant: Ant, spot: CacheSpot): Float32Array {
 
 /** Wait out an extreme below: converge on the queen, where crop feeding
  * reaches; idle (eating from any adjacent hoard) at the bottom. */
-function retreatMove(
-  world: World,
-  ant: Ant,
-  colony: Colony,
-  inputs: Float32Array
-): Float32Array {
+function retreatMove(world: World, ant: Ant, colony: Colony, inputs: Float32Array): Float32Array {
   if (Math.max(Math.abs(ant.x - colony.x), Math.abs(ant.z - colony.z)) > 1) {
     return withVertical(approach(ant, colony.x, colony.z), -1);
   }

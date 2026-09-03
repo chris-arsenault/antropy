@@ -1,5 +1,6 @@
 import { randNormal, type Rng } from "../rng";
 import { FORAGER_SEED } from "./seeds/forager";
+import { extendFunctionalSeed } from "./functionalSeed";
 import { ENERGY } from "../tunables";
 import {
   Input,
@@ -150,13 +151,15 @@ const ACTION_BIAS_LOCI = [
  * physical traits (Rule 9) that derivation must not optimize. */
 export const WEIGHT_COUNT = PHYS;
 
-// The Phase 2 digger seed (docs/seed-spec.md): three reflexes, eight
-// weights, two hidden relays, no recurrence. Hidden units are indices
+// The Phase 2 digger seed (docs/seed-spec.md): five reflexes, about twenty
+// loci, six memoryless relays, and no recurrence. Hidden units are indices
 // into a layer that is otherwise all zero, so each relay is isolated.
 const H_AMPLIFY = 0;
 const H_CROWD = 1;
-/** Constant terrain drive; tanh(2) = 0.96, past the action threshold. */
-const DIG_DRIVE = 2;
+const H_HAUL = 2;
+const H_DIG_SITE = 3;
+const H_DUMP = 4;
+const H_CAST = 5;
 /** Constant down bias; tanh(-2) = -0.96, past the -0.33 dig-down band. */
 const DOWN_DRIVE = -2;
 /**
@@ -164,13 +167,15 @@ const DOWN_DRIVE = -2;
  * never enters it: motion needs forward thrust even to descend, so a
  * digger with no drive sinks exactly one voxel and then starves in place.
  */
-const FORWARD_DRIVE = 0.7;
-/** Marking strength while working; tanh(1.5) = 0.9 of a full deposit. */
-const MARK_DRIVE = 1.5;
+const FORWARD_DRIVE = 0.700221;
 /** Channel-A stereo gain into the amplify relay. */
-const AMPLIFY_GAIN = 4;
+const AMPLIFY_GAIN = 3.098311;
 /** Amplify relay to TURN: how hard the ant swings toward the mark. */
-const AMPLIFY_TURN = 2;
+const AMPLIFY_TURN = 1.752951;
+/** Total-A relay: a marked dig face drives DIG and reinforces its mark. */
+const DIG_SITE_GAIN = 4.611572;
+const DIG_SITE_DRIVE = 4.610979;
+const DIG_SITE_MARK = 0.44646;
 /**
  * Crowding gain and lift. Sized so one neighbour leaves the down bias
  * intact (net -0.58, still digging down) and two or more cancel it into
@@ -179,32 +184,132 @@ const AMPLIFY_TURN = 2;
  */
 const CROWD_GAIN = 6;
 const CROWD_LIFT = 2.1;
+/** Load relay: climb and inhibit DIG while carrying through a marked shaft. */
+const HAUL_LOAD_GAIN = 3.154215;
+const HAUL_LIFT = 6.702527;
+const HAUL_DIG_INHIBITION = -2.206419;
+/**
+ * Dump relay. Load excites it while total local A inhibits it. Together
+ * with the haul inhibitor and marked-site relay this yields the four cases
+ * required by the shared DIG/deposit actuator: quiet+empty off,
+ * marked+empty DIG, marked+loaded off, quiet+loaded deposit.
+ */
+const DUMP_LOAD_GAIN = 4.190144;
+const DUMP_SCENT_INHIBITION = -11.80862;
+const DUMP_DRIVE = 2.901328;
+/**
+ * Casting is a constant turn cancelled by high total A. At zero A the
+ * relay is zero and the bias turns; at high A it saturates negative and
+ * cancels that bias, leaving the stereo amplify relay in control.
+ */
+const CAST_SCENT_INHIBITION = -5.601472;
+const CAST_DRIVE = 0.986716;
 
 /**
  * Hand-written founder weights for the Phase 2 digger (docs/seed-spec.md).
- * Reflex 1 sinks a shaft with no input; reflex 2 marks and steers toward
- * the strongest mark; reflex 3 turns a crowded digger sideways.
+ * Reflex 1 sinks a marked shaft; reflex 2 hauls spoil to quiet ground and
+ * deposits it; reflex 3 reinforces and follows the mark; reflex 4 turns a
+ * crowded digger sideways; reflex 5 casts until it reacquires channel A.
  */
 export function diggerSeedVector(): Float32Array {
   const v = new Float32Array(GENOME_LENGTH);
 
-  // Reflex 1 — dig-down bias: fire the terrain channel, aim it down, and
-  // supply the thrust that carries the ant into the hole it makes.
-  v[B_OUT + Output.DIG] = DIG_DRIVE;
+  // Reflex 1 — marked-site dig-down. Aim down and supply the thrust that
+  // enters the hole; total channel A gates DIG to the founded shaft site.
   v[B_OUT + Output.VERTICAL_BIAS] = DOWN_DRIVE;
   v[B_OUT + Output.FORWARD] = FORWARD_DRIVE;
+  v[W_IN + H_DIG_SITE * INPUT_COUNT + Input.PHEROMONE_A_LEFT] = DIG_SITE_GAIN;
+  v[W_IN + H_DIG_SITE * INPUT_COUNT + Input.PHEROMONE_A_RIGHT] = DIG_SITE_GAIN;
+  v[W_OUT + Output.DIG * HIDDEN_COUNT + H_DIG_SITE] = DIG_SITE_DRIVE;
 
-  // Reflex 2 — amplify: mark, and turn toward the stronger mark.
-  v[B_OUT + Output.PHEROMONE_A] = MARK_DRIVE;
+  // Reflex 2 — spoil haul/deposit. Load flips the vertical preference up
+  // and inhibits digging in the marked shaft. The dump relay re-enables
+  // the shared terrain trigger only when a loaded ant reaches low-A ground.
+  v[W_IN + H_HAUL * INPUT_COUNT + Input.CARRY_LOAD] = HAUL_LOAD_GAIN;
+  v[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + H_HAUL] = HAUL_LIFT;
+  v[W_OUT + Output.DIG * HIDDEN_COUNT + H_HAUL] = HAUL_DIG_INHIBITION;
+  v[W_IN + H_DUMP * INPUT_COUNT + Input.CARRY_LOAD] = DUMP_LOAD_GAIN;
+  v[W_IN + H_DUMP * INPUT_COUNT + Input.PHEROMONE_A_LEFT] = DUMP_SCENT_INHIBITION;
+  v[W_IN + H_DUMP * INPUT_COUNT + Input.PHEROMONE_A_RIGHT] = DUMP_SCENT_INHIBITION;
+  v[W_OUT + Output.DIG * HIDDEN_COUNT + H_DUMP] = DUMP_DRIVE;
+
+  // Reflex 3 — amplify: reinforce channel A only at its marked site and
+  // turn toward the stronger forward sample.
+  v[W_OUT + Output.PHEROMONE_A * HIDDEN_COUNT + H_DIG_SITE] = DIG_SITE_MARK;
   v[W_IN + H_AMPLIFY * INPUT_COUNT + Input.PHEROMONE_A_LEFT] = AMPLIFY_GAIN;
   v[W_IN + H_AMPLIFY * INPUT_COUNT + Input.PHEROMONE_A_RIGHT] = -AMPLIFY_GAIN;
   v[W_OUT + Output.TURN * HIDDEN_COUNT + H_AMPLIFY] = AMPLIFY_TURN;
 
-  // Reflex 3 — overflow: crowding cancels the down bias into neutral,
+  // Reflex 4 — overflow: crowding cancels the down bias into neutral,
   // so the terrain channel takes the faced voxel instead of the floor.
   v[W_IN + H_CROWD * INPUT_COUNT + Input.CROWDING] = CROWD_GAIN;
   v[W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + H_CROWD] = CROWD_LIFT;
 
+  // Reflex 5 — reacquisition by casting. Uniform low A leaves a constant
+  // turn; total A cancels it so the amplify differential controls taxis.
+  v[B_OUT + Output.TURN] = CAST_DRIVE;
+  v[W_IN + H_CAST * INPUT_COUNT + Input.PHEROMONE_A_LEFT] = CAST_SCENT_INHIBITION;
+  v[W_IN + H_CAST * INPUT_COUNT + Input.PHEROMONE_A_RIGHT] = CAST_SCENT_INHIBITION;
+  v[W_OUT + Output.TURN * HIDDEN_COUNT + H_CAST] = CAST_DRIVE;
+
+  return v;
+}
+
+/** Step-12 founder: the five digging reflexes plus local brood/food transport. */
+export function functionalSeedVector(): Float32Array {
+  return extendFunctionalSeed(diggerSeedVector());
+}
+
+/** Behavioral loci belonging to the five-reflex digger topology. */
+export function diggerSeedLoci(): number[] {
+  return diggerSeedLocusGroups().flat();
+}
+
+/**
+ * Parameter-sharing groups for derivation. Paired stereo, total-A, and
+ * casting-cancellation loci must retain equal magnitude; otherwise the
+ * optimizer can replace a reflex with an accidental constant turn.
+ */
+export function diggerSeedLocusGroups(): number[][] {
+  return [
+    [
+      W_IN + H_AMPLIFY * INPUT_COUNT + Input.PHEROMONE_A_LEFT,
+      W_IN + H_AMPLIFY * INPUT_COUNT + Input.PHEROMONE_A_RIGHT,
+    ],
+    [W_OUT + Output.TURN * HIDDEN_COUNT + H_AMPLIFY],
+    [W_IN + H_CROWD * INPUT_COUNT + Input.CROWDING],
+    [W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + H_CROWD],
+    [W_IN + H_HAUL * INPUT_COUNT + Input.CARRY_LOAD],
+    [W_OUT + Output.VERTICAL_BIAS * HIDDEN_COUNT + H_HAUL],
+    [W_OUT + Output.DIG * HIDDEN_COUNT + H_HAUL],
+    [
+      W_IN + H_DIG_SITE * INPUT_COUNT + Input.PHEROMONE_A_LEFT,
+      W_IN + H_DIG_SITE * INPUT_COUNT + Input.PHEROMONE_A_RIGHT,
+    ],
+    [W_OUT + Output.DIG * HIDDEN_COUNT + H_DIG_SITE],
+    [W_OUT + Output.PHEROMONE_A * HIDDEN_COUNT + H_DIG_SITE],
+    [W_IN + H_DUMP * INPUT_COUNT + Input.CARRY_LOAD],
+    [
+      W_IN + H_DUMP * INPUT_COUNT + Input.PHEROMONE_A_LEFT,
+      W_IN + H_DUMP * INPUT_COUNT + Input.PHEROMONE_A_RIGHT,
+    ],
+    [W_OUT + Output.DIG * HIDDEN_COUNT + H_DUMP],
+    [
+      W_IN + H_CAST * INPUT_COUNT + Input.PHEROMONE_A_LEFT,
+      W_IN + H_CAST * INPUT_COUNT + Input.PHEROMONE_A_RIGHT,
+    ],
+    [B_OUT + Output.TURN, W_OUT + Output.TURN * HIDDEN_COUNT + H_CAST],
+    [B_OUT + Output.FORWARD],
+    [B_OUT + Output.VERTICAL_BIAS],
+  ];
+}
+
+/** Step-9 ablation: reflex 1 without amplification or overflow. */
+export function shaftSeedVector(): Float32Array {
+  const v = new Float32Array(GENOME_LENGTH);
+  v[B_OUT + Output.DIG] = 2;
+  v[B_OUT + Output.VERTICAL_BIAS] = DOWN_DRIVE;
+  v[B_OUT + Output.FORWARD] = FORWARD_DRIVE;
   return v;
 }
 

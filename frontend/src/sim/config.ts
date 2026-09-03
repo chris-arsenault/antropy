@@ -8,10 +8,16 @@
  * is FULL (everything the project has built); presets below isolate phases.
  */
 export interface SimConfig {
+  /** World core: ants may remove soil through the shared DIG actuator. */
+  terrainDigging: boolean;
   /** Phase 3: ants age and starve; corpses drop as food. Off = immortal. */
   mortality: boolean;
-  /** Phase 3: queens lay eggs and brood hatches. Off = fixed population. */
+  /** Phase 3: queens/workers lay eggs and brood hatches. Off = fixed population. */
   reproduction: boolean;
+  /** Phase 3: DIG can pick up and place live brood. */
+  broodTransport: boolean;
+  /** World-core deterministic turn noise; breaks exact behavioral lockstep. */
+  motorJitter: boolean;
   /** Phase 4: untrafficked tunnels collapse to loose fill. */
   nestDecay: boolean;
   /** Phase 4: seasonal food oscillation. Off = steady carrying capacity. */
@@ -52,8 +58,11 @@ export interface SimConfig {
 
 /** Everything on — the behavior the project shipped through Release 3. */
 export const FULL_CONFIG: SimConfig = {
+  terrainDigging: true,
   mortality: true,
   reproduction: true,
+  broodTransport: true,
+  motorJitter: true,
   nestDecay: true,
   seasons: true,
   weather: true,
@@ -73,8 +82,11 @@ export const FULL_CONFIG: SimConfig = {
  * a chamber and store food, and does the nest persist?" is answerable.
  */
 export const PHASE2_CONFIG: SimConfig = {
+  terrainDigging: true,
   mortality: false,
   reproduction: false,
+  broodTransport: false,
+  motorJitter: false,
   nestDecay: false,
   seasons: false,
   weather: false,
@@ -91,9 +103,65 @@ export const PHASE2_CONFIG: SimConfig = {
   spoilCapacity: null,
 };
 
+/** Static authored colony used to review nest geometry before behavior work. */
+export const PROGRAMMED_COLONY_CONFIG: SimConfig = {
+  ...PHASE2_CONFIG,
+  terrainDigging: false,
+  motorJitter: true,
+};
+
+/** Appendix D step 1: Phase 2 with conserved spoil and real haul trips. */
+export const LADDER_STEP1_CONFIG: SimConfig = {
+  ...PHASE2_CONFIG,
+  spoilHauling: true,
+};
+
+/** Appendix D steps 2-9: step 1 plus mortality and its live energy budget. */
+export const LADDER_STEP2_CONFIG: SimConfig = {
+  ...LADDER_STEP1_CONFIG,
+  mortality: true,
+};
+
+/** Appendix D step 10b: admit reproduction after the step-9 gate state. */
+export const LADDER_STEP10B_CONFIG: SimConfig = {
+  ...LADDER_STEP2_CONFIG,
+  reproduction: true,
+};
+
+/** Appendix D step 10c: admit live brood transport after reproduction. */
+export const LADDER_STEP10C_CONFIG: SimConfig = {
+  ...LADDER_STEP10B_CONFIG,
+  broodTransport: true,
+};
+
+/** Step 10d-prime: admit the climate field that egg exposure depends on. */
+export const LADDER_STEP10D_PRIME_CONFIG: SimConfig = {
+  ...LADDER_STEP10C_CONFIG,
+  microclimate: true,
+};
+
+/** Appendix D step 10d: expose brood after climate cost is measured. */
+export const LADDER_STEP10D_CONFIG: SimConfig = {
+  ...LADDER_STEP10D_PRIME_CONFIG,
+  eggExposure: true,
+};
+
+/** Appendix D steps 11b-11c: admit weather after food transport is proven. */
+export const LADDER_STEP11B_CONFIG: SimConfig = {
+  ...LADDER_STEP10D_CONFIG,
+  weather: true,
+};
+
+/** Appendix D step 12: the summit gate set plus deterministic motor diversity. */
+export const LADDER_STEP12_CONFIG: SimConfig = {
+  ...LADDER_STEP11B_CONFIG,
+  motorJitter: true,
+};
+
 const PRESETS: Record<string, SimConfig> = {
   full: FULL_CONFIG,
   phase2: PHASE2_CONFIG,
+  programmedColony: PROGRAMMED_COLONY_CONFIG,
 };
 
 /** Resolve a preset name to a fresh config copy; throws on unknown name. */

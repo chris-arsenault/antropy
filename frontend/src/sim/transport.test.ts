@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { spoilCapacity, tryDig, tryEat } from "./actions";
 import { foundColony } from "./colony";
+import { PROGRAMMED_COLONY_CONFIG } from "./config";
+import { rnnController } from "./controller/rnn";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
 import { ENERGY } from "./tunables";
@@ -21,6 +23,17 @@ function antWithFood(world: World) {
 }
 
 describe("physical food transport (ADR-0006)", () => {
+  it("keeps food pickup available when terrain digging is disabled", () => {
+    const world = createWorld(7000, rnnController, PROGRAMMED_COLONY_CONFIG);
+    foundColony(world);
+    const ant = antWithFood(world);
+
+    tryDig(world, ant, 0);
+
+    expect(ant.carrying).toBe(Material.FOOD);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.AIR);
+  });
+
   it("picks up faced food when full instead of eating it", () => {
     const world = createWorld(7001);
     foundColony(world);

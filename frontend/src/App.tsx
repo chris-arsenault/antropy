@@ -11,7 +11,7 @@ import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
-const DEFAULT_SCENARIO: ScenarioId = "digging";
+const DEFAULT_SCENARIO: ScenarioId = "programmed";
 
 function freshWorldFactory(scenario: ScenarioId, seed: number): () => World {
   return () => scenarioById(scenario).build(seed);

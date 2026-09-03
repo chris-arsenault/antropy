@@ -26,5 +26,7 @@ export function intFlag(flags: Flags, key: string, fallback: number): number {
 }
 
 export function seedsOf(flags: Flags, fallback: string): number[] {
-  return flag(flags, "seeds", flag(flags, "seed", fallback)).split(",").map(Number);
+  return flag(flags, "seeds", flag(flags, "seed", fallback))
+    .split(",")
+    .map(Number);
 }

@@ -33,8 +33,7 @@ function fitnessOf(job: Job): Record<string, number> {
   const eggSurvival = world.eggsLaid === 0 ? 0 : 1 - world.eggsPerished / world.eggsLaid;
   // The delivery loop's signature: sustained population, credited
   // deliveries, and a crop that stays provisioned.
-  const fitness =
-    workerDays + 0.03 * merit + 2 * Math.min(4, colony.stockpile) + 5 * eggSurvival;
+  const fitness = workerDays + 0.03 * merit + 2 * Math.min(4, colony.stockpile) + 5 * eggSurvival;
   return {
     fitness,
     workerDays,

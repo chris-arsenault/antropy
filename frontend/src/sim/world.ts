@@ -6,12 +6,13 @@ import { stepColonies, type Colony } from "./colony";
 import { type Controller } from "./controller/contract";
 import { stampVisit, stepDecay } from "./decay";
 import { rnnController } from "./controller/rnn";
-import { stepEggs, type Egg } from "./eggs";
+import { stepEggs, syncCarriedEggs, type Egg } from "./eggs";
 import { applyBasalDrain, applyStepCost, checkDeath, reapDead } from "./energy";
 import { stepFoodGovernor } from "./foodSpawner";
 import { getVoxel, setVoxel, voxelIndex, type VoxelGrid } from "./grid";
 import { applyMotor } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
+import { applyMotorJitter } from "./motorJitter";
 import { decodeOutputs } from "./motors";
 import { assertWorldViability } from "./ratios";
 import { createRng, type Rng, type RngState } from "./rng";
@@ -251,6 +252,12 @@ function stepScents(world: World): void {
 /** Oracles pay the controller-comparable think cost (ADR-0009). */
 const ORACLE_THINK_COST = 0.00008;
 
+function resolveLayEgg(world: World, ant: Ant, layEgg: boolean): void {
+  if (world.config.reproduction && layEgg) {
+    tryLayEgg(world, ant);
+  }
+}
+
 function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
   ant.age += 1;
   stampVisit(world, ant.x, ant.y, ant.z);
@@ -266,18 +273,24 @@ function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant
   ant.lastInputs.set(inputs);
   ant.lastOutputs.set(outputs);
   const actions = decodeOutputs(outputs);
+  if (world.config.motorJitter) {
+    applyMotorJitter(actions.motor, world.seed, ant.id, world.tick);
+  }
 
-  applyMotor(world.grid, ant, actions.motor);
+  // EAT resolves at the mandible position represented by CONTACT_* in this
+  // tick's sensory vector. If translation ran first, an ant could consume
+  // an egg or food voxel it had never sensed, making contact-gated handling
+  // inexpressible. DIG remains after motion: that ordering is load-bearing
+  // for the calibrated dig/descend and haul/deposit loop.
   if (actions.eat) {
     tryEat(world, ant);
   }
+  applyMotor(world.grid, ant, actions.motor);
   if (actions.dig) {
     tryDig(world, ant, actions.motor.verticalBias);
   }
   depositPheromones(world, ant, actions.pheromoneA, actions.pheromoneB);
-  if (actions.layEgg) {
-    tryLayEgg(world, ant);
-  }
+  resolveLayEgg(world, ant, actions.layEgg);
   tryTrophallaxis(world, ant);
 
   applyBasalDrain(ant, thinkCost, climate);
@@ -329,6 +342,7 @@ export function stepWorld(world: World): void {
       stepAnt(world, ctx, inputs, ant);
     }
   }
+  syncCarriedEggs(world);
   reapDead(world);
   stepAutoContinue(world);
 }

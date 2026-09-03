@@ -6,6 +6,7 @@ import { openLedger, recordRun } from "./lib/ledger";
 import { applyPatches } from "./lib/patch";
 import { runCalibrate } from "./experiments/calibrate";
 import { runDerive } from "./experiments/derive";
+import { runDeriveDigger } from "./experiments/deriveDigger";
 import { runDeriveVivo } from "./experiments/deriveVivo";
 import { runDeterminism } from "./determinism";
 
@@ -155,8 +156,23 @@ function cmdSql(argv: string[]): void {
   console.log(JSON.stringify(rows, null, 1));
 }
 
+function handleDerivation(command: string, rest: string[]): boolean {
+  if (command === "derive") {
+    runDerive(parseFlags(rest));
+    return true;
+  }
+  if (command === "derive-digger") {
+    runDeriveDigger(parseFlags(rest));
+    return true;
+  }
+  return false;
+}
+
 function main(): void {
   const [command, ...rest] = process.argv.slice(2);
+  if (handleDerivation(command, rest)) {
+    return;
+  }
   switch (command) {
     case "run":
       return cmdRun(parseFlags(rest));
@@ -166,8 +182,6 @@ function main(): void {
       return cmdLadder(parseFlags(rest));
     case "calibrate":
       return runCalibrate(parseFlags(rest));
-    case "derive":
-      return runDerive(parseFlags(rest));
     case "derive-vivo":
       void runDeriveVivo(parseFlags(rest));
       return;
@@ -179,7 +193,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|derive|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|derive|derive-digger|determinism|recent|sql> [flags]"
       );
   }
 }
