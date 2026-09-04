@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { StrictMode, act } from "react";
+import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { App } from "./App";
 
@@ -8,11 +8,7 @@ async function renderApp(): Promise<{ container: HTMLElement; root: Root }> {
   document.body.appendChild(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(
-      <StrictMode>
-        <App />
-      </StrictMode>
-    );
+    root.render(<App />);
   });
   return { container, root };
 }
@@ -33,9 +29,13 @@ describe("App", () => {
     const scenario = container.querySelector<HTMLSelectElement>('[data-testid="scenario-select"]');
     expect(scenario?.value).toBe("programmed");
     expect(Array.from(scenario?.options ?? []).map((option) => option.textContent)).toContain(
-      "Programmed colony review"
+      "Colony loop (Appendix E)"
     );
     expect(container.querySelector("button")?.textContent).toBe("Run");
+    const effectiveConfig = container.querySelector('[data-testid="effective-config"]');
+    expect(effectiveConfig?.textContent).toContain("food energy2.4");
+    expect(effectiveConfig?.textContent).toContain("energy tank8");
+    expect(effectiveConfig?.textContent).toContain("surface food target1600");
 
     await cleanup(container, root);
   });

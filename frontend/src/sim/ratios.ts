@@ -58,7 +58,7 @@ export const RATIO_BANDS = {
 export function typicalMetabolicRate(): number {
   const basal = ENERGY.basalPerTick;
   const upkeep = ENERGY.sensorUpkeep;
-  const think = 0.00008;
+  const think = 0.00008 * ENERGY.thinkCostScale;
   const stepping = ENERGY.stepCost * MEAN_SPEED;
   return basal + upkeep + think + stepping;
 }

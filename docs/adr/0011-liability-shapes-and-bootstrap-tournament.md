@@ -54,16 +54,17 @@ nest-scent plume carrier inverted the recorded worker-days finding: the compass
 had been subsidizing O-surface's forage efficiency. On the legal interface,
 O-surface ≺ O-shelter holds strictly on the master ledger, and the tournament
 gates are pinned there (no longer sub-ledger-provisional for that inequality).
-O-shelter ≺ O-architect on worker-days remains open pending brood-as-capital
-(R3-PLAN M4.75).
+The later brood-as-capital measurement still found O-architect below O-shelter on worker-days;
+deep construction remains a priced investment whose current return is brood protection rather
+than population dominance (see [the calibration record](../calibration.md)).
 
 ## Consequences
 
 - Rule 6 is satisfied in spirit on the reproductive and storage channels; anyone reading
   Appendix B's letter should start from this ADR.
-- The STRESS sensory input (thermoreception) ships so shelter and dig reflexes are
+- The `TEMPERATURE` sensory input (thermoreception) ships so shelter and dig reflexes are
   reflex-expressible (Rule 4); seeds may use it, behavior remains fully evolvable.
-- Founding nests carve a 2×2 entrance shaft: 1×1 shafts are undescendable under the
-  movement primitives, which had left every chamber decorative.
+- `FULL` retains the calibrated 2×2 founding entrance. The later locomotion correction made a
+  1×1 entrance navigable, so isolated Phase 2 configurations use the narrower form.
 - Evolution keeping or eroding the seeded underground preference becomes a Release 4+
-  observable, with the backlog carrying the brood-capital lever.
+  observable, with the backlog carrying deeper climate and raid repricing.

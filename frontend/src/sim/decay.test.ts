@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { stepDecay } from "./decay";
 import { addEgg } from "./eggs";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
@@ -22,8 +23,8 @@ describe("nest decay (spec §9.2)", () => {
     const spot = carveTestTunnel(world);
 
     world.tick = DECAY.ttlTicks + 1; // the cavity is long overdue
-    for (let t = 0; t < DECAY.interval * 60; t++) {
-      stepWorld(world);
+    for (let pass = 0; pass < 60; pass++) {
+      stepDecay(world);
     }
     expect(getVoxel(world.grid, spot.x, spot.y, spot.z)).toBe(Material.LOOSE_FILL);
     expect(world.cavities.size).toBe(0);
@@ -34,10 +35,10 @@ describe("nest decay (spec §9.2)", () => {
     const spot = carveTestTunnel(world);
     world.tick = DECAY.ttlTicks + 1;
 
-    for (let t = 0; t < DECAY.interval * 60; t++) {
+    for (let pass = 0; pass < 60; pass++) {
       world.lastVisit[(spot.y * world.grid.sizeZ + spot.z) * world.grid.sizeX + spot.x] =
         world.tick;
-      stepWorld(world);
+      stepDecay(world);
     }
     expect(getVoxel(world.grid, spot.x, spot.y, spot.z)).toBe(Material.AIR);
   });
@@ -63,8 +64,8 @@ describe("nest decay (spec §9.2)", () => {
       fatherId: 0,
     });
 
-    for (let t = 0; t < DECAY.interval * 60; t++) {
-      stepWorld(world);
+    for (let pass = 0; pass < 60; pass++) {
+      stepDecay(world);
     }
     expect(getVoxel(world.grid, spot.x, spot.y, spot.z)).toBe(Material.AIR);
   });

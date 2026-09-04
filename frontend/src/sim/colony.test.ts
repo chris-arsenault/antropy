@@ -3,6 +3,7 @@ import { SEX_MALE } from "./ant";
 import { foundColony } from "./colony";
 import { tryEat } from "./actions";
 import { addEgg, STAGE_LARVA, type Egg } from "./eggs";
+import { NEST_CONFIG } from "./config";
 import { rnnController } from "./controller/rnn";
 import { COLONY, LARVA, QUEEN } from "./tunables";
 import { createWorld, spawnAnt, stepWorld } from "./world";
@@ -40,7 +41,11 @@ describe("colony founding", () => {
 
 describe("eggs", () => {
   it("lays from the stockpile, incubates, and hatches a juvenile", { timeout: 30_000 }, () => {
-    const world = createWorld(4003);
+    const world = createWorld(4003, rnnController, {
+      ...NEST_CONFIG,
+      workerReproduction: true,
+      larvalRearing: true,
+    });
     const colony = foundColony(world);
     world.ants = []; // isolate the egg lifecycle
     colony.stockpile = 5;

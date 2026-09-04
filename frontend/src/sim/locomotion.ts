@@ -85,5 +85,9 @@ export function applyMotor(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
     tryStep(grid, ant, motor);
     steps += 1;
   }
-  ant.moveCharge = Math.min(ant.moveCharge, 1);
+  // The per-tick step cap drops whole queued steps but preserves fractional
+  // progress. Retaining a charge of exactly one makes an ant coast on the
+  // next tick after it has commanded zero thrust, which can move it away
+  // from a contact target between sensing and the shared action resolver.
+  if (ant.moveCharge >= 1) ant.moveCharge %= 1;
 }

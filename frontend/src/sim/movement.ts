@@ -14,6 +14,13 @@ export interface MotorState {
 export const TURN_RADIANS_PER_TICK = Math.PI / 4;
 export const MAX_STEPS_PER_TICK = 1;
 
+/** Resolve the implemented vertical bands shared by contact sensing and action. */
+export function verticalBandOffset(verticalBias: number): -1 | 0 | 1 {
+  if (verticalBias < -0.33) return -1;
+  if (verticalBias > 0.33) return 1;
+  return 0;
+}
+
 const NEIGHBORHOOD_26: readonly (readonly [number, number, number])[] = (() => {
   const offsets: [number, number, number][] = [];
   for (let dy = -1; dy <= 1; dy++) {
@@ -78,27 +85,27 @@ function setCandidate(i: number, dx: number, dy: number, dz: number): void {
 
 /**
  * Step candidates in preference order. Under a strong vertical bias the
- * *stationary* vertical move comes first: it only resolves to a legal step
- * when the voxel directly above/below is air — i.e. a 1-wide shaft — so an
- * ant that wants to descend a shaft does, while on flat ground that
- * candidate is skipped (solid) and it walks forward. Neutral bias walks
- * forward-first. Returns a reused scratch array — do not retain.
+ * diagonal move comes first because the vertical-band stereo samples describe
+ * that destination. The stationary vertical move remains the fallback for a
+ * 1-wide shaft, where the diagonal is solid. Neutral bias walks forward-first.
+ * Returns a reused scratch array — do not retain.
  */
 export function stepCandidates(
   heading: number,
   verticalBias: number
 ): { dx: number; dy: number; dz: number }[] {
   const { dx, dz } = headingToDirection(heading);
-  if (verticalBias < -0.33) {
-    // Descend: straight down, then forward-down, forward-level, forward-up.
-    setCandidate(0, 0, -1, 0);
-    setCandidate(1, dx, -1, dz);
+  const verticalBand = verticalBandOffset(verticalBias);
+  if (verticalBand < 0) {
+    // Descend: follow the sampled diagonal, with straight down as shaft fallback.
+    setCandidate(0, dx, -1, dz);
+    setCandidate(1, 0, -1, 0);
     setCandidate(2, dx, 0, dz);
     setCandidate(3, dx, 1, dz);
-  } else if (verticalBias > 0.33) {
-    // Climb: straight up, then forward-up, forward-level, forward-down.
-    setCandidate(0, 0, 1, 0);
-    setCandidate(1, dx, 1, dz);
+  } else if (verticalBand > 0) {
+    // Climb: follow the sampled diagonal, with straight up as shaft fallback.
+    setCandidate(0, dx, 1, dz);
+    setCandidate(1, 0, 1, 0);
     setCandidate(2, dx, 0, dz);
     setCandidate(3, dx, -1, dz);
   } else {

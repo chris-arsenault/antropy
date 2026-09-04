@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { foundColony } from "../sim/colony";
+import { NEST_CONFIG } from "../sim/config";
+import { rnnController } from "../sim/controller/rnn";
 import { carryEgg, addEgg, STAGE_EGG, type Egg } from "../sim/eggs";
 import { createWorld, stepWorld } from "../sim/world";
+import { sampleMaterialScent, setMaterialScent } from "../sim/materialScent";
 import { deserializeWorld, serializeWorld } from "./checkpoint";
 import { checkpointFromJson, checkpointToJson } from "./file";
 
@@ -30,6 +33,34 @@ describe("checkpoint codec", () => {
     const checkpoint = serializeWorld(world);
     expect(() => deserializeWorld({ ...checkpoint, version: 99 })).toThrow(/version/);
     expect(() => deserializeWorld({ ...checkpoint, controllerId: "nope" })).toThrow(/controller/);
+  });
+
+  it("round-trips Appendix E gates and cargo capacities", () => {
+    const config = { ...NEST_CONFIG, broodCapacity: 3, spoilCapacity: 5 };
+    const world = createWorld(8005, rnnController, config);
+    const restored = deserializeWorld(serializeWorld(world));
+
+    expect(restored.config).toEqual(config);
+  });
+
+  it("preserves the vertical attention latch", () => {
+    const world = createWorld(8006, rnnController, NEST_CONFIG);
+    foundColony(world);
+    world.ants[0].verticalAttention = -0.75;
+
+    const restored = deserializeWorld(serializeWorld(world));
+
+    expect(restored.ants[0].verticalAttention).toBe(-0.75);
+  });
+
+  it("preserves colony odor absorbed by material", () => {
+    const world = createWorld(8007, rnnController, NEST_CONFIG);
+    const index = 10;
+    setMaterialScent(world.materialColonyScent, index, 0.4, 3);
+
+    const restored = deserializeWorld(serializeWorld(world));
+
+    expect(sampleMaterialScent(restored.materialColonyScent, index, 3)).toBeCloseTo(0.4);
   });
 
   it("preserves both sides of a live brood carrier link", () => {

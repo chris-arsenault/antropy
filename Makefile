@@ -21,15 +21,7 @@ test:
 	cd frontend && pnpm exec vitest run
 
 docs-check:
-	test -f README.md
-	test -f AGENTS.md
-	test -f CLAUDE.md
-	test -f docs/README.md
-	test -f docs/design-spec.md
-	test -f docs/architecture.md
-	test -f docs/development.md
-	test -f docs/backlog.md
-	test -f docs/adr/README.md
+	cd frontend && pnpm exec tsx harness/checkDocs.ts ..
 
 terraform-fmt-check:
 	terraform fmt -check -recursive infrastructure/terraform/

@@ -6,6 +6,8 @@ import { BEACON_PHYSICS, SCENT } from "./tunables";
 export interface ScentPhysics {
   readonly diffusionRate: number;
   readonly evaporation: number;
+  /** Smallest edge share worth transporting; independent of active-value culling. */
+  readonly transferEpsilon: number;
   readonly epsilon: number;
 }
 
@@ -95,6 +97,16 @@ export function sampleScent(field: ScentField, voxelIndex: number, owner = 0): n
   return field.owners[voxelIndex] === owner ? field.values[voxelIndex] : 0;
 }
 
+/**
+ * Map an unbounded scent concentration into the controller's normalized
+ * input range without flattening distinct concentrations at a hard cap.
+ * The response stays monotonic, so a strong field remains navigable.
+ */
+export function scentResponse(concentration: number, gain: number): number {
+  const scaled = Math.max(0, concentration * gain);
+  return scaled / (1 + scaled);
+}
+
 export function scentActiveCount(field: ScentField): number {
   return field.activeCount;
 }
@@ -164,9 +176,7 @@ function diffuse(grid: VoxelGrid, field: ScentField): void {
       continue;
     }
     const share = (field.values[index] * field.physics.diffusionRate) / 6;
-    // Mass conservation at the fringe: shares too small to survive the
-    // epsilon cull stay put instead of bleeding away tick by tick.
-    if (share < field.physics.epsilon) {
+    if (share < field.physics.transferEpsilon) {
       continue;
     }
     const owner = field.owners[index];
@@ -224,18 +234,15 @@ export function emitFoodScent(grid: VoxelGrid, field: ScentField, foodSources: S
   }
 }
 
-/** Colony-tagged emission from a queen's position (ADR-0006 nest scent). */
+/** Colony-tagged emission from a physical colony-odor source. */
 export function emitNestScent(
-  grid: VoxelGrid,
+  _grid: VoxelGrid,
   field: ScentField,
   voxelIndex: number,
-  owner: number
+  owner: number,
+  strength: number = SCENT.nestSourceStrength
 ): void {
-  depositScent(field, voxelIndex, SCENT.nestSourceStrength, owner);
-  const neighborCount = airNeighbors(grid, voxelIndex);
-  for (let n = 0; n < neighborCount; n++) {
-    depositScent(field, NEIGHBOR_SCRATCH[n], SCENT.nestSourceStrength, owner);
-  }
+  depositScent(field, voxelIndex, strength, owner);
 }
 
 /** Rebuild a food-source set by scanning the grid (used on load/creation). */

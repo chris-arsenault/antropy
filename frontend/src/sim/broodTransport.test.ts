@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { surfaceSpawnY, type Ant } from "./ant";
 import { buildAntIndex } from "./antIndex";
 import { eggCarryCapacity, tryDig } from "./actions";
@@ -10,14 +10,7 @@ import { killAnt } from "./energy";
 import { voxelIndex } from "./grid";
 import { Material } from "./materials";
 import { createInputBuffer, sense } from "./senses";
-import { BROOD_TRANSPORT } from "./tunables";
 import { createWorld, mutateVoxel, spawnAnt, type World } from "./world";
-
-const DEFAULT_CAPACITY = 1;
-
-afterEach(() => {
-  BROOD_TRANSPORT.eggCapacity = DEFAULT_CAPACITY;
-});
 
 function spawnCarrier(world: World): Ant {
   const x = 96;
@@ -71,10 +64,14 @@ function carryLoad(world: World, ant: Ant): number {
   const inputs = sense(
     {
       grid: world.grid,
+      surfaceMap: world.surfaceMap,
       pheromoneA: world.pheromoneA,
       pheromoneB: world.pheromoneB,
       foodScent: world.foodScent,
       nestScent: world.nestScent,
+      colonyScent: world.colonyScent,
+      materialColonyScent: world.materialColonyScent,
+      config: world.config,
       colonies: world.colonies,
       antIndex: buildAntIndex(world.grid, world.ants),
       eggIndex: world.eggIndex,
@@ -109,14 +106,14 @@ describe("live brood transport", () => {
     const east = groundEgg(world, ant.x + 1, ant.y, ant.z);
     const west = groundEgg(world, ant.x - 1, ant.y, ant.z);
 
-    expect(eggCarryCapacity()).toBe(1);
+    expect(eggCarryCapacity(ant, world.config)).toBe(1);
     tryDig(world, ant, 0);
     ant.heading = Math.PI;
     tryDig(world, ant, 0);
     expect(ant.carriedEggIds).toEqual([east.id]);
     expect(west.carrierId).toBeNull();
 
-    BROOD_TRANSPORT.eggCapacity = 2;
+    world.config.broodCapacity = 2;
     tryDig(world, ant, 0);
     expect(ant.carriedEggIds).toEqual([east.id, west.id]);
     expect(west.carrierId).toBe(ant.id);

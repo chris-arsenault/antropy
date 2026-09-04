@@ -1,5 +1,12 @@
 # Phase 2 — An RNN ant digs a branched nest
 
+> **Status: complete and superseded as an execution contract.** This file preserves the first
+> nine-step plan, including its obsolete three-reflex draft. Appendix D completed and replaced
+> this ladder; the current goal and work plan are in
+> [the operating principles](docs/ant-sim-principles.md) and
+> [Appendix E](docs/ant-sim-appendix-e.md). Current evidence is in
+> [docs/certifications.md](docs/certifications.md).
+
 Target: **an RNN ant, through the real sensors, digging a branched nest with a wide
 spot.** Nothing else. Spec §13 Phase 2 ("balance the ecology with ants whose behavior
 is known") before any evolution or later-phase liability returns.

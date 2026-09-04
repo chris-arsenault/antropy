@@ -19,8 +19,13 @@ no external dependency) optimizes controller weights against episodic probe task
 follow). Derivation runs as a dev-time harness; the resulting portfolio seeds are baked
 into a committed generated artifact that `seed()` draws from. Simple reflexive seeds may
 still be written constructively when the rung-3 assay proves them; composite seeds are
-always derived. The run itself keeps no fitness function — initialization is allowed to be
+normally derived. The run itself keeps no fitness function — initialization is allowed to be
 smart (§B.9.3).
+
+Appendix D later established a narrower constructive exception: a composite extension may be
+hand-written when it decomposes into independent, zero-recurrence linear-threshold relays and
+each relay has a rung-3 assay. The step-12 cargo extension uses that exception; the five-reflex
+digging base beneath it was still derived under constrained optimization.
 
 ## Alternatives considered
 

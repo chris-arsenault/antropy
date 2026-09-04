@@ -20,6 +20,8 @@ numbering.*
 
 ---
 
+<a id="d-1"></a>
+
 ## D.1 Scope, Fence, Gates, and Current State
 
 **Spec/status separation.** This document specifies; it does not track. Certification status
@@ -28,6 +30,8 @@ numbering.*
 and will always. **Ladder target:** an RNN ant, through the real controller and shipped sensors,
 digging a branched nest with structure that earns ledgers, on a live energy economy — reached by
 re-admitting gates one at a time from `PHASE2` toward `FULL`.
+
+<a id="d-1-1"></a>
 
 ### D.1.1 The config-gate system (the ladder's execution mechanism)
 
@@ -80,6 +84,8 @@ tests whether those two suffice **before** any richer world is contemplated.
 
 ---
 
+<a id="d-2"></a>
+
 ## D.2 The Micro-Step Ladder
 
 Each step: one deliverable, one pass condition, one config state, existing mechanisms only. A
@@ -90,6 +96,8 @@ ladder; the original compound steps 10–11 failed it and were decomposed into 1
 (everything off); per Rule 17, each step admits at most one new gate, and a gate once admitted
 stays on for all later steps unless noted. Steps 1–9 reach the first RNN nest; steps 10a–12
 extend to the next reasonable goal — a nest that *earns* something — still inside the fence.
+
+<a id="d-2-1"></a>
 
 ### D.2.1 Shape vocabulary (measurement, not targets)
 
@@ -173,7 +181,11 @@ itself.*
 
 ---
 
+<a id="d-3"></a>
+
 ## D.3 The Actuation Contract
+
+<a id="d-3-1"></a>
 
 ### D.3.1 Oracle parity — the headline requirement
 
@@ -197,6 +209,8 @@ arithmetic regardless of behavior — so the residual RNN risk class is **marsha
 ordering, normalization, sign conventions, output thresholds), owned by the step-7 assays and the
 loopback assertion.
 
+<a id="d-3-2"></a>
+
 ### D.3.2 Body model: yaw only
 
 An ant is a voxel occupant with a continuous heading θ (yaw). **There is no pitch axis.**
@@ -206,6 +220,8 @@ face, as in the animal). The lattice-clinging model deleted orientation kinemati
 adding pitch would purchase no expressible behavior at real cost (sensor-plane semantics, rate
 composition, orientation state). *Body orientation is yaw-only; vertical selection is attention,
 not posture.*
+
+<a id="d-3-3"></a>
 
 ### D.3.3 The resolution function
 
@@ -292,12 +308,16 @@ the ladder exists to prove the controller can express.
 
 ---
 
+<a id="d-4"></a>
+
 ## D.4 Staged Morphogenesis: The Deferred Program
 
 Everything in this section is **back-pocket material**: recorded so it is not re-derived, staged
 strictly behind the ladder, and gated. §D.4.1 is a desk task permitted now; §§D.4.2–D.4.4 are
 authorized only by the conditions stated on them. Nothing here overrides Rule 14 — new carriers
 enter one at a time, by finding report and human decision, never as a batch.
+
+<a id="d-4-1"></a>
 
 ### D.4.1 Carrier audit (desk task; permitted now)
 
@@ -312,6 +332,8 @@ The known morphogenesis ingredients from the biology, against implementation sta
 | Stop-condition templates (dig until local condition) | thermal field | present (climate-keyed exposure); *use as dig template deferred* |
 | Humidity / CO₂ gradients | none | **absent** — candidate W-additions; each passes carrier/locality/cost/question tests in principle; **not authorized**; enter only via finding report if the shape gate fails structurally |
 
+<a id="d-4-2"></a>
+
 ### D.4.2 Rule-set tournament (authorized only if the ladder's shape gate fails at finding level, or after step 12 to extend morphology)
 
 The morphogenesis analog of App. B §B.8: candidate local rule sets as parameterized,
@@ -320,6 +342,8 @@ temperature enters the brood band, then stop), and compositions — run as colon
 morphometrics (§D.4.3). Output: the **minimal rule set over the shipped interface** scoring
 nonzero chambers and branches; if none does, the tournament names the missing carrier — fault
 isolation for interface sufficiency at the morphogenesis level (rung 2, generalized).
+
+<a id="d-4-3"></a>
 
 ### D.4.3 Morphometrics ("looks like a colony" as description)
 
@@ -331,6 +355,8 @@ shaft-with-lateral-chambers, branching-with-size shape of real nest casts [[3]](
 metrics gate nothing; any tournament or comparison gates on function ledgers, with morphometrics
 attached as the description of what won).
 
+<a id="d-4-4"></a>
+
 ### D.4.4 Function coupling (the gate against decorative complexity)
 
 > **Design Rule 16 (Morphology must earn ledger).** Across any tournament or ladder extension,
@@ -341,6 +367,8 @@ attached as the description of what won).
 > 10e and 11c are its measurements.)
 
 ---
+
+<a id="d-5"></a>
 
 ## D.5 Constraint Summary
 
@@ -383,6 +411,8 @@ attached as the description of what won).
 | Function coupling | morphometrics must correlate with ledgers; decorative complexity not pursued | Rule 16 |
 
 ---
+
+<a id="d-references"></a>
 
 ## References
 

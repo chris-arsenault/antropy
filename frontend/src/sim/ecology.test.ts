@@ -170,11 +170,9 @@ describe("eating and death", () => {
     const world = createReferenceWorld(34);
     populateForagers(world, 3);
     const ant = firstAnt(world);
-    ant.energy = 0.0001;
+    ant.energy = Number.EPSILON;
 
-    for (let t = 0; t < 20 && ant.alive; t++) {
-      stepWorld(world);
-    }
+    stepWorld(world);
     expect(ant.alive).toBe(false);
     expect(world.ants).not.toContain(ant);
     expect(getVoxel(world.grid, ant.x, ant.y, ant.z)).toBe(Material.FOOD);

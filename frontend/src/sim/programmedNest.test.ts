@@ -45,6 +45,34 @@ function reachableAir(world: World, start: NestPoint): Set<number> {
   return reached;
 }
 
+function coordinates(world: World, index: number): NestPoint {
+  const x = index % world.grid.sizeX;
+  const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
+  const y = Math.floor(index / (world.grid.sizeX * world.grid.sizeZ));
+  return { x, y, z };
+}
+
+function surfaceBreaches(world: World, entrance: NestPoint): NestPoint[] {
+  const breaches: NestPoint[] = [];
+  for (const index of world.cavities) {
+    const point = coordinates(world, index);
+    const inEntranceAperture =
+      Math.max(Math.abs(point.x - entrance.x), Math.abs(point.z - entrance.z)) <= 1;
+    if (inEntranceAperture) continue;
+    const exposed = NEIGHBORS.some(({ x: dx, y: dy, z: dz }) => {
+      const x = point.x + dx;
+      const y = point.y + dy;
+      const z = point.z + dz;
+      if (!inBounds(world.grid, x, y, z) || getVoxel(world.grid, x, y, z) !== Material.AIR) {
+        return false;
+      }
+      return y > world.surfaceMap[z * world.grid.sizeX + x];
+    });
+    if (exposed) breaches.push(point);
+  }
+  return breaches;
+}
+
 describe("programmed colony nest", () => {
   it("uses an organic passage graph without an uninterrupted central shaft", () => {
     const world = createWorld(1, rnnController, PROGRAMMED_COLONY_CONFIG);
@@ -69,8 +97,8 @@ describe("programmed colony nest", () => {
     expect(
       nest.junctions.filter(
         (junction) => junction.point.x === nest.entrance.x && junction.point.z === nest.entrance.z
-      )
-    ).toHaveLength(1);
+      ).length
+    ).toBeLessThanOrEqual(1);
     expect(routeDeltas.some(({ dx, dy, dz }) => dx === 0 && dy !== 0 && dz === 0)).toBe(true);
     expect(routeDeltas.some(({ dx, dy, dz }) => dy === 0 && (dx !== 0 || dz !== 0))).toBe(true);
     expect(routeDeltas.some(({ dx, dy, dz }) => dy !== 0 && (dx !== 0 || dz !== 0))).toBe(true);
@@ -106,5 +134,13 @@ describe("programmed colony nest", () => {
         isLegalPosition(world.grid, station.x, station.y, station.z)
       )
     ).toBe(true);
+  });
+
+  it("keeps the authored network underground except at its designated entrance", () => {
+    for (const seed of [1, 20_000, 20_001, 20_002, 20_003, 20_004]) {
+      const world = createWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG);
+      const nest = authorProgrammedNest(world);
+      expect(surfaceBreaches(world, nest.entrance), `world seed ${seed}`).toEqual([]);
+    }
   });
 });

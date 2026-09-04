@@ -181,6 +181,7 @@ function hatch(world: World, egg: Egg): void {
     controllerState: world.controller.createState(),
     traits,
   });
+  world.metrics.workerBirths += 1;
   // Hatchlings are juveniles growing toward the genetic target (spec §7.3).
   ant.bodyScale = traits.bodyScale * COLONY.juvenileFraction;
 }
@@ -219,6 +220,7 @@ function stepLarva(world: World, larva: Egg): "alive" | "ripe" | "perished" {
   } else {
     larva.hungerTicks += 1;
     if (larva.hungerTicks > LARVA.starvationGraceTicks) {
+      world.metrics.broodStarved += 1;
       return "perished";
     }
   }
@@ -233,11 +235,23 @@ function stepLarva(world: World, larva: Egg): "alive" | "ripe" | "perished" {
  * partial, lossy recycle of the invested capital. Ripe brood hatches in
  * order.
  */
+function matureEgg(world: World, egg: Egg): "alive" | "ripe" {
+  if (egg.queenDestined === 1 && !world.config.colonyFounding) {
+    return "alive";
+  }
+  if (!world.config.larvalRearing) {
+    return "ripe";
+  }
+  egg.stage = STAGE_LARVA;
+  return "alive";
+}
+
 /** One brood tick: hazard roll, then incubation or rearing. */
 function stepBroodOne(world: World, egg: Egg): "alive" | "ripe" | "perished" {
   if (world.config.eggExposure) {
     const hazard = eggExposureHazard(world, egg);
     if (hazard > 0 && world.rng.next() < hazard) {
+      world.metrics.broodExposed += 1;
       return "perished";
     }
   }
@@ -246,10 +260,7 @@ function stepBroodOne(world: World, egg: Egg): "alive" | "ripe" | "perished" {
     if (egg.incubationRemaining <= 0) {
       // Phase 5 rearing gates the larval stage; without it a ripe egg
       // hatches straight to an adult (design spec §13 phase order).
-      if (!world.config.larvalRearing) {
-        return "ripe";
-      }
-      egg.stage = STAGE_LARVA;
+      return matureEgg(world, egg);
     }
     return "alive";
   }

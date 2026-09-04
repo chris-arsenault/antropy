@@ -17,11 +17,7 @@ describe("calibration harness", () => {
   });
 
   it("marks precondition-failing points inviable instead of throwing", () => {
-    const dead = runEconomyPoint(
-      9001,
-      { ...DEFAULT_ECONOMY, name: "dead", maxSpawnPerPass: 0.01 },
-      1
-    );
+    const dead = runEconomyPoint(9001, { ...DEFAULT_ECONOMY, name: "dead", maxSpawnPerPass: 0 }, 1);
     expect(dead.viable).toBe(false);
     expect(dead.ratios).toBeNull();
   });

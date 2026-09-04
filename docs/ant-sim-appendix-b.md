@@ -21,6 +21,8 @@ amend it.*
 
 ---
 
+<a id="b-1"></a>
+
 ## B.1 Scope and Diagnostic Posture
 
 Appendix A answers *"will the population evolve?"*; Appendix B answers *"will the population
@@ -36,7 +38,11 @@ unviable for *any* behavior (§B.3, §B.4 rung 1).
 
 ---
 
+<a id="b-2"></a>
+
 ## B.2 Controller Capacity: Auditing Instead of Formulas
+
+<a id="b-2-1"></a>
 
 ### B.2.1 Why the theory you'd want doesn't exist
 
@@ -47,6 +53,8 @@ setting exist," not "will search find it," and give no practical bound on hidden
 task. VC-style capacity bounds scale with weight count and are equally silent on the practical
 question. There is no formula. There are three methods, in increasing order of effort, that
 together give a real answer.
+
+<a id="b-2-2"></a>
 
 ### B.2.2 Method 1 — state-variable audit
 
@@ -66,6 +74,8 @@ $\ge 2$–$3\times$ the audit sum (redundancy; evolved solutions are sloppy). Th
 units clears the basic-colony repertoire. The same audit applies to linear-GP persistent
 registers; required effective-code length for these competences is tens of instructions, also
 within spec. **Capacity is not the observed problem.**
+
+<a id="b-2-3"></a>
 
 ### B.2.3 Method 2 — constructive proof (hand-derive the weights)
 
@@ -87,6 +97,8 @@ sufficient explanation of colony death on its own.
 > Memory-requiring competences are permitted as evolutionary upgrades, never as bootstrap
 > requirements.
 
+<a id="b-2-4"></a>
+
 ### B.2.4 Method 3 — trainability probe (the empirical capacity ruler)
 
 When a competence cannot be hand-constructed, measure whether the architecture can host it: lift
@@ -105,6 +117,8 @@ many hidden units," with confidence intervals, in minutes. Byproduct: optimized 
 competence — inputs to the seed pipeline (§B.9.3).
 
 ---
+
+<a id="b-3"></a>
 
 ## B.3 Viability Ratios: Nondimensionalize Before Tuning
 
@@ -128,6 +142,8 @@ is visible at a glance.
 
 ---
 
+<a id="b-4"></a>
+
 ## B.4 The Oracle Ladder: Fault Bisection by Scripted Cheat-Agents
 
 Ratios bound the space; oracles *localize the fault*. An oracle is a scripted policy that bypasses
@@ -148,6 +164,8 @@ should be attacked bottom-up through this ladder; the prior is a fault at rung 1
 
 ---
 
+<a id="b-5"></a>
+
 ## B.5 The Calibration Harness
 
 With parameters as ratios and oracles as agents, tuning is automatable:
@@ -164,6 +182,8 @@ With parameters as ratios and oracles as agents, tuning is automatable:
 Hundreds of short runs is an unattended batch at Appendix A §A.2 tick rates.
 
 ---
+
+<a id="b-6"></a>
 
 ## B.6 Diagnostic: The Circling Checklist
 
@@ -184,12 +204,16 @@ Five causes account for nearly all "circles then dies" in steering agents; check
 
 ---
 
+<a id="b-7"></a>
+
 ## B.7 Incentive Architecture: The Liability Principle
 
 > **Design Rule 5 (Liability principle).** In a fitness-function-free system, behaviors are not
 > incentivized by rewards; they are incentivized by liabilities. A behavior is selected for if
 > and only if the world **charges for its absence**, through some selection channel, at that
 > channel's speed. A world that charges for nothing selects for nothing but wandering.
+
+<a id="b-7-1"></a>
 
 ### B.7.1 Per-behavior channel map
 
@@ -202,6 +226,8 @@ Five causes account for nearly all "circles then dies" in steering agents; check
 The predicted emergence order — provisioning, then excavation, then (possibly, late) defensive
 architecture — follows from channel speed and is to be treated as a testable expectation, not a
 promise.
+
+<a id="b-7-2"></a>
 
 ### B.7.2 The merit counter is a smuggled fitness function — Goodhart accounting required
 
@@ -216,6 +242,8 @@ and it scores *delivery only*. Two mandated consequences:
    the counter (authored relative values — honest, but designer-flavored) or accept that
    non-provisioning behaviors are carried entirely by the slower channels of §B.7.1. The default
    is the latter, revisited if excavation fails to emerge under correctly tuned liabilities.
+
+<a id="b-7-3"></a>
 
 ### B.7.3 Required liability features (world additions)
 
@@ -234,10 +262,14 @@ and it scores *delivery only*. Two mandated consequences:
 
 ---
 
+<a id="b-8"></a>
+
 ## B.8 Comparative Calibration: Tuning the World So Underground Construction Wins
 
 Viability oracles (§B.4) answer an absolute question. Making ants *build* is comparative: the
 target is a **dominance ordering among strategies**, tuned by tournament.
+
+<a id="b-8-1"></a>
 
 ### B.8.1 The strategy-spectrum oracles
 
@@ -251,6 +283,8 @@ Scripted state machines on the same body/motor API:
   dimensions, hauls spoil out, relocates stockpile and eggs underground.
 - **O-fortress** — all of the above, deep placement, constricted entrance; prices the far end of
   the depth/defense economics.
+
+<a id="b-8-2"></a>
 
 ### B.8.2 Tournament protocol and target ordering
 
@@ -268,6 +302,8 @@ energy, egg survival fraction, stockpile retained across weather events.
 **Ablation worlds:** rerun the tuned world with each liability switched off. Microclimate off ⇒
 O-shelter's edge over O-surface must collapse; rain off ⇒ underground storage's edge must
 collapse. An edge that survives its ablation means the tuning rests on something unintended.
+
+<a id="b-8-3"></a>
 
 ### B.8.3 Payback inequalities (the construction ratios)
 
@@ -289,6 +325,8 @@ Harness: identical machinery to §B.5, with response variable the **dominance ga
 (O-architect ledger − O-surface ledger); map the polytope where the gap is robustly positive;
 defaults at its center.
 
+<a id="b-8-4"></a>
+
 ### B.8.4 The gradient must be smooth: the increment series
 
 A world where the *finished* nest beats the surface can still be unclimbable if a half-dug nest is
@@ -304,7 +342,11 @@ peak.
 
 ---
 
+<a id="b-9"></a>
+
 ## B.9 From Tuned World to Building Behavior: The Seeded-Construction Pipeline
+
+<a id="b-9-1"></a>
 
 ### B.9.1 Reflexive dig triggers
 
@@ -313,6 +355,8 @@ downward," "crowded + inside → dig laterally" are 2–3-weight mappings agains
 set (depth/darkness, local solidity, crowding, thermal stress via energy-drain rate), seedable and
 verifiable by the rung-3 assay and the §B.2.4 probe.
 
+<a id="b-9-2"></a>
+
 ### B.9.2 Stigmergic amplification
 
 Bias digging toward faces adjacent to existing air; optionally deposit a dig-site marker on one of
@@ -320,6 +364,8 @@ the unlabeled pheromone channels. Local rules plus environmental traces and temp
 established mechanism by which social-insect construction yields chambers and galleries with no
 blueprint anywhere [[9]](#references), [[10]](#references), [[11]](#references): individually
 shaped divots, collectively coherent architecture.
+
+<a id="b-9-3"></a>
 
 ### B.9.3 Seed derivation and portfolio integration
 
@@ -340,6 +386,8 @@ marginal payoffs verified by increment series (Rule 7) → reflexive-plus-stigme
 and unit-tested (rung 3) — evolution then free to *elaborate* rather than obligated to *invent*.
 
 ---
+
+<a id="b-10"></a>
 
 ## B.10 Constraint Summary
 
@@ -362,6 +410,8 @@ and unit-tested (rung 3) — evolution then free to *elaborate* rather than obli
 | Seeds | derived by probe/oracle-targeted optimization; portfolio-diverse; rung-3 unit-tested | §B.9.3 |
 
 ---
+
+<a id="b-references"></a>
 
 ## References
 

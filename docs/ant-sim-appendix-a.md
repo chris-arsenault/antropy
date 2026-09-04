@@ -17,10 +17,13 @@
 
 ---
 
+<a id="a-1"></a>
+
 ## A.1 Scope and Relationship to the Frozen Specification
 
-This appendix is normative. Where it conflicts with the frozen specification, the appendix
-governs. The following spec interfaces are amended:
+At publication, this appendix amended the frozen specification. Its implemented contracts and
+evidence remain in force, while current conflicts are resolved through the
+[operating principles](ant-sim-principles.md). The following spec interfaces were amended:
 
 1. **Sensor set** (spec §4): adds colony/nest-state inputs and internal reward-signal inputs
    (§A.9, §A.8). **[SUPERSEDES SPEC]**
@@ -35,7 +38,11 @@ governs. The following spec interfaces are amended:
 
 ---
 
+<a id="a-2"></a>
+
 ## A.2 Throughput: The Arithmetic of "Seconds per Generation"
+
+<a id="a-2-1"></a>
 
 ### A.2.1 Tick and selection-event budget
 
@@ -67,6 +74,8 @@ $T_g \approx 2\text{–}4 \times 10^3$ ticks, a population generation elapses ev
 wall-clock seconds. The question is therefore not whether events occur fast enough, but how many
 bits each event teaches the genome.
 
+<a id="a-2-2"></a>
+
 ### A.2.2 Information-rate bound: why recombination is load-bearing
 
 MacKay's analysis of evolution as an information-acquisition channel [[1]](#references) bounds
@@ -90,6 +99,8 @@ The design consequence stands regardless of the exact constant: sexual recombina
 stylistic choice but a throughput multiplier of order $\sqrt{G} \approx 23\times$, and every
 asexual fallback in the specification silently forfeits it.
 
+<a id="a-2-3"></a>
+
 ### A.2.3 Information demand of the search
 
 Structured initialization pre-pays the chemotaxis core. The residual search — refining the seeded
@@ -111,7 +122,11 @@ target.
 
 ---
 
+<a id="a-3"></a>
+
 ## A.3 Signal-to-Noise: The Binding Constraint
+
+<a id="a-3-1"></a>
 
 ### A.3.1 Heritability under environmental dominance
 
@@ -126,6 +141,8 @@ where $S$ is the selection differential. The stated concern — "environmental c
 more than any behavior configuration" — is exactly the regime $V_e \gg V_g$, $h^2 \to 0$,
 $R \to 0$ regardless of $S$. Three mechanisms govern whether this kills the simulation.
 
+<a id="a-3-2"></a>
+
 ### A.3.2 Population-level averaging of individual luck
 
 Selection acts on allele frequencies, not individual outcomes. A variant present in $k$ carriers
@@ -133,6 +150,8 @@ has experienced $k$ quasi-independent environmental draws; the population is the
 machine, and individual-level lottery noise is already priced into the $2s$ fixation probability
 (most beneficial mutations die young in nature too). Individual luck is survivable; what is not
 survivable is *systematic* noise that flips the sign of $s$.
+
+<a id="a-3-3"></a>
 
 ### A.3.3 Fluctuating selection and the season-period rule
 
@@ -150,6 +169,8 @@ the frozen specification:
 > many times per run. $T_s \approx T_g$ is the worst possible tuning and must be excluded by
 > construction, not convention.
 
+<a id="a-3-4"></a>
+
 ### A.3.4 Aggregation estimators: merit succession as variance reduction
 
 Merit-weighted royal succession scores a *patriline* by the summed delivery of its $n$ workers.
@@ -163,6 +184,8 @@ With $n = 30$ workers per patriline and raw $h^2 = 0.1$ (i.e., $V_e = 9V_g$),
 $h^2_{\text{agg}} = 0.77$. Merit succession is therefore formally a variance-reduction estimator
 on the germ-line channel, not decorative flavor. The same logic motivates block design of the
 environment: more parallel colonies = more environmental replicates per lineage.
+
+<a id="a-3-5"></a>
 
 ### A.3.5 The cost: reproductive skew and effective population size
 
@@ -185,11 +208,15 @@ against diversity-preservation. Both must be instrumented (§A.11).
 
 ---
 
+<a id="a-4"></a>
+
 ## A.4 Failure Modes of Self-Adaptive Continuous Evolution
 
 The system is a steady-state process of $(\mu + \lambda)$-ES character [[6]](#references):
 offspring are Gaussian-local to parents; the population diffuses at mutation–selection balance
 around local optima. It cannot "skip over hills"; its real pathologies are the following.
+
+<a id="a-4-1"></a>
 
 ### A.4.1 σ-collapse
 
@@ -206,6 +233,8 @@ self-correcting upward. Countermeasures (all three adopted):
    $\sigma_{\text{hot}} \gg \sigma$ regardless of lineage $\sigma$ — a standing stream of
    long-jump trials, the digital analog of bacterial hypermutator lineages, which reach
    observable frequencies in adapting *E. coli* populations [[8]](#references).
+
+<a id="a-4-2"></a>
 
 ### A.4.2 Competing conventions and convention-aligned recombination
 
@@ -242,6 +271,8 @@ Require: parent genomes A, B with input matrices W_in^A, W_in^B ∈ R^{n_h × n_
 
 ---
 
+<a id="a-5"></a>
+
 ## A.5 Anti-Pre-Locking Measures — [SUPERSEDES SPEC §10]
 
 Structured initialization biases the evolutionary trajectory even though weights are erasable: a
@@ -264,6 +295,8 @@ Adopted measures:
 
 ---
 
+<a id="a-6"></a>
+
 ## A.6 The Memory Hierarchy: Organizing Principle
 
 Every environmental regularity has a characteristic timescale and must be stored in a substrate
@@ -285,6 +318,8 @@ economics) currently have nowhere to live — too slow for activations, too fast
 public for pheromones. Filling that tier is the principal structural addition of this appendix.
 
 ---
+
+<a id="a-7"></a>
 
 ## A.7 Learnability: The Four-Gate Taxonomy
 
@@ -314,7 +349,11 @@ rescue beyond-lifetime payoffs.
 
 ---
 
+<a id="a-8"></a>
+
 ## A.8 Evolved Plasticity — [SUPERSEDES SPEC §2.3, §4]
+
+<a id="a-8-1"></a>
 
 ### A.8.1 Rationale
 
@@ -325,6 +364,8 @@ complete them — the Baldwin effect [[19]](#references), [[20]](#references), w
 assimilation [[21]](#references) gradually transferring stably useful structure into the genome.
 Evolved plastic networks are an established lineage of methods [[23]](#references),
 [[24]](#references), [[25]](#references), [[26]](#references).
+
+<a id="a-8-2"></a>
 
 ### A.8.2 Mechanism (RNN controller)
 
@@ -372,6 +413,8 @@ Require: genome (W, α, η, A, B, C, D, g, ...); state (h, H);
 6: return (o, thinkCost = κ₀ + κ₁·‖α‖₁)         // plasticity is metabolically priced
 ```
 
+<a id="a-8-3"></a>
+
 ### A.8.3 Inheritance discipline and known hazards
 
 Plastic traces $H$ die with the ant: learning is Darwinian, not Lamarckian. (Lamarckian
@@ -395,6 +438,8 @@ Assay-arena protocol is extended: each assayed lineage is tested as *naive* clon
 components per lineage — the instrument that makes Baldwinian assimilation visible as a
 migrating innate/learned ratio.
 
+<a id="a-8-4"></a>
+
 ### A.8.4 Mechanism (linear-GP controller)
 
 Both options preserve the controller contract:
@@ -415,7 +460,11 @@ representations); Algorithm 1 is thereby promoted from repair to prerequisite.
 
 ---
 
+<a id="a-9"></a>
+
 ## A.9 Developmental Reaction Norms and Colony-State Inputs — [SUPERSEDES SPEC §8, §4]
+
+<a id="a-9-1"></a>
 
 ### A.9.1 Genomic reaction norms
 
@@ -433,6 +482,8 @@ $z = z_0 + \Delta\, \sigma(\beta_1 d_1 + \beta_2 d_2 - \theta) + \epsilon$ with 
 $\theta$, is the minimal extension if linear norms prove unable to express bimodality; adopt only
 if measured necessary.)
 
+<a id="a-9-2"></a>
+
 ### A.9.2 Colony-state sensory inputs
 
 Division of labor requires that task *demand* be perceptible. The sensor set gains local,
@@ -444,6 +495,8 @@ conditioning on body and demand × colony-level arbitration of the mixture — w
 existence of roles, presupposed.
 
 ---
+
+<a id="a-10"></a>
 
 ## A.10 Compute Discipline for World Subsystems — [SUPERSEDES SPEC §5.5]
 
@@ -481,6 +534,8 @@ its pessimistic bound.
 
 ---
 
+<a id="a-11"></a>
+
 ## A.11 Instrumentation Additions
 
 Beyond the frozen spec's instruments:
@@ -494,6 +549,8 @@ Beyond the frozen spec's instruments:
    motivation is expected to be among the most interpretable outputs of the system.
 
 ---
+
+<a id="a-12"></a>
 
 ## A.12 Parameter Constraints Summary
 
@@ -509,6 +566,8 @@ Beyond the frozen spec's instruments:
 | Pheromone active set | floor-evicted, deposit-driven | Algorithm 3 |
 
 ---
+
+<a id="a-references"></a>
 
 ## References
 

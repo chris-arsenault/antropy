@@ -1,4 +1,3 @@
-import { surfaceSpawnY } from "./ant";
 import { getVoxelSafe, voxelIndex } from "./grid";
 import { Material } from "./materials";
 import { randNormal } from "./rng";
@@ -32,13 +31,14 @@ export function stepFoodGovernor(world: World): void {
   for (let i = 0; i < toSpawn; i++) {
     const x = 1 + Math.floor(world.rng.next() * (world.grid.sizeX - 2));
     const z = 1 + Math.floor(world.rng.next() * (world.grid.sizeZ - 2));
-    const y = surfaceSpawnY(world.grid, x, z);
+    const y = world.surfaceMap[z * world.grid.sizeX + x] + 1;
     if (
-      y !== null &&
       getVoxelSafe(world.grid, x, y, z) === Material.AIR &&
+      getVoxelSafe(world.grid, x, y - 1, z) !== Material.AIR &&
       !occupied.has(voxelIndex(world.grid, x, y, z))
     ) {
       mutateVoxel(world, x, y, z, Material.FOOD);
+      world.metrics.foodSpawned += 1;
     }
   }
 }

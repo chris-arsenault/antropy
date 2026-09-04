@@ -5,9 +5,18 @@ import { flag, intFlag, parseFlags, seedsOf, type Flags } from "./lib/flags";
 import { openLedger, recordRun } from "./lib/ledger";
 import { applyPatches } from "./lib/patch";
 import { runCalibrate } from "./experiments/calibrate";
+import { runCalibrateColonyEconomy } from "./experiments/calibrateColonyEconomy";
 import { runDerive } from "./experiments/derive";
 import { runDeriveDigger } from "./experiments/deriveDigger";
+import { runDeriveColonyLoop } from "./experiments/deriveColonyLoop";
+import { runCloneColonyLoop } from "./experiments/cloneColonyLoop";
+import { runColonyLoopRobustness } from "./experiments/colonyLoopRobustness";
+import { runCorrectColonyEnergy } from "./experiments/correctColonyEnergy";
+import { runOptimizeColonyLoop } from "./experiments/optimizeColonyLoop";
+import { runOptimizeColonyEnergy } from "./experiments/optimizeColonyEnergy";
 import { runDeriveVivo } from "./experiments/deriveVivo";
+import { runColonyLoop } from "./experiments/colonyLoop";
+import { runEvaluateColonyCohort } from "./experiments/evaluateColonyCohort";
 import { runDeterminism } from "./determinism";
 
 /**
@@ -20,6 +29,7 @@ import { runDeterminism } from "./determinism";
  *   pnpm harness tournament --seeds 4200 --ticks 28000
  *   pnpm harness ladder --ticks 8000
  *   pnpm harness calibrate --ticks 4000
+ *   pnpm harness calibrate-colony-economy --profile baseline:1:1:1:1:1
  *   pnpm harness recent [n]
  *   pnpm harness sql "select ..."
  *   pnpm harness determinism --seed 8001 --warmup 700 --span 500
@@ -156,13 +166,39 @@ function cmdSql(argv: string[]): void {
   console.log(JSON.stringify(rows, null, 1));
 }
 
+const ASYNC_EXPERIMENTS: Record<string, (flags: Flags) => Promise<void>> = {
+  "derive-colony-loop": runDeriveColonyLoop,
+  "optimize-colony-loop": runOptimizeColonyLoop,
+  "optimize-colony-energy": runOptimizeColonyEnergy,
+  "calibrate-colony-economy": runCalibrateColonyEconomy,
+  "evaluate-colony-cohort": runEvaluateColonyCohort,
+  "robustness-colony-loop": runColonyLoopRobustness,
+};
+
 function handleDerivation(command: string, rest: string[]): boolean {
+  const asyncExperiment = ASYNC_EXPERIMENTS[command];
+  if (asyncExperiment) {
+    void asyncExperiment(parseFlags(rest));
+    return true;
+  }
   if (command === "derive") {
     runDerive(parseFlags(rest));
     return true;
   }
   if (command === "derive-digger") {
     runDeriveDigger(parseFlags(rest));
+    return true;
+  }
+  if (command === "clone-colony-loop") {
+    runCloneColonyLoop(parseFlags(rest));
+    return true;
+  }
+  if (command === "correct-colony-energy") {
+    runCorrectColonyEnergy(parseFlags(rest));
+    return true;
+  }
+  if (command === "colony-loop") {
+    runColonyLoop(parseFlags(rest));
     return true;
   }
   return false;
@@ -193,7 +229,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|derive|derive-digger|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|robustness-colony-loop|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|determinism|recent|sql> [flags]"
       );
   }
 }

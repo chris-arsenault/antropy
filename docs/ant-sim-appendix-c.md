@@ -20,6 +20,8 @@ not amend them. Design Rules continue their numbering.*
 
 ---
 
+<a id="c-1"></a>
+
 ## C.1 Diagnosis: One Disease, Two Symptoms
 
 The observed behaviors — fixating on individually suggested mechanisms, and installing senses
@@ -35,6 +37,8 @@ that tells the agent *which loop it is in*.
 
 ---
 
+<a id="c-2"></a>
+
 ## C.2 The Five Layers
 
 > **Design Rule 8 (Layer classification).** Every change belongs to exactly one layer, is
@@ -47,6 +51,8 @@ that tells the agent *which loop it is in*.
 | **S — Seed / Init** | Founder weights, seed portfolios, probe-derived instincts | **The only layer where authored behavior is legal** — it is written in erasable ink, and evolution owns it from tick one. |
 | **P — Parameters** | Constants inside existing mechanisms | **Tuning only, via the harness against the ratio gates. No new mechanisms.** Tuning that requires a new `if` statement is not tuning; it is W- or I-work misfiled. |
 | **O — Oracles / Instrumentation** | Scripted agents, assays, ledgers, event triggers | **Unlimited hard-coding, because quarantined.** Nothing in O may ever execute inside the evolving population. |
+
+<a id="c-2-1"></a>
 
 ### C.2.1 The observed failures, classified
 
@@ -65,6 +71,8 @@ that tells the agent *which loop it is in*.
 > at the **seed and prior** (S-layer: initial values, portfolio spread) — never as global
 > constants.
 
+<a id="c-2-2"></a>
+
 ### C.2.2 The world-side preference
 
 > **Design Rule 10 (World-side resolution).** When a goal admits both an ant-side answer and a
@@ -77,6 +85,8 @@ honestly (I), let gain evolve (genome). The world-side version is always legal, 
 emergent-compatible, and usually what real biology did.
 
 ---
+
+<a id="c-3"></a>
 
 ## C.3 The Five Litmus Tests (I-Layer Admission)
 
@@ -105,6 +115,8 @@ A proposed sensor or actuator must pass **all five**:
 
 ---
 
+<a id="c-4"></a>
+
 ## C.4 Untunability: Operational Definition and Stop Signatures
 
 **Definition.** A parameter $k$ is *tunable toward goal $G$* only if $k$ appears with material
@@ -117,6 +129,8 @@ weight in the inequality that governs $G$.
 The r-selection episode is the canonical absence of this discipline: liability knobs were moved
 up to 15× across ~10 configurations while the governing inequality — replacement cost vs.
 insurance cost — did not contain them on the binding side. The knobs were not in the equation.
+
+<a id="c-4-1"></a>
 
 ### C.4.1 The four stop signatures
 
@@ -134,6 +148,8 @@ Any **one** of these means: stop tuning, file a finding (§C.5).
 > structural-finding report — not a fourth configuration.
 
 ---
+
+<a id="c-5"></a>
 
 ## C.5 The Structural-Finding Report
 
@@ -158,6 +174,8 @@ FINDING: <one-line statement of the structural invariance>
 
 ---
 
+<a id="c-6"></a>
+
 ## C.6 Instruction Ranking: Invariants ≻ Mechanisms ≻ Parameters
 
 > **Design Rule 13 (Rank of instructions).** Everything received from the design conversation
@@ -172,6 +190,8 @@ This rule is the direct fix for suggestion-fixation: the agent's obligation is t
 invariants and the measurements, never to the enumerated examples.
 
 ---
+
+<a id="c-7"></a>
 
 ## C.7 The Work Loop
 
@@ -192,6 +212,8 @@ COMPARE   — prediction wrong twice at material knob movement
 ```
 
 ---
+
+<a id="c-8"></a>
 
 ## C.8 Adjudicated Edge Cases
 
@@ -214,6 +236,8 @@ by analogy instead of re-litigating.
 
 ---
 
+<a id="c-9"></a>
+
 ## C.9 Constraint Summary
 
 | Quantity | Constraint | Source |
@@ -231,6 +255,8 @@ by analogy instead of re-litigating.
 | Master ledger | worker-days / lineage persistence; sub-ledger gates are provisional only | §C.4.1 sig. 4 |
 
 ---
+
+<a id="c-references"></a>
 
 ## References
 

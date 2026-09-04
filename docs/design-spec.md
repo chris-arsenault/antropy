@@ -1,5 +1,11 @@
 # Ant Evolution Simulation — Design Specification
 
+> **Authority note.** This remains the foundational design record. The
+> [operating principles](ant-sim-principles.md) are now the primary decision lens, and
+> [Appendix E](ant-sim-appendix-e.md) is the current work ladder. Numbered rules and older phase
+> ordering remain historical constraints and evidence, not instructions to ignore a later
+> measurement or current goal.
+
 A browser-based, 3D, continuous-time artificial life simulation in which ants with heritable
 genomes forage, dig, reproduce, and evolve. There is no fitness function and no generational
 boundary: selection is implicit in survival and reproduction inside a persistent, shared world.

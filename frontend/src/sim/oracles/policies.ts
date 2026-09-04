@@ -114,6 +114,29 @@ function plumeTurn(inputs: Float32Array): number {
 // Per-ant wander phase for the sensor-limited oracle (diagnostic state).
 const wanderPhase = new Map<number, number>();
 
+function sensorForage(inputs: Float32Array, phase: number, energy: number): Float32Array {
+  const left = inputs[Input.FOOD_SCENT_LEFT];
+  const right = inputs[Input.FOOD_SCENT_RIGHT];
+  const blind = left + right < 0.01;
+  const nestLeft = inputs[Input.NEST_SCENT_LEFT];
+  const nestRight = inputs[Input.NEST_SCENT_RIGHT];
+  const nestVisible = nestLeft + nestRight >= 0.01;
+  const blindTurn = nestVisible ? 6 * (nestRight - nestLeft) : 0.5 * Math.sin(phase);
+  const outputs = steer(blind ? blindTurn : 6 * (left - right), blind ? 0.7 : 1);
+  outputs[Output.VERTICAL_BIAS] = inputs[Input.FACING_SLOPE] > 0.5 ? 0.7 : 0;
+  if (antShouldEat(inputs, energy)) outputs[Output.EAT] = 1;
+  if (antShouldCarry(inputs, energy)) outputs[Output.DIG] = 1;
+  return guardBrood(inputs, outputs);
+}
+
+function antShouldEat(inputs: Float32Array, energy: number): boolean {
+  return energy < HUNGRY || inputs[Input.CONTACT_FOOD] > 0;
+}
+
+function antShouldCarry(inputs: Float32Array, energy: number): boolean {
+  return energy > SATED && inputs[Input.CONTACT_FOOD] > 0;
+}
+
 /**
  * Rung 2 — sensor-limited: the same strategy through the shipped sensors
  * only (food-scent stereo, home angle, nest scent, contacts). Answers "is
@@ -128,20 +151,11 @@ export function sensorOracle(_world: World, ant: Ant, inputs: Float32Array): Flo
   wanderPhase.set(ant.id, phase);
 
   if (isHomeward(ant)) {
-    return unloadAtNest(ant, inputs, steer(plumeTurn(inputs), 1));
+    const outputs = steer(plumeTurn(inputs), 1);
+    outputs[Output.VERTICAL_BIAS] = inputs[Input.FACING_SLOPE] > 0.5 ? -0.7 : 0;
+    return unloadAtNest(ant, inputs, outputs);
   }
-  const left = inputs[Input.FOOD_SCENT_LEFT];
-  const right = inputs[Input.FOOD_SCENT_RIGHT];
-  const blind = left + right < 0.01;
-  const turn = blind ? 0.5 * Math.sin(phase) : 6 * (left - right);
-  const outputs = steer(turn, blind ? 0.7 : 1);
-  if (ant.energy < HUNGRY || inputs[Input.CONTACT_FOOD] > 0) {
-    outputs[Output.EAT] = 1;
-  }
-  if (ant.energy > SATED && inputs[Input.CONTACT_FOOD] > 0) {
-    outputs[Output.DIG] = 1;
-  }
-  return guardBrood(inputs, outputs);
+  return sensorForage(inputs, phase, ant.energy);
 }
 
 /**

@@ -22,13 +22,13 @@ and checked at every later-phase system's entry point: `mortality`, `reproductio
 `microclimate`, `eggExposure`, `larvalRearing`, `autoContinue`, `wideEntranceShaft`, and
 `spoilHauling`. Numeric constants
 stay in `tunables.ts`; for example, `broodTransport` is the gate while
-`BROOD_TRANSPORT.eggCapacity` is the capacity magnitude, while `motorJitter` gates the generic
-per-ant turn perturbation whose amplitude lives in `MOTOR_JITTER`. Two presets ship: `FULL` (everything,
-the Release 3
-behavior) and `PHASE2` (the spec's base case — world core, ecology, and digging on;
-every later-phase liability off, ants immortal and non-reproducing). `createWorld` takes
-a config (default `FULL`) and stores a per-world copy; checkpoints serialize it. The
-harness selects a preset with `--config` and toggles single flags with `--flag key=bool`.
+`BROOD_TRANSPORT.eggCapacity` is the capacity magnitude. `motorJitter` gates the generic
+per-ant turn perturbation whose amplitude lives in `MOTOR_JITTER`. Three presets ship: `FULL`
+(the complete Release 3 world), `PHASE2` (world core, ecology, and digging on; later-phase
+liabilities off), and `PROGRAMMED_COLONY` (authored geometry with digging and lifecycle changes
+off for visual review). `createWorld` takes a config (default `FULL`) and stores a per-world
+copy; checkpoints serialize it. The harness selects a preset with `--config` and toggles single
+flags with `--flag key=bool`.
 
 ## Alternatives
 

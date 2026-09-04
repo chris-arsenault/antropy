@@ -2,6 +2,7 @@ import { useState } from "react";
 import { type World } from "./sim/world";
 import { SCENARIOS, scenarioById, type ScenarioId } from "./ui/scenarios";
 import { ChartsPanel } from "./ui/ChartsPanel";
+import { EffectiveConfigPanel } from "./ui/EffectiveConfigPanel";
 import { InspectorPanel } from "./ui/InspectorPanel";
 import { DEFAULT_LAYERS, MapLayersPanel, type LayerVisibility } from "./ui/MapLayersPanel";
 import { RatiosPanel } from "./ui/RatiosPanel";
@@ -195,6 +196,7 @@ function SimRun({
             onGroundOpacity={setGroundOpacity}
           />
           <RatiosPanel stats={sim.stats} />
+          <EffectiveConfigPanel world={sim.world} />
         </section>
         <InspectorPanel
           ant={selectedAnt}

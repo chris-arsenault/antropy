@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { PHASE2_CONFIG } from "./config";
+import { Output, OUTPUT_COUNT } from "./controller/contract";
 import { getVoxel } from "./grid";
 import { Material } from "./materials";
+import { applyMotor } from "./locomotion";
 import { hasSupport, headingToDirection, isLegalPosition, stepCandidates } from "./movement";
 import { createWorld, mutateVoxel, populateForagers, stepWorld } from "./world";
 
@@ -15,17 +18,69 @@ describe("headingToDirection", () => {
 });
 
 describe("stepCandidates", () => {
-  it("tries the stationary vertical move first under a strong bias", () => {
-    // So a 1-wide shaft is navigable: straight down/up wins when the voxel
-    // there is air, and is skipped (solid) on flat ground.
-    expect(stepCandidates(0, -0.9)[0]).toEqual({ dx: 0, dy: -1, dz: 0 });
-    expect(stepCandidates(0, 0.9)[0]).toEqual({ dx: 0, dy: 1, dz: 0 });
+  it("follows vertical stereo diagonally before using the shaft fallback", () => {
+    const down = stepCandidates(0, -0.9);
+    expect({ ...down[0] }).toEqual({ dx: 1, dy: -1, dz: 0 });
+    expect({ ...down[1] }).toEqual({ dx: 0, dy: -1, dz: 0 });
+    const up = stepCandidates(0, 0.9);
+    expect(up[0]).toEqual({ dx: 1, dy: 1, dz: 0 });
+    expect(up[1]).toEqual({ dx: 0, dy: 1, dz: 0 });
   });
 
   it("walks forward-level first under a neutral bias", () => {
     const candidates = stepCandidates(0, 0);
     expect(candidates[0]).toEqual({ dx: 1, dy: 0, dz: 0 });
     expect(candidates.at(-1)).toEqual({ dx: 0, dy: 1, dz: 0 });
+  });
+
+  it("does not spend a queued whole step after thrust stops", () => {
+    const world = createWorld(779, undefined, PHASE2_CONFIG);
+    populateForagers(world, 1);
+    const ant = world.ants[0];
+    ant.x = 20;
+    ant.y = 20;
+    ant.z = 20;
+    ant.heading = 0;
+    ant.traits = { ...ant.traits, legLength: 1.5 };
+    for (let x = 19; x <= 23; x++) {
+      mutateVoxel(world, x, 19, 20, Material.ROCK);
+      mutateVoxel(world, x, 20, 20, Material.AIR);
+    }
+
+    applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: 0 });
+    expect(ant.x).toBe(21);
+    expect(ant.moveCharge).toBeCloseTo(0.5);
+
+    applyMotor(world.grid, ant, { turn: 0, forward: 0, verticalBias: 0 });
+    expect(ant.x).toBe(21);
+    expect(ant.moveCharge).toBeCloseTo(0.5);
+  });
+
+  it("applies a vertical-band decision in the current sensor frame", () => {
+    const world = createWorld(778, undefined, PHASE2_CONFIG);
+    populateForagers(world, 1);
+    const ant = world.ants[0];
+    ant.x = 20;
+    ant.y = 20;
+    ant.z = 20;
+    ant.heading = 0;
+    ant.traits = { ...ant.traits, legLength: 1 };
+    ant.verticalAttention = -0.8;
+    mutateVoxel(world, 20, 19, 20, Material.AIR);
+    mutateVoxel(world, 20, 20, 20, Material.AIR);
+    mutateVoxel(world, 20, 21, 20, Material.AIR);
+    mutateVoxel(world, 19, 20, 20, Material.ROCK);
+    world.foodBase = 0;
+    world.foodTarget = 0;
+    const output = new Float32Array(OUTPUT_COUNT);
+    output[Output.FORWARD] = 1;
+    output[Output.VERTICAL_BIAS] = 0.8;
+    world.policyOverride = () => output;
+
+    stepWorld(world);
+
+    expect(ant.y).toBe(21);
+    expect(ant.verticalAttention).toBeCloseTo(0.8);
   });
 });
 

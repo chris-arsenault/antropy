@@ -1,9 +1,10 @@
 # Backlog
 
 Planned-but-not-built work, grouped by release. Each item is a positive assertion of
-future-state behavior. Scope derives from the [design spec](design-spec.md) as amended by
-[Appendix A](ant-sim-appendix-a.md) (evolutionary dynamics) and
-[Appendix B](ant-sim-appendix-b.md) (bootstrap viability), both normative. Every release
+future-state behavior. The [operating principles](ant-sim-principles.md) govern scope;
+the [design spec](design-spec.md) and [Appendices A–D](README.md) remain supporting design
+history and evidence. [Appendix E](ant-sim-appendix-e.md) is the current work ladder and is not
+duplicated here. Every release
 honors the binding constraint of §9: no architectural decision may preclude colony
 mortality/refounding, nest decay, or oscillating carrying capacity.
 
@@ -20,14 +21,12 @@ larval rearing, physical hoarding with larder restock, interface legalization
 (nest-plume homing, thermoreceptor), the heat-escape instinct, and automatic continue
 with survivor genetics. Residuals carried forward:
 
-- Derive founder seeds against in-vivo colony fitness with parallel evaluation
-  (probe-suite derivation aced probes and failed in vivo five times — the recorded
-  proxy-gap finding; ledger runs 23–34).
-- Ship the seed portfolio (forager-forward, digger, wander-heavy, pheromone-reactive,
-  unstructured minority) once derivation transfers; validate each with rung-3 assays.
+- Expand the shipped seed portfolio beyond the current in-vivo-derived forager and Appendix D
+  construction/transport seeds: add wander-heavy, pheromone-reactive, and unstructured minority
+  founders, each validated with rung-3 assays.
 - Reprice deep architecture: the vault currently buys brood protection at a net
-  worker-day loss (docs/calibration.md); harsher climates or raid pressure should make
-  depth pay on the master ledger.
+  worker-day loss ([calibration record](calibration.md)); harsher climates or raid pressure
+  should make depth pay on the master ledger.
 - Add the two cheap health instruments (§A.11): live parent–offspring heritability
   regression and realized effective-population-size estimate with an alarm below 10².
 - Convert the succession/merit counter to net-new-nest-energy accounting where it still

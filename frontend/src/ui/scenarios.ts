@@ -6,8 +6,8 @@ import {
   rnnController,
   setRuntimeSeedBase,
 } from "../sim/controller/rnn";
+import { buildAuthoredNestWorld } from "../sim/nestWorld";
 import { premarkDigSite } from "../sim/oracles/digSite";
-import { authorProgrammedNest, occupyProgrammedNest } from "../sim/programmedNest";
 import { createWorld, populateDiggers, type World } from "../sim/world";
 
 /**
@@ -30,20 +30,13 @@ const DIGGER_CREW = 9;
 export const SCENARIOS: Scenario[] = [
   {
     id: "programmed",
-    label: "Programmed colony review",
+    label: "Colony loop (Appendix E)",
     description:
-      "A fixed colony inside an authored 3D nest with branching, reconnecting passages and " +
-      "separate queen, brood, pupae, and food chambers. Digging, reproduction, mortality, " +
-      "weather, decay, and new-colony formation are disabled for structural review.",
+      "The NEST baseline: one fixed-genome colony inside the authored 3D nest with steady " +
+      "food. Digging, reproduction, mortality, founding, variation, weather, and decay are off.",
     build(seed) {
       setRuntimeSeedBase(null);
-      const world = createWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG);
-      const colony = foundColony(world);
-      const nest = authorProgrammedNest(world);
-      occupyProgrammedNest(world, colony, nest);
-      world.foodBase = 0;
-      world.foodTarget = 0;
-      return world;
+      return buildAuthoredNestWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG).world;
     },
   },
   {

@@ -1,6 +1,9 @@
 import { randNormal, type Rng } from "../rng";
 import { FORAGER_SEED } from "./seeds/forager";
+import { COLONY_SEED } from "./seeds/colony";
 import { extendFunctionalSeed } from "./functionalSeed";
+import { buildColonySeed, colonySeedLocusGroups } from "./colonySeed";
+import { HIDDEN_COUNT } from "./rnnShape";
 import { ENERGY } from "../tunables";
 import {
   Input,
@@ -14,9 +17,9 @@ import {
   type PhysicalTraits,
 } from "./contract";
 
-export const HIDDEN_COUNT = 12;
+export { HIDDEN_COUNT };
 
-// Weight layout inside one genome copy (design spec §2.1, ~550 loci):
+// Weight layout inside one genome copy (design spec §2.1):
 // W_in (H*I) | W_rec (H*H) | b_h (H) | W_out (O*H) | b_out (O) | physical (P)
 const W_IN = 0;
 const W_REC = W_IN + HIDDEN_COUNT * INPUT_COUNT;
@@ -26,6 +29,15 @@ const B_OUT = W_OUT + OUTPUT_COUNT * HIDDEN_COUNT;
 const PHYS = B_OUT + OUTPUT_COUNT;
 const PHYS_COUNT = 7;
 export const GENOME_LENGTH = PHYS + PHYS_COUNT;
+const LEGACY_INPUT_COUNT = 23;
+const LEGACY_W_REC = HIDDEN_COUNT * LEGACY_INPUT_COUNT;
+const LEGACY_GENOME_LENGTH =
+  LEGACY_W_REC +
+  HIDDEN_COUNT * HIDDEN_COUNT +
+  HIDDEN_COUNT +
+  OUTPUT_COUNT * HIDDEN_COUNT +
+  OUTPUT_COUNT +
+  PHYS_COUNT;
 
 const PhysGene = {
   BODY_SCALE: 0,
@@ -260,6 +272,18 @@ export function functionalSeedVector(): Float32Array {
   return extendFunctionalSeed(diggerSeedVector());
 }
 
+/** Appendix E constructive seed before randomized integration derivation. */
+export function colonySeedVector(): Float32Array {
+  return buildColonySeed(GENOME_LENGTH);
+}
+
+/** Appendix E seed after randomized in-world integration derivation. */
+export function derivedColonySeedVector(): Float32Array {
+  return normalizedSeedBase(COLONY_SEED) ?? backboneVector();
+}
+
+export { colonySeedLocusGroups };
+
 /** Behavioral loci belonging to the five-reflex digger topology. */
 export function diggerSeedLoci(): number[] {
   return diggerSeedLocusGroups().flat();
@@ -328,8 +352,8 @@ function seedCopy(rng: Rng): Float32Array {
   for (const locus of ACTION_BIAS_LOCI) {
     copy[locus] = randNormal(rng) * SEED_ACTION_BIAS_NOISE;
   }
-  const base = runtimeSeedBase ?? FORAGER_SEED;
-  if (base !== null && base.length === GENOME_LENGTH) {
+  const base = normalizedSeedBase(runtimeSeedBase ?? FORAGER_SEED);
+  if (base !== null) {
     // Derived founder weights (ADR-0010): the baked artifact (or the
     // derivation harness's runtime candidate) replaces the hand-derived
     // instincts as the mean; seed noise stays on top.
@@ -342,9 +366,33 @@ function seedCopy(rng: Rng): Float32Array {
   return copy;
 }
 
+function fixedSeedGenome(): Genome {
+  const base = normalizedSeedBase(runtimeSeedBase ?? FORAGER_SEED);
+  const copy = base ?? backboneVector();
+  return { copies: [copy, Float32Array.from(copy)] } as unknown as Genome;
+}
+
 // Runtime override of the seed base, used only by the derivation harness
 // to evaluate candidate vectors through the real seed() noise pipeline.
 let runtimeSeedBase: ArrayLike<number> | null = null;
+
+/** Rebase pre-Appendix-F artifacts into the append-only wider input matrix.
+ * Existing input weights retain their loci; new channels begin disconnected. */
+function normalizedSeedBase(base: ArrayLike<number> | null): Float32Array | null {
+  if (base === null) return null;
+  if (base.length === GENOME_LENGTH) return Float32Array.from(base);
+  if (base.length !== LEGACY_GENOME_LENGTH) return null;
+  const migrated = new Float32Array(GENOME_LENGTH);
+  const sourceValues = Float32Array.from(base);
+  for (let hidden = 0; hidden < HIDDEN_COUNT; hidden++) {
+    const source = hidden * LEGACY_INPUT_COUNT;
+    migrated.set(sourceValues.subarray(source, source + LEGACY_INPUT_COUNT), hidden * INPUT_COUNT);
+  }
+  for (let index = LEGACY_W_REC; index < LEGACY_GENOME_LENGTH; index++) {
+    migrated[W_REC + index - LEGACY_W_REC] = base[index];
+  }
+  return migrated;
+}
 
 /** Harness hook (S-layer evaluation): null restores the baked artifact. */
 export function setRuntimeSeedBase(base: ArrayLike<number> | null): void {
@@ -445,6 +493,8 @@ export const rnnController: Controller = {
   seed(rng) {
     return { copies: [seedCopy(rng), seedCopy(rng)] } as unknown as Genome;
   },
+
+  fixedSeed: fixedSeedGenome,
 
   haploidOffspring(genome, rng) {
     return { copies: [gamete(asRnn(genome), rng)] } as unknown as Genome;

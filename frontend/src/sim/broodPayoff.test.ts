@@ -20,7 +20,7 @@ describe("brood payoff gradient", () => {
       for (let extraDepth = 0; extraDepth <= 3; extraDepth++) {
         const world = createWorld(seed, rnnController, {
           ...LADDER_STEP10D_CONFIG,
-          reproduction: false,
+          workerReproduction: false,
           motorJitter: false,
         });
         world.tick = HARSH_MIDDAY_TICK;

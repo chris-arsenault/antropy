@@ -1,22 +1,36 @@
 import { describe, expect, it } from "vitest";
 import { LADDER_STEP12_CONFIG, PROGRAMMED_COLONY_CONFIG } from "../sim/config";
+import { rnnController } from "../sim/controller/rnn";
 import { voxelIndex } from "../sim/grid";
+import { authorProgrammedNest } from "../sim/programmedNest";
 import { sampleScent } from "../sim/scent";
-import { stepWorld } from "../sim/world";
+import { createWorld, stepWorld } from "../sim/world";
 import { scenarioById } from "./scenarios";
 
 describe("programmed colony scenario", () => {
   it("starts a fixed review colony with construction and lifecycle changes disabled", () => {
     const world = scenarioById("programmed").build(1);
+    const authored = createWorld(1, rnnController, PROGRAMMED_COLONY_CONFIG);
+    authorProgrammedNest(authored);
     const cavityCount = world.cavities.size;
 
     expect(world.config).toEqual(PROGRAMMED_COLONY_CONFIG);
     expect(world.config.terrainDigging).toBe(false);
-    expect(world.config.reproduction).toBe(false);
+    expect(world.config.workerReproduction).toBe(false);
+    expect(world.config.colonyFounding).toBe(false);
+    expect(world.config.geneticVariation).toBe(false);
     expect(world.config.mortality).toBe(false);
     expect(world.config.autoContinue).toBe(false);
     expect(world.colonies).toHaveLength(1);
     expect(world.ants).toHaveLength(40);
+    expect(Buffer.from(world.grid.data).equals(Buffer.from(authored.grid.data))).toBe(true);
+    expect(world.cavities).toEqual(authored.cavities);
+    const founderGenome = world.controller.serializeGenome(world.ants[0].genome);
+    expect(
+      world.ants.every((ant) =>
+        Buffer.from(world.controller.serializeGenome(ant.genome)).equals(Buffer.from(founderGenome))
+      )
+    ).toBe(true);
     expect(
       world.ants.every((ant) => ant.y <= world.surfaceMap[ant.z * world.grid.sizeX + ant.x])
     ).toBe(true);

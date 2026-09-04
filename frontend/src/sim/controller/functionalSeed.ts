@@ -1,6 +1,6 @@
 import { Input, INPUT_COUNT, Output, OUTPUT_COUNT } from "./contract";
+import { HIDDEN_COUNT } from "./rnnShape";
 
-const HIDDEN_COUNT = 12;
 const W_IN = 0;
 const W_REC = W_IN + HIDDEN_COUNT * INPUT_COUNT;
 const B_H = W_REC + HIDDEN_COUNT * HIDDEN_COUNT;

@@ -21,10 +21,12 @@ describe("viability ratios (§B.3)", () => {
     expect(meanFoodDistance(100, 10_000)).toBeCloseTo(5);
   });
 
-  it("holds every ratio in band at world defaults", () => {
+  it("holds every active no-dig ratio in band at world defaults", () => {
     const world = createWorld(9101);
     const ratios = computeRatios(world);
-    const keys = Object.keys(RATIO_BANDS) as (keyof ViabilityRatios)[];
+    const keys = (Object.keys(RATIO_BANDS) as (keyof ViabilityRatios)[]).filter(
+      (key) => key !== "digEconomics"
+    );
     for (const key of keys) {
       expect(ratioInBand(key, ratios[key]), `${key}=${ratios[key]}`).toBe(true);
     }

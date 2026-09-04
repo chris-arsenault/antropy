@@ -35,6 +35,19 @@ genetics on a 192×64×192 map. Measurements (tournaments, calibration, seed der
 determinism checks) run through the harness into a committed SQLite ledger
 (`frontend/harness/`, ADR-0012), never through the test tiers.
 
+The web app exposes four world-level scenarios: the default programmed-colony geometry review,
+the Appendix D functional-controller diagnostic, Phase 2 nest digging, and the full liability
+colony. A scenario selects the world configuration and founder seed together; feature gates are
+stored per world. The programmed review currently disables digging, mortality, reproduction,
+weather, decay, and automatic refounding so geometry can be inspected without the world changing
+underneath it. The web app does not yet display the effective gates or cargo capacities; that
+readout is Appendix E step-2 work.
+
+The programmed review is the precursor to Appendix E's `NEST` baseline, not yet that certified
+baseline. Its setup still calls `foundColony()`, which carves the legacy founding shaft before the
+authored blueprint. Appendix E step 1 removes that hidden mutation and locks exact blueprint
+parity before colony-loop work begins.
+
 ## Deployment
 
 - **Hosting**: the Ahara `website` module (`ahara-tf-patterns`) — S3 + CloudFront + ACM + WAF

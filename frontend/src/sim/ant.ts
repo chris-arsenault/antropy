@@ -29,12 +29,17 @@ export interface Ant {
   heading: number;
   /** Accumulated forward thrust; a step fires when it reaches 1. */
   moveCharge: number;
+  /** Latched vertical band used by contact sensing and vertical action this tick. */
+  verticalAttention: number;
   falling: boolean;
   energy: number;
   age: number;
   bodyScale: number;
   /** Carried material id, or null when unburdened. */
   carrying: number | null;
+  /** Colony odor physically retained by carried food (0 owner = unmarked). */
+  carriedColonyScentOwner: number;
+  carriedColonyScent: number;
   /** Fraction of spoil capacity in use (the sensor input). */
   carryLoad: number;
   /** Spoil loads carried; capacity scales with body size (spec §3.2). */
@@ -57,6 +62,8 @@ export interface Ant {
   traits: PhysicalTraits;
   /** Last sensory vector, kept for the inspector (spec §11.4). */
   lastInputs: Float32Array;
+  /** False until the first frame establishes a baseline for phasic channels. */
+  sensoryHistoryReady: boolean;
   /** Last motor outputs, kept for the inspector. */
   lastOutputs: Float32Array;
 }
@@ -89,11 +96,14 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     prevZ: spawn.z,
     heading: spawn.heading,
     moveCharge: 0,
+    verticalAttention: 0,
     falling: false,
     energy: spawn.energy,
     age: 0,
     bodyScale: spawn.traits.bodyScale,
     carrying: null,
+    carriedColonyScentOwner: 0,
+    carriedColonyScent: 0,
     carryLoad: 0,
     spoilLoads: 0,
     carriedEggIds: [],
@@ -108,6 +118,7 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     controllerState: spawn.controllerState,
     traits: spawn.traits,
     lastInputs: new Float32Array(INPUT_COUNT),
+    sensoryHistoryReady: false,
     lastOutputs: new Float32Array(OUTPUT_COUNT),
   };
 }

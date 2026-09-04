@@ -13,6 +13,8 @@ export interface Controller {
   recombine(a: Genome, b: Genome, rng: Rng): Genome | null;
   /** A structured-init founder genome (design spec §2.1). */
   seed(rng: Rng): Genome;
+  /** Exact founder used when genetic variation is disabled. */
+  fixedSeed(): Genome;
   /**
    * A haploid offspring genome from an unfertilized mother (design spec
    * §7.1 channel 2 — worker-laid males). Ploidy stays behind the boundary.
@@ -35,6 +37,16 @@ export interface Controller {
   deserializeGenome(data: Float32Array): Genome;
   serializeState(state: ControllerState): Float32Array;
   deserializeState(data: Float32Array): ControllerState;
+}
+
+/**
+ * A diagnostic controller restricted to the shipped sensory interface.
+ * The simulation owns one private state value per ant; the policy cannot
+ * inspect ant identity, coordinates, or world state.
+ */
+export interface SensorPolicy {
+  createState(): unknown;
+  act(inputs: Float32Array, state: unknown): Float32Array;
 }
 
 /** Expressed physical trait values consumed by the simulation systems. */
@@ -84,6 +96,7 @@ export const Input = {
   CARRY_LOAD: 8,
   CARRIED_MATERIAL: 9,
   BODY_SCALE: 10,
+  /** Terrain-relative depth: zero at/above the local surface, increasing below it. */
   DEPTH: 11,
   FACING_SLOPE: 12,
   LOCAL_SOLIDITY: 13,
@@ -101,9 +114,97 @@ export const Input = {
    * (Rules 4/5); homing has no sensor (§C.8: the nest-scent plume is the
    * carrier, chemotaxis the seeded use). */
   TEMPERATURE: 22,
+  /** Simultaneous vertical chemoreception. The existing stereo pairs sample
+   * the level band; these append-only channels sample directly below and
+   * above, so vertical choice never requires attention switching or memory. */
+  PHEROMONE_A_DOWN: 23,
+  PHEROMONE_A_UP: 24,
+  PHEROMONE_B_DOWN: 25,
+  PHEROMONE_B_UP: 26,
+  FOOD_SCENT_DOWN: 27,
+  FOOD_SCENT_UP: 28,
+  NEST_SCENT_DOWN: 29,
+  NEST_SCENT_UP: 30,
+  PHEROMONE_A_LEFT_CHANGE: 31,
+  PHEROMONE_A_RIGHT_CHANGE: 32,
+  PHEROMONE_A_DOWN_CHANGE: 33,
+  PHEROMONE_A_UP_CHANGE: 34,
+  PHEROMONE_B_LEFT_CHANGE: 35,
+  PHEROMONE_B_RIGHT_CHANGE: 36,
+  PHEROMONE_B_DOWN_CHANGE: 37,
+  PHEROMONE_B_UP_CHANGE: 38,
+  FOOD_SCENT_LEFT_CHANGE: 39,
+  FOOD_SCENT_RIGHT_CHANGE: 40,
+  FOOD_SCENT_DOWN_CHANGE: 41,
+  FOOD_SCENT_UP_CHANGE: 42,
+  NEST_SCENT_LEFT_CHANGE: 43,
+  NEST_SCENT_RIGHT_CHANGE: 44,
+  NEST_SCENT_DOWN_CHANGE: 45,
+  NEST_SCENT_UP_CHANGE: 46,
+  COLONY_SCENT_LEFT: 47,
+  COLONY_SCENT_RIGHT: 48,
+  COLONY_SCENT_DOWN: 49,
+  COLONY_SCENT_UP: 50,
+  COLONY_SCENT_LEFT_CHANGE: 51,
+  COLONY_SCENT_RIGHT_CHANGE: 52,
+  COLONY_SCENT_DOWN_CHANGE: 53,
+  COLONY_SCENT_UP_CHANGE: 54,
+  PHEROMONE_A_CENTER: 55,
+  PHEROMONE_A_CENTER_CHANGE: 56,
+  PHEROMONE_B_CENTER: 57,
+  PHEROMONE_B_CENTER_CHANGE: 58,
+  FOOD_SCENT_CENTER: 59,
+  FOOD_SCENT_CENTER_CHANGE: 60,
+  NEST_SCENT_CENTER: 61,
+  NEST_SCENT_CENTER_CHANGE: 62,
+  COLONY_SCENT_CENTER: 63,
+  COLONY_SCENT_CENTER_CHANGE: 64,
+  /** Stereo samples in the non-level bands. These complete the append-only
+   * three-band chemoreception contract: each vertical choice has the same
+   * left/right directional evidence as the original level band. */
+  PHEROMONE_A_DOWN_LEFT: 65,
+  PHEROMONE_A_DOWN_RIGHT: 66,
+  PHEROMONE_A_UP_LEFT: 67,
+  PHEROMONE_A_UP_RIGHT: 68,
+  PHEROMONE_A_DOWN_LEFT_CHANGE: 69,
+  PHEROMONE_A_DOWN_RIGHT_CHANGE: 70,
+  PHEROMONE_A_UP_LEFT_CHANGE: 71,
+  PHEROMONE_A_UP_RIGHT_CHANGE: 72,
+  PHEROMONE_B_DOWN_LEFT: 73,
+  PHEROMONE_B_DOWN_RIGHT: 74,
+  PHEROMONE_B_UP_LEFT: 75,
+  PHEROMONE_B_UP_RIGHT: 76,
+  PHEROMONE_B_DOWN_LEFT_CHANGE: 77,
+  PHEROMONE_B_DOWN_RIGHT_CHANGE: 78,
+  PHEROMONE_B_UP_LEFT_CHANGE: 79,
+  PHEROMONE_B_UP_RIGHT_CHANGE: 80,
+  FOOD_SCENT_DOWN_LEFT: 81,
+  FOOD_SCENT_DOWN_RIGHT: 82,
+  FOOD_SCENT_UP_LEFT: 83,
+  FOOD_SCENT_UP_RIGHT: 84,
+  FOOD_SCENT_DOWN_LEFT_CHANGE: 85,
+  FOOD_SCENT_DOWN_RIGHT_CHANGE: 86,
+  FOOD_SCENT_UP_LEFT_CHANGE: 87,
+  FOOD_SCENT_UP_RIGHT_CHANGE: 88,
+  NEST_SCENT_DOWN_LEFT: 89,
+  NEST_SCENT_DOWN_RIGHT: 90,
+  NEST_SCENT_UP_LEFT: 91,
+  NEST_SCENT_UP_RIGHT: 92,
+  NEST_SCENT_DOWN_LEFT_CHANGE: 93,
+  NEST_SCENT_DOWN_RIGHT_CHANGE: 94,
+  NEST_SCENT_UP_LEFT_CHANGE: 95,
+  NEST_SCENT_UP_RIGHT_CHANGE: 96,
+  COLONY_SCENT_DOWN_LEFT: 97,
+  COLONY_SCENT_DOWN_RIGHT: 98,
+  COLONY_SCENT_UP_LEFT: 99,
+  COLONY_SCENT_UP_RIGHT: 100,
+  COLONY_SCENT_DOWN_LEFT_CHANGE: 101,
+  COLONY_SCENT_DOWN_RIGHT_CHANGE: 102,
+  COLONY_SCENT_UP_LEFT_CHANGE: 103,
+  COLONY_SCENT_UP_RIGHT_CHANGE: 104,
 } as const;
 
-export const INPUT_COUNT = 23;
+export const INPUT_COUNT = 105;
 
 /**
  * Motor output layout (design spec §4). DIG manipulates terrain: it digs the

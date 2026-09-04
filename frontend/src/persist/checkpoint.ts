@@ -5,11 +5,16 @@ import { INPUT_COUNT, OUTPUT_COUNT } from "../sim/controller/contract";
 import { controllerById } from "../sim/controller/registry";
 import { type Egg } from "../sim/eggs";
 import { voxelIndex } from "../sim/grid";
+import {
+  materialScentActiveIndices,
+  restoreMaterialScentField,
+  type MaterialScentField,
+} from "../sim/materialScent";
 import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
-import { createWorld, type World } from "../sim/world";
+import { createWorld, type World, type WorldMetrics } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 12;
+export const CHECKPOINT_VERSION = 18;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -17,6 +22,8 @@ interface AntRecord {
   carriedEggIds: number[];
   genome: Float32Array;
   state: Float32Array;
+  lastInputs: Float32Array;
+  lastOutputs: Float32Array;
 }
 
 interface EggRecord {
@@ -55,6 +62,7 @@ export interface Checkpoint {
   queenEggsEaten: number;
   eggsLaid: number;
   eggsPerished: number;
+  metrics: WorldMetrics;
   config: SimConfig;
   continuations: number;
   lastContinueTick: number;
@@ -62,12 +70,20 @@ export interface Checkpoint {
   foodTarget: number;
   grid: Uint8Array;
   foodSources: number[];
+  storedFood: number[];
   cavities: number[];
   lastVisit: Uint32Array;
   ants: AntRecord[];
   eggs: EggRecord[];
   colonies: ColonyRecord[];
-  scents: { a: ScentRecord; b: ScentRecord; food: ScentRecord; nest: ScentRecord };
+  scents: {
+    a: ScentRecord;
+    b: ScentRecord;
+    food: ScentRecord;
+    nest: ScentRecord;
+    colony: ScentRecord;
+  };
+  materialColonyScent: ScentRecord;
 }
 
 const ANT_SCALARS = [
@@ -80,11 +96,14 @@ const ANT_SCALARS = [
   "prevZ",
   "heading",
   "moveCharge",
+  "verticalAttention",
   "energy",
   "age",
   "bodyScale",
   "carryLoad",
   "spoilLoads",
+  "carriedColonyScentOwner",
+  "carriedColonyScent",
   "sex",
   "lineageId",
   "patrilineId",
@@ -116,6 +135,9 @@ const COLONY_SCALARS = [
   "x",
   "y",
   "z",
+  "entranceX",
+  "entranceY",
+  "entranceZ",
   "queenAge",
   "queenLifespanTicks",
   "stockpile",
@@ -137,18 +159,29 @@ function restoreScent(field: ScentField, record: ScentRecord): void {
   restoreScentField(field, record.values, record.owners, record.active);
 }
 
+function serializeMaterialScent(field: MaterialScentField): ScentRecord {
+  return {
+    values: Float32Array.from(field.values),
+    owners: Uint8Array.from(field.owners),
+    active: materialScentActiveIndices(field),
+  };
+}
+
 function serializeAnt(world: World, ant: Ant): AntRecord {
   const scalars: Record<string, number> = {};
   for (const key of ANT_SCALARS) {
     scalars[key] = ant[key] as number;
   }
   scalars.falling = ant.falling ? 1 : 0;
+  scalars.sensoryHistoryReady = ant.sensoryHistoryReady ? 1 : 0;
   return {
     scalars,
     carrying: ant.carrying,
     carriedEggIds: [...ant.carriedEggIds],
     genome: world.controller.serializeGenome(ant.genome),
     state: world.controller.serializeState(ant.controllerState),
+    lastInputs: Float32Array.from(ant.lastInputs),
+    lastOutputs: Float32Array.from(ant.lastOutputs),
   };
 }
 
@@ -163,8 +196,9 @@ function restoreAnt(world: World, record: AntRecord): Ant {
     genome,
     controllerState: world.controller.deserializeState(record.state),
     traits: world.controller.physical(genome),
-    lastInputs: new Float32Array(INPUT_COUNT),
-    lastOutputs: new Float32Array(OUTPUT_COUNT),
+    sensoryHistoryReady: record.scalars.sensoryHistoryReady === 1,
+    lastInputs: Float32Array.from(record.lastInputs),
+    lastOutputs: Float32Array.from(record.lastOutputs),
   };
   return ant;
 }
@@ -216,6 +250,7 @@ export function serializeWorld(world: World): Checkpoint {
     queenEggsEaten: world.queenEggsEaten,
     eggsLaid: world.eggsLaid,
     eggsPerished: world.eggsPerished,
+    metrics: { ...world.metrics },
     config: world.config,
     continuations: world.continuations,
     lastContinueTick: world.lastContinueTick,
@@ -223,6 +258,7 @@ export function serializeWorld(world: World): Checkpoint {
     foodTarget: world.foodTarget,
     grid: Uint8Array.from(world.grid.data),
     foodSources: Array.from(world.foodSources),
+    storedFood: Array.from(world.storedFood),
     cavities: Array.from(world.cavities),
     lastVisit: Uint32Array.from(world.lastVisit),
     ants: world.ants.map((ant) => serializeAnt(world, ant)),
@@ -237,7 +273,9 @@ export function serializeWorld(world: World): Checkpoint {
       b: serializeScent(world.pheromoneB),
       food: serializeScent(world.foodScent),
       nest: serializeScent(world.nestScent),
+      colony: serializeScent(world.colonyScent),
     },
+    materialColonyScent: serializeMaterialScent(world.materialColonyScent),
   };
 }
 
@@ -262,6 +300,7 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.queenEggsEaten = checkpoint.queenEggsEaten;
   world.eggsLaid = checkpoint.eggsLaid;
   world.eggsPerished = checkpoint.eggsPerished;
+  world.metrics = { ...checkpoint.metrics };
   world.config = { ...checkpoint.config };
   world.continuations = checkpoint.continuations;
   world.lastContinueTick = checkpoint.lastContinueTick;
@@ -269,6 +308,7 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.foodTarget = checkpoint.foodTarget;
   world.grid.data.set(checkpoint.grid);
   world.foodSources = new Set(checkpoint.foodSources);
+  world.storedFood = new Set(checkpoint.storedFood);
   world.cavities = new Set(checkpoint.cavities);
   world.lastVisit.set(checkpoint.lastVisit);
   world.ants = checkpoint.ants.map((record) => restoreAnt(world, record));
@@ -288,6 +328,13 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   restoreScent(world.pheromoneB, checkpoint.scents.b);
   restoreScent(world.foodScent, checkpoint.scents.food);
   restoreScent(world.nestScent, checkpoint.scents.nest);
+  restoreScent(world.colonyScent, checkpoint.scents.colony);
+  restoreMaterialScentField(
+    world.materialColonyScent,
+    checkpoint.materialColonyScent.values,
+    checkpoint.materialColonyScent.owners,
+    checkpoint.materialColonyScent.active
+  );
   world.dirtyChunks.clear();
   return world;
 }

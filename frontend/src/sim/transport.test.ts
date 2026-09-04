@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 import { spoilCapacity, tryDig, tryEat } from "./actions";
 import { foundColony } from "./colony";
 import { PROGRAMMED_COLONY_CONFIG } from "./config";
+import { Output, OUTPUT_COUNT } from "./controller/contract";
 import { rnnController } from "./controller/rnn";
-import { getVoxel } from "./grid";
+import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
+import { exchangeMaterialScent, sampleMaterialScent } from "./materialScent";
+import { sampleScent } from "./scent";
 import { ENERGY } from "./tunables";
-import { createWorld, mutateVoxel, type World } from "./world";
+import { createWorld, mutateVoxel, stepWorld, type World } from "./world";
 
 import { surfaceSpawnY } from "./ant";
 
@@ -29,6 +32,24 @@ describe("physical food transport (ADR-0006)", () => {
     const ant = antWithFood(world);
 
     tryDig(world, ant, 0);
+
+    expect(ant.carrying).toBe(Material.FOOD);
+    expect(ant.carriedColonyScentOwner).toBe(ant.lineageId);
+    expect(ant.carriedColonyScent).toBeGreaterThan(0);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.AIR);
+  });
+
+  it("resolves contact pickup before a simultaneous turn changes the target", () => {
+    const world = createWorld(7006, rnnController, PROGRAMMED_COLONY_CONFIG);
+    foundColony(world);
+    const ant = antWithFood(world);
+    ant.energy = ENERGY.max * ant.traits.storage;
+    const output = new Float32Array(OUTPUT_COUNT);
+    output[Output.TURN] = 1;
+    output[Output.DIG] = 1;
+    world.policyOverride = () => output;
+
+    stepWorld(world);
 
     expect(ant.carrying).toBe(Material.FOOD);
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.AIR);
@@ -91,7 +112,12 @@ describe("physical food transport (ADR-0006)", () => {
     ant.carrying = Material.FOOD;
 
     tryDig(world, ant, 0);
+    const cache = voxelIndex(world.grid, ant.x + 1, ant.y, ant.z);
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.FOOD);
+    expect(sampleMaterialScent(world.materialColonyScent, cache, ant.lineageId)).toBeGreaterThan(0);
+    exchangeMaterialScent(world.grid, world.colonyScent, world.materialColonyScent);
+    expect(sampleScent(world.colonyScent, voxelIndex(world.grid, ant.x, ant.y, ant.z), ant.lineageId))
+      .toBeGreaterThan(0);
     expect(ant.deliveries).toBe(0);
   });
 

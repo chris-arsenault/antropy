@@ -1,7 +1,5 @@
-import { type Colony } from "./colony";
 import { getVoxel, inBounds } from "./grid";
 import { Material } from "./materials";
-import { isLegalPosition } from "./movement";
 import { mutateVoxel, type World } from "./world";
 
 export type ProgrammedChamberRole = "brood" | "pupae" | "food" | "queen";
@@ -74,7 +72,7 @@ const CHAMBER_SPECS: readonly ChamberSpec[] = [
 ];
 
 const JUNCTION_SPECS: readonly JunctionSpec[] = [
-  { id: "entrance-neck", dx: 0, depth: 2, dz: 0 },
+  { id: "entrance-neck", dx: -2, depth: 2, dz: 1 },
   { id: "upper-fork", dx: 2, depth: 6, dz: -1 },
   { id: "east-upper-junction", dx: 5, depth: 8, dz: -3 },
   { id: "west-upper-junction", dx: -4, depth: 9, dz: 2 },
@@ -130,6 +128,9 @@ const STATION_OFFSETS: readonly (readonly [number, number])[] = [
   [0, -2],
   [0, 2],
 ];
+
+const NEST_FOOTPRINT_RADIUS = 20;
+const NEST_COVER = 2;
 
 function carveAir(world: World, x: number, y: number, z: number): void {
   if (inBounds(world.grid, x, y, z) && getVoxel(world.grid, x, y, z) !== Material.AIR) {
@@ -215,7 +216,22 @@ function makeJunctions(cx: number, surfaceY: number, cz: number): ProgrammedJunc
   }));
 }
 
-function passagePoints(from: NestPoint, to: NestPoint, index: number): NestPoint[] {
+function entrancePassagePoints(from: NestPoint, to: NestPoint, collarY: number): NestPoint[] {
+  return [
+    from,
+    { x: from.x, y: collarY, z: from.z },
+    { x: from.x - 1, y: Math.min(collarY - 1, to.y + 1), z: from.z + 1 },
+    to,
+  ];
+}
+
+function passagePoints(
+  from: NestPoint,
+  to: NestPoint,
+  index: number,
+  entranceCollarY: number | null
+): NestPoint[] {
+  if (entranceCollarY !== null) return entrancePassagePoints(from, to, entranceCollarY);
   if (from.x === to.x && from.z === to.z) {
     return [from, to];
   }
@@ -236,7 +252,8 @@ function passagePoints(from: NestPoint, to: NestPoint, index: number): NestPoint
 function makePassages(
   entrance: NestPoint,
   junctions: readonly ProgrammedJunction[],
-  chambers: readonly ProgrammedChamber[]
+  chambers: readonly ProgrammedChamber[],
+  entranceCollarY: number
 ): ProgrammedPassage[] {
   const nodes = new Map<string, NestPoint>([["entrance", entrance]]);
   for (const junction of junctions) {
@@ -251,7 +268,8 @@ function makePassages(
     if (!from || !to) {
       throw new Error(`programmed passage has unknown endpoint ${spec.from} -> ${spec.to}`);
     }
-    return { ...spec, points: passagePoints(from, to, index) };
+    const collarY = spec.from === "entrance" ? entranceCollarY : null;
+    return { ...spec, points: passagePoints(from, to, index, collarY) };
   });
 }
 
@@ -263,6 +281,20 @@ function makeWorkerStations(chambers: readonly ProgrammedChamber[]): NestPoint[]
       z: chamber.center.z + dz,
     }))
   );
+}
+
+function minimumSurface(world: World, cx: number, cz: number, radius: number): number {
+  let minimum = Number.POSITIVE_INFINITY;
+  for (let dz = -radius; dz <= radius; dz++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      minimum = Math.min(minimum, world.surfaceMap[(cz + dz) * world.grid.sizeX + cx + dx]);
+    }
+  }
+  return minimum;
+}
+
+function undergroundDatum(world: World, cx: number, cz: number): number {
+  return minimumSurface(world, cx, cz, NEST_FOOTPRINT_RADIUS) - NEST_COVER;
 }
 
 /**
@@ -281,9 +313,11 @@ export function authorProgrammedNest(world: World): ProgrammedNest {
     world.surfaceMap[(cz + 1) * world.grid.sizeX + cx + 1]
   );
   const entrance = { x: cx, y: surfaceY + 1, z: cz };
-  const chambers = makeChambers(cx, surfaceY, cz);
-  const junctions = makeJunctions(cx, surfaceY, cz);
-  const passages = makePassages(entrance, junctions, chambers);
+  const datumY = undergroundDatum(world, cx, cz);
+  const chambers = makeChambers(cx, datumY, cz);
+  const junctions = makeJunctions(cx, datumY, cz);
+  const entranceCollarY = minimumSurface(world, cx, cz, 2) - 1;
+  const passages = makePassages(entrance, junctions, chambers, entranceCollarY);
   const queen = chambers.find((chamber) => chamber.role === "queen");
   if (!queen) {
     throw new Error("programmed nest requires a queen chamber");
@@ -305,29 +339,4 @@ export function authorProgrammedNest(world: World): ProgrammedNest {
     carveJunction(world, junction);
   }
   return { entrance, queenHome, chambers, junctions, passages, workerStations };
-}
-
-/** Place the scripted queen and fixed founder workforce inside the authored rooms. */
-export function occupyProgrammedNest(world: World, colony: Colony, nest: ProgrammedNest): void {
-  if (nest.workerStations.length < world.ants.length) {
-    throw new Error("programmed nest has fewer worker stations than founder ants");
-  }
-  colony.x = nest.queenHome.x;
-  colony.y = nest.queenHome.y;
-  colony.z = nest.queenHome.z;
-  for (const [index, ant] of world.ants.entries()) {
-    const station = nest.workerStations[index];
-    if (!isLegalPosition(world.grid, station.x, station.y, station.z)) {
-      throw new Error(`illegal programmed worker station ${station.x},${station.y},${station.z}`);
-    }
-    ant.x = station.x;
-    ant.y = station.y;
-    ant.z = station.z;
-    ant.prevX = station.x;
-    ant.prevY = station.y;
-    ant.prevZ = station.z;
-    ant.heading = (index % 8) * (Math.PI / 4);
-    ant.moveCharge = 0;
-    ant.falling = false;
-  }
 }

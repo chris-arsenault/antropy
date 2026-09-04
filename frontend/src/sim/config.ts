@@ -12,12 +12,22 @@ export interface SimConfig {
   terrainDigging: boolean;
   /** Phase 3: ants age and starve; corpses drop as food. Off = immortal. */
   mortality: boolean;
-  /** Phase 3: queens/workers lay eggs and brood hatches. Off = fixed population. */
-  reproduction: boolean;
+  /** Queens and workers may lay non-queen eggs. Off = no worker replacement. */
+  workerReproduction: boolean;
+  /** Queen-destined brood may establish another colony. */
+  colonyFounding: boolean;
+  /** Founders and offspring may differ genetically. Off = exact genome copies. */
+  geneticVariation: boolean;
   /** Phase 3: DIG can pick up and place live brood. */
   broodTransport: boolean;
+  /** Experimental live-brood capacity override; null derives from body scale. */
+  broodCapacity: number | null;
   /** World-core deterministic turn noise; breaks exact behavioral lockstep. */
   motorJitter: boolean;
+  /** Solid material absorbs and re-emits colony odor. */
+  materialColonyOdor: boolean;
+  /** Food handled by an ant retains and re-emits that colony's contact odor. */
+  contactFoodOdor: boolean;
   /** Phase 4: untrafficked tunnels collapse to loose fill. */
   nestDecay: boolean;
   /** Phase 4: seasonal food oscillation. Off = steady carrying capacity. */
@@ -60,9 +70,14 @@ export interface SimConfig {
 export const FULL_CONFIG: SimConfig = {
   terrainDigging: true,
   mortality: true,
-  reproduction: true,
+  workerReproduction: true,
+  colonyFounding: true,
+  geneticVariation: true,
   broodTransport: true,
+  broodCapacity: null,
   motorJitter: true,
+  materialColonyOdor: true,
+  contactFoodOdor: true,
   nestDecay: true,
   seasons: true,
   weather: true,
@@ -84,9 +99,14 @@ export const FULL_CONFIG: SimConfig = {
 export const PHASE2_CONFIG: SimConfig = {
   terrainDigging: true,
   mortality: false,
-  reproduction: false,
+  workerReproduction: false,
+  colonyFounding: false,
+  geneticVariation: true,
   broodTransport: false,
+  broodCapacity: null,
   motorJitter: false,
+  materialColonyOdor: false,
+  contactFoodOdor: false,
   nestDecay: false,
   seasons: false,
   weather: false,
@@ -103,12 +123,18 @@ export const PHASE2_CONFIG: SimConfig = {
   spoilCapacity: null,
 };
 
-/** Static authored colony used to review nest geometry before behavior work. */
-export const PROGRAMMED_COLONY_CONFIG: SimConfig = {
+/** Appendix E baseline: authored nest, fixed genetics, and steady ecology. */
+export const NEST_CONFIG: SimConfig = {
   ...PHASE2_CONFIG,
   terrainDigging: false,
+  geneticVariation: false,
   motorJitter: true,
+  materialColonyOdor: true,
+  contactFoodOdor: true,
 };
+
+/** Compatibility name retained for the existing programmed scenario. */
+export const PROGRAMMED_COLONY_CONFIG = NEST_CONFIG;
 
 /** Appendix D step 1: Phase 2 with conserved spoil and real haul trips. */
 export const LADDER_STEP1_CONFIG: SimConfig = {
@@ -125,7 +151,7 @@ export const LADDER_STEP2_CONFIG: SimConfig = {
 /** Appendix D step 10b: admit reproduction after the step-9 gate state. */
 export const LADDER_STEP10B_CONFIG: SimConfig = {
   ...LADDER_STEP2_CONFIG,
-  reproduction: true,
+  workerReproduction: true,
 };
 
 /** Appendix D step 10c: admit live brood transport after reproduction. */
@@ -161,6 +187,7 @@ export const LADDER_STEP12_CONFIG: SimConfig = {
 const PRESETS: Record<string, SimConfig> = {
   full: FULL_CONFIG,
   phase2: PHASE2_CONFIG,
+  nest: NEST_CONFIG,
   programmedColony: PROGRAMMED_COLONY_CONFIG,
 };
 

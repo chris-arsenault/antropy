@@ -8,23 +8,50 @@ export function maxEnergy(ant: Ant): number {
   return ENERGY.max * ant.traits.storage;
 }
 
+export function spendEnergy(world: World, ant: Ant, amount: number): void {
+  ant.energy -= amount;
+  world.metrics.energyBurned += amount;
+}
+
+export function isAboveSurface(world: World, x: number, y: number, z: number): boolean {
+  return y > world.surfaceMap[z * world.grid.sizeX + x];
+}
+
+export function recordFoodPickup(
+  world: World,
+  material: MaterialId,
+  x: number,
+  y: number,
+  z: number
+): void {
+  if (material !== Material.FOOD) return;
+  const index = voxelIndex(world.grid, x, y, z);
+  const alreadyStored = world.storedFood.has(index);
+  world.metrics.foodPickedUp += 1;
+  if (!alreadyStored && isAboveSurface(world, x, y, z)) {
+    world.metrics.surfaceFoodEnergyGathered += ENERGY.foodEnergy;
+  }
+}
+
 /**
  * Per-tick fixed drains (design spec §6): size-scaled basal metabolism,
  * sensor upkeep scaling with the square of sensor gain, and think cost.
  * The climate multiplier (Rule 5 microclimate) scales basal maintenance;
  * sensing and thinking are climate-indifferent.
  */
-export function applyBasalDrain(ant: Ant, thinkCost: number, climate = 1): void {
+export function applyBasalDrain(world: World, ant: Ant, thinkCost: number, climate = 1): void {
   const basal = ENERGY.basalPerTick * Math.pow(ant.bodyScale, ENERGY.basalScaleExponent);
   const upkeep = ENERGY.sensorUpkeep * ant.traits.sensorGain * ant.traits.sensorGain;
-  ant.energy -= basal * climate + upkeep + thinkCost;
+  const cost = basal * climate + upkeep + thinkCost * ENERGY.thinkCostScale;
+  ant.energy -= cost;
+  world.metrics.energyBurned += cost;
 }
 
 /**
  * Movement cost for the distance moved this tick: leg length buys speed but
  * raises per-step cost; a fuller, larger store slows movement (spec §3.2).
  */
-export function applyStepCost(ant: Ant): void {
+export function applyStepCost(world: World, ant: Ant): void {
   const moved = ant.x !== ant.prevX || ant.y !== ant.prevY || ant.z !== ant.prevZ;
   if (!moved) {
     return;
@@ -32,7 +59,9 @@ export function applyStepCost(ant: Ant): void {
   const fullness = Math.max(0, ant.energy) / maxEnergy(ant);
   const storagePenalty = 1 + 0.3 * fullness * Math.max(0, ant.traits.storage - 1);
   const base = ENERGY.stepCost * ant.traits.legLength * storagePenalty;
-  ant.energy -= base + ENERGY.carryStepCost * (ant.spoilLoads + ant.carriedEggIds.length);
+  const cost = base + ENERGY.carryStepCost * (ant.spoilLoads + ant.carriedEggIds.length);
+  ant.energy -= cost;
+  world.metrics.energyBurned += cost;
 }
 
 /**
@@ -172,7 +201,11 @@ function releaseCarriedEggs(world: World, ant: Ant): void {
  * across death, not silently destroyed with the carrier.
  */
 export function killAnt(world: World, ant: Ant): void {
+  if (!ant.alive) {
+    return;
+  }
   ant.alive = false;
+  world.metrics.workerDeaths += 1;
   releaseCarriedEggs(world, ant);
   const carried = ant.carrying as MaterialId | null;
   if (carried !== null) {

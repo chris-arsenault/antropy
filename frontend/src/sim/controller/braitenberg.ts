@@ -68,6 +68,10 @@ export const braitenbergController: Controller = {
     return BRAITENBERG_GENOME;
   },
 
+  fixedSeed() {
+    return BRAITENBERG_GENOME;
+  },
+
   haploidOffspring() {
     return BRAITENBERG_GENOME;
   },

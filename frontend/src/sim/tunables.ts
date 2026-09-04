@@ -38,7 +38,7 @@ export const SCENT = {
   stepInterval: 5,
   /** Scent injected next to each FOOD voxel per pass (drives R3 reach). */
   foodSourceStrength: 0.8,
-  /** Nest scent injected at each queen per pass (ADR-0006): sized with
+  /** Nest scent injected at each queen site per pass: sized with
    * NEST_PHYSICS so the plume's detect radius covers the forage range. */
   nestSourceStrength: 1.2,
 } as const;
@@ -51,17 +51,22 @@ export const SCENT = {
 export const TRAIL_PHYSICS = {
   diffusionRate: 0.06,
   evaporation: 0.994,
+  transferEpsilon: 2e-3,
   epsilon: 2e-3,
 } as const;
 
 /**
- * Beacon physics (food scent): fast turnover keeps continuously
- * re-emitted source clouds compact, bounding the active set.
+ * Beacon physics (food scent): persistent enough for a stored food source to
+ * remain legible through the authored nest, while continuous evaporation
+ * still removes a source that is consumed. The low transport cutoff preserves
+ * weak gradients along branching tunnels instead of truncating the carrier a
+ * few edges from its material source (Appendix F ledger runs 1673-1688).
  */
 export const BEACON_PHYSICS = {
   diffusionRate: 0.5,
-  evaporation: 0.9,
-  epsilon: 5e-3,
+  evaporation: 0.98,
+  transferEpsilon: 1e-5,
+  epsilon: 1e-5,
 } as const;
 
 /**
@@ -72,8 +77,56 @@ export const BEACON_PHYSICS = {
  */
 export const NEST_PHYSICS = {
   diffusionRate: 0.5,
-  evaporation: 0.999,
-  epsilon: 2e-4,
+  /** A deep source must remain legible through roughly 100 air steps from
+   * queen chamber to forage-radius edge. The resulting long-lived carrier
+   * also matches mature nest fabric; abandonment is handled by absorption
+   * loss rather than an entrance beacon disappearing immediately. */
+  evaporation: 0.99999,
+  /** Weak long-range gradients must continue transporting rather than pinning. */
+  transferEpsilon: 0,
+  /** Below the minimum navigable concentration across the authored
+   * queen-to-surface path (Appendix F ledger runs 1323-1327). */
+  epsilon: 1e-8,
+} as const;
+
+/** Airborne colony identity released locally by marked solid material. */
+export const COLONY_ODOR_PHYSICS = {
+  diffusionRate: 0.5,
+  /** Material re-emission sustains occupied nest air; faster airborne loss
+   * prevents the identity carrier accumulating into a surface-wide cloud. */
+  evaporation: 0.98,
+  transferEpsilon: 1e-5,
+  epsilon: 1e-5,
+} as const;
+
+/** Initial standing odor in the pre-built Appendix E nest. The value is
+ * evaluated over connected air-path distance, then handed to ordinary scent
+ * diffusion; it is a carrier, not a bearing sensor or controller input. */
+export const NEST_FIXTURE_SCENT = {
+  /** Near-source initial guess for the steady-state solver. */
+  sourceStrength: 3.2,
+  /** Initial solver profile; runtime physics refines this to steady state. */
+  distanceScale: 10,
+  /** Surface neighborhood carrying mature odor at authored-world startup. */
+  surfaceRadius: 24,
+} as const;
+
+/** Colony odor held by nest fabric and other solid material. Rates are per
+ * scent pass, not per simulation tick. */
+export const COLONY_ODOR = {
+  saturation: 1,
+  fixtureSaturation: 0.75,
+  contactTransfer: 0.75,
+  /** Establish the fixture's material/air equilibrium before ants act
+   * (Appendix F startup and 2,500-tick ledger runs 1709-1718). */
+  fixtureWarmupPasses: 125,
+  absorptionRate: 0.002,
+  absorptionFloor: 0.002,
+  reemissionRate: 0.01,
+  retention: 0.999,
+  epsilon: 1e-5,
+  /** Diagnostic/readable-policy boundary in normalized sensor space. */
+  insideThreshold: 0.159,
 } as const;
 
 /**
@@ -85,26 +138,30 @@ export const MOTOR_JITTER = {
   turnAmplitude: 0.08,
 } as const;
 
-// Energy economy (M4, design spec §6). Energy is normalized: 1 = a full ant.
-// Mutable (no `as const`) solely for the calibration harness's scoped,
-// restoring overrides (calibration.ts); production code never writes it.
+// Energy economy (M4, design spec §6). Sensors normalize stored energy against
+// the tank; ledger values remain absolute. Mutable (no `as const`) solely for
+// calibration harnesses' scoped, restoring overrides; production code never
+// writes it. Defaults are the broad-controller interior measured in colony-
+// economy runs 922, 924, and 930.
 export const ENERGY = {
   /** Basal metabolic drain per tick at bodyScale 1 (superlinear in scale). */
-  basalPerTick: 0.00012,
+  basalPerTick: 0.0000015,
   basalScaleExponent: 1.5,
   /** Cost per lattice step. */
-  stepCost: 0.0003,
+  stepCost: 0.00000375,
   /** Extra per-step cost while carrying spoil (per load). */
-  carryStepCost: 0.0003,
+  carryStepCost: 0.00000375,
   /** Sensor upkeep per tick. */
-  sensorUpkeep: 0.0001,
+  sensorUpkeep: 0.00000125,
+  /** World price applied to every controller-reported thinking cost. */
+  thinkCostScale: 0.0125,
   /** Cost per unit of pheromone deposited. */
-  depositCostPerUnit: 0.002,
+  depositCostPerUnit: 0.0000625,
   /** Energy granted by eating one FOOD voxel (corpses are FOOD voxels too).
-   * Sized for satiation ratio R2 in its 0.1–0.3 band (§B.3). */
-  foodEnergy: 0.2,
+   * Meal/tank ratio R2 remains 0.3; broad viability comes from cheaper work. */
+  foodEnergy: 2.4,
   /** Maximum stored energy. */
-  max: 1,
+  max: 8,
   /** Age cap in ticks (pre-genome default; the lifespan gene refines it). */
   ageCap: 20_000,
 };
@@ -117,18 +174,11 @@ export const DIG = {
     clay: 0.012,
     looseFill: 0.002,
     /** Picking up a FOOD voxel for transport (ADR-0006). */
-    foodPickup: 0.001,
+    foodPickup: 0.0000125,
   },
   /** Cost to place a carried load, also charged for a failed terrain intent. */
-  depositCost: 0.001,
+  depositCost: 0.0000125,
 } as const;
-
-// Live-brood transport. Mutable so experiments can scope and restore a
-// capacity override; the production default is one egg per ant.
-export const BROOD_TRANSPORT = {
-  /** Maximum live eggs carried at once; non-integers are rounded down. */
-  eggCapacity: 1,
-};
 
 // Appendix D descriptive nest classifier. These thresholds name observed
 // morphology; no evolving controller receives them and no function ledger is
@@ -148,10 +198,10 @@ export const FOOD_GOVERNOR = {
   /** Baseline FOOD voxels at season midpoint — dense enough that the scent
    * horizon R3 exceeds 1 (§B.3): mean nearest-food distance under the
    * beacon's measured detection radius. */
-  targetCount: 800,
+  targetCount: 1600,
   /** Maximum voxels spawned per pass (kept low enough that patch turnover
    * clears the trail half-life, R5b). */
-  maxSpawnPerPass: 20,
+  maxSpawnPerPass: 40,
 };
 
 // Oscillating carrying capacity (design spec §9.3): K breathes forever.

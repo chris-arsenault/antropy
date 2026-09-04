@@ -89,6 +89,7 @@ describe("merit fraud gate (§B.7.2)", () => {
     foundColony(world);
     const { ant, colony } = antNearFood(world);
     tryDig(world, ant, 0); // pick up
+    const gatheredAfterInitialPickup = world.metrics.surfaceFoodEnergyGathered;
     ant.spoilLoads = spoilCapacity(ant);
     ant.carrying = Material.FOOD;
     const meritBefore = colony.patrilineDeliveries.get(ant.patrilineId) ?? 0;
@@ -101,5 +102,6 @@ describe("merit fraud gate (§B.7.2)", () => {
     }
     expect(colony.stockpile).toBeCloseTo(COLONY.foundingStockpile);
     expect(colony.patrilineDeliveries.get(ant.patrilineId) ?? 0).toBe(meritBefore);
+    expect(world.metrics.surfaceFoodEnergyGathered).toBe(gatheredAfterInitialPickup);
   });
 });
