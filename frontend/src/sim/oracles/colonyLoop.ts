@@ -142,17 +142,13 @@ function outboundBand(inputs: Float32Array): number {
   // equal outward gradient. A materially stronger (inward) band is never
   // selected just because it is unmarked.
   for (const index of [2, 1, 0]) {
-    if (
-      carrier[index] < SIGNAL_FLOOR ||
-      carrier[index] > minimumCarrier + OUTWARD_TIE_WINDOW
-    ) {
+    if (carrier[index] < SIGNAL_FLOOR || carrier[index] > minimumCarrier + OUTWARD_TIE_WINDOW) {
       continue;
     }
     if (
       best < 0 ||
       trail[index] < trail[best] - GRADIENT_EPSILON ||
-      (Math.abs(trail[index] - trail[best]) < GRADIENT_EPSILON &&
-        carrier[index] < carrier[best])
+      (Math.abs(trail[index] - trail[best]) < GRADIENT_EPSILON && carrier[index] < carrier[best])
     ) {
       best = index;
     }
@@ -175,11 +171,7 @@ function bandChanges(
   inputs: Float32Array,
   channels: ScentChannels
 ): readonly [number, number, number] {
-  return [
-    inputs[channels.downChange],
-    inputs[channels.centerChange],
-    inputs[channels.upChange],
-  ];
+  return [inputs[channels.downChange], inputs[channels.centerChange], inputs[channels.upChange]];
 }
 
 function taxisTurn(
@@ -195,20 +187,57 @@ function taxisTurn(
   return stereoGain * difference;
 }
 
+function castWithoutBearing(inputs: Float32Array, channels: ScentChannels): void {
+  const local = inputs[channels.center];
+  const hasLocalCarrier = local >= SIGNAL_FLOOR;
+  setMotion(hasLocalCarrier ? CAST_TURN : EXPLORE_TURN, hasLocalCarrier ? CAST_FORWARD : 1, 0);
+}
+
+function directlySampledFood(
+  inputs: Float32Array,
+  channels: ScentChannels,
+  sourceBand: number
+): boolean {
+  if (channels !== FOOD_CHANNELS) return false;
+  const central = sourceBand === 0 ? channels.down : channels.up;
+  const [left, right] = bandStereo(channels, sourceBand);
+  return (
+    inputs[central] >= DIRECT_FOOD_SIGNAL &&
+    inputs[central] >= Math.max(inputs[left], inputs[right])
+  );
+}
+
+function moveVertical(inputs: Float32Array, channels: ScentChannels, sourceBand: number): boolean {
+  if (sourceBand === 1) return false;
+  const vertical = BANDS[sourceBand];
+  if (directlySampledFood(inputs, channels, sourceBand)) {
+    // Select the band without translating. The next frame's shared mandible
+    // resolver can then report and consume this sampled food.
+    setMotion(0, 0, vertical);
+  } else {
+    setMotion(taxisTurn(inputs, channels, 1, sourceBand), 1, vertical);
+  }
+  return true;
+}
+
+function moveLevel(inputs: Float32Array, channels: ScentChannels, improvement: number): void {
+  const [left, right] = bandStereo(channels, 1);
+  const directional = Math.abs(inputs[left] - inputs[right]);
+  if (improvement <= PHASIC_EPSILON && directional < GRADIENT_EPSILON) {
+    setMotion(CAST_TURN, CAST_FORWARD, 0);
+    return;
+  }
+  setMotion(taxisTurn(inputs, channels, 1, 1), 1, 0);
+}
+
 function taxisToward(inputs: Float32Array, channels: ScentChannels): void {
   const samples = bandSignals(inputs, channels);
   const sourceBand = strongestBand(samples);
-  const vertical = BANDS[sourceBand];
   if (samples[sourceBand] < SIGNAL_FLOOR) {
     // A carrier only at the current voxel is present but non-directional:
     // cast slowly rather than walking out of it. With no local carrier at
     // all, keep exploring until the plume is reacquired.
-    const local = inputs[channels.center];
-    setMotion(
-      local >= SIGNAL_FLOOR ? CAST_TURN : EXPLORE_TURN,
-      local >= SIGNAL_FLOOR ? CAST_FORWARD : 1,
-      BANDS[1]
-    );
+    castWithoutBearing(inputs, channels);
     return;
   }
   const improvement = bandChanges(inputs, channels)[sourceBand];
@@ -216,29 +245,8 @@ function taxisToward(inputs: Float32Array, channels: ScentChannels): void {
     setMotion(CAST_TURN, CAST_FORWARD, BANDS[1]);
     return;
   }
-  if (sourceBand !== 1) {
-    const central = sourceBand === 0 ? channels.down : channels.up;
-    const [left, right] = bandStereo(channels, sourceBand);
-    if (
-      channels === FOOD_CHANNELS &&
-      inputs[central] >= DIRECT_FOOD_SIGNAL &&
-      inputs[central] >= Math.max(inputs[left], inputs[right])
-    ) {
-      // Select the band without translating. The next frame's shared
-      // mandible resolver can then report and consume this sampled food.
-      setMotion(0, 0, vertical);
-      return;
-    }
-    setMotion(taxisTurn(inputs, channels, 1, sourceBand), 1, vertical);
-    return;
-  }
-  const [left, right] = bandStereo(channels, sourceBand);
-  const directional = Math.abs(inputs[left] - inputs[right]);
-  if (improvement <= PHASIC_EPSILON && directional < GRADIENT_EPSILON) {
-    setMotion(CAST_TURN, CAST_FORWARD, vertical);
-    return;
-  }
-  setMotion(taxisTurn(inputs, channels, 1, sourceBand), 1, vertical);
+  if (moveVertical(inputs, channels, sourceBand)) return;
+  moveLevel(inputs, channels, improvement);
 }
 
 function colonySignal(inputs: Float32Array): number {
@@ -274,9 +282,7 @@ function outboundTurn(inputs: Float32Array, band: number): number {
     return BREADCRUMB_GAIN * trailDifference;
   }
   const nestDifference = inputs[nestRight] - inputs[nestLeft];
-  return Math.abs(nestDifference) >= GRADIENT_EPSILON
-    ? stereoGain * nestDifference
-    : EXPLORE_TURN;
+  return Math.abs(nestDifference) >= GRADIENT_EPSILON ? stereoGain * nestDifference : EXPLORE_TURN;
 }
 
 function exploreOut(inputs: Float32Array): void {

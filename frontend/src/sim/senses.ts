@@ -67,10 +67,7 @@ const PHEROMONE_A_INPUTS: ScentInputs = {
     Input.PHEROMONE_A_UP_CHANGE,
   ],
   centerChange: Input.PHEROMONE_A_CENTER_CHANGE,
-  downStereoChange: [
-    Input.PHEROMONE_A_DOWN_LEFT_CHANGE,
-    Input.PHEROMONE_A_DOWN_RIGHT_CHANGE,
-  ],
+  downStereoChange: [Input.PHEROMONE_A_DOWN_LEFT_CHANGE, Input.PHEROMONE_A_DOWN_RIGHT_CHANGE],
   upStereoChange: [Input.PHEROMONE_A_UP_LEFT_CHANGE, Input.PHEROMONE_A_UP_RIGHT_CHANGE],
 };
 const PHEROMONE_B_INPUTS: ScentInputs = {
@@ -87,10 +84,7 @@ const PHEROMONE_B_INPUTS: ScentInputs = {
     Input.PHEROMONE_B_UP_CHANGE,
   ],
   centerChange: Input.PHEROMONE_B_CENTER_CHANGE,
-  downStereoChange: [
-    Input.PHEROMONE_B_DOWN_LEFT_CHANGE,
-    Input.PHEROMONE_B_DOWN_RIGHT_CHANGE,
-  ],
+  downStereoChange: [Input.PHEROMONE_B_DOWN_LEFT_CHANGE, Input.PHEROMONE_B_DOWN_RIGHT_CHANGE],
   upStereoChange: [Input.PHEROMONE_B_UP_LEFT_CHANGE, Input.PHEROMONE_B_UP_RIGHT_CHANGE],
 };
 const FOOD_SCENT_INPUTS: ScentInputs = {
@@ -141,10 +135,7 @@ const COLONY_SCENT_INPUTS: ScentInputs = {
     Input.COLONY_SCENT_UP_CHANGE,
   ],
   centerChange: Input.COLONY_SCENT_CENTER_CHANGE,
-  downStereoChange: [
-    Input.COLONY_SCENT_DOWN_LEFT_CHANGE,
-    Input.COLONY_SCENT_DOWN_RIGHT_CHANGE,
-  ],
+  downStereoChange: [Input.COLONY_SCENT_DOWN_LEFT_CHANGE, Input.COLONY_SCENT_DOWN_RIGHT_CHANGE],
   upStereoChange: [Input.COLONY_SCENT_UP_LEFT_CHANGE, Input.COLONY_SCENT_UP_RIGHT_CHANGE],
 };
 
@@ -192,6 +183,24 @@ function scentAt(
   return scentResponse(concentration, gain);
 }
 
+interface ScentSampling {
+  readonly ctx: SenseContext;
+  readonly field: ScentField;
+  readonly gain: number;
+  readonly owner: number;
+}
+
+function sampleInto(
+  inputs: Float32Array,
+  channel: number,
+  sampling: ScentSampling,
+  x: number,
+  y: number,
+  z: number
+): void {
+  inputs[channel] = scentAt(sampling.ctx, sampling.field, x, y, z, sampling.gain, sampling.owner);
+}
+
 function writeScentInputs(
   inputs: Float32Array,
   channels: ScentInputs,
@@ -202,63 +211,23 @@ function writeScentInputs(
   gain: number,
   owner: number
 ): void {
-  inputs[channels.level[0]] = scentAt(
-    ctx,
-    field,
-    positions.leftX,
-    ant.y,
-    positions.leftZ,
-    gain,
-    owner
-  );
-  inputs[channels.level[1]] = scentAt(
-    ctx,
-    field,
-    positions.rightX,
-    ant.y,
-    positions.rightZ,
-    gain,
-    owner
-  );
-  inputs[channels.center] = scentAt(ctx, field, ant.x, ant.y, ant.z, gain, owner);
-  inputs[channels.down] = scentAt(ctx, field, ant.x, ant.y - 1, ant.z, gain, owner);
-  inputs[channels.up] = scentAt(ctx, field, ant.x, ant.y + 1, ant.z, gain, owner);
-  inputs[channels.downStereo[0]] = scentAt(
-    ctx,
-    field,
-    positions.leftX,
-    ant.y - 1,
-    positions.leftZ,
-    gain,
-    owner
-  );
-  inputs[channels.downStereo[1]] = scentAt(
-    ctx,
-    field,
+  const sampling = { ctx, field, gain, owner };
+  sampleInto(inputs, channels.level[0], sampling, positions.leftX, ant.y, positions.leftZ);
+  sampleInto(inputs, channels.level[1], sampling, positions.rightX, ant.y, positions.rightZ);
+  sampleInto(inputs, channels.center, sampling, ant.x, ant.y, ant.z);
+  sampleInto(inputs, channels.down, sampling, ant.x, ant.y - 1, ant.z);
+  sampleInto(inputs, channels.up, sampling, ant.x, ant.y + 1, ant.z);
+  sampleInto(inputs, channels.downStereo[0], sampling, positions.leftX, ant.y - 1, positions.leftZ);
+  sampleInto(
+    inputs,
+    channels.downStereo[1],
+    sampling,
     positions.rightX,
     ant.y - 1,
-    positions.rightZ,
-    gain,
-    owner
+    positions.rightZ
   );
-  inputs[channels.upStereo[0]] = scentAt(
-    ctx,
-    field,
-    positions.leftX,
-    ant.y + 1,
-    positions.leftZ,
-    gain,
-    owner
-  );
-  inputs[channels.upStereo[1]] = scentAt(
-    ctx,
-    field,
-    positions.rightX,
-    ant.y + 1,
-    positions.rightZ,
-    gain,
-    owner
-  );
+  sampleInto(inputs, channels.upStereo[0], sampling, positions.leftX, ant.y + 1, positions.leftZ);
+  sampleInto(inputs, channels.upStereo[1], sampling, positions.rightX, ant.y + 1, positions.rightZ);
   writeScentChange(inputs, ant, channels.change[0], channels.level[0]);
   writeScentChange(inputs, ant, channels.change[1], channels.level[1]);
   writeScentChange(inputs, ant, channels.change[2], channels.down);

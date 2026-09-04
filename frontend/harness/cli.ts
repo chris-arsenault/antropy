@@ -9,13 +9,13 @@ import { runCalibrateColonyEconomy } from "./experiments/calibrateColonyEconomy"
 import { runDerive } from "./experiments/derive";
 import { runDeriveDigger } from "./experiments/deriveDigger";
 import { runDeriveColonyLoop } from "./experiments/deriveColonyLoop";
-import { runCloneColonyLoop } from "./experiments/cloneColonyLoop";
+import { runBakeColonyRun, runCloneColonyLoop } from "./experiments/cloneColonyLoop";
 import { runColonyLoopRobustness } from "./experiments/colonyLoopRobustness";
 import { runCorrectColonyEnergy } from "./experiments/correctColonyEnergy";
 import { runOptimizeColonyLoop } from "./experiments/optimizeColonyLoop";
 import { runOptimizeColonyEnergy } from "./experiments/optimizeColonyEnergy";
 import { runDeriveVivo } from "./experiments/deriveVivo";
-import { runColonyLoop } from "./experiments/colonyLoop";
+import { runColonyLoop } from "./experiments/colonyLoopRunner";
 import { runEvaluateColonyCohort } from "./experiments/evaluateColonyCohort";
 import { runDeterminism } from "./determinism";
 
@@ -193,6 +193,10 @@ function handleDerivation(command: string, rest: string[]): boolean {
     runCloneColonyLoop(parseFlags(rest));
     return true;
   }
+  if (command === "bake-colony-run") {
+    runBakeColonyRun(parseFlags(rest));
+    return true;
+  }
   if (command === "correct-colony-energy") {
     runCorrectColonyEnergy(parseFlags(rest));
     return true;
@@ -229,7 +233,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|robustness-colony-loop|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|determinism|recent|sql> [flags]"
       );
   }
 }

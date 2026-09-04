@@ -1,7 +1,6 @@
 import { type Ant } from "../sim/ant";
 import { type Colony } from "../sim/colony";
 import { type SimConfig } from "../sim/config";
-import { INPUT_COUNT, OUTPUT_COUNT } from "../sim/controller/contract";
 import { controllerById } from "../sim/controller/registry";
 import { type Egg } from "../sim/eggs";
 import { voxelIndex } from "../sim/grid";

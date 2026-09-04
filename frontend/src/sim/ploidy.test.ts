@@ -5,9 +5,9 @@ import { foundColony } from "./colony";
 import { Input, INPUT_COUNT } from "./controller/contract";
 import { rnnController } from "./controller/rnn";
 import { createRng } from "./rng";
-import { STAGE_EGG, STAGE_LARVA } from "./eggs";
+import { STAGE_EGG, STAGE_LARVA, stepEggs } from "./eggs";
 import { COLONY, LARVA } from "./tunables";
-import { createWorld, stepWorld } from "./world";
+import { createWorld } from "./world";
 
 function inputs(): Float32Array {
   const buffer = new Float32Array(INPUT_COUNT);
@@ -84,12 +84,12 @@ describe("worker-laid males (spec §7.1 channel 2)", () => {
     // incubate to hatch.
     world.ants = [];
     for (let t = 0; t <= COLONY.incubationTicks && egg.stage === STAGE_EGG; t++) {
-      stepWorld(world);
+      stepEggs(world);
     }
     // Incubated into a larva; fast-forward rearing (unit-gated) and pupate.
     expect(egg.stage).toBe(STAGE_LARVA);
     egg.fedProgress = LARVA.rearingCost;
-    stepWorld(world);
+    stepEggs(world);
     const male = world.ants.find((ant) => ant.sex === SEX_MALE);
     expect(male).toBeDefined();
     expect((male as NonNullable<typeof male>).motherId).toBe(worker.id);

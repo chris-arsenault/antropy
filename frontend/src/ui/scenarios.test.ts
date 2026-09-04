@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LADDER_STEP12_CONFIG, PROGRAMMED_COLONY_CONFIG } from "../sim/config";
-import { rnnController } from "../sim/controller/rnn";
+import { derivedColonySeedVector, rnnController } from "../sim/controller/rnn";
 import { voxelIndex } from "../sim/grid";
 import { authorProgrammedNest } from "../sim/programmedNest";
 import { sampleScent } from "../sim/scent";
@@ -26,6 +26,9 @@ describe("programmed colony scenario", () => {
     expect(Buffer.from(world.grid.data).equals(Buffer.from(authored.grid.data))).toBe(true);
     expect(world.cavities).toEqual(authored.cavities);
     const founderGenome = world.controller.serializeGenome(world.ants[0].genome);
+    const colonySeed = derivedColonySeedVector();
+    expect(founderGenome.slice(0, colonySeed.length)).toEqual(colonySeed);
+    expect(founderGenome.slice(colonySeed.length)).toEqual(colonySeed);
     expect(
       world.ants.every((ant) =>
         Buffer.from(world.controller.serializeGenome(ant.genome)).equals(Buffer.from(founderGenome))

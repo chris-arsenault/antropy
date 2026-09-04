@@ -37,9 +37,14 @@ long-horizon ecology, colony outcomes, and comparative simulation measurements r
 `pnpm harness` and are recorded in `frontend/harness/ledger.db`; they are not CI pass gates.
 Use `pnpm harness calibrate-colony-economy` for the authored-nest energy surface; its profile
 syntax and current evidence are documented in [calibration.md](calibration.md).
-Use `pnpm harness clone-colony-loop --count N` to record independently initialized recurrent
-clones, `optimize-colony-loop` for the fixed-budget closed-loop training stage, and
-`evaluate-colony-cohort --controller-runs ...` for a no-selection held-out cohort evaluation.
+Use `pnpm harness clone-colony-loop` to apply the fixed balanced-frame initializer to four
+predetermined RNN starts, `evaluate-colony-cohort --controller-runs ...` for a no-selection held-out
+cohort evaluation, and `robustness-colony-loop --controller-runs ...` for the Appendix F
+production-mutation retention curve. The initializer resets state for every shuffled frame and
+keeps recurrent weights at zero while fitting the feed-forward weights; recurrence remains in the
+genome for evolution. `bake-colony-run --run ID` regenerates the checked-in colony seed from an
+already measured ledger vector. `optimize-colony-loop` remains available for historical diagnosis
+or an explicitly scoped outcome-search experiment; it is not part of initial training.
 
 ## Lint and quality rules
 

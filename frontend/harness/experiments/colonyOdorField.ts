@@ -15,6 +15,13 @@ interface Distribution {
   readonly max: number;
 }
 
+interface Classification {
+  readonly inside: number[];
+  readonly outside: number[];
+  trueInside: number;
+  trueOutside: number;
+}
+
 function percentile(sorted: readonly number[], fraction: number): number {
   if (sorted.length === 0) return 0;
   return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * fraction))];
@@ -32,6 +39,21 @@ function distribution(values: number[]): Distribution {
   };
 }
 
+function recordClassification(
+  result: Classification,
+  value: number,
+  actualInside: boolean,
+  predictedInside: boolean
+): void {
+  if (actualInside) {
+    result.inside.push(value);
+    if (predictedInside) result.trueInside += 1;
+    return;
+  }
+  result.outside.push(value);
+  if (!predictedInside) result.trueOutside += 1;
+}
+
 /** Appendix F diagnostic: classify authored-nest air from colony odor alone. */
 export function colonyOdorEpisode(seed: number, ticks: number): ColonyLoopResult {
   const { world, nest, colony } = buildAuthoredNestWorld(seed);
@@ -44,31 +66,22 @@ export function colonyOdorEpisode(seed: number, ticks: number): ColonyLoopResult
     exchangeMaterialScent(world.grid, world.colonyScent, world.materialColonyScent);
   }
   const starts = fieldNavigationStarts(world, nest.entrance, NEST_FIXTURE_SCENT.surfaceRadius);
-  const inside: number[] = [];
-  const outside: number[] = [];
-  let trueInside = 0;
-  let trueOutside = 0;
+  const result: Classification = { inside: [], outside: [], trueInside: 0, trueOutside: 0 };
   for (const index of starts) {
     const value = scentResponse(sampleScent(world.colonyScent, index, colony.id), 1);
     const predictedInside = value >= COLONY_ODOR.insideThreshold;
-    if (world.cavities.has(index)) {
-      inside.push(value);
-      if (predictedInside) trueInside += 1;
-    } else {
-      outside.push(value);
-      if (!predictedInside) trueOutside += 1;
-    }
+    recordClassification(result, value, world.cavities.has(index), predictedInside);
   }
   return {
     params: { passes, threshold: COLONY_ODOR.insideThreshold },
     summary: {
-      inside: distribution(inside),
-      outside: distribution(outside),
-      trueInside,
-      falseOutside: inside.length - trueInside,
-      trueOutside,
-      falseInside: outside.length - trueOutside,
-      accuracy: (trueInside + trueOutside) / starts.length,
+      inside: distribution(result.inside),
+      outside: distribution(result.outside),
+      trueInside: result.trueInside,
+      falseOutside: result.inside.length - result.trueInside,
+      trueOutside: result.trueOutside,
+      falseInside: result.outside.length - result.trueOutside,
+      accuracy: (result.trueInside + result.trueOutside) / starts.length,
     },
     trace: [],
   };

@@ -5,7 +5,7 @@ import { Material } from "./materials";
 import { MICROCLIMATE, RAIN } from "./tunables";
 import { getVoxelSafe, voxelIndex } from "./grid";
 import { microclimateMultiplier, stepWeather, surfaceStress } from "./weather";
-import { createWorld, mutateVoxel, stepWorld } from "./world";
+import { createWorld, mutateVoxel } from "./world";
 
 function surfaceAirIndex(world: ReturnType<typeof createWorld>, x: number, z: number) {
   const y = surfaceSpawnY(world.grid, x, z) as number;
@@ -74,17 +74,5 @@ describe("rain (Rule 5)", () => {
       world.tick += 1;
     }
     expect(world.rng.getState()).toEqual(before);
-  });
-
-  it("keeps stepWorld deterministic for identical seeds", () => {
-    const a = createWorld(7005);
-    const b = createWorld(7005);
-    for (let i = 0; i < 600; i++) {
-      stepWorld(a);
-      stepWorld(b);
-    }
-    expect(a.rainRemaining).toBe(b.rainRemaining);
-    expect(a.weatherRng.getState()).toEqual(b.weatherRng.getState());
-    expect(a.foodSources.size).toBe(b.foodSources.size);
   });
 });

@@ -8,13 +8,17 @@ All notable user-visible changes are recorded here.
   authored-nest colony-loop ladder as the current plan of work.
 - Added per-world feature configuration and scenario selection. The default programmed-colony
   review disables terrain digging and later lifecycle systems while presenting an authored,
-  branching 3D nest for inspection. The effective-config and cargo-capacity readout remains
-  Appendix E step-2 work.
+  branching 3D nest for inspection. The web app displays its effective gates, energy values, and
+  cargo capacities.
+- Implemented Appendix F's world-affordance repair: parallel vertical and phasic sampling for all
+  scent fields, a deep-source homing carrier, absorbed colony odor in nest material, and passive
+  colony-odor transfer to handled food. The re-derived shared-interface oracle now uses no
+  persistent procedural state.
 - Completed the Appendix D ladder through the functional RNN summit: shared excavation,
   deposit, food pickup, and brood pickup/putdown semantics; conserved spoil hauling; brood and
   food transport; and deterministic per-ant motor jitter.
 - Added tunable brood carrying capacity and checkpoint persistence for carried brood.
-  Checkpoint version is now 12; earlier checkpoint versions are refused.
+  Checkpoint version is now 18; earlier checkpoint versions are refused.
 - Moved long-horizon simulation measurements out of the test targets. The bounded Vitest suite
   retains mechanics and integration invariants; campaigns and calibration remain in the
   harness ledger.
@@ -22,10 +26,11 @@ All notable user-visible changes are recorded here.
   populations instead of one optimized RNN. The installed defaults support 19/19 and 18/19
   task-capable and perturbed controllers across two separate ten-world distributions; the web app
   now displays the effective energy costs, food value, tank size, and maintained food supply.
-- Added cohort-aware full-RNN training and evaluation to the measurement harness. Independent
-  behavior clones exposed that teacher-trajectory loss does not predict closed-loop food logistics;
-  initial training now uses one common clone-plus-fixed-budget curriculum and is judged across the
-  complete held-out cohort rather than by a selected peak.
+- Replaced sequence cloning plus terminal outcome search with fixed balanced-frame distillation for
+  the zero-state Appendix F oracle. Four predetermined RNN starts now clear the 75% food-loop floor
+  across 24 held-out worlds, support positive colony energy without environmental retuning, retain
+  evolvable but initially zero recurrent weights, and train in 138.6 seconds total. Exact-genome
+  production-mutation curves and reproducible ledger-to-seed baking remain harness measurements.
 - Sealed the authored nest below varied terrain using a footprint-wide underground datum and a
   covered offset entrance collar. A bounded fixture invariant permits only the intended entrance;
   the sensor-limited programmed policy now completes cache-and-retrieval in ten new worlds before

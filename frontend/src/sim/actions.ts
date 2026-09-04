@@ -7,10 +7,7 @@ import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
 import { haploidOffspring } from "./genetics";
 import { dropUnsupportedOneVoxel } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
-import {
-  sampleMaterialScent,
-  setMaterialScent,
-} from "./materialScent";
+import { sampleMaterialScent, setMaterialScent } from "./materialScent";
 import { depositScent } from "./scent";
 import { mandibleTargetBand, type TargetBand } from "./targeting";
 import { COLONY, COLONY_ODOR, DIG, ENERGY, MALE, PHEROMONE_DEPOSIT_MAX } from "./tunables";
@@ -85,45 +82,52 @@ function digCost(material: MaterialId): number | null {
   }
 }
 
+function pickupCost(world: World, material: MaterialId): number | null {
+  if (material === Material.FOOD) return DIG.cost.foodPickup;
+  if (!world.config.terrainDigging) return null;
+  return digCost(material);
+}
+
+function discardUnhauledSpoil(
+  world: World,
+  ant: Ant,
+  x: number,
+  y: number,
+  z: number,
+  material: MaterialId,
+  cost: number
+): boolean {
+  if (material === Material.FOOD || world.config.spoilHauling) return false;
+  spendEnergy(world, ant, cost);
+  mutateVoxel(world, x, y, z, Material.AIR);
+  dropLoadBearingOccupant(world, ant, x, y, z);
+  return true;
+}
+
+function retainContactOdor(world: World, ant: Ant, materialIndex: number): void {
+  if (!world.config.contactFoodOdor) return;
+  const retained = sampleMaterialScent(world.materialColonyScent, materialIndex, ant.lineageId);
+  ant.carriedColonyScentOwner = ant.lineageId;
+  ant.carriedColonyScent = Math.max(retained, COLONY_ODOR.contactTransfer);
+}
+
 /**
  * Load one unit from the target voxel. Loads are type-exclusive: spoil and
  * food never mix in one carry. FOOD pickup is the transport path (ADR-0006).
  */
 function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
-  if (ant.carriedEggIds.length > 0) {
-    return false;
-  }
+  if (ant.carriedEggIds.length > 0) return false;
   const material = getVoxelSafe(world.grid, x, y, z);
   const isFood = material === Material.FOOD;
-  if (!isFood && !world.config.terrainDigging) {
-    return false;
-  }
-  const cost = isFood ? DIG.cost.foodPickup : digCost(material);
-  if (cost === null) {
-    return false;
-  }
+  const cost = pickupCost(world, material);
+  if (cost === null) return false;
   // Spoil hauling off: excavation clears the voxel outright and the soil
   // vanishes — the ant pays the dig cost but carries nothing. Food
   // transport is unaffected (it is how food reaches the nest).
-  if (!isFood && !world.config.spoilHauling) {
-    spendEnergy(world, ant, cost);
-    mutateVoxel(world, x, y, z, Material.AIR);
-    dropLoadBearingOccupant(world, ant, x, y, z);
-    return true;
-  }
-  if (ant.carrying !== null && (ant.carrying === Material.FOOD) !== isFood) {
-    return false;
-  }
+  if (discardUnhauledSpoil(world, ant, x, y, z, material, cost)) return true;
+  if (ant.carrying !== null && (ant.carrying === Material.FOOD) !== isFood) return false;
   const materialIndex = voxelIndex(world.grid, x, y, z);
-  if (isFood && world.config.contactFoodOdor) {
-    const retained = sampleMaterialScent(
-      world.materialColonyScent,
-      materialIndex,
-      ant.lineageId
-    );
-    ant.carriedColonyScentOwner = ant.lineageId;
-    ant.carriedColonyScent = Math.max(retained, COLONY_ODOR.contactTransfer);
-  }
+  if (isFood) retainContactOdor(world, ant, materialIndex);
   ant.carrying = material;
   ant.spoilLoads += 1;
   ant.carryLoad = ant.spoilLoads / spoilCapacity(ant, world.config);

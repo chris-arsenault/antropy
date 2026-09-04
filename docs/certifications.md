@@ -8,17 +8,17 @@ silently becoming additional gates.
 
 ## Appendix E — current colony-loop ladder
 
-| Step  | Status      | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | green       | `scenarios.test.ts` compares every authored air/cavity voxel with the programmed blueprint after occupant placement; `programmedNest.test.ts` records a connected graph with horizontal, vertical, and sloped passages, branches, joins, and cycles without an uninterrupted central shaft, and verifies across six terrains that only the designated entrance aperture reaches the surface                                                                                                                   |
-| 2     | green       | `config.test.ts` isolates `terrainDigging`, `workerReproduction`, `colonyFounding`, and `geneticVariation`; `checkpoint.test.ts` round-trips the gates and cargo capacities; `EffectiveConfigPanel.tsx` renders the running values                                                                                                                                                                                                                                                                            |
-| 3     | green       | After the surface-breach repair, sensor-limited Oracle runs 1035–1044 complete exit, surface pickup, homing, re-entry, and underground deposit in 10/10 untouched worlds. Nest-odor shape remains descriptive harness output rather than a Vitest outcome gate                                                                                                                                                                                                                                                |
-| 4     | green       | After the surface-breach repair, runs 1035–1044 create an underground FOOD cache, drain it under imposed scarcity, and conserve food mass in 10/10 untouched worlds. Destinations vary and are recorded rather than asserted                                                                                                                                                                                                                                                                                  |
-| 5     | in progress | The installed economy remains unchanged, and the repaired programmed colony is positive in 10/10 new 2,500-tick worlds (runs 1045–1054): median balance `+119.445`, worst `+76.325`, with physical caches in every world. The current 1,200-tick control is also positive in 5/5 worlds with median `+114.967` (run 1251). Its recurrent cohort supports 0/4 because three controllers gather no food, not because the energy margin is narrow                                                                |
-| 6, 8  | green       | The explicit controller competence list and bounded sensor/output assays remain valid; the repair changed fixture placement and programmed-policy sequencing, not the shared tuple                                                                                                                                                                                                                                                                                                                            |
-| 7, 9  | in progress | Run 824 and outcome runs 833–851 were trained on the former breached geometry. They establish that full recurrent training can close the physical loop, but do not certify a controller in the repaired fixture                                                                                                                                                                                                                                                                                               |
-| 10    | in progress | In the current fixture, long-context clones complete 7/20 unseen loops after 512 epochs and 8/20 after 2,048 (runs 1252 and 1258), but only one of four gathers any food in a full colony and none meet the energy-support gate (run 1251). Recovery trajectories, doubled hidden width, vertical-band loss, and persistent recurrent initialization all fail to improve completion (runs 1268, 1275, 1281, 1294, 1296). Fixed-panel outcome training overfits; a true fixed-budget stochastic ES run is next |
-| 11–19 | unadmitted  | Initial RNN training has not yet placed a broad controller cohort inside the calibrated viable region                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Step  | Status     | Evidence                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | green      | `scenarios.test.ts` compares every authored air/cavity voxel with the programmed blueprint after occupant placement; `programmedNest.test.ts` records a connected graph with horizontal, vertical, and sloped passages, branches, joins, and cycles without an uninterrupted central shaft, and verifies across six terrains that only the designated entrance aperture reaches the surface                       |
+| 2     | green      | `config.test.ts` isolates `terrainDigging`, `workerReproduction`, `colonyFounding`, and `geneticVariation`; `checkpoint.test.ts` round-trips the gates and cargo capacities; `EffectiveConfigPanel.tsx` renders the running values                                                                                                                                                                                |
+| 3     | green      | The zero-state, sensor-limited Appendix F oracle completes exit, surface pickup, deep-source homing, re-entry, and underground deposit in 16/16 held-out worlds (runs 1719–1734). Carrier shape remains descriptive harness output rather than a Vitest outcome gate                                                                                                                                              |
+| 4     | green      | With surface food removed and the ant relocated after storage, the same oracle creates and drains a physical marked-food cache in 16/16 held-out worlds (runs 1735–1750). Food mass and energy accounting hold; destinations vary and are recorded rather than asserted                                                                                                                                           |
+| 5     | green      | Without environmental retuning, the programmed colony is positive in 16/16 new 1,200-tick worlds (median `+99.254`, worst `+70.427`) and all four independently frame-distilled RNNs gather food and are positive in a majority (run 1790). The RNN cohort is positive in 63/64 episodes, controller median balances span `+26.614` to `+117.701`, and gathering/balance correlation is `0.999`                   |
+| 6, 8  | green      | The current competence list is reflex-grade under Appendix F's 105-input tuple. Bounded loopback, parallel-band, phasic-input, direct-contact, precedence, and exact-controller checks pass without an oracle-only action path                                                                                                                                                                                    |
+| 7, 9  | green      | The corrected initializer trains the feed-forward slice of the 1,520-weight genome from 18 balanced output regimes while leaving recurrent weights exactly zero and available to evolution (runs 1784–1788). Initialization 0, chosen by fixed order rather than performance, completes 19/24 storage/retrieval loops across the two held-out panels, with 24/24 exits, pickups, and returns (runs 1789 and 1792) |
+| 10    | green      | Across previously unused worlds 22000–22015 and transfer worlds 24000–24007, the four predetermined balanced-frame initializations complete 19/24, 18/24, 19/24, and 22/24 loops; every controller meets the 75% floor (runs 1784–1789 and 1792). Run 1790 independently places all four inside step 5's energy-support region. No controller received closed-loop optimization, selection, or individual repair  |
+| 11–19 | unadmitted | The corrected initial-training and colony-loop gates are complete; later ladder steps have not started                                                                                                                                                                                                                                                                                                            |
 
 ### Appendix E step-5 governing inequality
 
@@ -46,11 +46,12 @@ the measured environment rather than treated as a cosmetic unit choice.
 
 The environment is therefore no longer calibrated to a zero-crossing. Runs 1045–1054 confirm after
 the authored-nest repair that the programmed reference remains positive in 10/10 new worlds, with
-median balance `+119.445` and worst balance `+76.325`. The remaining open result is training width:
-all recurrent-controller evidence in this section predates the repaired geometry and now serves as
-historical calibration evidence. Raising surface food from 1,600 to 3,200 changed neither the old
-clone's 6/13 support count nor its median ordering, while increasing harness runtime; that denser
-point remains rejected.
+median balance `+119.445` and worst balance `+76.325`. The older recurrent-controller evidence in
+this section now serves as historical calibration evidence. Raising surface food from 1,600 to
+3,200 changed neither the old clone's 6/13 support count nor its median ordering, while increasing
+harness runtime; that denser point remains rejected. Run 1790 closes the former training-width gap
+without changing the installed economy: all four corrected initializations gather and satisfy the
+majority-positive condition across sixteen new worlds.
 
 ### Appendix E step-4 finding — the authored nest had extra surface openings
 
@@ -158,6 +159,68 @@ available in the harness for descriptive diagnosis.
    changed its focus worlds but still selected every update against the same five guard worlds; it
    was guarded local search, not the full distributional training procedure now required.
 
+### Appendix E step-10 finding — Appendix F removed the procedural target
+
+1. **Observed change.** The former programmed controller needed roughly eighteen persistent state
+   fields. After Appendix F's carriers and parallel sensing landed, the re-derived controller needs
+   none. It completes both the surface forage loop and the forced cache-retrieval assay in 16/16
+   held-out worlds (runs 1719–1750). Four independently initialized full-RNN clones then complete
+   14/16, 12/16, 7/16, and 8/16 held-out loops (runs 1754–1759), a material increase over the former
+   interface but still only two controllers above the 75% floor.
+2. **Mechanism.** The old target forced a small recurrent network to reproduce timers, latches,
+   remembered vertical samples, and an entrance protocol because the world omitted the facts those
+   mechanisms reconstructed. Parallel bands, deep-source homing, absorbed colony odor,
+   contact-marked food, and phasic readings expose those facts through physical carriers. The
+   training target is now a composition of same-frame responses rather than an eighteen-field state
+   machine.
+3. **Minimal structural fix.** No further controller mechanism is indicated. Retain the current
+   12-unit RNN and apply Appendix E's common fixed-budget closed-loop stage to every predetermined
+   initialization. Train on fresh common-random worlds and judge the finished cohort once on an
+   untouched panel.
+4. **Cost and risk.** The controller input grew append-only from 23 to 105 values, checkpoint 18
+   carries phasic history, and old seed artifacts migrate with the new suffix disconnected. Colony
+   odor and contact transfer are permanent world commitments. Closed-loop training can still
+   overfit or fail to find the viable region, so one selected controller cannot certify the cohort.
+5. **Decision.** Keep the RNN: production-scale perturbations around run 1754 decline gradually
+   rather than falling off a knife edge (run 1760). Latch registers, frame stacks, attention,
+   another pheromone stream, and linear GP are not justified by this result. Bake run 1754 as the
+   watchable diagnostic seed, but leave step 10 in progress until at least three of four controllers
+   pass after the common complete training procedure.
+
+### Appendix E step-10 finding — terminal search trains the wrong problem
+
+1. **Observed contradiction.** Appendix F reduced the oracle to same-frame decisions, but the
+   inherited training procedure still followed cloning with a 1,520-dimensional outcome search.
+   One 24-generation run spent 42.9 minutes on up to 1,152 long simulation episodes and degraded
+   its starting controller from 13/16 to 10/16 completed evaluation worlds (run 1783). The input
+   expansion raises controller arithmetic, but it does not explain or justify that episode budget.
+2. **Mechanism.** Sequence cloning lets long trajectories dominate updates and trains random
+   recurrence for a target with no state. The terminal evolution strategy then perturbs all 1,520
+   behavioral weights together: its raw `0.04` deviation corresponds to roughly `0.33` under the
+   production mutation scale. This is a high-dimensional search around an already capable seed,
+   not a method for placing ordinary initializations broadly inside the viable region.
+3. **Minimal structural fix.** Distill the oracle from shuffled independent frames. Group frames by
+   their output-defined behavior regime, give each regime equal representation per epoch, reset
+   hidden state for every frame, and initialize and hold recurrent weights at zero during initial
+   training. Keep those recurrent loci in the genome so later mutation can recruit them.
+4. **Cost and risk.** Balanced sampling repeats rare decisions and sees only a rotating subset of
+   common decisions per epoch. A zero-state initializer can also expose insufficient feed-forward
+   capacity. A fixed training corpus, validation corpus, epoch budget, and predetermined cohort make
+   either failure visible without another parameter sweep or controller-specific repair.
+5. **Decision.** Amend Appendix E steps 7 and 10. Remove terminal closed-loop optimization from the
+   initial-training gate, run the corrected procedure once across the predetermined four starts,
+   and judge every result on a separately fixed, previously unused 16-world panel.
+
+The fixed execution passes. Runs 1784–1788 train four starts in 138.6 seconds total, with each
+controller's recurrent norm exactly zero. On worlds 22000–22015 they complete 14, 13, 12, and 14
+loops respectively (run 1789). The exact run-1784 baseline then completed only 5/8 robustness-panel
+worlds, so the full fixed cohort was checked on that panel rather than certifying around the smaller
+sample: it completed 5, 5, 7, and 8 loops (run 1792). Across all 24 held-out worlds the four totals
+are 19, 18, 19, and 22, leaving every controller at or above the 75% floor. On separate energy
+worlds 23000–23015 all four gather food and meet the majority-positive condition; 63/64
+controller-world episodes are positive, while the programmed reference remains positive in 16/16
+(run 1790).
+
 ### Appendix E step-3 finding — vertical carrier resolution
 
 The authored fixture now has an offset sloped entrance rather than a central vertical throat, and
@@ -186,13 +249,33 @@ This finding was resolved by the subsequently approved coupled vertical-band sen
 Runs 587–596 established that result in the former fixture; post-repair runs 1035–1044 are the
 current step-3 evidence. No additional carrier or oracle-only path was added.
 
+## Appendix F — viable-space repair
+
+Appendix F is complete. It changes the interface and world carriers used by Appendix E; it does
+not waive Appendix E's independent-cohort gate.
+
+| Deliverable                   | Status | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parallel vertical sensing     | green  | The append-only controller contract now has 105 inputs. All five scent fields expose level, center, down/up, down/up stereo, and phasic samples; bounded loopback and same-tick vertical-action tests pass                                                                                                                                                                                                                                    |
+| Deep-source nest field        | green  | Runs 1333–1337 greedily reach the queen source from every 4,031–4,047 reachable nest/surface candidate in five worlds, with no entrance maximum                                                                                                                                                                                                                                                                                               |
+| Absorbed colony odor          | green  | With airborne retention `0.98` and 125 fixture warmup passes, the fixed `0.159` threshold classified every sampled inside/outside voxel correctly at startup and after 2,500 ticks across five worlds (runs 1709–1718)                                                                                                                                                                                                                        |
+| Contact-transfer food marking | green  | Stored FOOD retains owner-tagged material odor and re-emits it. Runs 1735–1750 store, remove surface food, relocate and hunger the ant, then drain the cache in all 16 worlds                                                                                                                                                                                                                                                                 |
+| Phasic scent inputs           | green  | First-frame change inputs are zero, later changes are signed differences from the prior sensed frame, and checkpoint 18 preserves the required sensory history                                                                                                                                                                                                                                                                                |
+| Re-derived oracle audit       | green  | `colonyLoopOracle.createState()` returns `null`; the policy contains zero counters, latches, timers, or remembered readings. Runs 1719–1750 pass forage and cache retrieval 16/16 through the shared action resolver                                                                                                                                                                                                                          |
+| Mutational robustness         | green  | Run 1791 applies the production mutation operator to the checked-in run-1784 genome. Across normalized sigma `0`, `0.05`, `0.1`, `0.25`, `0.5`, and `1.0`, episode completion is `0.625`, `0.719`, `0.656`, `0.656`, `0.500`, and `0.313`. Four samples per nonzero scale make the middle non-monotonic, but the neighborhood does not collapse at the first perturbation; the unperturbed controller clears 19/24 across the combined panels |
+
+The audit outcome is the low-residual branch of Appendix F's decision rule. No latch registers,
+frame stack, attention mechanism, extra pheromone stream, or linear-GP migration is justified by
+this evidence. The current 12-unit RNN remains the controller substrate; Appendix E step 10 is green
+because the corrected common initializer lands all four predetermined starts in the viable region.
+
 ## Appendix D — completed ladder
 
 | Step | Status     | Evidence                                                                                                                                                                                                                                                                     |
 | ---- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | historical | The former exact-shaft outcome assay was retired from Vitest; `spoil.test.ts` retains bounded material-conservation and actuator checks                                                                                                                                      |
 | 2    | historical | The former mortal-oracle energy outcome assay was retired from Vitest; future comparison belongs in the harness                                                                                                                                                              |
-| 3    | green      | `amplify.test.ts`: marking and marked-face preference preserve solo digging                                                                                                                                                                                                  |
+| 3    | green      | `diggerSeed.test.ts`: bounded output assays cover founded-mark reinforcement and left/right marked-face preference                                                                                                                                                           |
 | 4    | historical | The former fixed-world nest-shape outcome assay was retired from Vitest; the classifier remains descriptive                                                                                                                                                                  |
 | 5    | green      | `seed-spec.md`: five-reflex amendment recorded                                                                                                                                                                                                                               |
 | 6    | green      | `seed-spec.md`: 22-locus, six-relay, zero-recurrence weight specification                                                                                                                                                                                                    |

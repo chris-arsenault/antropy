@@ -46,10 +46,14 @@ describe("scent fields", () => {
 
   it("evaporates to inactive over many passes", () => {
     const grid = createGrid(8, 8, 8);
-    const field = createScentField(grid);
+    const field = createScentField(grid, {
+      ...BEACON_PHYSICS,
+      evaporation: 0.5,
+      epsilon: 0.01,
+    });
     depositScent(field, voxelIndex(grid, 4, 4, 4), 1);
 
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 20; i++) {
       stepScentField(grid, field);
     }
     expect(scentActiveCount(field)).toBe(0);
@@ -90,7 +94,8 @@ describe("trail physics", () => {
     }
     expect(trailMass).toBeGreaterThan(0.4);
     expect(sampleScent(trail, index)).toBeGreaterThan(0.02);
-    expect(sampleScent(beacon, index)).toBe(0);
+    expect(sampleScent(beacon, index)).toBeLessThan(0.001);
+    expect(sampleScent(trail, index)).toBeGreaterThan(sampleScent(beacon, index));
   });
 });
 

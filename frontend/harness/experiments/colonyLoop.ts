@@ -1,34 +1,17 @@
 import { type Ant } from "../../src/sim/ant";
 import { NEST_CONFIG } from "../../src/sim/config";
 import { type Controller, type SensorPolicy } from "../../src/sim/controller/contract";
-import {
-  backboneVector,
-  colonySeedVector,
-  derivedColonySeedVector,
-  diggerSeedVector,
-  functionalSeedVector,
-  rnnController,
-  setRuntimeSeedBase,
-} from "../../src/sim/controller/rnn";
+import { rnnController } from "../../src/sim/controller/rnn";
 import { maxEnergy } from "../../src/sim/energy";
 import { voxelIndex } from "../../src/sim/grid";
 import { Material } from "../../src/sim/materials";
 import { buildAuthoredNestWorld, type AuthoredNestWorld } from "../../src/sim/nestWorld";
 import { exchangeMaterialScent, sampleMaterialScent } from "../../src/sim/materialScent";
-import {
-  colonyLoopOracle,
-  resetColonyLoopOracle,
-  tuneColonyLoopOracle,
-} from "../../src/sim/oracles/colonyLoop";
+import { colonyLoopOracle, resetColonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
 import { emitFoodScent, stepScentField } from "../../src/sim/scent";
 import { COLONY, ENERGY } from "../../src/sim/tunables";
 import { mutateVoxel, stepWorld, type World } from "../../src/sim/world";
-import { flag, intFlag, seedsOf, type Flags } from "../lib/flags";
-import { openLedger, recordRun, type TraceSample } from "../lib/ledger";
-import { applyPatches } from "../lib/patch";
-import { energyCeilingEpisode, energyEpisode, energySeedEpisode } from "./colonyLoopEnergy";
-import { fieldNavigationEpisode } from "./colonyLoopField";
-import { colonyOdorEpisode } from "./colonyOdorField";
+import { type TraceSample } from "../lib/ledger";
 import {
   createForageProgress,
   forageProgressSummary,
@@ -267,7 +250,7 @@ function runForageEpisode(
   };
 }
 
-function forageEpisode(seed: number, ticks: number, cadence: number): ColonyLoopResult {
+export function forageEpisode(seed: number, ticks: number, cadence: number): ColonyLoopResult {
   return runForageEpisode(seed, ticks, cadence, colonyLoopOracle);
 }
 
@@ -373,7 +356,7 @@ function runCacheEpisode(
   };
 }
 
-function cacheEpisode(seed: number, ticks: number, cadence: number): ColonyLoopResult {
+export function cacheEpisode(seed: number, ticks: number, cadence: number): ColonyLoopResult {
   return runCacheEpisode(seed, ticks, cadence, colonyLoopOracle);
 }
 
@@ -399,78 +382,4 @@ export function oracleCacheDemonstration(
   const frames: SensorFrame[] = [];
   const result = runCacheEpisode(seed, ticks, 0, colonyLoopOracle, (frame) => frames.push(frame));
   return { frames, result };
-}
-
-function driverFor(stage: string): string {
-  if (stage === "oracle-energy-ceiling") return "omniscient-pathing-oracle";
-  if (stage.startsWith("seeded-")) return "seed-e-rnn";
-  return "sensor-oracle";
-}
-
-function selectSeedBase(name: string): Float32Array | null {
-  if (name === "baked") return null;
-  if (name === "backbone") return backboneVector();
-  if (name === "functional") return functionalSeedVector();
-  if (name === "colony") return colonySeedVector();
-  if (name === "derived") return derivedColonySeedVector();
-  if (name === "digger") return diggerSeedVector();
-  throw new Error(`unknown seed base "${name}"`);
-}
-
-/** Run the Appendix E behavioral ladder in the measurement harness. */
-export function runColonyLoop(flags: Flags): void {
-  const stage = flag(flags, "stage", "oracle-forage");
-  const episodes: Record<string, typeof forageEpisode> = {
-    "field-navigation": fieldNavigationEpisode,
-    "colony-odor": colonyOdorEpisode,
-    "oracle-forage": forageEpisode,
-    "seeded-forage": seededForageEpisode,
-    "seeded-cache": seededCacheEpisode,
-    "oracle-cache": cacheEpisode,
-    "oracle-energy": energyEpisode,
-    "oracle-energy-ceiling": energyCeilingEpisode,
-    "seeded-energy": energySeedEpisode,
-  };
-  const episode = episodes[stage];
-  if (!episode) {
-    throw new Error(`unknown colony-loop stage "${stage}"`);
-  }
-  const ticks = intFlag(flags, "ticks", 2500);
-  const cadence = intFlag(flags, "cadence", 25);
-  const stereoGain = Number(flag(flags, "stereo-gain", "6"));
-  const label = flag(flags, "label", "");
-  const seedBase = flag(flags, "seed-base", "baked");
-  const patches = flags.values.get("patch") ?? [];
-  const db = openLedger();
-  const restore = applyPatches(patches);
-  const restoreOracle = tuneColonyLoopOracle(stereoGain);
-  setRuntimeSeedBase(selectSeedBase(seedBase));
-  try {
-    for (const seed of seedsOf(flags, "9100,9101,9102,9103,9104")) {
-      const started = Date.now();
-      const result = episode(seed, ticks, cadence);
-      const runId = recordRun(
-        db,
-        {
-          experiment: `colony-loop/${stage}`,
-          label,
-          driver: driverFor(stage),
-          seed,
-          ticks,
-          cadence,
-          params: { ...result.params, stereoGain, seedBase },
-          patches,
-          summary: result.summary,
-          wallMs: Date.now() - started,
-        },
-        [],
-        result.trace
-      );
-      console.log(`[run ${runId}] ${stage} seed=${seed} ${JSON.stringify(result.summary)}`);
-    }
-  } finally {
-    setRuntimeSeedBase(null);
-    restoreOracle();
-    restore();
-  }
 }

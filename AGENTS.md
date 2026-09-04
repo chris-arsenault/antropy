@@ -9,6 +9,7 @@ on the Ahara platform.
 | ---------------------------- | -------------------------------------------------------------------------------- |
 | Primary operating principles | [docs/ant-sim-principles.md](docs/ant-sim-principles.md)                         |
 | Current work ladder          | [docs/ant-sim-appendix-e.md](docs/ant-sim-appendix-e.md)                         |
+| Viable-space companion       | [docs/ant-sim-appendix-f.md](docs/ant-sim-appendix-f.md)                         |
 | Certification status         | [docs/certifications.md](docs/certifications.md)                                 |
 | Workspace overview           | [README.md](README.md)                                                           |
 | Documentation index          | [docs/README.md](docs/README.md)                                                 |
@@ -86,5 +87,5 @@ on the Ahara platform.
 
 Harness commands: `run`, `tournament`, `ladder`, `calibrate`, `calibrate-colony-economy`,
 `derive`, `derive-vivo`, `derive-digger`, `derive-colony-loop`, `clone-colony-loop`,
-`correct-colony-energy`, `optimize-colony-loop`, `optimize-colony-energy`, `colony-loop`,
-`determinism`, `recent`, and `sql`.
+`bake-colony-run`, `robustness-colony-loop`, `correct-colony-energy`, `optimize-colony-loop`,
+`optimize-colony-energy`, `colony-loop`, `determinism`, `recent`, and `sql`.

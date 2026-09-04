@@ -62,7 +62,9 @@ describe("checkpoint codec", () => {
 
     expect(sampleMaterialScent(restored.materialColonyScent, index, 3)).toBeCloseTo(0.4);
   });
+});
 
+describe("checkpoint relationship restoration", () => {
   it("preserves both sides of a live brood carrier link", () => {
     const world = createWorld(8004);
     foundColony(world);

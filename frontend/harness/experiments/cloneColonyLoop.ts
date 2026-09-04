@@ -2,23 +2,22 @@ import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { oracleCacheDemonstration, type SensorFrame } from "./colonyLoop";
-import { oracleEnergyDemonstration } from "./colonyLoopEnergy";
+import { GENOME_LENGTH } from "../../src/sim/controller/rnn";
 import { createRng } from "../../src/sim/rng";
 import { flag, intFlag, type Flags } from "../lib/flags";
 import { openLedger, recordRun } from "../lib/ledger";
-import { trainBehaviorClone, type CloneTrainingResult } from "../lib/rnnClone";
+import {
+  FRAME_DISTILLATION_SETTINGS,
+  trainFrameDistillation,
+  type FrameDistillationResult,
+} from "../lib/rnnFrameClone";
 
 interface CloneSettings {
-  readonly dataset: "cache" | "population";
-  readonly successfulOnly: boolean;
-  readonly balanceActions: boolean;
-  readonly earlyStopping: boolean;
-  readonly parameterNoise: number;
   readonly trainSeeds: number[];
   readonly validationSeeds: number[];
   readonly ticks: number;
   readonly epochs: number;
-  readonly chunk: number;
+  readonly batchSize: number;
   readonly rate: number;
   readonly rngSeed: number;
   readonly count: number;
@@ -37,11 +36,9 @@ function seedList(raw: string): number[] {
   return raw.split(",").map(Number);
 }
 
-function collectCache(seeds: number[], ticks: number, successfulOnly: boolean): CloneDataset {
+function collect(seeds: number[], ticks: number): CloneDataset {
   const worlds = seeds.map((seed) => oracleCacheDemonstration(seed, ticks));
-  const selected = successfulOnly
-    ? worlds.filter(({ result }) => result.summary.cacheDrained === true)
-    : worlds;
+  const selected = worlds.filter(({ result }) => result.summary.cacheDrained === true);
   return {
     sequences: selected.map(({ frames }) => frames),
     framesByWorld: selected.map(({ frames }) => frames.length),
@@ -49,32 +46,6 @@ function collectCache(seeds: number[], ticks: number, successfulOnly: boolean): 
     selectedWorlds: selected.length,
     worldCount: worlds.length,
   };
-}
-
-function collectPopulation(seeds: number[], ticks: number, successfulOnly: boolean): CloneDataset {
-  const worlds = seeds.map((seed) => oracleEnergyDemonstration(seed, ticks));
-  const selected = successfulOnly
-    ? worlds.filter(
-        ({ result }) => typeof result.summary.balance === "number" && result.summary.balance > 0
-      )
-    : worlds;
-  return {
-    sequences: selected.flatMap(({ sequences }) => sequences),
-    framesByWorld: selected.map(({ sequences }) =>
-      sequences.reduce((sum, frames) => sum + frames.length, 0)
-    ),
-    successfulWorlds: worlds.filter(
-      ({ result }) => typeof result.summary.balance === "number" && result.summary.balance > 0
-    ).length,
-    selectedWorlds: selected.length,
-    worldCount: worlds.length,
-  };
-}
-
-function collect(settings: CloneSettings, seeds: number[]): CloneDataset {
-  return settings.dataset === "population"
-    ? collectPopulation(seeds, settings.ticks, settings.successfulOnly)
-    : collectCache(seeds, settings.ticks, settings.successfulOnly);
 }
 
 export function bakeClone(vector: Float32Array, runId: number): string {
@@ -94,10 +65,10 @@ export function bakeClone(vector: Float32Array, runId: number): string {
   writeFileSync(
     artifact,
     "/**\n" +
-      ` * GENERATED ARTIFACT: full recurrent behavior cloning, ledger run ${runId}.\n` +
-      " * Trained from sensor/output sequences produced by the sensor-limited\n" +
-      " * colony controller. All behavioral weights were trainable.\n" +
-      " * Do not edit by hand; regenerate with `pnpm harness clone-colony-loop`.\n" +
+      ` * GENERATED ARTIFACT: full recurrent colony controller, ledger run ${runId}.\n` +
+      " * The source ledger row records its training method and held-out measurements.\n" +
+      " * Initial training fits feed-forward weights; recurrent genes remain evolvable.\n" +
+      " * Do not edit by hand; regenerate with `pnpm harness bake-colony-run`.\n" +
       " */\n" +
       "// prettier-ignore\n" +
       `export const COLONY_SEED: number[] = [\n  ${values},\n];\n`
@@ -105,25 +76,35 @@ export function bakeClone(vector: Float32Array, runId: number): string {
   return artifact;
 }
 
+function vectorFromRun(runId: number): Float32Array {
+  const row = openLedger().prepare("SELECT summary FROM runs WHERE id = ?").get(runId) as
+    { summary: string } | undefined;
+  const vector = row ? (JSON.parse(row.summary) as { vector?: number[] }).vector : undefined;
+  if (vector?.length !== GENOME_LENGTH) throw new Error(`run ${runId} has no controller vector`);
+  return Float32Array.from(vector);
+}
+
+/** Regenerate the checked-in seed from an already measured ledger row. */
+export function runBakeColonyRun(flags: Flags): void {
+  const runId = intFlag(flags, "run", 0);
+  if (runId < 1) throw new Error("--run is required");
+  console.log(`baked ${bakeClone(vectorFromRun(runId), runId)}`);
+}
+
 function settingsOf(flags: Flags): CloneSettings {
-  const dataset = flag(flags, "dataset", "cache");
-  if (dataset !== "cache" && dataset !== "population") {
-    throw new Error('--dataset must be "cache" or "population"');
-  }
   return {
-    dataset,
-    successfulOnly: flag(flags, "successful-only", "false") === "true",
-    balanceActions: flag(flags, "balance-actions", "false") === "true",
-    earlyStopping: flag(flags, "early-stopping", "false") === "true",
-    parameterNoise: Number(flag(flags, "parameter-noise", "0")),
-    trainSeeds: seedList(flag(flags, "train-seeds", "9100,9101,9102,9103,9104,9105")),
-    validationSeeds: seedList(flag(flags, "validation-seeds", "9200,9201")),
+    trainSeeds: seedList(
+      flag(
+        flags,
+        "train-seeds",
+        "9300,9301,9302,9303,9304,9305,9306,9307,9308,9309,9310,9311,9312,9313,9314,9315"
+      )
+    ),
+    validationSeeds: seedList(flag(flags, "validation-seeds", "9400,9401,9402,9403")),
     ticks: intFlag(flags, "ticks", 2500),
-    epochs: intFlag(flags, "epochs", 30),
-    chunk: intFlag(flags, "chunk", 96),
-    rate: Number(flag(flags, "rate", "0.003")),
-    rngSeed: intFlag(flags, "seed", 9300),
-    count: intFlag(flags, "count", 1),
+    ...FRAME_DISTILLATION_SETTINGS,
+    rngSeed: intFlag(flags, "seed", 9510),
+    count: intFlag(flags, "count", 4),
     label: flag(flags, "label", ""),
   };
 }
@@ -133,7 +114,7 @@ function recordClone(
   initialization: number,
   training: CloneDataset,
   validation: CloneDataset,
-  trained: CloneTrainingResult,
+  trained: FrameDistillationResult,
   wallMs: number,
   collectionWallMs: number
 ): number {
@@ -142,20 +123,19 @@ function recordClone(
     {
       experiment: "clone-colony-loop",
       label: settings.label,
-      driver: "full-rnn-sequence-clone",
+      driver: "balanced-stateless-frame-distillation",
       seed: settings.rngSeed + initialization,
       ticks: settings.ticks,
       cadence: 0,
       params: {
-        dataset: settings.dataset,
-        successfulOnly: settings.successfulOnly,
-        balanceActions: settings.balanceActions,
-        earlyStopping: settings.earlyStopping,
-        parameterNoise: settings.parameterNoise,
+        dataset: "successful-cache-oracle-frames",
+        stateHandling: "reset-every-frame",
+        recurrentInitialization: "zero-frozen-during-distillation",
+        frameSampling: "equal-output-regime",
         trainSeeds: settings.trainSeeds,
         validationSeeds: settings.validationSeeds,
         epochs: settings.epochs,
-        chunk: settings.chunk,
+        batchSize: settings.batchSize,
         rate: settings.rate,
         initialization,
         initializationCount: settings.count,
@@ -177,6 +157,9 @@ function recordClone(
         bestEpoch: trained.bestEpoch,
         actionPositiveCounts: trained.actionPositiveCounts,
         actionPositiveWeights: trained.actionPositiveWeights,
+        frameClassCounts: trained.frameClassCounts,
+        samplesPerEpoch: trained.samplesPerEpoch,
+        recurrentWeightNorm: trained.recurrentWeightNorm,
         vector: Array.from(trained.vector),
       },
       wallMs,
@@ -192,7 +175,7 @@ function recordCohort(settings: CloneSettings, runIds: number[], wallMs: number)
     {
       experiment: "clone-colony-loop-cohort",
       label: settings.label,
-      driver: "independent-full-rnn-clones",
+      driver: "independent-frame-distilled-rnns",
       seed: settings.rngSeed,
       ticks: settings.ticks,
       cadence: 0,
@@ -211,14 +194,14 @@ function validateSettings(settings: CloneSettings, bake: boolean): void {
   if (bake && settings.count !== 1) throw new Error("--bake requires --count 1");
 }
 
-/** Train the full recurrent behavioral weight space from oracle sequences. */
+/** Train independent RNN seeds from balanced same-frame oracle decisions. */
 export function runCloneColonyLoop(flags: Flags): void {
   const settings = settingsOf(flags);
   const bake = flag(flags, "bake", "false") === "true";
   validateSettings(settings, bake);
   const started = Date.now();
-  const training = collect(settings, settings.trainSeeds);
-  const validation = collect(settings, settings.validationSeeds);
+  const training = collect(settings.trainSeeds, settings.ticks);
+  const validation = collect(settings.validationSeeds, settings.ticks);
   if (training.sequences.length === 0 || validation.sequences.length === 0) {
     throw new Error("training and validation datasets must each contain a selected sequence");
   }
@@ -226,18 +209,14 @@ export function runCloneColonyLoop(flags: Flags): void {
   const runIds: number[] = [];
   for (let initialization = 0; initialization < settings.count; initialization++) {
     const trainingStarted = Date.now();
-    const trained = trainBehaviorClone(
+    const trained = trainFrameDistillation(
       training.sequences,
       validation.sequences,
       createRng(settings.rngSeed + initialization),
-      settings.epochs,
-      settings.rate,
-      settings.chunk,
-      null,
       {
-        balanceActions: settings.balanceActions,
-        earlyStopping: settings.earlyStopping,
-        parameterNoise: settings.parameterNoise,
+        epochs: settings.epochs,
+        rate: settings.rate,
+        batchSize: settings.batchSize,
       }
     );
     const runId = recordClone(
@@ -251,9 +230,10 @@ export function runCloneColonyLoop(flags: Flags): void {
     );
     runIds.push(runId);
     console.log(
-      `[run ${runId}] clone ${initialization + 1}/${settings.count}: ` +
+      `[run ${runId}] frame distillation ${initialization + 1}/${settings.count}: ` +
         `loss ${trained.losses[0].toFixed(5)} -> ${trained.losses.at(-1)?.toFixed(5)} ` +
-        `validation=${trained.validationLoss.toFixed(5)}`
+        `validation=${trained.validationLoss.toFixed(5)} ` +
+        `classes=${Object.keys(trained.frameClassCounts).length}`
     );
     if (bake) console.log(`baked ${bakeClone(trained.vector, runId)}`);
   }

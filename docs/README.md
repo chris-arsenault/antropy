@@ -2,20 +2,21 @@
 
 ## Core documents
 
-| Topic                         | Link                                                   |
-| ----------------------------- | ------------------------------------------------------ |
-| Primary operating principles  | [ant-sim-principles.md](ant-sim-principles.md)         |
-| Current work ladder           | [ant-sim-appendix-e.md](ant-sim-appendix-e.md)         |
-| Certification status          | [certifications.md](certifications.md)                 |
-| Design specification          | [design-spec.md](design-spec.md)                       |
-| Architecture                  | [architecture.md](architecture.md)                     |
-| Development                   | [development.md](development.md)                       |
-| Calibration record            | [calibration.md](calibration.md)                       |
-| Current backlog               | [backlog.md](backlog.md)                               |
-| Architecture decisions        | [adr/README.md](adr/README.md)                         |
-| Appendix D seed specification | [seed-spec.md](seed-spec.md)                           |
-| Changelog                     | [../CHANGELOG.md](../CHANGELOG.md)                     |
-| Agent guide                   | [../AGENTS.md](../AGENTS.md)                           |
+| Topic                         | Link                                           |
+| ----------------------------- | ---------------------------------------------- |
+| Primary operating principles  | [ant-sim-principles.md](ant-sim-principles.md) |
+| Current work ladder           | [ant-sim-appendix-e.md](ant-sim-appendix-e.md) |
+| Viable-space companion        | [ant-sim-appendix-f.md](ant-sim-appendix-f.md) |
+| Certification status          | [certifications.md](certifications.md)         |
+| Design specification          | [design-spec.md](design-spec.md)               |
+| Architecture                  | [architecture.md](architecture.md)             |
+| Development                   | [development.md](development.md)               |
+| Calibration record            | [calibration.md](calibration.md)               |
+| Current backlog               | [backlog.md](backlog.md)                       |
+| Architecture decisions        | [adr/README.md](adr/README.md)                 |
+| Appendix D seed specification | [seed-spec.md](seed-spec.md)                   |
+| Changelog                     | [../CHANGELOG.md](../CHANGELOG.md)             |
+| Agent guide                   | [../AGENTS.md](../AGENTS.md)                   |
 
 Historical implementation plans are retained as records: [Phase 2](../PHASE2-PLAN.md),
 [Release 2](../R2-PLAN.md), and [Release 3](../R3-PLAN.md). Their commands and acceptance
@@ -149,3 +150,21 @@ shared-contract history; its execution evidence is in the [certification ledger]
 - [The ladder](ant-sim-appendix-e.md#e-ladder)
 - [Things that will tempt you, and why to resist](ant-sim-appendix-e.md#e-temptations)
 - [After the summit](ant-sim-appendix-e.md#e-after-summit)
+
+## Appendix F — The viable-space problem
+
+[Open Appendix F](ant-sim-appendix-f.md). This companion records why the original colony-loop
+target occupied too little RNN weight space and the world-affordance repair.
+
+- [F.1 The problem, stated correctly](ant-sim-appendix-f.md#f-1)
+- [F.2 Where the narrowness came from](ant-sim-appendix-f.md#f-2)
+- [F.3 The candidates](ant-sim-appendix-f.md#f-3)
+  - [F.3.1 External memory](ant-sim-appendix-f.md#f-3-1)
+  - [F.3.2 More pheromone streams](ant-sim-appendix-f.md#f-3-2)
+  - [F.3.3 Simplify the programmed behavior](ant-sim-appendix-f.md#f-3-3)
+  - [F.3.4 Temporal input](ant-sim-appendix-f.md#f-3-4)
+  - [F.3.5 Attention heads](ant-sim-appendix-f.md#f-3-5)
+- [F.4 The world mechanisms](ant-sim-appendix-f.md#f-4)
+- [F.5 The audit and the decision rule](ant-sim-appendix-f.md#f-5)
+- [F.6 What this buys the experiment](ant-sim-appendix-f.md#f-6)
+- [F.7 Failure modes to avoid](ant-sim-appendix-f.md#f-7)

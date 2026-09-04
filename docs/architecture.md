@@ -35,18 +35,20 @@ genetics on a 192×64×192 map. Measurements (tournaments, calibration, seed der
 determinism checks) run through the harness into a committed SQLite ledger
 (`frontend/harness/`, ADR-0012), never through the test tiers.
 
-The web app exposes four world-level scenarios: the default programmed-colony geometry review,
-the Appendix D functional-controller diagnostic, Phase 2 nest digging, and the full liability
-colony. A scenario selects the world configuration and founder seed together; feature gates are
-stored per world. The programmed review currently disables digging, mortality, reproduction,
-weather, decay, and automatic refounding so geometry can be inspected without the world changing
-underneath it. The web app does not yet display the effective gates or cargo capacities; that
-readout is Appendix E step-2 work.
+The web app exposes four world-level scenarios: the default Appendix E colony-loop review, the
+Appendix D functional-controller diagnostic, Phase 2 nest digging, and the full liability colony.
+A scenario selects the world configuration and founder seed together; feature gates and cargo
+capacities are stored per world and displayed by the effective-config panel. The default review
+uses the trained colony seed in the exact authored nest. It disables digging, mortality,
+reproduction, founding, genetic variation, weather, decay, and automatic continuation so food
+logistics can be watched without admitting later ladder systems.
 
-The programmed review is the precursor to Appendix E's `NEST` baseline, not yet that certified
-baseline. Its setup still calls `foundColony()`, which carves the legacy founding shaft before the
-authored blueprint. Appendix E step 1 removes that hidden mutation and locks exact blueprint
-parity before colony-loop work begins.
+The authored-nest builder carves the fixture before placing the colony and never calls the legacy
+founding excavation path. Appendix F adds three physical carrier families to this control arm:
+the deep-source homing field, absorbed owner-tagged colony odor in nest material, and colony odor
+transferred by contact to handled food. Five scent families expose level, center, down/up, vertical
+stereo, and phasic samples through the 105-input controller vector. The sensor-limited oracle and
+the RNN resolve the same eight outputs through the same world action path.
 
 ## Deployment
 

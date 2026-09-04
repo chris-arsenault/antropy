@@ -115,9 +115,43 @@ not establish a broad cohort:
 
 Teacher-trajectory loss is therefore a diagnostic, not the initial-training acceptance metric.
 These controller runs predate the sealed authored-nest fixture and are now historical evidence for
-the training-method decision. Appendix E step 10 evaluates a newly generated common
-clone-plus-closed-loop curriculum across independent initializations and accepts only the held-out
-cohort result.
+the training-method decision.
+
+### Appendix F initial-training result
+
+Appendix F removed the oracle's persistent state by adding parallel vertical sensing, deep-source
+homing, absorbed colony odor, contact marking on handled food, and phasic scent readings. The
+resulting zero-state oracle completes the forage and forced cache-retrieval assays in 16/16 worlds
+each (runs 1719–1750). Four independent 12-unit RNNs were then cloned with the same corpus,
+training budget, and selection procedure. On one shared 16-world held-out panel they completed
+14, 12, 7, and 8 loops respectively (runs 1754–1759). Two of four clear the 75% per-controller
+floor; at that checkpoint Appendix E step 10 remained open.
+
+Run 1760 measures whether the leading clone is an isolated peak using the production mutation
+operator and eight fresh worlds per sample. All four mutants retain the gate at normalized sigma
+`0.05` and `0.1`; two of four retain it at `0.25` and `0.5`; one of four retains it at `1.0`.
+The curve declines rather than collapsing at the first perturbation. That supports retaining the
+current RNN substrate, but it does not replace the cohort gate with selection of the best clone.
+
+Run 1783 then showed that the inherited terminal search was itself the wrong continuation: 24
+generations and up to 1,152 long episodes took 42.9 minutes and reduced completion from 13/16 to
+10/16. Appendix E step 10 now uses one balanced same-frame distillation procedure for every
+predetermined initialization. The initializer resets hidden state per frame and leaves recurrence
+at zero; the recurrent loci remain available to later mutation. A separately fixed, previously
+unused 16-world panel judges the cohort once. Teacher loss and one controller's peak score remain
+diagnostics, not acceptance criteria.
+
+The fixed execution passes without changing the environment. Four starts trained in 138.6 seconds
+total (runs 1784–1788). They complete 14/16, 13/16, 12/16, and 14/16 loops on new worlds
+22000–22015 (run 1789). A required robustness check found only 5/8 baseline completions for the
+first controller on worlds 24000–24007, so run 1792 applied that panel to the whole unchanged cohort:
+5/8, 5/8, 7/8, and 8/8. Combined 24-world totals are 19, 18, 19, and 22, leaving all four at or above
+75% without retraining. On separate energy worlds 23000–23015, all four gather food and satisfy the
+majority-positive rule; their median balances are `+52.875`, `+38.393`, `+26.614`, and `+117.701`,
+with 63/64 positive controller-world episodes and gathering/balance correlation `0.999` (run 1790).
+The programmed reference remains positive in 16/16 with median `+99.254` and worst `+70.427`.
+Run 1790's 973.6-second wall time is full-population measurement cost across 80 episodes, not
+training time.
 
 ## Historical Release 3 method
 

@@ -12,9 +12,10 @@ const APPENDIX_E_BOUNDARIES = [
   "geneticVariation",
 ] as const satisfies readonly (keyof SimConfig)[];
 
-const APPENDIX_F_BOUNDARIES = ["materialColonyOdor", "contactFoodOdor"] as const satisfies readonly (
-  keyof SimConfig
-)[];
+const APPENDIX_F_BOUNDARIES = [
+  "materialColonyOdor",
+  "contactFoodOdor",
+] as const satisfies readonly (keyof SimConfig)[];
 
 function changedKeys(left: SimConfig, right: SimConfig): (keyof SimConfig)[] {
   return (Object.keys(left) as (keyof SimConfig)[]).filter((key) => left[key] !== right[key]);

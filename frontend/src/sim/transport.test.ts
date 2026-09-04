@@ -80,7 +80,9 @@ describe("physical food transport (ADR-0006)", () => {
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.AIR);
     expect(ant.energy).toBeGreaterThan(0.2);
   });
+});
 
+describe("physical food deposits (ADR-0006)", () => {
   it("converts a food deposit at the queen into stockpile and merit", () => {
     const world = createWorld(7003);
     const colony = foundColony(world);
@@ -116,8 +118,9 @@ describe("physical food transport (ADR-0006)", () => {
     expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.FOOD);
     expect(sampleMaterialScent(world.materialColonyScent, cache, ant.lineageId)).toBeGreaterThan(0);
     exchangeMaterialScent(world.grid, world.colonyScent, world.materialColonyScent);
-    expect(sampleScent(world.colonyScent, voxelIndex(world.grid, ant.x, ant.y, ant.z), ant.lineageId))
-      .toBeGreaterThan(0);
+    expect(
+      sampleScent(world.colonyScent, voxelIndex(world.grid, ant.x, ant.y, ant.z), ant.lineageId)
+    ).toBeGreaterThan(0);
     expect(ant.deliveries).toBe(0);
   });
 

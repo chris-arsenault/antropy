@@ -26,16 +26,20 @@ surface|shelter|architect> --seeds a,b --ticks N --patch TABLE.key=value --vault
   `tournament`, `ladder`, `calibrate`, and `calibrate-colony-economy`. The colony-economy
   command measures fixed trained and perturbed controller populations across scoped food/work
   profiles; it never trains or selects a controller. `clone-colony-loop` trains one or more
-  independent full recurrent initializations from recorded sensor/output sequences, and
+  independent RNN initializations from balanced, shuffled sensor/output frames, and
   `evaluate-colony-cohort` evaluates fixed ledger vectors as a cohort without selection.
+  `robustness-colony-loop` applies the production mutation operator at increasing normalized
+  sigma values and records controller retention plus episode completion. `bake-colony-run`
+  regenerates the checked-in seed from a named, already measured ledger row.
 - **Determinism checker**: `pnpm harness determinism` runs the
   save/restore/checksum-series/first-divergence workflow as a command.
 - **Seed derivation**: `pnpm harness derive`, `derive-vivo`, and `derive-digger` run the
   probe, live-colony, and constrained digging optimizers outside the application runtime.
-- **Initial controller training**: `clone-colony-loop` records every independent recurrent clone
-  and its aggregate cohort. `optimize-colony-loop` provides the fixed-budget, mirrored,
-  rank-shaped closed-loop stage; its milestone ordering and candidate worlds are ledger data, and
-  final acceptance uses `evaluate-colony-cohort` on separate worlds.
+- **Initial controller training**: `clone-colony-loop` resets state per frame, balances
+  output-defined behavior regimes, leaves recurrent weights at zero, and records every independent
+  result plus its aggregate cohort. `evaluate-colony-cohort` and `robustness-colony-loop` judge
+  behavioral coverage and local flatness on separate worlds. `optimize-colony-loop` remains a
+  historical or explicitly scoped outcome-search instrument; it is not an initial-training stage.
 - The test suite keeps bounded mechanics and integration invariants. Long-horizon ecology,
   calibration, and comparative world outcomes do not run as timed test targets. No test asserts
   a long-run world-state number; recorded ledgers plus documentation replace pinned measurement

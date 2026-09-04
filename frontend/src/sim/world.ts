@@ -1,16 +1,14 @@
 import { createAnt, surfaceSpawnY, type Ant, type AntSpawn } from "./ant";
 import { buildAntIndex } from "./antIndex";
-import { tryDig, tryEat, tryLayEgg, tryTrophallaxis, depositPheromones } from "./actions";
 import { affectedChunkKeys } from "./chunks";
 import { stepColonies, type Colony } from "./colony";
-import { Input, type Controller, type SensorPolicy } from "./controller/contract";
+import { type Controller, type SensorPolicy } from "./controller/contract";
 import { stampVisit, stepDecay } from "./decay";
 import { rnnController } from "./controller/rnn";
 import { stepEggs, syncCarriedEggs, type Egg } from "./eggs";
-import { applyBasalDrain, applyStepCost, checkDeath, reapDead } from "./energy";
+import { reapDead } from "./energy";
 import { stepFoodGovernor } from "./foodSpawner";
 import { getVoxel, setVoxel, voxelIndex, type VoxelGrid } from "./grid";
-import { applyMotor } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
 import {
   clearMaterialScent,
@@ -18,8 +16,6 @@ import {
   exchangeMaterialScent,
   type MaterialScentField,
 } from "./materialScent";
-import { applyMotorJitter } from "./motorJitter";
-import { decodeOutputs } from "./motors";
 import { assertWorldViability } from "./ratios";
 import { createRng, type Rng, type RngState } from "./rng";
 import {
@@ -29,7 +25,8 @@ import {
   stepScentField,
   type ScentField,
 } from "./scent";
-import { createInputBuffer, sense, type SenseContext } from "./senses";
+import { createInputBuffer, type SenseContext } from "./senses";
+import { stepAnt } from "./antStep";
 import { generateTerrain, surfaceHeight } from "./terrain";
 import { stepAutoContinue } from "./continuity";
 import { microclimateMultiplier, stepWeather } from "./weather";
@@ -310,87 +307,6 @@ function stepScents(world: World): void {
   stepScentField(world.grid, world.pheromoneA);
   stepScentField(world.grid, world.pheromoneB);
   stepScentField(world.grid, world.foodScent);
-}
-
-/** Oracles pay the controller-comparable think cost (ADR-0009). */
-const ORACLE_THINK_COST = 0.00008;
-
-function diagnosticOutputs(world: World, ant: Ant, inputs: Float32Array): Float32Array | null {
-  const sensorPolicy = world.sensorPolicyOverride;
-  if (!sensorPolicy) return world.policyOverride?.(world, ant, inputs) ?? null;
-  let policyState = world.sensorPolicyStates.get(ant.id);
-  if (policyState === undefined) {
-    policyState = sensorPolicy.createState();
-    world.sensorPolicyStates.set(ant.id, policyState);
-  }
-  return sensorPolicy.act(inputs, policyState);
-}
-
-function resolveLayEgg(world: World, ant: Ant, layEgg: boolean): void {
-  if (world.config.workerReproduction && layEgg) {
-    tryLayEgg(world, ant);
-  }
-}
-
-function stepAnt(world: World, ctx: SenseContext, inputs: Float32Array, ant: Ant): void {
-  ant.age += 1;
-  stampVisit(world, ant.x, ant.y, ant.z);
-  const climate = world.config.microclimate ? microclimateMultiplier(world, ant) : 1;
-  sense(ctx, ant, inputs);
-  const sensedContactBand = ant.verticalAttention;
-  let outputs = diagnosticOutputs(world, ant, inputs);
-  let thinkCost = ORACLE_THINK_COST;
-  if (outputs === null) {
-    const acted = world.controller.act(ant.genome, inputs, ant.controllerState);
-    outputs = acted.outputs;
-    thinkCost = acted.thinkCost;
-  }
-  ant.lastInputs.set(inputs);
-  ant.lastOutputs.set(outputs);
-  const actions = decodeOutputs(outputs);
-  // Parallel scent samples let the controller select a movement/terrain band
-  // in this tick. Contact remains attached to the band that produced this
-  // tick's CONTACT_* inputs so handling cannot target an unsensed voxel.
-  const nextVerticalBand = actions.motor.verticalBias;
-  if (world.config.motorJitter) {
-    applyMotorJitter(actions.motor, world.seed, ant.id, world.tick);
-  }
-
-  // A contact-gated mandible action resolves against the heading and band
-  // that produced this tick's CONTACT_* input. Turning or translating first
-  // would make the ant act on a different voxel than the one it sensed.
-  const contactDig =
-    actions.dig &&
-    ant.carrying === null &&
-    ant.carriedEggIds.length === 0 &&
-    (inputs[Input.CONTACT_FOOD] > 0 || inputs[Input.CONTACT_EGG] > 0);
-
-  // EAT resolves at the mandible position represented by CONTACT_* in this
-  // tick's sensory vector. If translation ran first, an ant could consume
-  // an egg or food voxel it had never sensed, making contact-gated handling
-  // inexpressible. Contact-gated DIG shares that ordering; ordinary terrain
-  // DIG remains after motion for the calibrated dig/descend and haul/deposit
-  // loop.
-  if (actions.eat) {
-    tryEat(world, ant);
-  }
-  if (contactDig) {
-    tryDig(world, ant, sensedContactBand);
-  }
-  applyMotor(world.grid, ant, actions.motor);
-  if (actions.dig && !contactDig) {
-    tryDig(world, ant, actions.motor.verticalBias);
-  }
-  depositPheromones(world, ant, actions.pheromoneA, actions.pheromoneB);
-  resolveLayEgg(world, ant, actions.layEgg);
-  tryTrophallaxis(world, ant);
-  ant.verticalAttention = nextVerticalBand;
-
-  applyBasalDrain(world, ant, thinkCost, climate);
-  applyStepCost(world, ant);
-  if (world.config.mortality) {
-    checkDeath(world, ant);
-  }
 }
 
 /**

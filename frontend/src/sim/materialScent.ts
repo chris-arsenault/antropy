@@ -78,11 +78,7 @@ function faceNeighbors(grid: VoxelGrid, index: number): number {
   return count;
 }
 
-function reemitAndFade(
-  grid: VoxelGrid,
-  air: ScentField,
-  material: MaterialScentField
-): void {
+function reemitAndFade(grid: VoxelGrid, air: ScentField, material: MaterialScentField): void {
   const priorCount = material.activeCount;
   let write = 0;
   for (let offset = 0; offset < priorCount; offset++) {
@@ -117,6 +113,22 @@ function absorbAt(
   setMaterialScent(material, index, current + amount * Math.max(0, available), owner);
 }
 
+function absorbNeighbors(
+  grid: VoxelGrid,
+  material: MaterialScentField,
+  source: number,
+  amount: number,
+  owner: number
+): void {
+  const count = faceNeighbors(grid, source);
+  for (let neighbor = 0; neighbor < count; neighbor++) {
+    const target = NEIGHBORS[neighbor];
+    if (grid.data[target] !== Material.AIR && grid.data[target] !== Material.FOOD) {
+      absorbAt(material, target, amount, owner);
+    }
+  }
+}
+
 function absorbFromAir(grid: VoxelGrid, air: ScentField, material: MaterialScentField): void {
   const airCount = air.activeCount;
   for (let offset = 0; offset < airCount; offset++) {
@@ -125,13 +137,7 @@ function absorbFromAir(grid: VoxelGrid, air: ScentField, material: MaterialScent
     if (value < COLONY_ODOR.absorptionFloor) continue;
     const owner = air.owners[source];
     if (owner === 0) continue;
-    const count = faceNeighbors(grid, source);
-    for (let neighbor = 0; neighbor < count; neighbor++) {
-      const target = NEIGHBORS[neighbor];
-      if (grid.data[target] !== Material.AIR && grid.data[target] !== Material.FOOD) {
-        absorbAt(material, target, value * COLONY_ODOR.absorptionRate, owner);
-      }
-    }
+    absorbNeighbors(grid, material, source, value * COLONY_ODOR.absorptionRate, owner);
   }
 }
 

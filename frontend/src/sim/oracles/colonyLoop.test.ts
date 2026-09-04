@@ -59,7 +59,9 @@ describe("colony-loop oracle vertical taxis", () => {
 
     expect(outputs[Output.VERTICAL_BIAS]).toBe(-1);
   });
+});
 
+describe("colony-loop oracle contact and cache actions", () => {
   it("does not turn toward a zero-breadcrumb solid wall", () => {
     const inputs = createInputBuffer();
     inputs[Input.ENERGY] = 1;

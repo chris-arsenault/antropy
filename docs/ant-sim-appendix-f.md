@@ -1,6 +1,6 @@
 # Appendix F: The Viable-Space Problem
 
-*September 2026. Companion to Appendix E. Status lives in `docs/certifications.md`.*
+_September 2026. Companion to Appendix E. Status lives in `docs/certifications.md`._
 
 **The question this appendix answers:** the set of RNN weights that can perform the current
 behavioral target appears to be very small. If only near-optimal weight settings survive,
@@ -14,6 +14,8 @@ heads, and temporal or stateful designs. The main finding is that the first fix 
 the world, not in the controller.
 
 ---
+
+<a id="f-1"></a>
 
 ## F.1 The problem, stated correctly
 
@@ -42,18 +44,20 @@ robustness curve is the measurement of viable-space size. A flat curve means a b
 and room to evolve; a cliff means a peak and no experiment. The curve is cheap to compute,
 works for any substrate, and is required for every seed from now on.
 
+<a id="f-2"></a>
+
 ## F.2 Where the narrowness came from
 
 The programmed oracle carries roughly eighteen state fields. Nearly every one exists to
 reconstruct a fact the world does not emit:
 
-| Oracle state | Missing world affordance |
-|---|---|
-| Three stored vertical-band samples plus attention switching | Sensing reads one vertical band per tick, so comparing bands requires a multi-tick scan-and-remember routine |
+| Oracle state                                                                                                 | Missing world affordance                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Three stored vertical-band samples plus attention switching                                                  | Sensing reads one vertical band per tick, so comparing bands requires a multi-tick scan-and-remember routine                             |
 | Remembered entrance signal and depth, 12-tick mouth-transition counter, descend-until-signal-halves protocol | The nest-scent source is at the mouth. An entering ant must walk down the same gradient it climbed, which requires memory and hysteresis |
-| 16-tick cache-search floor, roominess test, deposit latch | Nothing in the world signals where stores are or belong; counters substitute for a carrier |
-| Remembered previous signal plus cast counters | No channel carries derivative information, so rising-versus-falling must be computed from memory |
-| Cached-vs-wild food discrimination | Handled food is chemically identical to wild food |
+| 16-tick cache-search floor, roominess test, deposit latch                                                    | Nothing in the world signals where stores are or belong; counters substitute for a carrier                                               |
+| Remembered previous signal plus cast counters                                                                | No channel carries derivative information, so rising-versus-falling must be computed from memory                                         |
+| Cached-vs-wild food discrimination                                                                           | Handled food is chemically identical to wild food                                                                                        |
 
 None of these were cheats. Each was a reasonable repair given the interface as shipped.
 Together they changed the target from "compose several reflexes" into "rebuild a state
@@ -65,7 +69,11 @@ became the standard the seed had to match.
 The general lesson: when a target seems too hard for every controller, first audit what the
 controllers are being forced to compute.
 
+<a id="f-3"></a>
+
 ## F.3 The candidates
+
+<a id="f-3-1"></a>
 
 ### F.3.1 External memory
 
@@ -92,6 +100,8 @@ widens the viable region, which is the criterion that matters.
 system. It reintroduces the initialization problem inside a more complicated controller, and
 it makes behavior unattributable — no one can say which substrate produced what. External
 memory means world fields or in-genome gates. It never means a second controller.
+
+<a id="f-3-2"></a>
 
 ### F.3.2 More pheromone streams
 
@@ -121,6 +131,8 @@ airflow (a draft channel is an honest near-an-opening fact), light (depth/darkne
 is one), and contact. The rule is physical facts through physical carriers. The mechanisms
 in F.4 are mostly chemical only because that is where the oracle's state traced.
 
+<a id="f-3-3"></a>
+
 ### F.3.3 Simplify the programmed behavior
 
 This candidate and the world-affordance finding are the same idea from opposite ends. The
@@ -130,6 +142,8 @@ the deletion list. The re-derivation audit in F.5 measures the result. The predi
 written down before the measurement: eighteen fields fall to between three and five — one
 or two phase latches, possibly one timer, a casting trace.
 
+<a id="f-3-4"></a>
+
 ### F.3.4 Temporal input
 
 Two cheap forms, both feedforward: **phasic channels** (a change-since-last-tick value
@@ -138,11 +152,15 @@ alongside each scent magnitude; sensory adaptation is universal in real receptor
 short-horizon memory demands into ordinary weights on honest inputs. Phasic channels are in
 the build list. Stacking is the fallback if remembered-comparison state survives the audit.
 
+<a id="f-3-5"></a>
+
 ### F.3.5 Attention heads
 
 No. Attention provides content-addressable routing across many tokens. An ant has about 23
 scalar inputs and no token structure. Everything attention would solve here is solved by
 gates or by honest inputs at a fraction of the machinery. Recorded to avoid revisiting.
+
+<a id="f-4"></a>
 
 ## F.4 The world mechanisms
 
@@ -179,6 +197,8 @@ Build in this order. Each deletes named oracle state.
    No new channels beyond colony odor and its contact-transfer mechanic. Corpse scent
    waits for mortality; brood scent arrives with the brood steps as planned.
 
+<a id="f-5"></a>
+
 ## F.5 The audit and the decision rule
 
 After mechanisms 1–5 land, re-derive the sensor-limited oracle in the fixed world and
@@ -197,6 +217,8 @@ publish its residual state count as a finding. That number drives the substrate 
 The answer to the opening question is therefore a sequence, not a component: fix what the
 world owes, re-derive, count, measure flatness, and only then argue about controllers.
 
+<a id="f-6"></a>
+
 ## F.6 What this buys the experiment
 
 Environment tuning already banked real margin: from +1 to roughly +180 energy per 1,000
@@ -207,6 +229,8 @@ match the oracle. The oracle is a capability benchmark whose ledger sits above t
 population, and the climb toward it is what real-time evolution exists to demonstrate.
 Immortality and the absence of threats will end, and margins will tighten. When they do,
 the robustness curve says whether the population has anywhere to stand.
+
+<a id="f-7"></a>
 
 ## F.7 Failure modes to avoid
 

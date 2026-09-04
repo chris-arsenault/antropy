@@ -2,6 +2,7 @@ import { foundColony } from "../sim/colony";
 import { LADDER_STEP12_CONFIG, PHASE2_CONFIG, PROGRAMMED_COLONY_CONFIG } from "../sim/config";
 import {
   diggerSeedVector,
+  derivedColonySeedVector,
   functionalSeedVector,
   rnnController,
   setRuntimeSeedBase,
@@ -32,11 +33,15 @@ export const SCENARIOS: Scenario[] = [
     id: "programmed",
     label: "Colony loop (Appendix E)",
     description:
-      "The NEST baseline: one fixed-genome colony inside the authored 3D nest with steady " +
+      "The NEST baseline: one trained fixed-genome colony inside the authored 3D nest with steady " +
       "food. Digging, reproduction, mortality, founding, variation, weather, and decay are off.",
     build(seed) {
-      setRuntimeSeedBase(null);
-      return buildAuthoredNestWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG).world;
+      setRuntimeSeedBase(derivedColonySeedVector());
+      try {
+        return buildAuthoredNestWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG).world;
+      } finally {
+        setRuntimeSeedBase(null);
+      }
     },
   },
   {

@@ -17,7 +17,9 @@ function accumulatePositiveActions(frame: SensorFrame, counts: number[]): void {
 }
 
 /** Balance rare binary actuator labels against their inactive frames. */
-export function actionClassBalance(training: SensorFrame[][]): ActionClassBalance {
+export function actionClassBalance(
+  training: readonly (readonly SensorFrame[])[]
+): ActionClassBalance {
   const counts = new Array<number>(OUTPUT_COUNT).fill(0);
   let frameCount = 0;
   for (const frames of training) {
@@ -36,7 +38,7 @@ export function actionClassBalance(training: SensorFrame[][]): ActionClassBalanc
 }
 
 export function trainingBalance(
-  training: SensorFrame[][],
+  training: readonly (readonly SensorFrame[])[],
   useCorpusBalance: boolean
 ): ActionClassBalance {
   const balance = actionClassBalance(training);

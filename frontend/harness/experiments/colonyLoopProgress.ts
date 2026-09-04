@@ -59,13 +59,7 @@ function recordDeposit(progress: ForageProgress, ant: Ant, tick: number, surface
   progress.priorLoad = ant.carryLoad;
 }
 
-export function recordForageSignals(
-  progress: ForageProgress,
-  ant: Ant,
-  food: FoodSite,
-  entrance: { x: number; y: number; z: number },
-  surfaced: boolean
-): void {
+function recordBasicSignals(progress: ForageProgress, ant: Ant, food: FoodSite): void {
   progress.maxFoodSignal = Math.max(progress.maxFoodSignal, foodSignal(ant));
   const foodContact = ant.lastInputs[Input.CONTACT_FOOD] > 0;
   const digIntent = ant.lastOutputs[Output.DIG] > ACTION_THRESHOLD;
@@ -79,7 +73,14 @@ export function recordForageSignals(
     progress.minFoodDistance,
     Math.max(Math.abs(ant.x - food.x), Math.abs(ant.z - food.z))
   );
-  if (ant.carryLoad <= 0) return;
+}
+
+function recordLoadedSignals(
+  progress: ForageProgress,
+  ant: Ant,
+  entrance: { x: number; y: number; z: number },
+  surfaced: boolean
+): void {
   const nestLeft = ant.lastInputs[Input.NEST_SCENT_LEFT];
   const nestRight = ant.lastInputs[Input.NEST_SCENT_RIGHT];
   progress.loadedTicks += 1;
@@ -103,6 +104,17 @@ export function recordForageSignals(
       Math.abs(ant.z - entrance.z)
     )
   );
+}
+
+export function recordForageSignals(
+  progress: ForageProgress,
+  ant: Ant,
+  food: FoodSite,
+  entrance: { x: number; y: number; z: number },
+  surfaced: boolean
+): void {
+  recordBasicSignals(progress, ant, food);
+  if (ant.carryLoad > 0) recordLoadedSignals(progress, ant, entrance, surfaced);
 }
 
 export function observeForageProgress(
@@ -163,11 +175,12 @@ export function recordLoadedMove(
   }
 }
 
-export function forageProgressSummary(
-  ant: Ant,
-  progress: ForageProgress,
-  elapsed: number
-): Record<string, unknown> {
+function homePathEfficiency(progress: ForageProgress): number | null {
+  if (progress.homePathStepsAtReturn === null || progress.optimalHomeSteps === null) return null;
+  return progress.homePathStepsAtReturn / Math.max(1, progress.optimalHomeSteps);
+}
+
+function progressSummary(progress: ForageProgress, elapsed: number): Record<string, unknown> {
   return {
     exited: progress.exitTick !== null,
     pickedUp: progress.pickupTick !== null,
@@ -203,58 +216,81 @@ export function forageProgressSummary(
     homePathSteps: progress.homePathSteps,
     homePathStepsAtReturn: progress.homePathStepsAtReturn,
     optimalHomeSteps: progress.optimalHomeSteps,
-    homePathEfficiency:
-      progress.homePathStepsAtReturn !== null && progress.optimalHomeSteps !== null
-        ? progress.homePathStepsAtReturn / Math.max(1, progress.optimalHomeSteps)
-        : null,
+    homePathEfficiency: homePathEfficiency(progress),
     minFoodDistance: progress.minFoodDistance,
     elapsed,
-    final: {
-      x: ant.x,
-      y: ant.y,
-      z: ant.z,
-      heading: ant.heading,
-      verticalAttention: ant.verticalAttention,
-      moveCharge: ant.moveCharge,
-      energy: ant.energy,
-      load: ant.carryLoad,
-      facingSlope: ant.lastInputs[Input.FACING_SLOPE],
-      food: {
-        left: ant.lastInputs[Input.FOOD_SCENT_LEFT],
-        center: ant.lastInputs[Input.FOOD_SCENT_CENTER],
-        right: ant.lastInputs[Input.FOOD_SCENT_RIGHT],
-        down: ant.lastInputs[Input.FOOD_SCENT_DOWN],
-        up: ant.lastInputs[Input.FOOD_SCENT_UP],
-        centerChange: ant.lastInputs[Input.FOOD_SCENT_CENTER_CHANGE],
-      },
-      nest: {
-        left: ant.lastInputs[Input.NEST_SCENT_LEFT],
-        center: ant.lastInputs[Input.NEST_SCENT_CENTER],
-        right: ant.lastInputs[Input.NEST_SCENT_RIGHT],
-        down: ant.lastInputs[Input.NEST_SCENT_DOWN],
-        up: ant.lastInputs[Input.NEST_SCENT_UP],
-        centerChange: ant.lastInputs[Input.NEST_SCENT_CENTER_CHANGE],
-      },
-      colony: {
-        left: ant.lastInputs[Input.COLONY_SCENT_LEFT],
-        center: ant.lastInputs[Input.COLONY_SCENT_CENTER],
-        right: ant.lastInputs[Input.COLONY_SCENT_RIGHT],
-        down: ant.lastInputs[Input.COLONY_SCENT_DOWN],
-        up: ant.lastInputs[Input.COLONY_SCENT_UP],
-      },
-      breadcrumb: {
-        left: ant.lastInputs[Input.PHEROMONE_B_LEFT],
-        center: ant.lastInputs[Input.PHEROMONE_B_CENTER],
-        right: ant.lastInputs[Input.PHEROMONE_B_RIGHT],
-        down: ant.lastInputs[Input.PHEROMONE_B_DOWN],
-        up: ant.lastInputs[Input.PHEROMONE_B_UP],
-      },
-      outputs: {
-        turn: ant.lastOutputs[Output.TURN],
-        forward: ant.lastOutputs[Output.FORWARD],
-        verticalBias: ant.lastOutputs[Output.VERTICAL_BIAS],
-        dig: ant.lastOutputs[Output.DIG],
-      },
+  };
+}
+
+function scentSnapshot(ant: Ant, channels: readonly number[]): Record<string, number> {
+  const [left, center, right, down, up] = channels;
+  return {
+    left: ant.lastInputs[left],
+    center: ant.lastInputs[center],
+    right: ant.lastInputs[right],
+    down: ant.lastInputs[down],
+    up: ant.lastInputs[up],
+  };
+}
+
+function finalSummary(ant: Ant): Record<string, unknown> {
+  return {
+    x: ant.x,
+    y: ant.y,
+    z: ant.z,
+    heading: ant.heading,
+    verticalAttention: ant.verticalAttention,
+    moveCharge: ant.moveCharge,
+    energy: ant.energy,
+    load: ant.carryLoad,
+    facingSlope: ant.lastInputs[Input.FACING_SLOPE],
+    food: {
+      ...scentSnapshot(ant, [
+        Input.FOOD_SCENT_LEFT,
+        Input.FOOD_SCENT_CENTER,
+        Input.FOOD_SCENT_RIGHT,
+        Input.FOOD_SCENT_DOWN,
+        Input.FOOD_SCENT_UP,
+      ]),
+      centerChange: ant.lastInputs[Input.FOOD_SCENT_CENTER_CHANGE],
+    },
+    nest: {
+      ...scentSnapshot(ant, [
+        Input.NEST_SCENT_LEFT,
+        Input.NEST_SCENT_CENTER,
+        Input.NEST_SCENT_RIGHT,
+        Input.NEST_SCENT_DOWN,
+        Input.NEST_SCENT_UP,
+      ]),
+      centerChange: ant.lastInputs[Input.NEST_SCENT_CENTER_CHANGE],
+    },
+    colony: scentSnapshot(ant, [
+      Input.COLONY_SCENT_LEFT,
+      Input.COLONY_SCENT_CENTER,
+      Input.COLONY_SCENT_RIGHT,
+      Input.COLONY_SCENT_DOWN,
+      Input.COLONY_SCENT_UP,
+    ]),
+    breadcrumb: scentSnapshot(ant, [
+      Input.PHEROMONE_B_LEFT,
+      Input.PHEROMONE_B_CENTER,
+      Input.PHEROMONE_B_RIGHT,
+      Input.PHEROMONE_B_DOWN,
+      Input.PHEROMONE_B_UP,
+    ]),
+    outputs: {
+      turn: ant.lastOutputs[Output.TURN],
+      forward: ant.lastOutputs[Output.FORWARD],
+      verticalBias: ant.lastOutputs[Output.VERTICAL_BIAS],
+      dig: ant.lastOutputs[Output.DIG],
     },
   };
+}
+
+export function forageProgressSummary(
+  ant: Ant,
+  progress: ForageProgress,
+  elapsed: number
+): Record<string, unknown> {
+  return { ...progressSummary(progress, elapsed), final: finalSummary(ant) };
 }
