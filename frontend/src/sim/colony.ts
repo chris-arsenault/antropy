@@ -18,7 +18,7 @@ import { killAnt } from "./energy";
 import { carveFoundingNest } from "./foundingNest";
 import { sexualOffspring } from "./genetics";
 import { restockFromLarder } from "./larder";
-import { COLONY, QUEEN } from "./tunables";
+import { AUTHORED_NEST_FIXTURE, COLONY, ENERGY, QUEEN } from "./tunables";
 import { spawnAnt, type World } from "./world";
 
 export { type Sperm } from "./colonyGenetics";
@@ -150,24 +150,29 @@ function spawnFounderWorker(
   spermIndex: number,
   founderIndex: number,
   position: ColonyPosition,
-  heading: number
-): void {
+  heading: number,
+  startingEnergyFraction?: number
+): Ant {
   const genome = makeColonyOffspring(world, colony.queenGenome, sperm[spermIndex]);
   const father = sperm[spermIndex];
   const identity = offspringIdentity(world, father.founderLineId);
+  const traits = world.controller.physical(genome);
   const ant = spawnAnt(
     world,
     {
       ...position,
       heading,
-      energy: 1,
+      energy:
+        startingEnergyFraction === undefined
+          ? 1
+          : ENERGY.max * traits.storage * startingEnergyFraction,
       lineageId: colony.id,
       patrilineId: father.patrilineId,
       motherId: colony.queenGeneticId,
       fatherId: father.geneticId,
       genome,
       controllerState: world.controller.createState(),
-      traits: world.controller.physical(genome),
+      traits,
     },
     identity,
     false
@@ -177,6 +182,7 @@ function spawnFounderWorker(
     const record = world.geneticRecords.get(ant.geneticId);
     if (record) record.birthTick = world.tick - ant.age;
   }
+  return ant;
 }
 
 /** Fast-forwarded adult first brood on the open surface around the
@@ -236,7 +242,8 @@ export function placeBootstrapColony(
       spermIndex,
       index,
       workerStations[index],
-      (index % 8) * (Math.PI / 4)
+      (index % 8) * (Math.PI / 4),
+      AUTHORED_NEST_FIXTURE.workerEnergyFraction
     );
   }
   return colony;

@@ -7,7 +7,7 @@ import { voxelIndex } from "../../src/sim/grid";
 import { Material } from "../../src/sim/materials";
 import { buildAuthoredNestWorld, type AuthoredNestWorld } from "../../src/sim/nestWorld";
 import { exchangeMaterialScent, sampleMaterialScent } from "../../src/sim/materialScent";
-import { colonyLoopOracle, resetColonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
+import { colonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
 import { emitFoodScent, stepScentField } from "../../src/sim/scent";
 import { COLONY, ENERGY } from "../../src/sim/tunables";
 import { mutateVoxel, stepWorld, type World } from "../../src/sim/world";
@@ -17,7 +17,7 @@ import {
   forageProgressSummary,
   observeForageProgress,
   recordForageSignals,
-  recordLoadedMove,
+  recordForageMove,
 } from "./colonyLoopProgress";
 import {
   type ColonyLoopResult,
@@ -164,7 +164,6 @@ function prepareForage(
   policy: SensorPolicy | null,
   controller: Controller = rnnController
 ): PreparedForage {
-  resetColonyLoopOracle();
   const setup = buildAuthoredNestWorld(seed, controller, NEST_CONFIG);
   const { world } = setup;
   world.foodBase = 0;
@@ -205,7 +204,7 @@ function advanceForage(
     outputs: Float32Array.from(ant.lastOutputs),
     phase,
   });
-  recordLoadedMove(progress, ant, previous, wasLoaded);
+  recordForageMove(progress, ant, previous, wasLoaded);
   const surfaced = onSurface(world, ant);
   recordForageSignals(progress, ant, food, episode.setup.nest.entrance, surfaced);
   observeForageProgress(world, progress, ant, surfaced, episode.elapsed);
@@ -305,6 +304,7 @@ function runCacheEpisode(
     record
   );
   const cacheAfterAbundance = cachedFood(world);
+  const completedOutbound = episode.progress.depositTick !== null && cacheAfterAbundance.length > 0;
   const foodEatenBeforeScarcity = world.metrics.foodEaten;
   const foodDepositedBeforeScarcity = world.metrics.foodDeposited;
   const foodDeliveredBeforeScarcity = world.metrics.foodDelivered;
@@ -340,8 +340,8 @@ function runCacheEpisode(
       cacheBeforeScarcity,
       cacheAfterScarcity,
       cacheColonyOdor,
-      cacheGrew: cacheAfterAbundance.length > 0,
-      cacheDrained: cacheAfterScarcity < cacheBeforeScarcity,
+      cacheGrew: completedOutbound,
+      cacheDrained: completedOutbound && cacheAfterScarcity < cacheBeforeScarcity,
       foodMassConserved: conservedFoodUnits === episode.initialFood,
       foodEatenBeforeScarcity,
       foodDepositedBeforeScarcity,

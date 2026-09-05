@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { compareColonyOutcomes, summarizeColonyOutcomes } from "./colonyOutcome";
 
 function outcome(milestone: "complete" | "cached" | "returned" | "picked" | "exited") {
+  const cached = milestone === "complete" || milestone === "cached";
   return {
     cacheDrained: milestone === "complete",
-    cacheGrew: milestone === "complete" || milestone === "cached",
+    cacheGrew: cached,
+    deposited: cached,
     returned: milestone !== "picked" && milestone !== "exited",
     pickedUp: milestone !== "exited",
     exited: true,
@@ -14,6 +16,25 @@ function outcome(milestone: "complete" | "cached" | "returned" | "picked" | "exi
 }
 
 describe("colony outcome ordering", () => {
+  it("rejects a deposit or cache result without the ordered surface trip", () => {
+    const malformed = {
+      exited: false,
+      pickedUp: true,
+      returned: true,
+      deposited: true,
+      cacheGrew: true,
+      cacheDrained: true,
+    };
+
+    const result = summarizeColonyOutcomes([malformed]);
+
+    expect(result.scores).toEqual([0]);
+    expect(result.completionCount).toBe(0);
+    expect(result.cacheCount).toBe(0);
+    expect(result.returnCount).toBe(0);
+    expect(result.pickupCount).toBe(0);
+  });
+
   it("does not trade completed loops for partial progress in more worlds", () => {
     const specialist = summarizeColonyOutcomes([
       outcome("complete"),

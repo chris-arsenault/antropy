@@ -2,7 +2,7 @@ import { placeBootstrapColony, type Colony } from "./colony";
 import { NEST_CONFIG, type SimConfig } from "./config";
 import { type Controller } from "./controller/contract";
 import { rnnController } from "./controller/rnn";
-import { primeAuthoredNestScent } from "./nestScentCarrier";
+import { primeAuthoredNestScent, primeAuthoredNestTrail } from "./nestScentCarrier";
 import { exchangeMaterialScent, primeAuthoredMaterialScent } from "./materialScent";
 import { stepScentField } from "./scent";
 import { COLONY_ODOR } from "./tunables";
@@ -25,6 +25,7 @@ export function buildAuthoredNestWorld(
   const nest = authorProgrammedNest(world);
   const colony = placeBootstrapColony(world, nest.queenHome, nest.workerStations, nest.entrance);
   primeAuthoredNestScent(world, colony);
+  primeAuthoredNestTrail(world, colony, nest.workerStations);
   if (world.config.materialColonyOdor) {
     primeAuthoredMaterialScent(world.grid, world.cavities, world.materialColonyScent, colony.id);
     for (let pass = 0; pass < COLONY_ODOR.fixtureWarmupPasses; pass++) {

@@ -26,6 +26,43 @@ function colonySignal(ant: Ant): number {
   );
 }
 
+function recordRawPickup(
+  progress: ForageProgress,
+  ant: Ant,
+  tick: number,
+  loadedNow: boolean
+): void {
+  if (!loadedNow || progress.rawPickupTick !== null) return;
+  progress.rawPickupTick = tick;
+  progress.rawPickupDepth = ant.lastInputs[Input.DEPTH];
+}
+
+function recordSurfacePickup(
+  world: World,
+  progress: ForageProgress,
+  ant: Ant,
+  tick: number,
+  loadedNow: boolean
+): void {
+  const pickedUpOnSurface = loadedNow && ant.lastInputs[Input.DEPTH] === 0;
+  if (progress.exitTick === null || progress.pickupTick !== null || !pickedUpOnSurface) return;
+  progress.pickupTick = tick;
+  progress.pickupNestSignal = nestSignal(ant);
+  progress.optimalHomeSteps = shortestAntPathToNest(world, ant);
+}
+
+function recordReturn(progress: ForageProgress, tick: number, surfaced: boolean): void {
+  if (
+    progress.pickupTick !== null &&
+    tick > progress.pickupTick &&
+    progress.returnTick === null &&
+    !surfaced
+  ) {
+    progress.returnTick = tick;
+    progress.homePathStepsAtReturn = progress.homePathSteps;
+  }
+}
+
 function recordArrival(
   world: World,
   progress: ForageProgress,
@@ -34,15 +71,10 @@ function recordArrival(
   tick: number
 ): void {
   if (progress.exitTick === null && surfaced) progress.exitTick = tick;
-  if (progress.pickupTick === null && ant.carryLoad > 0) {
-    progress.pickupTick = tick;
-    progress.pickupNestSignal = nestSignal(ant);
-    progress.optimalHomeSteps = shortestAntPathToNest(world, ant);
-  }
-  if (progress.pickupTick !== null && progress.returnTick === null && !surfaced) {
-    progress.returnTick = tick;
-    progress.homePathStepsAtReturn = progress.homePathSteps;
-  }
+  const loadedNow = progress.priorLoad <= 0 && ant.carryLoad > 0;
+  recordRawPickup(progress, ant, tick, loadedNow);
+  recordSurfacePickup(world, progress, ant, tick, loadedNow);
+  recordReturn(progress, tick, surfaced);
 }
 
 function recordDeposit(progress: ForageProgress, ant: Ant, tick: number, surfaced: boolean): void {
@@ -53,7 +85,13 @@ function recordDeposit(progress: ForageProgress, ant: Ant, tick: number, surface
     progress.unloadDepth = ant.lastInputs[Input.DEPTH];
     progress.unloadSurface = surfaced;
   }
-  if (progress.returnTick !== null && progress.depositTick === null && unloaded && !surfaced) {
+  if (
+    progress.returnTick !== null &&
+    tick > progress.returnTick &&
+    progress.depositTick === null &&
+    unloaded &&
+    !surfaced
+  ) {
     progress.depositTick = tick;
   }
   progress.priorLoad = ant.carryLoad;
@@ -131,6 +169,8 @@ export function observeForageProgress(
 export function createForageProgress(ant: Ant): ForageProgress {
   return {
     exitTick: null,
+    rawPickupTick: null,
+    rawPickupDepth: null,
     pickupTick: null,
     returnTick: null,
     depositTick: null,
@@ -161,18 +201,44 @@ export function createForageProgress(ant: Ant): ForageProgress {
     homePathSteps: 0,
     homePathStepsAtReturn: null,
     optimalHomeSteps: null,
+    startX: ant.x,
+    startY: ant.y,
+    startZ: ant.z,
+    movementSteps: 0,
+    visitedPositions: new Set([`${ant.x},${ant.y},${ant.z}`]),
+    signedTurn: 0,
+    absoluteTurn: 0,
+    priorTurnDirection: 0,
+    turnDirectionChanges: 0,
   };
 }
 
-export function recordLoadedMove(
+export function recordForageMove(
   progress: ForageProgress,
   ant: Ant,
   previous: { x: number; y: number; z: number },
   wasLoaded: boolean
 ): void {
-  if (wasLoaded && (ant.x !== previous.x || ant.y !== previous.y || ant.z !== previous.z)) {
+  const moved = ant.x !== previous.x || ant.y !== previous.y || ant.z !== previous.z;
+  if (moved) {
+    progress.movementSteps += 1;
+    progress.visitedPositions.add(`${ant.x},${ant.y},${ant.z}`);
+  }
+  if (wasLoaded && moved) {
     progress.homePathSteps += 1;
   }
+  const turn = ant.lastOutputs[Output.TURN];
+  progress.signedTurn += turn;
+  progress.absoluteTurn += Math.abs(turn);
+  const direction = Math.sign(turn) as -1 | 0 | 1;
+  if (
+    direction !== 0 &&
+    progress.priorTurnDirection !== 0 &&
+    direction !== progress.priorTurnDirection
+  ) {
+    progress.turnDirectionChanges += 1;
+  }
+  if (direction !== 0) progress.priorTurnDirection = direction;
 }
 
 function homePathEfficiency(progress: ForageProgress): number | null {
@@ -180,13 +246,28 @@ function homePathEfficiency(progress: ForageProgress): number | null {
   return progress.homePathStepsAtReturn / Math.max(1, progress.optimalHomeSteps);
 }
 
-function progressSummary(progress: ForageProgress, elapsed: number): Record<string, unknown> {
+function progressSummary(
+  progress: ForageProgress,
+  ant: Ant,
+  elapsed: number
+): Record<string, unknown> {
+  const displacement = Math.max(
+    Math.abs(progress.startX - ant.x),
+    Math.abs(progress.startY - ant.y),
+    Math.abs(progress.startZ - ant.z)
+  );
   return {
     exited: progress.exitTick !== null,
+    rawPickupTick: progress.rawPickupTick,
+    rawPickupDepth: progress.rawPickupDepth,
     pickedUp: progress.pickupTick !== null,
     returned: progress.returnTick !== null,
     deposited: progress.depositTick !== null,
-    roundTrip: progress.depositTick !== null,
+    roundTrip:
+      progress.exitTick !== null &&
+      progress.pickupTick !== null &&
+      progress.returnTick !== null &&
+      progress.depositTick !== null,
     exitTick: progress.exitTick,
     pickupTick: progress.pickupTick,
     returnTick: progress.returnTick,
@@ -217,6 +298,15 @@ function progressSummary(progress: ForageProgress, elapsed: number): Record<stri
     homePathStepsAtReturn: progress.homePathStepsAtReturn,
     optimalHomeSteps: progress.optimalHomeSteps,
     homePathEfficiency: homePathEfficiency(progress),
+    movementSteps: progress.movementSteps,
+    uniquePositions: progress.visitedPositions.size,
+    netDisplacement: displacement,
+    pathStretch: progress.movementSteps / Math.max(1, displacement),
+    signedTurnRevolutions: progress.signedTurn / 8,
+    absoluteTurnRevolutions: progress.absoluteTurn / 8,
+    turnBias:
+      progress.absoluteTurn === 0 ? 0 : Math.abs(progress.signedTurn) / progress.absoluteTurn,
+    turnDirectionChanges: progress.turnDirectionChanges,
     minFoodDistance: progress.minFoodDistance,
     elapsed,
   };
@@ -292,5 +382,5 @@ export function forageProgressSummary(
   progress: ForageProgress,
   elapsed: number
 ): Record<string, unknown> {
-  return { ...progressSummary(progress, elapsed), final: finalSummary(ant) };
+  return { ...progressSummary(progress, ant, elapsed), final: finalSummary(ant) };
 }

@@ -19,9 +19,7 @@ describe("founder variation gate", () => {
     const first = seedFounderGenomes(firstWorld, 7);
     const second = seedFounderGenomes(secondWorld, 7);
 
-    expect(
-      first.some((genome) => rnnController.genomeDistance(first[0], genome) > 0)
-    ).toBe(true);
+    expect(first.some((genome) => rnnController.genomeDistance(first[0], genome) > 0)).toBe(true);
     expect(first.map((genome) => Array.from(rnnController.serializeGenome(genome)))).toEqual(
       second.map((genome) => Array.from(rnnController.serializeGenome(genome)))
     );

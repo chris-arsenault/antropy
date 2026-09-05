@@ -57,6 +57,10 @@ When prediction and measurement disagree twice under a material change, or a tun
 exhausted, stop. Record the observed invariance, mechanism hypothesis, smallest structural fix,
 recalibration cost, and requested human decision. Do not tune around a structural result.
 
+When a controller has an unhandled context, first fill that branch by composing behaviors and
+inputs that already exist. Add a carrier, field, sensor, or memory mechanism only after the simple
+branch fails with a measured signature that names what information is missing.
+
 <a id="principles-evidence"></a>
 
 ## Measurements outrank plans

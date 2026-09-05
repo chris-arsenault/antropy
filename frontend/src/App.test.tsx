@@ -28,9 +28,9 @@ describe("App", () => {
     expect(container.querySelector('[data-testid="tick"]')?.textContent).toBe("0");
     const scenario = container.querySelector<HTMLSelectElement>('[data-testid="scenario-select"]');
     expect(scenario?.value).toBe("programmed");
-    expect(Array.from(scenario?.options ?? []).map((option) => option.textContent)).toContain(
-      "Colony loop (Appendix E)"
-    );
+    const scenarioLabels = Array.from(scenario?.options ?? []).map((option) => option.textContent);
+    expect(scenarioLabels).toContain("Programmed policy (Appendix E)");
+    expect(scenarioLabels).toContain("Trained RNN (Appendix E)");
     expect(container.querySelector("button")?.textContent).toBe("Run");
     const effectiveConfig = container.querySelector('[data-testid="effective-config"]');
     expect(effectiveConfig?.textContent).toContain("food energy2.4");

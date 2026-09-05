@@ -13,6 +13,7 @@ import {
   setRuntimeSeedBase,
 } from "../sim/controller/rnn";
 import { buildAuthoredNestWorld } from "../sim/nestWorld";
+import { colonyLoopOracle } from "../sim/oracles/colonyLoop";
 import { premarkDigSite } from "../sim/oracles/digSite";
 import { createWorld, populateDiggers, type World } from "../sim/world";
 
@@ -22,7 +23,7 @@ import { createWorld, populateDiggers, type World } from "../sim/world";
  * watch. Without this the app could only ever run the full-liability
  * colony, so the Phase 2 work was invisible outside the test suite.
  */
-export type ScenarioId = "programmed" | "variation" | "functional" | "colony" | "digging";
+export type ScenarioId = "programmed" | "rnn" | "variation" | "functional" | "colony" | "digging";
 
 export interface Scenario {
   id: ScenarioId;
@@ -36,10 +37,27 @@ const DIGGER_CREW = 9;
 export const SCENARIOS: Scenario[] = [
   {
     id: "programmed",
-    label: "Colony loop (Appendix E)",
+    label: "Programmed policy (Appendix E)",
     description:
-      "The NEST baseline: one trained fixed-genome colony inside the authored 3D nest with steady " +
-      "food. Digging, reproduction, mortality, founding, variation, weather, and decay are off.",
+      "The sensor-limited programmed policy driving ordinary ant bodies inside the authored 3D " +
+      "nest. This diagnostic exposes the teacher behavior directly; it is not an evolving colony.",
+    build(seed) {
+      setRuntimeSeedBase(derivedColonySeedVector());
+      try {
+        const world = buildAuthoredNestWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG).world;
+        world.sensorPolicyOverride = colonyLoopOracle;
+        return world;
+      } finally {
+        setRuntimeSeedBase(null);
+      }
+    },
+  },
+  {
+    id: "rnn",
+    label: "Trained RNN (Appendix E)",
+    description:
+      "The trained fixed-genome RNN inside the same authored 3D nest and world configuration as " +
+      "the programmed-policy diagnostic.",
     build(seed) {
       setRuntimeSeedBase(derivedColonySeedVector());
       try {

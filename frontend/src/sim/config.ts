@@ -28,6 +28,8 @@ export interface SimConfig {
   materialColonyOdor: boolean;
   /** Food handled by an ant retains and re-emits that colony's contact odor. */
   contactFoodOdor: boolean;
+  /** The mature authored nest starts with an owner-tagged pheromone trail to its entrance. */
+  authoredNestTrail: boolean;
   /** Phase 4: untrafficked tunnels collapse to loose fill. */
   nestDecay: boolean;
   /** Phase 4: seasonal food oscillation. Off = steady carrying capacity. */
@@ -78,6 +80,7 @@ export const FULL_CONFIG: SimConfig = {
   motorJitter: true,
   materialColonyOdor: true,
   contactFoodOdor: true,
+  authoredNestTrail: true,
   nestDecay: true,
   seasons: true,
   weather: true,
@@ -107,6 +110,7 @@ export const PHASE2_CONFIG: SimConfig = {
   motorJitter: false,
   materialColonyOdor: false,
   contactFoodOdor: false,
+  authoredNestTrail: false,
   nestDecay: false,
   seasons: false,
   weather: false,
@@ -131,6 +135,7 @@ export const NEST_CONFIG: SimConfig = {
   motorJitter: true,
   materialColonyOdor: true,
   contactFoodOdor: true,
+  authoredNestTrail: true,
 };
 
 /** Authored-nest turnover control: mortality and queen upkeep, no replacement. */

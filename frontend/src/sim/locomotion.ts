@@ -5,6 +5,7 @@ import {
   MAX_STEPS_PER_TICK,
   TURN_RADIANS_PER_TICK,
   hasSupport,
+  headingToDirection,
   isLegalPosition,
   stepCandidates,
   type MotorState,
@@ -49,18 +50,86 @@ export function dropUnsupportedOneVoxel(grid: VoxelGrid, ant: Ant): boolean {
   return true;
 }
 
-function tryStep(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
-  for (const candidate of stepCandidates(ant.heading, motor.verticalBias)) {
-    const nx = ant.x + candidate.dx;
-    const ny = ant.y + candidate.dy;
-    const nz = ant.z + candidate.dz;
-    if (isLegalPosition(grid, nx, ny, nz)) {
-      ant.x = nx;
-      ant.y = ny;
-      ant.z = nz;
-      return;
-    }
+function moveIfLegal(
+  grid: VoxelGrid,
+  ant: Ant,
+  candidate: { dx: number; dy: number; dz: number }
+): boolean {
+  const nx = ant.x + candidate.dx;
+  const ny = ant.y + candidate.dy;
+  const nz = ant.z + candidate.dz;
+  if (!isLegalPosition(grid, nx, ny, nz)) return false;
+  ant.x = nx;
+  ant.y = ny;
+  ant.z = nz;
+  return true;
+}
+
+function moveToFirstLegal(
+  grid: VoxelGrid,
+  ant: Ant,
+  candidates: readonly { dx: number; dy: number; dz: number }[],
+  start = 0,
+  end = candidates.length
+): boolean {
+  for (let index = start; index < end; index++) {
+    if (moveIfLegal(grid, ant, candidates[index])) return true;
   }
+  return false;
+}
+
+function normalizedHeadingResidual(heading: number, quantized: number): number {
+  let residual = heading - quantized;
+  while (residual > Math.PI) residual -= Math.PI * 2;
+  while (residual < -Math.PI) residual += Math.PI * 2;
+  return residual;
+}
+
+/**
+ * Resolve blocked thrust through local contact mechanics. Try the smallest
+ * yaw deflection first, keep the first legal heading, and reverse only at a
+ * true dead end. The continuous sub-octant heading orders symmetric choices,
+ * so deterministic motor jitter separates colocated ants without a remembered
+ * wall side or a world-selected destination.
+ */
+function tryDeflectionAtDistance(
+  grid: VoxelGrid,
+  ant: Ant,
+  verticalBias: number,
+  quantized: number,
+  preferredSign: number,
+  distance: number
+): boolean {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const sign = attempt === 0 ? preferredSign : -preferredSign;
+    const candidateHeading = quantized + sign * distance * TURN_RADIANS_PER_TICK;
+    const candidate = stepCandidates(candidateHeading, verticalBias)[0];
+    if (!moveIfLegal(grid, ant, candidate)) continue;
+    ant.heading = candidateHeading;
+    return true;
+  }
+  return false;
+}
+
+function tryContactDeflection(grid: VoxelGrid, ant: Ant, verticalBias: number): boolean {
+  const { dx, dz } = headingToDirection(ant.heading);
+  const quantized = Math.atan2(dz, dx);
+  const preferredSign = normalizedHeadingResidual(ant.heading, quantized) >= 0 ? 1 : -1;
+  for (let distance = 1; distance <= 3; distance++) {
+    if (tryDeflectionAtDistance(grid, ant, verticalBias, quantized, preferredSign, distance))
+      return true;
+  }
+  const reverse = quantized + Math.PI;
+  const candidate = stepCandidates(reverse, verticalBias)[0];
+  if (!moveIfLegal(grid, ant, candidate)) return false;
+  ant.heading = reverse;
+  return true;
+}
+
+function tryStep(grid: VoxelGrid, ant: Ant, motor: MotorState): void {
+  const candidates = stepCandidates(ant.heading, motor.verticalBias);
+  if (moveToFirstLegal(grid, ant, candidates)) return;
+  tryContactDeflection(grid, ant, motor.verticalBias);
 }
 
 /**

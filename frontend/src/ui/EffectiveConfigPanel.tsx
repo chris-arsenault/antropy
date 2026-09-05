@@ -1,6 +1,12 @@
 import { eggCarryCapacity, spoilCapacity } from "../sim/capacity";
 import { type SimConfig } from "../sim/config";
-import { DIG, ENERGY, FOOD_GOVERNOR } from "../sim/tunables";
+import {
+  AUTHORED_NEST_FIXTURE,
+  AUTHORED_NEST_TRAIL,
+  DIG,
+  ENERGY,
+  FOOD_GOVERNOR,
+} from "../sim/tunables";
 import { type World } from "../sim/world";
 
 type GateKey = {
@@ -15,6 +21,9 @@ const GATES: readonly { key: GateKey; label: string }[] = [
   { key: "geneticVariation", label: "genetic variation" },
   { key: "broodTransport", label: "brood transport" },
   { key: "motorJitter", label: "motor jitter" },
+  { key: "materialColonyOdor", label: "material colony odor" },
+  { key: "contactFoodOdor", label: "contact food odor" },
+  { key: "authoredNestTrail", label: "authored entrance trail" },
   { key: "nestDecay", label: "nest decay" },
   { key: "seasons", label: "seasons" },
   { key: "weather", label: "weather" },
@@ -26,7 +35,13 @@ const GATES: readonly { key: GateKey; label: string }[] = [
   { key: "spoilHauling", label: "spoil hauling" },
 ];
 
-const ECONOMY: readonly { label: string; value: () => number }[] = [
+const TUNABLES: readonly { label: string; value: () => number }[] = [
+  {
+    label: "authored worker energy fraction",
+    value: () => AUTHORED_NEST_FIXTURE.workerEnergyFraction,
+  },
+  { label: "authored trail strength", value: () => AUTHORED_NEST_TRAIL.entranceStrength },
+  { label: "authored trail warmup", value: () => AUTHORED_NEST_TRAIL.fixtureWarmupPasses },
   { label: "food energy", value: () => ENERGY.foodEnergy },
   { label: "energy tank", value: () => ENERGY.max },
   { label: "basal cost / tick", value: () => ENERGY.basalPerTick },
@@ -76,7 +91,7 @@ export function EffectiveConfigPanel({ world }: { world: World }) {
           <span className="ratio-label">spoil capacity</span>
           <span className="ratio-value">{capacityLabel(world.config.spoilCapacity, spoil)}</span>
         </div>
-        {ECONOMY.map(({ label, value }) => (
+        {TUNABLES.map(({ label, value }) => (
           <div key={label} className="layer-row">
             <span className="ratio-label">{label}</span>
             <span className="ratio-value">{value()}</span>

@@ -20,6 +20,8 @@ export interface SensorFrame {
 
 export interface ForageProgress {
   exitTick: number | null;
+  rawPickupTick: number | null;
+  rawPickupDepth: number | null;
   pickupTick: number | null;
   returnTick: number | null;
   depositTick: number | null;
@@ -50,4 +52,13 @@ export interface ForageProgress {
   homePathSteps: number;
   homePathStepsAtReturn: number | null;
   optimalHomeSteps: number | null;
+  startX: number;
+  startY: number;
+  startZ: number;
+  movementSteps: number;
+  visitedPositions: Set<string>;
+  signedTurn: number;
+  absoluteTurn: number;
+  priorTurnDirection: -1 | 0 | 1;
+  turnDirectionChanges: number;
 }

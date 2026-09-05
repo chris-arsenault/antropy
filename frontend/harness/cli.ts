@@ -14,6 +14,7 @@ import { runColonyLoopRobustness } from "./experiments/colonyLoopRobustness";
 import { runCorrectColonyEnergy } from "./experiments/correctColonyEnergy";
 import { runOptimizeColonyLoop } from "./experiments/optimizeColonyLoop";
 import { runOptimizeColonyEnergy } from "./experiments/optimizeColonyEnergy";
+import { runProgrammedForaging } from "./experiments/programmedForaging";
 import { runDeriveVivo } from "./experiments/deriveVivo";
 import { runColonyLoop } from "./experiments/colonyLoopRunner";
 import { runColonyResilience } from "./experiments/colonyResilience";
@@ -32,6 +33,7 @@ import { runDeterminism } from "./determinism";
  *   pnpm harness calibrate --ticks 4000
  *   pnpm harness calibrate-colony-economy --profile baseline:1:1:1:1:1
  *   pnpm harness colony-resilience --fractions 0.25,0.5,0.75
+ *   pnpm harness programmed-foraging --seeds 2,3,4,5
  *   pnpm harness recent [n]
  *   pnpm harness sql "select ..."
  *   pnpm harness determinism --seed 8001 --warmup 700 --span 500
@@ -208,6 +210,10 @@ function handleDerivation(command: string, rest: string[]): boolean {
     runColonyLoop(parseFlags(rest));
     return true;
   }
+  if (command === "programmed-foraging") {
+    runProgrammedForaging(parseFlags(rest));
+    return true;
+  }
   return false;
 }
 
@@ -236,7 +242,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|colony-resilience|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|colony-resilience|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|programmed-foraging|determinism|recent|sql> [flags]"
       );
   }
 }

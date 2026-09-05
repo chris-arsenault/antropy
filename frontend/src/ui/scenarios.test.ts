@@ -5,14 +5,16 @@ import {
   VARIATION_NEST_CONFIG,
 } from "../sim/config";
 import { derivedColonySeedVector, rnnController } from "../sim/controller/rnn";
+import { maxEnergy } from "../sim/energy";
 import { voxelIndex } from "../sim/grid";
 import { authorProgrammedNest } from "../sim/programmedNest";
+import { colonyLoopOracle } from "../sim/oracles/colonyLoop";
 import { sampleScent } from "../sim/scent";
 import { createWorld, stepWorld } from "../sim/world";
 import { scenarioById } from "./scenarios";
 
 describe("programmed colony scenario", () => {
-  it("starts a fixed review colony with construction and lifecycle changes disabled", () => {
+  it("exposes the sensor-limited programmed policy in the fixed review world", () => {
     const world = scenarioById("programmed").build(1);
     const authored = createWorld(1, rnnController, PROGRAMMED_COLONY_CONFIG);
     authorProgrammedNest(authored);
@@ -25,6 +27,9 @@ describe("programmed colony scenario", () => {
     expect(world.config.geneticVariation).toBe(false);
     expect(world.config.mortality).toBe(false);
     expect(world.config.autoContinue).toBe(false);
+    expect(world.config.authoredNestTrail).toBe(true);
+    expect(world.pheromoneA.activeCount).toBeGreaterThan(0);
+    expect(world.sensorPolicyOverride).toBe(colonyLoopOracle);
     expect(world.colonies).toHaveLength(1);
     expect(world.ants).toHaveLength(40);
     expect(Buffer.from(world.grid.data).equals(Buffer.from(authored.grid.data))).toBe(true);
@@ -41,6 +46,7 @@ describe("programmed colony scenario", () => {
     expect(
       world.ants.every((ant) => ant.y <= world.surfaceMap[ant.z * world.grid.sizeX + ant.x])
     ).toBe(true);
+    expect(world.ants.every((ant) => ant.energy === maxEnergy(ant))).toBe(true);
 
     for (let tick = 0; tick < 100; tick++) {
       stepWorld(world);
@@ -48,6 +54,14 @@ describe("programmed colony scenario", () => {
     expect(world.cavities.size).toBe(cavityCount);
     expect(world.colonies).toHaveLength(1);
     expect(world.ants).toHaveLength(40);
+  });
+
+  it("exposes the trained RNN as a separate scenario in the same world", () => {
+    const rnn = scenarioById("rnn").build(1);
+
+    expect(rnn.config).toEqual(PROGRAMMED_COLONY_CONFIG);
+    expect(rnn.sensorPolicyOverride).toBeNull();
+    expect(rnn.controller.id).toBe("rnn");
   });
 });
 
@@ -72,9 +86,9 @@ describe("Appendix D ladder scenario", () => {
 describe("standing-variation colony scenario", () => {
   it("changes the replacement world only by admitting genetic variation", () => {
     const world = scenarioById("variation").build(2);
-    const distances = world.ants.slice(1).map((ant) =>
-      world.controller.genomeDistance(world.ants[0].genome, ant.genome)
-    );
+    const distances = world.ants
+      .slice(1)
+      .map((ant) => world.controller.genomeDistance(world.ants[0].genome, ant.genome));
 
     expect(world.config).toEqual(VARIATION_NEST_CONFIG);
     expect(world.config.colonyFounding).toBe(false);

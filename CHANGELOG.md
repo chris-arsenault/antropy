@@ -4,6 +4,11 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Repaired the programmed web colony against population-time outcomes rather than isolated
+  single-ant trips. The artificial mature nest can seed an owner-tagged, normally diffusing
+  entrance trail and provision its workers; surface food taxis now makes broad moving corrections
+  instead of tight circles. A bounded exact-world check and four-world harness panel cover exit,
+  sustained surface presence, food collection, loaded return, and repeated productive windows.
 - Added a world-wide genetic identity that follows eggs into workers, males, queens, and stored
   sperm; real parent links, founder lines, offspring contribution, completed deaths, net-energy
   merit, retained founder genomes, and checkpoint version 22 replace mixed ant/patriline ids.

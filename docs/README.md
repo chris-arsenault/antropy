@@ -47,6 +47,7 @@ provenance; they are not parallel plans.
 - [Current RNN](design/controller.md#controller-rnn)
 - [Initialization and seeded competences](design/controller.md#controller-initialization)
 - [Memory and navigation](design/controller.md#controller-memory)
+- [Search without a target signal](design/controller.md#controller-search)
 - [Linear implementation order](design/controller.md#controller-order)
 - [OBE and rejected directions](design/controller.md#controller-obe)
 - [Source provenance](design/controller.md#controller-sources)
@@ -127,6 +128,7 @@ provenance; they are not parallel plans.
 - [Appendix E and E2](design/source-coverage.md#coverage-e)
 - [Appendix F](design/source-coverage.md#coverage-f)
 - [Appendix G](design/source-coverage.md#coverage-g)
+- [Appendix H](design/source-coverage.md#coverage-h)
 - [Plans, notes, and visual source](design/source-coverage.md#coverage-plans)
 
 ## Feature backlog

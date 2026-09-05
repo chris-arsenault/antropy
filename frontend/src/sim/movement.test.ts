@@ -84,6 +84,77 @@ describe("stepCandidates", () => {
   });
 });
 
+describe("wall deflection", () => {
+  it("takes an aligned slope before treating the forward solid as a wall", () => {
+    const world = createWorld(782, undefined, PHASE2_CONFIG);
+    populateForagers(world, 1);
+    const ant = world.ants[0];
+    ant.x = 20;
+    ant.y = 20;
+    ant.z = 20;
+    ant.heading = 0;
+    ant.traits = { ...ant.traits, legLength: 1 };
+    mutateVoxel(world, 20, 19, 20, Material.ROCK);
+    mutateVoxel(world, 21, 20, 20, Material.ROCK);
+    mutateVoxel(world, 21, 21, 20, Material.AIR);
+
+    applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: 0 });
+
+    expect([ant.x, ant.y, ant.z]).toEqual([21, 21, 20]);
+    expect(ant.heading).toBeCloseTo(0);
+  });
+
+  it("deflects a blocked forward intention into a persistent wall slide", () => {
+    const world = createWorld(780, undefined, PHASE2_CONFIG);
+    populateForagers(world, 1);
+    const ant = world.ants[0];
+    ant.x = 20;
+    ant.y = 20;
+    ant.z = 20;
+    ant.heading = 0;
+    ant.traits = { ...ant.traits, legLength: 1 };
+    for (let z = 19; z <= 23; z++) {
+      mutateVoxel(world, 20, 19, z, Material.ROCK);
+      mutateVoxel(world, 20, 20, z, Material.AIR);
+      mutateVoxel(world, 21, 20, z, Material.ROCK);
+      mutateVoxel(world, 21, 21, z, Material.ROCK);
+    }
+
+    applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: 0 });
+
+    expect([ant.x, ant.y, ant.z]).toEqual([20, 20, 21]);
+    expect(ant.heading).toBeCloseTo(Math.PI / 2);
+
+    applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: 0 });
+
+    expect([ant.x, ant.y, ant.z]).toEqual([20, 20, 22]);
+  });
+
+  it("reverses only when every nearer yaw deflection is blocked", () => {
+    const world = createWorld(781, undefined, PHASE2_CONFIG);
+    populateForagers(world, 1);
+    const ant = world.ants[0];
+    ant.x = 20;
+    ant.y = 20;
+    ant.z = 20;
+    ant.heading = 0;
+    ant.traits = { ...ant.traits, legLength: 1 };
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        mutateVoxel(world, 20 + dx, 19, 20 + dz, Material.ROCK);
+        const open = (dx === 0 && dz === 0) || (dx === -1 && dz === 0);
+        mutateVoxel(world, 20 + dx, 20, 20 + dz, open ? Material.AIR : Material.ROCK);
+        mutateVoxel(world, 20 + dx, 21, 20 + dz, Material.ROCK);
+      }
+    }
+
+    applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: 0 });
+
+    expect([ant.x, ant.y, ant.z]).toEqual([19, 20, 20]);
+    expect(ant.heading).toBeCloseTo(Math.PI);
+  });
+});
+
 describe("walker population invariants", () => {
   function assertLegalPositions(world: ReturnType<typeof createWorld>): void {
     // Assert positions first; never step the world mid-iteration (stepping

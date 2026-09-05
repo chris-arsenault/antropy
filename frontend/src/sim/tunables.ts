@@ -111,6 +111,24 @@ export const NEST_FIXTURE_SCENT = {
   surfaceRadius: 24,
 } as const;
 
+/** Standing worker traffic in the mature authored nest. The fixture lays a
+ * real owner-tagged pheromone-A trail along traversable air; normal trail
+ * diffusion and evaporation take over after startup. */
+export const AUTHORED_NEST_TRAIL = {
+  /** Concentration at the entrance end of the seeded trail. */
+  entranceStrength: 1.2,
+  /** Air-path distance over which the initial concentration falls by e. */
+  distanceScale: 18,
+  /** Ordinary diffusion passes representing traffic before the review begins. */
+  fixtureWarmupPasses: 30,
+} as const;
+
+/** Initial conditions supplied by the artificial mature nest fixture. */
+export const AUTHORED_NEST_FIXTURE = {
+  /** Adult workers begin provisioned; ongoing food still has to fund later work. */
+  workerEnergyFraction: 1,
+} as const;
+
 /** Colony odor held by nest fabric and other solid material. Rates are per
  * scent pass, not per simulation tick. */
 export const COLONY_ODOR = {

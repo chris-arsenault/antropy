@@ -6,7 +6,6 @@ import {
   functionalSeedVector,
   setRuntimeSeedBase,
 } from "../../src/sim/controller/rnn";
-import { tuneColonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
 import { flag, intFlag, seedsOf, type Flags } from "../lib/flags";
 import { openLedger, recordRun } from "../lib/ledger";
 import { applyPatches } from "../lib/patch";
@@ -49,13 +48,11 @@ function selectSeedBase(name: string): Float32Array | null {
 function recordEpisodes(flags: Flags, episode: Episode, stage: string): void {
   const ticks = intFlag(flags, "ticks", 2500);
   const cadence = intFlag(flags, "cadence", 25);
-  const stereoGain = Number(flag(flags, "stereo-gain", "6"));
   const label = flag(flags, "label", "");
   const seedBase = flag(flags, "seed-base", "baked");
   const patches = flags.values.get("patch") ?? [];
   const db = openLedger();
   const restore = applyPatches(patches);
-  const restoreOracle = tuneColonyLoopOracle(stereoGain);
   setRuntimeSeedBase(selectSeedBase(seedBase));
   try {
     for (const seed of seedsOf(flags, "9100,9101,9102,9103,9104")) {
@@ -70,7 +67,7 @@ function recordEpisodes(flags: Flags, episode: Episode, stage: string): void {
           seed,
           ticks,
           cadence,
-          params: { ...result.params, stereoGain, seedBase },
+          params: { ...result.params, seedBase },
           patches,
           summary: result.summary,
           wallMs: Date.now() - started,
@@ -82,7 +79,6 @@ function recordEpisodes(flags: Flags, episode: Episode, stage: string): void {
     }
   } finally {
     setRuntimeSeedBase(null);
-    restoreOracle();
     restore();
   }
 }

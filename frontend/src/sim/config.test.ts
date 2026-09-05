@@ -4,6 +4,7 @@ import {
   FULL_CONFIG,
   MORTAL_NEST_CONFIG,
   NEST_CONFIG,
+  PHASE2_CONFIG,
   REPLACEMENT_NEST_CONFIG,
   VARIATION_NEST_CONFIG,
   configPreset,
@@ -25,13 +26,21 @@ const APPENDIX_F_BOUNDARIES = [
   "contactFoodOdor",
 ] as const satisfies readonly (keyof SimConfig)[];
 
+const AUTHORED_FIXTURE_BOUNDARIES = [
+  "authoredNestTrail",
+] as const satisfies readonly (keyof SimConfig)[];
+
 function changedKeys(left: SimConfig, right: SimConfig): (keyof SimConfig)[] {
   return (Object.keys(left) as (keyof SimConfig)[]).filter((key) => left[key] !== right[key]);
 }
 
 describe("Appendix E configuration boundaries", () => {
   it("keeps each newly separated switch independent", () => {
-    for (const key of [...APPENDIX_E_BOUNDARIES, ...APPENDIX_F_BOUNDARIES]) {
+    for (const key of [
+      ...APPENDIX_E_BOUNDARIES,
+      ...APPENDIX_F_BOUNDARIES,
+      ...AUTHORED_FIXTURE_BOUNDARIES,
+    ]) {
       const variant = { ...NEST_CONFIG, [key]: !NEST_CONFIG[key] };
       expect(changedKeys(NEST_CONFIG, variant)).toEqual([key]);
     }
@@ -45,6 +54,8 @@ describe("Appendix E configuration boundaries", () => {
     expect(NEST_CONFIG.mortality).toBe(false);
     expect(NEST_CONFIG.seasons).toBe(false);
     expect(NEST_CONFIG.nestDecay).toBe(false);
+    expect(NEST_CONFIG.authoredNestTrail).toBe(true);
+    expect(PHASE2_CONFIG.authoredNestTrail).toBe(false);
     expect(FULL_CONFIG.workerReproduction).toBe(true);
     expect(FULL_CONFIG.colonyFounding).toBe(true);
     expect(FULL_CONFIG.geneticVariation).toBe(true);

@@ -2,8 +2,8 @@
 
 This document owns the colony's food, energy, brood, queen, reproduction, mortality, and recovery
 loops. The immediate target is demographic closure inside the authored nest: gathered food funds
-workers that replace deaths. Digging and genetic variation remain isolated until that target is
-measured.
+workers that replace deaths. That outcome is currently reopened at its food-loop locomotion base;
+digging and genetic variation remain isolated until the repaired loop is measured.
 
 <a id="colony-goal"></a>
 
@@ -15,8 +15,8 @@ scripted replenishment. The colony ledger—not a particular cache, nursery, rou
 trace—decides whether this loop works.
 
 The authored nest removes construction as a confounder and becomes the later control arm for
-evolved excavation. Current measured worlds use one fixed genome and keep terrain digging,
-genetic variation, new-colony founding, seasons, decay, and automatic continuation off.
+evolved excavation. Certification worlds use one fixed genome and keep terrain digging, genetic
+variation, new-colony founding, seasons, decay, and automatic continuation off.
 
 <a id="colony-energy"></a>
 
@@ -95,7 +95,8 @@ redeposit can manufacture fitness.
 Merit concentrates the signal of many workers and can raise effective heritability, but
 reproductive skew lowers effective population size. Worker-laid male gene flux and the succession
 weighting exponent must be measured together. The fixed-genome colony has closed its first
-replacement window; new-colony founding, mating, and genetic variation remain off through the
+replacement window in historical runs, but that admission is suspended pending food-loop
+recertification. New-colony founding, mating, and genetic variation remain off through the renewed
 long-horizon continuity gate.
 
 <a id="colony-order"></a>
@@ -104,20 +105,20 @@ long-horizon continuity gate.
 
 | ID     | Status      | Work and finish                                                                                                                                                                                               |
 | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BIO-01 | Delivered   | Physical gathering, carrying, underground deposit, marked-cache retrieval, and conservation work through the shared controller interface in the authored nest.                                                |
-| BIO-02 | Delivered   | The current economy supports the programmed reference in every measured world and four predetermined RNN initializations broadly, with food gathering positively associated with colony balance.              |
-| BIO-03 | Delivered   | The matched resilience harness records worker and energy shocks, demographic time series, and source-attributed energy. Run 1916 establishes the untreated eight-world baseline.                              |
+| BIO-01 | Backlog, reopened | Recertify physical gathering, carrying, underground deposit, marked-cache retrieval, and conservation through the repaired programmed policy and RNN cohort.                                              |
+| BIO-02 | Backlog, reopened | Re-establish that the current economy supports the programmed reference and a broad predetermined RNN cohort after credible physical food trips are restored.                                              |
+| BIO-03 | Delivered instrument; recertification pending | The matched resilience harness records worker and energy shocks, demographic time series, and source-attributed energy. Rerun its untreated baseline after BIO-01–BIO-02.                   |
 | BIO-04 | Conditional | If mortality or replacement fails because low consumption cannot leave a standing crop, branch the plan to test bounded accumulation and rot against both shocked and healthy ledgers.                        |
 | BIO-05 | Conditional | If measured energy depletion kills otherwise recovering colonies, branch the plan to test metabolically priced depression with reduced movement and output. Torpor must remain inferior to health.            |
 | BIO-06 | Conditional | If measured queen starvation prevents worker replacement, branch the plan to test a deeper earned reserve and preferential feeding without making weak colonies reproductively competitive.                   |
-| BIO-07 | Delivered   | Mortality and queen upkeep are admitted alone. Runs 1927–1935 certify 8/8 fixed-genome worlds through 4,200 ticks with living queens, 32 workers, attributable distributed deaths, and closed energy ledgers. |
+| BIO-07 | Delivered mechanism; recertification pending | Mortality and queen-upkeep mechanics exist. Repeat the isolated admission gate after BIO-01–BIO-03; runs 1927–1935 remain historical evidence.                                                 |
 | BIO-08 | Backlog     | Impose a surface-food gap and compare caching with a no-cache policy control. Caching must extend colony survival; storage location remains descriptive.                                                      |
 | BIO-09 | Delivered   | Worker-egg, incubation, larval transition, hatching, brood transport, microclimate, exposure, and larval-rearing mechanics have bounded tests. Transport, climate, and exposure remain isolated.              |
-| BIO-10 | Delivered   | Queen-laid worker reproduction is admitted with colony founding off. Egg endowment and laying cost are separately attributable, and runs 1946–1954 close the first replacement window.                        |
+| BIO-10 | Delivered mechanism; recertification pending | Queen-laid worker reproduction, egg endowment, and laying-cost attribution exist. Repeat the replacement gate after the repaired baseline.                                                    |
 | BIO-11 | Backlog     | Re-admit brood transport in the authored nest and verify pickup, carriage, putdown, persistence, and carrier death before judging placement.                                                                  |
 | BIO-12 | Backlog     | Admit microclimate alone and measure adult cost; then admit egg exposure and measure brood survival. Do not bundle the two gates.                                                                             |
-| BIO-13 | Delivered   | Larval rearing is admitted. Feed investment and metamorphosis cost are attributable; bounded tests cover starvation and edible brood, and runs 1946–1954 mature eight workers per world with no brood loss.   |
-| BIO-14 | Delivered   | Runs 1957 and 1959–1963 cross the founder lifespan in five worlds. Post-reference births meet or exceed deaths, population stays 37–49, queens live, energy rises, continuation stays off, and ledgers close. |
+| BIO-13 | Delivered mechanism; recertification pending | Feed investment and metamorphosis cost are attributable, and bounded tests cover starvation and edible brood. Repeat the live rearing outcome after the repaired baseline.                     |
+| BIO-14 | Backlog, reopened | Re-establish demographic continuity after controller recertification. Runs 1957 and 1959–1963 retain historical founder-turnover measurements but do not admit the new baseline.                         |
 | BIO-15 | Backlog     | Make the certified loop observable: caches and withdrawals, brood stages, queen reserve, births, deaths, effective config, checkpoints, and replay visible in the web app.                                    |
 | BIO-16 | Backlog     | After fixed-genome continuity, admit genetic variation and the portfolio safeguards in [advanced systems](advanced.md); then admit colony founding as a separate gate.                                        |
 

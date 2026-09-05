@@ -23,6 +23,7 @@ Current evidence lives in [the certification ledger](../certifications.md) and
 | [Appendix E2](ant-sim-appendix-e2.md) | Division of labor between field navigation, controllers, and instruments | Controller, environment, experimentation, advanced systems |
 | [Appendix F](ant-sim-appendix-f.md) | Viable-space diagnosis and world-affordance repair | Controller, environment, experimentation |
 | [Appendix G](ant-sim-appendix-g.md) | Ecological viability floors and resilience measurement | Colony biology, environment, experimentation, advanced systems |
+| [Appendix H](ant-sim-appendix-h.md) | Scentless-search fallback, escalation order, and return-reserve calibration | Controller and experimentation |
 | [Digging seed specification](seed-spec.md) | Exact five-reflex construction seed and sixth cargo reflex | Controller and environment |
 
 ## Historical execution sources
@@ -232,6 +233,14 @@ This is a navigation index into the unchanged source bodies. The
 - [G.3 Resilience curve](ant-sim-appendix-g.md#g3-the-instrument-the-resilience-curve)
 - [G.4 Build order](ant-sim-appendix-g.md#g4-build-order)
 - [G.5 Failure modes](ant-sim-appendix-g.md#g5-failure-modes-to-avoid)
+
+**Appendix H — scentless search**
+
+- [H.0 Fallback branch](ant-sim-appendix-h.md#h0-level-0-the-fallback-branch-build-this)
+- [H.1 Measured search failures](ant-sim-appendix-h.md#h1-level-1-fixes-for-measured-search-failures-build-only-on-evidence)
+- [H.2 Directional exit cues](ant-sim-appendix-h.md#h2-level-2-directional-exit-cues-build-only-if-level-1-is-not-enough)
+- [H.3 Memory-based search](ant-sim-appendix-h.md#h3-level-3-memory-based-search-deferred-arrives-with-other-work)
+- [H.4 Decision record](ant-sim-appendix-h.md#h4-the-record-of-how-this-decision-went-wrong-before-it-went-right)
 
 **Digging seed specification**
 

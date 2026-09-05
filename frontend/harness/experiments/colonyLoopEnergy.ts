@@ -1,7 +1,7 @@
 import { type Ant } from "../../src/sim/ant";
 import { type SensorPolicy } from "../../src/sim/controller/contract";
 import { Input, Output } from "../../src/sim/controller/contract";
-import { colonyLoopOracle, resetColonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
+import { colonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
 import { ENERGY } from "../../src/sim/tunables";
 import { stepWorld, type World } from "../../src/sim/world";
 import {
@@ -33,10 +33,6 @@ function tracePopulation(world: World, cadence: number, trace: TraceSample[]): v
 
 function onSurface(world: World, ant: Ant): boolean {
   return ant.y > world.surfaceMap[ant.z * world.grid.sizeX + ant.x];
-}
-
-function resetPolicy(policy: DiagnosticPolicy): void {
-  if (policy === colonyLoopOracle) resetColonyLoopOracle();
 }
 
 function installPolicy(world: World, policy: DiagnosticPolicy): void {
@@ -75,7 +71,6 @@ function runEnergyEpisode(
   policy: DiagnosticPolicy,
   record?: PopulationRecorder
 ): ColonyLoopResult {
-  resetPolicy(policy);
   const { world, colony, nest } = prepareAuthoredNestEconomy(seed);
   installPolicy(world, policy);
   const initialEnergy = totalColonyEnergy(world, colony);

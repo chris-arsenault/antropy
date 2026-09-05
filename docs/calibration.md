@@ -207,12 +207,16 @@ Teacher-trajectory loss is therefore a diagnostic, not the initial-training acce
 These controller runs predate the sealed authored-nest fixture and are now historical evidence for
 the training-method decision.
 
-### Appendix F initial-training result
+### Historical Appendix F initial-training result
 
-Appendix F removed the oracle's persistent state by adding parallel vertical sensing, deep-source
-homing, absorbed colony odor, contact marking on handled food, and phasic scent readings. The
-resulting zero-state oracle completes the forage and forced cache-retrieval assays in 16/16 worlds
-each (runs 1719–1750). Four independent 12-unit RNNs were then cloned with the same corpus,
+Appendix F removed the former oracle's persistent state by adding parallel vertical sensing,
+deep-source homing, absorbed colony odor, contact marking on handled food, and phasic scent
+readings. The resulting zero-state oracle completed the forage and forced cache-retrieval assays in
+16/16 worlds each (runs 1719–1750). Appendix H later invalidated the incomplete no-signal policy and
+those measurements, but not the zero-state training method. A subsequent state audit assigned
+heading persistence and contact deflection to the body and used phasic sensor inputs for signal
+change; the current programmed policy is again a same-frame teacher. Four independent 12-unit RNNs
+were then cloned with the same corpus,
 training budget, and selection procedure. On one shared 16-world held-out panel they completed
 14, 12, 7, and 8 loops respectively (runs 1754–1759). Two of four clear the 75% per-controller
 floor; at that checkpoint Appendix E step 10 remained open.

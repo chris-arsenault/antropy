@@ -37,14 +37,20 @@ long-horizon ecology, colony outcomes, and comparative simulation measurements r
 `pnpm harness` and are recorded in `frontend/harness/ledger.db`; they are not CI pass gates.
 Use `pnpm harness calibrate-colony-economy` for the authored-nest energy surface; its profile
 syntax and current evidence are documented in [calibration.md](calibration.md).
-Use `pnpm harness clone-colony-loop` to apply the fixed balanced-frame initializer to four
-predetermined RNN starts, `evaluate-colony-cohort --controller-runs ...` for a no-selection held-out
-cohort evaluation, and `robustness-colony-loop --controller-runs ...` for the current
-production-mutation retention curve. The initializer resets state for every shuffled frame and
-keeps recurrent weights at zero while fitting the feed-forward weights; recurrence remains in the
-genome for evolution. `bake-colony-run --run ID` regenerates the checked-in colony seed from an
-already measured ledger vector. `optimize-colony-loop` remains available for historical diagnosis
-or an explicitly scoped outcome-search experiment; it is not part of initial training.
+Use `pnpm harness programmed-foraging` for the fixed 500-tick, four-world programmed-colony panel.
+It records population exit participation, sampled surface presence, external-food participation,
+loaded return efficiency, and repeated productive windows without adding a multi-world simulation
+to CI. The bounded CI check runs only the exact review seed.
+`pnpm harness clone-colony-loop` is the starting initializer for the current stateless Appendix H
+teacher. It trains balanced independent sensor/output frames while holding recurrence at zero; the
+recurrent genes remain in every produced genome for later evolution. Its old controller artifacts
+remain historical because their teacher lacked the search branch and their outcome recorder could
+accept an impossible event order.
+`evaluate-colony-cohort --controller-runs ...` and `robustness-colony-loop --controller-runs ...`
+remain the no-selection held-out evaluation and production-mutation curve. `bake-colony-run --run
+ID` regenerates the checked-in colony seed from an already measured ledger vector.
+`optimize-colony-loop` remains available for historical diagnosis or an explicitly scoped
+outcome-search experiment; it is not part of initial training.
 
 Use `pnpm harness colony-resilience` for matched authored-nest worker-loss and worker-energy
 curves. Shared flags include `--seeds`, `--fractions`, `--warmup`, `--recovery`, `--cadence`, and

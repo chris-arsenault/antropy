@@ -1,8 +1,8 @@
 import { type Colony } from "./colony";
 import { voxelIndex } from "./grid";
 import { Material } from "./materials";
-import { depositScent } from "./scent";
-import { NEST_FIXTURE_SCENT, SCENT } from "./tunables";
+import { depositScent, stepScentField } from "./scent";
+import { AUTHORED_NEST_TRAIL, NEST_FIXTURE_SCENT, SCENT } from "./tunables";
 import { type World } from "./world";
 
 const SURFACE_AIR_LAYERS = 4;
@@ -93,6 +93,24 @@ function nextTowardEntrance(world: World, distances: Int32Array, index: number):
     if (next !== null && distances[next] === distance - 1) return next;
   }
   return null;
+}
+
+function addEntrancePath(
+  world: World,
+  distances: Int32Array,
+  start: { readonly x: number; readonly y: number; readonly z: number },
+  trail: Set<number>
+): void {
+  let current: number | null = voxelIndex(world.grid, start.x, start.y, start.z);
+  if (distances[current] < 0) {
+    throw new Error("authored nest trail start is not connected to the entrance");
+  }
+  while (current !== null) {
+    trail.add(current);
+    if (distances[current] === 0) return;
+    current = nextTowardEntrance(world, distances, current);
+  }
+  throw new Error("authored nest trail could not reach the entrance");
 }
 
 function connectCarrierPaths(world: World, distances: Int32Array, voxels: Set<number>): void {
@@ -282,4 +300,34 @@ export function primeAuthoredNestScent(world: World, colony: Colony): void {
     depositScent(world.nestScent, index, value, colony.id);
   }
   solveSteadyState(world, voxels, source);
+}
+
+/**
+ * Lay the standing traffic trail of the artificial mature nest through the
+ * ordinary pheromone field. The fixture only chooses traversable air paths;
+ * ants receive no route coordinates and read the same local scent tuple as
+ * every other controller.
+ */
+export function primeAuthoredNestTrail(
+  world: World,
+  colony: Colony,
+  workerStations: readonly { readonly x: number; readonly y: number; readonly z: number }[]
+): void {
+  if (!world.config.authoredNestTrail) return;
+  const distances = airDistances(world, {
+    x: colony.entranceX,
+    y: colony.entranceY,
+    z: colony.entranceZ,
+  });
+  const trail = new Set<number>();
+  for (const station of workerStations) addEntrancePath(world, distances, station, trail);
+  for (const index of trail) {
+    const concentration =
+      AUTHORED_NEST_TRAIL.entranceStrength *
+      Math.exp(-distances[index] / AUTHORED_NEST_TRAIL.distanceScale);
+    depositScent(world.pheromoneA, index, concentration, colony.id);
+  }
+  for (let pass = 0; pass < AUTHORED_NEST_TRAIL.fixtureWarmupPasses; pass++) {
+    stepScentField(world.grid, world.pheromoneA);
+  }
 }
