@@ -76,6 +76,11 @@ samples where evolution strategies are used, deterministic jitter, and explicit 
 provenance reduce noise without hiding variation. Behavioral claims vary worlds, food placement,
 starts, and headings.
 
+When genetic variation is off, evaluation materializes one controller genome and clones that exact
+serialized value into every comparison world. A world seed may change terrain, food, headings, and
+jitter; it must not silently select a different controller. Otherwise a multi-world score averages
+different agents and turns controller evaluation into a noise source.
+
 <a id="experimentation-training"></a>
 
 ## Controller initialization experiments

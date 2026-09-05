@@ -22,6 +22,11 @@ persistence all run in the browser; the deployed artifact is a static bundle.
 - **Persistence**: IndexedDB for checkpoints plus downloadable file export/import. No server
   round-trips.
 
+The ant renderer instances one merged low-poly geometry with abdomen, thorax, head, six legs, and
+two antennae. Terrain rendering separates the adjustable-opacity surface skin from opaque
+subsurface tunnel walls so x-ray viewing does not erase the tunnel boundary. These are display
+mechanisms only; neither affects simulation state.
+
 The full simulation design — controller model, genome, world, energy economy, reproduction,
 regimes, and instrumentation — is decomposed in [the normalized design](design/README.md). The
 original specification is retained in the [source archive](sources/design-spec.md). As of

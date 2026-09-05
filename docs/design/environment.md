@@ -22,6 +22,12 @@ Scent fields diffuse through connected air, decay, wash out, and may carry colon
 Tunnel topology therefore shapes communication. The two pheromone channels remain unlabeled; the
 controller supplies their meaning.
 
+The September MVP performance investigation traced a 3.7 ms zero-ant tick to a 26,000-voxel food
+scent active set plus per-pass map and array allocation. Flat fixed-capacity scent buffers,
+allocation-free hot loops, and time-budgeted frame stepping reduced the measured hot path from
+roughly 2.5 to 1.2 ms per tick with a 25–37 MB heap. These are historical spot measurements, not a
+current target-scale benchmark; later optimization still begins with a fresh profile.
+
 <a id="environment-authored-nest"></a>
 
 ## Authored-nest control world
@@ -123,7 +129,7 @@ brood, energy, or persistence is not pursued.
 
 | ID | Status | Work and finish |
 | --- | --- | --- |
-| ENV-01 | Delivered | Shared 3D voxel world, layered diggable materials, lattice locomotion, conserved spoil, sparse scent fields, food, and deterministic world updates. |
+| ENV-01 | Delivered | Shared 3D voxel world, layered diggable materials, lattice locomotion, conserved spoil, flat-buffer sparse scent fields, food, deterministic world updates, and time-budgeted frame stepping. |
 | ENV-02 | Delivered | Per-world feature gates, checkpointed configuration, independent lifecycle/construction switches, and genome-derived cargo-capacity defaults. |
 | ENV-03 | Delivered | Authored organic nest with one entrance, no hidden carve or uninterrupted central shaft, and a connected mix of slopes, verticals, horizontals, branches, joins, cycles, and chambers. |
 | ENV-04 | Delivered | Shared threshold-band action resolution, parallel vertical sensing, failed-dig cost, load-bearing excavation drop, and common cargo deposit semantics. |
