@@ -4,8 +4,13 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
-- Established the five operating principles as the primary decision lens and added Appendix E's
-  authored-nest colony-loop ladder as the current plan of work.
+- Replaced overlapping appendix work plans with five normalized design categories and one
+  cross-category implementation order. Every item is marked delivered, backlog, or OBE; a
+  section-level coverage map traces the original specification and Appendices A–G into the new
+  owners. Supplied documents, historical plans, review notes, and the nest reference now live
+  unchanged under `docs/sources/`.
+- Established the five operating principles as the primary decision lens and the authored-nest
+  colony loop as the current goal.
 - Added per-world feature configuration and scenario selection. The default programmed-colony
   review disables terrain digging and later lifecycle systems while presenting an authored,
   branching 3D nest for inspection. The web app displays its effective gates, energy values, and

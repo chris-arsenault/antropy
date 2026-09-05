@@ -1,8 +1,8 @@
 # Architecture Decision Records
 
-Founding design decisions — controller model, genome, world representation, reproduction
-channels, recurrent regimes — are recorded with their alternatives and rationale in
-[../design-spec.md](../design-spec.md). ADRs record implementation-time decisions.
+Current controller, genome, world, reproduction, and evolutionary design is decomposed in the
+[normalized design](../design/README.md). The founding specification and its alternatives remain
+in the [source archive](../sources/design-spec.md). ADRs record implementation-time decisions.
 
 | # | Title | Status | Date |
 | - | ----- | ------ | ---- |

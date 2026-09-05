@@ -1,12 +1,32 @@
-# Ladder certification ledger
+# Certification ledger
 
-This file tracks ladder status under the [operating principles](ant-sim-principles.md).
-[Appendix E](ant-sim-appendix-e.md) is the current plan; Appendix D is completed diagnostic
-evidence. Every green row names executable evidence. A contradiction with a written pass
-condition stops the current ladder; measurements outside that condition remain visible without
-silently becoming additional gates.
+This file records evidence under the [operating principles](principles.md). Work status and order
+live in [the normalized design](design/README.md); archived appendix step numbers below preserve
+provenance for existing runs. Every green row names executable or ledger evidence. A contradiction
+with a written pass condition stops certification; measurements outside that condition remain
+visible without silently becoming additional gates.
 
-## Appendix E — current colony-loop ladder
+<a id="certifications-current"></a>
+
+## Current normalized status
+
+| Design work | Status | Evidence boundary |
+| --- | --- | --- |
+| CTRL-01–CTRL-06 | Delivered | Shared controller/body contract, honest 105-input interface, and fixed cohort initialization are covered below by Appendix E steps 2–10 and Appendix F evidence |
+| CTRL-07 | Delivered diagnostic | Construction/cargo seed mechanics remain covered; historical world outcomes are not current gates |
+| ENV-01–ENV-05 | Delivered | Deterministic world, configuration, authored nest, shared resolver, and carrier repair are covered by bounded tests and Appendix F runs |
+| BIO-01–BIO-02 | Delivered | Physical food/cache loop and broad positive energy support are certified by runs 1719–1750 and 1789–1792 |
+| EXP-01–EXP-07 | Delivered | Harness provenance, oracle parity, calibration, cohort evaluation, and mutation robustness are recorded below |
+| BIO-03–BIO-15, EXP-08–EXP-10 | Backlog | Resilience floors, mortality, famine value, brood admission, continuity, and watchability have not started |
+| ADV-01 | Delivered mechanics only | Full-world genetics, founding, regimes, and lifecycle mechanics exist but are isolated from the current colony certification |
+| Remaining scheduled CTRL, ENV, EXP, and ADV IDs | Backlog | Ordered in the owning category documents; no appendix-era result silently certifies them |
+
+<a id="certifications-appendix-e"></a>
+
+## Archived Appendix E evidence — colony loop
+
+The original gates are preserved in [Appendix E](sources/ant-sim-appendix-e.md). Their normalized
+owners are BIO-01–BIO-15, CTRL-04–CTRL-06, ENV-03–ENV-05, and EXP-05–EXP-09.
 
 | Step  | Status     | Evidence                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -245,11 +265,13 @@ deposit through the vertical-bias-selected target band. `ecology.test.ts`, `tran
 `spoil.test.ts`, and `broodTransport.test.ts` cover the common precondition contract. No oracle-only
 drop path or ninth output was added.
 
-This finding was resolved by the subsequently approved coupled vertical-band sensing contract.
+This finding was resolved by the subsequently approved parallel vertical-band sensing contract.
 Runs 587–596 established that result in the former fixture; post-repair runs 1035–1044 are the
 current step-3 evidence. No additional carrier or oracle-only path was added.
 
-## Appendix F — viable-space repair
+<a id="certifications-appendix-f"></a>
+
+## Archived Appendix F evidence — viable-space repair
 
 Appendix F is complete. It changes the interface and world carriers used by Appendix E; it does
 not waive Appendix E's independent-cohort gate.
@@ -269,7 +291,9 @@ frame stack, attention mechanism, extra pheromone stream, or linear-GP migration
 this evidence. The current 12-unit RNN remains the controller substrate; Appendix E step 10 is green
 because the corrected common initializer lands all four predetermined starts in the viable region.
 
-## Appendix D — completed ladder
+<a id="certifications-appendix-d"></a>
+
+## Archived Appendix D evidence — completed ladder
 
 | Step | Status     | Evidence                                                                                                                                                                                                                                                                     |
 | ---- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -277,8 +301,8 @@ because the corrected common initializer lands all four predetermined starts in 
 | 2    | historical | The former mortal-oracle energy outcome assay was retired from Vitest; future comparison belongs in the harness                                                                                                                                                              |
 | 3    | green      | `diggerSeed.test.ts`: bounded output assays cover founded-mark reinforcement and left/right marked-face preference                                                                                                                                                           |
 | 4    | historical | The former fixed-world nest-shape outcome assay was retired from Vitest; the classifier remains descriptive                                                                                                                                                                  |
-| 5    | green      | `seed-spec.md`: five-reflex amendment recorded                                                                                                                                                                                                                               |
-| 6    | green      | `seed-spec.md`: 22-locus, six-relay, zero-recurrence weight specification                                                                                                                                                                                                    |
+| 5    | green      | `sources/seed-spec.md`: five-reflex amendment recorded                                                                                                                                                                                                                       |
+| 6    | green      | `sources/seed-spec.md`: 22-locus, six-relay, zero-recurrence weight specification                                                                                                                                                                                            |
 | 7    | green      | `diggerSeed.test.ts`, `senses.test.ts`: five reflex assays and full input loopback                                                                                                                                                                                           |
 | 8    | historical | The former fixed-seed digging outcome assay was retired from Vitest                                                                                                                                                                                                          |
 | 9    | historical | The former fixed-world RNN nest-shape outcome and ablation assays were retired from Vitest                                                                                                                                                                                   |

@@ -27,21 +27,20 @@ automatically on push to `main`.
 
 ## Documentation
 
-| Topic                        | Link                                                     |
-| ---------------------------- | -------------------------------------------------------- |
-| Complete documentation index | [docs/README.md](docs/README.md)                         |
-| Primary operating principles | [docs/ant-sim-principles.md](docs/ant-sim-principles.md) |
-| Current colony-loop ladder   | [docs/ant-sim-appendix-e.md](docs/ant-sim-appendix-e.md) |
-| Viable-space companion       | [docs/ant-sim-appendix-f.md](docs/ant-sim-appendix-f.md) |
-| Certification status         | [docs/certifications.md](docs/certifications.md)         |
-| Design specification         | [docs/design-spec.md](docs/design-spec.md)               |
-| Architecture                 | [docs/architecture.md](docs/architecture.md)             |
-| Development                  | [docs/development.md](docs/development.md)               |
-| Calibration                  | [docs/calibration.md](docs/calibration.md)               |
-| Architecture decisions       | [docs/adr/README.md](docs/adr/README.md)                 |
-| Backlog                      | [docs/backlog.md](docs/backlog.md)                       |
-| Changelog                    | [CHANGELOG.md](CHANGELOG.md)                             |
-| Agent guide                  | [AGENTS.md](AGENTS.md)                                   |
+| Topic                        | Link                                             |
+| ---------------------------- | ------------------------------------------------ |
+| Complete documentation index | [docs/README.md](docs/README.md)                 |
+| Primary operating principles | [docs/principles.md](docs/principles.md)         |
+| Current design and work order | [docs/design/README.md](docs/design/README.md)  |
+| Certification status         | [docs/certifications.md](docs/certifications.md) |
+| Architecture                 | [docs/architecture.md](docs/architecture.md)     |
+| Development                  | [docs/development.md](docs/development.md)       |
+| Calibration                  | [docs/calibration.md](docs/calibration.md)       |
+| Architecture decisions       | [docs/adr/README.md](docs/adr/README.md)         |
+| Feature backlog              | [docs/backlog.md](docs/backlog.md)               |
+| Preserved design sources     | [docs/sources/README.md](docs/sources/README.md) |
+| Changelog                    | [CHANGELOG.md](CHANGELOG.md)                     |
+| Agent guide                  | [AGENTS.md](AGENTS.md)                           |
 
 ## License
 

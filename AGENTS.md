@@ -7,13 +7,16 @@ on the Ahara platform.
 
 | Topic                        | Link                                                                             |
 | ---------------------------- | -------------------------------------------------------------------------------- |
-| Primary operating principles | [docs/ant-sim-principles.md](docs/ant-sim-principles.md)                         |
-| Current work ladder          | [docs/ant-sim-appendix-e.md](docs/ant-sim-appendix-e.md)                         |
-| Viable-space companion       | [docs/ant-sim-appendix-f.md](docs/ant-sim-appendix-f.md)                         |
+| Primary operating principles | [docs/principles.md](docs/principles.md)                                         |
+| Current work order           | [docs/design/README.md](docs/design/README.md)                                   |
+| Controller design            | [docs/design/controller.md](docs/design/controller.md)                           |
+| Colony biology               | [docs/design/colony-biology.md](docs/design/colony-biology.md)                   |
+| Environment and morphology   | [docs/design/environment.md](docs/design/environment.md)                         |
+| Experiments and certification | [docs/design/experimentation.md](docs/design/experimentation.md)                |
+| Evolution and advanced work  | [docs/design/advanced.md](docs/design/advanced.md)                               |
 | Certification status         | [docs/certifications.md](docs/certifications.md)                                 |
-| Workspace overview           | [README.md](README.md)                                                           |
 | Documentation index          | [docs/README.md](docs/README.md)                                                 |
-| Design specification         | [docs/design-spec.md](docs/design-spec.md)                                       |
+| Source archive               | [docs/sources/README.md](docs/sources/README.md)                                 |
 | Architecture                 | [docs/architecture.md](docs/architecture.md)                                     |
 | Architecture decisions       | [docs/adr/README.md](docs/adr/README.md)                                         |
 | Backlog                      | [docs/backlog.md](docs/backlog.md)                                               |
@@ -26,11 +29,14 @@ on the Ahara platform.
 - Name which ordered goal the task serves: ultimately genuine evolution; currently one colony
   that gathers and stores food, survives, raises brood, and replaces dead workers inside the
   authored nest; always attributable results, measured claims, and human-approved structural
-  changes. The [operating principles](docs/ant-sim-principles.md) supersede numbered Design
-  Rules as the primary lens. Appendices remain reference, derivation, and amendable work plans.
-- Follow the [Appendix E ladder](docs/ant-sim-appendix-e.md) one deliverable and one gate at a
-  time. Until its colony loop is certified, digging, spoil, colony founding, genetic variation,
-  seasons, and decay stay off. Isolate systems through per-world config, not source edits.
+  changes. The [operating principles](docs/principles.md) are the primary lens.
+- Follow the [normalized cross-category order](docs/design/README.md#design-order) and the owning
+  category's linear sequence one deliverable and one gate at a time. Until the fixed-genome colony
+  loop is certified, digging, spoil, colony founding, genetic variation, seasons, and decay stay
+  off. Isolate systems through per-world config, not source edits.
+- Documents under [docs/sources/](docs/sources/README.md) preserve supplied wording and historical
+  plans. They are provenance, not a parallel work queue. Reconcile a new source into the normalized
+  categories and mark displaced ideas OBE instead of silently deleting them.
 - Author the world, not the ant. Build pressures, physics, costs, and honest sensory carriers;
   never add an infallible answer, chosen destination, or self-targeting action to make behavior
   pass. Reflexes may be seeded as erasable genome weights, and oracles may diagnose outside the
@@ -50,8 +56,9 @@ on the Ahara platform.
 - Run readable scripted oracles before opaque seeded controllers at each behavioral rung. Both use
   the identical sensor/output tuple and world resolution; no oracle-only action or privileged world
   mutation is allowed. Scoring and fitness machinery stays quarantined from the evolving population.
-- Use [Appendix C](docs/ant-sim-appendix-c.md) to classify world, interface, seed, parameter, and
-  oracle work, but reason from the operating principles when a historical numbered rule fits badly.
+- Classify work as world, interface, seed, parameter, or oracle work using
+  [the ownership model](docs/principles.md#principles-layers). Apply the tuning stop conditions and
+  finding process in [the experimentation design](docs/design/experimentation.md#experimentation-loop).
 - Treat the behavioral controller as a pluggable module behind the `act`/`mutate`/
   `recombine`/`seed` contract. Nothing outside the controller inspects genome internals.
 - Follow the Ahara platform contract: shared Terraform state bucket, `ahara-tf-patterns`
@@ -73,7 +80,7 @@ on the Ahara platform.
 | `frontend/`                 | Vite React/TypeScript SPA — simulation, rendering, UI       |
 | `infrastructure/terraform/` | Project Terraform root using the Ahara `website` module     |
 | `scripts/`                  | Parameterless local deploy script                           |
-| `docs/`                     | Design spec, architecture, development notes, ADRs, backlog |
+| `docs/`                     | Normalized design, evidence, architecture, ADRs, backlog, and source archive |
 
 ## Commands
 

@@ -27,7 +27,7 @@ From the repo root:
 | `make format`              | `prettier --write .` in `frontend/`                         |
 | `make typecheck`           | `tsc -b` project references                                 |
 | `make test`                | The complete bounded Vitest suite                           |
-| `make docs-check`          | Required docs, local links, and principles/appendix indexes |
+| `make docs-check`          | Required docs, local links, normalized-section indexes, and source preservation |
 | `make terraform-fmt-check` | `terraform fmt -check -recursive infrastructure/terraform/` |
 | `make build`               | Production frontend build                                   |
 | `make deploy`              | `scripts/deploy.sh`                                         |
@@ -39,7 +39,7 @@ Use `pnpm harness calibrate-colony-economy` for the authored-nest energy surface
 syntax and current evidence are documented in [calibration.md](calibration.md).
 Use `pnpm harness clone-colony-loop` to apply the fixed balanced-frame initializer to four
 predetermined RNN starts, `evaluate-colony-cohort --controller-runs ...` for a no-selection held-out
-cohort evaluation, and `robustness-colony-loop --controller-runs ...` for the Appendix F
+cohort evaluation, and `robustness-colony-loop --controller-runs ...` for the current
 production-mutation retention curve. The initializer resets state for every shuffled frame and
 keeps recurrent weights at zero while fitting the feed-forward weights; recurrence remains in the
 genome for evolution. `bake-colony-run --run ID` regenerates the checked-in colony seed from an

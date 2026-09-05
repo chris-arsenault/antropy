@@ -342,7 +342,7 @@ export const RAIN = {
   eggExposureMultiplier: 5,
 };
 
-// Larval rearing (ADR-0011 brood-as-capital, R3-PLAN M4.75): hatchlings
+// Larval rearing (ADR-0011 brood-as-capital, archived R3-PLAN M4.75): hatchlings
 // are not free — a larva is immobile brood that consumes stockpile
 // feedings over a rearing period before becoming a worker. Replacement
 // cost (endowment + lay cost + rearing energy + rearing time) is the

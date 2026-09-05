@@ -1,107 +1,65 @@
-# Backlog
+# Feature backlog
 
-Planned-but-not-built work, grouped by release. Each item is a positive assertion of
-future-state behavior. The [operating principles](ant-sim-principles.md) govern scope;
-the [design spec](design-spec.md) and [Appendices A–D](README.md) remain supporting design
-history and evidence. [Appendix E](ant-sim-appendix-e.md) is the current work ladder and is not
-duplicated here. Every release
-honors the binding constraint of §9: no architectural decision may preclude colony
-mortality/refounding, nest decay, or oscillating carrying capacity.
+This is the high-level queue. Detailed implementation order, biological rationale, acceptance
+conditions, and OBE work live in [the normalized design](design/README.md). Evidence belongs in
+[certifications](certifications.md) and [calibration](calibration.md).
 
-The MVP ("selection visible in one session") shipped in v0.1.0 and Release 2
-(metapopulation and recurrent regimes) in v0.2.0 — see
-[../CHANGELOG.md](../CHANGELOG.md) and [architecture.md](architecture.md).
+<a id="backlog-colony"></a>
 
-## Release 3 — shipped residuals
+## Living colony and resilience
 
-Release 3 shipped (v0.3.0): viability ratios and diagnostics, the oracle ladder,
-calibration and tournament measurement (harness + ledger, ADR-0012), the liability world
-(microclimate, climate-keyed egg exposure, storms, famine troughs), brood-as-capital
-larval rearing, physical hoarding with larder restock, interface legalization
-(nest-plume homing, thermoreceptor), the heat-escape instinct, and automatic continue
-with survivor genetics. Residuals carried forward:
+- Measure the colony resilience baseline and add attributable ecological floors.
+- Certify survival and the value of physical food storage under scarcity.
+- Close the queen, brood-rearing, and worker-replacement loop in the authored nest.
+- Make the resulting colony state independently reviewable in the web app.
 
-- Expand the shipped seed portfolio beyond the current in-vivo-derived forager and Appendix D
-  construction/transport seeds: add wander-heavy, pheromone-reactive, and unstructured minority
-  founders, each validated with rung-3 assays.
-- Reprice deep architecture: the vault currently buys brood protection at a net
-  worker-day loss ([calibration record](calibration.md)); harsher climates or raid pressure
-  should make depth pay on the master ledger.
-- Add the two cheap health instruments (§A.11): live parent–offspring heritability
-  regression and realized effective-population-size estimate with an alarm below 10².
-- Convert the succession/merit counter to net-new-nest-energy accounting where it still
-  counts events rather than energy (anti-Goodhart, §B.7.2).
+Details: [colony biology BIO-03–BIO-15](design/colony-biology.md#colony-order) and
+[experimentation EXP-08–EXP-10](design/experimentation.md#experimentation-order).
 
-## Release 4 — evolutionary machinery (Appendix A core)
+<a id="backlog-evolution"></a>
 
-The depth work that makes long-run evolution real once colonies are worth watching.
+## Evolution readiness
 
-- Implement evolved synaptic plasticity with genomic reward wiring (§A.8): per-connection
-  plastic traces with neuromodulated Hebbian updates and Oja decay, class-shared
-  plasticity gains, evolvable reward-wiring vector, strictly positive plasticity metabolic
-  cost (anti-masking), traces dying with the ant (Darwinian; Lamarckian flag default off).
-- Implement convention-aligned recombination (§A.4.2 Algorithm 1): hidden-unit assignment
-  matching inside `recombine` — promoted to prerequisite once plasticity lands.
-- Implement σ-collapse countermeasures (§A.4.1): hard σ floor, log-normal meta-mutation,
-  and hot eggs (~1% of eggs at hot σ).
-- Implement invasion events (§A.5.3): periodic founding queens carrying fresh portfolio
-  draws or mutated historical-checkpoint genomes.
-- Reduce the nest-plume scent cost (measured ~3x on long runs: the slow-evaporation
-  plume holds a large active set per colony and multiplies with founded colonies) —
-  e.g. a coarser plume lattice or a lower step cadence with adjusted physics, validated
-  against the homing detect-radius inequality.
-- Emit colony-state scents as carriers if not landed in Release 3 M5 (Appendix C §C.8:
-  stockpile-fullness at the queen, brood scent from eggs).
-- Make worker-laid-male gene flux material and tune the succession weighting exponent
-  against the N_e alarm (§A.3.5).
-- Extend the assay protocol to naive-vs-experienced clone pairs (§A.8.3), decomposing
-  competence into innate and learned components per lineage.
+- Add population-health instruments and conservation-correct germ-line accounting.
+- Admit genetic variation to the certified colony and add diverse, mutation-tolerant founder
+  portfolios.
+- Establish sustainable multi-colony founding and collapse/recovery without measured-run rescue.
 
-## Release 5 — watching at scale (§11.2, §11.3, §11.4, §A.11)
+Details: [advanced systems ADV-03–ADV-07](design/advanced.md#advanced-order) and
+[controller CTRL-08–CTRL-09](design/controller.md#controller-order).
 
-- Implement event detection with a timeline: colony founded/died, lineage share thresholds,
-  gene-mean excursions, depth/spoil records, per-region r/K regime transitions, with
-  optional auto-slowdown and camera moves.
-- Implement headless burst mode for overnight runs and replay-from-checkpoint at 1×
-  (shares infrastructure with the Release 3 sweep harness).
-- Implement two-gene scatter plots colored by lineage.
-- Implement offline behavioral assays: clone a genome into an isolated arena with
-  controlled stimuli (controller-agnostic).
-- Add the remaining Appendix instruments: distance-from-seed in weight and behavior space
-  (§A.5.4), cross- vs. within-colony offspring survival ratio (§A.4.2 Design Rule 3), and
-  per-lineage reward-wiring vectors as first-class charted genes.
+<a id="backlog-morphogenesis"></a>
 
-## Release 6 — emergence layers (§8 as amended by §A.9, §13.5)
+## Evolved environment and morphogenesis
 
-- Implement genomic developmental reaction norms (§A.9.1) in place of the authored
-  feeding→size caste dial: each physical trait an evolvable function of larval feeding,
-  incubation depth, and maternal signal, with evolvable developmental noise; morphs are an
-  evolved outcome (sigmoidal norm variant only if linear norms measurably cannot express
-  bimodality).
-- Implement inter-colony contact consequences, opening selective room for raiding and
-  soldier morphs.
-- Add soil/water ecosystem heterogeneity (reserved `WATER` and soil material IDs, rain
-  accelerating nest decay).
+- Return excavation as optional expansion and compare dug colonies with the authored control.
+- Admit nest maintenance, seasons, weather, and stronger liabilities one mechanism at a time.
+- Add activity-scaled threats, inter-colony pressure, and richer soil/water ecology after multiple
+  colonies persist.
 
-## Release 7 — second controller (§2.2, §2.3, §A.8.4)
+Details: [environment ENV-08–ENV-13](design/environment.md#environment-order) and
+[advanced systems ADV-08–ADV-12](design/advanced.md#advanced-order).
 
-- Implement the linear genetic programming controller behind the controller contract, with
-  its own inheritance model, per-instruction energy cost, and architected plastic
-  registers gated by the same evolvable modulation signal.
-- Add a WebGPU compute path for the RNN controller.
+<a id="backlog-learning"></a>
 
-## Performance debt (§A.10 deltas)
+## Learning, development, and controller diversity
 
-The active-set scent fields, bounded decay set, and noalloc hot path already satisfy the
-compute discipline in spirit; the remaining named deltas:
+- Add metabolically priced within-lifetime plasticity with evolvable motivation.
+- Add genomic developmental reaction norms and observe whether morphs and task allocation emerge.
+- Implement linear genetic programming behind the controller contract and compare it with the RNN.
 
-- Move pheromone decay to lazy per-voxel evaluation (Algorithm 3) if active-set sweeps
-  show up in profiles at scale.
-- Move tunnel decay to an event-scheduled priority queue keyed by last-traffic time if the
-  cavity sweep shows up in profiles.
-- Migrate ant storage to structure-of-arrays layout when population targets exceed ~10³.
+Details: [controller CTRL-10–CTRL-12](design/controller.md#controller-order) and
+[advanced systems ADV-10–ADV-13](design/advanced.md#advanced-order).
 
-## Platform
+<a id="backlog-observation"></a>
 
-- Add cloud-stored checkpoints (activates the Ahara ALB/database/Cognito integration steps
-  for syncing overnight runs across machines).
+## Observation and scale
+
+- Add event-driven observation, headless burst runs, checkpoint-linked replay, and deeper lineage
+  inspection.
+- Profile target-scale worlds and optimize scent, decay, storage layout, WASM, or GPU paths only
+  where measurements identify a bottleneck.
+- Add cloud-stored checkpoints only with an explicit platform/authentication design decision.
+
+Details: [experimentation EXP-11–EXP-13](design/experimentation.md#experimentation-order) and
+[environment ENV-14](design/environment.md#environment-order).

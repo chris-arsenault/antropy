@@ -163,7 +163,7 @@ const ACTION_BIAS_LOCI = [
  * physical traits (Rule 9) that derivation must not optimize. */
 export const WEIGHT_COUNT = PHYS;
 
-// The Phase 2 digger seed (docs/seed-spec.md): five reflexes, about twenty
+// The Phase 2 digger seed (docs/sources/seed-spec.md): five reflexes, about twenty
 // loci, six memoryless relays, and no recurrence. Hidden units are indices
 // into a layer that is otherwise all zero, so each relay is isolated.
 const H_AMPLIFY = 0;
@@ -218,7 +218,7 @@ const CAST_SCENT_INHIBITION = -5.601472;
 const CAST_DRIVE = 0.986716;
 
 /**
- * Hand-written founder weights for the Phase 2 digger (docs/seed-spec.md).
+ * Hand-written founder weights for the Phase 2 digger (docs/sources/seed-spec.md).
  * Reflex 1 sinks a marked shaft; reflex 2 hauls spoil to quiet ground and
  * deposits it; reflex 3 reinforces and follows the mark; reflex 4 turns a
  * crowded digger sideways; reflex 5 casts until it reacquires channel A.

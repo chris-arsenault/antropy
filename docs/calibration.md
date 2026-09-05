@@ -1,6 +1,7 @@
 # Calibration
 
-The economy is tuned by measurement, not by knob-turning (Appendix B §B.6).
+The economy is tuned by measurement, not by knob-turning, under the
+[calibration design](design/experimentation.md#experimentation-calibration).
 Measurements run through the harness (ADR-0012): `pnpm harness
 calibrate-colony-economy` for the current authored-nest distribution,
 `pnpm harness calibrate` for the historical Release 3 axis sweep,

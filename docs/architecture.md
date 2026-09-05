@@ -23,20 +23,22 @@ persistence all run in the browser; the deployed artifact is a static bundle.
   round-trips.
 
 The full simulation design — controller model, genome, world, energy economy, reproduction,
-regimes, and instrumentation — is specified in [design-spec.md](design-spec.md). As of
+regimes, and instrumentation — is decomposed in [the normalized design](design/README.md). The
+original specification is retained in the [source archive](sources/design-spec.md). As of
 v0.3.0 the world runs the liability metapopulation: colony-tagged scent channels
 (ADR-0005), scripted queen provisioning via trophallaxis, food transport, larder restock,
 and larval rearing (ADR-0006, ADR-0011), haploid males from a global pool (ADR-0007),
 structured initialization with chemotaxis, excavation, nest-plume homing, brood care,
-pickup, and heat-escape instincts (ADR-0004/0006/0008; interface legalized per Appendix C),
+pickup, and heat-escape instincts (ADR-0004/0006/0008; interface ownership follows the
+[current principles](principles.md#principles-layers)),
 microclimate stress with climate-keyed egg exposure and year-round storms, physical
 hoarding, nest decay, seasonal famine troughs, and automatic continuation from survivor
 genetics on a 192×64×192 map. Measurements (tournaments, calibration, seed derivation,
 determinism checks) run through the harness into a committed SQLite ledger
 (`frontend/harness/`, ADR-0012), never through the test tiers.
 
-The web app exposes four world-level scenarios: the default Appendix E colony-loop review, the
-Appendix D functional-controller diagnostic, Phase 2 nest digging, and the full liability colony.
+The web app exposes four world-level scenarios: the default authored-nest colony-loop review, the
+historical functional-controller diagnostic, isolated nest digging, and the full liability colony.
 A scenario selects the world configuration and founder seed together; feature gates and cargo
 capacities are stored per world and displayed by the effective-config panel. The default review
 uses the trained colony seed in the exact authored nest. It disables digging, mortality,
@@ -44,11 +46,12 @@ reproduction, founding, genetic variation, weather, decay, and automatic continu
 logistics can be watched without admitting later ladder systems.
 
 The authored-nest builder carves the fixture before placing the colony and never calls the legacy
-founding excavation path. Appendix F adds three physical carrier families to this control arm:
-the deep-source homing field, absorbed owner-tagged colony odor in nest material, and colony odor
-transferred by contact to handled food. Five scent families expose level, center, down/up, vertical
-stereo, and phasic samples through the 105-input controller vector. The sensor-limited oracle and
-the RNN resolve the same eight outputs through the same world action path.
+founding excavation path. The current [environment design](design/environment.md) gives this
+control arm three physical carrier families: the deep-source homing field, absorbed owner-tagged
+colony odor in nest material, and colony odor transferred by contact to handled food. Five scent
+fields expose level, center, down/up, vertical stereo, and phasic samples through the 105-input
+controller vector. The sensor-limited oracle and the RNN resolve the same eight outputs through
+the same world action path.
 
 ## Deployment
 
