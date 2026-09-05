@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { TRAIT_LABELS, type WorldStats } from "../sim/stats";
 import { DivergingBars } from "./charts/DivergingBars";
 import { LineChart } from "./charts/LineChart";
@@ -12,14 +13,18 @@ interface ChartsPanelProps {
   version: number;
 }
 
-/** The Act One dashboard (spec §11.4): selection differential first. */
+/** Live population and descriptive trait instrumentation. */
 export function ChartsPanel({ history, stats, version }: ChartsPanelProps) {
+  const meritCorrelations = useMemo(
+    () => stats?.traitMeritCorrelation.map((estimate) => estimate.value) ?? [],
+    [stats]
+  );
   return (
     <div data-testid="charts-panel">
       <DivergingBars
-        title="Selection differential (trait ↔ delivery rate)"
+        title="Live trait ↔ net-merit rate"
         labels={TRAIT_LABELS}
-        values={stats?.selectionDifferential ?? []}
+        values={meritCorrelations}
         version={version}
       />
       <LineChart

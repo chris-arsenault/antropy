@@ -72,6 +72,10 @@ export const braitenbergController: Controller = {
     return BRAITENBERG_GENOME;
   },
 
+  genomeDistance() {
+    return 0;
+  },
+
   haploidOffspring() {
     return BRAITENBERG_GENOME;
   },

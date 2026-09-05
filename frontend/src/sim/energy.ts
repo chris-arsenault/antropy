@@ -1,4 +1,5 @@
 import { SEX_MALE, type Ant } from "./ant";
+import { recordAntDeath, recordNetEnergyDelivery } from "./ancestry";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
 import { Material, type MaterialId } from "./materials";
 import { ENERGY, MALE } from "./tunables";
@@ -13,6 +14,26 @@ export function spendEnergy(world: World, ant: Ant, amount: number): void {
   world.metrics.energyBurned += amount;
 }
 
+/** Transfer ordinary internal energy to the colony without creating germ-line merit. */
+export function transferToStockpile(world: World, lineageId: number, amount: number): void {
+  const colony = world.colonies.find((candidate) => candidate.id === lineageId);
+  if (!colony) return;
+  colony.stockpile += amount;
+}
+
+/** Credit net-new external food energy after it first enters an owned colony sink. */
+export function creditNetEnergyMerit(world: World, ant: Ant, amount: number): void {
+  const colony = world.colonies.find((candidate) => candidate.id === ant.lineageId);
+  if (!colony) return;
+  colony.patrilineMerit.set(
+    ant.patrilineId,
+    (colony.patrilineMerit.get(ant.patrilineId) ?? 0) + amount
+  );
+  ant.netEnergyDelivered += amount;
+  recordNetEnergyDelivery(world, ant, amount);
+  world.metrics.netEnergyMeritCredited += amount;
+}
+
 export function isAboveSurface(world: World, x: number, y: number, z: number): boolean {
   return y > world.surfaceMap[z * world.grid.sizeX + x];
 }
@@ -23,14 +44,21 @@ export function recordFoodPickup(
   x: number,
   y: number,
   z: number
-): void {
-  if (material !== Material.FOOD) return;
+): boolean {
+  if (material !== Material.FOOD) return false;
   const index = voxelIndex(world.grid, x, y, z);
   const alreadyStored = world.storedFood.has(index);
+  const recycled = world.recycledFood.has(index);
+  const uncreditedExternal =
+    world.uncreditedExternalFood.has(index) ||
+    (!alreadyStored && !recycled && isAboveSurface(world, x, y, z));
   world.metrics.foodPickedUp += 1;
-  if (!alreadyStored && isAboveSurface(world, x, y, z)) {
+  if (recycled) {
+    world.metrics.recycledFoodEnergyRecovered += ENERGY.foodEnergy;
+  } else if (!alreadyStored && isAboveSurface(world, x, y, z)) {
     world.metrics.surfaceFoodEnergyGathered += ENERGY.foodEnergy;
   }
+  return uncreditedExternal;
 }
 
 /**
@@ -82,8 +110,8 @@ const DROP_OFFSETS = [
 /**
  * Place a dropped voxel (corpse, perished brood, a dead ant's carried
  * load) at the first unoccupied AIR spot at or beside the site — never
- * entombing a living ant or an egg inside solid matter. Returns false
- * when there is nowhere to put it.
+ * entombing a living ant or an egg inside solid matter. Returns the placed
+ * voxel index, or null when there is nowhere to put it.
  */
 export function dropMaterialAt(
   world: World,
@@ -91,7 +119,7 @@ export function dropMaterialAt(
   y: number,
   z: number,
   material: MaterialId
-): boolean {
+): number | null {
   for (const [dx, dy, dz] of DROP_OFFSETS) {
     const tx = x + dx;
     const ty = y + dy;
@@ -104,15 +132,16 @@ export function dropMaterialAt(
       world.ants.some((a) => a.alive && a.x === tx && a.y === ty && a.z === tz);
     if (!occupied) {
       mutateVoxel(world, tx, ty, tz, material);
-      return true;
+      return voxelIndex(world.grid, tx, ty, tz);
     }
   }
-  return false;
+  return null;
 }
 
 /** Place dropped biomass (corpse, perished brood) as a FOOD voxel. */
 export function dropFoodAt(world: World, x: number, y: number, z: number): void {
-  dropMaterialAt(world, x, y, z, Material.FOOD);
+  const index = dropMaterialAt(world, x, y, z, Material.FOOD);
+  if (index !== null) world.recycledFood.add(index);
 }
 
 function isEggReleaseSpot(world: World, x: number, y: number, z: number): boolean {
@@ -195,6 +224,22 @@ function releaseCarriedEggs(world: World, ant: Ant): void {
   }
 }
 
+function dropCarriedLoad(world: World, ant: Ant): void {
+  const carried = ant.carrying as MaterialId | null;
+  if (carried === null) return;
+  for (let index = 0; index < ant.spoilLoads; index++) {
+    const placed = dropMaterialAt(world, ant.x, ant.y, ant.z, carried);
+    if (carried === Material.FOOD && placed !== null) {
+      world.storedFood.add(placed);
+      if (index < ant.uncreditedFoodLoads) world.uncreditedExternalFood.add(placed);
+    }
+  }
+  ant.spoilLoads = 0;
+  ant.carryLoad = 0;
+  ant.carrying = null;
+  ant.uncreditedFoodLoads = 0;
+}
+
 /**
  * Kill an ant in place: the corpse persists as edible energy (spec §6),
  * and anything it was carrying returns to the world — matter is conserved
@@ -205,17 +250,16 @@ export function killAnt(world: World, ant: Ant): void {
     return;
   }
   ant.alive = false;
-  world.metrics.workerDeaths += 1;
-  releaseCarriedEggs(world, ant);
-  const carried = ant.carrying as MaterialId | null;
-  if (carried !== null) {
-    for (let i = 0; i < ant.spoilLoads; i++) {
-      dropMaterialAt(world, ant.x, ant.y, ant.z, carried);
-    }
-    ant.spoilLoads = 0;
-    ant.carryLoad = 0;
-    ant.carrying = null;
+  recordAntDeath(world, ant);
+  if (ant.sex === SEX_MALE) {
+    world.metrics.maleDeaths += 1;
+    world.metrics.maleEnergyRemovedAtDeath += ant.energy;
+  } else {
+    world.metrics.workerDeaths += 1;
+    world.metrics.workerEnergyRemovedAtDeath += ant.energy;
   }
+  releaseCarriedEggs(world, ant);
+  dropCarriedLoad(world, ant);
   dropFoodAt(world, ant.x, ant.y, ant.z);
 }
 
@@ -226,6 +270,15 @@ export function checkDeath(world: World, ant: Ant): void {
       : ant.traits.lifespanTicks;
   if (ant.energy > 0 && ant.age <= lifespan) {
     return;
+  }
+  if (ant.sex === SEX_MALE && ant.energy <= 0) {
+    world.metrics.maleEnergyDeaths += 1;
+  } else if (ant.sex === SEX_MALE) {
+    world.metrics.maleAgeDeaths += 1;
+  } else if (ant.energy <= 0) {
+    world.metrics.workerEnergyDeaths += 1;
+  } else {
+    world.metrics.workerAgeDeaths += 1;
   }
   killAnt(world, ant);
 }

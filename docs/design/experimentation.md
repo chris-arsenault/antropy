@@ -121,10 +121,24 @@ controlled fraction of workers or energy, and measures recovery probability and 
 world-seed distribution. The perturbation at which recovery falls below 50% estimates the basin of
 attraction around viability.
 
-Build this harness and record an untreated baseline before any floor mechanism. Rerun the identical
-curve after standing-crop accumulation, metabolic depression, and queen-reserve changes. Also
-rerun the healthy-colony ledger so a deeper floor is not purchased by making healthy reproduction
-worse or the floor attractive.
+The harness records an untreated baseline before any floor mechanism. If a later mortality or
+replacement result justifies one conditional floor, rerun the identical curve and the healthy
+colony ledger so recovery is not purchased by making healthy reproduction worse or the floor
+attractive.
+
+Recovery means regaining 90% of the pre-shock worker count for a workforce shock or 90% of mean
+worker energy for an energy shock. Four worlds are sufficient for an exploratory comparison;
+certification uses at least eight, with the same warmed state reused across treatment arms. The
+largest shock recovered by at least half the worlds is the reported basin edge.
+
+The current implementation sequence uses these quantitative gates before any tuning:
+
+| Gate                        | Predeclared acceptance                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mortality admission         | With mortality and queen upkeep as the only new gates, at least 6/8 worlds retain a living queen and 30 workers through 4,200 ticks—two complete 2,100-tick replacement latencies. Death cause, energy removed at death, and recycled corpse energy are attributable; no tick loses more than four bootstrap workers to an initialization artifact; energy residual is at most `1e-8`. |
+| Resource-funded replacement | A reared worker costs its genome endowment plus `COLONY.eggLayCost` plus `LARVA.rearingCost`; the current founder value is `1.0`. The first possible worker matures by tick 2,100, every birth is conserved through the brood ledger, and post-pipeline births equal or exceed natural deaths in at least 6/8 worlds without external replenishment.                                   |
+| Fixed-genome continuity     | One 24,000-tick smoke crosses the 20,000-tick founder lifespan; four new varied worlds repeat it. Every world keeps the queen alive, ends with post-4,200 births at least deaths, keeps population in `[20, 80]`, and does not lose colony energy relative to tick 4,200. Automatic continuation remains off and conservation residual remains at most `1e-8`.                    |
+| In-world selection          | On at least 16 paired continuous worlds, a heritable genome or trait change has a positive parent-offspring estimate and improves survival, reproduction, or conserved colony energy relative to both fixed-genome and neutral-parent controls; the paired 95% bootstrap interval excludes zero. No explicit fitness or offline replacement enters the population.                     |
 
 <a id="experimentation-observation"></a>
 
@@ -143,38 +157,38 @@ checkpoint. Detection never affects selection.
 
 ## Linear implementation order
 
-| ID | Status | Work and finish |
-| --- | --- | --- |
-| EXP-01 | Delivered | Deterministic simulation seeds, checkpoint provenance, bounded mechanics tests, and a parameterized harness writing git/config/run metadata to SQLite. |
-| EXP-02 | Delivered | Layer classification, interface legality tests, inequality-first tuning, stop signatures, and the five-part structural-finding discipline govern work. |
-| EXP-03 | Delivered | Shared-action oracle infrastructure, omniscient and sensor-limited policies, bounded controller assays, degradation tools, and world-versus-controller fault isolation. |
-| EXP-04 | Delivered | Viability ratios, calibration sweeps, strategy tournaments, liability ablations, and interpreted calibration/certification ledgers exist. |
-| EXP-05 | Delivered | The authored-nest sensor-limited policy completes forage, cache, and retrieval with zero private state across held-out worlds. |
-| EXP-06 | Delivered | Fixed balanced-frame RNN distillation and cohort evaluation certify four predetermined starts without terminal outcome selection. |
-| EXP-07 | Delivered | A production-mutation robustness curve exists for the baked colony RNN and declines without an immediate cliff. |
-| EXP-08 | Backlog | Add the colony resilience-curve scenario; record the current untreated baseline, then repeat it after every viability-floor mechanism. |
-| EXP-09 | Backlog | Complete current colony-loop harness gates in order: mortality survival, cache-versus-no-cache famine, reproduction, brood transport, microclimate, exposure, larval rearing, continuity, and watchability. |
-| EXP-10 | Backlog | Add standing path-efficiency measurement to food and homing trips. Keep shortest-path planning outside sensor-limited behavior. |
-| EXP-11 | Backlog | Add live parent-offspring heritability and effective-population-size instruments before genetic variation; then naive-versus-experienced assays before plasticity. |
-| EXP-12 | Backlog | Add event detection, lineage/genome exploration, controller-agnostic offline assay UI, headless burst execution, and checkpoint-linked replay for long evolutionary runs. |
-| EXP-13 | Backlog | Before reintroducing digging, establish authored-versus-dug paired ledger scenarios and descriptive morphometrics in the harness. |
+| ID     | Status    | Work and finish                                                                                                                                                                                                    |
+| ------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| EXP-01 | Delivered | Deterministic simulation seeds, checkpoint provenance, bounded mechanics tests, and a parameterized harness writing git/config/run metadata to SQLite.                                                             |
+| EXP-02 | Delivered | Layer classification, interface legality tests, inequality-first tuning, stop signatures, and the five-part structural-finding discipline govern work.                                                             |
+| EXP-03 | Delivered | Shared-action oracle infrastructure, omniscient and sensor-limited policies, bounded controller assays, degradation tools, and world-versus-controller fault isolation.                                            |
+| EXP-04 | Delivered | Viability ratios, calibration sweeps, strategy tournaments, liability ablations, and interpreted calibration/certification ledgers exist.                                                                          |
+| EXP-05 | Delivered | The authored-nest sensor-limited policy completes forage, cache, and retrieval with zero private state across held-out worlds.                                                                                     |
+| EXP-06 | Delivered | Fixed balanced-frame RNN distillation and cohort evaluation certify four predetermined starts without terminal outcome selection.                                                                                  |
+| EXP-07 | Delivered | A production-mutation robustness curve exists for the baked colony RNN and declines without an immediate cliff.                                                                                                    |
+| EXP-08 | Delivered | The reusable colony-resilience harness records matched worker-loss and worker-energy shocks, conserved energy, lifecycle attribution, and demographic time series. Run 1916 is the untreated eight-world baseline. |
+| EXP-09 | Delivered | Mortality, resource-funded replacement, and fixed-genome continuity pass in runs 1927–1963. Storage scarcity, watchability, and later liabilities remain separate backlog questions.                                  |
+| EXP-10 | Backlog   | Add standing path-efficiency measurement to food and homing trips. Keep shortest-path planning outside sensor-limited behavior.                                                                                    |
+| EXP-11 | Delivered / backlog | Live completed-life heritability, effective population, genetic diversity, founder distance, and line survival are persisted with sample counts and unavailable states. Naive-versus-experienced assays remain ordered before plasticity. |
+| EXP-12 | Backlog   | Add event detection, lineage/genome exploration, controller-agnostic offline assay UI, headless burst execution, and checkpoint-linked replay for long evolutionary runs.                                          |
+| EXP-13 | Backlog   | Before reintroducing digging, establish authored-versus-dug paired ledger scenarios and descriptive morphometrics in the harness.                                                                                  |
 
 <a id="experimentation-obe"></a>
 
 ## OBE and invalid evidence
 
-| Direction or evidence | Status and reason |
-| --- | --- |
-| Multi-minute behavioral outcome tests in normal or slow Vitest gates | **OBE.** They proved fixture-specific trajectories and made routine validation expensive. Their mechanics were retained; their claims require harness runs. |
-| Fixed-seed nest-shape, brood-cohort, and storm-cache assays as current certification | **OBE.** World and carrier changes invalidated them. Historical measurements remain in the certification ledger. |
-| Strict field-gradient success from every voxel | **OBE as a gate.** The sealed entrance contains a local maximum while agents still complete the functional loop. Field analysis remains descriptive. |
-| Teacher-trajectory loss as controller acceptance | **Rejected.** Similar loss produced materially different closed-loop behavior. |
-| More sequence epochs, rare-action weights, selected validation epochs, successful-world filtering, long recurrent chunks, or parameter noise as the initial-training remedy | **OBE.** Measured sweeps did not broaden the controller cohort. |
-| Guarded or changing-world terminal outcome search | **OBE.** It overfit consulted worlds or degraded the initial controller and solved the wrong post-Appendix-F problem. |
-| Milestone reward shaping for initial food-loop training | **OBE for the zero-state target.** It was proposed to repair outcome search; balanced supervised frames removed the need. It remains a diagnostic pattern, not a current training stage. |
-| Behavioral reflex assays as hard optimization constraints | **Rejected.** They protect the designer's decomposition instead of controller function. |
-| Single best controller, single seed, or positive median as a population claim | **Rejected.** Cohort breadth and unseen-world distributions are the acceptance unit. |
-| Auto-continue in measured runs | **Rejected.** It masks colony death, which is the datum under study. |
+| Direction or evidence                                                                                                                                                       | Status and reason                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-minute behavioral outcome tests in normal or slow Vitest gates                                                                                                        | **OBE.** They proved fixture-specific trajectories and made routine validation expensive. Their mechanics were retained; their claims require harness runs.                              |
+| Fixed-seed nest-shape, brood-cohort, and storm-cache assays as current certification                                                                                        | **OBE.** World and carrier changes invalidated them. Historical measurements remain in the certification ledger.                                                                         |
+| Strict field-gradient success from every voxel                                                                                                                              | **OBE as a gate.** The sealed entrance contains a local maximum while agents still complete the functional loop. Field analysis remains descriptive.                                     |
+| Teacher-trajectory loss as controller acceptance                                                                                                                            | **Rejected.** Similar loss produced materially different closed-loop behavior.                                                                                                           |
+| More sequence epochs, rare-action weights, selected validation epochs, successful-world filtering, long recurrent chunks, or parameter noise as the initial-training remedy | **OBE.** Measured sweeps did not broaden the controller cohort.                                                                                                                          |
+| Guarded or changing-world terminal outcome search                                                                                                                           | **OBE.** It overfit consulted worlds or degraded the initial controller and solved the wrong post-Appendix-F problem.                                                                    |
+| Milestone reward shaping for initial food-loop training                                                                                                                     | **OBE for the zero-state target.** It was proposed to repair outcome search; balanced supervised frames removed the need. It remains a diagnostic pattern, not a current training stage. |
+| Behavioral reflex assays as hard optimization constraints                                                                                                                   | **Rejected.** They protect the designer's decomposition instead of controller function.                                                                                                  |
+| Single best controller, single seed, or positive median as a population claim                                                                                               | **Rejected.** Cohort breadth and unseen-world distributions are the acceptance unit.                                                                                                     |
+| Auto-continue in measured runs                                                                                                                                              | **Rejected.** It masks colony death, which is the datum under study.                                                                                                                     |
 
 <a id="experimentation-sources"></a>
 

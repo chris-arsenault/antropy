@@ -10,16 +10,112 @@ visible without silently becoming additional gates.
 
 ## Current normalized status
 
-| Design work | Status | Evidence boundary |
-| --- | --- | --- |
-| CTRL-01–CTRL-06 | Delivered | Shared controller/body contract, honest 105-input interface, and fixed cohort initialization are covered below by Appendix E steps 2–10 and Appendix F evidence |
-| CTRL-07 | Delivered diagnostic | Construction/cargo seed mechanics remain covered; historical world outcomes are not current gates |
-| ENV-01–ENV-05 | Delivered | Deterministic world, configuration, authored nest, shared resolver, and carrier repair are covered by bounded tests and Appendix F runs |
-| BIO-01–BIO-02 | Delivered | Physical food/cache loop and broad positive energy support are certified by runs 1719–1750 and 1789–1792 |
-| EXP-01–EXP-07 | Delivered | Harness provenance, oracle parity, calibration, cohort evaluation, and mutation robustness are recorded below |
-| BIO-03–BIO-15, EXP-08–EXP-10 | Backlog | Resilience floors, mortality, famine value, brood admission, continuity, and watchability have not started |
-| ADV-01 | Delivered mechanics only | Full-world genetics, founding, regimes, and lifecycle mechanics exist but are isolated from the current colony certification |
-| Remaining scheduled CTRL, ENV, EXP, and ADV IDs | Backlog | Ordered in the owning category documents; no appendix-era result silently certifies them |
+| Design work                                                        | Status                   | Evidence boundary                                                                                                                                               |
+| ------------------------------------------------------------------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CTRL-01–CTRL-06                                                    | Delivered                | Shared controller/body contract, honest 105-input interface, and fixed cohort initialization are covered below by Appendix E steps 2–10 and Appendix F evidence |
+| CTRL-07                                                            | Delivered diagnostic     | Construction/cargo seed mechanics remain covered; historical world outcomes are not current gates                                                               |
+| ENV-01–ENV-05                                                      | Delivered                | Deterministic world, configuration, authored nest, shared resolver, and carrier repair are covered by bounded tests and Appendix F runs                         |
+| BIO-01–BIO-02                                                      | Delivered                | Physical food/cache loop and broad positive energy support are certified by runs 1719–1750 and 1789–1792                                                        |
+| EXP-01–EXP-07                                                      | Delivered                | Harness provenance, oracle parity, calibration, cohort evaluation, and mutation robustness are recorded below                                                   |
+| BIO-03, EXP-08                                                     | Delivered                | The matched untreated resilience curve, demographic series, and recycled-food attribution are recorded in runs 1860–1916                                        |
+| BIO-07                                                             | Delivered                | Mortality and queen upkeep pass the 4,200-tick admission gate in 8/8 worlds in runs 1927–1935                                                                   |
+| BIO-10, BIO-13                                                     | Delivered                | Conserved worker reproduction and larval rearing replace all scheduled deaths in 8/8 worlds in runs 1946–1954                                                   |
+| BIO-14, EXP-09, ADV-02                                              | Delivered                | Runs 1957 and 1959–1963 cross complete founder turnover in five worlds with replacement, bounded population, rising conserved energy, and no continuation        |
+| ADV-03, EXP-11 instruments                                         | Delivered                | Global genetic ancestry, conservation-correct merit, completed-life estimators, controller-owned distances, founder-line health, checkpoint v22, web readouts, and SQLite persistence pass bounded mechanics checks |
+| BIO-04–BIO-06                                                    | Conditional, not admitted | Mortality, replacement, and continuity did not activate a resilience floor                                                                                        |
+| BIO-08, BIO-11–BIO-12, BIO-15, EXP-10                             | Backlog                  | Storage scarcity, transport, climate/exposure, watchability, and path efficiency remain separately ordered work                                                   |
+| ADV-01                                                             | Delivered mechanics only | Full-world genetics, founding, regimes, and lifecycle mechanics exist but are isolated from the current colony certification                                    |
+| Remaining scheduled CTRL, ENV, EXP, and ADV IDs                    | Backlog                  | Ordered in the owning category documents; no appendix-era result silently certifies them                                                                        |
+
+<a id="certifications-turnover-baseline"></a>
+
+## Untreated turnover baseline
+
+Run 1916 records eight authored-nest worlds after a 1,200-tick warmup and a 1,200-tick matched
+recovery window. Each seed warms once; control, 25%, 50%, and 75% treatment arms restore the exact
+same checkpoint. Controls gained colony energy in 8/8 worlds: post-warmup balances range from
+`+6.223` to `+37.512`, with mean gathered energy `16.2`, mean burn `0.969`, and mean balance
+`+15.231`. The maximum absolute conservation residual across all 56 arms is `5.2e-12`.
+
+The untreated energy-recovery basin reaches the 25% shock: 6/8 worlds regain 90% of pre-shock mean
+worker energy, with median recovery at 560.5 ticks. A 50% shock recovers in 1/8 and a 75% shock in
+0/8. Workforce shocks recover in 0/8 at every fraction because worker reproduction is off; this is
+the intended no-replacement control, not evidence for a rescue mechanism. Death recycling is now
+separate from external gathering: worker-loss arms record corpse-food recovery independently, and
+the energy equation remains closed.
+
+Every founder has the current fixed traits: egg endowment `0.3`, direct-hatch capital `0.4`, full
+reared-worker capital `1.0`, lifespan 20,000 ticks, incubation 600 ticks, and rearing 1,200 ticks.
+Observed brood flows are exactly zero in this baseline—no eggs, births, or brood losses—because the
+reproduction and larval-rearing gates remain off. Existing run 1790 supplies the controller-width
+control: all four predetermined initializations gather and are positive in a majority of sixteen
+worlds, with 63/64 positive controller-world episodes.
+
+Run 1856 is retained but invalid for this gate. It exposed that the controller's shipped default
+still used the obsolete pre-Appendix-F forager artifact even though the web scenario explicitly
+selected run 1784. The default now uses the checked-in run-1784 colony seed, and a bounded test
+locks that identity. Runs 1860–1916 are the corrected evidence.
+
+<a id="certifications-mortality-admission"></a>
+
+## Mortality admission
+
+Runs 1917–1926 compare untreated and mortality-only authored-nest worlds on seeds 26000–26003 for
+4,200 ticks. Mortality is the only changed feature gate: worker reproduction, larval rearing,
+brood transport, climate, genetic variation, digging, founding, and automatic continuation remain
+off. Every treated world keeps its queen and 32 of 40 workers. The eight deaths per world are all
+age deaths, distributed one every 500 ticks; none are energy deaths. Energy change remains positive
+at `+17.446` to `+24.798`, and the maximum absolute conservation residual is `7.35e-12`.
+
+Runs 1927–1935 certify the same treatment on seeds 26100–26107. All 8/8 worlds pass against the
+predeclared 6/8 threshold: queens remain alive, populations end at 32, all 64 deaths are
+age-attributed, and no 100-tick ledger interval contains more than one death. Energy change ranges
+from `+0.537` to `+24.494`; the maximum absolute residual is `7.04e-12`. No measured result activates
+a conditional food, metabolic-depression, or queen-reserve branch.
+
+<a id="certifications-worker-replacement"></a>
+
+## Resource-funded worker replacement
+
+The `nest-replacement` preset differs from `nest-mortality` only by enabling worker reproduction
+and larval rearing. Female and male births and deaths are counted separately, so a male cannot
+satisfy the replacement gate. Egg endowment, larval feed, and metamorphosis consumption have
+separate counters; maturation converts accumulated rearing capital into an attributed cost.
+
+Runs 1936–1940 are retained but invalid for conservation. Although all four worlds produced eight
+workers against eight age deaths, residuals were exact multiples of one `2.4`-energy food voxel.
+The discrepancy localized to queen-side larder restock consuming recycled corpse food without
+recording the source. The corrected shared attribution path is covered by a bounded test. Runs
+1941–1945 repeat the same worlds with unchanged demographics and residuals below `4.40e-12`.
+
+Runs 1946–1954 certify seeds 26300–26307 against the predeclared 6/8 threshold. All 8/8 first
+mature a worker at tick 2,100, record eight female births against eight natural age deaths, and end
+with 40 workers plus six live brood. No world produces a male, loses brood, exhausts a worker, or
+loses its queen. Energy change ranges from `+16.690` to `+49.471`; the maximum absolute residual is
+`9.87e-12`. Brood transport, microclimate, exposure, founding, genetic variation, and automatic
+continuation remain off.
+
+<a id="certifications-fixed-genome-continuity"></a>
+
+## Fixed-genome demographic continuity
+
+Run 1955 first crossed the 20,000-tick founder lifespan and exposed a real logistics boundary:
+the queen's attendants could see only a six-voxel larder radius, while physically stored,
+colony-marked food remained elsewhere in the authored multi-chamber nest. Eighteen brood perished
+and 31 post-reference births trailed 39 deaths even as total colony energy rose. The repair keeps
+the local path and permits remote retrieval only from physical stored food below the local surface
+with matching colony material odor. It adds no ant sensor, action, destination, or energy source.
+
+Corrected run 1957 and independent runs 1959–1963 each advance 24,000 ticks. All five queens live;
+births meet or exceed deaths after tick 4,200; population stays between 37 and 49; colony energy
+rises by `+24.932` to `+112.342`; automatic continuation remains zero; and the maximum absolute
+conservation residual is `5.13e-10`. Every founder worker has aged out by this horizon, so the
+observed population consists of descendants supported by the replacement loop.
+
+The earlier plan called for another eight-world certification with a `6/8` threshold. That run
+was stopped after review: the smoke plus four varied worlds had already answered the fixed-genome
+mechanism and distribution question, while another half hour would not advance inheritance or
+selection. This is a recorded gate amendment, not an inferred pass for the canceled run.
 
 <a id="certifications-appendix-e"></a>
 
@@ -38,7 +134,12 @@ owners are BIO-01–BIO-15, CTRL-04–CTRL-06, ENV-03–ENV-05, and EXP-05–EXP
 | 6, 8  | green      | The current competence list is reflex-grade under Appendix F's 105-input tuple. Bounded loopback, parallel-band, phasic-input, direct-contact, precedence, and exact-controller checks pass without an oracle-only action path                                                                                                                                                                                    |
 | 7, 9  | green      | The corrected initializer trains the feed-forward slice of the 1,520-weight genome from 18 balanced output regimes while leaving recurrent weights exactly zero and available to evolution (runs 1784–1788). Initialization 0, chosen by fixed order rather than performance, completes 19/24 storage/retrieval loops across the two held-out panels, with 24/24 exits, pickups, and returns (runs 1789 and 1792) |
 | 10    | green      | Across previously unused worlds 22000–22015 and transfer worlds 24000–24007, the four predetermined balanced-frame initializations complete 19/24, 18/24, 19/24, and 22/24 loops; every controller meets the 75% floor (runs 1784–1789 and 1792). Run 1790 independently places all four inside step 5's energy-support region. No controller received closed-loop optimization, selection, or individual repair  |
-| 11–19 | unadmitted | The corrected initial-training and colony-loop gates are complete; later ladder steps have not started                                                                                                                                                                                                                                                                                                            |
+| 11    | green      | Mortality and queen upkeep pass in 8/8 4,200-tick worlds (runs 1927–1935)                                                                                                                                                                                                                                                                                                                                           |
+| 12    | backlog    | The cache-versus-no-cache scarcity comparison remains separate from the current evolution path                                                                                                                                                                                                                                                                                                                     |
+| 13, 17 | green     | Queen-funded worker eggs and larval rearing close the conserved replacement window in 8/8 worlds (runs 1946–1954)                                                                                                                                                                                                                                                                                                 |
+| 14–16 | isolated   | Transport, microclimate, and exposure mechanics exist but were not needed for fixed-genome continuity and remain off                                                                                                                                                                                                                                                                                                |
+| 18    | green      | Runs 1957 and 1959–1963 cross complete founder turnover in five worlds; births meet or exceed deaths, population stays bounded, energy rises, queens live, and continuation stays off                                                                                                                                                                                                                              |
+| 19    | backlog    | Reviewability follows the selection work in the current high-level plan                                                                                                                                                                                                                                                                                                                                             |
 
 ### Appendix E step-5 governing inequality
 

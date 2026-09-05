@@ -16,6 +16,7 @@ import { runOptimizeColonyLoop } from "./experiments/optimizeColonyLoop";
 import { runOptimizeColonyEnergy } from "./experiments/optimizeColonyEnergy";
 import { runDeriveVivo } from "./experiments/deriveVivo";
 import { runColonyLoop } from "./experiments/colonyLoopRunner";
+import { runColonyResilience } from "./experiments/colonyResilience";
 import { runEvaluateColonyCohort } from "./experiments/evaluateColonyCohort";
 import { runDeterminism } from "./determinism";
 
@@ -30,6 +31,7 @@ import { runDeterminism } from "./determinism";
  *   pnpm harness ladder --ticks 8000
  *   pnpm harness calibrate --ticks 4000
  *   pnpm harness calibrate-colony-economy --profile baseline:1:1:1:1:1
+ *   pnpm harness colony-resilience --fractions 0.25,0.5,0.75
  *   pnpm harness recent [n]
  *   pnpm harness sql "select ..."
  *   pnpm harness determinism --seed 8001 --warmup 700 --span 500
@@ -173,6 +175,7 @@ const ASYNC_EXPERIMENTS: Record<string, (flags: Flags) => Promise<void>> = {
   "calibrate-colony-economy": runCalibrateColonyEconomy,
   "evaluate-colony-cohort": runEvaluateColonyCohort,
   "robustness-colony-loop": runColonyLoopRobustness,
+  "colony-resilience": runColonyResilience,
 };
 
 function handleDerivation(command: string, rest: string[]): boolean {
@@ -233,7 +236,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|colony-resilience|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|determinism|recent|sql> [flags]"
       );
   }
 }

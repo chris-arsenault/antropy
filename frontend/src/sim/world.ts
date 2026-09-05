@@ -1,8 +1,9 @@
 import { createAnt, surfaceSpawnY, type Ant, type AntSpawn } from "./ant";
+import { registerAdult, type GeneticIdentity, type GeneticRecord } from "./ancestry";
 import { buildAntIndex } from "./antIndex";
 import { affectedChunkKeys } from "./chunks";
 import { stepColonies, type Colony } from "./colony";
-import { type Controller, type SensorPolicy } from "./controller/contract";
+import { type Controller, type Genome, type SensorPolicy } from "./controller/contract";
 import { stampVisit, stepDecay } from "./decay";
 import { rnnController } from "./controller/rnn";
 import { stepEggs, syncCarriedEggs, type Egg } from "./eggs";
@@ -43,6 +44,19 @@ import {
 
 export interface WorldMetrics {
   surfaceFoodEnergyGathered: number;
+  recycledFoodEnergyRecovered: number;
+  workerEnergyRemovedAtDeath: number;
+  maleEnergyRemovedAtDeath: number;
+  broodEnergyRemovedAtDeath: number;
+  workerAgeDeaths: number;
+  workerEnergyDeaths: number;
+  maleAgeDeaths: number;
+  maleEnergyDeaths: number;
+  queenAgeDeaths: number;
+  queenStarvationDeaths: number;
+  eggEnergyInvested: number;
+  larvalEnergyInvested: number;
+  metamorphosisEnergyBurned: number;
   foodEnergyConsumed: number;
   foodEaten: number;
   energyBurned: number;
@@ -50,8 +64,11 @@ export interface WorldMetrics {
   foodPickedUp: number;
   foodDeposited: number;
   foodDelivered: number;
+  netEnergyMeritCredited: number;
   workerBirths: number;
   workerDeaths: number;
+  maleBirths: number;
+  maleDeaths: number;
   broodStarved: number;
   broodExposed: number;
   queenDeaths: number;
@@ -60,6 +77,19 @@ export interface WorldMetrics {
 function createMetrics(): WorldMetrics {
   return {
     surfaceFoodEnergyGathered: 0,
+    recycledFoodEnergyRecovered: 0,
+    workerEnergyRemovedAtDeath: 0,
+    maleEnergyRemovedAtDeath: 0,
+    broodEnergyRemovedAtDeath: 0,
+    workerAgeDeaths: 0,
+    workerEnergyDeaths: 0,
+    maleAgeDeaths: 0,
+    maleEnergyDeaths: 0,
+    queenAgeDeaths: 0,
+    queenStarvationDeaths: 0,
+    eggEnergyInvested: 0,
+    larvalEnergyInvested: 0,
+    metamorphosisEnergyBurned: 0,
     foodEnergyConsumed: 0,
     foodEaten: 0,
     energyBurned: 0,
@@ -67,8 +97,11 @@ function createMetrics(): WorldMetrics {
     foodPickedUp: 0,
     foodDeposited: 0,
     foodDelivered: 0,
+    netEnergyMeritCredited: 0,
     workerBirths: 0,
     workerDeaths: 0,
+    maleBirths: 0,
+    maleDeaths: 0,
     broodStarved: 0,
     broodExposed: 0,
     queenDeaths: 0,
@@ -89,6 +122,11 @@ export interface World {
   grid: VoxelGrid;
   ants: Ant[];
   nextAntId: number;
+  /** Monotonic world-wide ancestry namespace and durable outcomes. */
+  nextGeneticId: number;
+  geneticRecords: Map<number, GeneticRecord>;
+  /** Initial founder references retained for controller-owned distance measurements. */
+  founderGenomes: Genome[];
   eggs: Egg[];
   /** Single world-wide egg id counter: every lay path draws from it, so
    * ids are unique (composite per-colony/per-tick schemes collided). */
@@ -125,6 +163,10 @@ export interface World {
   foodSources: Set<number>;
   /** FOOD voxels placed by worker deposit, independent of their chosen depth. */
   storedFood: Set<number>;
+  /** FOOD carrying external provenance that has not yet earned colony merit. */
+  uncreditedExternalFood: Set<number>;
+  /** Corpse and perished-brood FOOD not yet recovered by a worker. */
+  recycledFood: Set<number>;
   /** Seasonal baseline for the food governor; 0 disables food entirely. */
   foodBase: number;
   /** Current FOOD-voxel target, recomputed each governor pass (§9.3). */
@@ -185,6 +227,9 @@ export function createWorld(
     grid,
     ants: [],
     nextAntId: 1,
+    nextGeneticId: 1,
+    geneticRecords: new Map(),
+    founderGenomes: [],
     eggs: [],
     nextEggId: 1,
     eggIndex: new Map(),
@@ -207,6 +252,8 @@ export function createWorld(
     materialColonyScent: createMaterialScentField(grid),
     foodSources: new Set(),
     storedFood: new Set(),
+    uncreditedExternalFood: new Set(),
+    recycledFood: new Set(),
     foodBase: FOOD_GOVERNOR.targetCount,
     foodTarget: FOOD_GOVERNOR.targetCount,
     surfaceMap: buildSurfaceMap(seed, grid),
@@ -222,9 +269,15 @@ export function createWorld(
   return world;
 }
 
-export function spawnAnt(world: World, spawn: AntSpawn): Ant {
+export function spawnAnt(
+  world: World,
+  spawn: AntSpawn,
+  identity: GeneticIdentity | null = null,
+  observedFromBirth = false
+): Ant {
   const ant = createAnt(world.nextAntId, spawn);
   world.nextAntId += 1;
+  registerAdult(world, ant, identity, observedFromBirth);
   world.ants.push(ant);
   return ant;
 }
@@ -375,6 +428,8 @@ export function mutateVoxel(
   if (previous === Material.FOOD) {
     world.foodSources.delete(index);
     world.storedFood.delete(index);
+    world.uncreditedExternalFood.delete(index);
+    world.recycledFood.delete(index);
   }
   if (material === Material.FOOD) {
     world.foodSources.add(index);

@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { SEX_MALE } from "./ant";
+import { GENETIC_ROLE_QUEEN } from "./ancestry";
 import { foundColony } from "./colony";
 import { tryEat } from "./actions";
 import { addEgg, STAGE_LARVA, type Egg } from "./eggs";
-import { NEST_CONFIG } from "./config";
+import { MORTAL_NEST_CONFIG, NEST_CONFIG } from "./config";
 import { rnnController } from "./controller/rnn";
-import { COLONY, LARVA, QUEEN } from "./tunables";
+import { killAnt, reapDead } from "./energy";
+import { buildAuthoredNestWorld } from "./nestWorld";
+import { COLONY, ENERGY, LARVA, QUEEN } from "./tunables";
 import { createWorld, spawnAnt, stepWorld } from "./world";
 
 /** Fast-forward brood to the pupation threshold (rearing is unit-gated). */
@@ -24,6 +27,13 @@ describe("colony founding", () => {
     expect(world.ants.length).toBeGreaterThan(COLONY.initialWorkers / 2);
     const patrilines = new Set(world.ants.map((ant) => ant.patrilineId));
     expect(patrilines.size).toBeGreaterThan(1);
+    expect(world.geneticRecords.get(colony.queenGeneticId)?.role).toBe(GENETIC_ROLE_QUEEN);
+    expect(new Set(colony.sperm.map((entry) => entry.geneticId)).size).toBe(COLONY.spermCount);
+    for (const ant of world.ants) {
+      expect(ant.motherId).toBe(colony.queenGeneticId);
+      expect(colony.sperm.some((entry) => entry.geneticId === ant.fatherId)).toBe(true);
+      expect(world.geneticRecords.get(ant.geneticId)?.observedFromBirth).toBe(false);
+    }
   });
 
   it("spawns every founder on the surface, never down the shaft", () => {
@@ -36,6 +46,29 @@ describe("colony founding", () => {
         expect(ant.y).toBeGreaterThan(colony.y + 1);
       }
     }
+  });
+
+  it("starts immortal founders at age zero", () => {
+    const { world } = buildAuthoredNestWorld(4011);
+
+    expect(world.ants).toHaveLength(COLONY.initialWorkers);
+    expect(world.ants.every((ant) => ant.age === 0)).toBe(true);
+  });
+
+  it("distributes mortal founder ages across one lifespan", () => {
+    const { world } = buildAuthoredNestWorld(4011, rnnController, {
+      ...NEST_CONFIG,
+      mortality: true,
+    });
+
+    const lifespan = world.ants[0].traits.lifespanTicks;
+    expect(world.ants.map((ant) => ant.age)).toEqual(
+      Array.from({ length: COLONY.initialWorkers }, (_, index) =>
+        Math.floor((index * lifespan) / COLONY.initialWorkers)
+      )
+    );
+    expect(new Set(world.ants.map((ant) => ant.age)).size).toBe(COLONY.initialWorkers);
+    expect(world.ants.at(-1)?.age).toBeLessThan(lifespan);
   });
 });
 
@@ -57,6 +90,7 @@ describe("eggs", () => {
     expect(colony.stockpile).toBeLessThan(5);
 
     const egg = world.eggs[0];
+    expect(world.metrics.eggEnergyInvested).toBeCloseTo(egg.energy, 6);
     for (let t = 0; t < COLONY.incubationTicks + 1; t++) {
       stepWorld(world);
     }
@@ -112,7 +146,7 @@ function injectMales(world: ReturnType<typeof createWorld>, count: number): void
       sex: SEX_MALE,
       lineageId: mother.lineageId,
       patrilineId: mother.patrilineId,
-      motherId: mother.id,
+      motherId: mother.geneticId,
       fatherId: 0,
       genome,
       controllerState: rnnController.createState(),
@@ -127,13 +161,15 @@ describe("real founding and collapse (spec §9.1)", () => {
     const colony = foundColony(world);
     colony.stockpile = QUEEN.eggThreshold + 2;
     colony.lastQueenEggTick = -QUEEN.eggIntervalMin;
-    colony.patrilineDeliveries.set(colony.sperm[2].patrilineId, 50);
+    colony.patrilineMerit.set(colony.sperm[2].patrilineId, 50);
 
     stepWorld(world);
     const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
     expect(queenEgg).toBeDefined();
     const egg = queenEgg as NonNullable<typeof queenEgg>;
-    expect(egg.fatherId).toBe(colony.sperm[2].patrilineId);
+    expect(egg.motherId).toBe(colony.queenGeneticId);
+    expect(egg.fatherId).toBe(colony.sperm[2].geneticId);
+    expect(world.geneticRecords.get(egg.geneticId)?.motherId).toBe(colony.queenGeneticId);
     expect(egg.energy).toBeCloseTo(QUEEN.eggEndowment);
   });
 
@@ -148,13 +184,21 @@ describe("real founding and collapse (spec §9.1)", () => {
     const queenEgg = world.eggs.find((egg) => egg.queenDestined === 1);
     expect(queenEgg).toBeDefined();
     ripen(queenEgg as NonNullable<typeof queenEgg>);
+    const queenGeneticId = (queenEgg as NonNullable<typeof queenEgg>).geneticId;
+    const maleGeneticIds = world.ants
+      .filter((ant) => ant.sex === SEX_MALE && ant.alive)
+      .map((ant) => ant.geneticId);
 
     stepWorld(world);
     expect(world.foundings).toBe(1);
     expect(world.colonies.length).toBe(2);
     const daughter = world.colonies[1];
+    expect(daughter.queenGeneticId).toBe(queenGeneticId);
+    expect(daughter.sperm.map((entry) => entry.geneticId).sort()).toEqual(maleGeneticIds.sort());
     expect(daughter.sperm.length).toBe(maleCount);
     expect(world.ants.filter((ant) => ant.sex === SEX_MALE && ant.alive).length).toBe(0);
+    expect(world.metrics.maleDeaths).toBe(maleCount);
+    expect(world.metrics.workerDeaths).toBe(0);
   });
 
   it("fails founding loudly when no males exist", () => {
@@ -170,6 +214,28 @@ describe("real founding and collapse (spec §9.1)", () => {
     expect(world.foundingFailures).toBe(1);
     expect(world.colonies.length).toBe(1);
   });
+});
+
+describe("queen collapse (spec §9.1)", () => {
+  it("attributes recycled corpse energy used to restock the queen", () => {
+    const world = createWorld(4012, rnnController, MORTAL_NEST_CONFIG);
+    const colony = foundColony(world);
+    const ant = world.ants[0];
+    ant.x = colony.x;
+    ant.y = colony.y;
+    ant.z = colony.z;
+    ant.energy = 0.5;
+    killAnt(world, ant);
+    reapDead(world);
+    world.ants = [];
+    colony.stockpile = 0.5;
+
+    stepWorld(world);
+
+    expect(world.metrics.recycledFoodEnergyRecovered).toBeCloseTo(ENERGY.foodEnergy);
+    expect(colony.stockpile).toBeCloseTo(0.5 - QUEEN.upkeepPerTick + ENERGY.foodEnergy);
+    expect(world.recycledFood.size).toBe(0);
+  });
 
   it("collapses the colony when the queen ages out", () => {
     const world = createWorld(4008);
@@ -178,6 +244,7 @@ describe("real founding and collapse (spec §9.1)", () => {
     stepWorld(world);
     expect(world.colonies.length).toBe(0);
     expect(world.collapses).toBe(1);
+    expect(world.metrics.queenAgeDeaths).toBe(1);
   });
 
   it("collapses the starved colony, then auto-continue refounds", () => {
@@ -188,6 +255,7 @@ describe("real founding and collapse (spec §9.1)", () => {
     world.tick = QUEEN.starvationGraceTicks + 1;
     stepWorld(world);
     expect(world.collapses).toBe(1);
+    expect(world.metrics.queenStarvationDeaths).toBe(1);
     // The shipped world is never left dead (R3 auto-continue): a new
     // colony is force-founded from the survivor pool in the same tick.
     expect(world.continuations).toBe(1);

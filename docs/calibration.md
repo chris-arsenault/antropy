@@ -4,12 +4,101 @@ The economy is tuned by measurement, not by knob-turning, under the
 [calibration design](design/experimentation.md#experimentation-calibration).
 Measurements run through the harness (ADR-0012): `pnpm harness
 calibrate-colony-economy` for the current authored-nest distribution,
+`pnpm harness colony-resilience` for matched demographic shocks,
 `pnpm harness calibrate` for the historical Release 3 axis sweep,
 `pnpm harness tournament` for strategy ledgers, and `pnpm harness ladder`
 for the certification rungs.
 Every run lands in `frontend/harness/ledger.db` with its parameters and
 git commit; the tables below are interpreted snapshots of specific runs
 and are superseded by the ledger when the world changes.
+
+## Untreated demographic baseline
+
+Run 1916 applies matched 25%, 50%, and 75% worker-loss and worker-energy shocks across seeds
+25000–25007. The world uses the fixed run-1784 colony controller, steady food, and the authored
+nest; mortality, reproduction, larval rearing, variation, digging, weather, seasons, decay, and
+automatic continuation are off. Recovery is 90% of the pre-shock worker count or mean worker
+energy within 1,200 ticks.
+
+| Shock         |                     25% |            50% | 75% |
+| ------------- | ----------------------: | -------------: | --: |
+| Worker count  |                     0/8 |            0/8 | 0/8 |
+| Worker energy | 6/8, median 560.5 ticks | 1/8, 917 ticks | 0/8 |
+
+The eight controls are energy-positive (`+6.223` worst, `+15.231` mean post-warmup balance), so
+the curve does not revisit economy calibration. It establishes one useful margin and one expected
+absence: modest worker-energy damage usually recovers, while lost workers cannot return before
+reproduction is admitted. The predeclared later gates are in the
+[experimentation design](design/experimentation.md#experimentation-resilience).
+
+## Mortality admission
+
+Runs 1917–1926 compare four untreated and four mortality-only authored-nest worlds for 4,200 ticks
+on seeds 26000–26003. The mortality arm kept every queen and ended with 32 workers in every world.
+Each world recorded exactly eight age deaths, one every 500 ticks; no worker exhausted its energy.
+Colony energy still increased by `+17.446` to `+24.798`, and the maximum absolute conservation
+residual was `7.35e-12`.
+
+Runs 1927–1935 repeat the mortality-only treatment on eight new seeds, 26100–26107. All eight
+worlds pass the predeclared admission gate: every queen remains alive, every population ends at 32,
+all 64 deaths are age-attributed, and no 100-tick ledger interval contains more than one death.
+Energy change ranges from `+0.537` to `+24.494`; the maximum absolute residual is `7.04e-12`.
+Mortality therefore does not justify a food, torpor, or queen-reserve floor before replacement is
+admitted.
+
+## Resource-funded worker replacement
+
+The `nest-replacement` preset adds only worker reproduction and larval rearing to the certified
+`nest-mortality` world. An audit before measurement found that accumulated larval feed vanished at
+metamorphosis without an attributed conversion cost. Metamorphosis now records that consumed
+capital; egg endowment, larval feed, female births, male births, worker deaths, and male deaths are
+also distinct ledger terms.
+
+Runs 1936–1940 are invalid for conservation. Their demographic outcome was correct, but exact
+`2.4`-energy residual increments showed that queen-side larder restock could consume recycled
+corpse food without recording its provenance. The larder now uses the same source attribution as
+worker pickup. Corrected runs 1941–1945 retain the exact demographics and reduce the maximum
+absolute residual from `7.2` to `4.40e-12`.
+
+Runs 1946–1954 certify eight new worlds on seeds 26300–26307. In every world the first worker
+matures at tick 2,100, eight female births match eight natural age deaths, population returns to
+40, and six live brood remain at tick 4,200. There are no male births, energy deaths, or brood
+losses. Colony energy change ranges from `+16.690` to `+49.471`, and the maximum absolute residual
+is `9.87e-12`. Resource-funded replacement passes 8/8 without brood transport, climate, exposure,
+founding, variation, or automatic continuation.
+
+## Fixed-genome continuity smoke
+
+Run 1955 extends seed 26400 through 24,000 ticks and crosses the 20,000-tick founder lifespan. It
+keeps the queen alive and gains `+86.087` colony energy after tick 4,200, but fails demographic
+continuity: 31 post-reference births trail 39 deaths, population falls to 32, and 18 brood perish.
+At tick 8,000 the queen stockpile is below its `1.0` reserve while `4.8` energy remains in physical
+stored food elsewhere in the authored nest. The fixed six-voxel attendant radius, not food or
+energy scarcity, prevents the multi-chamber larder from funding brood.
+
+The minimal repair preserves the local restock path and permits remote attendant retrieval only
+from physical stored `FOOD` that is underground and retains the owning colony's material odor.
+It adds no ant sensor, action, destination, world mutation, or energy. Bounded tests reject
+unmarked and surface stores and retain source attribution for recycled food.
+
+Run 1957 repeats the same seed, controller, preset, and horizon with that larder boundary. After
+tick 4,200, 44 births exceed 41 deaths, population stays between 37 and 49 and ends at 43, brood
+losses fall to 12, and the queen remains alive. Colony energy gains `+112.342`; automatic
+continuation remains off and the conservation residual is `-3.20e-10`. This clears the smoke
+prerequisite for a varied-world continuity panel but does not establish variation by itself.
+
+Runs 1959–1963 repeat the 24,000-tick horizon on seeds 26500–26503. All four queens survive.
+Post-reference births meet or exceed deaths in every world (`40/40`, `43/41`, `43/42`, and
+`41/40`); worker population stays within 38–49 and ends at 40–42. Colony energy gains `+24.932`
+to `+61.580`, automatic continuation remains off, and the maximum absolute residual is
+`5.13e-10`. Together with run 1957, these five worlds establish the fixed-genome continuity
+control and permit work to move to inheritance measurement.
+
+An eight-world repeat was started and stopped before persistence after review found that it added
+only confidence around an already repeated fixed-controller outcome. The original `6/8` threshold
+was an over-specified verification rule, not a distinct functional mechanism or evolutionary
+question. Long evolutionary experiments remain appropriate when they measure selection; repeated
+24,000-tick fixed-genome panels do not.
 
 ## Current authored-nest energy calibration
 

@@ -38,15 +38,14 @@ world are separate claims.
 
 ## Current boundary
 
-The authored nest, world carriers, programmed policy, trained RNN cohort, and fixed-genome food
-loop are delivered. The next implementation question is not better RNN optimization. It is whether
-the colony has enough in-world recovery margin to survive bad stretches and then close the
-food-brood-replacement loop.
+The authored nest, world carriers, programmed policy, trained RNN cohort, mortality, resource-funded
+replacement, and fixed-genome demographic continuity are delivered. The next implementation
+question is not better RNN optimization or another fixed-controller panel. It is whether
+inheritance and selection can be measured honestly before genetic variation changes the colony.
 
-Appendix G adds work before mortality certification: establish the untreated resilience curve,
-then add and attribute standing crop, metabolic depression, and queen reserve in that order. This
-resolves its source build-order ambiguity—the measuring instrument must precede the mechanisms it
-compares.
+The untreated resilience curve preceded mortality as Appendix G required. Mortality, replacement,
+and continuity did not activate standing crop, metabolic depression, or a deeper queen reserve;
+those mechanisms remain conditional rather than silently joining the evolution world.
 
 <a id="design-order"></a>
 
@@ -58,16 +57,16 @@ compares.
 | 2 | Delivered, isolated | Construction/cargo seed and full-world lifecycle/evolution mechanics exist as diagnostics but are not admitted into the current colony | CTRL-07, ADV-01 |
 | 3 | Delivered | Organic authored-nest control with no hidden carve; deep and material odor carriers; readable zero-state food/cache policy | ENV-03–05, EXP-05 |
 | 4 | Delivered | One fixed training procedure places a predetermined RNN cohort broadly inside the food-loop and energy-support region without terminal search | CTRL-06, EXP-06–07, BIO-01–02 |
-| 5 | Backlog | Measure the untreated colony resilience curve | BIO-03, EXP-08 |
-| 6 | Backlog | Add capped standing crop, then metabolic depression with cost, then queen reserve/preferential feeding; rerun resilience and health ledgers after each | BIO-04–06, ENV-06 |
-| 7 | Backlog | Admit mortality and queen upkeep alone; certify fixed-genome survival across varied worlds | BIO-07, EXP-09 |
+| 5 | Delivered | Measure the untreated colony resilience curve | BIO-03, EXP-08 |
+| 6 | Conditional, not admitted | Add a standing crop, metabolic depression, or deeper queen reserve only for a measured viability failure | BIO-04–06, ENV-06 |
+| 7 | Delivered | Admit mortality and queen upkeep alone; certify fixed-genome survival across varied worlds | BIO-07, EXP-09 |
 | 8 | Backlog | Demonstrate that physical caching extends survival through an imposed food gap | BIO-08, EXP-09 |
-| 9 | Backlog | Admit worker reproduction; revalidate brood transport in the authored nest | BIO-09–11 |
-| 10 | Backlog | Admit microclimate, then brood exposure, then larval rearing as separate steps; verify brood liquidation remains possible | BIO-12–13, ENV-07 |
-| 11 | Backlog | Certify demographic continuity: gathered food funds matured workers that replace deaths without energy decay | BIO-14, EXP-09, ADV-02 |
+| 9 | Delivered / backlog | Worker reproduction is admitted; brood transport remains isolated because replacement did not require it | BIO-09–11 |
+| 10 | Delivered / backlog | Larval rearing is admitted and edible brood is covered; microclimate and exposure remain isolated | BIO-12–13, ENV-07 |
+| 11 | Delivered | Certify demographic continuity: gathered food funds matured workers that replace deaths without energy decay | BIO-14, EXP-09, ADV-02 |
 | 12 | Backlog | Make the certified colony loop independently reviewable in the web app | BIO-15 |
 | 13 | Backlog | Measure food and homing path efficiency without putting pathfinding inside the controller | EXP-10 |
-| 14 | Backlog | Add evolutionary health instruments, conservation-correct merit accounting, event detection, lineage inspection, and checkpoint-linked replay | ADV-03, EXP-11–12 |
+| 14 | Delivered / backlog | Evolutionary health, conservation-correct merit, global ancestry, founder-line outcomes, and durable harness series are delivered; event detection, deep lineage inspection, and checkpoint-linked replay remain later observation work | ADV-03, EXP-11–12 |
 | 15 | Backlog | Admit genetic variation alone, then the diverse-sire and mutation portfolio safeguards | ADV-04–06, CTRL-08–09, BIO-16 |
 | 16 | Backlog | Admit sustainable colony founding and repeated collapse/recovery on one shared map | ADV-07, BIO-16 |
 | 17 | Backlog | Reintroduce optional excavation and spoil; compare dug colonies with the authored control on colony ledgers | ENV-08–11, ADV-08, EXP-13 |

@@ -1,17 +1,27 @@
 import { SEX_FEMALE, SEX_MALE, surfaceSpawnY, type Ant } from "./ant";
+import {
+  offspringIdentity,
+  recordGeneticDeath,
+  recordQueenRole,
+  type GeneticIdentity,
+} from "./ancestry";
 import { type Genome } from "./controller/contract";
+import {
+  continuationColonyGenetics,
+  makeColonyOffspring,
+  meritSperm,
+  seedColonyGenetics,
+  type Sperm,
+} from "./colonyGenetics";
 import { addEgg, findEggSpot, STAGE_EGG, type Egg } from "./eggs";
 import { killAnt } from "./energy";
 import { carveFoundingNest } from "./foundingNest";
-import { haploidOffspring, seedFounderGenomes, sexualOffspring } from "./genetics";
-import { Material } from "./materials";
-import { COLONY, ENERGY, QUEEN } from "./tunables";
-import { mutateVoxel, spawnAnt, type World } from "./world";
+import { sexualOffspring } from "./genetics";
+import { restockFromLarder } from "./larder";
+import { COLONY, QUEEN } from "./tunables";
+import { spawnAnt, type World } from "./world";
 
-export interface Sperm {
-  genome: Genome;
-  patrilineId: number;
-}
+export { type Sperm } from "./colonyGenetics";
 
 /**
  * A colony is deliberately lightweight (design spec §7.2): a scripted queen
@@ -29,12 +39,13 @@ export interface Colony {
   entranceY: number;
   entranceZ: number;
   queenGenome: Genome;
+  queenGeneticId: number;
   queenAge: number;
   queenLifespanTicks: number;
   sperm: Sperm[];
   stockpile: number;
-  /** Food-delivery credit per patriline — the merit signal (spec §7.1). */
-  patrilineDeliveries: Map<number, number>;
+  /** Conservation-accounted net-new food energy per patriline. */
+  patrilineMerit: Map<number, number>;
   nextPatrilineId: number;
   lastEggTick: number;
   lastQueenEggTick: number;
@@ -46,25 +57,6 @@ export interface ColonyPosition {
   readonly x: number;
   readonly y: number;
   readonly z: number;
-}
-
-function makeOffspring(world: World, colony: Colony, spermIndex: number): Genome {
-  const father = colony.sperm[spermIndex];
-  return sexualOffspring(world, colony.queenGenome, father.genome);
-}
-
-/** Delivery-weighted sperm pick — the merit signal selecting the father line. */
-function meritSperm(colony: Colony): Sperm {
-  let best = colony.sperm[0];
-  let bestScore = -1;
-  for (const sperm of colony.sperm) {
-    const score = colony.patrilineDeliveries.get(sperm.patrilineId) ?? 0;
-    if (score > bestScore) {
-      best = sperm;
-      bestScore = score;
-    }
-  }
-  return best;
 }
 
 /** Colony ids double as scent owner tags (Uint8), so they cycle in 1..250. */
@@ -79,6 +71,7 @@ function createColonyAt(
   x: number,
   z: number,
   queenGenome: Genome,
+  queenIdentity: GeneticIdentity,
   sperm: Sperm[]
 ): Colony | null {
   const surfaceY = surfaceSpawnY(world.grid, x, z);
@@ -87,7 +80,7 @@ function createColonyAt(
   }
   const y = Math.max(3, surfaceY - COLONY.chamberDepth);
   carveFoundingNest(world, x, y, z, surfaceY);
-  return createColonyRecord(world, { x, y, z }, queenGenome, sperm, {
+  return createColonyRecord(world, { x, y, z }, queenGenome, queenIdentity, sperm, {
     x,
     y: surfaceY + 1,
     z,
@@ -98,6 +91,7 @@ function createColonyRecord(
   world: World,
   position: ColonyPosition,
   queenGenome: Genome,
+  queenIdentity: GeneticIdentity,
   sperm: Sperm[],
   entrance: ColonyPosition = position
 ): Colony {
@@ -108,32 +102,20 @@ function createColonyRecord(
     entranceY: entrance.y,
     entranceZ: entrance.z,
     queenGenome,
+    queenGeneticId: queenIdentity.geneticId,
     queenAge: 0,
     queenLifespanTicks: COLONY.queenLifespanTicks,
     sperm,
     stockpile: COLONY.foundingStockpile,
-    patrilineDeliveries: new Map(),
+    patrilineMerit: new Map(),
     nextPatrilineId: sperm.length + 1,
     lastEggTick: 0,
     lastQueenEggTick: 0,
     starvingSince: -1,
   };
   world.colonies.push(colony);
+  recordQueenRole(world, queenIdentity.geneticId, colony.id);
   return colony;
-}
-
-interface FounderGenetics {
-  readonly queenGenome: Genome;
-  readonly sperm: Sperm[];
-}
-
-function founderGenetics(world: World): FounderGenetics {
-  const [queenGenome, ...spermGenomes] = seedFounderGenomes(world, COLONY.spermCount + 1);
-  const sperm = spermGenomes.map((genome, index) => ({
-    genome,
-    patrilineId: index + 1,
-  }));
-  return { queenGenome, sperm };
 }
 
 /**
@@ -145,8 +127,15 @@ function founderGenetics(world: World): FounderGenetics {
 export function foundColony(world: World): Colony {
   const x = Math.floor(world.grid.sizeX / 2);
   const z = Math.floor(world.grid.sizeZ / 2);
-  const genetics = founderGenetics(world);
-  const colony = createColonyAt(world, x, z, genetics.queenGenome, genetics.sperm);
+  const genetics = seedColonyGenetics(world);
+  const colony = createColonyAt(
+    world,
+    x,
+    z,
+    genetics.queenGenome,
+    genetics.queenIdentity,
+    genetics.sperm
+  );
   if (!colony) {
     throw new Error("no surface for colony founding");
   }
@@ -159,22 +148,35 @@ function spawnFounderWorker(
   colony: Colony,
   sperm: Sperm[],
   spermIndex: number,
+  founderIndex: number,
   position: ColonyPosition,
   heading: number
 ): void {
-  const genome = makeOffspring(world, colony, spermIndex);
-  spawnAnt(world, {
-    ...position,
-    heading,
-    energy: 1,
-    lineageId: colony.id,
-    patrilineId: sperm[spermIndex].patrilineId,
-    motherId: 0,
-    fatherId: sperm[spermIndex].patrilineId,
-    genome,
-    controllerState: world.controller.createState(),
-    traits: world.controller.physical(genome),
-  });
+  const genome = makeColonyOffspring(world, colony.queenGenome, sperm[spermIndex]);
+  const father = sperm[spermIndex];
+  const identity = offspringIdentity(world, father.founderLineId);
+  const ant = spawnAnt(
+    world,
+    {
+      ...position,
+      heading,
+      energy: 1,
+      lineageId: colony.id,
+      patrilineId: father.patrilineId,
+      motherId: colony.queenGeneticId,
+      fatherId: father.geneticId,
+      genome,
+      controllerState: world.controller.createState(),
+      traits: world.controller.physical(genome),
+    },
+    identity,
+    false
+  );
+  if (world.config.mortality) {
+    ant.age = Math.floor((founderIndex * ant.traits.lifespanTicks) / COLONY.initialWorkers);
+    const record = world.geneticRecords.get(ant.geneticId);
+    if (record) record.birthTick = world.tick - ant.age;
+  }
 }
 
 /** Fast-forwarded adult first brood on the open surface around the
@@ -196,6 +198,7 @@ function spawnFirstBrood(world: World, colony: Colony, sperm: Sperm[]): void {
       colony,
       sperm,
       spermIndex,
+      i,
       { x: sx, y: spawnY, z: sz },
       world.rng.next() * Math.PI * 2
     );
@@ -215,11 +218,12 @@ export function placeBootstrapColony(
   if (workerStations.length < COLONY.initialWorkers) {
     throw new Error(`bootstrap colony needs ${COLONY.initialWorkers} legal worker stations`);
   }
-  const genetics = founderGenetics(world);
+  const genetics = seedColonyGenetics(world);
   const colony = createColonyRecord(
     world,
     queenHome,
     genetics.queenGenome,
+    genetics.queenIdentity,
     genetics.sperm,
     entrance
   );
@@ -230,6 +234,7 @@ export function placeBootstrapColony(
       colony,
       genetics.sperm,
       spermIndex,
+      index,
       workerStations[index],
       (index % 8) * (Math.PI / 4)
     );
@@ -244,28 +249,21 @@ export function placeBootstrapColony(
  * pool falls back to fresh wide-prior draws.
  */
 export function foundColonyFromPool(world: World, pool: Genome[]): Colony | null {
-  const draw = (): Genome =>
-    pool.length > 0
-      ? pool[Math.floor(world.rng.next() * pool.length)]
-      : world.controller.seed(world.rng);
-  const mix = (): Genome => {
-    return sexualOffspring(world, draw(), draw());
-  };
-  const sperm: Sperm[] = [];
-  for (let i = 0; i < COLONY.spermCount; i++) {
-    const genome = draw();
-    sperm.push({
-      genome: haploidOffspring(world, genome),
-      patrilineId: i + 1,
-    });
-  }
+  const genetics = continuationColonyGenetics(world, pool);
   const cx = Math.floor(world.grid.sizeX / 2) + Math.floor(world.rng.next() * 41) - 20;
   const cz = Math.floor(world.grid.sizeZ / 2) + Math.floor(world.rng.next() * 41) - 20;
-  const colony = createColonyAt(world, cx, cz, mix(), sperm);
+  const colony = createColonyAt(
+    world,
+    cx,
+    cz,
+    genetics.queenGenome,
+    genetics.queenIdentity,
+    genetics.sperm
+  );
   if (!colony) {
     return null;
   }
-  spawnFirstBrood(world, colony, sperm);
+  spawnFirstBrood(world, colony, genetics.sperm);
   return colony;
 }
 
@@ -275,14 +273,16 @@ function layColonyEgg(
   genome: Genome,
   endowment: number,
   queenDestined: number,
-  patrilineId: number
+  father: Sperm
 ): boolean {
   const spot = findEggSpot(world, colony.x, colony.y, colony.z, queenDestined === 1 ? 2 : 1);
   if (spot === null) {
     return false;
   }
   colony.stockpile -= endowment + COLONY.eggLayCost;
+  world.metrics.eggEnergyInvested += endowment;
   world.metrics.energyBurned += COLONY.eggLayCost;
+  const identity = offspringIdentity(world, father.founderLineId);
   addEgg(world, {
     id: world.nextEggId++,
     x: spot.x,
@@ -296,20 +296,22 @@ function layColonyEgg(
     fedProgress: 0,
     hungerTicks: 0,
     sex: SEX_FEMALE,
+    geneticId: identity.geneticId,
+    founderLineId: identity.founderLineId,
     queenDestined,
     lineageId: colony.id,
-    patrilineId,
-    motherId: 0,
-    fatherId: patrilineId,
+    patrilineId: father.patrilineId,
+    motherId: colony.queenGeneticId,
+    fatherId: father.geneticId,
   });
   return true;
 }
 
 function layWorkerEgg(world: World, colony: Colony): void {
   const spermIndex = Math.floor(world.rng.next() * colony.sperm.length);
-  const genome = makeOffspring(world, colony, spermIndex);
+  const genome = makeColonyOffspring(world, colony.queenGenome, colony.sperm[spermIndex]);
   const endowment = world.controller.physical(colony.queenGenome).eggEndowment;
-  if (layColonyEgg(world, colony, genome, endowment, 0, colony.sperm[spermIndex].patrilineId)) {
+  if (layColonyEgg(world, colony, genome, endowment, 0, colony.sperm[spermIndex])) {
     colony.lastEggTick = world.tick;
   }
 }
@@ -319,9 +321,9 @@ function layWorkerEgg(world: World, colony: Colony): void {
  * channel 3) — the father line is the top-delivering patriline.
  */
 function layQueenEgg(world: World, colony: Colony): void {
-  const father = meritSperm(colony);
+  const father = meritSperm(colony.sperm, colony.patrilineMerit);
   const genome = sexualOffspring(world, colony.queenGenome, father.genome);
-  if (layColonyEgg(world, colony, genome, QUEEN.eggEndowment, 1, father.patrilineId)) {
+  if (layColonyEgg(world, colony, genome, QUEEN.eggEndowment, 1, father)) {
     colony.lastQueenEggTick = world.tick;
   }
 }
@@ -343,6 +345,7 @@ export function foundFromQueenEgg(world: World, egg: Egg): void {
   const males = livingMales(world);
   if (males.length === 0) {
     world.foundingFailures += 1;
+    recordGeneticDeath(world, egg.geneticId, world.tick - geneticBirthTick(world, egg.geneticId));
     return;
   }
   const sperm: Sperm[] = [];
@@ -351,28 +354,40 @@ export function foundFromQueenEgg(world: World, egg: Egg): void {
   for (let i = 0; i < matings; i++) {
     const pick = Math.floor(world.rng.next() * pool.length);
     const male = pool.splice(pick, 1)[0];
-    sperm.push({ genome: male.genome, patrilineId: i + 1 });
+    sperm.push({
+      genome: male.genome,
+      patrilineId: i + 1,
+      geneticId: male.geneticId,
+      founderLineId: male.founderLineId,
+    });
     killAnt(world, male);
   }
   const x =
     QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeX - 2 * QUEEN.flightMargin));
   const z =
     QUEEN.flightMargin + Math.floor(world.rng.next() * (world.grid.sizeZ - 2 * QUEEN.flightMargin));
-  const colony = createColonyAt(world, x, z, egg.genome, sperm);
+  const queenIdentity = { geneticId: egg.geneticId, founderLineId: egg.founderLineId };
+  const colony = createColonyAt(world, x, z, egg.genome, queenIdentity, sperm);
   if (colony) {
     world.foundings += 1;
   } else {
     world.foundingFailures += 1;
+    recordGeneticDeath(world, egg.geneticId, world.tick - geneticBirthTick(world, egg.geneticId));
   }
 }
 
+function geneticBirthTick(world: World, geneticId: number): number {
+  return world.geneticRecords.get(geneticId)?.birthTick ?? world.tick;
+}
+
 function collapseColony(world: World, colony: Colony): void {
+  recordGeneticDeath(world, colony.queenGeneticId, colony.queenAge);
   world.colonies = world.colonies.filter((c) => c.id !== colony.id);
   world.collapses += 1;
   world.metrics.queenDeaths += 1;
 }
 
-/** Upkeep and the starvation clock; true when the queen has died. */
+/** Upkeep and the starvation clock; attributes the death it reports. */
 function queenDies(world: World, colony: Colony): boolean {
   colony.queenAge += 1;
   colony.stockpile -= QUEEN.upkeepPerTick;
@@ -387,7 +402,12 @@ function queenDies(world: World, colony: Colony): boolean {
   }
   const starved =
     colony.starvingSince >= 0 && world.tick - colony.starvingSince > QUEEN.starvationGraceTicks;
-  return colony.queenAge >= colony.queenLifespanTicks || starved;
+  if (colony.queenAge >= colony.queenLifespanTicks) {
+    world.metrics.queenAgeDeaths += 1;
+    return true;
+  }
+  if (starved) world.metrics.queenStarvationDeaths += 1;
+  return starved;
 }
 
 function layEggs(world: World, colony: Colony): void {
@@ -410,44 +430,8 @@ function layEggs(world: World, colony: Colony): void {
   }
 }
 
-/**
- * One tick of scripted queen behavior per colony: upkeep from the stockpile,
- * death by age or starvation (colony collapse, spec §9.1), then queen or
- * worker egg laying as provisioning allows.
- */
-/**
- * Attendants refill a low crop from the physical larder: the nearest
- * hoarded FOOD voxel within restock reach (underground galleries count,
- * surface piles beyond the nest do too) is consumed into the stockpile.
- * Scripted colony logistics at the same abstraction level as
- * trophallaxis; where the hoard physically survives weather is what the
- * liabilities price.
- */
-function restockFromLarder(world: World, colony: Colony): void {
-  if (colony.stockpile >= COLONY.restockBelow) {
-    return;
-  }
-  const surface = world.surfaceMap[colony.z * world.grid.sizeX + colony.x];
-  for (const index of world.foodSources) {
-    const x = index % world.grid.sizeX;
-    const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
-    const y = Math.floor(index / (world.grid.sizeX * world.grid.sizeZ));
-    if (
-      Math.abs(x - colony.x) <= COLONY.restockRadius &&
-      Math.abs(z - colony.z) <= COLONY.restockRadius &&
-      y <= surface + 1
-    ) {
-      mutateVoxel(world, x, y, z, Material.AIR);
-      colony.stockpile += ENERGY.foodEnergy;
-      return;
-    }
-  }
-}
-
 export function stepColonies(world: World): void {
   for (const colony of world.colonies.slice()) {
-    // Mortality gates queen death/collapse (Phase 3+); without it the
-    // scripted queen is immortal for the Phase 2 base case.
     if (world.config.mortality && queenDies(world, colony)) {
       collapseColony(world, colony);
       continue;
@@ -457,22 +441,4 @@ export function stepColonies(world: World): void {
       layEggs(world, colony);
     }
   }
-}
-
-/** Credit a physical food delivery: full value to the stockpile + merit. */
-export function creditDelivery(
-  world: World,
-  lineageId: number,
-  patrilineId: number,
-  amount: number
-): void {
-  const colony = world.colonies.find((c) => c.id === lineageId);
-  if (!colony) {
-    return;
-  }
-  colony.stockpile += amount;
-  colony.patrilineDeliveries.set(
-    patrilineId,
-    (colony.patrilineDeliveries.get(patrilineId) ?? 0) + 1
-  );
 }

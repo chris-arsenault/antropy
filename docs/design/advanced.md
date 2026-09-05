@@ -40,6 +40,54 @@ constraint is approximately `10 * genome generation time <= season period << run
 Turnover controls selection-event rate near carrying capacity; lifespan is the first clock dial,
 not mutation.
 
+<a id="advanced-instrument-contract"></a>
+
+### Selection instrument contract
+
+Genetic identity is global and monotonic within a world. One identity follows a genome-bearing
+individual from egg through worker, male, or queen; mother and father fields always reference
+genetic identities, never colony ids or local patriline numbers. Bootstrap queens and stored sires
+receive explicit founder identities. Colony scent ownership remains a separate, deliberately
+small world id.
+
+Germ-line merit uses energy units, not event counts. A worker earns merit when food with uncredited
+external provenance first enters its colony through direct queen delivery or an accessible,
+colony-marked underground cache. That provenance survives carriage, temporary placement, and
+checkpointing until the first qualifying ingress. Recycled biomass, an already-owned cache, and
+internal trophallaxis transfer earn zero. This is a conservative net-new-energy signal: ambiguous
+energy is omitted rather than credited.
+
+The live instruments use these definitions:
+
+- parent-offspring delivery heritability is the regression slope of completed offspring lifetime
+  net-energy delivery rate on the completed mid-parent rate, or the one known parent for haploid
+  offspring;
+- lifespan heritability uses realized age at death over the same eligible parent-offspring pairs;
+- realized effective population uses offspring-count variance across eligible genetic
+  contributors, reporting both census and `4N / (variance + 2)`;
+- diversity is controller-owned pairwise genome distance among the living population; distance
+  from initialization is the nearest controller-owned distance to the world's retained founder
+  references;
+- lineage survival reports living descendants and reproductive contribution per founder line.
+
+Completed outcomes include only individuals observed from birth through death. Diploid regression
+requires both completed parents; a haploid male uses its one completed mother. Effective-population
+variance includes adult records whose lifetime is complete or whose reproductive contribution is
+already nonzero, including zero-offspring completed adults rather than silently dropping them.
+Every estimate carries its sample count. Fewer than three completed pairs, zero parent variance,
+or absent reproductive contribution produces `unavailable`, never numeric zero.
+
+Controller implementations own genome-distance semantics behind the controller contract; the
+world never inspects serialized loci. The RNN uses root-mean-square distance over expressed loci,
+so allele-copy order and ploidy remain controller-private. The web view and harness expose these
+instruments separately from the descriptive live correlation between traits and net-merit rate.
+
+Variation inside the current single colony creates standing diversity but not an intergenerational
+selection loop: its queen and stored sire genomes remain fixed. Worker variants can transmit genes
+through haploid sons, but those genes return to daughter workers only after mating and founding.
+ADV-04 therefore admits and measures variation and viability; it does not claim evolution before
+the existing mating/founding path supplies gene feedback.
+
 <a id="advanced-genetic-floor"></a>
 
 ## Genetic diversity and collapse resistance
@@ -154,8 +202,8 @@ measured, not hidden.
 | ID | Status | Work and finish |
 | --- | --- | --- |
 | ADV-01 | Delivered | Per-ant genomes, mutation and recombination at egg creation, diploid females, haploid worker-laid males, polyandrous founding data, queen aging/collapse, seasons, nest decay, and multiple-colony mechanics exist in the isolated full world. |
-| ADV-02 | Backlog | Finish the fixed-genome authored-nest replacement loop and resilience floors before enabling any evolutionary system. |
-| ADV-03 | Backlog | Add live heritability and effective-population-size estimates, net-energy merit accounting, lineage survival, and seed-distance instruments before genetic variation. |
+| ADV-02 | Delivered | Fixed-genome replacement and continuity pass in runs 1946–1963. No resilience floor was activated because the measured colony remained viable without one. |
+| ADV-03 | Delivered | Global ancestry, conservation-correct net-energy merit, completed-life heritability, offspring-variance effective population, controller-owned genome/founder distance, founder-line survival, web readouts, checkpoints, and harness series are implemented and covered by bounded checks. |
 | ADV-04 | Backlog | Admit genetic variation alone to the certified living colony. Track selection, mutation robustness, diversity, and colony viability without founding or digging. |
 | ADV-05 | Backlog | Activate the genetic portfolio: multiple stored sires, conservative and hot eggs, positive mutation floor, log-normal meta-mutation, and catastrophic-only embryonic screening. |
 | ADV-06 | Backlog | Make worker-laid male gene flux material and calibrate merit succession against heritability and effective-population alarms. Add convention-aligned RNN recombination before plasticity. |

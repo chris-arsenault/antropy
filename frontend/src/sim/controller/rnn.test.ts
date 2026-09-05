@@ -94,6 +94,22 @@ describe("rnn genome operations", () => {
     expect(rnnController.physical(child)).not.toEqual(before);
   });
 
+  it("measures expressed genome distance behind the controller boundary", () => {
+    const rng = createRng(24);
+    const genome = rnnController.seed(rng);
+    const serialized = rnnController.serializeGenome(genome);
+    const half = serialized.length / 2;
+    const swapped = new Float32Array(serialized.length);
+    swapped.set(serialized.subarray(half), 0);
+    swapped.set(serialized.subarray(0, half), half);
+
+    expect(rnnController.genomeDistance(genome, genome)).toBe(0);
+    expect(rnnController.genomeDistance(genome, rnnController.deserializeGenome(swapped))).toBe(0);
+    expect(
+      rnnController.genomeDistance(genome, rnnController.mutate(genome, 1, rng))
+    ).toBeGreaterThan(0);
+  });
+
   it("recombines two parents into a child mixing both", () => {
     const rng = createRng(22);
     const a = rnnController.seed(rng);

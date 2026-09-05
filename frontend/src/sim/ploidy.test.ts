@@ -77,8 +77,10 @@ describe("worker-laid males (spec §7.1 channel 2)", () => {
     expect(world.eggs.length).toBe(1);
     const egg = world.eggs[0];
     expect(egg.sex).toBe(SEX_MALE);
-    expect(egg.motherId).toBe(worker.id);
+    expect(egg.motherId).toBe(worker.geneticId);
+    expect(egg.founderLineId).toBe(worker.founderLineId);
     expect(worker.energy).toBeCloseTo(before - worker.traits.eggEndowment - COLONY.eggLayCost);
+    expect(world.metrics.eggEnergyInvested).toBeCloseTo(worker.traits.eggEndowment);
 
     // Isolate the egg from the colony (no policing, no interference) and
     // incubate to hatch.
@@ -92,7 +94,11 @@ describe("worker-laid males (spec §7.1 channel 2)", () => {
     stepEggs(world);
     const male = world.ants.find((ant) => ant.sex === SEX_MALE);
     expect(male).toBeDefined();
-    expect((male as NonNullable<typeof male>).motherId).toBe(worker.id);
+    expect((male as NonNullable<typeof male>).motherId).toBe(worker.geneticId);
+    expect((male as NonNullable<typeof male>).geneticId).toBe(egg.geneticId);
+    expect(world.geneticRecords.get(worker.geneticId)?.offspringCount).toBeGreaterThan(0);
+    expect(world.metrics.maleBirths).toBe(1);
+    expect(world.metrics.workerBirths).toBe(0);
   });
 
   it("refuses to lay below the energy reserve", () => {

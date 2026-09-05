@@ -46,6 +46,53 @@ export interface TraceSample {
   energy: number;
 }
 
+/** Demographic and conserved-energy state for long-horizon colony experiments. */
+export interface DemographySample {
+  tick: number;
+  phase: "warmup" | "post-shock" | "recovery";
+  workers: number;
+  eggs: number;
+  larvae: number;
+  workerEnergy: number;
+  broodEnergy: number;
+  stockpile: number;
+  storedFoodEnergy: number;
+  colonyEnergy: number;
+  meanWorkerEnergy: number;
+  minWorkerEnergy: number;
+  ageExpiredWorkers: number;
+  energyDepletedWorkers: number;
+  workerBirths: number;
+  workerDeaths: number;
+  queenDeaths: number;
+  gatheredEnergy: number;
+  burnedEnergy: number;
+}
+
+/** Population-genetic instruments sampled from one persistent world. */
+export interface EvolutionSample {
+  tick: number;
+  phase: string;
+  deliveryHeritability: number | null;
+  deliverySamples: number;
+  lifespanHeritability: number | null;
+  lifespanSamples: number;
+  effectivePopulation: number | null;
+  effectivePopulationSamples: number;
+  census: number;
+  reproductiveEvents: number;
+  genomeDiversity: number | null;
+  genomePairs: number;
+  founderDistanceMean: number | null;
+  founderDistanceMax: number | null;
+  founderDistanceSamples: number;
+  founderLinesTotal: number;
+  founderLinesRepresented: number;
+  founderLinesContributing: number;
+  maxFounderLineShare: number | null;
+  founderLinesJson: string;
+}
+
 function gitCommit(): string {
   try {
     // Dev-tool provenance lookup; the harness never runs in production.
@@ -59,8 +106,7 @@ function gitCommit(): string {
   }
 }
 
-export function openLedger(): DatabaseSync {
-  const db = new DatabaseSync(DB_PATH);
+export function initializeLedger(db: DatabaseSync): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS runs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,9 +137,42 @@ export function openLedger(): DatabaseSync {
       ant_id INTEGER NOT NULL,
       x INTEGER, y INTEGER, z INTEGER, energy REAL
     );
+    CREATE TABLE IF NOT EXISTS demography_series (
+      run_id INTEGER NOT NULL REFERENCES runs(id),
+      tick INTEGER NOT NULL,
+      phase TEXT NOT NULL,
+      workers INTEGER, eggs INTEGER, larvae INTEGER,
+      worker_energy REAL, brood_energy REAL, stockpile REAL,
+      stored_food_energy REAL, colony_energy REAL,
+      mean_worker_energy REAL, min_worker_energy REAL,
+      age_expired_workers INTEGER, energy_depleted_workers INTEGER,
+      worker_births INTEGER, worker_deaths INTEGER, queen_deaths INTEGER,
+      gathered_energy REAL, burned_energy REAL
+    );
+    CREATE TABLE IF NOT EXISTS evolution_series (
+      run_id INTEGER NOT NULL REFERENCES runs(id),
+      tick INTEGER NOT NULL,
+      phase TEXT NOT NULL,
+      delivery_heritability REAL, delivery_samples INTEGER,
+      lifespan_heritability REAL, lifespan_samples INTEGER,
+      effective_population REAL, effective_population_samples INTEGER,
+      census INTEGER, reproductive_events INTEGER,
+      genome_diversity REAL, genome_pairs INTEGER,
+      founder_distance_mean REAL, founder_distance_max REAL, founder_distance_samples INTEGER,
+      founder_lines_total INTEGER, founder_lines_represented INTEGER,
+      founder_lines_contributing INTEGER, max_founder_line_share REAL,
+      founder_lines TEXT NOT NULL
+    );
     CREATE INDEX IF NOT EXISTS idx_series_run ON series(run_id);
+    CREATE INDEX IF NOT EXISTS idx_demography_series_run ON demography_series(run_id);
+    CREATE INDEX IF NOT EXISTS idx_evolution_series_run ON evolution_series(run_id);
     CREATE INDEX IF NOT EXISTS idx_runs_experiment ON runs(experiment, started);
   `);
+}
+
+export function openLedger(): DatabaseSync {
+  const db = new DatabaseSync(DB_PATH);
+  initializeLedger(db);
   return db;
 }
 
@@ -146,4 +225,88 @@ export function recordRun(
     traceInsert.run(runId, t.tick, t.antId, t.x, t.y, t.z, t.energy);
   }
   return runId;
+}
+
+/** Attach demographic time-series rows to an already-recorded harness run. */
+export function recordDemographySeries(
+  db: DatabaseSync,
+  runId: number,
+  samples: DemographySample[]
+): void {
+  const insert = db.prepare(
+    `INSERT INTO demography_series (
+       run_id, tick, phase, workers, eggs, larvae, worker_energy, brood_energy, stockpile,
+       stored_food_energy, colony_energy, mean_worker_energy, min_worker_energy,
+       age_expired_workers, energy_depleted_workers, worker_births, worker_deaths,
+       queen_deaths, gathered_energy, burned_energy
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  for (const sample of samples) {
+    insert.run(
+      runId,
+      sample.tick,
+      sample.phase,
+      sample.workers,
+      sample.eggs,
+      sample.larvae,
+      sample.workerEnergy,
+      sample.broodEnergy,
+      sample.stockpile,
+      sample.storedFoodEnergy,
+      sample.colonyEnergy,
+      sample.meanWorkerEnergy,
+      sample.minWorkerEnergy,
+      sample.ageExpiredWorkers,
+      sample.energyDepletedWorkers,
+      sample.workerBirths,
+      sample.workerDeaths,
+      sample.queenDeaths,
+      sample.gatheredEnergy,
+      sample.burnedEnergy
+    );
+  }
+}
+
+/** Attach population-genetic time-series rows to an already-recorded harness run. */
+export function recordEvolutionSeries(
+  db: DatabaseSync,
+  runId: number,
+  samples: EvolutionSample[]
+): void {
+  const insert = db.prepare(
+    `INSERT INTO evolution_series (
+       run_id, tick, phase, delivery_heritability, delivery_samples,
+       lifespan_heritability, lifespan_samples,
+       effective_population, effective_population_samples, census, reproductive_events,
+       genome_diversity, genome_pairs,
+       founder_distance_mean, founder_distance_max, founder_distance_samples,
+       founder_lines_total, founder_lines_represented, founder_lines_contributing,
+       max_founder_line_share, founder_lines
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  for (const sample of samples) {
+    insert.run(
+      runId,
+      sample.tick,
+      sample.phase,
+      sample.deliveryHeritability,
+      sample.deliverySamples,
+      sample.lifespanHeritability,
+      sample.lifespanSamples,
+      sample.effectivePopulation,
+      sample.effectivePopulationSamples,
+      sample.census,
+      sample.reproductiveEvents,
+      sample.genomeDiversity,
+      sample.genomePairs,
+      sample.founderDistanceMean,
+      sample.founderDistanceMax,
+      sample.founderDistanceSamples,
+      sample.founderLinesTotal,
+      sample.founderLinesRepresented,
+      sample.founderLinesContributing,
+      sample.maxFounderLineShare,
+      sample.founderLinesJson
+    );
+  }
 }

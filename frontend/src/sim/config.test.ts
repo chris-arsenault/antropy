@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { foundColony } from "./colony";
-import { FULL_CONFIG, NEST_CONFIG, configPreset, type SimConfig } from "./config";
+import {
+  FULL_CONFIG,
+  MORTAL_NEST_CONFIG,
+  NEST_CONFIG,
+  REPLACEMENT_NEST_CONFIG,
+  VARIATION_NEST_CONFIG,
+  configPreset,
+  type SimConfig,
+} from "./config";
 import { rnnController } from "./controller/rnn";
 import { COLONY, QUEEN } from "./tunables";
 import { createWorld, stepWorld } from "./world";
@@ -46,6 +54,22 @@ describe("Appendix E configuration boundaries", () => {
     const first = configPreset("nest");
     first.workerReproduction = true;
     expect(configPreset("nest")).toEqual(NEST_CONFIG);
+  });
+
+  it("adds only mortality, then the two-part replacement pipeline", () => {
+    expect(changedKeys(NEST_CONFIG, MORTAL_NEST_CONFIG)).toEqual(["mortality"]);
+    expect(changedKeys(MORTAL_NEST_CONFIG, REPLACEMENT_NEST_CONFIG)).toEqual([
+      "workerReproduction",
+      "larvalRearing",
+    ]);
+    expect(configPreset("nest-replacement")).toEqual(REPLACEMENT_NEST_CONFIG);
+  });
+
+  it("admits standing variation as one axis after replacement", () => {
+    expect(changedKeys(REPLACEMENT_NEST_CONFIG, VARIATION_NEST_CONFIG)).toEqual([
+      "geneticVariation",
+    ]);
+    expect(configPreset("nest-variation")).toEqual(VARIATION_NEST_CONFIG);
   });
 
   it("keeps worker reproduction active while colony founding is disabled", () => {

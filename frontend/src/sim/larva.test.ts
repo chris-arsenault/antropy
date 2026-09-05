@@ -46,14 +46,25 @@ describe("larval rearing (brood-as-capital, ADR-0011)", () => {
 
     const stockBefore = colony.stockpile;
     const fedBefore = egg.fedProgress;
+    const investedBefore = world.metrics.larvalEnergyInvested;
     stepEggs(world);
     expect(colony.stockpile).toBeCloseTo(stockBefore - LARVA.feedPerTick, 6);
     expect(egg.fedProgress).toBeCloseTo(fedBefore + LARVA.feedPerTick, 6);
+    expect(world.metrics.larvalEnergyInvested - investedBefore).toBeCloseTo(LARVA.feedPerTick, 6);
 
     egg.fedProgress = LARVA.rearingCost;
+    const burnedBefore = world.metrics.energyBurned;
+    const capitalBefore = colony.stockpile + egg.energy + egg.fedProgress;
     stepEggs(world);
     expect(world.eggs.length).toBe(0);
     expect(world.ants.length).toBe(1);
+    expect(world.metrics.workerBirths).toBe(1);
+    expect(world.metrics.metamorphosisEnergyBurned).toBeCloseTo(LARVA.rearingCost, 6);
+    expect(world.metrics.energyBurned - burnedBefore).toBeCloseTo(LARVA.rearingCost, 6);
+    expect(capitalBefore - (colony.stockpile + world.ants[0].energy)).toBeCloseTo(
+      world.metrics.energyBurned - burnedBefore,
+      6
+    );
   });
 
   it("starves past the grace window into FOOD when the crop is dry", () => {

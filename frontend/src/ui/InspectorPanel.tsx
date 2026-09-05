@@ -83,7 +83,7 @@ export function InspectorPanel({ ant, controller, onClose }: InspectorPanelProps
       <ValueRow label="age" value={ant.age} />
       <ValueRow label="energy" value={ant.energy} />
       <ValueRow label="body" value={ant.bodyScale} />
-      <ValueRow label="deliveries" value={ant.deliveries} />
+      <ValueRow label="net food merit" value={ant.netEnergyDelivered} />
       <details className="inspector-block">
         <summary>Traits</summary>
         {TRAIT_KEYS.map((key, i) => (

@@ -1,13 +1,21 @@
 import { SEX_FEMALE, SEX_MALE, type Ant } from "./ant";
+import { offspringIdentity, recordGeneticDeath } from "./ancestry";
 import { eggCarryCapacity, spoilCapacity } from "./capacity";
-import { creditDelivery } from "./colony";
 import { addEgg, carryEgg, findEggSpot, placeCarriedEgg, removeEgg, STAGE_EGG } from "./eggs";
-import { isAboveSurface, maxEnergy, recordFoodPickup, spendEnergy } from "./energy";
+import {
+  creditNetEnergyMerit,
+  isAboveSurface,
+  maxEnergy,
+  recordFoodPickup,
+  spendEnergy,
+  transferToStockpile,
+} from "./energy";
 import { getVoxelSafe, inBounds, voxelIndex } from "./grid";
+import { recordFoodDeposit } from "./foodDeposit";
 import { haploidOffspring } from "./genetics";
 import { dropUnsupportedOneVoxel } from "./locomotion";
 import { Material, type MaterialId } from "./materials";
-import { sampleMaterialScent, setMaterialScent } from "./materialScent";
+import { sampleMaterialScent } from "./materialScent";
 import { depositScent } from "./scent";
 import { mandibleTargetBand, type TargetBand } from "./targeting";
 import { COLONY, COLONY_ODOR, DIG, ENERGY, MALE, PHEROMONE_DEPOSIT_MAX } from "./tunables";
@@ -34,12 +42,16 @@ function consume(ant: Ant, amount: number): number {
  */
 function eatAt(world: World, ant: Ant, x: number, y: number, z: number): boolean {
   if (getVoxelSafe(world.grid, x, y, z) === Material.FOOD) {
-    const alreadyStored = world.storedFood.has(voxelIndex(world.grid, x, y, z));
+    const index = voxelIndex(world.grid, x, y, z);
+    const alreadyStored = world.storedFood.has(index);
+    const recycled = world.recycledFood.has(index);
     mutateVoxel(world, x, y, z, Material.AIR);
     const absorbed = consume(ant, ENERGY.foodEnergy);
     world.metrics.foodEaten += 1;
     world.metrics.foodEnergyConsumed += absorbed;
-    if (!alreadyStored && isAboveSurface(world, x, y, z)) {
+    if (recycled) {
+      world.metrics.recycledFoodEnergyRecovered += absorbed;
+    } else if (!alreadyStored && isAboveSurface(world, x, y, z)) {
       world.metrics.surfaceFoodEnergyGathered += absorbed;
     }
     return true;
@@ -49,6 +61,8 @@ function eatAt(world: World, ant: Ant, x: number, y: number, z: number): boolean
     if (egg.queenDestined === 1) {
       world.queenEggsEaten += 1;
     }
+    const birthTick = world.geneticRecords.get(egg.geneticId)?.birthTick ?? world.tick;
+    recordGeneticDeath(world, egg.geneticId, world.tick - birthTick);
     removeEgg(world, egg);
     consume(ant, egg.energy);
     return true;
@@ -132,7 +146,7 @@ function pickUpAt(world: World, ant: Ant, x: number, y: number, z: number): bool
   ant.spoilLoads += 1;
   ant.carryLoad = ant.spoilLoads / spoilCapacity(ant, world.config);
   spendEnergy(world, ant, cost);
-  recordFoodPickup(world, material, x, y, z);
+  if (recordFoodPickup(world, material, x, y, z)) ant.uncreditedFoodLoads += 1;
   mutateVoxel(world, x, y, z, Material.AIR);
   dropLoadBearingOccupant(world, ant, x, y, z);
   return true;
@@ -190,8 +204,8 @@ function inNestReach(world: World, ant: Ant): boolean {
 /**
  * Scripted bidirectional trophallaxis (spec §7.2 — the queen is
  * special-cased): a fed female worker beside her queen passes surplus energy
- * to the stockpile (earning delivery merit); a hungry worker is fed from it.
- * The stockpile is the colony's energy buffer, not a one-way sink.
+ * to the stockpile; a hungry worker is fed from it. Internal transfers earn
+ * no germ-line merit. The stockpile is a buffer, not a one-way sink.
  */
 export function tryTrophallaxis(world: World, ant: Ant): void {
   if (ant.sex !== SEX_FEMALE) {
@@ -204,8 +218,7 @@ export function tryTrophallaxis(world: World, ant: Ant): void {
   if (ant.energy > COLONY.trophallaxisThreshold && colony.stockpile < COLONY.stockpileSatiation) {
     const amount = Math.min(COLONY.trophallaxisRate, ant.energy - COLONY.trophallaxisThreshold);
     ant.energy -= amount;
-    creditDelivery(world, ant.lineageId, ant.patrilineId, amount);
-    ant.deliveries += amount;
+    transferToStockpile(world, ant.lineageId, amount);
     return;
   }
   if (ant.energy < COLONY.feedThreshold && colony.stockpile > COLONY.queenReserve) {
@@ -219,7 +232,9 @@ export function tryTrophallaxis(world: World, ant: Ant): void {
   }
 }
 
-function unload(world: World, ant: Ant): void {
+function unload(world: World, ant: Ant): boolean {
+  const uncreditedExternal = ant.carrying === Material.FOOD && ant.uncreditedFoodLoads > 0;
+  if (uncreditedExternal) ant.uncreditedFoodLoads -= 1;
   ant.spoilLoads -= 1;
   ant.carryLoad = ant.spoilLoads / spoilCapacity(ant, world.config);
   if (ant.spoilLoads === 0) {
@@ -228,6 +243,7 @@ function unload(world: World, ant: Ant): void {
     ant.carriedColonyScent = 0;
   }
   spendEnergy(world, ant, DIG.depositCost);
+  return uncreditedExternal;
 }
 
 function isOccupied(world: World, x: number, y: number, z: number): boolean {
@@ -257,33 +273,24 @@ function depositAt(world: World, ant: Ant, x: number, y: number, z: number): boo
     return false;
   }
   const food = ant.carrying === Material.FOOD;
+  const uncreditedExternal = food && ant.uncreditedFoodLoads > 0;
   mutateVoxel(world, x, y, z, food ? Material.FOOD : Material.LOOSE_FILL);
   if (food) {
-    const index = voxelIndex(world.grid, x, y, z);
-    world.storedFood.add(index);
-    if (world.config.contactFoodOdor && ant.carriedColonyScentOwner !== 0) {
-      setMaterialScent(
-        world.materialColonyScent,
-        index,
-        ant.carriedColonyScent,
-        ant.carriedColonyScentOwner
-      );
-    }
-    world.metrics.foodDeposited += 1;
+    recordFoodDeposit(world, ant, x, y, z, uncreditedExternal);
   }
   unload(world, ant);
   return true;
 }
 
 function tryDeposit(world: World, ant: Ant, band: TargetBand): boolean {
-  // Food deposited at the queen becomes stockpile + patriline merit; this
-  // is the delivery event (design spec §7.1 merit signal). A full crop
+  // Food deposited at the queen becomes stockpile; uncredited external food
+  // also earns patriline merit. A full crop
   // absorbs nothing (§B.3 R2 colony sink): surplus falls through to
   // physical placement, so hoards beyond the crop are FOOD voxels whose
   // location the rain liability prices (§B.7.3 storage insurance).
   if (ant.carrying === Material.FOOD && inNestReach(world, ant) && cropHasRoom(world, ant)) {
-    creditDelivery(world, ant.lineageId, ant.patrilineId, ENERGY.foodEnergy);
-    ant.deliveries += 1;
+    transferToStockpile(world, ant.lineageId, ENERGY.foodEnergy);
+    if (ant.uncreditedFoodLoads > 0) creditNetEnergyMerit(world, ant, ENERGY.foodEnergy);
     world.metrics.foodDelivered += 1;
     unload(world, ant);
     return true;
@@ -418,8 +425,10 @@ export function tryLayEgg(world: World, ant: Ant): void {
     return;
   }
   ant.energy -= endowment + COLONY.eggLayCost;
+  world.metrics.eggEnergyInvested += endowment;
   world.metrics.energyBurned += COLONY.eggLayCost;
   const genome = haploidOffspring(world, ant.genome);
+  const identity = offspringIdentity(world, ant.founderLineId);
   addEgg(world, {
     id: world.nextEggId++,
     x: spot.x,
@@ -433,10 +442,12 @@ export function tryLayEgg(world: World, ant: Ant): void {
     fedProgress: 0,
     hungerTicks: 0,
     sex: SEX_MALE,
+    geneticId: identity.geneticId,
+    founderLineId: identity.founderLineId,
     queenDestined: 0,
     lineageId: ant.lineageId,
     patrilineId: ant.patrilineId,
-    motherId: ant.id,
+    motherId: ant.geneticId,
     fatherId: 0,
   });
 }

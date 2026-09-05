@@ -43,6 +43,54 @@ describe("checkpoint codec", () => {
     expect(restored.config).toEqual(config);
   });
 
+  it("preserves unrecovered corpse-food provenance", () => {
+    const world = createWorld(8008, rnnController, NEST_CONFIG);
+    world.recycledFood.add(1234);
+
+    const restored = deserializeWorld(serializeWorld(world));
+
+    expect(restored.recycledFood).toEqual(new Set([1234]));
+  });
+});
+
+describe("checkpoint simulation fields", () => {
+  it("preserves uncredited external food through caches and carriage", () => {
+    const world = createWorld(8010, rnnController, NEST_CONFIG);
+    const colony = foundColony(world);
+    const ant = world.ants[0];
+    ant.uncreditedFoodLoads = 2;
+    ant.netEnergyDelivered = 2.4;
+    world.uncreditedExternalFood.add(4321);
+    colony.patrilineMerit.set(ant.patrilineId, 2.4);
+
+    const restored = deserializeWorld(serializeWorld(world));
+
+    expect(restored.uncreditedExternalFood).toEqual(new Set([4321]));
+    expect(restored.ants[0].uncreditedFoodLoads).toBe(2);
+    expect(restored.ants[0].netEnergyDelivered).toBe(2.4);
+    expect(restored.colonies[0].patrilineMerit.get(ant.patrilineId)).toBe(2.4);
+    expect(restored.nextGeneticId).toBe(world.nextGeneticId);
+    expect(restored.colonies[0].queenGeneticId).toBe(colony.queenGeneticId);
+    expect(restored.geneticRecords).toEqual(world.geneticRecords);
+    expect(restored.founderGenomes).toHaveLength(world.founderGenomes.length);
+    expect(
+      restored.controller.genomeDistance(restored.founderGenomes[0], world.founderGenomes[0])
+    ).toBe(0);
+  });
+
+  it("preserves replacement energy attribution", () => {
+    const world = createWorld(8009, rnnController, NEST_CONFIG);
+    world.metrics.eggEnergyInvested = 0.3;
+    world.metrics.larvalEnergyInvested = 0.6;
+    world.metrics.metamorphosisEnergyBurned = 0.6;
+
+    const restored = deserializeWorld(serializeWorld(world));
+
+    expect(restored.metrics.eggEnergyInvested).toBe(0.3);
+    expect(restored.metrics.larvalEnergyInvested).toBe(0.6);
+    expect(restored.metrics.metamorphosisEnergyBurned).toBe(0.6);
+  });
+
   it("preserves the vertical attention latch", () => {
     const world = createWorld(8006, rnnController, NEST_CONFIG);
     foundColony(world);
@@ -82,6 +130,8 @@ describe("checkpoint relationship restoration", () => {
       fedProgress: 0,
       hungerTicks: 0,
       sex: 0,
+      geneticId: world.nextGeneticId++,
+      founderLineId: ant.founderLineId,
       queenDestined: 0,
       lineageId: ant.lineageId,
       patrilineId: ant.patrilineId,

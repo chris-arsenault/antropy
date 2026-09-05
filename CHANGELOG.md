@@ -4,6 +4,37 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Added a world-wide genetic identity that follows eggs into workers, males, queens, and stored
+  sperm; real parent links, founder lines, offspring contribution, completed deaths, net-energy
+  merit, retained founder genomes, and checkpoint version 22 replace mixed ant/patriline ids.
+- Added live evolutionary-health instrumentation to the web app and harness: completed-life
+  delivery and lifespan heritability, offspring-variance effective population, controller-owned
+  genome diversity and founder distance, and per-line survival. Every estimate retains its sample
+  count and unavailable values remain null in the new `evolution_series` ledger table.
+- Replaced event-count delivery merit with one-time net external-food energy credit. Provenance
+  follows food through carriage, caches, death drops, and checkpoints; recycled food, owned food,
+  eating, and internal trophallaxis cannot manufacture germ-line merit.
+- Certified fixed-genome demographic continuity across complete founder turnover: one smoke and
+  four new 24,000-tick worlds keep their queens, replace deaths with descendants, hold 37–49
+  workers, gain colony energy, and never invoke automatic continuation. A redundant eight-world
+  repeat was stopped rather than turning long fixed-controller verification into ongoing work.
+- Replaced the authored-nest-specific larder radius with physical access to colony-marked
+  underground stored food across the multi-chamber nest. Remote unmarked and surface stores remain
+  inaccessible, and all withdrawals retain source attribution.
+- Admitted mortality and queen upkeep to the authored-nest colony without enabling reproduction
+  or later ecology. Mortal bootstrap workers now begin at evenly spaced ages instead of dying as
+  one synchronized cohort; worker and queen death causes are separately attributable. Eight new
+  4,200-tick worlds retained their queens and 32/40 workers with closed energy ledgers.
+- Made egg endowment, larval feeding, and metamorphosis separately attributable. Metamorphosis now
+  records consumed rearing capital instead of silently dropping it; checkpoint version is 20.
+- Added named mortality and replacement nest presets and admitted resource-funded worker
+  replacement without later systems. Eight new worlds each matured eight female workers by tick
+  4,200, matching eight natural deaths and restoring the founder population to 40.
+- Added a matched colony-resilience harness with demographic time series and source-attributed
+  corpse/brood recycling. The first eight-world control establishes the untreated worker-energy
+  basin before mortality or reproduction is admitted.
+- Made the checked-in run-1784 colony controller the shipped RNN founder default; the obsolete
+  pre-Appendix-F forager artifact no longer seeds normal worlds.
 - Replaced overlapping appendix work plans with five normalized design categories and one
   cross-category implementation order. Every item is marked delivered, backlog, or OBE; a
   section-level coverage map traces the original specification and Appendices A–G into the new
@@ -22,8 +53,8 @@ All notable user-visible changes are recorded here.
 - Completed the Appendix D ladder through the functional RNN summit: shared excavation,
   deposit, food pickup, and brood pickup/putdown semantics; conserved spoil hauling; brood and
   food transport; and deterministic per-ant motor jitter.
-- Added tunable brood carrying capacity and checkpoint persistence for carried brood.
-  Checkpoint version is now 18; earlier checkpoint versions are refused.
+- Added tunable brood carrying capacity and checkpoint persistence for carried brood and
+  unrecovered recycled food. Checkpoint version is now 20; earlier checkpoint versions are refused.
 - Moved long-horizon simulation measurements out of the test targets. The bounded Vitest suite
   retains mechanics and integration invariants; campaigns and calibration remain in the
   harness ledger.

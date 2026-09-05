@@ -102,7 +102,7 @@ function hoardEnergy(world: World, colony: Colony): number {
 
 function totalMerit(colony: Colony): number {
   let merit = 0;
-  for (const credit of colony.patrilineDeliveries.values()) {
+  for (const credit of colony.patrilineMerit.values()) {
     merit += credit;
   }
   return merit;

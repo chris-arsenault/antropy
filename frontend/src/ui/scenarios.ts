@@ -1,5 +1,10 @@
 import { foundColony } from "../sim/colony";
-import { LADDER_STEP12_CONFIG, PHASE2_CONFIG, PROGRAMMED_COLONY_CONFIG } from "../sim/config";
+import {
+  LADDER_STEP12_CONFIG,
+  PHASE2_CONFIG,
+  PROGRAMMED_COLONY_CONFIG,
+  VARIATION_NEST_CONFIG,
+} from "../sim/config";
 import {
   diggerSeedVector,
   derivedColonySeedVector,
@@ -17,7 +22,7 @@ import { createWorld, populateDiggers, type World } from "../sim/world";
  * watch. Without this the app could only ever run the full-liability
  * colony, so the Phase 2 work was invisible outside the test suite.
  */
-export type ScenarioId = "programmed" | "functional" | "colony" | "digging";
+export type ScenarioId = "programmed" | "variation" | "functional" | "colony" | "digging";
 
 export interface Scenario {
   id: ScenarioId;
@@ -42,6 +47,17 @@ export const SCENARIOS: Scenario[] = [
       } finally {
         setRuntimeSeedBase(null);
       }
+    },
+  },
+  {
+    id: "variation",
+    label: "Colony with variation",
+    description:
+      "The instrumented authored nest with mortality, worker replacement, and inherited " +
+      "variation. Founding and later ecology remain off, so this shows standing diversity—not " +
+      "yet an intergenerational selection loop.",
+    build(seed) {
+      return buildAuthoredNestWorld(seed, rnnController, VARIATION_NEST_CONFIG).world;
     },
   },
   {

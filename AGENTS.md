@@ -5,35 +5,36 @@ on the Ahara platform.
 
 ## Read first
 
-| Topic                        | Link                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------- |
-| Primary operating principles | [docs/principles.md](docs/principles.md)                                         |
-| Current work order           | [docs/design/README.md](docs/design/README.md)                                   |
-| Controller design            | [docs/design/controller.md](docs/design/controller.md)                           |
-| Colony biology               | [docs/design/colony-biology.md](docs/design/colony-biology.md)                   |
-| Environment and morphology   | [docs/design/environment.md](docs/design/environment.md)                         |
-| Experiments and certification | [docs/design/experimentation.md](docs/design/experimentation.md)                |
-| Evolution and advanced work  | [docs/design/advanced.md](docs/design/advanced.md)                               |
-| Certification status         | [docs/certifications.md](docs/certifications.md)                                 |
-| Documentation index          | [docs/README.md](docs/README.md)                                                 |
-| Source archive               | [docs/sources/README.md](docs/sources/README.md)                                 |
-| Architecture                 | [docs/architecture.md](docs/architecture.md)                                     |
-| Architecture decisions       | [docs/adr/README.md](docs/adr/README.md)                                         |
-| Backlog                      | [docs/backlog.md](docs/backlog.md)                                               |
-| Changelog                    | [CHANGELOG.md](CHANGELOG.md)                                                     |
-| Platform integration         | [../ahara/INTEGRATION.md](../ahara/INTEGRATION.md)                               |
-| Ahara standards              | [../ahara-standards/standards/README.md](../ahara-standards/standards/README.md) |
+| Topic                         | Link                                                                             |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| Primary operating principles  | [docs/principles.md](docs/principles.md)                                         |
+| Current work order            | [docs/design/README.md](docs/design/README.md)                                   |
+| Controller design             | [docs/design/controller.md](docs/design/controller.md)                           |
+| Colony biology                | [docs/design/colony-biology.md](docs/design/colony-biology.md)                   |
+| Environment and morphology    | [docs/design/environment.md](docs/design/environment.md)                         |
+| Experiments and certification | [docs/design/experimentation.md](docs/design/experimentation.md)                 |
+| Evolution and advanced work   | [docs/design/advanced.md](docs/design/advanced.md)                               |
+| Certification status          | [docs/certifications.md](docs/certifications.md)                                 |
+| Documentation index           | [docs/README.md](docs/README.md)                                                 |
+| Source archive                | [docs/sources/README.md](docs/sources/README.md)                                 |
+| Architecture                  | [docs/architecture.md](docs/architecture.md)                                     |
+| Architecture decisions        | [docs/adr/README.md](docs/adr/README.md)                                         |
+| Backlog                       | [docs/backlog.md](docs/backlog.md)                                               |
+| Changelog                     | [CHANGELOG.md](CHANGELOG.md)                                                     |
+| Platform integration          | [../ahara/INTEGRATION.md](../ahara/INTEGRATION.md)                               |
+| Ahara standards               | [../ahara-standards/standards/README.md](../ahara-standards/standards/README.md) |
 
 ## Critical rules
 
-- Name which ordered goal the task serves: ultimately genuine evolution; currently one colony
-  that gathers and stores food, survives, raises brood, and replaces dead workers inside the
-  authored nest; always attributable results, measured claims, and human-approved structural
-  changes. The [operating principles](docs/principles.md) are the primary lens.
+- Name which ordered goal the task serves: ultimately genuine evolution; currently admit genetic
+  variation to the instrumented, certified living colony without claiming selection from standing
+  variation alone; always attributable results, measured claims, and human-approved structural changes. The
+  [operating principles](docs/principles.md) are the primary lens.
 - Follow the [normalized cross-category order](docs/design/README.md#design-order) and the owning
-  category's linear sequence one deliverable and one gate at a time. Until the fixed-genome colony
-  loop is certified, digging, spoil, colony founding, genetic variation, seasons, and decay stay
-  off. Isolate systems through per-world config, not source edits.
+  category's linear sequence one deliverable and one gate at a time. The fixed-genome colony loop
+  is now the control arm: admit genetic variation only after its instruments are trustworthy, and
+  keep digging, spoil, colony founding, seasons, and decay off until their ordered work. Isolate
+  systems through per-world config, not source edits.
 - Documents under [docs/sources/](docs/sources/README.md) preserve supplied wording and historical
   plans. They are provenance, not a parallel work queue. Reconcile a new source into the normalized
   categories and mark displaced ideas OBE instead of silently deleting them.
@@ -75,11 +76,11 @@ on the Ahara platform.
 
 ## Code map
 
-| Path                        | Purpose                                                     |
-| --------------------------- | ----------------------------------------------------------- |
-| `frontend/`                 | Vite React/TypeScript SPA — simulation, rendering, UI       |
-| `infrastructure/terraform/` | Project Terraform root using the Ahara `website` module     |
-| `scripts/`                  | Parameterless local deploy script                           |
+| Path                        | Purpose                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `frontend/`                 | Vite React/TypeScript SPA — simulation, rendering, UI                        |
+| `infrastructure/terraform/` | Project Terraform root using the Ahara `website` module                      |
+| `scripts/`                  | Parameterless local deploy script                                            |
 | `docs/`                     | Normalized design, evidence, architecture, ADRs, backlog, and source archive |
 
 ## Commands
@@ -93,6 +94,6 @@ on the Ahara platform.
 | `cd frontend && pnpm run dev`       | Local dev server (only when explicitly requested)                 |
 
 Harness commands: `run`, `tournament`, `ladder`, `calibrate`, `calibrate-colony-economy`,
-`derive`, `derive-vivo`, `derive-digger`, `derive-colony-loop`, `clone-colony-loop`,
+`colony-resilience`, `derive`, `derive-vivo`, `derive-digger`, `derive-colony-loop`, `clone-colony-loop`,
 `bake-colony-run`, `robustness-colony-loop`, `correct-colony-energy`, `optimize-colony-loop`,
 `optimize-colony-energy`, `colony-loop`, `determinism`, `recent`, and `sql`.

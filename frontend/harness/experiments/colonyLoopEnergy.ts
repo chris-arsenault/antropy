@@ -1,15 +1,14 @@
 import { type Ant } from "../../src/sim/ant";
-import { type Colony } from "../../src/sim/colony";
-import { NEST_CONFIG } from "../../src/sim/config";
 import { type SensorPolicy } from "../../src/sim/controller/contract";
 import { Input, Output } from "../../src/sim/controller/contract";
-import { stepFoodGovernor } from "../../src/sim/foodSpawner";
-import { Material } from "../../src/sim/materials";
-import { buildAuthoredNestWorld } from "../../src/sim/nestWorld";
 import { colonyLoopOracle, resetColonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
-import { emitFoodScent, stepScentField } from "../../src/sim/scent";
 import { ENERGY } from "../../src/sim/tunables";
 import { stepWorld, type World } from "../../src/sim/world";
+import {
+  cachedFoodCount,
+  prepareAuthoredNestEconomy,
+  totalColonyEnergy,
+} from "../lib/authoredNestEconomy";
 import { type TraceSample } from "../lib/ledger";
 import { type ColonyLoopResult, type SensorFrame } from "./colonyLoop";
 import { pathingCeilingOracle } from "./pathingCeilingOracle";
@@ -17,45 +16,6 @@ import { type OraclePolicy } from "../../src/sim/oracles/policies";
 
 type DiagnosticPolicy = OraclePolicy | SensorPolicy | null;
 type PopulationRecorder = (ant: Ant) => void;
-
-function stockSteadyFood(world: World): void {
-  for (let pass = 0; pass < 60 && world.foodSources.size < world.foodTarget; pass++) {
-    stepFoodGovernor(world);
-  }
-}
-
-function primeFoodCarrier(world: World, passes = 100): void {
-  for (let pass = 0; pass < passes; pass++) {
-    emitFoodScent(world.grid, world.foodScent, world.foodSources);
-    stepScentField(world.grid, world.foodScent);
-  }
-}
-
-function isCachedFood(world: World, index: number): boolean {
-  const x = index % world.grid.sizeX;
-  const z = Math.floor(index / world.grid.sizeX) % world.grid.sizeZ;
-  const y = Math.floor(index / (world.grid.sizeX * world.grid.sizeZ));
-  return y <= world.surfaceMap[z * world.grid.sizeX + x];
-}
-
-function carriedFoodEnergy(ants: readonly Ant[]): number {
-  return ants.reduce(
-    (sum, ant) => sum + (ant.carrying === Material.FOOD ? ant.spoilLoads * ENERGY.foodEnergy : 0),
-    0
-  );
-}
-
-function colonyEnergy(world: World, colony: Colony): number {
-  const workers = world.ants.reduce((sum, ant) => sum + ant.energy, 0);
-  const brood = world.eggs.reduce((sum, egg) => sum + egg.energy + egg.fedProgress, 0);
-  return (
-    workers +
-    colony.stockpile +
-    world.storedFood.size * ENERGY.foodEnergy +
-    carriedFoodEnergy(world.ants) +
-    brood
-  );
-}
 
 function tracePopulation(world: World, cadence: number, trace: TraceSample[]): void {
   if (world.tick % cadence !== 0) return;
@@ -116,11 +76,9 @@ function runEnergyEpisode(
   record?: PopulationRecorder
 ): ColonyLoopResult {
   resetPolicy(policy);
-  const { world, colony, nest } = buildAuthoredNestWorld(seed, undefined, NEST_CONFIG);
+  const { world, colony, nest } = prepareAuthoredNestEconomy(seed);
   installPolicy(world, policy);
-  stockSteadyFood(world);
-  primeFoodCarrier(world);
-  const initialEnergy = colonyEnergy(world, colony);
+  const initialEnergy = totalColonyEnergy(world, colony);
   const gatheredStart = world.metrics.surfaceFoodEnergyGathered;
   const burnedStart = world.metrics.energyBurned;
   const trace: TraceSample[] = [];
@@ -135,7 +93,7 @@ function runEnergyEpisode(
     movementSteps += observed.movementSteps;
     tracePopulation(world, cadence, trace);
   }
-  const finalEnergy = colonyEnergy(world, colony);
+  const finalEnergy = totalColonyEnergy(world, colony);
   const gathered = world.metrics.surfaceFoodEnergyGathered - gatheredStart;
   const burned = world.metrics.energyBurned - burnedStart;
   const balance = finalEnergy - initialEnergy;
@@ -156,7 +114,7 @@ function runEnergyEpisode(
       accountedBalance: gathered - burned,
       conservationResidual: balance - (gathered - burned),
       positive: balance > 0,
-      cache: [...world.foodSources].filter((index) => isCachedFood(world, index)).length,
+      cache: cachedFoodCount(world),
       stockpile: colony.stockpile,
       surfacedWorkers: surfaced.size,
       signaledWorkers: signaled.size,

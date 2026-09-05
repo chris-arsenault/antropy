@@ -1,4 +1,5 @@
 import { type Ant } from "../sim/ant";
+import { type GeneticRecord } from "../sim/ancestry";
 import { type Colony } from "../sim/colony";
 import { type SimConfig } from "../sim/config";
 import { controllerById } from "../sim/controller/registry";
@@ -13,7 +14,7 @@ import { type RngState } from "../sim/rng";
 import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
 import { createWorld, type World, type WorldMetrics } from "../sim/world";
 
-export const CHECKPOINT_VERSION = 18;
+export const CHECKPOINT_VERSION = 22;
 
 interface AntRecord {
   scalars: Record<string, number>;
@@ -34,8 +35,13 @@ interface EggRecord {
 interface ColonyRecord {
   scalars: Record<string, number>;
   queenGenome: Float32Array;
-  sperm: { genome: Float32Array; patrilineId: number }[];
-  deliveries: [number, number][];
+  sperm: {
+    genome: Float32Array;
+    patrilineId: number;
+    geneticId: number;
+    founderLineId: number;
+  }[];
+  merit: [number, number][];
 }
 
 interface ScentRecord {
@@ -53,6 +59,9 @@ export interface Checkpoint {
   weatherRngState: RngState;
   rainRemaining: number;
   nextAntId: number;
+  nextGeneticId: number;
+  geneticRecords: GeneticRecord[];
+  founderGenomes: Float32Array[];
   nextEggId: number;
   nextColonyId: number;
   foundings: number;
@@ -70,6 +79,8 @@ export interface Checkpoint {
   grid: Uint8Array;
   foodSources: number[];
   storedFood: number[];
+  uncreditedExternalFood: number[];
+  recycledFood: number[];
   cavities: number[];
   lastVisit: Uint32Array;
   ants: AntRecord[];
@@ -104,11 +115,14 @@ const ANT_SCALARS = [
   "carriedColonyScentOwner",
   "carriedColonyScent",
   "sex",
+  "geneticId",
+  "founderLineId",
   "lineageId",
   "patrilineId",
   "motherId",
   "fatherId",
-  "deliveries",
+  "netEnergyDelivered",
+  "uncreditedFoodLoads",
 ] as const;
 
 const EGG_SCALARS = [
@@ -122,6 +136,8 @@ const EGG_SCALARS = [
   "fedProgress",
   "hungerTicks",
   "sex",
+  "geneticId",
+  "founderLineId",
   "queenDestined",
   "lineageId",
   "patrilineId",
@@ -137,6 +153,7 @@ const COLONY_SCALARS = [
   "entranceX",
   "entranceY",
   "entranceZ",
+  "queenGeneticId",
   "queenAge",
   "queenLifespanTicks",
   "stockpile",
@@ -213,8 +230,10 @@ function serializeColony(world: World, colony: Colony): ColonyRecord {
     sperm: colony.sperm.map((s) => ({
       genome: world.controller.serializeGenome(s.genome),
       patrilineId: s.patrilineId,
+      geneticId: s.geneticId,
+      founderLineId: s.founderLineId,
     })),
-    deliveries: Array.from(colony.patrilineDeliveries.entries()),
+    merit: Array.from(colony.patrilineMerit.entries()),
   };
 }
 
@@ -225,8 +244,10 @@ function restoreColony(world: World, record: ColonyRecord): Colony {
     sperm: record.sperm.map((s) => ({
       genome: world.controller.deserializeGenome(s.genome),
       patrilineId: s.patrilineId,
+      geneticId: s.geneticId,
+      founderLineId: s.founderLineId,
     })),
-    patrilineDeliveries: new Map(record.deliveries),
+    patrilineMerit: new Map(record.merit),
   };
 }
 
@@ -241,6 +262,12 @@ export function serializeWorld(world: World): Checkpoint {
     weatherRngState: world.weatherRng.getState(),
     rainRemaining: world.rainRemaining,
     nextAntId: world.nextAntId,
+    nextGeneticId: world.nextGeneticId,
+    geneticRecords: Array.from(world.geneticRecords.values(), (record) => ({
+      ...record,
+      traits: { ...record.traits },
+    })),
+    founderGenomes: world.founderGenomes.map((genome) => world.controller.serializeGenome(genome)),
     nextEggId: world.nextEggId,
     nextColonyId: world.nextColonyId,
     foundings: world.foundings,
@@ -258,6 +285,8 @@ export function serializeWorld(world: World): Checkpoint {
     grid: Uint8Array.from(world.grid.data),
     foodSources: Array.from(world.foodSources),
     storedFood: Array.from(world.storedFood),
+    uncreditedExternalFood: Array.from(world.uncreditedExternalFood),
+    recycledFood: Array.from(world.recycledFood),
     cavities: Array.from(world.cavities),
     lastVisit: Uint32Array.from(world.lastVisit),
     ants: world.ants.map((ant) => serializeAnt(world, ant)),
@@ -291,6 +320,16 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.weatherRng.setState(checkpoint.weatherRngState);
   world.rainRemaining = checkpoint.rainRemaining;
   world.nextAntId = checkpoint.nextAntId;
+  world.nextGeneticId = checkpoint.nextGeneticId;
+  world.geneticRecords = new Map(
+    checkpoint.geneticRecords.map((record) => [
+      record.id,
+      { ...record, traits: { ...record.traits } },
+    ])
+  );
+  world.founderGenomes = checkpoint.founderGenomes.map((genome) =>
+    controller.deserializeGenome(genome)
+  );
   world.nextEggId = checkpoint.nextEggId;
   world.nextColonyId = checkpoint.nextColonyId;
   world.foundings = checkpoint.foundings;
@@ -308,6 +347,8 @@ export function deserializeWorld(checkpoint: Checkpoint): World {
   world.grid.data.set(checkpoint.grid);
   world.foodSources = new Set(checkpoint.foodSources);
   world.storedFood = new Set(checkpoint.storedFood);
+  world.uncreditedExternalFood = new Set(checkpoint.uncreditedExternalFood);
+  world.recycledFood = new Set(checkpoint.recycledFood);
   world.cavities = new Set(checkpoint.cavities);
   world.lastVisit.set(checkpoint.lastVisit);
   world.ants = checkpoint.ants.map((record) => restoreAnt(world, record));

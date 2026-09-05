@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { colonySeedVector, rnnController } from "./rnn";
+import { colonySeedVector, derivedColonySeedVector, rnnController } from "./rnn";
 import { Input, INPUT_COUNT, Output } from "./contract";
 
 function act(entries: readonly (readonly [number, number])[]): Float32Array {
@@ -11,6 +11,13 @@ function act(entries: readonly (readonly [number, number])[]): Float32Array {
 }
 
 describe("Appendix E constructive seed", () => {
+  it("is the controller's shipped founder default", () => {
+    const expected = derivedColonySeedVector();
+    const serialized = rnnController.serializeGenome(rnnController.fixedSeed());
+
+    expect(Array.from(serialized.slice(0, expected.length))).toEqual(Array.from(expected));
+  });
+
   it("turns toward the stronger food sample while unloaded", () => {
     const left = act([
       [Input.FOOD_SCENT_LEFT, 0.8],

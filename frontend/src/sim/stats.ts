@@ -1,4 +1,5 @@
 import { INPUT_COUNT, type PhysicalTraits } from "./controller/contract";
+import { computeEvolutionStats, type Estimate, type EvolutionStats } from "./evolutionStats";
 import { voxelIndex } from "./grid";
 import { computeRatios, type ViabilityRatios } from "./ratios";
 import { sampleScent } from "./scent";
@@ -25,11 +26,10 @@ export interface WorldStats {
   traitMeans: number[];
   /** Population variance per trait. */
   traitVariances: number[];
-  /**
-   * Live selection differential (design spec §11.4): Pearson correlation
-   * between each trait and the delivery-rate fitness proxy among living ants.
-   */
-  selectionDifferential: number[];
+  /** Descriptive live trait/merit-rate correlation; not a heritability estimate. */
+  traitMeritCorrelation: Estimate[];
+  /** Completed-life ancestry, effective-population, diversity, and founder-line instruments. */
+  evolution: EvolutionStats;
   /** Share of the population belonging to the largest patriline. */
   dominantPatrilineShare: number;
   stockpile: number;
@@ -73,6 +73,16 @@ export function pearson(xs: number[], ys: number[]): number {
     return 0;
   }
   return covariance / Math.sqrt(varX * varY);
+}
+
+function pearsonEstimate(xs: number[], ys: number[]): Estimate {
+  if (xs.length < 3) return { value: null, samples: xs.length };
+  const xSpread = Math.max(...xs) - Math.min(...xs);
+  const ySpread = Math.max(...ys) - Math.min(...ys);
+  return {
+    value: xSpread === 0 || ySpread === 0 ? null : pearson(xs, ys),
+    samples: xs.length,
+  };
 }
 
 function meanAndVariance(values: number[]): { mean: number; variance: number } {
@@ -135,17 +145,17 @@ function gradientVisibility(world: World): number {
 
 /** One instrumentation sample over the living population. */
 export function computeStats(world: World): WorldStats {
-  const fitness = world.ants.map((ant) => ant.deliveries / (ant.age + 1));
+  const fitness = world.ants.map((ant) => ant.netEnergyDelivered / (ant.age + 1));
   const traitMeans: number[] = [];
   const traitVariances: number[] = [];
-  const selectionDifferential: number[] = [];
+  const traitMeritCorrelation: Estimate[] = [];
 
   for (const key of TRAIT_KEYS) {
     const values = world.ants.map((ant) => ant.traits[key]);
     const { mean, variance } = meanAndVariance(values);
     traitMeans.push(mean);
     traitVariances.push(variance);
-    selectionDifferential.push(pearson(values, fitness));
+    traitMeritCorrelation.push(pearsonEstimate(values, fitness));
   }
 
   return {
@@ -154,7 +164,8 @@ export function computeStats(world: World): WorldStats {
     eggCount: world.eggs.length,
     traitMeans,
     traitVariances,
-    selectionDifferential,
+    traitMeritCorrelation,
+    evolution: computeEvolutionStats(world),
     dominantPatrilineShare: dominantShare(world),
     stockpile: world.colonies.reduce((sum, colony) => sum + colony.stockpile, 0),
     colonyCount: world.colonies.length,

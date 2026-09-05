@@ -28,7 +28,7 @@ describe("computeStats", () => {
     const median = scales[Math.floor(scales.length / 2)];
     for (const ant of world.ants) {
       ant.age = 100;
-      ant.deliveries = ant.traits.bodyScale > median ? 20 : 1;
+      ant.netEnergyDelivered = ant.traits.bodyScale > median ? 20 : 1;
     }
 
     const stats = computeStats(world);
@@ -36,7 +36,8 @@ describe("computeStats", () => {
     expect(stats.traitMeans.length).toBe(TRAIT_KEYS.length);
     expect(stats.traitMeans[0]).toBeGreaterThan(0.5);
     expect(stats.traitMeans[0]).toBeLessThan(1.5);
-    expect(stats.selectionDifferential[0]).toBeGreaterThan(0.5);
+    expect(stats.traitMeritCorrelation[0].value).toBeGreaterThan(0.5);
+    expect(stats.traitMeritCorrelation[0].samples).toBe(world.ants.length);
     expect(stats.dominantPatrilineShare).toBeGreaterThan(0);
     expect(stats.dominantPatrilineShare).toBeLessThanOrEqual(1);
   });
@@ -45,6 +46,6 @@ describe("computeStats", () => {
     const world = createWorld(5002);
     const stats = computeStats(world);
     expect(stats.population).toBe(0);
-    expect(stats.selectionDifferential.every((v) => v === 0)).toBe(true);
+    expect(stats.traitMeritCorrelation.every((estimate) => estimate.value === null)).toBe(true);
   });
 });

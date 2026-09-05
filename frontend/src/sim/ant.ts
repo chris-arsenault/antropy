@@ -49,11 +49,18 @@ export interface Ant {
   alive: boolean;
   /** SEX_FEMALE (diploid worker/queen line) or SEX_MALE (haploid). */
   sex: number;
+  /** World-wide identity for ancestry; distinct from the transient ant id. */
+  geneticId: number;
+  /** Founder genetic line represented by this individual. */
+  founderLineId: number;
   lineageId: number;
   patrilineId: number;
   motherId: number;
   fatherId: number;
-  deliveries: number;
+  /** Conservation-accounted external food energy first brought into the colony by this ant. */
+  netEnergyDelivered: number;
+  /** Uncredited external FOOD loads currently carried. */
+  uncreditedFoodLoads: number;
   /** Opaque behavioral genome — only the controller reads it (spec §2.3). */
   genome: Genome;
   /** Opaque recurrent controller state — the ant's only memory. */
@@ -109,11 +116,14 @@ export function createAnt(id: number, spawn: AntSpawn): Ant {
     carriedEggIds: [],
     alive: true,
     sex: spawn.sex ?? SEX_FEMALE,
+    geneticId: 0,
+    founderLineId: 0,
     lineageId: spawn.lineageId,
     patrilineId: spawn.patrilineId,
     motherId: spawn.motherId,
     fatherId: spawn.fatherId,
-    deliveries: 0,
+    netEnergyDelivered: 0,
+    uncreditedFoodLoads: 0,
     genome: spawn.genome,
     controllerState: spawn.controllerState,
     traits: spawn.traits,

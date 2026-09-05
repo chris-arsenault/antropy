@@ -3,7 +3,7 @@ import { surfaceSpawnY } from "./ant";
 import { spoilCapacity, tryDig, tryTrophallaxis } from "./actions";
 import { foundColony } from "./colony";
 import { Material } from "./materials";
-import { COLONY } from "./tunables";
+import { COLONY, ENERGY } from "./tunables";
 import { createWorld, mutateVoxel, type World } from "./world";
 
 /**
@@ -35,7 +35,7 @@ describe("merit fraud gate (§B.7.2)", () => {
 
     tryDig(world, ant, 0); // deliver
     const stockAfter = colony.stockpile;
-    const meritAfter = colony.patrilineDeliveries.get(ant.patrilineId);
+    const meritAfter = colony.patrilineMerit.get(ant.patrilineId);
     expect(world.foodSources.size).toBe(0); // the physical food is gone
 
     ant.spoilLoads = 0;
@@ -44,7 +44,7 @@ describe("merit fraud gate (§B.7.2)", () => {
       tryDig(world, ant, 0); // nothing to deposit, nothing to defraud
     }
     expect(colony.stockpile).toBe(stockAfter);
-    expect(colony.patrilineDeliveries.get(ant.patrilineId)).toBe(meritAfter);
+    expect(colony.patrilineMerit.get(ant.patrilineId)).toBe(meritAfter);
   });
 
   it("trophallaxis conserves ant + stockpile energy and terminates", () => {
@@ -58,7 +58,7 @@ describe("merit fraud gate (§B.7.2)", () => {
     ant.energy = 1;
     colony.stockpile = 2;
     const total = ant.energy + colony.stockpile;
-    const meritBefore = colony.patrilineDeliveries.get(ant.patrilineId) ?? 0;
+    const meritBefore = colony.patrilineMerit.get(ant.patrilineId) ?? 0;
 
     for (let i = 0; i < 200; i++) {
       tryTrophallaxis(world, ant);
@@ -67,23 +67,25 @@ describe("merit fraud gate (§B.7.2)", () => {
     // into feed range (0.3) by giving, so no give/feed cycle exists.
     expect(ant.energy).toBeCloseTo(COLONY.trophallaxisThreshold);
     expect(ant.energy + colony.stockpile).toBeCloseTo(total);
-    const credited = (colony.patrilineDeliveries.get(ant.patrilineId) ?? 0) - meritBefore;
-    const surrendered = 1 - COLONY.trophallaxisThreshold;
-    expect(credited).toBe(Math.ceil(surrendered / COLONY.trophallaxisRate));
+    const credited = (colony.patrilineMerit.get(ant.patrilineId) ?? 0) - meritBefore;
+    expect(credited).toBe(0);
+    expect(ant.netEnergyDelivered).toBe(0);
 
     // The feed direction credits nothing.
     ant.energy = 0.1;
-    const meritMid = colony.patrilineDeliveries.get(ant.patrilineId);
+    const meritMid = colony.patrilineMerit.get(ant.patrilineId);
     tryTrophallaxis(world, ant);
     expect(ant.energy).toBeGreaterThan(0.1);
-    expect(colony.patrilineDeliveries.get(ant.patrilineId)).toBe(meritMid);
+    expect(colony.patrilineMerit.get(ant.patrilineId)).toBe(meritMid);
     // And feeding restores at most to feedThreshold < give threshold.
     for (let i = 0; i < 200; i++) {
       tryTrophallaxis(world, ant);
     }
     expect(ant.energy).toBeLessThanOrEqual(COLONY.feedThreshold + 1e-9);
   });
+});
 
+describe("external-food merit provenance", () => {
   it("depositing food away from the nest re-places it without credit", () => {
     const world = createWorld(7103);
     foundColony(world);
@@ -92,7 +94,7 @@ describe("merit fraud gate (§B.7.2)", () => {
     const gatheredAfterInitialPickup = world.metrics.surfaceFoodEnergyGathered;
     ant.spoilLoads = spoilCapacity(ant);
     ant.carrying = Material.FOOD;
-    const meritBefore = colony.patrilineDeliveries.get(ant.patrilineId) ?? 0;
+    const meritBefore = colony.patrilineMerit.get(ant.patrilineId) ?? 0;
 
     for (let i = 0; i < 5; i++) {
       tryDig(world, ant, 0); // re-place
@@ -101,7 +103,31 @@ describe("merit fraud gate (§B.7.2)", () => {
       ant.carrying = Material.FOOD;
     }
     expect(colony.stockpile).toBeCloseTo(COLONY.foundingStockpile);
-    expect(colony.patrilineDeliveries.get(ant.patrilineId) ?? 0).toBe(meritBefore);
+    expect(colony.patrilineMerit.get(ant.patrilineId) ?? 0).toBe(meritBefore);
     expect(world.metrics.surfaceFoodEnergyGathered).toBe(gatheredAfterInitialPickup);
+  });
+
+  it("credits external food once when it first enters a marked underground larder", () => {
+    const world = createWorld(7104);
+    foundColony(world);
+    const { ant, colony } = antNearFood(world);
+    tryDig(world, ant, 0);
+    expect(ant.uncreditedFoodLoads).toBe(1);
+
+    colony.stockpile = COLONY.stockpileSatiation;
+    ant.x = colony.x;
+    ant.y = colony.y;
+    ant.z = colony.z;
+    ant.heading = 0;
+    const meritBefore = colony.patrilineMerit.get(ant.patrilineId) ?? 0;
+    tryDig(world, ant, 0);
+
+    expect(colony.patrilineMerit.get(ant.patrilineId)).toBeCloseTo(meritBefore + ENERGY.foodEnergy);
+    expect(ant.netEnergyDelivered).toBeCloseTo(ENERGY.foodEnergy);
+    expect(world.metrics.netEnergyMeritCredited).toBeCloseTo(ENERGY.foodEnergy);
+
+    tryDig(world, ant, 0);
+    tryDig(world, ant, 0);
+    expect(colony.patrilineMerit.get(ant.patrilineId)).toBeCloseTo(meritBefore + ENERGY.foodEnergy);
   });
 });

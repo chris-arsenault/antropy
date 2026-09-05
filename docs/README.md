@@ -101,6 +101,7 @@ provenance; they are not parallel plans.
 
 - [Continuous evolution](design/advanced.md#advanced-evolution)
 - [Selection signal and population health](design/advanced.md#advanced-signal)
+- [Selection instrument contract](design/advanced.md#advanced-instrument-contract)
 - [Genetic diversity and collapse resistance](design/advanced.md#advanced-genetic-floor)
 - [Avoiding evolutionary pre-lock](design/advanced.md#advanced-prelock)
 - [Within-lifetime learning](design/advanced.md#advanced-plasticity)

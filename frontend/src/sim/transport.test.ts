@@ -96,12 +96,12 @@ describe("physical food deposits (ADR-0006)", () => {
     ant.z = colony.z;
     ant.spoilLoads = spoilCapacity(ant); // force deposit mode
     const stockpileBefore = colony.stockpile;
-    const meritBefore = colony.patrilineDeliveries.get(ant.patrilineId) ?? 0;
+    const meritBefore = colony.patrilineMerit.get(ant.patrilineId) ?? 0;
 
     tryDig(world, ant, 0);
     expect(colony.stockpile).toBeCloseTo(stockpileBefore + ENERGY.foodEnergy);
-    expect(colony.patrilineDeliveries.get(ant.patrilineId)).toBe(meritBefore + 1);
-    expect(ant.deliveries).toBe(1);
+    expect(colony.patrilineMerit.get(ant.patrilineId)).toBeCloseTo(meritBefore + ENERGY.foodEnergy);
+    expect(ant.netEnergyDelivered).toBeCloseTo(ENERGY.foodEnergy);
     expect(ant.spoilLoads).toBe(spoilCapacity(ant) - 1);
   });
 
@@ -121,7 +121,7 @@ describe("physical food deposits (ADR-0006)", () => {
     expect(
       sampleScent(world.colonyScent, voxelIndex(world.grid, ant.x, ant.y, ant.z), ant.lineageId)
     ).toBeGreaterThan(0);
-    expect(ant.deliveries).toBe(0);
+    expect(ant.netEnergyDelivered).toBe(0);
   });
 
   it("refuses to mix food and spoil in one carry", () => {

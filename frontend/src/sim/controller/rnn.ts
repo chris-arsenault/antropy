@@ -1,5 +1,4 @@
 import { randNormal, type Rng } from "../rng";
-import { FORAGER_SEED } from "./seeds/forager";
 import { COLONY_SEED } from "./seeds/colony";
 import { extendFunctionalSeed } from "./functionalSeed";
 import { buildColonySeed, colonySeedLocusGroups } from "./colonySeed";
@@ -352,7 +351,7 @@ function seedCopy(rng: Rng): Float32Array {
   for (const locus of ACTION_BIAS_LOCI) {
     copy[locus] = randNormal(rng) * SEED_ACTION_BIAS_NOISE;
   }
-  const base = normalizedSeedBase(runtimeSeedBase ?? FORAGER_SEED);
+  const base = normalizedSeedBase(runtimeSeedBase ?? COLONY_SEED);
   if (base !== null) {
     // Derived founder weights (ADR-0010): the baked artifact (or the
     // derivation harness's runtime candidate) replaces the hand-derived
@@ -367,7 +366,7 @@ function seedCopy(rng: Rng): Float32Array {
 }
 
 function fixedSeedGenome(): Genome {
-  const base = normalizedSeedBase(runtimeSeedBase ?? FORAGER_SEED);
+  const base = normalizedSeedBase(runtimeSeedBase ?? COLONY_SEED);
   const copy = base ?? backboneVector();
   return { copies: [copy, Float32Array.from(copy)] } as unknown as Genome;
 }
@@ -495,6 +494,17 @@ export const rnnController: Controller = {
   },
 
   fixedSeed: fixedSeedGenome,
+
+  genomeDistance(a, b) {
+    const left = asRnn(a);
+    const right = asRnn(b);
+    let squared = 0;
+    for (let locus = 0; locus < GENOME_LENGTH; locus++) {
+      const difference = expressed(left, locus) - expressed(right, locus);
+      squared += difference * difference;
+    }
+    return Math.sqrt(squared / GENOME_LENGTH);
+  },
 
   haploidOffspring(genome, rng) {
     return { copies: [gamete(asRnn(genome), rng)] } as unknown as Genome;

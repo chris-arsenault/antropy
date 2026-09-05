@@ -1,4 +1,10 @@
-import { type Ant } from "../ant";
+import { SEX_FEMALE, SEX_MALE, type Ant } from "../ant";
+import {
+  GENETIC_ROLE_QUEEN,
+  GENETIC_ROLE_SIRE,
+  recordQueenRole,
+  registerFounder,
+} from "../ancestry";
 import { type Colony, type Sperm } from "../colony";
 import { Output } from "../controller/contract";
 import { getVoxelSafe } from "../grid";
@@ -30,8 +36,17 @@ export function placeQueenInNest(world: World, x: number, y: number, z: number):
   }
   const sperm: Sperm[] = [];
   for (let i = 0; i < COLONY.spermCount; i++) {
-    sperm.push({ genome: world.controller.seed(world.rng), patrilineId: i + 1 });
+    const genome = world.controller.seed(world.rng);
+    const identity = registerFounder(world, genome, GENETIC_ROLE_SIRE, SEX_MALE);
+    sperm.push({
+      genome,
+      patrilineId: i + 1,
+      geneticId: identity.geneticId,
+      founderLineId: identity.founderLineId,
+    });
   }
+  const queenGenome = world.controller.seed(world.rng);
+  const queenIdentity = registerFounder(world, queenGenome, GENETIC_ROLE_QUEEN, SEX_FEMALE);
   const colony: Colony = {
     id: world.nextColonyId++,
     x,
@@ -40,18 +55,20 @@ export function placeQueenInNest(world: World, x: number, y: number, z: number):
     entranceX: x,
     entranceY: y,
     entranceZ: z,
-    queenGenome: world.controller.seed(world.rng),
+    queenGenome,
+    queenGeneticId: queenIdentity.geneticId,
     queenAge: 0,
     queenLifespanTicks: COLONY.queenLifespanTicks,
     sperm,
     stockpile: COLONY.foundingStockpile,
-    patrilineDeliveries: new Map(),
+    patrilineMerit: new Map(),
     nextPatrilineId: sperm.length + 1,
     lastEggTick: 0,
     lastQueenEggTick: 0,
     starvingSince: -1,
   };
   world.colonies.push(colony);
+  recordQueenRole(world, queenIdentity.geneticId, colony.id);
   return colony;
 }
 

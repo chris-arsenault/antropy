@@ -8,9 +8,7 @@ conditions, and OBE work live in [the normalized design](design/README.md). Evid
 
 ## Living colony and resilience
 
-- Measure the colony resilience baseline and add attributable ecological floors.
 - Certify survival and the value of physical food storage under scarcity.
-- Close the queen, brood-rearing, and worker-replacement loop in the authored nest.
 - Make the resulting colony state independently reviewable in the web app.
 
 Details: [colony biology BIO-03–BIO-15](design/colony-biology.md#colony-order) and
@@ -20,12 +18,11 @@ Details: [colony biology BIO-03–BIO-15](design/colony-biology.md#colony-order)
 
 ## Evolution readiness
 
-- Add population-health instruments and conservation-correct germ-line accounting.
 - Admit genetic variation to the certified colony and add diverse, mutation-tolerant founder
   portfolios.
 - Establish sustainable multi-colony founding and collapse/recovery without measured-run rescue.
 
-Details: [advanced systems ADV-03–ADV-07](design/advanced.md#advanced-order) and
+Details: [advanced systems ADV-04–ADV-07](design/advanced.md#advanced-order) and
 [controller CTRL-08–CTRL-09](design/controller.md#controller-order).
 
 <a id="backlog-morphogenesis"></a>

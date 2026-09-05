@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { LADDER_STEP12_CONFIG, PROGRAMMED_COLONY_CONFIG } from "../sim/config";
+import {
+  LADDER_STEP12_CONFIG,
+  PROGRAMMED_COLONY_CONFIG,
+  VARIATION_NEST_CONFIG,
+} from "../sim/config";
 import { derivedColonySeedVector, rnnController } from "../sim/controller/rnn";
 import { voxelIndex } from "../sim/grid";
 import { authorProgrammedNest } from "../sim/programmedNest";
@@ -62,5 +66,21 @@ describe("Appendix D ladder scenario", () => {
 
     stepWorld(world);
     expect(world.tick).toBe(1);
+  });
+});
+
+describe("standing-variation colony scenario", () => {
+  it("changes the replacement world only by admitting genetic variation", () => {
+    const world = scenarioById("variation").build(2);
+    const distances = world.ants.slice(1).map((ant) =>
+      world.controller.genomeDistance(world.ants[0].genome, ant.genome)
+    );
+
+    expect(world.config).toEqual(VARIATION_NEST_CONFIG);
+    expect(world.config.colonyFounding).toBe(false);
+    expect(world.config.autoContinue).toBe(false);
+    expect(world.ants).toHaveLength(40);
+    expect(distances.some((distance) => distance > 0)).toBe(true);
+    expect(world.founderGenomes).toHaveLength(7);
   });
 });

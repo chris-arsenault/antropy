@@ -15,6 +15,8 @@ export interface Controller {
   seed(rng: Rng): Genome;
   /** Exact founder used when genetic variation is disabled. */
   fixedSeed(): Genome;
+  /** RMS-like distance in the controller's expressed genome space. */
+  genomeDistance(a: Genome, b: Genome): number;
   /**
    * A haploid offspring genome from an unfertilized mother (design spec
    * §7.1 channel 2 — worker-laid males). Ploidy stays behind the boundary.

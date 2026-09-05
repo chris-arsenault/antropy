@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { spoilCapacity, tryDig, tryEat } from "./actions";
 import { braitenbergController } from "./controller/braitenberg";
 import { Output, OUTPUT_COUNT } from "./controller/contract";
-import { getVoxel } from "./grid";
+import { checkDeath } from "./energy";
+import { getVoxel, voxelIndex } from "./grid";
 import { Material } from "./materials";
 import { DIG, ENERGY, FOOD_GOVERNOR } from "./tunables";
 import { createWorld, mutateVoxel, populateForagers, stepWorld, type World } from "./world";
@@ -176,6 +177,36 @@ describe("eating and death", () => {
     expect(ant.alive).toBe(false);
     expect(world.ants).not.toContain(ant);
     expect(getVoxel(world.grid, ant.x, ant.y, ant.z)).toBe(Material.FOOD);
+    const corpseIndex = voxelIndex(world.grid, ant.x, ant.y, ant.z);
+    expect(world.recycledFood.has(corpseIndex)).toBe(true);
+
+    const eater = firstAnt(world);
+    eater.x = ant.x - 1;
+    eater.y = ant.y;
+    eater.z = ant.z;
+    eater.heading = 0;
+    eater.verticalAttention = 0;
+    eater.energy = 0.2;
+    tryEat(world, eater);
+
+    expect(world.metrics.recycledFoodEnergyRecovered).toBeCloseTo(ENERGY.foodEnergy);
+    expect(world.metrics.surfaceFoodEnergyGathered).toBe(0);
+    expect(world.metrics.workerEnergyDeaths).toBe(1);
+    expect(world.metrics.workerAgeDeaths).toBe(0);
+    expect(world.recycledFood.has(corpseIndex)).toBe(false);
+  });
+
+  it("attributes a positive-energy lifespan death to age", () => {
+    const world = createReferenceWorld(3401);
+    populateForagers(world, 1);
+    const ant = firstAnt(world);
+    ant.energy = 1;
+    ant.age = ant.traits.lifespanTicks + 1;
+
+    checkDeath(world, ant);
+
+    expect(world.metrics.workerAgeDeaths).toBe(1);
+    expect(world.metrics.workerEnergyDeaths).toBe(0);
   });
 
   it("resolves EAT at the contact pose sensed before translation", () => {

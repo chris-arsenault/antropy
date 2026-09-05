@@ -12,8 +12,8 @@ persistence all run in the browser; the deployed artifact is a static bundle.
   (seeded sfc32 PRNG, fixed integer ticks — [ADR-0002](adr/0002-deterministic-simulation.md)),
   running on the main thread in a budgeted loop with a worker-portable state shape
   ([ADR-0001](adr/0001-main-thread-simulation.md)). The behavioral controller sits behind a
-  pluggable `act`/`mutate`/`recombine`/`seed` contract so controller models can be swapped
-  without touching the rest of the simulation.
+  pluggable `act`/`mutate`/`recombine`/`seed`/`genomeDistance` contract so controller models can be
+  swapped without exposing genome internals to the world.
 - **Module boundaries** (lint-enforced via ESLint import restrictions): `src/sim/` imports
   neither React, three.js, DOM APIs, nor the other layers; `src/render/` (three.js) and
   `src/ui/` (React, including in-house canvas charts —
@@ -39,8 +39,14 @@ pickup, and heat-escape instincts (ADR-0004/0006/0008; interface ownership follo
 microclimate stress with climate-keyed egg exposure and year-round storms, physical
 hoarding, nest decay, seasonal famine troughs, and automatic continuation from survivor
 genetics on a 192×64×192 map. Measurements (tournaments, calibration, seed derivation,
-determinism checks) run through the harness into a committed SQLite ledger
+determinism checks and evolutionary-health series) run through the harness into a committed SQLite ledger
 (`frontend/harness/`, ADR-0012), never through the test tiers.
+
+Genetic ancestry uses a world-wide monotonic identity distinct from transient ant ids, local
+patrilines, and colony scent owners. The identity follows an egg into its adult or queen state;
+durable records retain actual parents, founder line, offspring contribution, net external-food
+merit, and completed death outcomes. Checkpoints preserve those records and the controller-owned
+founder genome references used for distance measurements.
 
 The web app exposes four world-level scenarios: the default authored-nest colony-loop review, the
 historical functional-controller diagnostic, isolated nest digging, and the full liability colony.

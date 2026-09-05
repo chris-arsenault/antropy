@@ -134,7 +134,7 @@ export function runEconomyPoint(
       stepWorld(world);
     }
     let merit = 0;
-    for (const credit of colony.patrilineDeliveries.values()) {
+    for (const credit of colony.patrilineMerit.values()) {
       merit += credit;
     }
     return {

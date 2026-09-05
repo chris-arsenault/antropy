@@ -26,7 +26,7 @@ function fitnessOf(job: Job): Record<string, number> {
     workerTicks += world.ants.length;
   }
   let merit = 0;
-  for (const credit of colony.patrilineDeliveries.values()) {
+  for (const credit of colony.patrilineMerit.values()) {
     merit += credit;
   }
   const workerDays = workerTicks / 1000;

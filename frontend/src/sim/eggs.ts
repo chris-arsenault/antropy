@@ -1,4 +1,5 @@
 import { SEX_FEMALE, type Ant } from "./ant";
+import { recordGeneticDeath, registerEgg } from "./ancestry";
 import { foundFromQueenEgg } from "./colony";
 import { type Genome } from "./controller/contract";
 import { dropFoodAt } from "./energy";
@@ -37,6 +38,9 @@ export interface Egg {
   hungerTicks: number;
   /** SEX_FEMALE (fertilized) or SEX_MALE (unfertilized, haploid). */
   sex: number;
+  /** World-wide identity retained when this egg becomes an adult or queen. */
+  geneticId: number;
+  founderLineId: number;
   /** 1 for a queen-destined egg (founds on hatch), else 0. */
   queenDestined: number;
   lineageId: number;
@@ -51,6 +55,7 @@ export function eggKey(world: World, egg: Egg): number {
 
 export function addEgg(world: World, egg: Egg): void {
   egg.carrierId = null;
+  registerEgg(world, egg);
   world.eggs.push(egg);
   world.eggIndex.set(eggKey(world, egg), egg);
   world.eggsLaid += 1;
@@ -166,22 +171,33 @@ function hatch(world: World, egg: Egg): void {
     return;
   }
   const traits = world.controller.physical(egg.genome);
-  const ant = spawnAnt(world, {
-    x: egg.x,
-    y: egg.y,
-    z: egg.z,
-    heading: world.rng.next() * Math.PI * 2,
-    energy: egg.energy,
-    sex: egg.sex ?? SEX_FEMALE,
-    lineageId: egg.lineageId,
-    patrilineId: egg.patrilineId,
-    motherId: egg.motherId,
-    fatherId: egg.fatherId,
-    genome: egg.genome,
-    controllerState: world.controller.createState(),
-    traits,
-  });
-  world.metrics.workerBirths += 1;
+  world.metrics.metamorphosisEnergyBurned += egg.fedProgress;
+  world.metrics.energyBurned += egg.fedProgress;
+  const ant = spawnAnt(
+    world,
+    {
+      x: egg.x,
+      y: egg.y,
+      z: egg.z,
+      heading: world.rng.next() * Math.PI * 2,
+      energy: egg.energy,
+      sex: egg.sex ?? SEX_FEMALE,
+      lineageId: egg.lineageId,
+      patrilineId: egg.patrilineId,
+      motherId: egg.motherId,
+      fatherId: egg.fatherId,
+      genome: egg.genome,
+      controllerState: world.controller.createState(),
+      traits,
+    },
+    { geneticId: egg.geneticId, founderLineId: egg.founderLineId },
+    true
+  );
+  if (egg.sex === SEX_FEMALE) {
+    world.metrics.workerBirths += 1;
+  } else {
+    world.metrics.maleBirths += 1;
+  }
   // Hatchlings are juveniles growing toward the genetic target (spec §7.3).
   ant.bodyScale = traits.bodyScale * COLONY.juvenileFraction;
 }
@@ -210,11 +226,13 @@ function feedLarva(world: World, larva: Egg): boolean {
   const draw = Math.min(LARVA.feedPerTick, colony.stockpile - COLONY.queenReserve);
   colony.stockpile -= draw;
   larva.fedProgress += draw;
+  world.metrics.larvalEnergyInvested += draw;
   return true;
 }
 
 /** A larva's tick: rearing, starvation, pupation-readiness. */
 function stepLarva(world: World, larva: Egg): "alive" | "ripe" | "perished" {
+  if (larva.fedProgress >= LARVA.rearingCost) return "ripe";
   if (feedLarva(world, larva)) {
     larva.hungerTicks = 0;
   } else {
@@ -280,6 +298,12 @@ export function stepEggs(world: World): void {
   }
   for (const egg of perished) {
     world.eggsPerished += 1;
+    world.metrics.broodEnergyRemovedAtDeath += egg.energy + egg.fedProgress;
+    recordGeneticDeath(
+      world,
+      egg.geneticId,
+      world.tick - (world.geneticRecords.get(egg.geneticId)?.birthTick ?? world.tick)
+    );
     removeEgg(world, egg);
     dropFoodAt(world, egg.x, egg.y, egg.z);
   }

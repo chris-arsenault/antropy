@@ -133,6 +133,25 @@ export const NEST_CONFIG: SimConfig = {
   contactFoodOdor: true,
 };
 
+/** Authored-nest turnover control: mortality and queen upkeep, no replacement. */
+export const MORTAL_NEST_CONFIG: SimConfig = {
+  ...NEST_CONFIG,
+  mortality: true,
+};
+
+/** Authored-nest worker replacement: mortal adults plus the full brood pipeline. */
+export const REPLACEMENT_NEST_CONFIG: SimConfig = {
+  ...MORTAL_NEST_CONFIG,
+  workerReproduction: true,
+  larvalRearing: true,
+};
+
+/** Authored-nest replacement with standing inherited variation admitted. */
+export const VARIATION_NEST_CONFIG: SimConfig = {
+  ...REPLACEMENT_NEST_CONFIG,
+  geneticVariation: true,
+};
+
 /** Compatibility name retained for the existing programmed scenario. */
 export const PROGRAMMED_COLONY_CONFIG = NEST_CONFIG;
 
@@ -188,6 +207,9 @@ const PRESETS: Record<string, SimConfig> = {
   full: FULL_CONFIG,
   phase2: PHASE2_CONFIG,
   nest: NEST_CONFIG,
+  "nest-mortality": MORTAL_NEST_CONFIG,
+  "nest-replacement": REPLACEMENT_NEST_CONFIG,
+  "nest-variation": VARIATION_NEST_CONFIG,
   programmedColony: PROGRAMMED_COLONY_CONFIG,
 };
 
