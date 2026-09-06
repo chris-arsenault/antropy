@@ -15,6 +15,7 @@ import { runCorrectColonyEnergy } from "./experiments/correctColonyEnergy";
 import { runOptimizeColonyLoop } from "./experiments/optimizeColonyLoop";
 import { runOptimizeColonyEnergy } from "./experiments/optimizeColonyEnergy";
 import { runProgrammedForaging } from "./experiments/programmedForaging";
+import { runSingleForagerComparison } from "./experiments/singleForagerComparison";
 import { runDeriveVivo } from "./experiments/deriveVivo";
 import { runColonyLoop } from "./experiments/colonyLoopRunner";
 import { runColonyResilience } from "./experiments/colonyResilience";
@@ -34,7 +35,8 @@ import { runDeterminism } from "./determinism";
  *   pnpm harness calibrate-colony-economy --profile baseline:1:1:1:1:1
  *   pnpm harness colony-resilience --fractions 0.25,0.5,0.75
  *   pnpm harness programmed-foraging --seeds 2,3,4,5
- *   pnpm harness recent [n]
+ *   pnpm harness single-forager-comparison --seed 1
+ *   pnpm harness recent --n 20
  *   pnpm harness sql "select ..."
  *   pnpm harness determinism --seed 8001 --warmup 700 --span 500
  *
@@ -156,10 +158,14 @@ function cmdRecent(flags: Flags): void {
     .all(n) as Record<string, unknown>[];
   for (const row of rows.reverse()) {
     const s = JSON.parse(row.summary as string) as Record<string, unknown>;
+    const summary =
+      typeof s.workerDays === "number"
+        ? formatSummary(row.driver as string, row.seed as number, s)
+        : JSON.stringify(s);
     console.log(
       `#${row.id} ${row.started} [${row.git}] ${row.experiment}/${row.driver}` +
         ` seed=${row.seed} ticks=${row.ticks} (${((row.wall_ms as number) / 1000).toFixed(0)}s)` +
-        ` → ${formatSummary(row.driver as string, row.seed as number, s)}`
+        ` → ${summary}`
     );
   }
 }
@@ -214,6 +220,10 @@ function handleDerivation(command: string, rest: string[]): boolean {
     runProgrammedForaging(parseFlags(rest));
     return true;
   }
+  if (command === "single-forager-comparison") {
+    runSingleForagerComparison(parseFlags(rest));
+    return true;
+  }
   return false;
 }
 
@@ -242,7 +252,7 @@ function main(): void {
       return cmdSql(rest);
     default:
       throw new Error(
-        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|colony-resilience|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|programmed-foraging|determinism|recent|sql> [flags]"
+        "usage: harness <run|tournament|ladder|calibrate|calibrate-colony-economy|evaluate-colony-cohort|derive|derive-vivo|derive-digger|derive-colony-loop|clone-colony-loop|bake-colony-run|robustness-colony-loop|colony-resilience|correct-colony-energy|optimize-colony-loop|optimize-colony-energy|colony-loop|programmed-foraging|single-forager-comparison|determinism|recent|sql> [flags]"
       );
   }
 }

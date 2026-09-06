@@ -41,9 +41,10 @@ gates and recalibration cost, and the decision reserved for the human.
 
 Oracles are readable diagnostic policies driving the real body. They emit the same output tuple as
 controllers and receive the same world resolution. A sensor-limited oracle receives the shipped
-sensor vector plus its private state, never coordinates or a world reference. An omniscient oracle
-may use world knowledge only when measuring a world ceiling, and its behavior is not a training
-target.
+sensor vector and may use only controller state permitted by the experiment; the current programmed
+single-forager is stricter and has no private state. It never receives coordinates or a world
+reference. An omniscient oracle may use world knowledge only when measuring a world ceiling, and
+its behavior is not a training target.
 
 The ordered fault isolation is:
 
@@ -90,14 +91,23 @@ audit, construct simple reflexes directly, then use an offline training probe wh
 not hand-verifiable. Failure under direct optimization can indict capacity; easy fit clears only
 representation, not in-world selection.
 
-The intended food-loop initializer distills the sensor-limited policy into the existing RNN. The
-current programmed teacher has no private state: body heading persists, the shared locomotion
-resolver handles contact, and ordinary scent/depth inputs separate entrance, food, and homing
-contexts. Training therefore uses balanced independent sensor/output frames while recurrence
-remains initialized and held at zero.
-One fixed procedure applies to each predetermined start. Acceptance comes from the whole cohort on
-untouched closed-loop worlds and a separate energy-support panel. Teacher loss remains diagnostic
-rather than an outcome gate.
+The intended food-loop initializer will distill an accepted sensor-limited policy into the existing
+RNN. The Appendix H policy passed population ratios but failed human trajectory review with
+universal translated circles and severe entrance congestion. Its stateless replacement passes the
+matched five-return and steering-stability gates in runs 2460–2462 and now awaits trajectory review.
+Training remains blocked until that review rather than learning from another unobserved metric pass.
+
+The web comparison fixes one authored world, one persistent food patch, one larder stance, and one
+ordinary body/action path. The full-map arm establishes connectivity and action cost. The
+programmed arm sees only local sensors and a physical authored entrance-traffic trace. The short gate requires
+five genuine external pickups and five completed returns, counting both queen-crop delivery and
+physical cache placement. It rejects recycled loads, requires the final unloading stances to lie
+within one voxel, permits at most 10% slowdown, and bounds immediate turn reversals to 6% of sensor
+ticks. Runs 2460–2462 completed the sensor arm 1.8–6.9% faster than the full-map arm with no sensor
+turn reversals. After human review of the programmed trajectory, one fixed initialization procedure
+applies to each predetermined start. Acceptance comes from the whole cohort on untouched closed-loop
+worlds and a separate energy-support panel. Teacher loss remains diagnostic rather than an outcome
+gate.
 
 Behavioral assays remain diagnostics during search. A candidate that violates a designer's
 expected reflex but improves untouched colony ledgers may have found a better behavior. Hard
@@ -160,21 +170,22 @@ checkpoint. Detection never affects selection.
 
 ## Linear implementation order
 
-| ID     | Status                                        | Work and finish                                                                                                                                                                                                                                                                        |
-| ------ | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| EXP-01 | Delivered                                     | Deterministic simulation seeds, checkpoint provenance, bounded mechanics tests, and a parameterized harness writing git/config/run metadata to SQLite.                                                                                                                                 |
-| EXP-02 | Delivered                                     | Layer classification, interface legality tests, inequality-first tuning, stop signatures, and the five-part structural-finding discipline govern work.                                                                                                                                 |
-| EXP-03 | Delivered                                     | Shared-action oracle infrastructure, omniscient and sensor-limited policies, bounded controller assays, degradation tools, and world-versus-controller fault isolation.                                                                                                                |
-| EXP-04 | Delivered                                     | Viability ratios, calibration sweeps, strategy tournaments, liability ablations, and interpreted calibration/certification ledgers exist.                                                                                                                                              |
-| EXP-05 | Implemented; review pending                   | One bounded exact-web-world check and untouched harness runs 2438–2441 measure population ratios over 500 ticks. All 4/4 harness worlds clear exit, sampled surface presence, external-food participation, loaded return, and repeated productive-window floors. Human review remains. |
-| EXP-06 | Backlog, reopened                             | Train balanced independent frames from the reviewed stateless policy, then evaluate the predetermined cohort. No terminal outcome selection or controller-specific repair.                                                                                                             |
-| EXP-07 | Backlog, reopened                             | Repeat the production-mutation robustness curve for the newly certified cohort. The former curve describes an invalidated controller baseline.                                                                                                                                         |
-| EXP-08 | Delivered instrument; recertification pending | The reusable colony-resilience harness records matched shocks, conserved energy, lifecycle attribution, and demographic time series. Repeat the untreated baseline after EXP-05–EXP-07.                                                                                                |
-| EXP-09 | Backlog, reopened                             | Rerun mortality, resource-funded replacement, and fixed-genome continuity after the controller baseline passes. Runs 1927–1963 remain historical evidence.                                                                                                                             |
-| EXP-10 | Backlog                                       | Add standing path-efficiency measurement to food and homing trips. Keep shortest-path planning outside sensor-limited behavior.                                                                                                                                                        |
-| EXP-11 | Delivered / backlog                           | Live completed-life heritability, effective population, genetic diversity, founder distance, and line survival are persisted with sample counts and unavailable states. Naive-versus-experienced assays remain ordered before plasticity.                                              |
-| EXP-12 | Backlog                                       | Add event detection, lineage/genome exploration, controller-agnostic offline assay UI, headless burst execution, and checkpoint-linked replay for long evolutionary runs.                                                                                                              |
-| EXP-13 | Backlog                                       | Before reintroducing digging, establish authored-versus-dug paired ledger scenarios and descriptive morphometrics in the harness.                                                                                                                                                      |
+| ID     | Status                                        | Work and finish                                                                                                                                                                                                                                                                                     |
+| ------ | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EXP-01 | Delivered                                     | Deterministic simulation seeds, checkpoint provenance, bounded mechanics tests, and a parameterized harness writing git/config/run metadata to SQLite.                                                                                                                                              |
+| EXP-02 | Delivered                                     | Layer classification, interface legality tests, inequality-first tuning, stop signatures, and the five-part structural-finding discipline govern work.                                                                                                                                              |
+| EXP-03 | Delivered                                     | Shared-action oracle infrastructure, omniscient and sensor-limited policies, bounded controller assays, degradation tools, and world-versus-controller fault isolation.                                                                                                                             |
+| EXP-04 | Delivered                                     | Viability ratios, calibration sweeps, strategy tournaments, liability ablations, and interpreted calibration/certification ledgers exist.                                                                                                                                                           |
+| EXP-05 | Implemented; human review pending             | Runs 2438–2441 remain invalid. Matched runs 2460–2462 require genuine external pickups, completed crop/cache returns in the same queen-core neighborhood, and at most 6% immediate turn reversals; the sensor candidate finishes 1.8–6.9% ahead with no reversals. Human trajectory review remains. |
+| EXP-06 | Backlog, blocked                              | Wait for review of the fresh sensor-limited trajectory. Then train one predetermined initialization procedure and evaluate the whole cohort without terminal selection or controller-specific repair.                                                                                               |
+| EXP-07 | Backlog, reopened                             | Repeat the production-mutation robustness curve for the newly certified cohort. The former curve describes an invalidated controller baseline.                                                                                                                                                      |
+| EXP-08 | Delivered instrument; recertification pending | The reusable colony-resilience harness records matched shocks, conserved energy, lifecycle attribution, and demographic time series. Repeat the untreated baseline after EXP-05–EXP-07.                                                                                                             |
+| EXP-09 | Backlog, reopened                             | Rerun mortality, resource-funded replacement, and fixed-genome continuity after the controller baseline passes. Runs 1927–1963 remain historical evidence.                                                                                                                                          |
+| EXP-10 | Backlog                                       | Add standing path-efficiency measurement to food and homing trips. Keep shortest-path planning outside sensor-limited behavior.                                                                                                                                                                     |
+| EXP-11 | Delivered / backlog                           | Live completed-life heritability, effective population, genetic diversity, founder distance, and line survival are persisted with sample counts and unavailable states. Naive-versus-experienced assays remain ordered before plasticity.                                                           |
+| EXP-12 | Backlog                                       | Add event detection, lineage/genome exploration, controller-agnostic offline assay UI, headless burst execution, and checkpoint-linked replay for long evolutionary runs.                                                                                                                           |
+| EXP-13 | Backlog                                       | Before reintroducing digging, establish authored-versus-dug paired ledger scenarios and descriptive morphometrics in the harness.                                                                                                                                                                   |
+| EXP-14 | Delivered; human accepted                     | The full-map single-ant ceiling uses ordinary motor and mandible resolution. The matched run-2457 fixture completes five external pickup and underground deposit cycles by tick 944 at the same larder used by the sensor arm.                                                                      |
 
 <a id="experimentation-obe"></a>
 

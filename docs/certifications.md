@@ -10,19 +10,21 @@ visible without silently becoming additional gates.
 
 ## Current normalized status
 
-| Design work                                                  | Status                                       | Evidence boundary                                                                                                                                                                                                    |
-| ------------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CTRL-01–CTRL-05                                              | Delivered                                    | The shared controller/body contract, 105-input interface, and deterministic motor jitter remain covered by bounded mechanics tests.                                                                                  |
-| CTRL-13, EXP-05                                              | Implemented; review pending                  | The exact programmed web world passes its bounded population-time gate. Untouched harness runs 2438–2441 pass 4/4 varied worlds; human trajectory review remains before admission.                                   |
-| CTRL-06, EXP-06–EXP-07, BIO-01–BIO-02                        | Reopened                                     | The old RNN cohort learned from an incomplete teacher, and the former outcome aggregation admitted impossible event orderings. Retraining waits for CTRL-13 and EXP-05.                                              |
-| CTRL-07                                                      | Delivered diagnostic                         | Construction/cargo seed mechanics remain covered; historical world outcomes are not current gates.                                                                                                                   |
-| ENV-01–ENV-05                                                | Delivered mechanics                          | Deterministic world, configuration, authored nest, shared resolver, and carrier mechanics remain covered. The artificial nest's optional seeded entrance trail uses ordinary owner-tagged pheromone physics.         |
-| BIO-03, BIO-07, BIO-10, BIO-13–BIO-14, EXP-08–EXP-09, ADV-02 | Historical evidence; recertification pending | Runs 1860–1963 retain their measurements, but admission from those results is suspended until the food-loop baseline is repaired and the downstream worlds are rerun.                                                |
-| ADV-03, EXP-11 instruments                                   | Delivered                                    | Global genetic ancestry, conservation-correct merit, completed-life estimators, controller-owned distances, founder-line health, checkpoint v22, web readouts, and SQLite persistence pass bounded mechanics checks. |
-| BIO-04–BIO-06                                                | Conditional, not admitted                    | No current evidence authorizes a resilience-floor mechanism.                                                                                                                                                         |
-| BIO-08, BIO-11–BIO-12, BIO-15, EXP-10                        | Backlog                                      | Storage scarcity, transport, climate/exposure, watchability, and path efficiency remain separately ordered work.                                                                                                     |
-| ADV-01                                                       | Delivered mechanics only                     | Full-world genetics, founding, regimes, and lifecycle mechanics exist but are isolated from current colony certification.                                                                                            |
-| Remaining scheduled CTRL, ENV, EXP, and ADV IDs              | Backlog                                      | Ordered in the owning category documents; no appendix-era result silently certifies them.                                                                                                                            |
+| Design work                                                  | Status                                       | Evidence boundary                                                                                                                                                                                                                |
+| ------------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CTRL-01–CTRL-05                                              | Delivered                                    | The shared controller/body contract, 120-input interface, prior-genome migration, direct/sloped vertical motor resolution, and deterministic motor jitter remain covered by bounded mechanics tests.                             |
+| Former CTRL-13 and EXP-05 runs                               | Invalidated                                  | Human review found universal translated-circle motion inside and outside the nest and more than half the workers congested at the mouth by tick 100. Runs 2438–2441 measured the wrong behavior and do not admit the old policy. |
+| Omniscient pathing ceiling                                   | Delivered; human accepted                    | The full-map single ant completes the physical loop through ordinary body actions and is retained as one arm of the matched web comparison.                                                                                      |
+| CTRL-13, EXP-05 sensor reset                                 | Implemented; human review pending            | Runs 2460–2462 record five genuine external pickups and five completed queen-core returns in both arms. The stateless sensor ant finishes 1.8–6.9% faster than the full-map ant with no immediate turn reversals.                |
+| CTRL-06, EXP-06–EXP-07, BIO-01–BIO-02                        | Reopened                                     | The old RNN cohort learned from an invalid teacher. Retraining remains blocked until the fresh sensor-limited trajectory passes human review.                                                                                    |
+| CTRL-07                                                      | Delivered diagnostic                         | Construction/cargo seed mechanics remain covered; historical world outcomes are not current gates.                                                                                                                               |
+| ENV-01–ENV-05                                                | Delivered mechanics                          | Deterministic world, configuration, authored nest, shared resolver, and carrier mechanics remain covered. The artificial nest's optional seeded entrance trail uses ordinary owner-tagged pheromone physics.                     |
+| BIO-03, BIO-07, BIO-10, BIO-13–BIO-14, EXP-08–EXP-09, ADV-02 | Historical evidence; recertification pending | Runs 1860–1963 retain their measurements, but admission from those results is suspended until the food-loop baseline is repaired and the downstream worlds are rerun.                                                            |
+| ADV-03, EXP-11 instruments                                   | Delivered                                    | Global genetic ancestry, conservation-correct merit, completed-life estimators, controller-owned distances, founder-line health, checkpoint v22, web readouts, and SQLite persistence pass bounded mechanics checks.             |
+| BIO-04–BIO-06                                                | Conditional, not admitted                    | No current evidence authorizes a resilience-floor mechanism.                                                                                                                                                                     |
+| BIO-08, BIO-11–BIO-12, BIO-15, EXP-10                        | Backlog                                      | Storage scarcity, transport, climate/exposure, watchability, and path efficiency remain separately ordered work.                                                                                                                 |
+| ADV-01                                                       | Delivered mechanics only                     | Full-world genetics, founding, regimes, and lifecycle mechanics exist but are isolated from current colony certification.                                                                                                        |
+| Remaining scheduled CTRL, ENV, EXP, and ADV IDs              | Backlog                                      | Ordered in the owning category documents; no appendix-era result silently certifies them.                                                                                                                                        |
 
 <a id="certifications-turnover-baseline"></a>
 
@@ -133,10 +135,11 @@ The exact review world initially produced no exits or food contacts in 500 ticks
 shared resolver's full legal vertical and sloped step set raised exit participation to `0.15`, but
 blind search from forty chamber starts still had no reliable outbound cue. For this artificial
 mature nest, the approved level-2 resolution is an initial traffic trail: the fixture deposits
-owner-tagged pheromone A along traversable paths from worker stations to the entrance and advances
-it through 30 ordinary diffusion/evaporation passes. A configuration flag disables the fixture.
-The controller receives only the existing local pheromone samples, including the parallel vertical
-band; it receives no route, destination, or coordinate.
+owner-tagged pheromone A along traversable paths from worker stations to the entrance. Runtime
+diffusion and evaporation begin after startup; pre-diffusing the fixture was removed after it formed
+false local maxima. A configuration flag disables the fixture. The controller receives only local
+pheromone samples, including parallel vertical and direct-ahead bands; it receives no route,
+destination, or coordinate.
 
 Two further failures were environmental and kinematic. Authored workers began with only `1/8` of a
 tank. One `2.4`-energy meal raised them to `0.425`, below the derived `0.5` return reserve, so a hungry
@@ -155,11 +158,45 @@ at least two of four 100-tick windows. The bounded seed-1 check passes at `0.50`
 participation is `0.30–0.525`, surface presence `0.625–1.0`, foraging participation `0.30–0.375`,
 return efficiency `0.50–0.769`, and productive windows `3–4`.
 
-The return reserve remains `0.5` because unloaded outbound and home marginal costs are equal. The
-new gate establishes population-level exit, continued surface activity, food collection, and loaded
-return without requiring a route or perfect participation. It does not yet recertify cache use,
-long-horizon energy balance, or the RNN. CTRL-13 and EXP-05 remain implemented with human trajectory
-review pending.
+The return reserve remained `0.5` because unloaded outbound and home marginal costs were equal.
+The population ratios above did not constrain route quality. Human review then found the same
+translated-circle motion inside chambers and on the surface, plus more than half the population
+congested at the mouth by tick 100. That observation invalidates CTRL-13 and EXP-05: the recorded
+exits, contacts, and returns can coexist with visibly broken locomotion and are not policy
+certification.
+
+<a id="certifications-pathing-reset"></a>
+
+## Matched single-forager controls
+
+The web scenario selector exposes two versions of one immortal worker in the same authored nest.
+Both receive the same fixed eight-load outside food patch, full energy tank, disabled mortality and
+motor jitter, ordinary sensing cost, and shared motor and mandible resolver. The full-map arm reads
+food coordinates and the complete legal 3D movement graph. The programmed arm receives only the
+120 shipped sensor inputs and no private state. A movement-valid, owner-tagged pheromone-A trace
+records only its queen-to-entrance traffic. Emitted food odor leads outward foraging and emitted nest
+odor leads the loaded return; neither pheromone field contains a food or larder route. Fifteen
+append-only inputs expose each existing scent directly ahead in all three vertical bands. Older
+23- and 105-input RNN artifacts migrate with those new weights set to zero.
+
+The revised gate uses five completed returns, a 1,100-tick ceiling, at most 10% sensor slowdown, an
+immediate turn-reversal rate no greater than 6%, and final unloading stances no more than one voxel
+apart. Each arm must record exactly five external pickups and five returns, counting both queen-crop
+deliveries and physical cache deposits. This prevents eating, recycled food, or repeated bookkeeping
+from satisfying the gate without requiring the crop to be full before useful delivery counts.
+
+Runs 2460–2462 pass on seeds 1–3. Full-map completion ticks are 984, 1004, and 1064; sensor
+completion ticks are 966, 935, and 1034. Sensor slowdowns are `-0.01829`, `-0.06873`, and
+`-0.02820`: 1.8–6.9% faster than the full-map control. Each arm makes two crop deliveries and three
+physical cache deposits from five external pickups. The sensor policy makes no immediate turn
+reversals. Final full-map and sensor stances differ by one vertical voxel inside the queen-core
+neighborhood.
+
+This certifies the requested matched performance, stateless information boundary, and shared
+world/action mechanics. It does not certify the sensor policy's visible trajectory, a colony, an
+RNN, or evolution. The comparison lives in `single-forager-comparison` in the harness ledger;
+Vitest covers only the selector and bounded mechanics without repeatedly constructing or advancing
+the 3D fixture.
 
 <a id="certifications-appendix-e"></a>
 
@@ -168,22 +205,22 @@ review pending.
 The original gates are preserved in [Appendix E](sources/ant-sim-appendix-e.md). Their normalized
 owners are BIO-01–BIO-15, CTRL-04–CTRL-06, ENV-03–ENV-05, and EXP-05–EXP-09.
 
-| Step   | Status                      | Evidence                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1      | green                       | `scenarios.test.ts` compares every authored air/cavity voxel with the programmed blueprint after occupant placement; `programmedNest.test.ts` records a connected graph with horizontal, vertical, and sloped passages, branches, joins, and cycles without an uninterrupted central shaft, and verifies across six terrains that only the designated entrance aperture reaches the surface |
-| 2      | green                       | `config.test.ts` isolates the authored entrance-trail flag with the other world gates; `checkpoint.test.ts` round-trips configuration and cargo capacities; `EffectiveConfigPanel.tsx` renders the running flags and fixture tunables                                                                                                                                                       |
-| 3      | implemented; review pending | The exact programmed web scenario passes the fixed population-time gate. Untouched harness runs 2438–2441 pass 4/4 worlds with nontrivial exit, sampled surface presence, external-food participation, loaded return efficiency, and repeated productive windows. Human trajectory review remains.                                                                                          |
-| 4      | reopened                    | Runs 2430–2437 retain isolated cache-mechanics evidence, but they predate the exact-world controller and environment repair. Cache use must be remeasured after the current programmed trajectory is accepted.                                                                                                                                                                              |
-| 5      | reopened                    | Run 1790 retains historical energy measurements, but positive balance did not prove credible physical foraging and cannot certify the repaired policy or a new RNN cohort.                                                                                                                                                                                                                  |
-| 6, 8   | green                       | The current competence list is reflex-grade under Appendix F's 105-input tuple. Bounded loopback, parallel-band, phasic-input, direct-contact, precedence, and exact-controller checks pass without an oracle-only action path                                                                                                                                                              |
-| 7, 9   | reopened                    | Runs 1784–1792 trained and judged controllers against the invalidated teacher and outcome contract. The current Appendix H teacher is again stateless, so the corrected initializer returns to balanced independent-frame distillation with recurrence held at zero.                                                                                                                        |
-| 10     | invalidated                 | The former 75% cohort result in runs 1784–1792 used the invalidated outcome contract. No controller received individual repair, but the result is not current certification.                                                                                                                                                                                                                |
-| 11     | historical                  | Mortality and queen upkeep passed the former 8/8 gate in runs 1927–1935; admission awaits the repaired baseline and a downstream rerun.                                                                                                                                                                                                                                                     |
-| 12     | backlog                     | The cache-versus-no-cache scarcity comparison remains separate from the current evolution path                                                                                                                                                                                                                                                                                              |
-| 13, 17 | historical                  | Queen-funded worker eggs and larval rearing closed the former conserved replacement window in 8/8 worlds (runs 1946–1954); admission awaits baseline recertification.                                                                                                                                                                                                                       |
-| 14–16  | isolated                    | Transport, microclimate, and exposure mechanics exist but were not needed for fixed-genome continuity and remain off                                                                                                                                                                                                                                                                        |
-| 18     | historical                  | Runs 1957 and 1959–1963 retain their founder-turnover measurements, but demographic-continuity admission awaits baseline recertification.                                                                                                                                                                                                                                                   |
-| 19     | backlog                     | Reviewability follows the selection work in the current high-level plan                                                                                                                                                                                                                                                                                                                     |
+| Step   | Status      | Evidence                                                                                                                                                                                                                                                               |
+| ------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1      | green       | `programmedNest.test.ts` records a connected graph with horizontal, vertical, and sloped passages, branches, joins, and cycles without an uninterrupted central shaft, and verifies across six terrains that only the designated entrance aperture reaches the surface |
+| 2      | green       | `config.test.ts` isolates the authored entrance-trail flag with the other world gates; `checkpoint.test.ts` round-trips configuration and cargo capacities; `EffectiveConfigPanel.tsx` renders the running flags and fixture tunables                                  |
+| 3      | invalidated | Runs 2438–2441 retain their population ratios, but human review found universal translated-circle motion and severe mouth congestion. The gate measured outcomes compatible with broken locomotion and cannot certify the policy.                                      |
+| 4      | reopened    | Runs 2430–2437 retain isolated cache-mechanics evidence, but they predate the exact-world controller and environment repair. Cache use must be remeasured after the current programmed trajectory is accepted.                                                         |
+| 5      | reopened    | Run 1790 retains historical energy measurements, but positive balance did not prove credible physical foraging and cannot certify the repaired policy or a new RNN cohort.                                                                                             |
+| 6, 8   | green       | The current competence list is reflex-grade under the 120-input tuple that extends Appendix F's surface. Bounded loopback, parallel-band, direct-ahead, phasic-input, direct-contact, precedence, and exact-controller checks pass without an oracle-only action path  |
+| 7, 9   | reopened    | Runs 1784–1792 trained and judged controllers against the invalidated teacher and outcome contract. The current Appendix H teacher is again stateless, so the corrected initializer returns to balanced independent-frame distillation with recurrence held at zero.   |
+| 10     | invalidated | The former 75% cohort result in runs 1784–1792 used the invalidated outcome contract. No controller received individual repair, but the result is not current certification.                                                                                           |
+| 11     | historical  | Mortality and queen upkeep passed the former 8/8 gate in runs 1927–1935; admission awaits the repaired baseline and a downstream rerun.                                                                                                                                |
+| 12     | backlog     | The cache-versus-no-cache scarcity comparison remains separate from the current evolution path                                                                                                                                                                         |
+| 13, 17 | historical  | Queen-funded worker eggs and larval rearing closed the former conserved replacement window in 8/8 worlds (runs 1946–1954); admission awaits baseline recertification.                                                                                                  |
+| 14–16  | isolated    | Transport, microclimate, and exposure mechanics exist but were not needed for fixed-genome continuity and remain off                                                                                                                                                   |
+| 18     | historical  | Runs 1957 and 1959–1963 retain their founder-turnover measurements, but demographic-continuity admission awaits baseline recertification.                                                                                                                              |
+| 19     | backlog     | Reviewability follows the selection work in the current high-level plan                                                                                                                                                                                                |
 
 ### Appendix E step-5 governing inequality
 
@@ -423,22 +460,20 @@ Appendix F's interface and carrier work remains complete. Its former oracle and 
 are historical after Appendix H reopened the food-loop policy; it does not waive Appendix E's
 independent-cohort gate.
 
-| Deliverable                   | Status                      | Evidence                                                                                                                                                                                                               |
-| ----------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Parallel vertical sensing     | green                       | The append-only controller contract now has 105 inputs. All five scent fields expose level, center, down/up, down/up stereo, and phasic samples; bounded loopback and same-tick vertical-action tests pass             |
-| Deep-source nest field        | green                       | Runs 1333–1337 greedily reach the queen source from every 4,031–4,047 reachable nest/surface candidate in five worlds, with no entrance maximum                                                                        |
-| Absorbed colony odor          | green                       | With airborne retention `0.98` and 125 fixture warmup passes, the fixed `0.159` threshold classified every sampled inside/outside voxel correctly at startup and after 2,500 ticks across five worlds (runs 1709–1718) |
-| Contact-transfer food marking | green                       | Stored FOOD retains owner-tagged material odor and re-emits it. Runs 1735–1750 store, remove surface food, relocate and hunger the ant, then drain the cache in all 16 worlds                                          |
-| Phasic scent inputs           | green                       | First-frame change inputs are zero, later changes are signed differences from the prior sensed frame, and checkpoint 18 preserves the required sensory history                                                         |
-| Re-derived oracle audit       | implemented; review pending | Runs 2200–2437 remain isolated diagnostic history. The no-private-state teacher now passes the exact web-world gate and 4/4 untouched population panels in runs 2438–2441.                                             |
-| Mutational robustness         | historical                  | Run 1791 applies the production mutation operator to the checked-in run-1784 genome. Its curve describes the former controller and must be repeated for the recertified cohort.                                        |
+| Deliverable                   | Status      | Evidence                                                                                                                                                                                                                                             |
+| ----------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parallel vertical sensing     | green       | The append-only controller contract now has 120 inputs. All five scent fields expose level, center, down/up, down/up stereo, direct-ahead values at all three heights, and phasic samples; bounded loopback and same-tick vertical-action tests pass |
+| Deep-source nest field        | green       | Runs 1333–1337 greedily reach the queen source from every 4,031–4,047 reachable nest/surface candidate in five worlds, with no entrance maximum                                                                                                      |
+| Absorbed colony odor          | green       | With airborne retention `0.98` and 125 fixture warmup passes, the fixed `0.159` threshold classified every sampled inside/outside voxel correctly at startup and after 2,500 ticks across five worlds (runs 1709–1718)                               |
+| Contact-transfer food marking | green       | Stored FOOD retains owner-tagged material odor and re-emits it. Runs 1735–1750 store, remove surface food, relocate and hunger the ant, then drain the cache in all 16 worlds                                                                        |
+| Phasic scent inputs           | green       | First-frame change inputs are zero, later changes are signed differences from the prior sensed frame, and checkpoint 18 preserves the required sensory history                                                                                       |
+| Re-derived oracle audit       | invalidated | Runs 2200–2437 remain isolated diagnostic history. Runs 2438–2441 pass their ratio gate, but direct trajectory review found universal circling and severe entrance congestion, so they do not certify the teacher.                                   |
+| Mutational robustness         | historical  | Run 1791 applies the production mutation operator to the checked-in run-1784 genome. Its curve describes the former controller and must be repeated for the recertified cohort.                                                                      |
 
-The carrier audit still supports Appendix F's low-residual branch: no task latch registers, frame
-stack, attention mechanism, extra pheromone stream, or controller-substrate migration follows from
-the repaired defect. The artificial fixture uses the existing pheromone-A field as standing mature
-traffic. The 12-unit RNN remains the next substrate to train, but Appendix E step 10 is reopened
-until programmed trajectory review finishes and balanced independent-frame initialization is rerun
-against the current teacher.
+The carrier mechanics remain available, but the Appendix H policy assembled on top of them is
+rejected and must not train a controller. The matched single-forager section above records its
+fresh stateless sensor-limited replacement. That replacement passes runs 2460–2462 but awaits human
+trajectory review before it may be used as an RNN teacher.
 
 <a id="certifications-appendix-d"></a>
 

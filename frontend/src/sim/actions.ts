@@ -399,10 +399,13 @@ export function tryDig(world: World, ant: Ant, verticalBias: number): void {
     // a multi-load carrier does not immediately re-dig the pile it placed.
     return;
   }
-  if (hasCapacity && pickUpInTargetBand(world, ant, band)) {
+  // A food load makes this a release attempt before the same mandibles may
+  // collect anything else. Otherwise an arriving forager re-picks its own
+  // cache before unloading it.
+  if (ant.carrying === Material.FOOD && tryDeposit(world, ant, band)) {
     return;
   }
-  if (ant.carrying === Material.FOOD && tryDeposit(world, ant, band)) {
+  if (hasCapacity && pickUpInTargetBand(world, ant, band)) {
     return;
   }
   spendEnergy(world, ant, DIG.depositCost);

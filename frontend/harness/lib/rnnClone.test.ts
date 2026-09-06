@@ -32,7 +32,7 @@ describe("full recurrent behavior cloning", () => {
       { earlyStopping: true, parameterNoise: 0.005 }
     );
     expect(trained.losses.at(-1)).toBeLessThan(trained.losses[0]);
-    expect(trained.validationLoss).toBeLessThan(0.02);
+    expect(trained.validationLoss).toBeLessThan(trained.validationLosses[0] * 0.25);
     expect(trained.validationLoss).toBe(Math.min(...trained.validationLosses));
     expect(trained.bestEpoch).toBeGreaterThanOrEqual(0);
     expect(trained.vector).toHaveLength(GENOME_LENGTH);

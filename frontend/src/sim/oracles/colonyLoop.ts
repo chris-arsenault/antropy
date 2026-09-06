@@ -289,7 +289,6 @@ function seekFood(inputs: Float32Array, inside: boolean): void {
  * private controller state.
  */
 export const colonyLoopOracle: SensorPolicy = {
-  createState: () => null,
   act(inputs) {
     OUT.fill(0);
     const inside = insideNest(inputs);

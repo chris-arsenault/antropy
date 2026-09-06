@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { type World } from "./sim/world";
-import { SCENARIOS, scenarioById, type ScenarioId } from "./ui/scenarios";
 import { ChartsPanel } from "./ui/ChartsPanel";
 import { EffectiveConfigPanel } from "./ui/EffectiveConfigPanel";
 import { EvolutionPanel } from "./ui/EvolutionPanel";
@@ -9,14 +8,26 @@ import { DEFAULT_LAYERS, MapLayersPanel, type LayerVisibility } from "./ui/MapLa
 import { RatiosPanel } from "./ui/RatiosPanel";
 import { PersistenceControls } from "./ui/PersistenceControls";
 import { SPEED_PRESETS, isChartsOnly, type SpeedPreset } from "./ui/pacing";
+import {
+  buildScenarioWorld,
+  DEFAULT_SCENARIO,
+  SCENARIOS,
+  scenarioDefinition,
+  type ScenarioId,
+} from "./ui/scenarios";
 import { useSimulation } from "./ui/useSimulation";
 import { WorldView } from "./ui/WorldView";
 
 const DEFAULT_SEED = 1;
-const DEFAULT_SCENARIO: ScenarioId = "programmed";
 
-function freshWorldFactory(scenario: ScenarioId, seed: number): () => World {
-  return () => scenarioById(scenario).build(seed);
+type ScenarioWorldBuilder = (scenario: ScenarioId, seed: number) => World;
+
+function freshWorldFactory(
+  seed: number,
+  scenario: ScenarioId,
+  buildWorld: ScenarioWorldBuilder
+): () => World {
+  return () => buildWorld(scenario, seed);
 }
 
 interface Run {
@@ -24,12 +35,20 @@ interface Run {
   factory: () => World;
 }
 
+interface ConfiguredAppProps {
+  readonly buildWorld: ScenarioWorldBuilder;
+}
+
 export function App() {
+  return <ConfiguredApp buildWorld={buildScenarioWorld} />;
+}
+
+export function ConfiguredApp({ buildWorld }: ConfiguredAppProps) {
   const [seedInput, setSeedInput] = useState(String(DEFAULT_SEED));
   const [scenario, setScenario] = useState<ScenarioId>(DEFAULT_SCENARIO);
   const [run, setRun] = useState<Run>({
     id: 0,
-    factory: freshWorldFactory(DEFAULT_SCENARIO, DEFAULT_SEED),
+    factory: freshWorldFactory(DEFAULT_SEED, DEFAULT_SCENARIO, buildWorld),
   });
 
   const restart = (factory: () => World) => {
@@ -42,38 +61,36 @@ export function App() {
   };
 
   const newWorld = () => {
-    restart(freshWorldFactory(scenario, parsedSeed()));
+    restart(freshWorldFactory(parsedSeed(), scenario, buildWorld));
   };
 
-  // Switching scenario restarts immediately: the world it builds is the
-  // whole point of the choice.
-  const chooseScenario = (id: ScenarioId) => {
-    setScenario(id);
-    restart(freshWorldFactory(id, parsedSeed()));
+  const changeScenario = (next: ScenarioId) => {
+    setScenario(next);
+    restart(freshWorldFactory(parsedSeed(), next, buildWorld));
   };
 
   return (
     <SimRun
       key={run.id}
       factory={run.factory}
+      scenario={scenario}
+      onScenario={changeScenario}
       seedInput={seedInput}
       onSeedInput={setSeedInput}
       onNewWorld={newWorld}
       onRestore={restart}
-      scenario={scenario}
-      onScenario={chooseScenario}
     />
   );
 }
 
 interface SimRunProps {
   factory: () => World;
+  scenario: ScenarioId;
+  onScenario(value: ScenarioId): void;
   seedInput: string;
   onSeedInput(value: string): void;
   onNewWorld(): void;
   onRestore(factory: () => World): void;
-  scenario: ScenarioId;
-  onScenario(id: ScenarioId): void;
 }
 
 const DEFAULT_GROUND_OPACITY = 0.25;
@@ -81,7 +98,7 @@ const DEFAULT_GROUND_OPACITY = 0.25;
 interface ControlBarProps {
   sim: ReturnType<typeof useSimulation>;
   scenario: ScenarioId;
-  onScenario(id: ScenarioId): void;
+  onScenario(value: ScenarioId): void;
   seedInput: string;
   onSeedInput(value: string): void;
   onNewWorld(): void;
@@ -148,18 +165,19 @@ function ControlBar({
 
 function SimRun({
   factory,
+  scenario,
+  onScenario,
   seedInput,
   onSeedInput,
   onNewWorld,
   onRestore,
-  scenario,
-  onScenario,
 }: SimRunProps) {
   const sim = useSimulation(factory);
   const [selectedAntId, setSelectedAntId] = useState<number | null>(null);
   const [groundOpacity, setGroundOpacity] = useState(DEFAULT_GROUND_OPACITY);
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const selectedAnt = sim.world.ants.find((ant) => ant.id === selectedAntId) ?? null;
+  const scenarioInfo = scenarioDefinition(scenario);
 
   return (
     <main className="app-shell">
@@ -168,6 +186,9 @@ function SimRun({
         <p className="status-line">
           Tick <span data-testid="tick">{sim.tick}</span> · seed {sim.world.seed} · ants{" "}
           {sim.stats?.population ?? 0}
+        </p>
+        <p className="status-line" data-testid="world-mode">
+          {scenarioInfo.label} · {scenarioInfo.description}
         </p>
         <ControlBar
           sim={sim}

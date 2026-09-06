@@ -179,9 +179,8 @@ export interface World {
   lastVisit: Uint32Array;
   /** The behavioral controller for every ant (design spec §2.3). */
   controller: Controller;
-  /** Sensor-parity diagnostic controller; state is private and per ant. */
+  /** Stateless sensor-parity diagnostic controller. */
   sensorPolicyOverride: SensorPolicy | null;
-  sensorPolicyStates: Map<number, unknown>;
   /**
    * Change feed for the renderer: chunk keys whose voxels changed since the
    * last drain. Transient — rebuilt, never checkpointed.
@@ -261,7 +260,6 @@ export function createWorld(
     lastVisit: new Uint32Array(grid.data.length),
     controller,
     sensorPolicyOverride: null,
-    sensorPolicyStates: new Map(),
     policyOverride: null,
     dirtyChunks: new Set(),
   };

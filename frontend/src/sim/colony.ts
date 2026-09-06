@@ -219,10 +219,11 @@ export function placeBootstrapColony(
   world: World,
   queenHome: ColonyPosition,
   workerStations: readonly ColonyPosition[],
-  entrance: ColonyPosition = queenHome
+  entrance: ColonyPosition = queenHome,
+  workerCount: number = COLONY.initialWorkers
 ): Colony {
-  if (workerStations.length < COLONY.initialWorkers) {
-    throw new Error(`bootstrap colony needs ${COLONY.initialWorkers} legal worker stations`);
+  if (workerStations.length < workerCount) {
+    throw new Error(`bootstrap colony needs ${workerCount} legal worker stations`);
   }
   const genetics = seedColonyGenetics(world);
   const colony = createColonyRecord(
@@ -233,7 +234,7 @@ export function placeBootstrapColony(
     genetics.sperm,
     entrance
   );
-  for (let index = 0; index < COLONY.initialWorkers; index++) {
+  for (let index = 0; index < workerCount; index++) {
     const spermIndex = Math.floor(world.rng.next() * genetics.sperm.length);
     spawnFounderWorker(
       world,

@@ -1,6 +1,9 @@
 import { Input } from "../controller/contract";
 
 export interface ScentChannels {
+  readonly ahead: number;
+  readonly downAhead: number;
+  readonly upAhead: number;
   readonly left: number;
   readonly right: number;
   readonly down: number;
@@ -18,6 +21,9 @@ export interface ScentChannels {
 }
 
 export const FOOD_CHANNELS: ScentChannels = {
+  ahead: Input.FOOD_SCENT_AHEAD,
+  downAhead: Input.FOOD_SCENT_DOWN_AHEAD,
+  upAhead: Input.FOOD_SCENT_UP_AHEAD,
   left: Input.FOOD_SCENT_LEFT,
   right: Input.FOOD_SCENT_RIGHT,
   down: Input.FOOD_SCENT_DOWN,
@@ -35,6 +41,9 @@ export const FOOD_CHANNELS: ScentChannels = {
 };
 
 export const NEST_CHANNELS: ScentChannels = {
+  ahead: Input.NEST_SCENT_AHEAD,
+  downAhead: Input.NEST_SCENT_DOWN_AHEAD,
+  upAhead: Input.NEST_SCENT_UP_AHEAD,
   left: Input.NEST_SCENT_LEFT,
   right: Input.NEST_SCENT_RIGHT,
   down: Input.NEST_SCENT_DOWN,
@@ -52,6 +61,9 @@ export const NEST_CHANNELS: ScentChannels = {
 };
 
 export const COLONY_CHANNELS: ScentChannels = {
+  ahead: Input.COLONY_SCENT_AHEAD,
+  downAhead: Input.COLONY_SCENT_DOWN_AHEAD,
+  upAhead: Input.COLONY_SCENT_UP_AHEAD,
   left: Input.COLONY_SCENT_LEFT,
   right: Input.COLONY_SCENT_RIGHT,
   down: Input.COLONY_SCENT_DOWN,
@@ -69,6 +81,9 @@ export const COLONY_CHANNELS: ScentChannels = {
 };
 
 export const PHEROMONE_A_CHANNELS: ScentChannels = {
+  ahead: Input.PHEROMONE_A_AHEAD,
+  downAhead: Input.PHEROMONE_A_DOWN_AHEAD,
+  upAhead: Input.PHEROMONE_A_UP_AHEAD,
   left: Input.PHEROMONE_A_LEFT,
   right: Input.PHEROMONE_A_RIGHT,
   down: Input.PHEROMONE_A_DOWN,

@@ -48,21 +48,24 @@ durable records retain actual parents, founder line, offspring contribution, net
 merit, and completed death outcomes. Checkpoints preserve those records and the controller-owned
 founder genome references used for distance measurements.
 
-The web app exposes four world-level scenarios: the default authored-nest colony-loop review, the
-historical functional-controller diagnostic, isolated nest digging, and the full liability colony.
-A scenario selects the world configuration and founder seed together; feature gates and cargo
-capacities are stored per world and displayed by the effective-config panel. The default review
-uses the trained colony seed in the exact authored nest. It disables digging, mortality,
-reproduction, founding, genetic variation, weather, decay, and automatic continuation so food
-logistics can be watched without admitting later ladder systems.
+The web app exposes two matched single-worker worlds through the scenario selector. The full-map
+arm reads all external food coordinates and a shortest-path field over the legal 3D motor graph.
+The programmed arm is a pure function of the current shipped sensor tuple. It contains no private
+state, location, map, route, target, or ant identity. Both arms turn, step, pick up, and deposit
+through the ordinary body resolver, use the same authored nest and food patch, and return food to
+the queen-core larder neighborhood. The labels distinguish full-map privilege from sensor-limited
+behavior. Feature gates and cargo capacities remain stored per world and visible in the effective-
+config panel.
 
 The authored-nest builder carves the fixture before placing the colony and never calls the legacy
 founding excavation path. The current [environment design](design/environment.md) gives this
-control arm three physical carrier families: the deep-source homing field, absorbed owner-tagged
-colony odor in nest material, and colony odor transferred by contact to handled food. Five scent
-fields expose level, center, down/up, vertical stereo, and phasic samples through the 105-input
-controller vector. The sensor-limited oracle and the RNN resolve the same eight outputs through
-the same world action path.
+control arm physical carrier families: the deep-source homing field, absorbed owner-tagged colony
+odor in nest material, colony odor transferred by contact to handled food, and configurable
+owner-tagged entrance traffic in an unlabeled pheromone field. Five scent fields expose level,
+center, down/up, vertical stereo, a direct-ahead sample in each vertical band, and phasic samples
+through the 120-input controller vector. The
+fresh programmed arm resolves those samples through the same eight outputs as the RNN. The former
+Appendix H policy remains invalid and is not exposed as a review option.
 
 ## Deployment
 

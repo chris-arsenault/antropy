@@ -2,6 +2,7 @@ import { type Ant } from "../../src/sim/ant";
 import { type SensorPolicy } from "../../src/sim/controller/contract";
 import { Input, Output } from "../../src/sim/controller/contract";
 import { colonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
+import { pathingCeilingOracle } from "../../src/sim/oracles/omniscientForager";
 import { ENERGY } from "../../src/sim/tunables";
 import { stepWorld, type World } from "../../src/sim/world";
 import {
@@ -11,7 +12,6 @@ import {
 } from "../lib/authoredNestEconomy";
 import { type TraceSample } from "../lib/ledger";
 import { type ColonyLoopResult, type SensorFrame } from "./colonyLoop";
-import { pathingCeilingOracle } from "./pathingCeilingOracle";
 import { type OraclePolicy } from "../../src/sim/oracles/policies";
 
 type DiagnosticPolicy = OraclePolicy | SensorPolicy | null;
@@ -169,14 +169,8 @@ export function shadowOracleEnergyDemonstration(
   ticks: number
 ): { sequences: SensorFrame[][]; result: ColonyLoopResult } {
   const frames = new Map<number, SensorFrame[]>();
-  const states = new Map<number, unknown>();
   const result = runEnergyEpisode(seed, ticks, 0, null, (ant) => {
-    let state = states.get(ant.id);
-    if (state === undefined) {
-      state = colonyLoopOracle.createState();
-      states.set(ant.id, state);
-    }
-    recordFrames(frames, ant, colonyLoopOracle.act(ant.lastInputs, state));
+    recordFrames(frames, ant, colonyLoopOracle.act(ant.lastInputs));
   });
   return { sequences: [...frames.values()], result };
 }

@@ -28,7 +28,7 @@ export interface SimConfig {
   materialColonyOdor: boolean;
   /** Food handled by an ant retains and re-emits that colony's contact odor. */
   contactFoodOdor: boolean;
-  /** The mature authored nest starts with an owner-tagged pheromone trail to its entrance. */
+  /** An authored mature-world fixture may start with owner-tagged pheromone route marks. */
   authoredNestTrail: boolean;
   /** Phase 4: untrafficked tunnels collapse to loose fill. */
   nestDecay: boolean;
@@ -138,6 +138,22 @@ export const NEST_CONFIG: SimConfig = {
   authoredNestTrail: true,
 };
 
+/**
+ * Matched single-forager world: one immortal worker, no motor noise, and only
+ * the physical scent carriers needed by the sensor-limited comparison. The
+ * omniscient arm receives the same world and ignores those carriers.
+ */
+export const SINGLE_FORAGER_CONFIG: SimConfig = {
+  ...NEST_CONFIG,
+  motorJitter: false,
+  materialColonyOdor: true,
+  contactFoodOdor: true,
+  authoredNestTrail: true,
+};
+
+/** Compatibility name for the accepted omniscient single-forager world. */
+export const OMNISCIENT_FORAGER_CONFIG = SINGLE_FORAGER_CONFIG;
+
 /** Authored-nest turnover control: mortality and queen upkeep, no replacement. */
 export const MORTAL_NEST_CONFIG: SimConfig = {
   ...NEST_CONFIG,
@@ -212,6 +228,8 @@ const PRESETS: Record<string, SimConfig> = {
   full: FULL_CONFIG,
   phase2: PHASE2_CONFIG,
   nest: NEST_CONFIG,
+  "single-forager": SINGLE_FORAGER_CONFIG,
+  "omniscient-forager": OMNISCIENT_FORAGER_CONFIG,
   "nest-mortality": MORTAL_NEST_CONFIG,
   "nest-replacement": REPLACEMENT_NEST_CONFIG,
   "nest-variation": VARIATION_NEST_CONFIG,

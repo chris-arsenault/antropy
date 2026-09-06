@@ -43,16 +43,19 @@ oracle-only action path are permitted.
 The interface exposes normalized, local, fallible observations:
 
 - stereo and vertical-band samples for the five scent fields, including center, up/down, vertical
-  stereo, and phasic change values;
+  stereo, directly ahead at each height, and phasic change values;
 - food scent, deep-nest scent, colony/material odor (including contact-marked handled food), and the
   two unlabeled pheromone carriers without controller-side semantic labels;
 - energy, age, load fraction, carried material, body scale, local slope and solidity, crowding,
   temperature, and contact with food, brood, or ants.
 
-The current append-only tuple has 105 inputs. Parallel vertical and phasic readings are body facts:
-receptor adaptation and spatial sampling expose world state without deciding how the ant should
-respond. Colony odor and handled-food odor can fade, wash out, transfer to the wrong object, or be
-absent, so they remain senses rather than answers.
+The current append-only tuple has 120 inputs. The fifteen newest channels sample the voxel directly
+ahead for each scent and vertical band; they close the physical blind spot between the two diagonal
+antennae without reporting a bearing or destination. Parallel vertical and phasic readings are body
+facts: receptor adaptation and spatial sampling expose world state without deciding how the ant
+should respond. Colony odor and handled-food odor can fade, wash out, transfer to the wrong object,
+or be absent, so they remain senses rather than answers. Older 23- and 105-input RNN artifacts are
+migrated with the new receptors disconnected.
 
 Future senses must pass the carrier, locality, cost, question-not-answer, and evolutionary-
 displacement tests in [the principles](../principles.md#principles-layers). Sun or polarized-light
@@ -64,10 +67,11 @@ azimuth can qualify; home direction, food direction, danger, and should-dig sign
 
 The production controller is a fixed-topology tanh RNN with 12 recurrent hidden units and eight
 outputs. Behavioral weights and seven physical genes form the genome. Recurrence is part of every
-genome. The current programmed teacher is nevertheless a pure function of one sensor frame.
-Persistent heading belongs to the body, contact deflection belongs to locomotion, and signed phasic
-inputs carry the relevant prior-sample difference. The initializer can therefore fit balanced
-independent frames while holding recurrence at zero; evolution remains free to recruit those loci.
+genome. The rejected Appendix H teacher was a pure function of one sensor frame, but direct review
+found universal translated-circle motion and entrance congestion. A fresh sensor-limited
+single-forager now passes the matched five-load gate, but it is not an accepted RNN teacher until
+its trajectory passes human review. Recurrence remains available to evolution; its initialization
+is undecided until that review.
 
 Female ants express two genome copies; haploid males express one. Mutation occurs at egg creation.
 Physical genes currently cover body scale, leg length, sensor gain, storage, egg endowment,
@@ -81,13 +85,22 @@ from remaining in artificial lockstep while preserving reproducibility.
 
 ## Initialization and seeded competences
 
-The authored-nest colony is intended to use one predetermined RNN initialization trained from the
-sensor-limited programmed policy. That policy follows a physical seeded entrance trail while below
-the local surface, switches to food search above it, carries food on the deep-nest gradient, and
-leaves contact deflection and heading persistence to the body. It composes center, flank, and
-parallel vertical samples without private state. Training therefore uses balanced independent
-sensor/output frames, one fixed procedure for every predetermined start, and whole-cohort judgment
-on untouched worlds. No controller receives terminal outcome polishing or individual repair.
+The authored-nest colony is intended to use one predetermined RNN initialization trained from an
+accepted sensor-limited programmed policy. The former Appendix H policy is not that teacher: its
+population ratios passed while every visible ant circled and workers accumulated at the entrance.
+The accepted physical ceiling and the fresh candidate now appear as matched web scenarios. The
+full-map ant reads food coordinates and the complete legal movement graph. The candidate receives
+only the current shipped sensor tuple and has no private state. Physical pheromone A records its
+nest-to-entrance traffic. It follows natural food odor outside and natural nest odor while loaded;
+no food or larder route is written into either pheromone field.
+
+Runs 2460–2462 record five external-food returns from each arm into the same queen-core
+neighborhood. The candidate finished 1.8–6.9% faster than the full-map arm and made no immediate
+turn reversals. The harness counts crop deliveries and physical cache deposits together, while
+requiring five external pickups so recycled food cannot pass the gate. Human trajectory review is
+the remaining teacher gate. After acceptance, one fixed initialization procedure and whole-cohort
+judgment on untouched worlds can resume. No controller receives terminal outcome polishing or
+individual repair.
 
 The separately retained construction seed proves six local competences are expressible without
 memory: marked-site dig-down, spoil haul and deposit, mark amplification, crowding overflow,
@@ -113,7 +126,7 @@ graph search inside the ant is outside the intended controller problem.
 
 ## Search without a target signal
 
-The programmed worker is one ordered policy over ordinary senses and actions:
+The rejected Appendix H worker used this ordered policy over ordinary senses and actions:
 
 ```text
 IF carrying food
@@ -130,11 +143,17 @@ ELSE
     follow deep-nest odor
 ```
 
-The authored entrance trail is a configurable initial condition of the artificial mature nest, not
-an ant-side route. It occupies the ordinary owner-tagged pheromone-A field, diffuses and evaporates
-normally, and is sampled through the same center, stereo, and vertical channels available to an
-RNN. Local positive depth plus colony odor establishes nest context; odor leaking around the mouth
-does not classify surface workers as still inside.
+This decomposition remains historical design input, not an accepted implementation. Human review
+showed that its steering composition produced translated circles in open terrain and chambers, and
+that more than half of the workers could accumulate at the nest mouth within 100 ticks.
+
+Authored route marks are a configurable initial condition of the artificial mature world, not an
+ant-side route. The colony fixture uses ordinary owner-tagged pheromone A for standing traffic to
+the entrance. The matched single-forager fixture seeds only its one worker's queen-to-entrance
+traffic trace. Outside that trace it navigates with emitted food odor and the queen's diffusing nest
+odor. All carriers are sampled through the same center, stereo, directly-ahead, and vertical
+channels available to an RNN. Local positive depth plus colony odor establishes nest context; odor
+leaking around the mouth does not classify surface workers as still inside.
 
 The heading persists across ticks. Motor jitter differentiates ants but does not select a new
 heading every frame. A blocked thrust is resolved by shared locomotion: try the controller's full
@@ -142,14 +161,14 @@ vertical/sloped step set, then local yaw alternatives by increasing angular dist
 first legal physical heading. This applies to every controller and target context; it is neither a
 food-policy mode nor remembered wall-side state.
 
-Food contact or a detectable food carrier immediately preempts search. Directed taxis estimates a
-full local bearing from center and flank samples: lateral change is `left - right`, forward change
-is `left + right - 2 * center`, and `atan2` maps both into a signed turn. Open-surface food taxis
-caps correction at one quarter of full turn and retains at least three-quarter thrust; this replaces
-the tight moving circles caused by near-maximum turn plus one-fifth thrust. Confined entrance and
-homing branches retain sharper corrections. The signed center-change input distinguishes a receding
-signal and triggers a local course correction without controller memory. Search applies only when
-no signal or phasic loss is present.
+Food contact or a stronger adjacent food carrier immediately preempts search. The programmed policy
+rotates in place by one lattice octant until its strongest sensed neighbor is directly ahead, then
+steps; it never turns while translating. Moderate vertical bias selects the sensed forward slope,
+while near-maximal bias selects the sensed voxel directly above or below. Unloaded nest egress
+requires both a strong local A trace and decreasing nest odor, so diffusion halo cannot pull the ant
+off the trace. Loaded homing climbs the natural nest-odor gradient and unloads only at its physical
+source neighborhood. This policy is entirely current-frame and uses body heading as ordinary
+physical orientation, not controller memory.
 
 The return threshold follows this governing inequality:
 
@@ -169,39 +188,39 @@ integration remain later evolutionary candidates rather than bootstrap dependenc
 
 ## Linear implementation order
 
-| ID      | Status                      | Work and finish                                                                                                                                                                                                                                                                                   |
-| ------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CTRL-01 | Delivered                   | Pluggable controller contract; no non-controller module inspects genome internals.                                                                                                                                                                                                                |
-| CTRL-02 | Delivered                   | Fixed 12-unit RNN, diploid females, haploid males, seven physical genes, mutation, recombination, and per-tick cognition cost.                                                                                                                                                                    |
-| CTRL-03 | Delivered                   | Shared eight-output body resolver with yaw-only embodiment, local mandible preconditions, failed-dig cost, and no privileged oracle action.                                                                                                                                                       |
-| CTRL-04 | Delivered                   | Honest 105-input surface with parallel vertical bands, phasic sensing, deep nest field, absorbed colony odor, handled-food marking, temperature, contacts, and load/body state.                                                                                                                   |
-| CTRL-05 | Delivered                   | Deterministic per-ant motor jitter and checkpointed controller/sensory state.                                                                                                                                                                                                                     |
-| CTRL-13 | Implemented; review pending | The stateless policy follows the authored entrance trail, searches persistently, uses broad surface-food taxis, homes loaded workers, and shares body contact resolution. The exact web gate passes seed 1 and 4/4 untouched worlds in runs 2438–2441; human trajectory review remains.           |
-| CTRL-06 | Backlog, reopened           | Train the fixed RNN initialization from balanced independent teacher frames after CTRL-13 review. Apply one predetermined procedure to the cohort; the former zero-recurrence cohort's behavioral outcome certification remains invalid because its teacher and outcome contract were incomplete. |
-| CTRL-07 | Delivered                   | Five construction reflexes plus local cargo transport exist as an isolated, zero-recurrence diagnostic seed. Construction remains off in the current colony world.                                                                                                                                |
-| CTRL-08 | Backlog                     | Extend the initial seed portfolio with independently predetermined forager, wander-heavy, pheromone-reactive, construction, and unstructured minorities; assess the whole distribution rather than selecting winners. This waits for the living-colony summit and genetic variation.              |
-| CTRL-09 | Backlog                     | Add convention-aligned hidden-unit matching inside RNN recombination before evolved synaptic plasticity makes representation mismatch more damaging.                                                                                                                                              |
-| CTRL-10 | Backlog                     | Add metabolically priced, neuromodulated within-lifetime plasticity only after its colony-level selection environment and naive-versus-experienced assay exist.                                                                                                                                   |
-| CTRL-11 | Backlog                     | Implement linear genetic programming behind the same contract, with persistent registers, homologous program variation, per-instruction energy cost, and architected plastic registers. Compare substrates by viable-space and colony ledgers.                                                    |
-| CTRL-12 | Backlog                     | Consider path integration, learned routes, or additional controller memory only as evolutionary upgrades supported by measurements; none may become initial viability requirements.                                                                                                               |
+| ID      | Status                            | Work and finish                                                                                                                                                                                                                                                                      |
+| ------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CTRL-01 | Delivered                         | Pluggable controller contract; no non-controller module inspects genome internals.                                                                                                                                                                                                   |
+| CTRL-02 | Delivered                         | Fixed 12-unit RNN, diploid females, haploid males, seven physical genes, mutation, recombination, and per-tick cognition cost.                                                                                                                                                       |
+| CTRL-03 | Delivered                         | Shared eight-output body resolver with yaw-only embodiment, local mandible preconditions, failed-dig cost, and no privileged oracle action.                                                                                                                                          |
+| CTRL-04 | Delivered                         | Honest 120-input surface with parallel vertical bands, direct-ahead scent samples, phasic sensing, deep nest field, absorbed colony odor, handled-food marking, temperature, contacts, and load/body state. Older RNN artifacts migrate with new inputs disconnected.                |
+| CTRL-05 | Delivered                         | Deterministic per-ant motor jitter and checkpointed controller/sensory state.                                                                                                                                                                                                        |
+| CTRL-13 | Implemented; human review pending | The former policy and runs 2438–2441 remain invalid. Its stateless replacement receives only shipped sensors and passes the five-return, larder-neighborhood, slowdown, and turn-reversal gates in runs 2460–2462 without full-map access.                                           |
+| CTRL-06 | Backlog, blocked                  | Review the fresh sensor-limited trajectory, then train one predetermined RNN initialization procedure and judge its whole cohort on untouched worlds. The omniscient policy is never a teacher.                                                                                      |
+| CTRL-07 | Delivered                         | Five construction reflexes plus local cargo transport exist as an isolated, zero-recurrence diagnostic seed. Construction remains off in the current colony world.                                                                                                                   |
+| CTRL-08 | Backlog                           | Extend the initial seed portfolio with independently predetermined forager, wander-heavy, pheromone-reactive, construction, and unstructured minorities; assess the whole distribution rather than selecting winners. This waits for the living-colony summit and genetic variation. |
+| CTRL-09 | Backlog                           | Add convention-aligned hidden-unit matching inside RNN recombination before evolved synaptic plasticity makes representation mismatch more damaging.                                                                                                                                 |
+| CTRL-10 | Backlog                           | Add metabolically priced, neuromodulated within-lifetime plasticity only after its colony-level selection environment and naive-versus-experienced assay exist.                                                                                                                      |
+| CTRL-11 | Backlog                           | Implement linear genetic programming behind the same contract, with persistent registers, homologous program variation, per-instruction energy cost, and architected plastic registers. Compare substrates by viable-space and colony ledgers.                                       |
+| CTRL-12 | Backlog                           | Consider path integration, learned routes, or additional controller memory only as evolutionary upgrades supported by measurements; none may become initial viability requirements.                                                                                                  |
 
 <a id="controller-obe"></a>
 
 ## OBE and rejected directions
 
-| Direction                                                                              | Status and reason                                                                                                                                                                                                                                   |
-| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| One hand-constrained reflex topology as the complete colony controller                 | **OBE.** It optimized a designer-selected problem and did not represent the broad initialization goal. The construction seed remains an assay artifact.                                                                                             |
-| Stateful eighteen-field food-loop oracle                                               | **OBE.** World carriers removed its task timers, latches, remembered samples, and entrance protocol. The temporary Appendix H wall-side, orientation, and casting state was also removed after the body and current sensor frame proved sufficient. |
-| Sequence cloning followed by terminal evolution-strategy search                        | **OBE.** Teacher loss did not predict closed-loop behavior, and a 24-generation terminal run consumed 42.9 minutes while degrading completion. Balanced independent-frame distillation replaced it.                                                 |
-| Controller-specific acceptance, best-of-run baking, or hard behavioral assay rejection | **OBE.** Predetermined cohorts receive one procedure and are judged as a distribution on untouched worlds. Behavioral assays diagnose; mechanics remain hard checks.                                                                                |
-| Home-angle, home-distance, chosen destination, storage-room, or should-dig inputs      | **Rejected.** They provide answers without carriers and displace navigation or task choice.                                                                                                                                                         |
-| Procedural memory wrapped around the network                                           | **Rejected.** It creates a second unattributable controller.                                                                                                                                                                                        |
-| Attention heads for scalar ant inputs                                                  | **Rejected.** The input has no token structure and current evidence does not justify the mechanism.                                                                                                                                                 |
-| Task latches, frame stacking, or another pheromone stream for the food loop            | **OBE for the current target.** Existing carriers, body heading, phasic inputs, and shared contact resolution cover the programmed loop without private oracle state. A future structural finding may reopen a specific mechanism.                  |
-| Continuous preference resolver as an automatic replacement for threshold bands         | **OBE.** Parallel band sensing repaired the measured defect. Migration requires a new finding that band quantization blocks a colony ledger and would reopen interface assays.                                                                      |
-| Naively random RNN founders as the only starting population                            | **Rejected.** Most starve before continuous selection can discover viability. Unstructured minorities remain valid within a viable portfolio.                                                                                                       |
-| Parameterized authored behavior, tree GP, or algorithmic pathfinding                   | **Rejected.** They either cap evolution at the authored algorithm, produce destructive/rugged variation, or solve the navigation problem outside the intended substrate.                                                                            |
+| Direction                                                                              | Status and reason                                                                                                                                                                                                                  |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One hand-constrained reflex topology as the complete colony controller                 | **OBE.** It optimized a designer-selected problem and did not represent the broad initialization goal. The construction seed remains an assay artifact.                                                                            |
+| Stateful eighteen-field food-loop oracle                                               | **OBE.** World carriers and parallel local sampling removed its task timers, remembered samples, wall-side state, entrance protocol, and final actuator-synchronization bit. The fresh single-forager is stateless.                |
+| Sequence cloning followed by terminal evolution-strategy search                        | **OBE.** Teacher loss did not predict closed-loop behavior, and a 24-generation terminal run consumed 42.9 minutes while degrading completion. Balanced independent-frame distillation replaced it.                                |
+| Controller-specific acceptance, best-of-run baking, or hard behavioral assay rejection | **OBE.** Predetermined cohorts receive one procedure and are judged as a distribution on untouched worlds. Behavioral assays diagnose; mechanics remain hard checks.                                                               |
+| Home-angle, home-distance, chosen destination, storage-room, or should-dig inputs      | **Rejected.** They provide answers without carriers and displace navigation or task choice.                                                                                                                                        |
+| Procedural memory wrapped around the network                                           | **Rejected.** It creates a second unattributable controller.                                                                                                                                                                       |
+| Attention heads for scalar ant inputs                                                  | **Rejected.** The input has no token structure and current evidence does not justify the mechanism.                                                                                                                                |
+| Task latches, frame stacking, or another pheromone stream for the food loop            | **OBE for the current target.** Existing carriers, body heading, phasic inputs, and shared contact resolution cover the programmed loop without private oracle state. A future structural finding may reopen a specific mechanism. |
+| Continuous preference resolver as an automatic replacement for threshold bands         | **OBE.** Parallel band sensing repaired the measured defect. Migration requires a new finding that band quantization blocks a colony ledger and would reopen interface assays.                                                     |
+| Naively random RNN founders as the only starting population                            | **Rejected.** Most starve before continuous selection can discover viability. Unstructured minorities remain valid within a viable portfolio.                                                                                      |
+| Parameterized authored behavior, tree GP, or algorithmic pathfinding                   | **Rejected.** They either cap evolution at the authored algorithm, produce destructive/rugged variation, or solve the navigation problem outside the intended substrate.                                                           |
 
 <a id="controller-sources"></a>
 

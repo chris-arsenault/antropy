@@ -13,6 +13,7 @@ export interface MotorState {
 
 export const TURN_RADIANS_PER_TICK = Math.PI / 4;
 export const MAX_STEPS_PER_TICK = 1;
+const DIRECT_VERTICAL_BIAS = 0.8;
 
 /** Resolve the implemented vertical bands shared by contact sensing and action. */
 export function verticalBandOffset(verticalBias: number): -1 | 0 | 1 {
@@ -83,11 +84,24 @@ function setCandidate(i: number, dx: number, dy: number, dz: number): void {
   CANDIDATE_SCRATCH[i].dz = dz;
 }
 
+function setVerticalCandidates(dx: number, dz: number, dy: -1 | 1, directFirst: boolean): void {
+  if (directFirst) {
+    setCandidate(0, 0, dy, 0);
+    setCandidate(1, dx, dy, dz);
+  } else {
+    setCandidate(0, dx, dy, dz);
+    setCandidate(1, 0, dy, 0);
+  }
+  setCandidate(2, dx, 0, dz);
+  setCandidate(3, dx, -dy, dz);
+}
+
 /**
- * Step candidates in preference order. Under a strong vertical bias the
- * diagonal move comes first because the vertical-band stereo samples describe
- * that destination. The stationary vertical move remains the fallback for a
- * 1-wide shaft, where the diagonal is solid. Neutral bias walks forward-first.
+ * Step candidates in preference order. A near-maximal vertical bias selects
+ * the voxel directly above or below; a moderate bias selects the corresponding
+ * forward diagonal. This lets the continuous motor command distinguish the
+ * direct and forward samples within one vertical sensory band. Neutral bias
+ * walks forward-first.
  * Returns a reused scratch array — do not retain.
  */
 export function stepCandidates(
@@ -97,17 +111,9 @@ export function stepCandidates(
   const { dx, dz } = headingToDirection(heading);
   const verticalBand = verticalBandOffset(verticalBias);
   if (verticalBand < 0) {
-    // Descend: follow the sampled diagonal, with straight down as shaft fallback.
-    setCandidate(0, dx, -1, dz);
-    setCandidate(1, 0, -1, 0);
-    setCandidate(2, dx, 0, dz);
-    setCandidate(3, dx, 1, dz);
+    setVerticalCandidates(dx, dz, -1, verticalBias <= -DIRECT_VERTICAL_BIAS);
   } else if (verticalBand > 0) {
-    // Climb: follow the sampled diagonal, with straight up as shaft fallback.
-    setCandidate(0, dx, 1, dz);
-    setCandidate(1, 0, 1, 0);
-    setCandidate(2, dx, 0, dz);
-    setCandidate(3, dx, -1, dz);
+    setVerticalCandidates(dx, dz, 1, verticalBias >= DIRECT_VERTICAL_BIAS);
   } else {
     // Walk: forward-level, forward-up, forward-down, then a last-resort climb.
     setCandidate(0, dx, 0, dz);

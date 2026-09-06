@@ -4,7 +4,7 @@ import { createInputBuffer } from "../senses";
 import { colonyLoopOracle, colonyLoopReturnThreshold } from "./colonyLoop";
 
 function act(inputs: Float32Array): Float32Array {
-  return colonyLoopOracle.act(inputs, colonyLoopOracle.createState());
+  return colonyLoopOracle.act(inputs);
 }
 
 describe("colony-loop worker priorities", () => {
@@ -319,20 +319,19 @@ describe("colony-loop steering", () => {
   });
 
   it("returns the same action for the same frame regardless of prior calls", () => {
-    const state = colonyLoopOracle.createState();
     const prior = createInputBuffer();
     prior[Input.CARRY_LOAD] = 1;
     prior[Input.NEST_SCENT_LEFT] = 0.8;
-    colonyLoopOracle.act(prior, state);
+    colonyLoopOracle.act(prior);
     const current = createInputBuffer();
     current[Input.CARRY_LOAD] = 1;
     current[Input.NEST_SCENT_LEFT] = 0.2;
     current[Input.NEST_SCENT_RIGHT] = 0.8;
 
-    const afterPrior = Float32Array.from(colonyLoopOracle.act(current, state));
-    const fromFreshState = colonyLoopOracle.act(current, colonyLoopOracle.createState());
+    const afterPrior = Float32Array.from(colonyLoopOracle.act(current));
+    const repeated = colonyLoopOracle.act(current);
 
-    expect(afterPrior).toEqual(fromFreshState);
+    expect(afterPrior).toEqual(repeated);
   });
 
   it("selects directly sampled vertical food without translating", () => {
@@ -399,18 +398,17 @@ describe("colony-loop casting", () => {
   });
 
   it("uses no private policy state", () => {
-    expect(colonyLoopOracle.createState()).toBeNull();
+    expect("createState" in colonyLoopOracle).toBe(false);
   });
 
   it("uses a broad moving turn for surface food instead of tracing a tight circle", () => {
-    const state = colonyLoopOracle.createState();
     const lateral = createInputBuffer();
     lateral[Input.ENERGY] = 1;
     lateral[Input.FOOD_SCENT_LEFT] = 0.5;
-    const turn = Float32Array.from(colonyLoopOracle.act(lateral, state));
+    const turn = Float32Array.from(colonyLoopOracle.act(lateral));
     const forward = createInputBuffer();
     forward[Input.ENERGY] = 1;
-    const step = colonyLoopOracle.act(forward, state);
+    const step = colonyLoopOracle.act(forward);
 
     expect(turn[Output.TURN]).toBeGreaterThan(0);
     expect(turn[Output.TURN]).toBeLessThanOrEqual(0.25);

@@ -37,15 +37,24 @@ long-horizon ecology, colony outcomes, and comparative simulation measurements r
 `pnpm harness` and are recorded in `frontend/harness/ledger.db`; they are not CI pass gates.
 Use `pnpm harness calibrate-colony-economy` for the authored-nest energy surface; its profile
 syntax and current evidence are documented in [calibration.md](calibration.md).
-Use `pnpm harness programmed-foraging` for the fixed 500-tick, four-world programmed-colony panel.
-It records population exit participation, sampled surface presence, external-food participation,
-loaded return efficiency, and repeated productive windows without adding a multi-world simulation
-to CI. The bounded CI check runs only the exact review seed.
-`pnpm harness clone-colony-loop` is the starting initializer for the current stateless Appendix H
-teacher. It trains balanced independent sensor/output frames while holding recurrence at zero; the
-recurrent genes remain in every produced genome for later evolution. Its old controller artifacts
-remain historical because their teacher lacked the search branch and their outcome recorder could
-accept an impossible event order.
+The web app's scenario selector exposes two matched single-ant controls: an omniscient pathfinding
+baseline and a programmed sensor-limited candidate. Both use the same authored nest, persistent
+surface food patch, queen-core larder neighborhood, configuration, and ordinary body actions. Use
+seeds 1–3 for the recorded comparison. The sensor arm is a stateless function of local production
+sensors; its authored entrance-traffic trace is physical world state and can be disabled through the
+existing
+`authoredNestTrail` configuration gate.
+
+`pnpm harness single-forager-comparison --seed 1` records the short five-load matched gate. It
+requires five genuine external pickups and five completed returns into the queen's crop or physical
+cache, final unloading stances within one voxel, completion within 1,100 ticks, no more than 10%
+sensor slowdown, and no more than 6% immediate sensor-turn reversals. This outcome stays in the
+harness rather than making the normal test suite build and run the 3D fixture repeatedly.
+
+`pnpm harness programmed-foraging` preserves the former fixed 500-tick, four-world Appendix H panel
+as invalidated evidence. Its ratios passed while direct review still found universal circling and
+severe mouth congestion. Do not use it as a current gate. `pnpm harness clone-colony-loop` likewise
+remains historical and must not train another controller from the rejected policy.
 `evaluate-colony-cohort --controller-runs ...` and `robustness-colony-loop --controller-runs ...`
 remain the no-selection held-out evaluation and production-mutation curve. `bake-colony-run --run
 ID` regenerates the checked-in colony seed from an already measured ledger vector.

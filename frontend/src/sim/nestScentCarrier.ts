@@ -1,7 +1,8 @@
 import { type Colony } from "./colony";
 import { voxelIndex } from "./grid";
 import { Material } from "./materials";
-import { depositScent, stepScentField } from "./scent";
+import { isLegalPosition } from "./movement";
+import { depositScent } from "./scent";
 import { AUTHORED_NEST_TRAIL, NEST_FIXTURE_SCENT, SCENT } from "./tunables";
 import { type World } from "./world";
 
@@ -17,6 +18,18 @@ const OFFSETS: readonly (readonly [number, number, number])[] = [
   [0, 0, 1],
   [0, 0, -1],
 ];
+
+const MOVEMENT_OFFSETS: readonly (readonly [number, number, number])[] = (() => {
+  const offsets: [number, number, number][] = [];
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx !== 0 || dy !== 0 || dz !== 0) offsets.push([dx, dy, dz]);
+      }
+    }
+  }
+  return offsets;
+})();
 
 function coordinates(world: World, index: number): { x: number; y: number; z: number } {
   const x = index % world.grid.sizeX;
@@ -57,6 +70,32 @@ function airDistances(
   return distances;
 }
 
+function movementDistances(
+  world: World,
+  startPoint: { readonly x: number; readonly y: number; readonly z: number }
+): Int32Array {
+  const start = voxelIndex(world.grid, startPoint.x, startPoint.y, startPoint.z);
+  const distances = new Int32Array(world.grid.data.length);
+  distances.fill(-1);
+  const queue = new Int32Array(world.grid.data.length);
+  let read = 0;
+  let write = 0;
+  distances[start] = 0;
+  queue[write++] = start;
+  while (read < write) {
+    const index = queue[read++];
+    const { x, y, z } = coordinates(world, index);
+    for (const [dx, dy, dz] of MOVEMENT_OFFSETS) {
+      const next = neighborIndex(world, x + dx, y + dy, z + dz);
+      if (next === null || distances[next] >= 0) continue;
+      if (!isLegalPosition(world.grid, x + dx, y + dy, z + dz)) continue;
+      distances[next] = distances[index] + 1;
+      queue[write++] = next;
+    }
+  }
+  return distances;
+}
+
 function addSurfaceColumn(
   world: World,
   colony: Colony,
@@ -85,10 +124,15 @@ function addSurfaceCarrier(world: World, colony: Colony, voxels: Set<number>): v
   }
 }
 
-function nextTowardEntrance(world: World, distances: Int32Array, index: number): number | null {
+function nextTowardEntrance(
+  world: World,
+  distances: Int32Array,
+  index: number,
+  offsets: readonly (readonly [number, number, number])[]
+): number | null {
   const distance = distances[index];
   const { x, y, z } = coordinates(world, index);
-  for (const [dx, dy, dz] of OFFSETS) {
+  for (const [dx, dy, dz] of offsets) {
     const next = neighborIndex(world, x + dx, y + dy, z + dz);
     if (next !== null && distances[next] === distance - 1) return next;
   }
@@ -108,9 +152,25 @@ function addEntrancePath(
   while (current !== null) {
     trail.add(current);
     if (distances[current] === 0) return;
-    current = nextTowardEntrance(world, distances, current);
+    current = nextTowardEntrance(world, distances, current, MOVEMENT_OFFSETS);
   }
   throw new Error("authored nest trail could not reach the entrance");
+}
+
+function depositTrail(
+  field: World["pheromoneA"],
+  trail: ReadonlySet<number>,
+  distances: Int32Array,
+  owner: number
+): void {
+  for (const index of trail) {
+    const distance = distances[index];
+    if (distance < 0) continue;
+    const concentration =
+      AUTHORED_NEST_TRAIL.entranceStrength *
+      Math.exp(-distance / AUTHORED_NEST_TRAIL.distanceScale);
+    depositScent(field, index, concentration, owner);
+  }
 }
 
 function connectCarrierPaths(world: World, distances: Int32Array, voxels: Set<number>): void {
@@ -118,7 +178,7 @@ function connectCarrierPaths(world: World, distances: Int32Array, voxels: Set<nu
     let current: number | null = start;
     while (current !== null && distances[current] > 0) {
       voxels.add(current);
-      current = nextTowardEntrance(world, distances, current);
+      current = nextTowardEntrance(world, distances, current, OFFSETS);
     }
   }
 }
@@ -314,20 +374,12 @@ export function primeAuthoredNestTrail(
   workerStations: readonly { readonly x: number; readonly y: number; readonly z: number }[]
 ): void {
   if (!world.config.authoredNestTrail) return;
-  const distances = airDistances(world, {
+  const distances = movementDistances(world, {
     x: colony.entranceX,
     y: colony.entranceY,
     z: colony.entranceZ,
   });
   const trail = new Set<number>();
   for (const station of workerStations) addEntrancePath(world, distances, station, trail);
-  for (const index of trail) {
-    const concentration =
-      AUTHORED_NEST_TRAIL.entranceStrength *
-      Math.exp(-distances[index] / AUTHORED_NEST_TRAIL.distanceScale);
-    depositScent(world.pheromoneA, index, concentration, colony.id);
-  }
-  for (let pass = 0; pass < AUTHORED_NEST_TRAIL.fixtureWarmupPasses; pass++) {
-    stepScentField(world.grid, world.pheromoneA);
-  }
+  depositTrail(world.pheromoneA, trail, distances, colony.id);
 }

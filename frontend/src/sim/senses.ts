@@ -29,6 +29,8 @@ export interface SenseContext {
 }
 
 interface StereoPositions {
+  readonly aheadX: number;
+  readonly aheadZ: number;
   readonly leftX: number;
   readonly leftZ: number;
   readonly rightX: number;
@@ -42,6 +44,7 @@ const NEST_SCENT_PAIR = [Input.NEST_SCENT_LEFT, Input.NEST_SCENT_RIGHT] as const
 
 interface ScentInputs {
   readonly level: readonly [number, number];
+  readonly ahead: readonly [number, number, number];
   readonly center: number;
   readonly down: number;
   readonly up: number;
@@ -55,6 +58,7 @@ interface ScentInputs {
 
 const PHEROMONE_A_INPUTS: ScentInputs = {
   level: PHEROMONE_A_PAIR,
+  ahead: [Input.PHEROMONE_A_AHEAD, Input.PHEROMONE_A_DOWN_AHEAD, Input.PHEROMONE_A_UP_AHEAD],
   center: Input.PHEROMONE_A_CENTER,
   down: Input.PHEROMONE_A_DOWN,
   up: Input.PHEROMONE_A_UP,
@@ -72,6 +76,7 @@ const PHEROMONE_A_INPUTS: ScentInputs = {
 };
 const PHEROMONE_B_INPUTS: ScentInputs = {
   level: PHEROMONE_B_PAIR,
+  ahead: [Input.PHEROMONE_B_AHEAD, Input.PHEROMONE_B_DOWN_AHEAD, Input.PHEROMONE_B_UP_AHEAD],
   center: Input.PHEROMONE_B_CENTER,
   down: Input.PHEROMONE_B_DOWN,
   up: Input.PHEROMONE_B_UP,
@@ -89,6 +94,7 @@ const PHEROMONE_B_INPUTS: ScentInputs = {
 };
 const FOOD_SCENT_INPUTS: ScentInputs = {
   level: FOOD_SCENT_PAIR,
+  ahead: [Input.FOOD_SCENT_AHEAD, Input.FOOD_SCENT_DOWN_AHEAD, Input.FOOD_SCENT_UP_AHEAD],
   center: Input.FOOD_SCENT_CENTER,
   down: Input.FOOD_SCENT_DOWN,
   up: Input.FOOD_SCENT_UP,
@@ -106,6 +112,7 @@ const FOOD_SCENT_INPUTS: ScentInputs = {
 };
 const NEST_SCENT_INPUTS: ScentInputs = {
   level: NEST_SCENT_PAIR,
+  ahead: [Input.NEST_SCENT_AHEAD, Input.NEST_SCENT_DOWN_AHEAD, Input.NEST_SCENT_UP_AHEAD],
   center: Input.NEST_SCENT_CENTER,
   down: Input.NEST_SCENT_DOWN,
   up: Input.NEST_SCENT_UP,
@@ -123,6 +130,7 @@ const NEST_SCENT_INPUTS: ScentInputs = {
 };
 const COLONY_SCENT_INPUTS: ScentInputs = {
   level: [Input.COLONY_SCENT_LEFT, Input.COLONY_SCENT_RIGHT],
+  ahead: [Input.COLONY_SCENT_AHEAD, Input.COLONY_SCENT_DOWN_AHEAD, Input.COLONY_SCENT_UP_AHEAD],
   center: Input.COLONY_SCENT_CENTER,
   down: Input.COLONY_SCENT_DOWN,
   up: Input.COLONY_SCENT_UP,
@@ -140,9 +148,12 @@ const COLONY_SCENT_INPUTS: ScentInputs = {
 };
 
 function stereoPositions(ant: Ant): StereoPositions {
+  const ahead = headingToDirection(ant.heading);
   const left = headingToDirection(ant.heading + Math.PI / 4);
   const right = headingToDirection(ant.heading - Math.PI / 4);
   return {
+    aheadX: ant.x + ahead.dx,
+    aheadZ: ant.z + ahead.dz,
     leftX: ant.x + left.dx,
     leftZ: ant.z + left.dz,
     rightX: ant.x + right.dx,
@@ -214,6 +225,9 @@ function writeScentInputs(
   const sampling = { ctx, field, gain, owner };
   sampleInto(inputs, channels.level[0], sampling, positions.leftX, ant.y, positions.leftZ);
   sampleInto(inputs, channels.level[1], sampling, positions.rightX, ant.y, positions.rightZ);
+  sampleInto(inputs, channels.ahead[0], sampling, positions.aheadX, ant.y, positions.aheadZ);
+  sampleInto(inputs, channels.ahead[1], sampling, positions.aheadX, ant.y - 1, positions.aheadZ);
+  sampleInto(inputs, channels.ahead[2], sampling, positions.aheadX, ant.y + 1, positions.aheadZ);
   sampleInto(inputs, channels.center, sampling, ant.x, ant.y, ant.z);
   sampleInto(inputs, channels.down, sampling, ant.x, ant.y - 1, ant.z);
   sampleInto(inputs, channels.up, sampling, ant.x, ant.y + 1, ant.z);

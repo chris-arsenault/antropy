@@ -113,14 +113,13 @@ export const NEST_FIXTURE_SCENT = {
 
 /** Standing worker traffic in the mature authored nest. The fixture lays a
  * real owner-tagged pheromone-A trail along traversable air; normal trail
- * diffusion and evaporation take over after startup. */
+ * diffusion and evaporation take over after startup. The initial trace is not
+ * pre-diffused: doing so can create false local maxima away from the entrance. */
 export const AUTHORED_NEST_TRAIL = {
   /** Concentration at the entrance end of the seeded trail. */
   entranceStrength: 1.2,
   /** Air-path distance over which the initial concentration falls by e. */
   distanceScale: 18,
-  /** Ordinary diffusion passes representing traffic before the review begins. */
-  fixtureWarmupPasses: 30,
 } as const;
 
 /** Initial conditions supplied by the artificial mature nest fixture. */

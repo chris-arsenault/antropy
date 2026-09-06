@@ -2,6 +2,7 @@ import { randNormal, type Rng } from "../rng";
 import { COLONY_SEED } from "./seeds/colony";
 import { extendFunctionalSeed } from "./functionalSeed";
 import { buildColonySeed, colonySeedLocusGroups } from "./colonySeed";
+import { deserializeGenomeCopies } from "./genomeSerialization";
 import { HIDDEN_COUNT } from "./rnnShape";
 import { ENERGY } from "../tunables";
 import {
@@ -29,14 +30,21 @@ const PHYS = B_OUT + OUTPUT_COUNT;
 const PHYS_COUNT = 7;
 export const GENOME_LENGTH = PHYS + PHYS_COUNT;
 const LEGACY_INPUT_COUNT = 23;
-const LEGACY_W_REC = HIDDEN_COUNT * LEGACY_INPUT_COUNT;
-const LEGACY_GENOME_LENGTH =
-  LEGACY_W_REC +
-  HIDDEN_COUNT * HIDDEN_COUNT +
-  HIDDEN_COUNT +
-  OUTPUT_COUNT * HIDDEN_COUNT +
-  OUTPUT_COUNT +
-  PHYS_COUNT;
+const PREVIOUS_INPUT_COUNT = 105;
+
+function genomeLengthForInputs(inputCount: number): number {
+  return (
+    HIDDEN_COUNT * inputCount +
+    HIDDEN_COUNT * HIDDEN_COUNT +
+    HIDDEN_COUNT +
+    OUTPUT_COUNT * HIDDEN_COUNT +
+    OUTPUT_COUNT +
+    PHYS_COUNT
+  );
+}
+
+const LEGACY_GENOME_LENGTH = genomeLengthForInputs(LEGACY_INPUT_COUNT);
+const PREVIOUS_GENOME_LENGTH = genomeLengthForInputs(PREVIOUS_INPUT_COUNT);
 
 const PhysGene = {
   BODY_SCALE: 0,
@@ -375,20 +383,28 @@ function fixedSeedGenome(): Genome {
 // to evaluate candidate vectors through the real seed() noise pipeline.
 let runtimeSeedBase: ArrayLike<number> | null = null;
 
-/** Rebase pre-Appendix-F artifacts into the append-only wider input matrix.
+function inputCountForGenomeLength(length: number): number | null {
+  if (length === LEGACY_GENOME_LENGTH) return LEGACY_INPUT_COUNT;
+  if (length === PREVIOUS_GENOME_LENGTH) return PREVIOUS_INPUT_COUNT;
+  return null;
+}
+
+/** Rebase older artifacts into the append-only wider input matrix.
  * Existing input weights retain their loci; new channels begin disconnected. */
 function normalizedSeedBase(base: ArrayLike<number> | null): Float32Array | null {
   if (base === null) return null;
   if (base.length === GENOME_LENGTH) return Float32Array.from(base);
-  if (base.length !== LEGACY_GENOME_LENGTH) return null;
+  const sourceInputCount = inputCountForGenomeLength(base.length);
+  if (sourceInputCount === null) return null;
+  const sourceWeightEnd = HIDDEN_COUNT * sourceInputCount;
   const migrated = new Float32Array(GENOME_LENGTH);
   const sourceValues = Float32Array.from(base);
   for (let hidden = 0; hidden < HIDDEN_COUNT; hidden++) {
-    const source = hidden * LEGACY_INPUT_COUNT;
-    migrated.set(sourceValues.subarray(source, source + LEGACY_INPUT_COUNT), hidden * INPUT_COUNT);
+    const source = hidden * sourceInputCount;
+    migrated.set(sourceValues.subarray(source, source + sourceInputCount), hidden * INPUT_COUNT);
   }
-  for (let index = LEGACY_W_REC; index < LEGACY_GENOME_LENGTH; index++) {
-    migrated[W_REC + index - LEGACY_W_REC] = base[index];
+  for (let index = sourceWeightEnd; index < base.length; index++) {
+    migrated[W_REC + index - sourceWeightEnd] = base[index];
   }
   return migrated;
 }
@@ -528,16 +544,10 @@ export const rnnController: Controller = {
   },
 
   deserializeGenome(data) {
-    if (data.length !== GENOME_LENGTH && data.length !== GENOME_LENGTH * 2) {
-      throw new Error(
-        `rnn genome payload has length ${data.length}, expected ${GENOME_LENGTH} or ${GENOME_LENGTH * 2}`
-      );
-    }
-    const copies: Float32Array[] = [];
-    for (let offset = 0; offset < data.length; offset += GENOME_LENGTH) {
-      copies.push(data.slice(offset, offset + GENOME_LENGTH));
-    }
-    return { copies } as unknown as Genome;
+    const lengths = [GENOME_LENGTH, PREVIOUS_GENOME_LENGTH, LEGACY_GENOME_LENGTH];
+    return {
+      copies: deserializeGenomeCopies(data, lengths, normalizedSeedBase),
+    } as unknown as Genome;
   },
 
   serializeState(state) {

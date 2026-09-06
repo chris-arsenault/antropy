@@ -1,10 +1,9 @@
-import { type Ant } from "../../src/sim/ant";
-import { Input, Output, OUTPUT_COUNT } from "../../src/sim/controller/contract";
-import { getVoxelSafe, voxelIndex } from "../../src/sim/grid";
-import { Material } from "../../src/sim/materials";
-import { headingToDirection, verticalBandOffset } from "../../src/sim/movement";
-import { turnToward } from "../../src/sim/oracles/policies";
-import { type World } from "../../src/sim/world";
+import { type Ant } from "../ant";
+import { Output, OUTPUT_COUNT } from "../controller/contract";
+import { getVoxelSafe, voxelIndex } from "../grid";
+import { Material } from "../materials";
+import { headingToDirection, verticalBandOffset } from "../movement";
+import { type World } from "../world";
 import {
   coordinates,
   foodField,
@@ -12,9 +11,10 @@ import {
   nextMove,
   plannerFor,
   refreshPlanner,
+  type PathPoint,
   type PlannedMove,
   type Planner,
-} from "./pathingCeilingPlanner";
+} from "./omniscientPlanner";
 
 const OUT = new Float32Array(OUTPUT_COUNT);
 
@@ -31,7 +31,11 @@ function desiredBand(dx: number, dy: number, dz: number): -1 | 0 | 1 {
 }
 
 function pointToward(ant: Ant, dx: number, dz: number): void {
-  if (dx !== 0 || dz !== 0) OUT[Output.TURN] = turnToward(ant, ant.x + dx, ant.z + dz);
+  if (dx === 0 && dz === 0) return;
+  let relative = Math.atan2(dz, dx) - ant.heading;
+  relative = ((relative + Math.PI) % (2 * Math.PI)) - Math.PI;
+  if (relative < -Math.PI) relative += 2 * Math.PI;
+  OUT[Output.TURN] = Math.max(-1, Math.min(1, relative / (Math.PI / 4)));
 }
 
 function issueMove(ant: Ant, move: PlannedMove): void {
@@ -46,7 +50,7 @@ function issueMove(ant: Ant, move: PlannedMove): void {
   }
 }
 
-function faceFood(world: World, ant: Ant, food: number, hungry: boolean): boolean {
+function faceFood(world: World, ant: Ant, food: number): boolean {
   if (world.grid.data[food] !== Material.FOOD) return false;
   const point = coordinates(world, food);
   const dx = point.x - ant.x;
@@ -56,26 +60,20 @@ function faceFood(world: World, ant: Ant, food: number, hungry: boolean): boolea
   OUT[Output.VERTICAL_BIAS] = band;
   pointToward(ant, dx, dz);
   if (!aligned(ant, dx, dz) || verticalBandOffset(ant.verticalAttention) !== band) return true;
-  OUT[hungry ? Output.EAT : Output.DIG] = 1;
+  OUT[Output.DIG] = 1;
   return true;
 }
 
-function invalidateFood(planner: Planner, includeStored: boolean): void {
-  if (includeStored) planner.allFood = null;
-  else planner.externalFood = null;
-}
-
-function seekFood(world: World, ant: Ant, inputs: Float32Array, planner: Planner): void {
-  const hungry = inputs[Input.ENERGY] < 0.3;
-  let field = foodField(world, planner, hungry);
+function seekFood(world: World, ant: Ant, planner: Planner): void {
+  let field = foodField(world, planner);
   const current = voxelIndex(world.grid, ant.x, ant.y, ant.z);
   if (field.distance[current] === 0) {
-    if (!faceFood(world, ant, field.target[current], hungry)) invalidateFood(planner, hungry);
+    if (!faceFood(world, ant, field.target[current])) planner.externalFood = null;
     return;
   }
   let move = nextMove(world, field, current);
   if (move === null && refreshPlanner(world, planner)) {
-    field = foodField(world, planner, hungry);
+    field = foodField(world, planner);
     move = nextMove(world, field, current);
   }
   if (move !== null) issueMove(ant, move);
@@ -118,6 +116,7 @@ function actAtHome(world: World, ant: Ant): void {
 }
 
 function carryHome(world: World, ant: Ant, planner: Planner): void {
+  refreshPlanner(world, planner);
   const current = voxelIndex(world.grid, ant.x, ant.y, ant.z);
   if (planner.home.distance[current] === 0) {
     actAtHome(world, ant);
@@ -134,11 +133,33 @@ function carryHome(world: World, ant: Ant, planner: Planner): void {
   if (move !== null) issueMove(ant, move);
 }
 
-/** E2 rung-1 ceiling: omniscient routes, shared body, shared action tuple. */
-export function pathingCeilingOracle(world: World, ant: Ant, inputs: Float32Array): Float32Array {
-  OUT.fill(0);
-  const planner = plannerFor(world);
-  if (inputs[Input.CARRY_LOAD] > 0) carryHome(world, ant, planner);
-  else seekFood(world, ant, inputs, planner);
-  return OUT;
+export interface OmniscientForagerOptions {
+  /** Legal stances inside the nest from which the ant may deposit food. */
+  readonly homeGoals: readonly PathPoint[];
 }
+
+export type OmniscientForagerPolicy = (
+  world: World,
+  ant: Ant,
+  inputs: Float32Array
+) => Float32Array;
+
+/**
+ * A deliberately privileged diagnostic. It reads every food coordinate and
+ * the complete traversable topology, then drives the ordinary turn, thrust,
+ * vertical-band, and mandible outputs one planned lattice step at a time.
+ */
+export function makeOmniscientForager(
+  options: OmniscientForagerOptions | null = null
+): OmniscientForagerPolicy {
+  return (world, ant) => {
+    OUT.fill(0);
+    const planner = plannerFor(world, options?.homeGoals);
+    if (ant.carrying === Material.FOOD) carryHome(world, ant, planner);
+    else seekFood(world, ant, planner);
+    return OUT;
+  };
+}
+
+/** Historical harness ceiling: defaults to the open surface receiving area. */
+export const pathingCeilingOracle = makeOmniscientForager();

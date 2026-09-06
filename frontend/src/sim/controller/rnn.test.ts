@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRng } from "../rng";
 import { Input, INPUT_COUNT, Output } from "./contract";
-import { rnnController, zeroGenome } from "./rnn";
+import { GENOME_LENGTH, HIDDEN_COUNT, rnnController, zeroGenome } from "./rnn";
 
 function inputsWith(values: Partial<Record<number, number>>): Float32Array {
   const inputs = new Float32Array(INPUT_COUNT);
@@ -85,6 +85,22 @@ describe("rnnController", () => {
 });
 
 describe("rnn genome operations", () => {
+  it("migrates the prior 105-input genome layout with new receptors disconnected", () => {
+    const previousLength = GENOME_LENGTH - HIDDEN_COUNT * 15;
+    const serialized = new Float32Array(previousLength * 2);
+    serialized[0] = 0.75;
+    serialized[previousLength - 1] = -0.5;
+    serialized[previousLength] = -0.25;
+
+    const migrated = rnnController.serializeGenome(rnnController.deserializeGenome(serialized));
+
+    expect(migrated).toHaveLength(GENOME_LENGTH * 2);
+    expect(migrated[0]).toBe(0.75);
+    expect(migrated[105]).toBe(0);
+    expect(migrated[GENOME_LENGTH - 1]).toBe(-0.5);
+    expect(migrated[GENOME_LENGTH]).toBe(-0.25);
+  });
+
   it("mutates genomes without touching the source", () => {
     const rng = createRng(21);
     const genome = rnnController.seed(rng);

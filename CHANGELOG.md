@@ -4,11 +4,19 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
-- Repaired the programmed web colony against population-time outcomes rather than isolated
-  single-ant trips. The artificial mature nest can seed an owner-tagged, normally diffusing
-  entrance trail and provision its workers; surface food taxis now makes broad moving corrections
-  instead of tight circles. A bounded exact-world check and four-world harness panel cover exit,
-  sustained surface presence, food collection, loaded return, and repeated productive windows.
+- Reset the food-loop review to one immortal worker and restored a two-arm scenario selector. The
+  full-map arm knows all food coordinates and the legal 3D movement graph. The programmed arm is a
+  stateless function of the shipped local sensors: a movement-valid pheromone-A traffic trace leads
+  from its queen chamber to the entrance, natural food odor leads to food, and natural nest odor
+  leads home. Fifteen append-only forward chemoreceptor inputs let every controller sample the
+  directly ahead voxel in all three vertical bands. Strong vertical bias now selects a direct climb
+  while moderate bias selects a sloped step, and a carried food load unloads before the same
+  mandible action may collect another voxel. Matched harness runs 2460–2462 record five external
+  returns into the same queen-core neighborhood in all three worlds; the sensor arm finishes
+  1.8–6.9% faster than the pathfinding ceiling with no immediate turn reversals. The former
+  Appendix H policy and its passing population-ratio panel remain invalid after human review found
+  universal translated circles and severe nest-mouth congestion. The replacement still requires
+  direct human trajectory review before it becomes an RNN teacher.
 - Added a world-wide genetic identity that follows eggs into workers, males, queens, and stored
   sperm; real parent links, founder lines, offspring contribution, completed deaths, net-energy
   merit, retained founder genomes, and checkpoint version 22 replace mixed ant/patriline ids.

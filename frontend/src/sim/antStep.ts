@@ -16,12 +16,7 @@ const ORACLE_THINK_COST = 0.00008;
 function diagnosticOutputs(world: World, ant: Ant, inputs: Float32Array): Float32Array | null {
   const sensorPolicy = world.sensorPolicyOverride;
   if (!sensorPolicy) return world.policyOverride?.(world, ant, inputs) ?? null;
-  let policyState = world.sensorPolicyStates.get(ant.id);
-  if (policyState === undefined) {
-    policyState = sensorPolicy.createState();
-    world.sensorPolicyStates.set(ant.id, policyState);
-  }
-  return sensorPolicy.act(inputs, policyState);
+  return sensorPolicy.act(inputs);
 }
 
 function controllerOutputs(

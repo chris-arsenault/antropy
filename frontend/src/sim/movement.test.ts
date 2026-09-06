@@ -18,13 +18,16 @@ describe("headingToDirection", () => {
 });
 
 describe("stepCandidates", () => {
-  it("follows vertical stereo diagonally before using the shaft fallback", () => {
+  it("distinguishes direct vertical movement from a diagonal climb", () => {
     const down = stepCandidates(0, -0.9);
-    expect({ ...down[0] }).toEqual({ dx: 1, dy: -1, dz: 0 });
-    expect({ ...down[1] }).toEqual({ dx: 0, dy: -1, dz: 0 });
+    expect({ ...down[0] }).toEqual({ dx: 0, dy: -1, dz: 0 });
+    expect({ ...down[1] }).toEqual({ dx: 1, dy: -1, dz: 0 });
     const up = stepCandidates(0, 0.9);
-    expect(up[0]).toEqual({ dx: 1, dy: 1, dz: 0 });
-    expect(up[1]).toEqual({ dx: 0, dy: 1, dz: 0 });
+    expect(up[0]).toEqual({ dx: 0, dy: 1, dz: 0 });
+    expect(up[1]).toEqual({ dx: 1, dy: 1, dz: 0 });
+
+    expect(stepCandidates(0, 0.6)[0]).toEqual({ dx: 1, dy: 1, dz: 0 });
+    expect(stepCandidates(0, -0.6)[0]).toEqual({ dx: 1, dy: -1, dz: 0 });
   });
 
   it("walks forward-level first under a neutral bias", () => {

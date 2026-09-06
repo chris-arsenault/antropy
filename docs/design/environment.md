@@ -52,18 +52,24 @@ material can fade. Handling transfers colony odor to food, allowing cached and w
 chemically without a storage label.
 
 The artificial mature nest may also start with standing traffic. When `authoredNestTrail` is on,
-the fixture deposits owner-tagged pheromone A along traversable air paths from its worker stations
-to the entrance, then applies 30 ordinary diffusion and evaporation passes. The controller reads
-only local samples; the path is not exposed as a route or destination. The switch is off in the
-general Phase 2 world and on in authored-nest presets.
+the colony fixture deposits owner-tagged pheromone A along traversable air paths from its worker
+stations to the entrance. The initial trace is movement-valid and monotonic toward the entrance;
+runtime diffusion and evaporation begin after startup because pre-diffusing the fixture created
+false local maxima. The matched single-forager seeds only its one worker's queen-to-entrance trace.
+Food emits its ordinary food odor and the queen emits the ordinary nest odor; no food or larder
+route is written into pheromone A or B. These fields occupy ordinary air voxels, decay through
+ordinary physics, and are sampled only locally; the controller receives no route, destination,
+coordinate, or food bearing. The switch is off in the general Phase 2 world and on in these authored
+fixtures.
 
 These carriers replaced controller-side entrance timers, roominess tests, deposit latches, and
 cached-versus-wild bookkeeping. Their fallibility is load-bearing: fields can saturate, decay,
 wash out, lead through an unintended breach, or mark an abandoned nest.
 
-No new field or sensor was added for the current repair; the fixture uses an existing unlabeled
-pheromone carrier. Sky-connected light and entrance-sourced airflow remain deferred. Either would
-require its own physical source, cost, and interface review.
+No new field was added for the current repair. Fifteen append-only receptor channels sample each
+existing scent directly ahead at the level, lower, and upper bands, closing the gap between the two
+diagonal antennae without encoding a goal. Sky-connected light and entrance-sourced airflow remain
+deferred. Either would require its own physical source, cost, and interface review.
 
 Pathfinding algorithms have three instrumentation uses only: verify field connectivity, establish
 an omniscient viability ceiling, and measure realized route efficiency against a shortest path.
@@ -82,12 +88,13 @@ genome-derived production values and explicit per-world values only for logged e
 
 The current action resolver uses discrete vertical bands. The sensory interface exposes all bands
 in parallel rather than coupling perception to the selected action band. Yaw selects horizontal
-direction. When thrust points into solid, shared locomotion tries legal yaw alternatives by
-increasing angular distance, retains the resulting physical heading, and reverses only when every
-nearer direction is blocked. This contact rule knows neither goal nor destination. The shared
-mandible intent digs solid, picks up contacted cargo, or deposits a carried item into air according
-to local preconditions. The world never chooses the best dig face, cache, brood destination, or
-path for the ant.
+direction. A moderate vertical command prefers the forward slope sampled by the diagonal receptors;
+a near-maximal command prefers the directly vertical sample. When thrust points into solid, shared
+locomotion tries legal yaw alternatives by increasing angular distance, retains the resulting
+physical heading, and reverses only when every nearer direction is blocked. This contact rule knows
+neither goal nor destination. The shared mandible intent releases an existing food load before it
+may collect another voxel; otherwise local preconditions resolve excavation, pickup, and deposit.
+The world never chooses the best dig face, cache, brood destination, or path for the ant.
 
 <a id="environment-liabilities"></a>
 
@@ -140,22 +147,22 @@ brood, energy, or persistence is not pursued.
 
 ## Linear implementation order
 
-| ID     | Status    | Work and finish                                                                                                                                                                                                                                                              |
-| ------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ENV-01 | Delivered | Shared 3D voxel world, layered diggable materials, lattice locomotion, conserved spoil, flat-buffer sparse scent fields, food, deterministic world updates, and time-budgeted frame stepping.                                                                                |
-| ENV-02 | Delivered | Per-world feature gates, checkpointed configuration, independent lifecycle/construction/fixture switches, and genome-derived cargo-capacity defaults.                                                                                                                        |
-| ENV-03 | Delivered | Authored organic nest with one entrance, no hidden carve or uninterrupted central shaft, and a connected mix of slopes, verticals, horizontals, branches, joins, cycles, and chambers.                                                                                       |
-| ENV-04 | Delivered | Shared threshold-band action resolution, nearest-legal contact deflection, parallel vertical sensing, failed-dig cost, load-bearing excavation drop, and common cargo deposit semantics.                                                                                     |
-| ENV-05 | Delivered | Deep nest field, absorbed colony odor, contact-transferred food marking, parallel vertical samples, phasic readings, and the optional physical authored entrance trail are implemented. No controller receives a route or food bearing outside a carrier's physical horizon. |
-| ENV-06 | Backlog   | Implement capped standing-crop accumulation and rot as the low-population side of the food governor; attribute its resilience contribution before ordinary survival certification.                                                                                           |
-| ENV-07 | Backlog   | Admit existing microclimate, exposure, weather, seasons, and decay one at a time only when their owning colony or construction step is ready; remeasure the ledger cost after every admission.                                                                               |
-| ENV-08 | Backlog   | After fixed-genome colony continuity and then genetic variation/founding, re-enable excavation as optional expansion from the authored nest. Compare dug and authored worlds on colony ledgers.                                                                              |
-| ENV-09 | Backlog   | Revalidate construction through readable local policies and controllers: founding mark, dig/haul/cast/crowd behavior, cargo placement, and matter conservation. Shapes remain observations.                                                                                  |
-| ENV-10 | Backlog   | Test the smallest morphogenesis rule sets against functional ledgers and attach morphology distributions. Add a thermal stop template only if existing carriers warrant it.                                                                                                  |
-| ENV-11 | Backlog   | Admit traffic-keyed nest decay alone. First measure maintenance-as-use: occupied structure persists while an abandoned control collapses. Add repair behavior only if colony ledgers require it.                                                                             |
-| ENV-12 | Backlog   | Add threat activity and inter-colony liabilities after multiple sustainable colonies exist. Threat pressure scales with conspicuous activity and relaxes when colonies go quiet.                                                                                             |
-| ENV-13 | Backlog   | Add water, further soil heterogeneity, rain-accelerated decay, humidity, or carbon-dioxide carriers one mechanism at a time when a measured evolutionary question requires them.                                                                                             |
-| ENV-14 | Backlog   | Profile world subsystems at target scale; adopt lazy scent decay, event-scheduled tunnel decay, structure-of-arrays ant storage, WASM, or GPU acceleration only in measured bottleneck order.                                                                                |
+| ID     | Status    | Work and finish                                                                                                                                                                                                                                                                        |
+| ------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ENV-01 | Delivered | Shared 3D voxel world, layered diggable materials, lattice locomotion, conserved spoil, flat-buffer sparse scent fields, food, deterministic world updates, and time-budgeted frame stepping.                                                                                          |
+| ENV-02 | Delivered | Per-world feature gates, checkpointed configuration, independent lifecycle/construction/fixture switches, and genome-derived cargo-capacity defaults.                                                                                                                                  |
+| ENV-03 | Delivered | Authored organic nest with one entrance, no hidden carve or uninterrupted central shaft, and a connected mix of slopes, verticals, horizontals, branches, joins, cycles, and chambers.                                                                                                 |
+| ENV-04 | Delivered | Shared threshold-band action resolution, direct-versus-sloped vertical intent, nearest-legal contact deflection, parallel vertical sensing, failed-dig cost, load-bearing excavation drop, unload-before-collect mandible precedence, and common cargo deposit semantics.              |
+| ENV-05 | Delivered | Deep nest field, absorbed colony odor, contact-transferred food marking, parallel vertical and direct-ahead samples, phasic readings, and configurable physical authored entrance traffic are implemented. No controller receives a route or food bearing outside a carrier's horizon. |
+| ENV-06 | Backlog   | Implement capped standing-crop accumulation and rot as the low-population side of the food governor; attribute its resilience contribution before ordinary survival certification.                                                                                                     |
+| ENV-07 | Backlog   | Admit existing microclimate, exposure, weather, seasons, and decay one at a time only when their owning colony or construction step is ready; remeasure the ledger cost after every admission.                                                                                         |
+| ENV-08 | Backlog   | After fixed-genome colony continuity and then genetic variation/founding, re-enable excavation as optional expansion from the authored nest. Compare dug and authored worlds on colony ledgers.                                                                                        |
+| ENV-09 | Backlog   | Revalidate construction through readable local policies and controllers: founding mark, dig/haul/cast/crowd behavior, cargo placement, and matter conservation. Shapes remain observations.                                                                                            |
+| ENV-10 | Backlog   | Test the smallest morphogenesis rule sets against functional ledgers and attach morphology distributions. Add a thermal stop template only if existing carriers warrant it.                                                                                                            |
+| ENV-11 | Backlog   | Admit traffic-keyed nest decay alone. First measure maintenance-as-use: occupied structure persists while an abandoned control collapses. Add repair behavior only if colony ledgers require it.                                                                                       |
+| ENV-12 | Backlog   | Add threat activity and inter-colony liabilities after multiple sustainable colonies exist. Threat pressure scales with conspicuous activity and relaxes when colonies go quiet.                                                                                                       |
+| ENV-13 | Backlog   | Add water, further soil heterogeneity, rain-accelerated decay, humidity, or carbon-dioxide carriers one mechanism at a time when a measured evolutionary question requires them.                                                                                                       |
+| ENV-14 | Backlog   | Profile world subsystems at target scale; adopt lazy scent decay, event-scheduled tunnel decay, structure-of-arrays ant storage, WASM, or GPU acceleration only in measured bottleneck order.                                                                                          |
 
 <a id="environment-obe"></a>
 

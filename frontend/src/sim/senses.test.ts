@@ -223,6 +223,9 @@ const LOOPBACK_EXPECTED = Float32Array.from([
   0,
   0,
   0,
+  ...new Array(6).fill(0),
+  1,
+  ...new Array(8).fill(0),
 ]);
 
 function expectedLoopbackInputs(world: World, ant: Ant): Float32Array {

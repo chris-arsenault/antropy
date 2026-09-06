@@ -1,6 +1,13 @@
 import { type Ant } from "../../src/sim/ant";
+import { PROGRAMMED_COLONY_CONFIG } from "../../src/sim/config";
+import {
+  derivedColonySeedVector,
+  rnnController,
+  setRuntimeSeedBase,
+} from "../../src/sim/controller/rnn";
+import { buildAuthoredNestWorld } from "../../src/sim/nestWorld";
+import { colonyLoopOracle } from "../../src/sim/oracles/colonyLoop";
 import { stepWorld, type World } from "../../src/sim/world";
-import { scenarioById } from "../../src/ui/scenarios";
 
 export const PROGRAMMED_FORAGING_GATE = Object.freeze({
   ticks: 500,
@@ -175,7 +182,14 @@ export function measureForagingWorld(world: World, seed: number): ProgrammedFora
   return summarize(seed, observation);
 }
 
-/** Measure the unmodified programmed web scenario through population-time outcomes. */
+/** Preserve measurement of the rejected Appendix E policy outside the web UI. */
 export function measureProgrammedForaging(seed: number): ProgrammedForagingSummary {
-  return measureForagingWorld(scenarioById("programmed").build(seed), seed);
+  setRuntimeSeedBase(derivedColonySeedVector());
+  try {
+    const world = buildAuthoredNestWorld(seed, rnnController, PROGRAMMED_COLONY_CONFIG).world;
+    world.sensorPolicyOverride = colonyLoopOracle;
+    return measureForagingWorld(world, seed);
+  } finally {
+    setRuntimeSeedBase(null);
+  }
 }

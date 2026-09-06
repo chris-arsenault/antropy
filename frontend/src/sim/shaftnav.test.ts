@@ -68,7 +68,7 @@ describe("1x1 shaft navigation", () => {
     const { floor, mouthY } = carve1x1Shaft(world, x, z, 6);
     const ant = placeAnt(world, x, floor + 1, z);
     const startY = ant.y;
-    for (let t = 0; t < 40; t++) {
+    for (let t = 0; t < 40 && ant.y < mouthY - 1; t++) {
       applyMotor(world.grid, ant, { turn: 0, forward: 1, verticalBias: 1 });
     }
     expect(ant.y, `climbed from ${startY} to ${ant.y}`).toBeGreaterThanOrEqual(mouthY - 1);

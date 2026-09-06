@@ -42,13 +42,12 @@ export interface Controller {
 }
 
 /**
- * A diagnostic controller restricted to the shipped sensory interface.
- * The simulation owns one private state value per ant; the policy cannot
- * inspect ant identity, coordinates, or world state.
+ * A stateless diagnostic controller restricted to the shipped sensory
+ * interface. It cannot inspect ant identity, coordinates, world state, or
+ * facts retained from an earlier call.
  */
 export interface SensorPolicy {
-  createState(): unknown;
-  act(inputs: Float32Array, state: unknown): Float32Array;
+  act(inputs: Float32Array): Float32Array;
 }
 
 /** Expressed physical trait values consumed by the simulation systems. */
@@ -204,9 +203,27 @@ export const Input = {
   COLONY_SCENT_DOWN_RIGHT_CHANGE: 102,
   COLONY_SCENT_UP_LEFT_CHANGE: 103,
   COLONY_SCENT_UP_RIGHT_CHANGE: 104,
+  /** Directly-ahead chemoreception. The original diagonal antenna samples
+   * cannot observe a one-voxel passage continuing straight ahead. These local
+   * samples complete that physical blind spot in all three vertical bands. */
+  PHEROMONE_A_AHEAD: 105,
+  PHEROMONE_A_DOWN_AHEAD: 106,
+  PHEROMONE_A_UP_AHEAD: 107,
+  PHEROMONE_B_AHEAD: 108,
+  PHEROMONE_B_DOWN_AHEAD: 109,
+  PHEROMONE_B_UP_AHEAD: 110,
+  FOOD_SCENT_AHEAD: 111,
+  FOOD_SCENT_DOWN_AHEAD: 112,
+  FOOD_SCENT_UP_AHEAD: 113,
+  NEST_SCENT_AHEAD: 114,
+  NEST_SCENT_DOWN_AHEAD: 115,
+  NEST_SCENT_UP_AHEAD: 116,
+  COLONY_SCENT_AHEAD: 117,
+  COLONY_SCENT_DOWN_AHEAD: 118,
+  COLONY_SCENT_UP_AHEAD: 119,
 } as const;
 
-export const INPUT_COUNT = 105;
+export const INPUT_COUNT = 120;
 
 /**
  * Motor output layout (design spec §4). DIG manipulates terrain: it digs the

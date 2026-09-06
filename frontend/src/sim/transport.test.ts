@@ -83,6 +83,25 @@ describe("physical food transport (ADR-0006)", () => {
 });
 
 describe("physical food deposits (ADR-0006)", () => {
+  it("unloads an existing food load before collecting another one", () => {
+    const world = createWorld(7007);
+    const colony = foundColony(world);
+    const ant = antWithFood(world);
+    tryDig(world, ant, 0);
+    ant.x = colony.x + 1;
+    ant.y = colony.y;
+    ant.z = colony.z;
+    ant.heading = 0;
+    mutateVoxel(world, ant.x + 1, ant.y, ant.z, Material.FOOD);
+    const pickupsBefore = world.metrics.foodPickedUp;
+
+    tryDig(world, ant, 0);
+
+    expect(ant.carrying).toBeNull();
+    expect(world.metrics.foodPickedUp).toBe(pickupsBefore);
+    expect(getVoxel(world.grid, ant.x + 1, ant.y, ant.z)).toBe(Material.FOOD);
+  });
+
   it("converts a food deposit at the queen into stockpile and merit", () => {
     const world = createWorld(7003);
     const colony = foundColony(world);
