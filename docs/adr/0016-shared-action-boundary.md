@@ -1,6 +1,6 @@
 # 0016 — Shared physical action boundary
 
-- Status: Accepted
+- Status: Superseded by [0018](0018-bacterial-runtime.md); body preserved as ant interface history
 - Date: 2026-09-06
 
 ## Context

@@ -1,46 +1,37 @@
-import { type Checkpoint2D } from "./checkpoint";
-
-const DB_NAME = "antropy-2d";
-const STORE_NAME = "checkpoints";
-
-function requestResult<T>(request: IDBRequest<T>): Promise<T> {
+function open(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
+    const request = indexedDB.open("antropy-bacteria", 1);
+    request.onupgradeneeded = () => request.result.createObjectStore("checkpoints");
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed"));
+    request.onerror = () => reject(request.error);
   });
 }
-
-function openDatabase(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("IndexedDB open failed"));
-  });
-}
-
-export async function saveCheckpoint(checkpoint: Checkpoint2D): Promise<void> {
-  const database = await openDatabase();
+export async function saveLocal(text: string): Promise<void> {
+  const db = await open();
   try {
-    const request = database
-      .transaction(STORE_NAME, "readwrite")
-      .objectStore(STORE_NAME)
-      .put(checkpoint, "latest");
-    await requestResult(request);
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("checkpoints", "readwrite");
+      tx.objectStore("checkpoints").put(text, "latest");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
   } finally {
-    database.close();
+    db.close();
   }
 }
-
-export async function loadCheckpoint(): Promise<Checkpoint2D | null> {
-  const database = await openDatabase();
+export async function loadLocal(): Promise<string> {
+  const db = await open();
   try {
-    const request = database
-      .transaction(STORE_NAME, "readonly")
-      .objectStore(STORE_NAME)
-      .get("latest");
-    return (await requestResult<Checkpoint2D | undefined>(request)) ?? null;
+    return await new Promise<string>((resolve, reject) => {
+      const request = db.transaction("checkpoints").objectStore("checkpoints").get("latest");
+      request.onsuccess = () =>
+        typeof request.result === "string"
+          ? resolve(request.result)
+          : reject(new Error("No bacterial checkpoint saved"));
+      request.onerror = () => reject(request.error);
+    });
   } finally {
-    database.close();
+    db.close();
   }
 }

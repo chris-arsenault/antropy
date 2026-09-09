@@ -1,116 +1,69 @@
-import { cellIndex, getCell } from "./grid";
-import { Material } from "./materials";
-import { isInterior } from "./terrain";
-import { type Ant, type Economy, type World } from "./types";
+import { type World } from "./types";
+import { sample, stencil } from "./fields";
+import { basal } from "./movement";
+import { reserveCapacity } from "./config";
 
-export function createEconomy(): Economy {
-  return {
-    initial: 0,
-    grown: 0,
-    dissipated: 0,
-    metabolism: 0,
-    work: 0,
-    queenFed: 0,
-    broodFed: 0,
-    eaten: 0,
-    ageDeaths: 0,
-    starvationDeaths: 0,
-    broodDeaths: 0,
-    queenDeath: null,
-    movement: 0,
-    workerTicks: 0,
-    completedReturns: 0,
-    returnTicks: 0,
-    harvested: 0,
-  };
+export function absorb(world: World): void {
+  const c = world.config,
+    demand = new Float64Array(world.nutrient.length);
+  const requests = world.cells.map((cell) => {
+    const concentration = sample(world.nutrient, cell, c);
+    const quantity = Math.max(
+      0,
+      Math.min(
+        (c.uptakeRate * cell.mass * c.dt * concentration) / (concentration + c.nutrientK),
+        reserveCapacity(cell.mass, c) - cell.energy
+      )
+    );
+    const sites = stencil(cell, c);
+    for (const [i, w] of sites) demand[i] += quantity * w;
+    return { cell, quantity, sites };
+  });
+  const supply = world.nutrient.slice();
+  for (const { cell, quantity, sites } of requests)
+    for (const [i, w] of sites) {
+      const amount = quantity * w * Math.min(1, supply[i] / Math.max(demand[i], 1e-30));
+      world.nutrient[i] = Math.max(0, world.nutrient[i] - amount);
+      cell.energy += amount;
+    }
 }
-
-export function foodAt(world: World, x: number, y: number): number {
-  const material = getCell(world.grid, x, y);
-  if (material !== Material.AIR && material !== Material.CACHE) return 0;
-  return world.food.get(cellIndex(world.grid, x, y)) ?? 0;
-}
-
-export function storedFood(world: World): number {
-  let total = 0;
-  for (const [index, amount] of world.food) {
-    if (
-      isInterior(world.grid, index) &&
-      foodAt(world, index % world.grid.width, Math.floor(index / world.grid.width)) > 0
-    )
-      total += amount;
-  }
-  return total;
-}
-
-export function putFood(
-  world: Pick<World, "food" | "foodSources">,
-  index: number,
-  amount: number
-): void {
-  if (amount <= 0) return;
-  world.food.set(index, (world.food.get(index) ?? 0) + amount);
-  world.foodSources.add(index);
-}
-
-export function takeFood(world: World, index: number, requested: number): number {
-  const material = world.grid.cells[index];
-  if (material !== Material.AIR && material !== Material.CACHE) return 0;
-  const available = world.food.get(index) ?? 0;
-  const taken = Math.min(available, Math.max(0, requested));
-  const remaining = available - taken;
-  if (remaining > 0) world.food.set(index, remaining);
-  else {
-    world.food.delete(index);
-    world.foodSources.delete(index);
-  }
-  return taken;
-}
-
-export function spend(world: World, ant: Ant, requested: number, metabolic = false): void {
-  const amount = Math.min(Math.max(0, ant.energy), requested);
-  ant.energy -= amount;
-  world.economy.dissipated += amount;
-  if (metabolic) world.economy.metabolism += amount;
-  else world.economy.work += amount;
-  world.metrics.energySpent += amount;
-}
-
-export type ResourceContext = Pick<
-  World,
-  "grid" | "config" | "food" | "foodSources" | "renewableSources" | "economy"
->;
-
-export const resourceSystem = {
-  id: "food-regrowth",
-  version: 1,
-  phase: "resources" as const,
-  run: growFood,
-};
-
-export function growFood(world: ResourceContext): void {
-  for (const index of world.renewableSources) {
-    if (world.grid.cells[index] !== Material.AIR) continue;
-    const available = world.food.get(index) ?? 0;
+export function metabolize(world: World): void {
+  const c = world.config;
+  for (const cell of world.cells) {
+    const maintenance = Math.min(cell.energy, basal(cell, c));
+    cell.energy -= maintenance;
+    world.ledger.metabolism += maintenance;
+    const surplus = Math.max(0, cell.energy - c.protectedReserve * reserveCapacity(cell.mass, c));
     const growth = Math.max(
       0,
-      Math.min(world.config.foodRegrowth, world.config.sourceCapacity - available)
+      Math.min(
+        c.growthRate * cell.mass * c.dt,
+        2 * c.birthMass - cell.mass,
+        surplus * c.growthEfficiency
+      )
     );
-    putFood(world, index, growth);
-    world.economy.grown += growth * world.config.foodEnergyDensity;
+    cell.mass += growth;
+    cell.energy -= growth / c.growthEfficiency;
+    world.ledger.growthLoss += growth * (1 / c.growthEfficiency - 1);
   }
 }
-
-export function totalEnergy(world: World): number {
-  let total = world.queen.energy + world.queen.cargo * world.config.foodEnergyDensity;
-  for (const amount of world.food.values()) total += amount * world.config.foodEnergyDensity;
-  for (const ant of world.ants) total += ant.energy + ant.cargo * world.config.foodEnergyDensity;
-  for (const brood of world.brood) total += brood.energy + brood.investment;
-  return total;
+export function total(field: Float64Array): number {
+  return field.reduce((a, b) => a + b, 0);
 }
-
-export function energyResidual(world: World): number {
+export function balance(world: World): number {
+  const l = world.ledger;
+  const body = world.cells.reduce((sum, cell) => sum + cell.mass + cell.energy, 0);
   return (
-    world.economy.initial + world.economy.grown - world.economy.dissipated - totalEnergy(world)
+    l.initial +
+    l.supplied -
+    total(world.nutrient) -
+    body -
+    l.nutrientLoss -
+    l.metabolism -
+    l.motors -
+    l.secretion -
+    l.growthLoss -
+    l.division -
+    l.deathLoss
   );
 }

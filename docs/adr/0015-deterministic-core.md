@@ -1,6 +1,6 @@
 # 0015 — Deterministic, serializable simulation core
 
-- Status: Accepted
+- Status: Superseded by [0018](0018-bacterial-runtime.md); determinism retained, ant checkpoint details historical
 - Date: 2026-09-06
 
 ## Context

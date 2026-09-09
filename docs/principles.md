@@ -3,6 +3,11 @@
 This is the governing decision lens for Antropy. The archived source documents explain how these
 principles were derived; the [normalized design index](design/README.md) applies them to the work.
 
+The September 9 [bacterium decision](design/bacteria.md) replaces the ant work order. The current
+runtime implements a top-down resource ecology and the reviewed local RNN sensor/action contract.
+Ant-specific interfaces and examples below are historical. Authoring physical pressures, keeping
+controller decisions heritable, and measuring consequences remain governing principles.
+
 <a id="principles-goals"></a>
 
 ## Ordered goals
@@ -10,18 +15,20 @@ principles were derived; the [normalized design index](design/README.md) applies
 1. **Genuine evolution.** Build a persistent browser simulation where selection acting on
    heritable controllers produces behavior and colony organization. Do not author an interesting
    answer when the world can create pressure for evolution to earn it.
-2. **A living colony at scale.** Establish one colony near 2,000 workers that gathers and stores
-   food, survives on it, raises brood and replaces dead workers while remaining interactive.
-   Genetic work waits for this prerequisite; population remains resource-limited, not fixed.
+2. **An observable evolving population.** Establish local nutrient acquisition, paid movement,
+   growth, death and resource-funded division in top-down bacteria. Add inheritance and live
+   mutation directly after viable RNN reproduction. Measure interactive population capacity;
+   no fixed census or 2,000-ant gate precedes genetics.
 3. **Attributable work.** Every result has a named cause, every claim has measurement, and every
    structural change has human authorization.
 
 A task that serves none of these goals is not current work.
 
-The current prerequisite is [physical and runtime capacity for roughly 2,000 workers](design/colony-scale.md).
-Programmed and LGP controllers are implemented; RNN-specific plans are canceled. Human review
-remains required for changed physics and scale. No earlier spatial-world certification transfers
-across the substrate change.
+The current implementation follows the [bacterium world and sensor/action contract](design/bacteria.md).
+Initial reproduction and variation are measured; adaptation remains unproven and motion awaits review.
+The preserved ant implementation and canceled ant-RNN campaigns do not define the new RNN
+interface. Human review remains required for changed physics and motion. No ant certification
+transfers across the substrate change.
 
 <a id="principles-world"></a>
 

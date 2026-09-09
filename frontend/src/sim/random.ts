@@ -16,11 +16,6 @@ export function nextRandom(state: RandomState): number {
   return state.value / 0x1_0000_0000;
 }
 
-export function randomInt(state: RandomState, minimum: number, maximum: number): number {
-  if (maximum <= minimum) throw new Error("random range must be non-empty");
-  return minimum + Math.floor(nextRandom(state) * (maximum - minimum));
-}
-
 export function deterministicJitter(seed: number, tick: number, identity: number): number {
   let value = (seed ^ Math.imul(tick + 1, 0x45d9f3b) ^ Math.imul(identity, 0x27d4eb2d)) >>> 0;
   value ^= value >>> 16;

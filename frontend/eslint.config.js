@@ -50,8 +50,7 @@ const withEslint9ContextCompat = (rule) => ({
 
 export default tseslint.config(
   {
-    // seeds/ holds generated weight artifacts (ADR-0010) — data, not code.
-    ignores: ["dist/", "node_modules/", "coverage/", "src/sim/controller/seeds/"],
+    ignores: ["dist/", "node_modules/", "coverage/"],
   },
 
   {
@@ -134,61 +133,40 @@ export default tseslint.config(
         "error",
         {
           paths: [
-            { name: "react", message: "src/sim is pure: no React (ADR-0001)." },
-            { name: "react-dom", message: "src/sim is pure: no React (ADR-0001)." },
+            { name: "react", message: "src/sim is pure: no React (ADR-0018)." },
+            { name: "react-dom", message: "src/sim is pure: no React (ADR-0018)." },
           ],
           patterns: [
             {
-              group: ["**/render/**", "**/ui/**", "**/persist/**"],
-              message: "src/sim must not import outer layers (ADR-0001).",
+              group: ["**/ui/**", "**/persist/**"],
+              message: "src/sim must not import outer layers (ADR-0018).",
             },
           ],
         },
       ],
       "no-restricted-globals": [
         "error",
-        { name: "window", message: "src/sim is DOM-free (ADR-0001)." },
-        { name: "document", message: "src/sim is DOM-free (ADR-0001)." },
+        { name: "window", message: "src/sim is DOM-free (ADR-0018)." },
+        { name: "document", message: "src/sim is DOM-free (ADR-0018)." },
       ],
       "no-restricted-properties": [
         "error",
         {
           object: "Math",
           property: "random",
-          message: "Use the world's seeded rng (ADR-0002).",
+          message: "Use the world's seeded rng (ADR-0018).",
         },
         {
           object: "Date",
           property: "now",
-          message: "src/sim is deterministic: no wall clock (ADR-0002).",
+          message: "src/sim is deterministic: no wall clock (ADR-0018).",
         },
       ],
       "no-restricted-syntax": [
         "error",
         {
           selector: "NewExpression[callee.name='Date']",
-          message: "src/sim is deterministic: no wall clock (ADR-0002).",
-        },
-      ],
-    },
-  },
-
-  {
-    files: ["src/render/**/*.ts"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [
-            { name: "react", message: "src/render draws; React lives in src/ui (ADR-0001)." },
-            { name: "react-dom", message: "src/render draws; React lives in src/ui (ADR-0001)." },
-          ],
-          patterns: [
-            {
-              group: ["**/ui/**", "**/persist/**"],
-              message: "src/render must not import ui or persist layers (ADR-0001).",
-            },
-          ],
+          message: "src/sim is deterministic: no wall clock (ADR-0018).",
         },
       ],
     },

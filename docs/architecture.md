@@ -1,92 +1,88 @@
 # Architecture
 
-Antropy is a static browser application. The simulation is deterministic and DOM-free; React owns
-control flow around it, and Canvas renders a read-only view of its state.
+Antropy is a static browser application. The deterministic, DOM-free bacterial kernel runs in
+both the browser and Node harness. React controls pacing and inspection; Canvas reads world state.
+The [bacteria contract](design/bacteria.md) defines the current substrate. Ant architecture is
+preserved at tag `ant-colony-checkpoint-2026-09-09`.
 
-## Layer boundaries
+## Ownership
 
-| Layer | Path | Responsibility |
-| --- | --- | --- |
-| Simulation | `frontend/src/sim/` | Grid, world generation, fields, sensing, actions, policies, metrics |
-| Persistence | `frontend/src/persist/` | Versioned 2D checkpoint serialization, IndexedDB, file transfer |
-| UI | `frontend/src/ui/` | Canvas rendering, controls, inspector, pacing |
-| Harness | `frontend/harness/` | Comparative runs and SQLite evidence |
+| Module | Responsibility |
+| --- | --- |
+| `sim/config.ts`, `types.ts`, `world.ts` | Resolved parameters, durable world shape, initialization and step order |
+| `sim/fields.ts`, `geometry.ts`, `spatial.ts` | Periodic transport and sampling, body geometry and local contact lookup |
+| `sim/sensors.ts`, `controller/rnn.ts` | Local observation and receptor adaptation; float32 inference and genome variation |
+| `sim/movement.ts`, `resources.ts`, `reproduction.ts` | Paid efforts, proportional uptake, metabolism, local division and death |
+| `sim/events.ts`, `stats.ts` | Logged diagnostic overrides, events and accounting summaries |
+| `persist/` | Validated bacterial checkpoints, IndexedDB and local file transfer |
+| `ui/` | Canvas, camera, pacing, stats and individual inspection |
+| `harness/` | Comparative runs, spatial traces, saved checkpoints and SQLite evidence |
 
-The simulation imports no React, DOM, UI, persistence, or harness modules. UI and harness callers
-may inspect simulation state. Diagnostic interventions are explicit; production controller actions
-resolve through the shared physical boundary.
+Simulation modules import no UI, DOM, persistence or harness code. Physics calls the controller
+interface without interpreting weights. The RNN receives an observation and private state, never
+the world. Genome encoding and mutation stay inside the controller; checkpoint validation preserves
+the exact encoding and scalar precision through controller-owned codecs. The physical interface
+owns sensor/action types; a static controller adapter owns brain implementation and inspection.
+There is no runtime plugin registry or alternate substrate. See [ADR 0018](adr/0018-bacterial-runtime.md).
 
-## Runtime composition
+## Kernel order
 
-The [modular runtime design](design/modular-runtime.md) records the independent SOLID/DRY and
-systems audits, contracts and limitations. A small typed kernel executes statically registered
-resources, chemistry, actors and lifecycle systems in explicit order. The composition root binds
-phase contexts; feature implementations own their registrations. World construction, controller
-adapters and checkpoint codecs are separate.
+A world step executes supply and field transport, then every cell's observation and RNN inference
+against the same chemical snapshot. Paid motion and contact resolution precede local secretion.
+Simultaneous uptake divides limited nutrient proportionally among overlapping requests. Maintenance
+and growth precede contact correction, death and local division. Daughters first act next tick.
 
-Configuration resolves independent environment mechanisms and per-world chemistry. Presets are
-conveniences at the browser/harness boundary, never physical branch conditions.
+Movement reserves basal maintenance before allocating motor and secretion expenditure. Body reserves,
+biomass, environmental nutrient, external input and losses form an explicit resource balance.
+Emitted chemical has a separate concentration/decay balance and cannot be eaten.
 
-## Simulation core
+The world uses float64 resource fields and physical quantities; observations, weights and hidden state
+use float32. Integer ticks, stable iteration, deterministic body perturbations and persisted random
+streams make checkpoint continuation reproducible. Source schedules, body initialization/division
+and genetic variation each have a separate persisted stream, so genetic draws cannot change
+physical headings, placement or food schedules independently of inherited behavior.
 
-The current review world is a 2,048 × 512 X/Y cell lattice. Y is height. Foreground and backing
-materials represent heterogeneous ground, exposed chamber walls and connected surface tiers.
-A compact six-room nest leaves substantial unused soil. The original layout remains a reference
-fixture on this same substrate. A seed determines terrain variation and distributed food.
-The material grids, five chemical fields, variable worker
-population, queen, staged brood, food quantities, PRNG state and economy are serializable. Integer ticks and deterministic iteration make
-checkpoint continuation reproducible.
+## Controllers and inheritance
 
-The default world runs the frozen task-register RNN; programmed controls remain selectable.
-Turning consumes a tick; translation attempts
-one adjacent unoccupied legal cell. Mandibles pick up or release a bounded food quantity one cell
-forward. Workers eat physical food and feed contacted queens or larvae over an occluded two-cell
-reach. Their reserves pay for work and upkeep. Queen-funded eggs and locally fed larvae become
-pupae and adults; starvation and age remove workers. See the [colony contract](design/programmed-colony.md)
-for the conservation equation and development rules.
+A dense 15-input, 16-unit recurrent network produces propulsion, steering, secretion, candidate task
+byte and byte-write gate. All 597 weights and biases are heritable. Founder weights encode a small
+nutrient response; there is no controller fallback, pathfinder or task dispatcher.
 
-## Controller boundary
-
-The navigation policies receive a 33-value current-frame vector. The colony policy additionally
-receives local contact observations, neighboring fresh-air concentrations and body reserve/crop quantities. It contains body-relative openness;
-center concentrations and signed adjacent contrasts for food odor, deep nest odor, and two
-pheromones; immediate food and cache contact; carried load; attenuated light; and deterministic individual
-variation. The stateless programmed policy has no reference to the world. The map-aware diagnostic
-receives the world only in its quarantined policy module, computes a shortest path, then emits the
-same action shape as local policies.
-
-The historical generic controller contract exposes `seed`, `act`, `mutate`, `recombine`, and inspection for the historical RNN. The current runtime adapter centralizes state creation, validation and
-inspection. Persistence still uses registered models and Float32 state; arbitrary genome opacity
-is a remaining boundary, not an implemented claim.
-
-Imported registered colony models add a private byte, a learned task-write head and optional
-sensory gains to a shared 64-unit recurrent actor. Eight values are used in the current study;
-their meanings are unconstrained at runtime. Private command history and seeded sampling state
-remain per worker. The programmed colony writes its existing decision mode for monitoring.
+At resource-funded division the parent is replaced by two daughters. Each inherits independently
+mutated weights, empty recurrent state and task byte, and locally initialized receptor baselines.
+The world preserves organism ancestry and genotype ancestry. Diagnostic competition runs sample
+genomes for measurement; they never select reproduction in a living population.
 
 ## Browser and persistence
 
-React owns scenario selection, seed selection, pacing, field-layer visibility, checkpoint
-controls, live charts, ratios, effective configuration, and the creature inspector. The Canvas
-projection uses a two-axis camera with anchored zoom, pan, fit controls and a minimap,
-and draws the material cross-section, quantified food, selected fields, oriented workers,
-carried-load color, queen reserve and brood stages. It
-does not create simulation state.
+The browser creates the same default configuration as the harness: seed 101, 48 founders, persistent
+nutrient patches, mutation on. It starts paused at tick zero and does not silently restore a saved
+run. Run and always-visible stats expose the experiment. Green nutrient and magenta chemical layers
+are enabled, with drag pan, wheel zoom, fit and cell selection.
 
-Checkpoint version 9 declares `dimension: "2d"`, stores foreground/backing cells and actual nest
-geometry without regenerating the map, records resolved environment/chemistry and ordered mechanism
-versions and independent nest-generation seed, separates food quantity from nutritional energy,
-and stores imported registered models plus each worker's numeric register, recurrent state,
-command history and private random stream. Import rejects every other shape rather than
-guessing at a migration. Browser storage is IndexedDB; file export is local to the user.
+Checkpoint version 2 declares substrate `bacteria-xy`. It preserves fields, source state, resolved
+configuration, PRNG streams, all live body/receptor/brain states, genome and organism ancestry,
+resource ledgers, recent diagnostic events, durable manual intervention history and stop reason.
+Import validates physical parameter relationships, matching body/ancestry records and lifetimes,
+controller-owned encodings and resource balances. It rejects version 1 and ant files rather than
+inventing missing history or random state. IndexedDB uses a separate bacterial database.
+No backend or hosted data transfer is involved.
 
-## Measurement harness
+## Measurements and limits
 
-The harness runs outside Vitest and writes summaries with seed, parameters, commit state, elapsed
-time, and outcome to `frontend/harness/ledger.db`. The colony harness measures population, queen reserves, staged brood, food transfers, deaths,
-births and energy conservation, including matched deprivation. The retained forager panel measures the
-map-aware, programmed, and recurrent arms for five complete food round trips in identical
-randomized worlds. Unit tests cover bounded mechanics, not campaign outcomes.
+The harness records configuration, seed, source digests before/after execution, elapsed time, outcomes and sampled trajectories
+in local artifacts and the retained SQLite ledger. Old rows keep their ant identities. Bounded tests
+cover mechanics and integration; ecological outcomes are in [the results record](design/bacteria-results.md).
+Competition artifacts embed both compared genome encodings and hashes, source-checkpoint hash and
+source interventions. A filename alone is not the identity of an experiment. The visible stats
+mark runs with manual interventions as diagnostic even after recent events have rolled over.
+
+Each mounted view owns one resize observer and reusable Canvas/raster buffers. Camera changes
+reuse the field image; only field ticks, layer changes or a replaced world invalidate it.
+
+The contact model uses bounded displacement and four local separation passes, not a rigid-body
+constraint solver. Long-run ancestry retention grows with births. The 2,000-cell load probe falls
+below 30 ticks/s on the measured host; no browser throughput or visual certification is claimed.
 
 ## Deployment
 

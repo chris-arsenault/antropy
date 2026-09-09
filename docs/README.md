@@ -2,15 +2,15 @@
 
 ## Start here
 
-Current implementation: [colony knowledge and linear genetic programs](design/colony-knowledge.md).
-RNN-specific work is canceled. [Capacity measurements and physical settling](design/settling.md)
-are implemented for review. [Digging and colony relocation](design/construction.md) now add
-physical spoil, queen transport and multiple cache sites. [Autonomous construction pressures](design/construction-pressures.md)
-add temperature, moisture, brood transport and controller-selected work without manual orders.
-[Collective work and behavior observability](design/collective-work.md) now add persistent local
-worksites, spoil handoff, ant-authored recruitment and measured repairs for wasted food trips.
-Visual review and nursery throughput precede further progress toward
-[a sustainable 2,000-ant colony](design/colony-scale.md) before genetics.
+Current direction: [top-down bacteria with heritable RNN controllers](design/bacteria.md).
+The reviewed sensor/action contract is implemented. The browser starts bacteria paused at tick zero,
+with live mutation enabled. [Initial measurements and limits](design/bacteria-results.md) record
+reproduction, inherited variation, mixed adaptation results and capacity. Human visual review is pending.
+The ant checkpoint is preserved at `780fa4e`, tagged `ant-colony-checkpoint-2026-09-09`.
+The new [work order](design/README.md) supersedes ant construction and the 2,000-worker gate.
+Ant-specific documents below retain historical designs and measurements. The architecture and
+development guides describe the bacterial runtime.
+Canceled ant-RNN campaigns remain historical; the new bacterium RNN is a separate contract.
 
 | Need                                                | Document                                                 |
 | --------------------------------------------------- | -------------------------------------------------------- |
@@ -46,6 +46,7 @@ rejected or deferred ideas; they are not a parallel implementation plan.
 
 ## Normalized design and roadmap
 
+- [Preserved ant work order](design/README.md#design-ant-history)
 - [Work categories](design/README.md#design-categories)
 - [Status vocabulary](design/README.md#design-status)
 - [Current boundary](design/README.md#design-current)
@@ -143,6 +144,7 @@ rejected or deferred ideas; they are not a parallel implementation plan.
 
 ## Feature backlog
 
+- [Current bacterial work](backlog.md#backlog-bacteria)
 - [Living colony and resilience](backlog.md#backlog-colony)
 - [Evolution readiness](backlog.md#backlog-evolution)
 - [Evolved environment and morphogenesis](backlog.md#backlog-morphogenesis)
@@ -161,4 +163,6 @@ rejected or deferred ideas; they are not a parallel implementation plan.
 | Changelog                  | [../CHANGELOG.md](../CHANGELOG.md)     |
 | Agent guide                | [../AGENTS.md](../AGENTS.md)           |
 
-The [modular runtime design](design/modular-runtime.md) records the architecture audit, plugin boundaries and controlled environment configuration.
+The [modular runtime design](design/modular-runtime.md) preserves the ant architecture audit.
+Current boundaries follow [ADR 0018](adr/0018-bacterial-runtime.md) and the
+[bacterial architecture](architecture.md).

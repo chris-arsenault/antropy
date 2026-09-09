@@ -9,11 +9,9 @@ Canvas SPA and deployed on the Ahara platform.
 | ---------------------- | -------------------------------------------------------------------------------- |
 | Governing principles   | [docs/principles.md](docs/principles.md)                                         |
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
-| Canonical 2D contract  | [docs/design/2d-migration.md](docs/design/2d-migration.md)                       |
-| Controller design      | [docs/design/controller.md](docs/design/controller.md)                           |
-| Environment design     | [docs/design/environment.md](docs/design/environment.md)                         |
-| Experiment design      | [docs/design/experimentation.md](docs/design/experimentation.md)                 |
-| Certification status   | [docs/certifications.md](docs/certifications.md)                                 |
+| Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
+| Current measurements | [docs/design/bacteria-results.md](docs/design/bacteria-results.md) |
+| Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
 | Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
 | Architecture decisions | [docs/adr/README.md](docs/adr/README.md)                                         |
@@ -22,78 +20,49 @@ Canvas SPA and deployed on the Ahara platform.
 
 ## Current goal and boundary
 
-Next priority is [a sustainable colony near 2,000 workers](docs/design/colony-scale.md), before
-genetics. The [programmed and linear-GP controllers](docs/design/colony-knowledge.md) are implemented.
-The controlled-queen implementation shares ant actions and private controller state, with explicit
-adjacent egg laying. The user has resumed [surplus-driven growth](docs/design/surplus-growth.md).
-Resolve measured food delivery and nursery constraints before increasing population scale.
-The ten-cell excavation result was rejected. The immediate target is
-[sustained chamber excavation](docs/design/chamber-excavation.md) that doubles the default nest
-from 148 to at least 296 connected underground cells through worker actions. Do not substitute
-population growth, tiny cuts or passing mechanics tests for this result.
-Inspect startup configuration instead of running browser assays.
-The browser opens programmed ants on compact terrain, paused at tick zero; the LGP seed is selectable.
-The user reviews through Run and the stats panel. Set the world conditions, camera, layers and
-pacing needed for review as defaults; never require dropdown, layer or import operations to reveal
-the behavior being reviewed. Retain existing controls for future use. The current default begins
-at normal material temperatures, with visible temperature, a colony close-up and Metrics open with a
-30 ticks/s target and measured throughput. The September 8 visual review failed after about
-18,000 ticks. The subsequent food-pack and scattered-digging rejection is tracked in
-[collective work](docs/design/collective-work.md). Follow its event and spatial evidence before scaling.
-Shared colony knowledge, ant-selected terrain routes, direct movement and an opaque task byte are
-authorized abstractions. Every worker still pays physical action costs and has private state.
+Current work is [top-down bacteria with heritable RNN controllers](docs/design/bacteria.md).
+The September 9 user decision supersedes the ant work order: first design sensors and actions,
+then convert the runtime. The reviewed design is implemented, including live inheritance and mutation.
+Sulion plan `d805a90c-31e7-4f20-8fb1-5b2c05d9b417` tracks the conversion and initial comparisons.
+Viable reproduction is measured; reliable adaptation remains unproven. Human motion review is next.
+The architecture correction follows [ADR 0018](docs/adr/0018-bacterial-runtime.md): checkpoint v2,
+separate environment/body/genetic random streams, controller-owned codecs, durable intervention
+provenance and matched body/ancestry invariants. Initial v1 comparisons are historical; do not
+silently upgrade their checkpoints or treat their seeded trajectories as current.
 
-Workers forage, store and consume food, feed queen and larvae, and die. Funded eggs, larvae and
-pupae produce replacement workers. Population is resource-limited; founder count is initialization,
-never a census target. The matched compact programmed/LGP runs sustain 20 workers with 57 births
-through 48,000 ticks. This does not establish capacity for 2,000 workers or future genetic viability.
+The ant runtime is preserved at commit `780fa4e`, annotated tag
+`ant-colony-checkpoint-2026-09-09`, pushed to origin. Bacteria have replaced it in the browser.
+Its physical lifecycle, programmed/LGP controllers and sustained excavation are historical evidence.
+Ant construction, the 2,000-worker prerequisite and canceled ant-RNN training campaigns are not
+the new work order. Do not resume old neural experiments or apply their interfaces to bacteria.
 
-Capacity/performance measurements and Y-axis settling are implemented in
-[the settling milestone](docs/design/settling.md). [Construction and relocation](docs/design/construction.md)
-now add local digging, conserved spoil, queen carrying and multiple cache sites.
-[Autonomous construction pressures](docs/design/construction-pressures.md) extend them with
-brood carrying, material temperature/moisture and spoilage. Programmed/LGP ants select work from
-observations; browser requests are optional diagnostics. Human review remains required for changed
-motion. Both adult castes grip backing and nearby solids; unsupported adults, brood and loose food
-settle downward through the same material grid.
-Do not merely increase initial population or speed up laying without food, care and space budgets.
-The September 8 collective-work decision permits ant-authored local work recruitment on pheromone B.
-Preserve the cellular map, configurable surface tiers and pan/zoom.
+The bacterium has tonic/phasic nutrient and released-chemical readings, local spatial
+contrasts, body/contact sensors, a small float32 RNN, private recurrent state and an inspectable
+opaque task byte. Physical swimming, turning and chemical release have costs; uptake, growth,
+death and division are local physiology. Offspring inherit weights and receive mutations at
+resource-funded division. No fitness scorer, central reproduction selector or prescribed task
+sequence enters the living population. Genetic implementation follows the viable body/controller
+loop directly, without another colony-scale or ecology prerequisite.
 
-RNN-specific plans are canceled, not paused for another training attempt. The
-[task-memory results](docs/design/task-memory.md), [nest transfer](docs/design/nest-generalization.md)
-and [recovery audit](docs/design/training-recovery.md) retain historical successes, failures and
-artifacts. They do not govern current implementation or browser defaults. Do not resume a saved
-training coordinator, evaluate pending neural candidates or require RNN certification.
+There is one top-down XY world. Recover the ant substrate from its tag; do not maintain two runtime
+modes or translate old checkpoints. The bacteria contract governs current work. No queen, digging,
+backing, vertical gravity, shared map or route service is part of the bacterial interface.
 
-Reproductive inheritance, live mutation and selection remain deferred until the scale milestone
-and a separate genetics decision. Existing LGP variation hooks do not implement those systems.
-Brood transport is implemented; nursery throughput remains a scale prerequisite. Collapse, seasons,
-flooding and gas exchange remain backlog. Microclimate is active under the approved construction design.
-Do not add the whole ecology package before reaching scale.
-
-The [modular runtime](docs/design/modular-runtime.md) retains a static typed kernel and sequential
-physical resolution. Profile before further architecture changes. Current checkpoint version 19
-stores actual foreground/backing terrain, full configuration, resources, lifecycle, colony knowledge,
-routes, task bytes, private registers, construction requests, partial work, spoil, caches, queen
-carrier, brood loads, climate fields/budgets, timestamped site observations, private worksite memory,
-bounded behavior events, full queen controller state, the original nest-area denominator and the LGP genome. Historical checkpoint versions and
-retired 3D certification do not describe current runtime capabilities.
+The user reviews through Run and stats. Keep review conditions as tick-zero paused defaults,
+retain useful camera/pacing controls, and inspect startup configuration instead of running browser
+assays. Start a development server only on explicit request. Current generated experiment dumps
+remain local; the preserved commit contains the ledger and test-required model, not every dump.
 
 ## Critical rules
 
-- The 2D X/Y cross-section is the only runtime substrate. Do not add a spatial depth coordinate, a
+- The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Shared-knowledge controllers follow colony-knowledge.md. The local-only restrictions below apply
-  to historical controller comparisons.
-- Author physical pressures and local carriers, not answers. Historical production controllers may sense
-  local openness, local chemical concentration and contrast, contact, carried load, light, and
-  deterministic individual variation. They may not receive coordinates, a bearing, a chosen
-  destination, or a hidden route.
-- The map-aware controller is a named harness and UI diagnostic. It may inspect the map to measure
-  a ceiling, but it acts through the same turn, move, and mandible resolver as every other
-  controller and may never enter an evolving population.
+- Author physical pressures and local carriers. Controllers receive fifteen local chemical,
+  body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
+  destination, hidden route, lineage identity or reproductive score.
+- RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
+  never select parents, filter mutants or promote a replacement founder automatically.
 - Measurements outrank plans and historical appendices. Documents under
   [docs/sources/](docs/sources/README.md) preserve provenance and rejected work; they do not govern
   current implementation.
@@ -101,9 +70,9 @@ retired 3D certification do not describe current runtime capabilities.
   the claimed outcome, stop tuning and record a structural finding.
 - Human review is a real gate for motion. Ratios and final counts cannot certify circling, jitter,
   congestion, or other visibly broken trajectories.
-- Treat the controller as a pluggable module behind `seed`, `act`, `mutate`, `recombine`, and
+- Treat the controller as a pluggable module behind `seed`, `createState`, `act`, `mutate`, `recombine`, and
   `genomeDistance`. Code outside a controller does not inspect genome internals.
-- Keep Vitest bounded to deterministic mechanics and integration invariants. Multi-trip and
+- Keep Vitest bounded to deterministic mechanics and integration invariants. Ecological and
   long-horizon results belong in `frontend/harness/ledger.db`.
 - Use pnpm, TypeScript, React, Canvas, and Vitest. ESLint limits complexity to 10, files to 400
   lines, and functions to 75 lines.
@@ -118,7 +87,7 @@ retired 3D certification do not describe current runtime capabilities.
 
 | Path                        | Purpose                                                               |
 | --------------------------- | --------------------------------------------------------------------- |
-| `frontend/src/sim/`         | Deterministic 2D world, sensing, action resolution, and policies      |
+| `frontend/src/sim/`         | Deterministic bodies, fields, sensing, RNN, resource economy and inheritance |
 | `frontend/src/ui/`          | Canvas view, field controls, charts, inspector, and simulation pacing |
 | `frontend/src/persist/`     | Current 2D checkpoints, IndexedDB, and file import/export             |
 | `frontend/harness/`         | Comparative measurements and committed SQLite ledger                  |
@@ -132,8 +101,9 @@ retired 3D certification do not describe current runtime capabilities.
 | `make ci`                                        | Lint, format check, typecheck, bounded tests, docs, and Terraform format |
 | `make build`                                     | Production SPA build                                                     |
 | `make deploy`                                    | Parameterless local deploy script                                        |
-| `cd frontend && pnpm harness forager-comparison` | Run the matched 2D food-return panel                                     |
-| `cd frontend && pnpm harness train-rnn`          | Regenerate the experimental RNN seed from local frames                   |
+| `cd frontend && pnpm harness bacteria` | Run live bacterial ecology and save evidence |
+| `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
+| `cd frontend && pnpm harness bacteria-capacity` | Measure a 2,000-cell initialization load probe |
 | `cd frontend && pnpm harness recent`             | Read recent ledger rows                                                  |
 | `cd frontend && pnpm harness sql "..."`          | Query the measurement ledger                                             |
 | `cd frontend && pnpm run dev`                    | Local server, only when explicitly requested                             |

@@ -1,59 +1,56 @@
-import { useRef, useState } from "react";
-import { createCheckpoint, restoreCheckpoint } from "../persist/checkpoint";
-import { loadCheckpoint, saveCheckpoint } from "../persist/db";
-import { downloadCheckpoint, readCheckpoint } from "../persist/file";
+import { useState } from "react";
 import { type World } from "../sim/types";
+import { checkpointToJson, restoreWorld } from "../persist/checkpoint";
+import { loadLocal, saveLocal } from "../persist/db";
 
 export function PersistenceControls({
   world,
   onRestore,
 }: {
-  readonly world: World;
-  readonly onRestore: (world: World) => void;
+  world: World;
+  onRestore: (world: World) => void;
 }) {
-  const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
-
-  const save = async () => {
-    await saveCheckpoint(createCheckpoint(world));
-    setMessage("Saved locally");
-  };
-  const load = async () => {
-    const checkpoint = await loadCheckpoint();
-    if (!checkpoint) return setMessage("No local checkpoint");
-    onRestore(restoreCheckpoint(checkpoint));
-  };
-  const importFile = async (file: File | undefined) => {
-    if (!file) return;
+  const run = async (operation: () => Promise<void>) => {
     try {
-      onRestore(await readCheckpoint(file));
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Checkpoint import failed");
+      await operation();
+      setMessage("Done");
+    } catch (e) {
+      setMessage(String(e));
     }
   };
-
+  const exportFile = () => {
+    const url = URL.createObjectURL(
+      new Blob([checkpointToJson(world)], { type: "application/json" })
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bacteria-${world.seed}-${world.tick}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
   return (
-    <div className="persistence-controls">
-      <button type="button" onClick={() => void save()}>
-        Save
+    <details className="panel">
+      <summary>Save, restore and export</summary>
+      <button onClick={() => void run(() => saveLocal(checkpointToJson(world)))}>
+        Save locally
       </button>
-      <button type="button" onClick={() => void load()}>
-        Load
+      <button onClick={() => void run(async () => onRestore(restoreWorld(await loadLocal())))}>
+        Restore local
       </button>
-      <button type="button" onClick={() => downloadCheckpoint(world)}>
-        Export
-      </button>
-      <button type="button" onClick={() => input.current?.click()}>
-        Import
-      </button>
-      <input
-        ref={input}
-        hidden
-        type="file"
-        accept="application/json"
-        onChange={(event) => void importFile(event.target.files?.[0])}
-      />
-      {message && <span className="persistence-message">{message}</span>}
-    </div>
+      <button onClick={exportFile}>Export checkpoint</button>
+      <label>
+        Import checkpoint{" "}
+        <input
+          type="file"
+          accept=".json"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void run(async () => onRestore(restoreWorld(await file.text())));
+          }}
+        />
+      </label>
+      <p role="status">{message}</p>
+    </details>
   );
 }

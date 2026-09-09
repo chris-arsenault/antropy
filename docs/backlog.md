@@ -3,6 +3,26 @@
 The backlog stays at feature level. Detailed mechanisms and gates belong in the owning design
 document and are activated only when they support genuine evolution.
 
+<a id="backlog-bacteria"></a>
+
+## Current bacterial work
+
+- The top-down body/resource loop, RNN, local chemical interface, inheritance and live mutation
+  are implemented. The architecture correction adds isolated genetic randomness, durable
+  intervention/competition identity, controller-owned codecs and consistent checkpoint invariants.
+- Next observation work: division/death markers and a visible population history, after the
+  architecture correction. This is proposed UI work, not an additional ecology prerequisite.
+- Reliable adaptation and useful chemical interaction remain unproven. Further comparisons should
+  identify inherited behavioral differences and environmental consequences without selecting
+  reproduction through an external score. No offline training campaign is authorized.
+- Profile demonstrated throughput constraints before changing execution architecture. The initial
+  2,000-cell load probe reached about 10 ticks/s; population size does not gate genetics.
+- Address cumulative ancestry storage before claiming indefinite browser runs. Additional ecology
+  requires a named evolutionary question and a separate decision.
+
+The ant backlog below is preserved history from `ant-colony-checkpoint-2026-09-09`. Its 2,000-worker
+gate, missing-inheritance statements and ant-RNN cancellation do not govern the bacterial runtime.
+
 <a id="backlog-colony"></a>
 
 ## Living colony and resilience

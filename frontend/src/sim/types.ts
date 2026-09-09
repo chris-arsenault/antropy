@@ -1,176 +1,98 @@
-import { type SimConfig } from "./config";
-import { type Action } from "./controller/contract";
-import { type Point } from "./geometry";
-import { type Grid } from "./grid";
+import { type Config } from "./config";
 import { type RandomState } from "./random";
-import { type ChemicalField } from "./scent";
-import { type RegisteredModel } from "./controller/registeredModel";
-import { type ColonyKnowledge, type DecisionState } from "./colony/contract";
-import { type LinearGenome } from "./controller/linear/genome";
-import { type ConstructionState } from "./construction/state";
-import { type Material } from "./materials";
-import { type ClimateState } from "./climate/state";
-import { type HabitatState } from "./construction/habitat";
-import { type BehaviorState } from "./colony/behavior";
+import { type Genome, type BrainState } from "./controller";
+import { type Action } from "./interface";
 
-export type ScenarioId =
-  | "oracle"
-  | "programmed"
-  | "programmed-lifecycle"
-  | "rnn"
-  | "registered-colony"
-  | "colony-programmed"
-  | "colony-lgp";
-export type ChamberRole = "brood" | "pupae" | "food" | "queen";
-
-export interface Chamber {
-  readonly id: string;
-  readonly role: ChamberRole;
-  readonly center: Point;
-  readonly radius: Point;
-}
-
-export interface Junction {
-  readonly id: string;
-  readonly point: Point;
-}
-
-export interface Passage {
-  readonly from: string;
-  readonly to: string;
-  readonly points: readonly Point[];
-}
-
-export interface Nest {
-  readonly entrance: Point;
-  readonly home: Point;
-  readonly start: Point;
-  readonly chambers: readonly Chamber[];
-  readonly junctions: readonly Junction[];
-  readonly passages: readonly Passage[];
-  readonly primaryRoute: readonly Point[];
-}
-
-export interface Ant {
-  readonly caste: "worker" | "queen";
-  brood: number | null;
-  job: number | null;
-  spoil: Material | null;
-  decision: DecisionState;
-  readonly id: number;
+export interface Point {
   x: number;
   y: number;
+}
+export interface Cell extends Point {
+  id: number;
+  parent: number | null;
+  lineage: number;
+  generation: number;
+  genome: number;
   heading: number;
-  /** Transported food quantity; energy is quantity times the world's food density. */
-  cargo: number;
+  mass: number;
   energy: number;
-  distanceMoved: number;
-  turns: number;
-  previousTurn: -1 | 0 | 1;
-  immediateTurnReversals: number;
-  lastInputs: Float32Array;
-  lastAction: Action;
-  controllerState: Float32Array;
-  task: number;
-  taskAge: number;
-  taskChanges: number;
-  age: number;
-  readonly birthTick: number;
-  pickupTick: number | null;
+  born: number;
+  brain: BrainState;
+  receptors: [number, number];
+  contacts: number[];
+  inputs: Float32Array;
+  action: Action;
 }
-
-export interface Cache extends Point {
-  y: number;
-  readonly capacity: number;
+export interface Source extends Point {
+  remaining: number;
 }
-
-export interface Brood extends Point {
-  x: number;
-  y: number;
-  readonly id: number;
-  stage: "egg" | "larva" | "pupa";
-  age: number;
-  energy: number;
-  investment: number;
+export interface GenomeRecord {
+  id: number;
+  parent: number | null;
+  born: number;
+  genome: Genome;
 }
-
-export interface Queen extends Ant {
-  readonly caste: "queen";
-  carrier: number | null;
-  layingAge: number;
-  alive: boolean;
+export interface Ancestor {
+  id: number;
+  parent: number | null;
+  lineage: number;
+  genome: number;
+  born: number;
+  ended: number | null;
+  cause: "alive" | "division" | "starvation";
 }
-
-export interface Economy {
-  initial: number;
-  grown: number;
-  dissipated: number;
-  metabolism: number;
-  work: number;
-  queenFed: number;
-  broodFed: number;
-  eaten: number;
-  ageDeaths: number;
-  starvationDeaths: number;
-  broodDeaths: number;
-  queenDeath: "age" | "starvation" | null;
-  movement: number;
-  workerTicks: number;
-  completedReturns: number;
-  returnTicks: number;
-  harvested: number;
-}
-
-export interface WorldMetrics {
-  foodPickedUp: number;
-  foodDeposited: number;
-  pheromoneDeposited: number;
-  failedMoves: number;
-  energySpent: number;
-  pickupTicks: number[];
-  depositTicks: number[];
-  deaths: number;
-  workerEggs: number;
-  workerHatches: number;
-}
-
-export interface World {
-  behavior: BehaviorState;
-  habitat: HabitatState;
-  climate: ClimateState;
-  construction: ConstructionState;
-  caches: Map<number, Cache>;
-  knowledge: ColonyKnowledge;
-  linearGenome: LinearGenome | null;
-  readonly dimension: "2d";
-  readonly checkpointVersion: 19;
-  taskOverrides: number;
-  registeredController: RegisteredModel | null;
-  readonly seed: number;
+export interface Event {
   tick: number;
-  readonly scenario: ScenarioId;
-  readonly config: SimConfig;
-  readonly random: RandomState;
-  readonly grid: Grid;
-  /** Derived first-worker accessor for historical diagnostics; throws after extinction. */
-  readonly ant: Ant;
-  /** Worker bodies. Reproductives share Ant machinery and retain separate population accounting. */
-  readonly ants: Ant[];
-  readonly brood: Brood[];
-  readonly queen: Queen;
-  nextAntId: number;
-  nextBroodId: number;
-  readonly economy: Economy;
-  /** Cell to food quantity, independent of nutritional density. */
-  readonly food: Map<number, number>;
-  readonly renewableSources: number[];
-  readonly cache: Cache;
-  readonly nest: Nest;
-  readonly foodSources: Set<number>;
-  readonly foodOdor: ChemicalField;
-  readonly nestOdor: ChemicalField;
-  readonly pheromoneA: ChemicalField;
-  readonly pheromoneB: ChemicalField;
-  readonly freshAir: ChemicalField;
-  readonly metrics: WorldMetrics;
+  kind: "division" | "death" | "task" | "override";
+  cell: number;
+  values: number[];
+}
+export interface Ledger {
+  initial: number;
+  supplied: number;
+  nutrientLoss: number;
+  metabolism: number;
+  motors: number;
+  secretion: number;
+  growthLoss: number;
+  division: number;
+  deathLoss: number;
+  emitted: number;
+  chemicalLoss: number;
+  births: number;
+  deaths: number;
+  divisions: number;
+  mutations: number;
+  distance: number;
+  turning: number;
+  taskWrites: number;
+  blockedDivisions: number;
+}
+export interface Intervention {
+  tick: number;
+  cell: number;
+  previous: number;
+  value: number;
+}
+export interface World {
+  substrate: "bacteria-xy";
+  version: 2;
+  seed: number;
+  tick: number;
+  config: Config;
+  rng: RandomState;
+  environmentRng: RandomState;
+  geneticRng: RandomState;
+  cells: Cell[];
+  nutrient: Float64Array;
+  chemical: Float64Array;
+  sources: Source[];
+  genomes: Map<number, GenomeRecord>;
+  nextCell: number;
+  nextGenome: number;
+  ancestry: Map<number, Ancestor>;
+  ledger: Ledger;
+  events: Event[];
+  interventions: Intervention[];
+  stopReason: string | null;
 }

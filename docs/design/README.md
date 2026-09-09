@@ -1,5 +1,27 @@
 # Normalized design and work order
 
+Current direction is [top-down bacteria with heritable RNN controllers](bacteria.md), authorized
+September 9. Plan `d805a90c-31e7-4f20-8fb1-5b2c05d9b417` implements the reviewed sensor/action and
+world contract. The network has fifteen inputs, sixteen recurrent
+units and five outputs. Tonic/phasic chemical readings and local spatial contrasts support
+chemotaxis; paid chemical release and an inspectable task byte extend the action/memory interface.
+Local physiology funds division and birth-local mutation supplies variation.
+
+The ant implementation is preserved at commit `780fa4e`, tag
+`ant-colony-checkpoint-2026-09-09`, pushed to origin. The browser now starts bacteria at tick zero,
+paused with mutation enabled. Kernel, RNN, inheritance, persistence and initial comparisons are
+implemented; no offline training was used. [Measurements](bacteria-results.md) establish viable
+reproduction and variation, but do not establish reliable adaptation. Human visual review is next.
+The new direction supersedes the ant construction
+and 2,000-worker work order below. Earlier canceled ant-RNN campaigns remain canceled.
+
+<a id="design-ant-history"></a>
+
+## Preserved ant work order
+
+The following records the ant milestone at the checkpoint. Its pending tasks and acceptance gates
+are historical, not prerequisites for the bacterium conversion.
+
 Current architecture: [modular runtime and controlled environment configuration](modular-runtime.md).
 The cellular terrain remains available; independent settings now isolate nest geometry from depth,
 support and chemical transport.

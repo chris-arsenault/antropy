@@ -1,6 +1,6 @@
 # 0014 — Canonical 2D substrate
 
-- Status: Accepted
+- Status: Superseded by [0018](0018-bacterial-runtime.md); body preserved as ant design history
 - Date: 2026-09-06
 
 ## Context

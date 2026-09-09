@@ -1,6 +1,15 @@
 # Certification ledger
 
-## Current chamber-excavation review
+## Current bacterial review
+
+The top-down bacterial conversion is implemented. [Runs 2815–2825](design/bacteria-results.md)
+measure resource-funded reproduction, inherited RNN variation, matched nutrient regimes and an
+ancestor/descendant competition. Reliable adaptation is unproven. The 2,000-cell load probe reaches
+about 10 ticks/s on the measured host. Human visual review is pending; no browser assay was run.
+The ant records below belong to the preserved `ant-colony-checkpoint-2026-09-09` implementation
+and do not certify the bacterial substrate.
+
+## Preserved chamber-excavation review
 
 The corrected default reaches 298 connected underground cells from 148 at tick 4,000. Workers
 excavate all 150 new cells; 110 soil units are placed outside, 32 remain loose and eight are carried.

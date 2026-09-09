@@ -1,5 +1,21 @@
 # Calibration record
 
+Current calibration follows the [bacterial contract](design/bacteria.md) and
+[measured parameter/economy record](design/bacteria-results.md). The runtime uses an 80 × 60
+periodic world, dt 0.2, 48 founders and the mutable 15 → 16 → 5 RNN. The authoritative defaults
+are in `frontend/src/sim/config.ts`; complete resolved parameters accompany each harness run.
+Inheritance and live mutation are implemented. No ant population prerequisite applies.
+
+The architecture correction introduces checkpoint v2 and separates genetic from body randomness.
+It changes seeded mutation trajectories, not physical rates or founder weights. The initial v1
+panel remains historical evidence; its mutation/control census differences do not isolate genetics
+from changed body-random draws. No adaptation claim follows from those differences.
+
+## Preserved ant calibration
+
+The following records the tagged ant implementation. Its values and final stop instruction are
+historical and do not govern bacterial calibration or genetics.
+
 Current measurements concern the canonical 2D programmed colony. Older spatial-world measurements
 remain in Git history. The September 7 user decision authorizes the living-colony economy and local
 sensor/action extensions; the earlier immortal-forager work order does not block them.
