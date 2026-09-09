@@ -1,13 +1,16 @@
 import { expect, it } from "vitest";
 import { DEFAULT_CONFIG } from "./config";
 import { createWorld, stepWorld } from "./world";
-import { balance, total, absorb } from "./resources";
+import { absorb } from "./resources";
+import { balance, materialBalance, total } from "./accounting";
+import { fundDivision } from "./testSupport";
 import { diffuse, sample } from "./fields";
 import { initializeReceptors, observe } from "./sensors";
 import { moveBodies } from "./movement";
 import { reproduce } from "./reproduction";
 import { distance } from "./geometry";
 import { act, createState, seed } from "./controller/rnn";
+import { INPUTS } from "./interface";
 
 it("conserves diffusing nutrient across a periodic seam and accounts for decay", () => {
   const c = { ...DEFAULT_CONFIG, width: 8, height: 8, dt: 3 };
@@ -33,7 +36,7 @@ it("provides an adapting phasic response without a newborn spike", () => {
   expect(observe(w, cell)[1]).toBe(0);
 });
 it("seeded RNN turns toward higher local nutrient with mirrored responses", () => {
-  const left = new Float32Array(15),
+  const left = new Float32Array(INPUTS),
     right = left.slice();
   left[3] = 0.1;
   right[3] = -0.1;
@@ -45,12 +48,12 @@ it("seeded RNN turns toward higher local nutrient with mirrored responses", () =
 });
 it("shares scarce local uptake without iteration priority", () => {
   const w = createWorld(2, { ...DEFAULT_CONFIG, founders: 2, initialNutrient: 0 });
-  Object.assign(w.cells[0], { x: 5, y: 5, energy: 0 });
-  Object.assign(w.cells[1], { x: 5, y: 5, energy: 0 });
+  Object.assign(w.cells[0], { x: 5, y: 5, reserve: 0 });
+  Object.assign(w.cells[1], { x: 5, y: 5, reserve: 0 });
   w.nutrient[5 * w.config.width + 5] = 0.0001;
   absorb(w);
-  expect(w.cells[0].energy).toBeCloseTo(w.cells[1].energy, 12);
-  expect(w.cells[0].energy * 2 + total(w.nutrient)).toBeCloseTo(0.0001, 12);
+  expect(w.cells[0].reserve).toBeCloseTo(w.cells[1].reserve, 12);
+  expect(w.cells[0].reserve * 2 + total(w.nutrient)).toBeCloseTo(0.0001, 12);
 });
 it("limits secretion and motion together to the available energy", () => {
   const w = createWorld(3, { ...DEFAULT_CONFIG, founders: 1 });
@@ -65,26 +68,32 @@ it("limits secretion and motion together to the available energy", () => {
   expect(w.ledger.secretion).toBeCloseTo(w.ledger.emitted * w.config.secretionCost, 12);
 });
 it("division conserves resources, records ancestry and resets private state", () => {
-  const w = createWorld(4, { ...DEFAULT_CONFIG, founders: 1, mutationRate: 0 });
-  const parent = w.cells[0];
-  parent.mass = 2;
-  parent.energy = 3;
+  const w = createWorld(4, {
+    ...DEFAULT_CONFIG,
+    founders: 1,
+    mutationRate: 0,
+    physicalMutationRate: 0,
+    learningRetention: 0,
+  });
+  const parent = fundDivision(w);
   parent.brain.hidden.fill(0.5);
+  parent.brain.traces.fill(0.5);
   parent.brain.task = 123;
   reproduce(w);
   expect(w.cells).toHaveLength(2);
-  expect(w.cells.reduce((s, c) => s + c.energy + c.mass, 0) + w.ledger.division).toBeCloseTo(5, 12);
+  expect(Math.abs(balance(w))).toBeLessThan(1e-9);
+  expect(Math.abs(materialBalance(w))).toBeLessThan(1e-9);
   expect(w.cells.every((c) => c.parent === parent.id && c.genome === 1 && c.brain.task === 0)).toBe(
     true
   );
   expect(w.cells[0].brain.hidden.every((v) => v === 0)).toBe(true);
+  expect(w.cells.every((c) => c.brain.traces.every((v) => v === 0))).toBe(true);
   expect(distance(w.cells[0], w.cells[1], w.config)).toBeGreaterThan(0.9);
   expect(w.ancestry.get(parent.id)?.cause).toBe("division");
 });
 it("physically born mutants inherit a genome without selecting on score", () => {
   const w = createWorld(5, { ...DEFAULT_CONFIG, founders: 1, mutationRate: 1 });
-  w.cells[0].mass = 2;
-  w.cells[0].energy = 3;
+  fundDivision(w);
   reproduce(w);
   expect(w.ledger.mutations).toBe(2);
   expect(w.genomes.size).toBe(3);
@@ -101,5 +110,6 @@ it("bounds resource residual through integrated movement and development", () =>
   for (let tick = 0; tick < 160; tick++) stepWorld(w);
   expect(Math.abs(balance(w))).toBeLessThan(1e-8);
   expect(Math.abs(w.ledger.emitted - w.ledger.chemicalLoss - total(w.chemical))).toBeLessThan(1e-9);
-  expect(w.cells.every((c) => c.energy >= 0)).toBe(true);
+  expect(w.cells.every((c) => c.energy >= 0 && c.reserve >= 0)).toBe(true);
+  expect(Math.abs(materialBalance(w))).toBeLessThan(1e-8);
 });

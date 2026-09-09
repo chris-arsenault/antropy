@@ -32,12 +32,14 @@ export function measure(world: World, ticks: number, cadence: number) {
     frames: Record<string, unknown>[] = [];
   const started = performance.now();
   let maxResidual = 0;
+  let maxMaterialResidual = 0;
   while (world.tick < ticks && !world.stopReason) {
     stepWorld(world);
     if (world.tick % cadence === 0) {
       const s = summary(world);
       series.push(s);
       maxResidual = Math.max(maxResidual, Math.abs(s.energyResidual));
+      maxMaterialResidual = Math.max(maxMaterialResidual, Math.abs(s.materialResidual));
       frames.push({
         tick: world.tick,
         cells: world.cells.map((c) => ({
@@ -45,7 +47,8 @@ export function measure(world: World, ticks: number, cadence: number) {
           x: c.x,
           y: c.y,
           heading: c.heading,
-          mass: c.mass,
+          body: { ...c.body },
+          reserve: c.reserve,
           energy: c.energy,
           genome: c.genome,
           lineage: c.lineage,
@@ -60,6 +63,7 @@ export function measure(world: World, ticks: number, cadence: number) {
     series,
     frames,
     maxResidual,
+    maxMaterialResidual,
     final: summary(world),
   };
 }
@@ -85,7 +89,11 @@ export function recordMeasurement(
     seed: world.seed,
     ticks: world.tick,
     params: { ...world.config, substrate: world.substrate, version: world.version, ...provenance },
-    summary: { ...result.final, maxResidual: result.maxResidual },
+    summary: {
+      ...result.final,
+      maxResidual: result.maxResidual,
+      maxMaterialResidual: result.maxMaterialResidual,
+    },
     wallMs: result.wallMs,
   });
   database.close();
@@ -103,12 +111,15 @@ export function runBacteria(
   ticks: number,
   regime: Config["regime"],
   mutation: boolean,
-  output: string
+  output: string,
+  overrides: Partial<Config> = {}
 ): number {
   const world = createWorld(seed, {
     ...DEFAULT_CONFIG,
+    ...overrides,
     regime,
     mutationRate: mutation ? DEFAULT_CONFIG.mutationRate : 0,
+    physicalMutationRate: mutation ? DEFAULT_CONFIG.physicalMutationRate : 0,
   });
   return recordMeasurement(world, ticks, output, `${regime}; mutation ${mutation}`);
 }

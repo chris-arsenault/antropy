@@ -1,7 +1,9 @@
 import { type Config } from "./config";
 import { type RandomState } from "./random";
-import { type Genome, type BrainState } from "./controller";
+import { type BrainState } from "./controller";
+import { type Genotype } from "./genetics/genotype";
 import { type Action } from "./interface";
+import { type Body } from "./body";
 
 export interface Point {
   x: number;
@@ -14,7 +16,8 @@ export interface Cell extends Point {
   generation: number;
   genome: number;
   heading: number;
-  mass: number;
+  body: Body;
+  reserve: number;
   energy: number;
   born: number;
   brain: BrainState;
@@ -30,7 +33,8 @@ export interface GenomeRecord {
   id: number;
   parent: number | null;
   born: number;
-  genome: Genome;
+  genome: Genotype;
+  learned: number;
 }
 export interface Ancestor {
   id: number;
@@ -49,20 +53,28 @@ export interface Event {
 }
 export interface Ledger {
   initial: number;
+  initialMaterial: number;
   supplied: number;
   nutrientLoss: number;
   metabolism: number;
+  learning: number;
   motors: number;
   secretion: number;
-  growthLoss: number;
+  construction: number;
+  constructedMaterial: number;
+  catabolismLoss: number;
+  metabolicWaste: number;
   division: number;
   deathLoss: number;
+  deathMaterial: number;
   emitted: number;
   chemicalLoss: number;
   births: number;
   deaths: number;
   divisions: number;
   mutations: number;
+  recombinations: number;
+  learnedBirths: number;
   distance: number;
   turning: number;
   taskWrites: number;
@@ -76,7 +88,7 @@ export interface Intervention {
 }
 export interface World {
   substrate: "bacteria-xy";
-  version: 2;
+  version: 4;
   seed: number;
   tick: number;
   config: Config;

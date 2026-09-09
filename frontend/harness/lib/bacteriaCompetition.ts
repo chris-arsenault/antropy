@@ -1,23 +1,30 @@
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createWorld } from "../../src/sim/world";
-import { controller, type Genome } from "../../src/sim/controller";
+import { controller } from "../../src/sim/controller";
+import { type Genotype } from "../../src/sim/genetics/genotype";
 import { type Config } from "../../src/sim/config";
 import { measure, sourceDigest } from "./bacteriaRun";
 import { openLedger, recordRun } from "./ledger";
 import { prepareCompetition } from "./competitionIdentity";
 
 function competition(
-  ancestor: Genome,
-  descendant: Genome,
+  ancestor: Genotype,
+  descendant: Genotype,
   config: Config,
   seed: number,
   ticks: number,
   swap: boolean
 ) {
-  const world = createWorld(seed, { ...config, mutationRate: 0 });
+  const world = createWorld(seed, {
+    ...config,
+    mutationRate: 0,
+    physicalMutationRate: 0,
+    transmission: "clonal",
+    learningRetention: 0,
+  });
   world.genomes.get(1)!.genome = ancestor;
-  world.genomes.set(2, { id: 2, parent: null, born: 0, genome: descendant });
+  world.genomes.set(2, { id: 2, parent: null, born: 0, genome: descendant, learned: 0 });
   world.nextGenome = 3;
   for (const [i, c] of world.cells.entries()) {
     c.genome = ((i + Number(swap)) % 2) + 1;
@@ -28,6 +35,7 @@ function competition(
   return {
     seed,
     regime: config.regime,
+    config: world.config,
     swap,
     counts,
     wallMs: result.wallMs,

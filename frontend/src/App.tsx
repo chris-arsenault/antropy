@@ -8,6 +8,7 @@ import { WorldView } from "./ui/WorldView";
 import { StatsPanel } from "./ui/StatsPanel";
 import { Inspector } from "./ui/Inspector";
 import { PersistenceControls } from "./ui/PersistenceControls";
+import { EvolutionSettings } from "./ui/EvolutionSettings";
 
 export function App() {
   const [run, setRun] = useState(() => ({ id: 0, world: createWorld() }));
@@ -47,7 +48,10 @@ function Simulation({ world, onRestore }: { world: World; onRestore: (world: Wor
               ))}
             </select>
           </label>
-          <span>Live mutation {world.config.mutationRate > 0 ? "on" : "off"}</span>
+          <span>
+            Live mutation{" "}
+            {world.config.mutationRate + world.config.physicalMutationRate > 0 ? "on" : "off"}
+          </span>
         </div>
       </header>
       <div className="workspace">
@@ -74,18 +78,22 @@ function Simulation({ world, onRestore }: { world: World; onRestore: (world: Wor
   );
 }
 function Environment({ world, onRestore }: { world: World; onRestore: (world: World) => void }) {
+  const [evolution, setEvolution] = useState(world.config);
   const [seed, setSeed] = useState(String(world.seed)),
     [regime, setRegime] = useState(world.config.regime);
-  const [mutation, setMutation] = useState(world.config.mutationRate > 0),
+  const [mutation, setMutation] = useState(
+      world.config.mutationRate + world.config.physicalMutationRate > 0
+    ),
     [message, setMessage] = useState("");
   const restart = () => {
     try {
       const parsed = Number(seed);
       if (!Number.isInteger(parsed)) throw new Error("Seed must be an integer");
       const config: Config = {
-        ...world.config,
+        ...evolution,
         regime,
         mutationRate: mutation ? DEFAULT_CONFIG.mutationRate : 0,
+        physicalMutationRate: mutation ? DEFAULT_CONFIG.physicalMutationRate : 0,
       };
       onRestore(createWorld(parsed, config));
     } catch (e) {
@@ -110,6 +118,7 @@ function Environment({ world, onRestore }: { world: World; onRestore: (world: Wo
         Mutate at division
       </label>
       <button onClick={restart}>Apply and restart</button>
+      <EvolutionSettings config={evolution} onChange={setEvolution} />
       <p role="status">{message}</p>
     </details>
   );

@@ -10,6 +10,7 @@ Canvas SPA and deployed on the Ahara platform.
 | Governing principles   | [docs/principles.md](docs/principles.md)                                         |
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
+| Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
 | Current measurements | [docs/design/bacteria-results.md](docs/design/bacteria-results.md) |
 | Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
@@ -24,8 +25,13 @@ Current work is [top-down bacteria with heritable RNN controllers](docs/design/b
 The September 9 user decision supersedes the ant work order: first design sensors and actions,
 then convert the runtime. The reviewed design is implemented, including live inheritance and mutation.
 Sulion plan `d805a90c-31e7-4f20-8fb1-5b2c05d9b417` tracks the conversion and initial comparisons.
-Viable reproduction is measured; reliable adaptation remains unproven. Human motion review is next.
-The architecture correction follows [ADR 0018](docs/adr/0018-bacterial-runtime.md): checkpoint v2,
+Viable reproduction is measured; reliable adaptation remains unproven.
+The current [funded-body and inheritable-learning contract](docs/design/funded-bodies.md), plan
+`49f9eee2-3e74-4eb8-8643-5e927bf32eda`, replaces allocation tuples with material-funded machinery
+and transfers acquired recurrent changes into offspring chromosomes before crossover/mutation.
+Current checkpoints are v4. Seed/fertilize and environmental developmental reaction norms remain
+designed extensions. Substantial further design changes require user review before implementation.
+The earlier architecture correction follows [ADR 0018](docs/adr/0018-bacterial-runtime.md):
 separate environment/body/genetic random streams, controller-owned codecs, durable intervention
 provenance and matched body/ancestry invariants. Initial v1 comparisons are historical; do not
 silently upgrade their checkpoints or treat their seeded trajectories as current.
@@ -58,7 +64,7 @@ remain local; the preserved commit contains the ledger and test-required model, 
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive fifteen local chemical,
+- Author physical pressures and local carriers. Controllers receive nineteen local chemical,
   body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
@@ -70,7 +76,7 @@ remain local; the preserved commit contains the ledger and test-required model, 
   the claimed outcome, stop tuning and record a structural finding.
 - Human review is a real gate for motion. Ratios and final counts cannot certify circling, jitter,
   congestion, or other visibly broken trajectories.
-- Treat the controller as a pluggable module behind `seed`, `createState`, `act`, `mutate`, `recombine`, and
+- Treat the controller as a pluggable module behind `seed`, `createState`, `act`, `assimilate`, `mutate`, `recombine`, and
   `genomeDistance`. Code outside a controller does not inspect genome internals.
 - Keep Vitest bounded to deterministic mechanics and integration invariants. Ecological and
   long-horizon results belong in `frontend/harness/ledger.db`.

@@ -1,6 +1,10 @@
 # Evolutionary and advanced systems
 
-This document preserves the program beyond the accepted living-colony baseline. The
+Current bacterial genetics and inheritable learning follow [the funded-body contract](funded-bodies.md).
+Its implementation supersedes the ant population gate, LGP preference and deferred-inheritance
+statements below. The remainder preserves the ant program and its source hypotheses.
+
+The historical program beyond the accepted living-colony baseline follows. The
 [colony-knowledge decision](colony-knowledge.md) delivered the LGP controller and variation hooks.
 The [2,000-worker milestone](colony-scale.md) precedes inheritance and in-world selection.
 Genetics is deferred; explicit navigation permissions supersede older restrictions below.

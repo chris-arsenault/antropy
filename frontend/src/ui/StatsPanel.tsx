@@ -1,30 +1,11 @@
 import { type World } from "../sim/types";
 import { summary } from "../sim/stats";
 import { lineageColor } from "./drawing";
+import { EvolutionStats } from "./EvolutionStats";
 
 export function StatsPanel({ world, throughput }: { world: World; throughput: number }) {
   const s = summary(world);
-  const rows = [
-    ["Living", s.population],
-    ["Born / divisions", `${s.births} / ${s.divisions}`],
-    ["Starved", s.deaths],
-    ["Highest generation", s.maxGeneration],
-    ["Living genomes", s.livingGenomes],
-    ["Mutant births", s.mutations],
-    ["Nutrient", s.nutrient.toFixed(1)],
-    ["External input", s.supplied.toFixed(1)],
-    ["Reserve energy", s.reserves.toFixed(1)],
-    [
-      "Energy dissipated",
-      (s.metabolism + s.motors + s.secretion + s.growthLoss + s.division).toFixed(1),
-    ],
-    ["Swim distance attempted", s.distance.toFixed(1)],
-    ["Motor rotation (radians)", s.turning.toFixed(1)],
-    ["Chemical released", s.emitted.toFixed(2)],
-    ["Task changes", s.taskWrites],
-    ["Energy residual", s.energyResidual.toExponential(1)],
-    ["Ticks / second", throughput.toFixed(1)],
-  ];
+  const rows = metricRows(s, throughput);
   return (
     <section className="panel">
       <h2>Population</h2>
@@ -43,6 +24,7 @@ export function StatsPanel({ world, throughput }: { world: World; throughput: nu
       {s.interventions > 0 && (
         <p role="status">Diagnostic run · {s.interventions} manual interventions</p>
       )}
+      <EvolutionStats world={world} stats={s.evolution} />
       <h3>Founder lineages</h3>
       <table>
         <thead>
@@ -75,4 +57,39 @@ export function StatsPanel({ world, throughput }: { world: World; throughput: nu
       </details>
     </section>
   );
+}
+
+function metricRows(s: ReturnType<typeof summary>, throughput: number) {
+  return [
+    ["Living", s.population],
+    ["Born / divisions", `${s.births} / ${s.divisions}`],
+    ["Starved", s.deaths],
+    ["Highest generation", s.maxGeneration],
+    ["Living genomes", s.livingGenomes],
+    ["Mutant births", s.mutations],
+    ["Nutrient", s.nutrient.toFixed(1)],
+    ["External input", s.supplied.toFixed(1)],
+    ["Usable energy", s.reserves.toFixed(1)],
+    ["Stored nutrient material", s.storedNutrient.toFixed(1)],
+    ["Structure built", s.constructedMaterial.toFixed(1)],
+    [
+      "Energy dissipated",
+      (
+        s.metabolism +
+        s.learning +
+        s.motors +
+        s.secretion +
+        s.construction +
+        s.catabolismLoss +
+        s.division
+      ).toFixed(1),
+    ],
+    ["Swim distance attempted", s.distance.toFixed(1)],
+    ["Motor rotation (radians)", s.turning.toFixed(1)],
+    ["Chemical released", s.emitted.toFixed(2)],
+    ["Task changes", s.taskWrites],
+    ["Energy residual", s.energyResidual.toExponential(1)],
+    ["Material residual", s.materialResidual.toExponential(1)],
+    ["Ticks / second", throughput.toFixed(1)],
+  ];
 }

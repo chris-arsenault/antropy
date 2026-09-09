@@ -1,5 +1,6 @@
 import { type Config } from "./config";
-import { type Point } from "./types";
+import { type Point, type Cell } from "./types";
+import { bodyRadius } from "./body";
 
 export const wrap = (value: number, size: number): number => ((value % size) + size) % size;
 export const delta = (value: number, size: number): number =>
@@ -7,9 +8,8 @@ export const delta = (value: number, size: number): number =>
 export function distance(a: Point, b: Point, c: Config): number {
   return Math.hypot(delta(a.x - b.x, c.width), delta(a.y - b.y, c.height));
 }
-export function radius(mass: number, c: Config): number {
-  return c.radius * Math.sqrt(mass / c.birthMass);
-}
+export const radius = (cell: Pick<Cell, "body" | "reserve">, c: Config): number =>
+  bodyRadius(cell, c);
 export function moved(p: Point, heading: number, length: number, c: Config): Point {
   return {
     x: wrap(p.x + Math.cos(heading) * length, c.width),

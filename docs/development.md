@@ -19,13 +19,22 @@ From `frontend/`:
 ```bash
 pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime persistent --output harness/artifacts/bacteria-study
 pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime transient --output harness/artifacts/bacteria-study
-pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime persistent --mutation false --output harness/artifacts/bacteria-control
+pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime persistent --mutation false --learning-retention 0 --output harness/artifacts/bacteria-control
 pnpm harness recent --n 5
 pnpm harness sql "SELECT id, experiment, summary FROM runs ORDER BY id DESC LIMIT 5"
 ```
 
-Each run starts from the same founder RNN and resolved default parameters. Mutation changes weights
-only at physical division; there is no offline training or score-based parent selection. The default
+Each run starts from the same founder RNN and resolved default parameters. Mutation changes innate
+behavioral and physical loci only at birth; there is no offline training or score-based parent selection.
+`--mutation false` disables both random mutation blocks; acquired learning can still change offspring
+genomes. `--learning-retention 0` disables that transfer; the default is one (full retention).
+Use both flags with clonal transmission for a fixed-genome control. `--learning static` disables
+new acquired synaptic effects and their cost, but preserves learning already encoded in inherited
+weights. `--ploidy diploid --transmission selfing --crossover one-point` selects
+recombined gametes from the same parent; `--reproduction budding` keeps the parent alive.
+`--mutation-kind uniform` selects uniform instead of Gaussian perturbations. Unknown policy IDs
+or haploid selfing are rejected. These flags select implemented mechanisms, not external trainers.
+The default
 step is 0.2 model seconds. Source schedules use an independent random stream, making equal-seed
 mutation controls comparable. Transient patches relocate the supply locations; existing nutrient
 continues to diffuse, decay and be eaten.
@@ -45,13 +54,16 @@ pnpm harness bacteria-compare --checkpoint harness/artifacts/bacteria-study/chec
 ```
 
 Replace the path and candidate with values from that run. The assay compares the original ancestor
-with the selected observed genotype, mutation disabled, in both nutrient regimes. Each seed runs
+with the selected observed whole-organism genotype, both mutation blocks and learned-weight transfer
+disabled and clonal transmission fixed, in both nutrient regimes. Each seed runs
 both assignments of genotypes to the same founder positions. Candidate selection is a diagnostic
 choice; the assay never installs a winner in the browser. Record selection method and held-out seeds.
 A surviving mutant or increased genome count alone does not establish adaptation. Artifacts embed
-both controller-owned genome encodings/hashes, source-checkpoint hash and manual interventions,
-so the compared brains remain identifiable after the input file is moved. Source history is
-preserved even though the competition itself starts new bodies.
+both whole-organism genome encodings/hashes, source-checkpoint hash and manual interventions,
+so the compared chromosomes remain identifiable after the input file is moved. Source history is
+preserved even though the competition itself starts new bodies. Both genotypes receive the same
+reference founder material stocks; differing construction targets develop through paid growth.
+The assay does not copy a candidate's acquired traces or mature body from the source checkpoint.
 
 ## Capacity
 
@@ -67,11 +79,13 @@ The [initial measurements](design/bacteria-results.md) report the resulting thro
 
 The UI supports explicit local save/restore and file import/export. Checkpoints preserve both
 ancestry graphs, fields, separate environment/body/genetic random streams, receptor state, private
-recurrent/task state and durable manual interventions. The current schema is version 2. Version 1
+recurrent/task/plastic state, actual machinery, nutrient material, usable energy and durable manual
+interventions. The current schema is version 4. Versions 1–3
 bacterial files and ant files are rejected explicitly; they lack the corrected state contract.
 New sessions do not auto-load a checkpoint. Initial v1 experiment files remain historical evidence.
 
-Select a cell to inspect all fifteen input channels, hidden values, resolved physical efforts and
+Select a cell to inspect all nineteen input channels, actual stocks versus construction targets, inherited loci,
+acquired traces, hidden values, resolved physical efforts and
 task history. Manual register changes remain logged even after the recent-event buffer rolls over,
 and stats label the population a diagnostic run. Field layers, inspection
 and performance measurements do not enter the RNN.

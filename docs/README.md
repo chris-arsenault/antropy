@@ -3,6 +3,10 @@
 ## Start here
 
 Current direction: [top-down bacteria with heritable RNN controllers](design/bacteria.md).
+The [funded-body and inheritable-learning contract](design/funded-bodies.md) governs
+the current evolutionary extension, including constructed machinery, acquired-weight transmission
+and configurable reproduction. The [first extension](design/bacterial-evolution.md) preserves
+the superseded allocation tuple and private-only learning interpretation.
 The reviewed sensor/action contract is implemented. The browser starts bacteria paused at tick zero,
 with live mutation enabled. [Initial measurements and limits](design/bacteria-results.md) record
 reproduction, inherited variation, mixed adaptation results and capacity. Human visual review is pending.

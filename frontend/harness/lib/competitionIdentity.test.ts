@@ -2,7 +2,8 @@ import { expect, it } from "vitest";
 import { createWorld } from "../../src/sim/world";
 import { checkpointToJson } from "../../src/persist/checkpoint";
 import { overrideTask } from "../../src/sim/events";
-import { controller } from "../../src/sim/controller";
+import { decodeGenotype } from "../../src/sim/genetics/codec";
+import { sameGenotype } from "../../src/sim/genetics/genotype";
 import { prepareCompetition } from "./competitionIdentity";
 
 it("competition identity embeds replayable genomes, checkpoint hash and source interventions", () => {
@@ -13,10 +14,8 @@ it("competition identity embeds replayable genomes, checkpoint hash and source i
   expect(identity.sourceInterventions).toEqual(world.interventions);
   expect(identity.checkpointHash).toHaveLength(64);
   expect(identity.ancestor.hash).toBe(identity.descendant.hash);
-  const reconstructed = controller.decodeGenome(
-    JSON.parse(JSON.stringify(identity.descendant.genome))
-  );
-  expect(controller.genomeDistance(ancestor, reconstructed)).toBe(0);
+  const reconstructed = decodeGenotype(JSON.parse(JSON.stringify(identity.descendant.genome)));
+  expect(sameGenotype(ancestor, reconstructed)).toBe(true);
   overrideTask(world, 1, 20);
   expect(prepareCompetition(checkpointToJson(world), 1).identity.checkpointHash).not.toBe(
     identity.checkpointHash

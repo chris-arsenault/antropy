@@ -3,6 +3,8 @@ import { type World } from "../sim/types";
 import { SENSOR_NAMES } from "../sim/interface";
 import { controller } from "../sim/controller";
 import { overrideTask } from "../sim/events";
+import { GeneInspector } from "./GeneInspector";
+import { structuralMass } from "../sim/body";
 
 export function Inspector({
   world,
@@ -29,7 +31,7 @@ export function Inspector({
       </p>
       <p>
         Task byte <strong>{cell.brain.task}</strong> · reserve {cell.energy.toFixed(3)} · biomass{" "}
-        {cell.mass.toFixed(3)}
+        {structuralMass(cell.body).toFixed(3)} · stored food {cell.reserve.toFixed(3)}
       </p>
       <table>
         <thead>
@@ -71,6 +73,7 @@ export function Inspector({
         </pre>
       </details>
       <TaskOverride world={world} id={cell.id} onChange={onChange} />
+      <GeneInspector world={world} cell={cell} />
     </section>
   );
 }

@@ -1,14 +1,17 @@
 import { DEFAULT_CONFIG, validateConfig, type Config } from "./config";
 import { type World } from "./types";
 import { createRandomState, nextRandom } from "./random";
-import { controller } from "./controller";
+import { seedGenotype } from "./genetics/genotype";
 import { advanceFields } from "./fields";
-import { observe } from "./sensors";
+import { infer } from "./inference";
 import { moveBodies, resolveContacts } from "./movement";
-import { absorb, metabolize, total } from "./resources";
+import { absorb } from "./resources";
+import { metabolize } from "./development";
+import { createLedger, heldMaterial, heldEnergy } from "./accounting";
+import { blueprint } from "./phenotype";
+import { bodyRadius } from "./body";
 import { makeCell, reproduce } from "./reproduction";
 import { SpatialIndex } from "./spatial";
-import { recordEvent } from "./events";
 
 export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): World {
   if (!Number.isInteger(seedValue) || seedValue < -2147483648 || seedValue > 4294967295)
@@ -17,7 +20,7 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
   const c = { ...config },
     world: World = {
       substrate: "bacteria-xy",
-      version: 2,
+      version: 4,
       seed: seedValue,
       tick: 0,
       config: c,
@@ -35,29 +38,9 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
       events: [],
       interventions: [],
       stopReason: null,
-      ledger: {
-        initial: 0,
-        supplied: 0,
-        nutrientLoss: 0,
-        metabolism: 0,
-        motors: 0,
-        secretion: 0,
-        growthLoss: 0,
-        division: 0,
-        deathLoss: 0,
-        emitted: 0,
-        chemicalLoss: 0,
-        births: 0,
-        deaths: 0,
-        divisions: 0,
-        mutations: 0,
-        distance: 0,
-        turning: 0,
-        taskWrites: 0,
-        blockedDivisions: 0,
-      },
+      ledger: createLedger(),
     };
-  world.genomes.set(1, { id: 1, parent: null, born: 0, genome: controller.seed() });
+  world.genomes.set(1, { id: 1, parent: null, born: 0, genome: seedGenotype(c), learned: 0 });
   for (let i = 0; i < c.sourceCount; i++)
     world.sources.push({
       x: nextRandom(world.environmentRng) * c.width,
@@ -67,36 +50,35 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
   const index = new SpatialIndex(c, []);
   for (let i = 0; i < c.founders; i++) {
     const position = findStart(world, index);
-    const cell = makeCell(world, position, null, 1, c.founderReserve);
+    const cell = makeCell(world, position, null, 1);
     world.cells.push(cell);
     index.add(cell);
   }
-  world.ledger.initial =
-    total(world.nutrient) + world.cells.reduce((s, b) => s + b.mass + b.energy, 0);
+  world.ledger.initialMaterial = heldMaterial(world);
+  world.ledger.initial = heldEnergy(world);
   return world;
 }
 function findStart(world: World, index: SpatialIndex) {
+  const r = bodyRadius(
+    {
+      body: blueprint(world.genomes.get(1)!.genome, world.config),
+      reserve: world.config.founderReserve,
+    },
+    world.config
+  );
   for (let attempt = 0; attempt < 10000; attempt++) {
     const p = {
       x: nextRandom(world.rng) * world.config.width,
       y: nextRandom(world.rng) * world.config.height,
     };
-    if (index.free(p, world.config.birthMass, -1)) return p;
+    if (index.free(p, r, -1)) return p;
   }
   throw new Error("Founder placement exceeds physical capacity");
 }
 export function stepWorld(world: World): void {
   if (world.stopReason) return;
   advanceFields(world);
-  for (const cell of world.cells) {
-    const previous = cell.brain.task;
-    cell.inputs = observe(world, cell);
-    cell.action = controller.act(world.genomes.get(cell.genome)!.genome, cell.inputs, cell.brain);
-    if (previous !== cell.brain.task) {
-      world.ledger.taskWrites++;
-      recordEvent(world, "task", cell.id, [previous, cell.brain.task]);
-    }
-  }
+  for (const cell of world.cells) infer(world, cell);
   moveBodies(world);
   absorb(world);
   metabolize(world);

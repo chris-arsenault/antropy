@@ -2,7 +2,7 @@
 
 Current direction is [top-down bacteria with heritable RNN controllers](bacteria.md), authorized
 September 9. Plan `d805a90c-31e7-4f20-8fb1-5b2c05d9b417` implements the reviewed sensor/action and
-world contract. The network has fifteen inputs, sixteen recurrent
+world contract. The network now has nineteen inputs, sixteen recurrent
 units and five outputs. Tonic/phasic chemical readings and local spatial contrasts support
 chemotaxis; paid chemical release and an inspectable task byte extend the action/memory interface.
 Local physiology funds division and birth-local mutation supplies variation.
@@ -11,7 +11,15 @@ The ant implementation is preserved at commit `780fa4e`, tag
 `ant-colony-checkpoint-2026-09-09`, pushed to origin. The browser now starts bacteria at tick zero,
 paused with mutation enabled. Kernel, RNN, inheritance, persistence and initial comparisons are
 implemented; no offline training was used. [Measurements](bacteria-results.md) establish viable
-reproduction and variation, but do not establish reliable adaptation. Human visual review is next.
+reproduction and variation, but do not establish reliable adaptation.
+The current [funded-body and inheritable-learning extension](funded-bodies.md), plan
+`49f9eee2-3e74-4eb8-8643-5e927bf32eda`, gives independent body targets actual material/energy costs
+and transmits acquired recurrent weights into offspring chromosomes before crossover/mutation.
+It replaces the first extension's allocation tuple and incorrect private-only learning model.
+Checkpoint v4 stores built machinery, nutrient material, usable energy and learning provenance.
+Substantial further designs require user review before implementation.
+It supersedes the ant-era genetics backlog. Seed/fertilize and environmental developmental reaction norms are
+documented extensions, not active lifecycle policies. Changed motion remains subject to human review.
 The new direction supersedes the ant construction
 and 2,000-worker work order below. Earlier canceled ant-RNN campaigns remain canceled.
 

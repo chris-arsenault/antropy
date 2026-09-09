@@ -18,30 +18,50 @@ export const DEFAULT_CONFIG = {
   chemicalK: 0.02,
   receptorTau: 2,
   birthMass: 1,
-  radius: 0.45,
-  reservePerMass: 3,
-  founderReserve: 1.5,
+  motorRatio: 0.08,
+  transporterRatio: 0.08,
+  storageRatio: 0.08,
+  bodyDensity: 4,
+  reserveDensity: 4,
+  storageCapacity: 20,
+  energyCapacity: 0.8,
+  founderReserve: 0.8,
+  founderEnergy: 0.5,
   maintenance: 0.006,
+  motorMaintenance: 0.02,
+  transporterMaintenance: 0.01,
+  storageMaintenance: 0.005,
   controllerCost: 0.001,
-  uptakeRate: 0.2,
+  transporterTurnover: 2.5,
+  catabolicRate: 0.08,
+  catabolicEfficiency: 0.8,
+  nutrientEnergy: 4,
   growthRate: 0.06,
-  growthEfficiency: 0.85,
+  constructionEnergy: 0.5,
   protectedReserve: 0.4,
   divisionCost: 0.08,
   daughterReserve: 0.3,
-  speed: 1.5,
-  turnRate: 3,
-  rotationalDiffusion: 0.08,
-  swimCost: 0.015,
-  turnCost: 0.008,
+  daughterEnergy: 0.1,
+  viscosity: 0.0004,
+  thermalEnergy: 0.00008,
+  motorPowerDensity: 0.2,
+  motorEfficiency: 0.5,
   secretionRate: 0.06,
   secretionCost: 0.04,
   mutationRate: 0.005,
   mutationScale: 0.12,
+  physicalMutationRate: 0.05,
+  physicalMutationScale: 0.12,
+  mutationKind: "gaussian" as "uniform" | "gaussian",
+  ploidy: "haploid" as "haploid" | "diploid",
+  transmission: "clonal" as "clonal" | "selfing",
+  crossover: "uniform" as "uniform" | "one-point",
+  reproduction: "fission" as "fission" | "budding",
+  learning: "plastic" as "static" | "plastic",
+  plasticityCost: 0.002,
+  learningRetention: 1,
 };
 export type Config = typeof DEFAULT_CONFIG;
-export const reserveCapacity = (mass: number, config: Config): number =>
-  mass * config.reservePerMass;
 
 function validateNumbers(config: Config): void {
   for (const [key, value] of Object.entries(DEFAULT_CONFIG)) {
@@ -59,21 +79,45 @@ export function validateConfig(config: Config): void {
     throw new Error("Field dimensions outside supported range");
   validatePositive(config);
   validateReserves(config);
-  if (config.growthEfficiency > 1 || config.protectedReserve > 1 || config.mutationRate > 1)
-    throw new Error("Invalid fractional parameter");
+  validateEvolution(config);
+  for (const key of [
+    "catabolicEfficiency",
+    "motorEfficiency",
+    "protectedReserve",
+    "mutationRate",
+    "learningRetention",
+  ] as const)
+    if (config[key] > 1) throw new Error(`Invalid fractional parameter: ${key}`);
   if (!["persistent", "transient"].includes(config.regime)) throw new Error("Invalid regime");
   if (config.founders > config.maxPopulation || config.maxPopulation > 100000)
     throw new Error("Invalid population safety limit");
 }
+function validateEvolution(c: Config): void {
+  const policies = {
+    mutationKind: ["uniform", "gaussian"],
+    ploidy: ["haploid", "diploid"],
+    transmission: ["clonal", "selfing"],
+    crossover: ["uniform", "one-point"],
+    reproduction: ["fission", "budding"],
+    learning: ["static", "plastic"],
+  };
+  for (const key of Object.keys(policies) as (keyof typeof policies)[])
+    if (!policies[key].includes(c[key])) throw new Error(`Invalid policy: ${key}`);
+  if (c.transmission === "selfing" && c.ploidy !== "diploid")
+    throw new Error("Selfing requires diploidy");
+  if (c.physicalMutationRate > 1) throw new Error("Invalid physical mutation rate");
+}
 function validateReserves(config: Config): void {
-  const capacity = reserveCapacity(config.birthMass, config);
+  const capacity = config.birthMass * config.storageRatio * config.storageCapacity;
   if (!Number.isFinite(capacity) || config.founderReserve > capacity)
     throw new Error("Founder reserve exceeds body capacity");
+  const energy = config.birthMass * config.energyCapacity;
+  if (config.founderEnergy > energy) throw new Error("Founder energy exceeds core capacity");
   if (
     config.daughterReserve > capacity ||
-    2 * config.daughterReserve + config.divisionCost > 2 * capacity
+    2 * config.daughterEnergy + config.divisionCost > 2 * energy
   )
-    throw new Error("Division reserves and cost exceed body capacity");
+    throw new Error("Division reserves and cost exceed reference body capacity");
 }
 function validatePositive(config: Config): void {
   for (const key of [
@@ -84,9 +128,16 @@ function validatePositive(config: Config): void {
     "chemicalK",
     "receptorTau",
     "birthMass",
-    "radius",
-    "reservePerMass",
-    "growthEfficiency",
+    "motorRatio",
+    "transporterRatio",
+    "storageRatio",
+    "bodyDensity",
+    "reserveDensity",
+    "storageCapacity",
+    "energyCapacity",
+    "nutrientEnergy",
+    "catabolicEfficiency",
+    "viscosity",
   ] as const)
     if (config[key] <= 0) throw new Error(`Positive value required: ${key}`);
 }

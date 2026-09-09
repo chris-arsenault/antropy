@@ -2,8 +2,11 @@
 
 Antropy explores evolution in embodied, resource-limited populations. The browser runs
 [top-down bacteria with heritable RNN controllers](docs/design/bacteria.md). Local nutrient uptake
-funds movement, chemical release, growth and division. Daughters inherit mutated network weights;
-starvation removes cells. There is no external fitness scorer or training loop.
+funds movement, chemical release, lifetime learning, growth and division. Daughters inherit
+behavioral and physical genes, including their parent's acquired recurrent-weight changes.
+Independent body targets require actual material, construction energy and maintenance;
+body size and stored food affect viscous drag. Starvation removes cells. There is no external
+fitness scorer or training loop.
 
 Initial measurements establish reproduction and inherited variation, with mixed evidence of
 adaptation. See [results and limits](docs/design/bacteria-results.md). Motion awaits human review.
@@ -28,7 +31,11 @@ Run `make ci` from the repository root before committing.
 Press **Run** to begin at tick zero: 48 bacteria, persistent nutrient patches, mutation enabled,
 30 ticks per second. Green shows nutrient, magenta shows released chemical. Drag to pan, wheel to
 zoom, and click a cell to inspect its sensors, recurrent state and task byte. Stats remain visible.
-Environment and persistence controls are available below the map.
+Stats also show physical capacity ranges and acquired learning. Environment, inheritance and
+persistence controls are available below the map. The default is haploid clonal fission with
+paid plasticity and full learned-weight retention. Diploidy, selfing, crossover, mutation operators,
+budding and learning retention are configurable. Material and usable energy have separate ledgers.
+See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v4 rejects older files.
 
 ## Measurement
 

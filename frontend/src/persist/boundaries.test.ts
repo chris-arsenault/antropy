@@ -5,12 +5,18 @@ import { reproduce } from "../sim/reproduction";
 import { overrideTask, recordEvent } from "../sim/events";
 import { checkpointToJson, restoreWorld } from "./checkpoint";
 import { controller } from "../sim/controller";
+import { INPUTS } from "../sim/interface";
+import { fundDivision } from "../sim/testSupport";
 
 function dividingWorld(mutationRate: number, mutationScale = 0) {
-  const world = createWorld(41, { ...DEFAULT_CONFIG, founders: 1, mutationRate, mutationScale });
-  world.cells[0].mass = 2;
-  world.cells[0].energy = 3;
-  world.ledger.initial += 2.5;
+  const world = createWorld(41, {
+    ...DEFAULT_CONFIG,
+    founders: 1,
+    mutationRate,
+    mutationScale,
+    physicalMutationRate: 0,
+  });
+  fundDivision(world);
   return world;
 }
 it("genetic random draws cannot change body placement or headings with unchanged weights", () => {
@@ -70,16 +76,16 @@ it("rejects impossible reserve configurations at creation", () => {
 it("rejects v1 state rather than inventing genetic randomness and intervention history", () => {
   const data = JSON.parse(checkpointToJson(createWorld()));
   data.version = 1;
-  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v2");
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v4");
 });
 it("controller codecs preserve exact genome and private state without sharing arrays", () => {
   const genome = controller.seed(),
     state = controller.createState();
-  controller.act(genome, new Float32Array(15).fill(0.1), state);
+  controller.act(genome, new Float32Array(INPUTS).fill(0.1), state);
   const copy = controller.decodeGenome(JSON.parse(JSON.stringify(controller.encodeGenome(genome))));
   const memory = controller.decodeState(JSON.parse(JSON.stringify(controller.encodeState(state))));
   expect(controller.genomeDistance(copy, genome)).toBe(0);
   expect(controller.inspectState(memory)).toEqual(controller.inspectState(state));
-  controller.act(copy, new Float32Array(15), memory);
+  controller.act(copy, new Float32Array(INPUTS), memory);
   expect(controller.inspectState(memory)).not.toEqual(controller.inspectState(state));
 });

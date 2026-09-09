@@ -1,27 +1,47 @@
-import { nextRandom, type RandomState } from "../random";
+import { type RandomState } from "../random";
 import { INPUTS, type Action } from "../interface";
+import {
+  combineVector,
+  meanVector,
+  mutateVector,
+  type Mutation,
+  type Crossover,
+} from "../genetics/operators";
+import {
+  DEFAULT_LEARNING,
+  seedPlasticity,
+  updateTraces,
+  type LearningContext,
+  type PlasticState,
+} from "./plasticity";
 
 export const HIDDEN = 16,
   OUTPUTS = 5,
-  PARAMETERS = 597;
+  PARAMETERS = INPUTS * HIDDEN + HIDDEN * HIDDEN + HIDDEN + OUTPUTS * HIDDEN + OUTPUTS;
 const RECURRENT = INPUTS * HIDDEN,
   BIAS = RECURRENT + HIDDEN * HIDDEN;
 const OUTPUT = BIAS + HIDDEN,
   OUTPUT_BIAS = OUTPUT + OUTPUTS * HIDDEN;
 export interface Genome {
   readonly weights: Float32Array;
+  readonly plasticity: Float32Array;
 }
-export interface BrainState {
+export interface BrainState extends PlasticState {
   hidden: Float32Array;
   task: number;
 }
-export const createState = (): BrainState => ({ hidden: new Float32Array(HIDDEN), task: 0 });
+export const createState = (): BrainState => ({
+  hidden: new Float32Array(HIDDEN),
+  task: 0,
+  traces: new Float32Array(HIDDEN * HIDDEN),
+  lastReserve: null,
+});
 const f = Math.fround;
 
 /** A small, erasable chemotactic founder; every response lives in ordinary RNN weights. */
 export function seed(): Genome {
   const w = new Float32Array(PARAMETERS);
-  for (let i = 0; i < INPUTS; i++) w[i * INPUTS + i] = 1.5;
+  for (let i = 0; i < 15; i++) w[i * INPUTS + i] = 1.5;
   w[3 * INPUTS + 3] = 8;
   w[7 * INPUTS + 7] = 4;
   w[RECURRENT + 1 * HIDDEN + 1] = 0.5;
@@ -37,7 +57,7 @@ export function seed(): Genome {
   w[OUTPUT + 3 * HIDDEN] = 2;
   w[OUTPUT_BIAS + 3] = -1;
   w[OUTPUT_BIAS + 4] = 1;
-  return { weights: w };
+  return { weights: w, plasticity: seedPlasticity() };
 }
 
 function dot(w: Float32Array, offset: number, values: Float32Array, initial: number): number {
@@ -46,16 +66,29 @@ function dot(w: Float32Array, offset: number, values: Float32Array, initial: num
   return total;
 }
 
-export function act(genome: Genome, observation: Float32Array, state: BrainState): Action {
+export function act(
+  genome: Genome,
+  observation: Float32Array,
+  state: BrainState,
+  context: LearningContext = DEFAULT_LEARNING
+): Action {
+  if (observation.length !== INPUTS) throw new Error("Incorrect sensor count");
   const w = genome.weights,
     hidden = new Float32Array(HIDDEN);
+  const alpha = context.plastic ? Math.abs(genome.plasticity[0]) : 0;
   for (let h = 0; h < HIDDEN; h++) {
-    const current = dot(w, h * INPUTS, observation, w[BIAS + h]);
-    hidden[h] = f(Math.tanh(dot(w, RECURRENT + h * HIDDEN, state.hidden, current)));
+    let current = dot(w, h * INPUTS, observation, w[BIAS + h]);
+    for (let j = 0; j < HIDDEN; j++) {
+      const index = h * HIDDEN + j;
+      const weight = f(w[RECURRENT + index] + f(alpha * state.traces[index]));
+      current = f(current + f(weight * state.hidden[j]));
+    }
+    hidden[h] = f(Math.tanh(current));
   }
   const logits = Array.from({ length: OUTPUTS }, (_, o) =>
     dot(w, OUTPUT + o * HIDDEN, hidden, w[OUTPUT_BIAS + o])
   );
+  updateTraces(genome.plasticity, state, state.hidden, hidden, observation, context);
   state.hidden = hidden;
   if (logits[4] >= 0) state.task = Math.round(255 / (1 + Math.exp(-logits[3])));
   return {
@@ -65,22 +98,58 @@ export function act(genome: Genome, observation: Float32Array, state: BrainState
   };
 }
 
-export function mutate(genome: Genome, rng: RandomState, rate: number, scale: number): Genome {
-  const weights = genome.weights.slice();
-  for (let i = 0; i < weights.length; i++)
-    if (nextRandom(rng) < rate)
-      weights[i] = Math.max(-16, Math.min(16, weights[i] + (nextRandom(rng) * 2 - 1) * scale));
-  return { weights };
+export function mutate(
+  genome: Genome,
+  rng: RandomState,
+  rate: number,
+  scale: number,
+  kind: Mutation = "uniform"
+): Genome {
+  const options = { rate, scale, kind };
+  return {
+    weights: mutateVector(genome.weights, rng, options, 16),
+    plasticity: mutateVector(genome.plasticity, rng, options, 1),
+  };
 }
 
 export function genomeDistance(a: Genome, b: Genome): number {
   let distance = 0;
   for (let i = 0; i < PARAMETERS; i++) distance += (a.weights[i] - b.weights[i]) ** 2;
-  return Math.sqrt(distance / PARAMETERS);
+  for (let i = 0; i < a.plasticity.length; i++)
+    distance += (a.plasticity[i] - b.plasticity[i]) ** 2;
+  return Math.sqrt(distance / (PARAMETERS + a.plasticity.length));
 }
 
-export function recombine(a: Genome, b: Genome, rng: RandomState): Genome {
+export function recombine(
+  a: Genome,
+  b: Genome,
+  rng: RandomState,
+  kind: Crossover = "uniform"
+): Genome {
   return {
-    weights: Float32Array.from(a.weights, (v, i) => (nextRandom(rng) < 0.5 ? v : b.weights[i])),
+    weights: combineVector(a.weights, b.weights, rng, kind),
+    plasticity: combineVector(a.plasticity, b.plasticity, rng, kind),
   };
+}
+export function express(a: Genome, b: Genome): Genome {
+  return {
+    weights: meanVector(a.weights, b.weights),
+    plasticity: meanVector(a.plasticity, b.plasticity),
+  };
+}
+/** Incorporate acquired changes once into a child chromosome, never into a shared parent genome. */
+export function assimilate(
+  allele: Genome,
+  expressed: Genome,
+  state: BrainState,
+  retention: number
+): Genome {
+  const weights = allele.weights.slice();
+  const strength = Math.abs(expressed.plasticity[0]);
+  for (let i = 0; i < state.traces.length; i++)
+    weights[RECURRENT + i] = Math.max(
+      -16,
+      Math.min(16, weights[RECURRENT + i] + f(retention * f(strength * state.traces[i])))
+    );
+  return { weights, plasticity: allele.plasticity.slice() };
 }

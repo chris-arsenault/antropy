@@ -1,6 +1,9 @@
 import { type Checkpoint } from "./checkpoint";
-import { DEFAULT_CONFIG, validateConfig, reserveCapacity, type Config } from "../sim/config";
+import { DEFAULT_CONFIG, validateConfig, type Config } from "../sim/config";
+import { BODY_PARTS, type Body, energyCapacity, materialCapacity } from "../sim/body";
+import { createLedger } from "../sim/accounting";
 import { controller } from "../sim/controller";
+import { decodeGenotype } from "../sim/genetics/codec";
 import { INPUTS } from "../sim/interface";
 import { validateRelations } from "./relations";
 
@@ -39,8 +42,11 @@ function validateCell(value: unknown, c: Config): void {
   idOrNull(value.parent);
   finite(value.x, 0, Number(c.width));
   finite(value.y, 0, Number(c.height));
-  finite(value.mass, Number(c.birthMass), 2 * Number(c.birthMass) + 1e-9);
-  finite(value.energy, 0, reserveCapacity(Number(value.mass), c) + 1e-8);
+  object(value.body);
+  for (const key of BODY_PARTS) finite(value.body[key], 1e-15);
+  const body = value.body as Body;
+  finite(value.energy, 0, energyCapacity(body, c) + 1e-8);
+  finite(value.reserve, 0, materialCapacity(body, c) + 1e-8);
   finite(value.heading, 0, 2 * Math.PI);
   numbers(value.inputs, INPUTS, -1, 1);
   numbers(value.contacts, 4, 0, 1);
@@ -61,7 +67,8 @@ function validateRecords(data: Record<string, unknown>): void {
     integer(r.id, 1);
     idOrNull(r.parent);
     integer(r.born);
-    controller.decodeGenome(r.genome);
+    finite(r.learned, 0, 32);
+    decodeGenotype(r.genome);
   }
   for (const a of data.ancestry) {
     object(a);
@@ -103,8 +110,8 @@ function validateFields(data: Record<string, unknown>): Config {
 }
 export function validateSnapshot(data: unknown): asserts data is Checkpoint {
   object(data);
-  if (data.substrate !== "bacteria-xy" || data.version !== 2)
-    fail("unsupported substrate or version; requires bacterial checkpoint v2");
+  if (data.substrate !== "bacteria-xy" || data.version !== 4)
+    fail("unsupported substrate or version; requires bacterial checkpoint v4");
   const config = validateFields(data);
   for (const key of ["tick", "nextCell", "nextGenome"]) integer(data[key]);
   integer(data.seed, -2147483648, 4294967295);
@@ -115,28 +122,7 @@ export function validateSnapshot(data: unknown): asserts data is Checkpoint {
   }
   if (data.stopReason !== null && typeof data.stopReason !== "string") fail("stop reason");
   object(data.ledger);
-  for (const key of [
-    "initial",
-    "supplied",
-    "nutrientLoss",
-    "metabolism",
-    "motors",
-    "secretion",
-    "growthLoss",
-    "division",
-    "deathLoss",
-    "emitted",
-    "chemicalLoss",
-    "births",
-    "deaths",
-    "divisions",
-    "mutations",
-    "distance",
-    "turning",
-    "taskWrites",
-    "blockedDivisions",
-  ])
-    finite(data.ledger[key]);
+  for (const key of Object.keys(createLedger())) finite(data.ledger[key]);
   array(data.cells);
   for (const cell of data.cells) validateCell(cell, config);
   validateRecords(data);

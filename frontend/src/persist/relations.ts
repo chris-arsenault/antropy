@@ -1,10 +1,15 @@
 import { type Checkpoint } from "./checkpoint";
 import { type Ancestor } from "../sim/types";
+import { decodeGenotype } from "../sim/genetics/codec";
 
 function requireRelation(condition: boolean, message: string): void {
   if (!condition) throw new Error(`Invalid bacterial checkpoint: ${message}`);
 }
-function checkParent(a: Ancestor, ancestors: Map<number, Ancestor>): number | null {
+function checkParent(
+  a: Ancestor,
+  ancestors: Map<number, Ancestor>,
+  budding: boolean
+): number | null {
   if (a.parent === null) {
     requireRelation(a.lineage === a.id && a.born === 0, "invalid founder ancestry");
     return null;
@@ -13,7 +18,10 @@ function checkParent(a: Ancestor, ancestors: Map<number, Ancestor>): number | nu
   requireRelation(!!parent && a.parent < a.id, "invalid parent reference");
   requireRelation(parent!.lineage === a.lineage, "inconsistent descendant lineage");
   requireRelation(
-    parent!.cause === "division" && parent!.ended === a.born,
+    parent!.born <= a.born &&
+      (budding
+        ? parent!.ended === null || parent!.ended >= a.born
+        : parent!.cause === "division" && parent!.ended === a.born),
     "invalid parent lifetime"
   );
   return parent!.id;
@@ -24,7 +32,7 @@ function checkAncestry(data: Checkpoint): Map<number, number> {
   const generations = new Map<number, number>();
   const genomes = new Map(data.genomes.map((g) => [g.id, g]));
   for (const a of [...data.ancestry].sort((a, b) => a.id - b.id)) {
-    const parent = checkParent(a, ancestors);
+    const parent = checkParent(a, ancestors, data.config.reproduction === "budding");
     generations.set(a.id, parent === null ? 0 : generations.get(parent)! + 1);
     requireRelation(a.born <= data.tick && a.id < data.nextCell, "invalid ancestor time or ID");
     requireRelation(
@@ -57,8 +65,15 @@ function checkCells(data: Checkpoint, generations: Map<number, number>): void {
 function checkGenomes(data: Checkpoint): void {
   const genomes = new Map(data.genomes.map((g) => [g.id, g]));
   for (const g of data.genomes) {
+    requireRelation(
+      decodeGenotype(g.genome).chromosomes.length === (data.config.ploidy === "haploid" ? 1 : 2),
+      "genotype and configuration ploidy disagree"
+    );
     requireRelation(g.id < data.nextGenome && g.born <= data.tick, "invalid genome ID or time");
-    if (g.parent === null) continue;
+    if (g.parent === null) {
+      requireRelation(g.learned === 0, "founder cannot have a learning transfer");
+      continue;
+    }
     const parent = genomes.get(g.parent);
     requireRelation(!!parent && g.parent < g.id, "invalid genome parent");
     requireRelation(parent!.born <= g.born, "invalid genome ancestry time");

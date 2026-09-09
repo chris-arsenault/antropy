@@ -2,6 +2,25 @@
 
 ## Current bacterial review
 
+The [funded-body and inheritable-learning extension](design/funded-bodies.md) replaces the v3
+allocation tuple and private-only learning interpretation. Checkpoint v4 preserves actual machinery,
+separate material/energy accounts and acquired recurrent-weight transmission. Runs 2829–2831 grow
+48 founders to 347 (Run default), 342 (mutation-free, retention zero) and 352 (mutation-free,
+retention one) by tick 3,000. The default completes 313 divisions; all 626 daughters receive learned
+changes. These are single-seed viability and transfer observations, not adaptation certification.
+`make ci` passes, including 53 bounded tests of physical and inheritance invariants; the production
+build passes. Motion remains unreviewed.
+
+## Earlier bacterial evidence
+
+The first [evolutionary extension](design/bacterial-evolution.md) added costed physical allocations,
+private synaptic learning and configurable inheritance/reproduction in checkpoint v3. Runs
+2826–2828 retain reproduction on the changed physics: static and plastic mutation-free controls
+end with 104 and 108 cells; the default mutating population ends with 112, from 48 founders,
+after 3,000 ticks. These are single-seed viability observations, not adaptation certification.
+Forty-five bounded tests and production build pass. Initial acquired weight changes are small;
+budding/selfing ecological effects and changed trajectories remain unreviewed.
+
 The top-down bacterial conversion is implemented. [Runs 2815–2825](design/bacteria-results.md)
 measure resource-funded reproduction, inherited RNN variation, matched nutrient regimes and an
 ancestor/descendant competition. Reliable adaptation is unproven. The 2,000-cell load probe reaches

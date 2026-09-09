@@ -2,11 +2,19 @@
 
 Current calibration follows the [bacterial contract](design/bacteria.md) and
 [measured parameter/economy record](design/bacteria-results.md). The runtime uses an 80 × 60
-periodic world, dt 0.2, 48 founders and the mutable 15 → 16 → 5 RNN. The authoritative defaults
+periodic world, dt 0.2, 48 founders and the mutable 19 → 16 → 5 RNN. The authoritative defaults
 are in `frontend/src/sim/config.ts`; complete resolved parameters accompany each harness run.
 Inheritance and live mutation are implemented. No ant population prerequisite applies.
 
-The architecture correction introduces checkpoint v2 and separates genetic from body randomness.
+The [funded-body extension](design/funded-bodies.md) introduces checkpoint v4, independently
+encoded construction targets, actual machinery, viscous drag and diffusion-limited uptake.
+Reference newborn stocks are core 1 and motor/transporter/storage 0.08 each, with stored nutrient
+0.8 and usable energy 0.5. Nutrient carries 4 energy per material unit; catabolism is 80% efficient.
+Construction consumes one material plus 0.5 usable energy per new material unit. Default acquired
+learning retention is one. Coefficients are dimensionless, not measured bacterial constants.
+The earlier v3 allocation/private-learning results do not certify these new rates.
+
+The earlier architecture correction introduced checkpoint v2 and separated genetic from body randomness.
 It changes seeded mutation trajectories, not physical rates or founder weights. The initial v1
 panel remains historical evidence; its mutation/control census differences do not isolate genetics
 from changed body-random draws. No adaptation claim follows from those differences.

@@ -8,13 +8,17 @@ export const SENSOR_NAMES = [
   "Chemical phasic",
   "Chemical forward",
   "Chemical left",
-  "Reserve",
+  "Usable energy",
   "Growth",
   "Front contact",
   "Left contact",
   "Rear contact",
   "Right contact",
   "Task byte",
+  "Built motor capacity",
+  "Built transporter capacity",
+  "Built storage capacity",
+  "Stored nutrient",
 ] as const;
 export const INPUTS = SENSOR_NAMES.length;
 export interface Action {

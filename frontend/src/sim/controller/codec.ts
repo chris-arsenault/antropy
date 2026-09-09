@@ -1,6 +1,7 @@
 import { type Genome, type BrainState, PARAMETERS, HIDDEN } from "./rnn";
+import { PLASTIC_LOCI } from "./plasticity";
 
-export const CONTROLLER_ID = "bacteria-rnn-15x16x5-v1";
+export const CONTROLLER_ID = "bacteria-rnn-19x16x5-inheritable-v3";
 function record(data: unknown): Record<string, unknown> {
   if (!data || typeof data !== "object" || Array.isArray(data))
     throw new Error("Invalid controller record");
@@ -16,15 +17,27 @@ function vector(data: unknown, length: number, limit: number): Float32Array {
   return Float32Array.from(data);
 }
 export function encodeGenome(genome: Genome): unknown {
-  return { controller: CONTROLLER_ID, weights: Array.from(genome.weights) };
+  return {
+    controller: CONTROLLER_ID,
+    weights: Array.from(genome.weights),
+    plasticity: Array.from(genome.plasticity),
+  };
 }
 export function decodeGenome(data: unknown): Genome {
   const value = record(data);
   if (value.controller !== CONTROLLER_ID) throw new Error("Unsupported controller identity");
-  return { weights: vector(value.weights, PARAMETERS, 16) };
+  return {
+    weights: vector(value.weights, PARAMETERS, 16),
+    plasticity: vector(value.plasticity, PLASTIC_LOCI, 1),
+  };
 }
 export function encodeState(state: BrainState): unknown {
-  return { task: state.task, hidden: Array.from(state.hidden) };
+  return {
+    task: state.task,
+    hidden: Array.from(state.hidden),
+    traces: Array.from(state.traces),
+    lastReserve: state.lastReserve,
+  };
 }
 export function decodeState(data: unknown): BrainState {
   const value = record(data);
@@ -35,5 +48,18 @@ export function decodeState(data: unknown): BrainState {
     value.task > 255
   )
     throw new Error("Invalid controller task byte");
-  return { task: value.task, hidden: vector(value.hidden, HIDDEN, 1) };
+  if (
+    value.lastReserve !== null &&
+    (typeof value.lastReserve !== "number" ||
+      !Number.isFinite(value.lastReserve) ||
+      value.lastReserve < 0 ||
+      value.lastReserve > 1)
+  )
+    throw new Error("Invalid controller reserve memory");
+  return {
+    task: value.task,
+    hidden: vector(value.hidden, HIDDEN, 1),
+    traces: vector(value.traces, HIDDEN * HIDDEN, 1),
+    lastReserve: value.lastReserve,
+  };
 }

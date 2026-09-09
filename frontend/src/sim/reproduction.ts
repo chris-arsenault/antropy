@@ -2,17 +2,20 @@ import { type World, type Cell, type Point } from "./types";
 import { controller } from "./controller";
 import { emptyAction, INPUTS } from "./interface";
 import { initializeReceptors } from "./sensors";
-import { moved, radius } from "./geometry";
 import { nextRandom } from "./random";
 import { SpatialIndex } from "./spatial";
 import { recordEvent } from "./events";
+import { inherit, sameGenotype } from "./genetics/genotype";
+import { reproductivePolicies } from "./reproductivePolicies";
+import { type Embodied, scaleBody, structuralMass } from "./body";
+import { blueprint, divisionReady } from "./phenotype";
 
 export function makeCell(
   world: World,
   position: Point,
   parent: Cell | null,
   genome: number,
-  energy: number
+  stocks?: Embodied
 ): Cell {
   const id = world.nextCell++;
   const cell: Cell = {
@@ -23,8 +26,11 @@ export function makeCell(
     generation: parent ? parent.generation + 1 : 0,
     genome,
     heading: nextRandom(world.rng) * 2 * Math.PI,
-    mass: world.config.birthMass,
-    energy,
+    ...(stocks ?? {
+      body: blueprint(world.genomes.get(genome)!.genome, world.config),
+      reserve: world.config.founderReserve,
+      energy: world.config.founderEnergy,
+    }),
     born: world.tick,
     brain: controller.createState(),
     receptors: [0, 0],
@@ -46,33 +52,25 @@ export function makeCell(
 }
 function inherited(world: World, parent: Cell): number {
   const record = world.genomes.get(parent.genome)!;
-  if (world.config.mutationRate === 0) return parent.genome;
-  const genome = controller.mutate(
+  const { genome, mutated, recombined, learned } = inherit(
     record.genome,
     world.geneticRng,
-    world.config.mutationRate,
-    world.config.mutationScale
+    world.config,
+    parent.brain
   );
-  if (controller.genomeDistance(record.genome, genome) === 0) return parent.genome;
+  if (mutated) world.ledger.mutations++;
+  if (recombined) world.ledger.recombinations++;
+  if (learned > 0) world.ledger.learnedBirths++;
+  if (sameGenotype(record.genome, genome)) return parent.genome;
   const id = world.nextGenome++;
-  world.genomes.set(id, { id, parent: parent.genome, born: world.tick, genome });
-  world.ledger.mutations++;
+  world.genomes.set(id, { id, parent: parent.genome, born: world.tick, genome, learned });
   return id;
-}
-function placement(world: World, parent: Cell, index: SpatialIndex): Point[] | null {
-  const c = world.config,
-    offset = radius(c.birthMass, c) * 1.001;
-  const phase = nextRandom(world.rng) * 2 * Math.PI;
-  for (let attempt = 0; attempt < 8; attempt++) {
-    const angle = phase + (attempt * Math.PI) / 4;
-    const points = [moved(parent, angle, offset, c), moved(parent, angle, -offset, c)];
-    if (points.every((p) => index.free(p, c.birthMass, parent.id))) return points;
-  }
-  return null;
 }
 function die(world: World, cell: Cell): void {
   world.ledger.deaths++;
-  world.ledger.deathLoss += cell.mass + cell.energy;
+  const material = structuralMass(cell.body) + cell.reserve;
+  world.ledger.deathMaterial += material;
+  world.ledger.deathLoss += material * world.config.nutrientEnergy + cell.energy;
   Object.assign(world.ancestry.get(cell.id)!, { ended: world.tick, cause: "starvation" });
   recordEvent(world, "death", cell.id, []);
 }
@@ -84,8 +82,9 @@ export function reproduce(world: World): void {
   let population = live.length;
   for (const cell of live) {
     if (
-      cell.mass < 2 * c.birthMass - 1e-10 ||
-      cell.energy < 2 * c.daughterReserve + c.divisionCost
+      !divisionReady(world, cell) ||
+      cell.reserve < 2 * c.daughterReserve ||
+      cell.energy < 2 * c.daughterEnergy + c.divisionCost
     ) {
       result.push(cell);
       continue;
@@ -95,7 +94,7 @@ export function reproduce(world: World): void {
       result.push(cell);
       continue;
     }
-    const points = placement(world, cell, index);
+    const points = reproductivePolicies[c.reproduction].place(world, cell, index);
     if (!points) {
       world.ledger.blockedDivisions++;
       result.push(cell);
@@ -116,19 +115,30 @@ function removeDead(world: World): Cell[] {
 }
 function divide(world: World, cell: Cell, points: Point[], index: SpatialIndex): Cell[] {
   index.remove(cell);
-  const daughters = points.map((p) =>
-    makeCell(world, p, cell, inherited(world, cell), (cell.energy - world.config.divisionCost) / 2)
+  const survives = reproductivePolicies[world.config.reproduction].parentSurvives;
+  const energy = (cell.energy - world.config.divisionCost) / 2;
+  const daughters = (survives ? points.slice(1) : points).map((p) =>
+    makeCell(world, p, cell, inherited(world, cell), {
+      body: scaleBody(cell.body, 0.5),
+      reserve: cell.reserve / 2,
+      energy,
+    })
   );
+  world.ledger.births += daughters.length;
+  if (survives) {
+    cell.body = scaleBody(cell.body, 0.5);
+    cell.reserve /= 2;
+    cell.energy = energy;
+    daughters.unshift(cell);
+  } else Object.assign(world.ancestry.get(cell.id)!, { ended: world.tick, cause: "division" });
   for (const daughter of daughters) index.add(daughter);
-  world.ledger.births += 2;
   world.ledger.divisions++;
   world.ledger.division += world.config.divisionCost;
-  Object.assign(world.ancestry.get(cell.id)!, { ended: world.tick, cause: "division" });
   recordEvent(
     world,
     "division",
     cell.id,
-    daughters.map((d) => d.id)
+    daughters.filter((d) => d.id !== cell.id).map((d) => d.id)
   );
   return daughters;
 }

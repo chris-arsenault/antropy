@@ -10,6 +10,12 @@ export const controller: Controller<rnn.Genome, rnn.BrainState> = {
   act: rnn.act,
   mutate: rnn.mutate,
   recombine: rnn.recombine,
+  express: rnn.express,
+  assimilate: rnn.assimilate,
+  plasticityStrength: (genome) => Math.abs(genome.plasticity[0]),
+  learnedMagnitude: (genome, state) =>
+    Math.abs(genome.plasticity[0]) *
+    Math.sqrt(state.traces.reduce((sum, v) => sum + v * v, 0) / state.traces.length),
   genomeDistance: rnn.genomeDistance,
   encodeGenome: codec.encodeGenome,
   decodeGenome: codec.decodeGenome,

@@ -63,7 +63,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   };
 }
 function body(ctx: CanvasRenderingContext2D, world: World, cell: Cell, selected: number | null) {
-  const r = radius(cell.mass, world.config);
+  const r = radius(cell, world.config);
   ctx.fillStyle = lineageColor(cell.lineage);
   ctx.beginPath();
   ctx.arc(cell.x, cell.y, r, 0, 2 * Math.PI);

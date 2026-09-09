@@ -7,6 +7,12 @@ document and are activated only when they support genuine evolution.
 
 ## Current bacterial work
 
+- [Evolutionary depth](design/funded-bodies.md): physical/behavioral chromosomes, material-funded
+  machinery, inherited acquired learning and configurable fission/budding inheritance.
+  Next extensions are physical seed/fertilize entities and multi-parent genetic ancestry,
+  environmental developmental reaction norms and evolvable mutation machinery. None is a selectable placeholder.
+  Resource-limited construction is implemented; receptor noise and propeller morphology remain
+  deferred. Substantial further designs require user review before implementation.
 - The top-down body/resource loop, RNN, local chemical interface, inheritance and live mutation
   are implemented. The architecture correction adds isolated genetic randomness, durable
   intervention/competition identity, controller-owned codecs and consistent checkpoint invariants.

@@ -13,6 +13,20 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Replaced bacterial allocation tuples with independent construction targets and actual core,
+  motor, transporter and storage material. Viscous drag, diffusion-limited uptake, construction
+  and machinery maintenance couple capability to physical costs. Stored food and usable energy
+  have separate conserved ledgers; offspring receive a physical share of existing machinery.
+  Corrected learning inheritance: acquired recurrent-weight changes enter offspring chromosomes
+  before crossover and mutation, with configurable retention. Hidden activity and task bytes reset.
+  Checkpoint v4 preserves both resource books and learning provenance; older files are rejected.
+
+- Added bacterial physical/behavioral chromosomes, paid private recurrent plasticity and three
+  competing body allocations for motors, uptake and storage. Added configurable haploid/diploid
+  expression, clonal/selfing transmission, crossover, mutation and fission/budding policies.
+  Checkpoint v3 preserves complete inherited and acquired state. Run defaults enable physical
+  mutation and learning; stats expose both. Seed/fertilize remains a documented lifecycle extension.
+
 - Replaced frame-batch speed multipliers with wall-clock tick targets and Maximum. The default
   target is 30 ticks/s; Metrics reports actual throughput and computation cost. Recorded the
   failed 18,000-tick construction review and a matched excavation-disabled replay: both colonies

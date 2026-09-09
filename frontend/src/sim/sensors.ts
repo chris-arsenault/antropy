@@ -1,6 +1,8 @@
 import { type World, type Cell } from "./types";
 import { moved, radius } from "./geometry";
 import { sample } from "./fields";
+import { energyCapacity, materialCapacity } from "./body";
+import { targetBody } from "./phenotype";
 
 function chemicalReads(
   world: World,
@@ -10,7 +12,7 @@ function chemicalReads(
   baseline: number
 ): number[] {
   const c = world.config,
-    r = radius(cell.mass, c),
+    r = radius(cell, c),
     center = sample(field, cell, c);
   const around = [0, Math.PI, -Math.PI / 2, Math.PI / 2].map((angle) =>
     sample(field, moved(cell, cell.heading + angle, r, c), c)
@@ -39,9 +41,13 @@ export function observe(world: World, cell: Cell): Float32Array {
   return Float32Array.from([
     ...nutrient,
     ...chemical,
-    Math.min(1, cell.energy / (c.reservePerMass * cell.mass)),
-    Math.min(1, (cell.mass - c.birthMass) / c.birthMass),
+    Math.min(1, cell.energy / energyCapacity(cell.body, c)),
+    Math.max(0, Math.min(1, cell.body.core / targetBody(world, cell).core - 1)),
     ...cell.contacts,
     cell.brain.task / 255,
+    cell.body.motor / (cell.body.motor + c.birthMass * c.motorRatio),
+    cell.body.transport / (cell.body.transport + c.birthMass * c.transporterRatio),
+    cell.body.storage / (cell.body.storage + c.birthMass * c.storageRatio),
+    Math.min(1, cell.reserve / materialCapacity(cell.body, c)),
   ]);
 }
