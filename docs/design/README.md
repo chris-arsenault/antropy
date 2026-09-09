@@ -1,104 +1,143 @@
-# Normalized simulation design
+# Normalized design and work order
 
-These documents are the current design and work sequence for Antropy. They replace the appendices
-as operating documents while preserving every supplied source in [the source archive](../sources/README.md).
-The [principles](../principles.md) govern decisions; [certifications](../certifications.md) record
-evidence; [the backlog](../backlog.md) lists only feature-level future work.
+Current architecture: [modular runtime and controlled environment configuration](modular-runtime.md).
+The cellular terrain remains available; independent settings now isolate nest geometry from depth,
+support and chemical transport.
+
+Current implementation: [colony knowledge, explicit actions and linear genetic programs](colony-knowledge.md).
+Programmed and LGP ants share colony knowledge, terrain routing, physical requests and task bytes.
+RNN-specific plans are canceled; their experiments remain historical evidence.
+
+Current work: [sustained chamber excavation](chamber-excavation.md). The user rejected the ten-cell
+result from [surplus-driven growth](surplus-growth.md) as imperceptible and requires the default
+nest to double from 148 to at least 296 connected underground cells through physical digging.
+Population growth and occupied individual cuts do not satisfy this target. The
+[controlled queen](controlled-queen.md) and food-supported growth remain prerequisites.
+The corrected default reaches 298 cells by tick 4,000, with twenty workers, continued feeding,
+110 soil units placed outside and eight brood occupying newly excavated floor.
+
+Earlier implementation: [collective work and attributable behavior](collective-work.md).
+The September 8 food-pack and scattered-digging rejection remains the review boundary. Event traces,
+sampled spatial replay, private worksite memory, spoil handoff and local work recruitment are implemented;
+the record separates failed development assays from the current integrated candidate.
+
+Next work: review the measured chamber doubling and collective-work motion. Afterwards resume
+[a sustainable, interactive colony near 2,000 workers](colony-scale.md),
+before genetics.
+Capacity and performance measurement and [support/settling](settling.md) are implemented.
+[Digging, queen transport and cache creation/relocation](construction.md) have been extended with
+[autonomous work, brood transport and material microclimate](construction-pressures.md).
+Programmed/LGP ants choose work without manual orders; changed behavior requires visual review.
+The earlier default failed that review after approximately 18,000 ticks. The
+[default pressure audit](default-pressure-audit.md) traces the failure, and the
+[autonomous colony repair](colony-repair.md) records the corrected policy and founding-nest default.
+The repaired trajectory also failed human review: the queen and food concentrate at the entrance
+while workers make scattered one-cell cuts. [Spatial construction repair](spatial-construction.md)
+removes artificial cavity heating and adds observed connected-floor, access and preservation-cost
+rules. The changed trajectory needs another human review; survival and completion counts do not
+override the prior failure.
+Measured nursery throughput and population/runtime scaling follow. The current roughly
+20-worker results do not certify the large-colony goal.
+The new pressure panel still fails tiered queen feeding and replacement; keep that terrain
+experimental. The founding startup and the small construction assays are the current review scope.
+
+This directory owns the current design. Archived appendices and earlier plans preserve ideas and
+evidence under [sources](../sources/README.md), but their old mechanisms and sequencing do not
+override current decisions or measured behavior.
+
+Current terrain: [cellular materials, compact nests and tiered surfaces](cellular-terrain.md).
+The browser opens programmed ants with climate and autonomous construction on the founding
+2,048 × 512 map, paused at tick zero.
+The Run-only review default starts at the normal material temperature, with daily surface exchange,
+temperature visible, Metrics open, the camera framing the colony and a 30 ticks/s target.
+Artificial cavity heating is off; the setting remains available for explicit assays.
+Actual throughput appears in Metrics; explicit tick-rate controls also offer Maximum.
+All other controls remain available. Storage holds 12 food units per cell. Completion totals for
+all five construction kinds persist after individual work records expire. The repair record
+separates browser checks, long survival measurements and the still-pending human motion review.
+Foreground/backing materials govern the world; surface tiers and historical controllers remain
+selectable. Camera pan and zoom are independent of simulation state.
 
 <a id="design-categories"></a>
 
 ## Work categories
 
-| Category                                                          | Owns                                                                                                      |
-| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [Controller, genome, and embodiment](controller.md)               | Sensor/action contract, controller substrates, genomes, initialization, seeded competences, and memory    |
-| [Colony biology and survival](colony-biology.md)                  | Food, energy, queen, brood, reproduction, mortality, replacement, and viability floors                    |
-| [Environment and nest morphogenesis](environment.md)              | Terrain, fields, resources, liabilities, configuration, authored nest, and later construction             |
-| [Experimentation, harness, and certification](experimentation.md) | Oracles, tests, harnesses, calibration, training, ledgers, findings, and evidence                         |
-| [Evolutionary and advanced systems](advanced.md)                  | Selection, population genetics, plasticity, castes, multiple colonies, threats, and alternate controllers |
-
-The [source coverage map](source-coverage.md) routes every source section into these owners and
-records where later evidence changed its status.
+| Category                              | Owns                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| [Controller](controller.md)           | Sensors, actions, policies, genome boundary, memory, future controller representations |
+| [Environment](environment.md)         | 2D substrate, materials, fields, resources, liabilities, future morphogenesis          |
+| [Colony biology](colony-biology.md)   | Energy use, mortality, queen, brood, replacement, demographic persistence              |
+| [Experimentation](experimentation.md) | Oracles, harnesses, gates, calibration, findings, certification                        |
+| [Advanced systems](advanced.md)       | In-world evolution, selection signal, genetic diversity, learning, regimes             |
 
 <a id="design-status"></a>
 
 ## Status vocabulary
 
-- **Delivered:** the stated mechanism or evidence exists for exactly the scope named. “Mechanics
-  delivered” does not imply a long-horizon colony outcome is certified.
-- **In progress:** the current repair or implementation boundary; its finish condition is stated in
-  the owning category and no completion claim is implied.
-- **Backlog:** intended work with an explicit place in the linear sequence. Detailed requirements
-  live in the owning category document.
-- **OBE:** overtaken by evidence, a later design, or a changed goal. The idea remains recorded with
-  its replacement or rejection reason.
-
-There is no implicit “done because code exists.” Certification and admission into the current
-world are separate claims.
+- **Delivered** means the canonical 2D implementation and its proportional verification exist.
+- **Needs human review** means numeric and mechanical checks pass but visual behavior is not yet
+  accepted.
+- **Backlog** means the idea is retained but has no active implementation in the canonical runtime.
+- **OBE** means a prior implementation or prescription was overtaken by evidence or the 2D reset;
+  provenance remains in sources and Git history.
 
 <a id="design-current"></a>
 
 ## Current boundary
 
-The authored nest, world carriers, and bounded body mechanics remain delivered. The Appendix H
-programmed food-loop policy is invalid: despite passing its population-ratio panel, human review
-found universal translated-circle motion inside and outside the nest and more than half the workers
-congested at the mouth by tick 100. The old trained RNN cohort is also invalid because it learned an
-earlier failed policy.
+The current programmed/LGP colony gathers, stores and eats physical food, feeds queen and larvae,
+and replaces workers through funded eggs, larvae and pupae. Mortality and conservation are active.
+Shared knowledge and routing are explicit abstractions; they do not transfer resources remotely.
+The [implementation record](colony-knowledge.md) preserves the exact comparison and known failures.
 
-The web app now presents a matched pair of immortal single-ant controls in the authored nest. The
-full-map ant reads all food coordinates and the legal 3D movement graph. The fresh programmed ant is
-a stateless function of the shipped local sensors. It follows physical entrance traffic, food odor,
-and nest odor rather than a planner-authored food or larder route. Both use the ordinary motor and
-mandible actions, the same persistent food patch, and the same queen-core larder neighborhood. Runs
-2460–2462 place the sensor arm 1.8–6.9% ahead of the full-map arm over five genuine external-food
-returns with no immediate steering reversals. The sensor arm still awaits human trajectory review
-before it becomes an RNN teacher.
+Runs 2717 and 2718 have identical compact-world summaries at 48,000 ticks: queen alive, 20 workers,
+57 births and no founders. The programmed reference run also passes. These are two world cases
+and one matched controller comparison, not evidence of 2,000-worker capacity or tiered-map survival.
 
-Mortality, resource-funded replacement, fixed-genome continuity, and selection instruments remain
-implemented. Their historical measurements are retained, but their admission evidence is suspended
-until the food-loop controller is recertified and the downstream worlds are rerun from that base.
-Standing genetic variation remains paused behind that boundary.
+The September 8 user correction makes colony size the prerequisite for later genetic work.
+Current laying, brood space and food throughput cannot sustain that scale. Settling for queen,
+brood and loose food is implemented; larger storage/care capacity and seed retries remain separate
+work. The subsequent user decision authorizes digging, queen transport and cache relocation. Follow
+[the scale work order](colony-scale.md). The later collective-work decision authorizes local work
+recruitment on pheromone B. Positive feedback on
+the earlier view does not certify changed physics or larger populations.
 
-The untreated resilience curve preceded mortality as Appendix G required. Mortality, replacement,
-and continuity did not activate standing crop, metabolic depression, or a deeper queen reserve;
-those mechanisms remain conditional rather than silently joining the evolution world.
+RNN studies are closed as current work. Their historical successes under former rules and later
+transfer/training failures remain in [task memory](task-memory.md),
+[nest generalization](nest-generalization.md) and [training recovery](training-recovery.md).
+Do not resume training or treat neural certification as a prerequisite. Inheritance and live
+genetics remain deferred. Construction and microclimate require visual review; collapse, flooding,
+gas exchange, seasons and broad ecology remain later work.
 
 <a id="design-order"></a>
 
 ## Cross-category implementation order
 
-| Order | Status                                       | Outcome                                                                                                                                                                                                                                 | Detailed owners                  |
-| ----: | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-|     1 | Delivered                                    | Deterministic voxel world, energy economy, controller contract, physical cargo, lifecycle/config gates, persistence, rendering, and harness ledger                                                                                      | CTRL-01–05, ENV-01–02, EXP-01–04 |
-|     2 | Delivered, isolated                          | Construction/cargo seed and full-world lifecycle/evolution mechanics exist as diagnostics but are not admitted into the current colony                                                                                                  | CTRL-07, ADV-01                  |
-|     3 | Delivered; human accepted                    | One immortal omniscient pathfinding ant completes repeated external-food-to-underground-larder trips through ordinary body actions                                                                                                      | EXP-14                           |
-|     4 | Implemented; human review pending            | Review the stateless sensor-limited programmed policy that passes matched five-return runs 2460–2462; the Appendix H policy and its ratio gate remain invalid                                                                           | CTRL-13, EXP-05                  |
-|     5 | Backlog, blocked                             | Train one predetermined controller initialization procedure from the accepted policy, then repeat cohort and robustness evaluation                                                                                                      | CTRL-06, EXP-06–07, BIO-01–02    |
-|     6 | Delivered mechanism; recertification pending | Rerun the untreated colony resilience curve from the repaired controller base                                                                                                                                                           | BIO-03, EXP-08                   |
-|     7 | Conditional, not admitted                    | Add a standing crop, metabolic depression, or deeper queen reserve only for a measured viability failure                                                                                                                                | BIO-04–06, ENV-06                |
-|     8 | Delivered mechanism; recertification pending | Recheck mortality and queen upkeep alone across varied worlds                                                                                                                                                                           | BIO-07, EXP-09                   |
-|     9 | Backlog                                      | Demonstrate that physical caching extends survival through an imposed food gap                                                                                                                                                          | BIO-08, EXP-09                   |
-|    10 | Delivered mechanism; recertification pending | Recheck worker reproduction; keep brood transport isolated unless replacement requires it                                                                                                                                               | BIO-09–11                        |
-|    11 | Delivered mechanism; recertification pending | Recheck larval rearing and edible brood; keep microclimate and exposure isolated                                                                                                                                                        | BIO-12–13, ENV-07                |
-|    12 | Delivered mechanism; recertification pending | Re-establish demographic continuity from physical gathering through matured-worker replacement                                                                                                                                          | BIO-14, EXP-09, ADV-02           |
-|    13 | Backlog                                      | Make the certified colony loop independently reviewable in the web app                                                                                                                                                                  | BIO-15                           |
-|    14 | Backlog                                      | Measure food and homing path efficiency without putting pathfinding inside the evolving controller                                                                                                                                      | EXP-10                           |
-|    15 | Delivered / backlog                          | Evolutionary health, conservation-correct merit, global ancestry, founder-line outcomes, and durable harness series are delivered; event detection, deep lineage inspection, and checkpoint-linked replay remain later observation work | ADV-03, EXP-11–12                |
-|    16 | Backlog                                      | Admit genetic variation alone, then the diverse-sire and mutation portfolio safeguards                                                                                                                                                  | ADV-04–06, CTRL-08–09, BIO-16    |
-|    17 | Backlog                                      | Admit sustainable colony founding and repeated collapse/recovery on one shared map                                                                                                                                                      | ADV-07, BIO-16                   |
-|    18 | Backlog                                      | Reintroduce optional excavation and spoil; compare dug colonies with the authored control on colony ledgers                                                                                                                             | ENV-08–11, ADV-08, EXP-13        |
-|    19 | Backlog                                      | Admit decay, seasons, and stronger liabilities one at a time; preserve an ordinary viable region                                                                                                                                        | ADV-09, ENV-07                   |
-|    20 | Backlog                                      | Add within-lifetime plasticity and developmental reaction norms; observe learning, assimilation, morphs, and roles                                                                                                                      | CTRL-10, ADV-10–11               |
-|    21 | Backlog                                      | Add multiple-colony threats, invasion, raiding, activity-scaled pressure, and richer soil/water ecology                                                                                                                                 | ADV-12, ENV-12–13                |
-|    22 | Backlog                                      | Implement linear GP and compare it with the RNN on viable-space width, evolutionary outcomes, cost, and legibility                                                                                                                      | CTRL-11–12, ADV-13               |
-|    23 | Backlog                                      | Scale world computation only where target-scale profiles demonstrate need                                                                                                                                                               | ENV-14, ADV-14                   |
+| Order | Status | Deliverable |
+| ---: | --- | --- |
+| 1 | Delivered | Canonical cellular 2D terrain, configurable nest/surface mechanisms and camera |
+| 2 | Delivered | Conserved food/energy, mortality, queen upkeep, staged brood and replacement |
+| 3 | Delivered | Shared colony knowledge, explicit route actions, task byte and programmed/LGP seed |
+| 4 | Delivered | Capacity budgets and Node/headless Canvas measurements (SCALE-01) |
+| 5 | Implemented; visual review required | Y-axis support and settling with checkpoint v11 (SCALE-02) |
+| 5a | Implemented; visual review required | Local digging, spoil hauling, queen carrying and multiple cache creation/relocation; checkpoint v12 |
+| 5b | Collective-work candidate implemented; human review pending | Checkpoint v17 adds private worksites, physical spoil handoff, ant-authored recruitment and attributable behavior traces. Programmed/LGP 2801/2803 and the Run-only browser agree at 4,000 ticks; sustained chamber growth remains unproved |
+| 5c | Partially implemented | Nursery and distributed storage throughput measurements remain (SCALE-03) |
+| 5d | Measured doubling; visual review required | Persistent chamber work, observed disposal routes and connected-area stats; default 148 → 298 cells at tick 4,000, checkpoint v19 |
+| 6 | Planned | Staged population scaling and measured runtime performance (SCALE-04–05) |
+| 7 | Planned; review required | Sustained roughly 2,000-worker replacement and interactive visual review (SCALE-06) |
+| 8 | Deferred until scale and genetics decision | Inheritance, reproductive lineages, variation and in-world selection |
+| 9 | Backlog | Evolved construction and additional ecology for selected physical or evolutionary questions |
+
+The unfinished RNN plans are canceled, not deliverables in this sequence. Detailed category lists
+retain their stable task IDs; this table defines their current cross-category priority.
 
 <a id="design-change"></a>
 
 ## Changing the design
 
-A new supplied document is archived unchanged, entered in the coverage map, and reconciled into
-the owning category sequence. It supersedes only the ideas it explicitly changes. A new mechanism,
-sensor, field, or gate meaning requires a structural finding and human decision. Evidence may mark
-an item OBE without deleting its provenance.
+Use the [operating principles](../principles.md): classify the owner, state the governing
+inequality, change one mechanism, and measure it. When a source document conflicts with the
+canonical runtime or visible behavior, preserve the source and amend this design. Never make a
+historical appendix pass by silently restoring an oracle sensor or hidden state. Shared knowledge
+and routing permissions are explicitly recorded in the current controller design.

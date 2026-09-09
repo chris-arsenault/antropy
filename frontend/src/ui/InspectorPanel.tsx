@@ -1,98 +1,105 @@
-import { type Ant } from "../sim/ant";
-import { type Controller } from "../sim/controller/contract";
-import { TRAIT_KEYS, TRAIT_LABELS } from "../sim/stats";
+import { INPUT_NAMES, type Action } from "../sim/controller/contract";
+import { type World } from "../sim/types";
+import { useState } from "react";
+import { ColonySensePanel } from "./ColonySensePanel";
+import { TaskMemoryPanel } from "./TaskMemoryPanel";
+import { KnowledgePanel } from "./KnowledgePanel";
+import { isKnowledgeScenario } from "../sim/colony/contract";
+import { adultBodies, canAct } from "../sim/adultBody";
 
-interface InspectorPanelProps {
-  ant: Ant | null;
-  controller: Controller;
-  onClose(): void;
+function format(value: number): string {
+  return Math.abs(value) >= 0.001 ? value.toFixed(3) : value.toExponential(1);
 }
 
-const INPUT_LABELS = [
-  "phA L",
-  "phA R",
-  "phB L",
-  "phB R",
-  "food L",
-  "food R",
-  "energy",
-  "age",
-  "load",
-  "carried",
-  "scale",
-  "depth",
-  "slope",
-  "solid",
-  "crowd",
-  "c.food",
-  "c.egg",
-  "c.ant",
-  "fall",
-  "bias",
-  "nest L",
-  "nest R",
-  "home ∠",
-  "home d",
-];
-
-const OUTPUT_LABELS = ["turn", "fwd", "vert", "eat", "dig", "phA", "phB", "egg"];
-
-function ValueRow({ label, value }: { label: string; value: number }) {
+function ValueRow({ label, value }: { readonly label: string; readonly value: string | number }) {
   return (
     <div className="inspector-row">
       <span className="inspector-key">{label}</span>
-      <span className="inspector-value">{value.toFixed(2)}</span>
+      <span className="inspector-value">{value}</span>
     </div>
   );
 }
 
-function VectorBlock({
-  title,
-  labels,
-  values,
-}: {
-  title: string;
-  labels: string[];
-  values: readonly number[];
-}) {
-  return (
-    <details className="inspector-block">
-      <summary>{title}</summary>
-      {labels.map((label, i) => (
-        <ValueRow key={label} label={label} value={values[i] ?? 0} />
-      ))}
-    </details>
-  );
+function actionRows(action: Action): readonly [string, string | number][] {
+  return [
+    ["turn", action.turn],
+    ["move", String(action.move)],
+    ["mandible", String(action.mandible)],
+    ["pheromone A", format(action.pheromoneA)],
+    ["pheromone B", format(action.pheromoneB)],
+    ["eat", String(Boolean(action.eat))],
+    ["feed", String(Boolean(action.feed))],
+    ["release", String(Boolean(action.release))],
+    ["task write", action.task ?? "keep"],
+  ];
 }
 
-/** Selected-ant inspector (spec §11.4): live inputs, outputs, hidden state. */
-export function InspectorPanel({ ant, controller, onClose }: InspectorPanelProps) {
-  if (!ant) {
-    return null;
-  }
-  const hidden = controller.inspectState(ant.controllerState);
+export function InspectorPanel({
+  world,
+  onTask,
+}: {
+  readonly world: World;
+  readonly onTask: (id: number, value: number) => void;
+}) {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const adults = adultBodies(world).filter((ant) => canAct(world, ant));
+  if (adults.length === 0)
+    return (
+      <aside className="inspector" data-testid="inspector">
+        No living ants
+      </aside>
+    );
+  const ant = adults.find((candidate) => candidate.id === selectedId) ?? adults[0];
   return (
     <aside className="inspector" data-testid="inspector">
       <div className="inspector-header">
-        <strong>Ant #{ant.id}</strong>
-        <button type="button" onClick={onClose}>
-          ×
-        </button>
+        <label>
+          Ant{" "}
+          <select value={ant.id} onChange={(event) => setSelectedId(Number(event.target.value))}>
+            {adults.map((worker) => (
+              <option key={worker.id} value={worker.id}>
+                {worker.caste} #{worker.id}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span>{world.scenario}</span>
       </div>
-      <ValueRow label="patriline" value={ant.patrilineId} />
+      <ValueRow label="position" value={`${ant.x}, ${ant.y}`} />
+      <ValueRow label="heading" value={ant.heading} />
+      <ValueRow label="energy" value={format(ant.energy)} />
+      <ValueRow label="crop quantity" value={format(ant.cargo)} />
+      <ValueRow label="crop energy" value={format(ant.cargo * world.config.foodEnergyDensity)} />
       <ValueRow label="age" value={ant.age} />
-      <ValueRow label="energy" value={ant.energy} />
-      <ValueRow label="body" value={ant.bodyScale} />
-      <ValueRow label="net food merit" value={ant.netEnergyDelivered} />
-      <details className="inspector-block">
-        <summary>Traits</summary>
-        {TRAIT_KEYS.map((key, i) => (
-          <ValueRow key={key} label={TRAIT_LABELS[i]} value={ant.traits[key]} />
+      <TaskMemoryPanel
+        key={ant.id}
+        ant={ant}
+        overrides={world.taskOverrides}
+        maximum={(world.registeredController?.tasks ?? 256) - 1}
+        onTask={onTask}
+      />
+      <ColonySensePanel world={world} ant={ant} />
+      <KnowledgePanel world={world} ant={ant} />
+      <details className="inspector-block" open>
+        <summary>Outputs</summary>
+        {actionRows(ant.lastAction).map(([label, value]) => (
+          <ValueRow key={label} label={label} value={value} />
         ))}
       </details>
-      <VectorBlock title="Inputs" labels={INPUT_LABELS} values={Array.from(ant.lastInputs)} />
-      <VectorBlock title="Outputs" labels={OUTPUT_LABELS} values={Array.from(ant.lastOutputs)} />
-      <VectorBlock title="Hidden state" labels={hidden.map((_, i) => `h${i}`)} values={hidden} />
+      <details className="inspector-block">
+        <summary>Inputs ({INPUT_NAMES.length})</summary>
+        {INPUT_NAMES.map((label, index) => (
+          <ValueRow key={label} label={label} value={format(ant.lastInputs[index])} />
+        ))}
+      </details>
+      {!isKnowledgeScenario(world.scenario) && (
+        <details className="inspector-block">
+          <summary>Controller state ({ant.controllerState.length})</summary>
+          {Array.from(ant.controllerState).map((value, index) => (
+            <ValueRow key={index} label={`h${index}`} value={format(value)} />
+          ))}
+        </details>
+      )}
     </aside>
   );
 }

@@ -1,380 +1,290 @@
-import { type Ant } from "../sim/ant";
-import { type GeneticRecord } from "../sim/ancestry";
-import { type Colony } from "../sim/colony";
-import { type SimConfig } from "../sim/config";
-import { controllerById } from "../sim/controller/registry";
-import { type Egg } from "../sim/eggs";
-import { voxelIndex } from "../sim/grid";
 import {
-  materialScentActiveIndices,
-  restoreMaterialScentField,
-  type MaterialScentField,
-} from "../sim/materialScent";
-import { type RngState } from "../sim/rng";
-import { restoreScentField, scentActiveIndices, type ScentField } from "../sim/scent";
-import { createWorld, type World, type WorldMetrics } from "../sim/world";
+  checkpointEnvironment,
+  terrainCheckpoint,
+  type TerrainCheckpoint,
+} from "./checkpointTerrain";
+import { INPUT_COUNT } from "../sim/controller/contract";
+import { validateControllerState } from "../sim/controller/runtime";
+import { type SimConfig } from "../sim/config";
+import { validateConfig } from "../sim/configValidation";
+import { validateCheckpointState } from "./checkpointValidation";
+import { simulationManifest, validateSimulationManifest } from "../sim/simulation";
+import { activeIndices, restoreChemical, type ChemicalField } from "../sim/scent";
+import {
+  type Ant,
+  type Brood,
+  type Economy,
+  type Queen,
+  type ScenarioId,
+  type World,
+  type WorldMetrics,
+} from "../sim/types";
+import { createWorld } from "../sim/world";
+import { validTask } from "../sim/taskMemory";
+import { type RegisteredModel, validateRegisteredModel } from "../sim/controller/registeredModel";
+import { validateLinearGenome, type LinearGenome } from "../sim/controller/linear/genome";
+import { type KnownLocation } from "../sim/colony/contract";
+import { type BehaviorState } from "../sim/colony/behavior";
+import { validateBehavior } from "./behavior";
+import { validateKnowledgeState } from "./knowledgeValidation";
+import {
+  constructionCheckpoint,
+  restoreConstruction,
+  validateConstruction,
+  type ConstructionCheckpoint,
+} from "./construction";
 
-export const CHECKPOINT_VERSION = 22;
+import {
+  climateCheckpoint,
+  restoreClimate,
+  validateClimateState,
+  type ClimateCheckpoint,
+} from "./climate";
+import {
+  habitatCheckpoint,
+  restoreHabitat,
+  validateHabitat,
+  type HabitatCheckpoint,
+} from "./habitat";
 
-interface AntRecord {
-  scalars: Record<string, number>;
-  carrying: number | null;
-  carriedEggIds: number[];
-  genome: Float32Array;
-  state: Float32Array;
-  lastInputs: Float32Array;
-  lastOutputs: Float32Array;
+export const CHECKPOINT_VERSION = 19;
+type AntCheckpoint = Omit<Ant, "lastInputs" | "controllerState"> & {
+  readonly lastInputs: number[];
+  readonly controllerState: number[];
+};
+interface ChemicalCheckpoint {
+  readonly active: number[];
+  readonly values: number[];
 }
 
-interface EggRecord {
-  scalars: Record<string, number>;
-  carrierId: number | null;
-  genome: Float32Array;
+export interface Checkpoint2D {
+  readonly behavior: BehaviorState;
+  readonly version: 19;
+  readonly climate: ClimateCheckpoint;
+  readonly habitat: HabitatCheckpoint;
+  readonly construction: ConstructionCheckpoint;
+  readonly knowledge: { readonly colonyId: number; readonly locations: KnownLocation[] };
+  readonly linearGenome: LinearGenome | null;
+  readonly mechanisms: typeof simulationManifest;
+  readonly taskOverrides: number;
+  readonly registeredController: RegisteredModel | null;
+  readonly dimension: "2d";
+  readonly seed: number;
+  readonly tick: number;
+  readonly scenario: ScenarioId;
+  readonly config: SimConfig;
+  readonly randomState: number;
+  readonly grid: number[];
+  readonly terrain: TerrainCheckpoint;
+  readonly food: [number, number][];
+  readonly renewableSources: number[];
+  readonly foodOdor: ChemicalCheckpoint;
+  readonly nestOdor: ChemicalCheckpoint;
+  readonly pheromoneA: ChemicalCheckpoint;
+  readonly pheromoneB: ChemicalCheckpoint;
+  readonly freshAir: ChemicalCheckpoint;
+  readonly ants: AntCheckpoint[];
+  readonly brood: Brood[];
+  readonly queen: AntCheckpoint & Pick<Queen, "caste" | "alive" | "carrier" | "layingAge">;
+  readonly economy: Economy;
+  readonly nextAntId: number;
+  readonly nextBroodId: number;
+  readonly metrics: WorldMetrics;
 }
 
-interface ColonyRecord {
-  scalars: Record<string, number>;
-  queenGenome: Float32Array;
-  sperm: {
-    genome: Float32Array;
-    patrilineId: number;
-    geneticId: number;
-    founderLineId: number;
-  }[];
-  merit: [number, number][];
-}
-
-interface ScentRecord {
-  values: Float32Array;
-  owners: Uint8Array;
-  active: number[];
-}
-
-export interface Checkpoint {
-  version: number;
-  controllerId: string;
-  seed: number;
-  tick: number;
-  rngState: RngState;
-  weatherRngState: RngState;
-  rainRemaining: number;
-  nextAntId: number;
-  nextGeneticId: number;
-  geneticRecords: GeneticRecord[];
-  founderGenomes: Float32Array[];
-  nextEggId: number;
-  nextColonyId: number;
-  foundings: number;
-  foundingFailures: number;
-  collapses: number;
-  queenEggsEaten: number;
-  eggsLaid: number;
-  eggsPerished: number;
-  metrics: WorldMetrics;
-  config: SimConfig;
-  continuations: number;
-  lastContinueTick: number;
-  foodBase: number;
-  foodTarget: number;
-  grid: Uint8Array;
-  foodSources: number[];
-  storedFood: number[];
-  uncreditedExternalFood: number[];
-  recycledFood: number[];
-  cavities: number[];
-  lastVisit: Uint32Array;
-  ants: AntRecord[];
-  eggs: EggRecord[];
-  colonies: ColonyRecord[];
-  scents: {
-    a: ScentRecord;
-    b: ScentRecord;
-    food: ScentRecord;
-    nest: ScentRecord;
-    colony: ScentRecord;
-  };
-  materialColonyScent: ScentRecord;
-}
-
-const ANT_SCALARS = [
-  "id",
-  "x",
-  "y",
-  "z",
-  "prevX",
-  "prevY",
-  "prevZ",
-  "heading",
-  "moveCharge",
-  "verticalAttention",
-  "energy",
-  "age",
-  "bodyScale",
-  "carryLoad",
-  "spoilLoads",
-  "carriedColonyScentOwner",
-  "carriedColonyScent",
-  "sex",
-  "geneticId",
-  "founderLineId",
-  "lineageId",
-  "patrilineId",
-  "motherId",
-  "fatherId",
-  "netEnergyDelivered",
-  "uncreditedFoodLoads",
-] as const;
-
-const EGG_SCALARS = [
-  "id",
-  "x",
-  "y",
-  "z",
-  "energy",
-  "incubationRemaining",
-  "stage",
-  "fedProgress",
-  "hungerTicks",
-  "sex",
-  "geneticId",
-  "founderLineId",
-  "queenDestined",
-  "lineageId",
-  "patrilineId",
-  "motherId",
-  "fatherId",
-] as const;
-
-const COLONY_SCALARS = [
-  "id",
-  "x",
-  "y",
-  "z",
-  "entranceX",
-  "entranceY",
-  "entranceZ",
-  "queenGeneticId",
-  "queenAge",
-  "queenLifespanTicks",
-  "stockpile",
-  "nextPatrilineId",
-  "lastEggTick",
-  "lastQueenEggTick",
-  "starvingSince",
-] as const;
-
-function serializeScent(field: ScentField): ScentRecord {
+function antCheckpoint(ant: Ant): AntCheckpoint {
   return {
-    values: Float32Array.from(field.values),
-    owners: Uint8Array.from(field.owners),
-    active: scentActiveIndices(field),
+    ...ant,
+    decision: structuredClone(ant.decision),
+    lastInputs: [...ant.lastInputs],
+    controllerState: [...ant.controllerState],
+    lastAction: { ...ant.lastAction },
   };
 }
-
-function restoreScent(field: ScentField, record: ScentRecord): void {
-  restoreScentField(field, record.values, record.owners, record.active);
+function chemicalCheckpoint(field: ChemicalField): ChemicalCheckpoint {
+  const active = activeIndices(field);
+  return { active, values: active.map((index) => field.values[index]) };
 }
 
-function serializeMaterialScent(field: MaterialScentField): ScentRecord {
-  return {
-    values: Float32Array.from(field.values),
-    owners: Uint8Array.from(field.owners),
-    active: materialScentActiveIndices(field),
-  };
-}
-
-function serializeAnt(world: World, ant: Ant): AntRecord {
-  const scalars: Record<string, number> = {};
-  for (const key of ANT_SCALARS) {
-    scalars[key] = ant[key] as number;
-  }
-  scalars.falling = ant.falling ? 1 : 0;
-  scalars.sensoryHistoryReady = ant.sensoryHistoryReady ? 1 : 0;
-  return {
-    scalars,
-    carrying: ant.carrying,
-    carriedEggIds: [...ant.carriedEggIds],
-    genome: world.controller.serializeGenome(ant.genome),
-    state: world.controller.serializeState(ant.controllerState),
-    lastInputs: Float32Array.from(ant.lastInputs),
-    lastOutputs: Float32Array.from(ant.lastOutputs),
-  };
-}
-
-function restoreAnt(world: World, record: AntRecord): Ant {
-  const genome = world.controller.deserializeGenome(record.genome);
-  const ant = {
-    ...(record.scalars as unknown as Ant),
-    falling: record.scalars.falling === 1,
-    alive: true,
-    carrying: record.carrying,
-    carriedEggIds: [...record.carriedEggIds],
-    genome,
-    controllerState: world.controller.deserializeState(record.state),
-    traits: world.controller.physical(genome),
-    sensoryHistoryReady: record.scalars.sensoryHistoryReady === 1,
-    lastInputs: Float32Array.from(record.lastInputs),
-    lastOutputs: Float32Array.from(record.lastOutputs),
-  };
-  return ant;
-}
-
-function serializeColony(world: World, colony: Colony): ColonyRecord {
-  const scalars: Record<string, number> = {};
-  for (const key of COLONY_SCALARS) {
-    scalars[key] = colony[key] as number;
-  }
-  return {
-    scalars,
-    queenGenome: world.controller.serializeGenome(colony.queenGenome),
-    sperm: colony.sperm.map((s) => ({
-      genome: world.controller.serializeGenome(s.genome),
-      patrilineId: s.patrilineId,
-      geneticId: s.geneticId,
-      founderLineId: s.founderLineId,
-    })),
-    merit: Array.from(colony.patrilineMerit.entries()),
-  };
-}
-
-function restoreColony(world: World, record: ColonyRecord): Colony {
-  return {
-    ...(record.scalars as unknown as Colony),
-    queenGenome: world.controller.deserializeGenome(record.queenGenome),
-    sperm: record.sperm.map((s) => ({
-      genome: world.controller.deserializeGenome(s.genome),
-      patrilineId: s.patrilineId,
-      geneticId: s.geneticId,
-      founderLineId: s.founderLineId,
-    })),
-    patrilineMerit: new Map(record.merit),
-  };
-}
-
-/** Complete world state, including PRNG and iteration-order-bearing sets. */
-export function serializeWorld(world: World): Checkpoint {
+export function createCheckpoint(world: World): Checkpoint2D {
   return {
     version: CHECKPOINT_VERSION,
-    controllerId: world.controller.id,
+    behavior: structuredClone(world.behavior),
+    climate: climateCheckpoint(world),
+    habitat: habitatCheckpoint(world.habitat),
+    construction: constructionCheckpoint(world),
+    knowledge: {
+      colonyId: world.knowledge.colonyId,
+      locations: structuredClone([...world.knowledge.locations.values()]),
+    },
+    linearGenome: structuredClone(world.linearGenome),
+    mechanisms: structuredClone(simulationManifest),
+    taskOverrides: world.taskOverrides,
+    registeredController: structuredClone(world.registeredController),
+    dimension: "2d",
     seed: world.seed,
     tick: world.tick,
-    rngState: world.rng.getState(),
-    weatherRngState: world.weatherRng.getState(),
-    rainRemaining: world.rainRemaining,
-    nextAntId: world.nextAntId,
-    nextGeneticId: world.nextGeneticId,
-    geneticRecords: Array.from(world.geneticRecords.values(), (record) => ({
-      ...record,
-      traits: { ...record.traits },
-    })),
-    founderGenomes: world.founderGenomes.map((genome) => world.controller.serializeGenome(genome)),
-    nextEggId: world.nextEggId,
-    nextColonyId: world.nextColonyId,
-    foundings: world.foundings,
-    foundingFailures: world.foundingFailures,
-    collapses: world.collapses,
-    queenEggsEaten: world.queenEggsEaten,
-    eggsLaid: world.eggsLaid,
-    eggsPerished: world.eggsPerished,
-    metrics: { ...world.metrics },
-    config: world.config,
-    continuations: world.continuations,
-    lastContinueTick: world.lastContinueTick,
-    foodBase: world.foodBase,
-    foodTarget: world.foodTarget,
-    grid: Uint8Array.from(world.grid.data),
-    foodSources: Array.from(world.foodSources),
-    storedFood: Array.from(world.storedFood),
-    uncreditedExternalFood: Array.from(world.uncreditedExternalFood),
-    recycledFood: Array.from(world.recycledFood),
-    cavities: Array.from(world.cavities),
-    lastVisit: Uint32Array.from(world.lastVisit),
-    ants: world.ants.map((ant) => serializeAnt(world, ant)),
-    eggs: world.eggs.map((egg) => ({
-      scalars: Object.fromEntries(EGG_SCALARS.map((key) => [key, egg[key] as number])),
-      carrierId: egg.carrierId,
-      genome: world.controller.serializeGenome(egg.genome),
-    })),
-    colonies: world.colonies.map((colony) => serializeColony(world, colony)),
-    scents: {
-      a: serializeScent(world.pheromoneA),
-      b: serializeScent(world.pheromoneB),
-      food: serializeScent(world.foodScent),
-      nest: serializeScent(world.nestScent),
-      colony: serializeScent(world.colonyScent),
+    scenario: world.scenario,
+    config: structuredClone(world.config),
+    randomState: world.random.value,
+    grid: [...world.grid.cells],
+    terrain: terrainCheckpoint(world),
+    food: [...world.food],
+    renewableSources: [...world.renewableSources],
+    foodOdor: chemicalCheckpoint(world.foodOdor),
+    nestOdor: chemicalCheckpoint(world.nestOdor),
+    pheromoneA: chemicalCheckpoint(world.pheromoneA),
+    pheromoneB: chemicalCheckpoint(world.pheromoneB),
+    freshAir: chemicalCheckpoint(world.freshAir),
+    ants: world.ants.map(antCheckpoint),
+    brood: world.brood.map((brood) => ({ ...brood })),
+    queen: {
+      ...antCheckpoint(world.queen),
+      caste: "queen",
+      alive: world.queen.alive,
+      carrier: world.queen.carrier,
+      layingAge: world.queen.layingAge,
     },
-    materialColonyScent: serializeMaterialScent(world.materialColonyScent),
+    economy: { ...world.economy },
+    nextAntId: world.nextAntId,
+    nextBroodId: world.nextBroodId,
+    metrics: {
+      ...world.metrics,
+      pickupTicks: [...world.metrics.pickupTicks],
+      depositTicks: [...world.metrics.depositTicks],
+    },
   };
 }
 
-/** Rebuild a live world from a checkpoint. Unknown versions stop the load. */
-export function deserializeWorld(checkpoint: Checkpoint): World {
-  if (checkpoint.version !== CHECKPOINT_VERSION) {
-    throw new Error(`unsupported checkpoint version ${checkpoint.version}`);
+function checkpointRecord(value: unknown): Checkpoint2D {
+  if (!value || typeof value !== "object") throw new Error("invalid checkpoint document");
+  const record = value as Partial<Checkpoint2D>;
+  if (record.dimension !== "2d" || record.version !== CHECKPOINT_VERSION) {
+    throw new Error("checkpoint is not from the current canonical 2D simulation");
   }
-  const controller = controllerById(checkpoint.controllerId);
-  const world = createWorld(checkpoint.seed, controller);
+  if (
+    !Array.isArray(record.ants) ||
+    !Array.isArray(record.food) ||
+    !Array.isArray(record.brood) ||
+    !record.queen ||
+    !record.economy
+  )
+    throw new Error("incomplete colony checkpoint");
+  return record as Checkpoint2D;
+}
 
-  world.tick = checkpoint.tick;
-  world.rng.setState(checkpoint.rngState);
-  world.weatherRng.setState(checkpoint.weatherRngState);
-  world.rainRemaining = checkpoint.rainRemaining;
-  world.nextAntId = checkpoint.nextAntId;
-  world.nextGeneticId = checkpoint.nextGeneticId;
-  world.geneticRecords = new Map(
-    checkpoint.geneticRecords.map((record) => [
-      record.id,
-      { ...record, traits: { ...record.traits } },
-    ])
-  );
-  world.founderGenomes = checkpoint.founderGenomes.map((genome) =>
-    controller.deserializeGenome(genome)
-  );
-  world.nextEggId = checkpoint.nextEggId;
-  world.nextColonyId = checkpoint.nextColonyId;
-  world.foundings = checkpoint.foundings;
-  world.foundingFailures = checkpoint.foundingFailures;
-  world.collapses = checkpoint.collapses;
-  world.queenEggsEaten = checkpoint.queenEggsEaten;
-  world.eggsLaid = checkpoint.eggsLaid;
-  world.eggsPerished = checkpoint.eggsPerished;
-  world.metrics = { ...checkpoint.metrics };
-  world.config = { ...checkpoint.config };
-  world.continuations = checkpoint.continuations;
-  world.lastContinueTick = checkpoint.lastContinueTick;
-  world.foodBase = checkpoint.foodBase;
-  world.foodTarget = checkpoint.foodTarget;
-  world.grid.data.set(checkpoint.grid);
-  world.foodSources = new Set(checkpoint.foodSources);
-  world.storedFood = new Set(checkpoint.storedFood);
-  world.uncreditedExternalFood = new Set(checkpoint.uncreditedExternalFood);
-  world.recycledFood = new Set(checkpoint.recycledFood);
-  world.cavities = new Set(checkpoint.cavities);
-  world.lastVisit.set(checkpoint.lastVisit);
-  world.ants = checkpoint.ants.map((record) => restoreAnt(world, record));
-  world.eggs = checkpoint.eggs.map((record) => ({
-    ...(record.scalars as unknown as Egg),
-    carrierId: record.carrierId,
-    genome: controller.deserializeGenome(record.genome),
-  }));
-  world.eggIndex = new Map();
-  for (const egg of world.eggs) {
-    if (egg.carrierId === null) {
-      world.eggIndex.set(voxelIndex(world.grid, egg.x, egg.y, egg.z), egg);
-    }
+function restoreAnt(checkpoint: AntCheckpoint, model: RegisteredModel | null): Ant {
+  if (checkpoint.lastInputs.length !== INPUT_COUNT) {
+    throw new Error("checkpoint controller shape mismatch");
   }
-  world.colonies = checkpoint.colonies.map((record) => restoreColony(world, record));
-  restoreScent(world.pheromoneA, checkpoint.scents.a);
-  restoreScent(world.pheromoneB, checkpoint.scents.b);
-  restoreScent(world.foodScent, checkpoint.scents.food);
-  restoreScent(world.nestScent, checkpoint.scents.nest);
-  restoreScent(world.colonyScent, checkpoint.scents.colony);
-  restoreMaterialScentField(
-    world.materialColonyScent,
-    checkpoint.materialColonyScent.values,
-    checkpoint.materialColonyScent.owners,
-    checkpoint.materialColonyScent.active
+  validateControllerState(model, checkpoint.controllerState, checkpoint.task);
+  if (
+    !validTask(checkpoint.task) ||
+    ![checkpoint.taskAge, checkpoint.taskChanges].every(
+      (value) => Number.isSafeInteger(value) && value >= 0
+    )
+  )
+    throw new Error("invalid checkpoint task memory");
+  if (checkpoint.lastAction.task !== null && !validTask(checkpoint.lastAction.task))
+    throw new Error("invalid checkpoint task action");
+  return {
+    ...checkpoint,
+    decision: structuredClone(checkpoint.decision),
+    lastInputs: Float32Array.from(checkpoint.lastInputs),
+    lastAction: { ...checkpoint.lastAction },
+    controllerState: Float32Array.from(checkpoint.controllerState),
+  };
+}
+
+function restoreFood(world: World, food: readonly [number, number][]): void {
+  world.food.clear();
+  world.foodSources.clear();
+  for (const [index, amount] of food) {
+    if (
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= world.grid.cells.length ||
+      !Number.isFinite(amount) ||
+      amount <= 0
+    ) {
+      throw new Error("invalid checkpoint food quantity");
+    }
+    world.food.set(index, amount);
+    world.foodSources.add(index);
+  }
+}
+
+export function restoreCheckpoint(value: unknown): World {
+  const checkpoint = checkpointRecord(value);
+  validateSimulationManifest(checkpoint.mechanisms);
+  validateConfig(checkpoint.config);
+  validateCheckpointState(checkpoint);
+  validateKnowledgeState(checkpoint);
+  validateConstruction(checkpoint);
+  validateClimateState(checkpoint);
+  validateHabitat(checkpoint);
+  validateBehavior(
+    checkpoint.behavior,
+    checkpoint.tick,
+    checkpoint.config.width,
+    checkpoint.config.height
   );
-  world.dirtyChunks.clear();
+  const config = structuredClone(checkpoint.config);
+  const environment = checkpointEnvironment(config, checkpoint.grid, checkpoint.terrain);
+  const world = createWorld(checkpoint.seed, checkpoint.scenario, config, false, environment);
+  world.knowledge = {
+    colonyId: checkpoint.knowledge.colonyId,
+    locations: new Map(
+      checkpoint.knowledge.locations.map((location) => [location.id, structuredClone(location)])
+    ),
+  };
+  world.linearGenome =
+    checkpoint.linearGenome === null ? null : validateLinearGenome(checkpoint.linearGenome);
+  if ((world.scenario === "colony-lgp") !== (world.linearGenome !== null))
+    throw new Error("checkpoint scenario and linear genome disagree");
+  world.registeredController =
+    checkpoint.registeredController === null
+      ? null
+      : validateRegisteredModel(checkpoint.registeredController);
+  if ((world.scenario === "registered-colony") !== (world.registeredController !== null))
+    throw new Error("checkpoint scenario and registered model disagree");
+  if (checkpoint.grid.length !== world.grid.cells.length) {
+    throw new Error("checkpoint grid mismatch");
+  }
+  world.tick = checkpoint.tick;
+  world.behavior = structuredClone(checkpoint.behavior);
+  if (!Number.isSafeInteger(checkpoint.taskOverrides) || checkpoint.taskOverrides < 0)
+    throw new Error("invalid checkpoint task intervention count");
+  world.taskOverrides = checkpoint.taskOverrides;
+  world.random.value = checkpoint.randomState;
+  restoreFood(world, checkpoint.food);
+  world.renewableSources.splice(0, world.renewableSources.length, ...checkpoint.renewableSources);
+  for (const key of ["foodOdor", "nestOdor", "pheromoneA", "pheromoneB", "freshAir"] as const) {
+    restoreChemical(world[key], checkpoint[key].values, checkpoint[key].active);
+  }
+  world.ants.splice(
+    0,
+    world.ants.length,
+    ...checkpoint.ants.map((ant) => restoreAnt(ant, world.registeredController))
+  );
+  world.brood.splice(0, world.brood.length, ...checkpoint.brood.map((brood) => ({ ...brood })));
+  Object.assign(world.queen, restoreAnt(checkpoint.queen, null));
+  restoreConstruction(world, checkpoint.construction);
+  world.climate = restoreClimate(checkpoint.climate);
+  world.habitat = restoreHabitat(checkpoint.habitat);
+  Object.assign(world.economy, checkpoint.economy);
+  world.nextAntId = checkpoint.nextAntId;
+  world.nextBroodId = checkpoint.nextBroodId;
+  Object.assign(world.metrics, checkpoint.metrics, {
+    pickupTicks: [...checkpoint.metrics.pickupTicks],
+    depositTicks: [...checkpoint.metrics.depositTicks],
+  });
   return world;
+}
+
+export function encodeCheckpoint(world: World): string {
+  return JSON.stringify(createCheckpoint(world));
+}
+export function decodeCheckpoint(serialized: string): World {
+  return restoreCheckpoint(JSON.parse(serialized) as unknown);
 }

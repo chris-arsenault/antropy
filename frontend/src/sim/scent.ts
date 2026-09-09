@@ -1,257 +1,284 @@
-import { type VoxelGrid } from "./grid";
-import { Material } from "./materials";
-import { BEACON_PHYSICS, SCENT } from "./tunables";
+import { CHEMISTRY } from "./config";
+import { cellIndex, pointAt, type Grid } from "./grid";
+import { DIRECTIONS } from "./geometry";
+import { isAir, isWalkable } from "./terrain";
+export { isWalkable } from "./terrain";
 
-/** Per-field diffusion/evaporation parameters (trail vs beacon roles). */
-export interface ScentPhysics {
-  readonly diffusionRate: number;
+export interface FieldPhysics {
+  readonly diffusion: number;
   readonly evaporation: number;
-  /** Smallest edge share worth transporting; independent of active-value culling. */
-  readonly transferEpsilon: number;
   readonly epsilon: number;
 }
 
-/**
- * A diffusing scent field over air voxels (design spec §5.5), held in flat
- * fixed-shape arrays with no hot-path allocation. Deposits are owner-tagged
- * (ADR-0005): each voxel carries the colony id of its last depositor and
- * sampling filters by owner, so colonies never read each other's signals.
- * Owner 0 is the neutral channel (food scent, colony-less ants).
- * Iteration order is the active list order — deterministic.
- */
-export interface ScentField {
-  values: Float32Array;
-  /** Colony id owning each voxel's scent (0 = neutral). */
-  owners: Uint8Array;
-  /** Active voxel indices, insertion-ordered; only [0, activeCount) is live. */
-  activeList: Int32Array;
+export interface ChemicalField {
+  readonly values: Float32Array;
+  activeList: Int32Array<ArrayBufferLike>;
   activeCount: number;
-  /** 1 where the voxel is in the active list. */
-  activeFlags: Uint8Array;
-  physics: ScentPhysics;
+  readonly activeFlags: Uint8Array;
+  readonly physics: FieldPhysics;
+  readonly surfaceBound: boolean;
 }
 
-const INITIAL_ACTIVE_CAPACITY = 4096;
-
-// Diffusion scratch shared across fields (passes run sequentially on one
-// thread): per-voxel gain, gain owner, and the touched-index list.
+const INITIAL_ACTIVE_CAPACITY = 4_096;
 let gainScratch = new Float32Array(0);
-let gainOwnerScratch = new Uint8Array(0);
-let touchedScratch: Int32Array = new Int32Array(INITIAL_ACTIVE_CAPACITY);
+let touchedScratch: Int32Array<ArrayBufferLike> = new Int32Array(INITIAL_ACTIVE_CAPACITY);
+let touchedFlags = new Uint8Array(0);
 let touchedCount = 0;
 
 function ensureScratch(size: number): void {
-  if (gainScratch.length < size) {
-    gainScratch = new Float32Array(size);
-    gainOwnerScratch = new Uint8Array(size);
-  }
+  if (gainScratch.length >= size) return;
+  gainScratch = new Float32Array(size);
+  touchedFlags = new Uint8Array(size);
 }
 
-export function createScentField(
-  grid: VoxelGrid,
-  physics: ScentPhysics = BEACON_PHYSICS
-): ScentField {
-  const size = grid.data.length;
-  ensureScratch(size);
-  return {
-    values: new Float32Array(size),
-    owners: new Uint8Array(size),
-    activeList: new Int32Array(INITIAL_ACTIVE_CAPACITY),
-    activeCount: 0,
-    activeFlags: new Uint8Array(size),
-    physics,
-  };
-}
-
-function grow(list: Int32Array): Int32Array {
-  const next = new Int32Array(list.length * 2);
-  next.set(list);
+function grow(values: Int32Array): Int32Array {
+  const next = new Int32Array(values.length * 2);
+  next.set(values);
   return next;
 }
 
-function addActive(field: ScentField, voxelIndex: number): void {
-  if (field.activeFlags[voxelIndex] === 1) {
-    return;
+export function createChemicalField(
+  grid: Grid,
+  physics: FieldPhysics = CHEMISTRY.odor,
+  surfaceBound = false
+): ChemicalField {
+  ensureScratch(grid.cells.length);
+  return {
+    values: new Float32Array(grid.cells.length),
+    activeList: new Int32Array(INITIAL_ACTIVE_CAPACITY),
+    activeCount: 0,
+    activeFlags: new Uint8Array(grid.cells.length),
+    physics,
+    surfaceBound,
+  };
+}
+
+function addActive(field: ChemicalField, index: number): void {
+  if (field.activeFlags[index] === 1) return;
+  field.activeFlags[index] = 1;
+  if (field.activeCount === field.activeList.length) field.activeList = grow(field.activeList);
+  field.activeList[field.activeCount++] = index;
+}
+
+export function depositChemical(field: ChemicalField, index: number, amount: number): void {
+  if (index < 0 || index >= field.values.length || amount <= 0) return;
+  field.values[index] += amount;
+  addActive(field, index);
+}
+
+export function chemicalResponse(value: number): number {
+  const positive = Math.max(0, value);
+  return positive / (1 + positive);
+}
+
+function walkableNeighbors(grid: Grid, index: number, surfaceBound = true): number[] {
+  const point = pointAt(grid, index);
+  const neighbors: number[] = [];
+  for (const direction of DIRECTIONS) {
+    const x = point.x + direction.x;
+    const y = point.y + direction.y;
+    if (surfaceBound ? isWalkable(grid, x, y) : isAir(grid, x, y))
+      neighbors.push(cellIndex(grid, x, y));
   }
-  field.activeFlags[voxelIndex] = 1;
-  if (field.activeCount === field.activeList.length) {
-    field.activeList = grow(field.activeList);
+  return neighbors;
+}
+
+function recordGain(index: number, amount: number): void {
+  if (touchedFlags[index] === 0) {
+    touchedFlags[index] = 1;
+    if (touchedCount === touchedScratch.length) touchedScratch = grow(touchedScratch);
+    touchedScratch[touchedCount++] = index;
   }
-  field.activeList[field.activeCount++] = voxelIndex;
+  gainScratch[index] += amount;
 }
 
-/** Deposit stamps the owner: last writer claims the voxel (ADR-0005). */
-export function depositScent(
-  field: ScentField,
-  voxelIndex: number,
-  amount: number,
-  owner = 0
-): void {
-  field.values[voxelIndex] += amount;
-  field.owners[voxelIndex] = owner;
-  addActive(field, voxelIndex);
-}
-
-/** Sampling filters by owner: foreign scent reads as zero. */
-export function sampleScent(field: ScentField, voxelIndex: number, owner = 0): number {
-  return field.owners[voxelIndex] === owner ? field.values[voxelIndex] : 0;
-}
-
-/**
- * Map an unbounded scent concentration into the controller's normalized
- * input range without flattening distinct concentrations at a hard cap.
- * The response stays monotonic, so a strong field remains navigable.
- */
-export function scentResponse(concentration: number, gain: number): number {
-  const scaled = Math.max(0, concentration * gain);
-  return scaled / (1 + scaled);
-}
-
-export function scentActiveCount(field: ScentField): number {
-  return field.activeCount;
-}
-
-/** Live active indices in order — for checkpointing and tests. */
-export function scentActiveIndices(field: ScentField): number[] {
-  return Array.from(field.activeList.subarray(0, field.activeCount));
-}
-
-/** Restore a field from checkpoint data (values + owners + active order). */
-export function restoreScentField(
-  field: ScentField,
-  values: Float32Array,
-  owners: Uint8Array,
-  active: number[]
-): void {
-  field.values.set(values);
-  field.owners.set(owners);
-  field.activeFlags.fill(0);
-  field.activeCount = 0;
-  for (const index of active) {
-    addActive(field, index);
-  }
-}
-
-// Neighbor scratch — single-threaded reuse, valid until the next call.
-const NEIGHBOR_SCRATCH = new Int32Array(6);
-
-/** Air neighbors along the six faces, bounds-checked; returns the count. */
-function airNeighbors(grid: VoxelGrid, index: number): number {
-  const x = index % grid.sizeX;
-  const z = Math.floor(index / grid.sizeX) % grid.sizeZ;
-  const y = Math.floor(index / (grid.sizeX * grid.sizeZ));
-  const slab = grid.sizeX * grid.sizeZ;
-  let count = 0;
-  if (x > 0) NEIGHBOR_SCRATCH[count++] = index - 1;
-  if (x < grid.sizeX - 1) NEIGHBOR_SCRATCH[count++] = index + 1;
-  if (z > 0) NEIGHBOR_SCRATCH[count++] = index - grid.sizeX;
-  if (z < grid.sizeZ - 1) NEIGHBOR_SCRATCH[count++] = index + grid.sizeX;
-  if (y > 0) NEIGHBOR_SCRATCH[count++] = index - slab;
-  if (y < grid.sizeY - 1) NEIGHBOR_SCRATCH[count++] = index + slab;
-  let write = 0;
-  for (let i = 0; i < count; i++) {
-    if (grid.data[NEIGHBOR_SCRATCH[i]] === Material.AIR) {
-      NEIGHBOR_SCRATCH[write++] = NEIGHBOR_SCRATCH[i];
-    }
-  }
-  return write;
-}
-
-function recordGain(voxelIndex: number, amount: number, owner: number): void {
-  if (gainScratch[voxelIndex] === 0) {
-    if (touchedCount === touchedScratch.length) {
-      touchedScratch = grow(touchedScratch);
-    }
-    touchedScratch[touchedCount++] = voxelIndex;
-    gainOwnerScratch[voxelIndex] = owner;
-  }
-  gainScratch[voxelIndex] += amount;
-}
-
-function diffuse(grid: VoxelGrid, field: ScentField): void {
-  for (let i = 0; i < field.activeCount; i++) {
-    const index = field.activeList[i];
-    const neighborCount = airNeighbors(grid, index);
-    if (neighborCount === 0) {
+function diffuse(grid: Grid, field: ChemicalField): void {
+  for (let offset = 0; offset < field.activeCount; offset++) {
+    const index = field.activeList[offset];
+    if (!validSource(grid, field, index)) {
+      field.values[index] = 0;
       continue;
     }
-    const share = (field.values[index] * field.physics.diffusionRate) / 6;
-    if (share < field.physics.transferEpsilon) {
-      continue;
-    }
-    const owner = field.owners[index];
-    for (let n = 0; n < neighborCount; n++) {
-      recordGain(NEIGHBOR_SCRATCH[n], share, owner);
-    }
-    field.values[index] -= share * neighborCount;
+    const neighbors = walkableNeighbors(grid, index, field.surfaceBound);
+    if (neighbors.length === 0) continue;
+    const share = (field.values[index] * field.physics.diffusion) / DIRECTIONS.length;
+    if (share < field.physics.epsilon) continue;
+    field.values[index] -= share * neighbors.length;
+    for (const neighbor of neighbors) recordGain(neighbor, share);
   }
-  for (let j = 0; j < touchedCount; j++) {
-    const index = touchedScratch[j];
-    // A voxel with no standing scent takes the gain's owner; an owned voxel
-    // keeps its owner (first-writer-per-pass, then last-depositor).
-    if (field.values[index] === 0) {
-      field.owners[index] = gainOwnerScratch[index];
-    }
+  for (let offset = 0; offset < touchedCount; offset++) {
+    const index = touchedScratch[offset];
     field.values[index] += gainScratch[index];
     gainScratch[index] = 0;
+    touchedFlags[index] = 0;
     addActive(field, index);
   }
   touchedCount = 0;
 }
 
-function evaporateAndCompact(field: ScentField): void {
+function validSource(grid: Grid, field: ChemicalField, index: number): boolean {
+  const point = pointAt(grid, index);
+  return field.surfaceBound ? isWalkable(grid, point.x, point.y) : isAir(grid, point.x, point.y);
+}
+
+function evaporate(field: ChemicalField): void {
   let write = 0;
-  for (let i = 0; i < field.activeCount; i++) {
-    const index = field.activeList[i];
+  for (let offset = 0; offset < field.activeCount; offset++) {
+    const index = field.activeList[offset];
     const next = field.values[index] * field.physics.evaporation;
     if (next < field.physics.epsilon) {
       field.values[index] = 0;
       field.activeFlags[index] = 0;
-    } else {
-      field.values[index] = next;
-      field.activeList[write++] = index;
+      continue;
     }
+    field.values[index] = next;
+    field.activeList[write++] = index;
   }
   field.activeCount = write;
 }
 
-/**
- * One diffusion + evaporation pass. Runs on a cadence (SCENT.stepInterval
- * ticks), not every tick. Allocation-free at steady state.
- */
-export function stepScentField(grid: VoxelGrid, field: ScentField): void {
+export function stepChemical(grid: Grid, field: ChemicalField): void {
   diffuse(grid, field);
-  evaporateAndCompact(field);
+  evaporate(field);
 }
 
-/** Continuous neutral emission from FOOD voxels into the food-scent field. */
-export function emitFoodScent(grid: VoxelGrid, field: ScentField, foodSources: Set<number>): void {
-  for (const source of foodSources) {
-    const neighborCount = airNeighbors(grid, source);
-    for (let n = 0; n < neighborCount; n++) {
-      depositScent(field, NEIGHBOR_SCRATCH[n], SCENT.foodSourceStrength, 0);
-    }
-  }
-}
-
-/** Colony-tagged emission from a physical colony-odor source. */
-export function emitNestScent(
-  _grid: VoxelGrid,
-  field: ScentField,
-  voxelIndex: number,
-  owner: number,
-  strength: number = SCENT.nestSourceStrength
+export function emitFromSources(
+  grid: Grid,
+  field: ChemicalField,
+  sources: ReadonlySet<number>,
+  amount: number
 ): void {
-  depositScent(field, voxelIndex, strength, owner);
-}
-
-/** Rebuild a food-source set by scanning the grid (used on load/creation). */
-export function scanFoodSources(grid: VoxelGrid): Set<number> {
-  const sources = new Set<number>();
-  for (let i = 0; i < grid.data.length; i++) {
-    if (grid.data[i] === Material.FOOD) {
-      sources.add(i);
+  for (const source of sources) {
+    for (const neighbor of walkableNeighbors(grid, source, field.surfaceBound)) {
+      depositChemical(field, neighbor, amount);
     }
   }
-  return sources;
+}
+
+interface EquilibriumGraph {
+  readonly cells: number[];
+  readonly fixed: Uint8Array;
+  readonly adjacency: readonly number[][];
+}
+
+function equilibriumStarts(
+  grid: Grid,
+  sources: ReadonlySet<number>,
+  surfaceBound: boolean
+): { readonly cells: number[]; readonly fixed: Uint8Array; readonly seen: Uint8Array } {
+  const cells: number[] = [];
+  const fixed = new Uint8Array(grid.cells.length);
+  const seen = new Uint8Array(grid.cells.length);
+  for (const source of sources) {
+    const point = pointAt(grid, source);
+    const traversable = surfaceBound
+      ? isWalkable(grid, point.x, point.y)
+      : isAir(grid, point.x, point.y);
+    const starts = traversable ? [source] : walkableNeighbors(grid, source, surfaceBound);
+    for (const neighbor of starts) {
+      fixed[neighbor] = 1;
+      if (seen[neighbor] === 1) continue;
+      seen[neighbor] = 1;
+      cells.push(neighbor);
+    }
+  }
+  return { cells, fixed, seen };
+}
+
+function buildEquilibriumGraph(
+  grid: Grid,
+  sources: ReadonlySet<number>,
+  surfaceBound: boolean
+): EquilibriumGraph {
+  const { cells, fixed, seen } = equilibriumStarts(grid, sources, surfaceBound);
+  for (let read = 0; read < cells.length; read++) {
+    for (const neighbor of walkableNeighbors(grid, cells[read], surfaceBound)) {
+      if (seen[neighbor] === 1) continue;
+      seen[neighbor] = 1;
+      cells.push(neighbor);
+    }
+  }
+  return {
+    cells,
+    fixed,
+    adjacency: cells.map((index) => walkableNeighbors(grid, index, surfaceBound)),
+  };
+}
+
+function relaxCell(
+  field: ChemicalField,
+  graph: EquilibriumGraph,
+  offset: number,
+  sourceValue: number,
+  retention: number
+): number {
+  const index = graph.cells[offset];
+  if (graph.fixed[index] === 1) {
+    const change = Math.abs(field.values[index] - sourceValue);
+    field.values[index] = sourceValue;
+    return change;
+  }
+  const neighbors = graph.adjacency[offset];
+  if (neighbors.length === 0) return 0;
+  let total = 0;
+  for (const neighbor of neighbors) total += field.values[neighbor];
+  const next = (total / neighbors.length) * retention;
+  const change = Math.abs(field.values[index] - next);
+  field.values[index] = next;
+  return change;
+}
+
+function relaxToEquilibrium(
+  field: ChemicalField,
+  graph: EquilibriumGraph,
+  sourceValue: number,
+  retention: number,
+  maximumPasses: number
+): void {
+  for (let pass = 0; pass < maximumPasses; pass++) {
+    let largestChange = 0;
+    const reverse = pass % 2 === 1;
+    for (let offset = 0; offset < graph.cells.length; offset++) {
+      const relaxationOffset = reverse ? graph.cells.length - 1 - offset : offset;
+      const change = relaxCell(field, graph, relaxationOffset, sourceValue, retention);
+      largestChange = Math.max(largestChange, change);
+    }
+    if (largestChange < field.physics.epsilon) break;
+  }
+}
+
+export function equilibrateFromSources(
+  grid: Grid,
+  field: ChemicalField,
+  sources: ReadonlySet<number>,
+  sourceValue: number,
+  retention: number,
+  maximumPasses: number,
+  surfaceBound = field.surfaceBound
+): void {
+  const graph = buildEquilibriumGraph(grid, sources, surfaceBound);
+  relaxToEquilibrium(field, graph, sourceValue, retention, maximumPasses);
+  for (const index of graph.cells) {
+    if (field.values[index] >= field.physics.epsilon) addActive(field, index);
+  }
+}
+
+export function restoreChemical(
+  field: ChemicalField,
+  values: readonly number[],
+  active: readonly number[]
+): void {
+  if (values.length !== active.length) throw new Error("chemical checkpoint mismatch");
+  field.values.fill(0);
+  field.activeFlags.fill(0);
+  field.activeCount = 0;
+  for (let offset = 0; offset < active.length; offset++) {
+    const index = active[offset];
+    field.values[index] = values[offset];
+    addActive(field, index);
+  }
+}
+
+export function activeIndices(field: ChemicalField): number[] {
+  return Array.from(field.activeList.subarray(0, field.activeCount));
 }

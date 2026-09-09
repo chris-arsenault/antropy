@@ -1,155 +1,92 @@
 import { describe, expect, it } from "vitest";
-import { foundColony } from "../sim/colony";
-import { NEST_CONFIG } from "../sim/config";
-import { rnnController } from "../sim/controller/rnn";
-import { carryEgg, addEgg, STAGE_EGG, type Egg } from "../sim/eggs";
-import { createWorld, stepWorld } from "../sim/world";
-import { sampleMaterialScent, setMaterialScent } from "../sim/materialScent";
-import { deserializeWorld, serializeWorld } from "./checkpoint";
-import { checkpointFromJson, checkpointToJson } from "./file";
+import { decodeCheckpoint, encodeCheckpoint, restoreCheckpoint } from "./checkpoint";
+import { createWorld, stepWorld, summarizeWorld } from "../sim/world";
+import { FORAGER_CONFIG, PROGRAMMED_LIFECYCLE_CONFIG } from "../sim/config";
+import { createCheckpoint } from "./checkpoint";
+import { maintainColony } from "../sim/lifecycle";
+import { totalEnergy } from "../sim/resources";
+import { programmedColony } from "../sim/policies/colony";
 
-describe("checkpoint codec", () => {
-  it("round-trips through the JSON file codec", { timeout: 30_000 }, () => {
-    const world = createWorld(8002);
-    foundColony(world);
-    for (let t = 0; t < 100; t++) {
-      stepWorld(world);
+it("persists nutritional density and rejects the old energy-only checkpoint shape", () => {
+  const world = createWorld(
+    7,
+    "programmed-lifecycle",
+    {
+      ...PROGRAMMED_LIFECYCLE_CONFIG,
+      foodEnergyDensity: 0.75,
+    },
+    false
+  );
+  world.ant.cargo = 3;
+  world.economy.initial = totalEnergy(world);
+  stepWorld(world);
+  const checkpoint = createCheckpoint(world),
+    restored = restoreCheckpoint(checkpoint);
+  for (let tick = 0; tick < 5; tick++) {
+    stepWorld(world);
+    stepWorld(restored);
+  }
+  expect(createCheckpoint(restored)).toEqual(createCheckpoint(world));
+  expect(() => restoreCheckpoint({ ...checkpoint, version: 4 })).toThrow("canonical 2D");
+});
+
+describe("2D checkpoints", () => {
+  it("preserves exactly the same state through the training policy hook", () => {
+    const left = createWorld(9, "programmed-lifecycle", PROGRAMMED_LIFECYCLE_CONFIG, false);
+    const right = createWorld(9, "programmed-lifecycle", PROGRAMMED_LIFECYCLE_CONFIG, false);
+    for (let tick = 0; tick < 20; tick++) {
+      stepWorld(left);
+      stepWorld(right, programmedColony);
     }
-    const checkpoint = serializeWorld(world);
-    const decoded = checkpointFromJson(checkpointToJson(checkpoint));
-
-    expect(decoded.version).toBe(checkpoint.version);
-    expect(decoded.tick).toBe(checkpoint.tick);
-    expect(Buffer.from(decoded.grid).equals(Buffer.from(checkpoint.grid))).toBe(true);
-    expect(Array.from(decoded.ants[0].genome)).toEqual(Array.from(checkpoint.ants[0].genome));
-
-    const restored = deserializeWorld(decoded);
-    expect(restored.tick).toBe(world.tick);
-    expect(restored.ants.length).toBe(world.ants.length);
+    expect(createCheckpoint(right)).toEqual(createCheckpoint(left));
   });
 
-  it("refuses unknown versions and controllers", () => {
-    const world = createWorld(8003);
-    const checkpoint = serializeWorld(world);
-    expect(() => deserializeWorld({ ...checkpoint, version: 99 })).toThrow(/version/);
-    expect(() => deserializeWorld({ ...checkpoint, controllerId: "nope" })).toThrow(/controller/);
+  it("continues the deterministic world exactly", () => {
+    const original = createWorld(9, "programmed", FORAGER_CONFIG, false);
+    for (let tick = 0; tick < 30; tick++) stepWorld(original);
+    const restored = decodeCheckpoint(encodeCheckpoint(original));
+    for (let tick = 0; tick < 20; tick++) {
+      stepWorld(original);
+      stepWorld(restored);
+    }
+    expect(summarizeWorld(restored)).toEqual(summarizeWorld(original));
+    expect([...restored.grid.cells]).toEqual([...original.grid.cells]);
   });
 
-  it("round-trips Appendix E gates and cargo capacities", () => {
-    const config = { ...NEST_CONFIG, broodCapacity: 3, spoilCapacity: 5 };
-    const world = createWorld(8005, rnnController, config);
-    const restored = deserializeWorld(serializeWorld(world));
-
-    expect(restored.config).toEqual(config);
+  it("continues a changing population, developing brood and resource ledger exactly", () => {
+    const world = createWorld(9, "programmed-lifecycle", PROGRAMMED_LIFECYCLE_CONFIG, false);
+    world.ant.age = world.config.workerLifespan;
+    world.queen.layingAge = world.config.layingInterval;
+    maintainColony(world);
+    const restored = restoreCheckpoint(createCheckpoint(world));
+    for (let tick = 0; tick < 20; tick++) {
+      stepWorld(world);
+      stepWorld(restored);
+    }
+    expect(createCheckpoint(restored)).toEqual(createCheckpoint(world));
   });
 
-  it("preserves unrecovered corpse-food provenance", () => {
-    const world = createWorld(8008, rnnController, NEST_CONFIG);
-    world.recycledFood.add(1234);
-
-    const restored = deserializeWorld(serializeWorld(world));
-
-    expect(restored.recycledFood).toEqual(new Set([1234]));
-  });
-});
-
-describe("checkpoint simulation fields", () => {
-  it("preserves uncredited external food through caches and carriage", () => {
-    const world = createWorld(8010, rnnController, NEST_CONFIG);
-    const colony = foundColony(world);
-    const ant = world.ants[0];
-    ant.uncreditedFoodLoads = 2;
-    ant.netEnergyDelivered = 2.4;
-    world.uncreditedExternalFood.add(4321);
-    colony.patrilineMerit.set(ant.patrilineId, 2.4);
-
-    const restored = deserializeWorld(serializeWorld(world));
-
-    expect(restored.uncreditedExternalFood).toEqual(new Set([4321]));
-    expect(restored.ants[0].uncreditedFoodLoads).toBe(2);
-    expect(restored.ants[0].netEnergyDelivered).toBe(2.4);
-    expect(restored.colonies[0].patrilineMerit.get(ant.patrilineId)).toBe(2.4);
-    expect(restored.nextGeneticId).toBe(world.nextGeneticId);
-    expect(restored.colonies[0].queenGeneticId).toBe(colony.queenGeneticId);
-    expect(restored.geneticRecords).toEqual(world.geneticRecords);
-    expect(restored.founderGenomes).toHaveLength(world.founderGenomes.length);
-    expect(
-      restored.controller.genomeDistance(restored.founderGenomes[0], world.founderGenomes[0])
-    ).toBe(0);
+  it("restores an extinct worker population without adding founders or reusing IDs", () => {
+    const world = createWorld(9, "programmed-lifecycle", PROGRAMMED_LIFECYCLE_CONFIG, false);
+    for (const ant of world.ants) ant.energy = 0;
+    world.economy.initial = totalEnergy(world);
+    maintainColony(world);
+    const restored = restoreCheckpoint(createCheckpoint(world));
+    expect(restored.ants).toHaveLength(0);
+    expect(restored.nextAntId).toBe(10);
+    expect(createCheckpoint(restored)).toEqual(createCheckpoint(world));
+    for (let tick = 0; tick < 5; tick++) {
+      stepWorld(world);
+      stepWorld(restored);
+    }
+    expect(restored.ants).toHaveLength(0);
+    expect(summarizeWorld(restored).energy).toBe(0);
+    expect(createCheckpoint(restored)).toEqual(createCheckpoint(world));
   });
 
-  it("preserves replacement energy attribution", () => {
-    const world = createWorld(8009, rnnController, NEST_CONFIG);
-    world.metrics.eggEnergyInvested = 0.3;
-    world.metrics.larvalEnergyInvested = 0.6;
-    world.metrics.metamorphosisEnergyBurned = 0.6;
-
-    const restored = deserializeWorld(serializeWorld(world));
-
-    expect(restored.metrics.eggEnergyInvested).toBe(0.3);
-    expect(restored.metrics.larvalEnergyInvested).toBe(0.6);
-    expect(restored.metrics.metamorphosisEnergyBurned).toBe(0.6);
-  });
-
-  it("preserves the vertical attention latch", () => {
-    const world = createWorld(8006, rnnController, NEST_CONFIG);
-    foundColony(world);
-    world.ants[0].verticalAttention = -0.75;
-
-    const restored = deserializeWorld(serializeWorld(world));
-
-    expect(restored.ants[0].verticalAttention).toBe(-0.75);
-  });
-
-  it("preserves colony odor absorbed by material", () => {
-    const world = createWorld(8007, rnnController, NEST_CONFIG);
-    const index = 10;
-    setMaterialScent(world.materialColonyScent, index, 0.4, 3);
-
-    const restored = deserializeWorld(serializeWorld(world));
-
-    expect(sampleMaterialScent(restored.materialColonyScent, index, 3)).toBeCloseTo(0.4);
-  });
-});
-
-describe("checkpoint relationship restoration", () => {
-  it("preserves both sides of a live brood carrier link", () => {
-    const world = createWorld(8004);
-    foundColony(world);
-    const ant = world.ants[0];
-    const egg: Egg = {
-      id: world.nextEggId++,
-      x: ant.x,
-      y: ant.y,
-      z: ant.z,
-      carrierId: null,
-      genome: ant.genome,
-      energy: 0.2,
-      incubationRemaining: 100,
-      stage: STAGE_EGG,
-      fedProgress: 0,
-      hungerTicks: 0,
-      sex: 0,
-      geneticId: world.nextGeneticId++,
-      founderLineId: ant.founderLineId,
-      queenDestined: 0,
-      lineageId: ant.lineageId,
-      patrilineId: ant.patrilineId,
-      motherId: 0,
-      fatherId: 0,
-    };
-    addEgg(world, egg);
-    expect(carryEgg(world, ant, egg)).toBe(true);
-
-    const restored = deserializeWorld(serializeWorld(world));
-    const restoredAnt = restored.ants.find((candidate) => candidate.id === ant.id);
-    const restoredEgg = restored.eggs.find((candidate) => candidate.id === egg.id);
-
-    expect(restored.config.broodTransport).toBe(true);
-    expect(restored.config.motorJitter).toBe(true);
-    expect(restored.config.terrainDigging).toBe(true);
-    expect(restoredAnt?.carriedEggIds).toEqual([egg.id]);
-    expect(restoredEgg?.carrierId).toBe(ant.id);
-    expect(restored.eggIndex.size).toBe(0);
+  it("rejects the former checkpoint shape", () => {
+    expect(() => restoreCheckpoint({ version: 22, grid: [], ants: [] })).toThrow(
+      "canonical 2D simulation"
+    );
   });
 });

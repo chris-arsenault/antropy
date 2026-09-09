@@ -1,130 +1,113 @@
-import { useEffect, useRef, useState } from "react";
-import { createWorldRenderer, type WorldRenderer } from "../render/worldRenderer";
-import { type World } from "../sim/world";
-import { type LayerVisibility } from "./MapLayersPanel";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { type World } from "../sim/types";
+import { drawWorld, resize } from "./worldDrawing";
+import { useCamera } from "./useCamera";
+import { colonyBounds, fitCamera, viewTransform } from "./camera";
+import { MiniMap } from "./MiniMap";
+import { ConstructionPanel } from "./ConstructionPanel";
+import { isKnowledgeScenario } from "../sim/colony/contract";
+import { type Point } from "../sim/geometry";
 
-interface WorldViewProps {
-  world: World;
-  /** When true (charts-only speed), the 3D viewport is not drawn. */
-  chartsOnly: boolean;
-  /** Ground opacity in [0.05, 1]; below 1 the terrain is x-ray. */
-  groundOpacity: number;
-  /** Scent map-layer visibility. */
-  layers: LayerVisibility;
-  /** Fractional-tick interpolation factor owned by the simulation host. */
-  alphaRef: { readonly current: number };
-  onPickAnt(antId: number | null): void;
-}
+import { type LayerVisibility } from "./layerVisibility";
+export type { LayerVisibility } from "./layerVisibility";
 
-function supportsWebgl(canvas: HTMLCanvasElement): boolean {
-  return canvas.getContext("webgl2") !== null;
-}
-
-/** Run the renderer's draw loop with element-size observation; returns cleanup. */
-function runRenderLoop(
-  canvas: HTMLCanvasElement,
-  renderer: WorldRenderer,
-  alphaRef: { readonly current: number }
-): () => void {
-  const resize = () => {
-    renderer.resize(canvas.clientWidth, canvas.clientHeight);
-  };
-  resize();
-  // Observe the element, not the window: sibling panels change our size.
-  const observer = new ResizeObserver(resize);
-  observer.observe(canvas);
-
-  let frame = 0;
-  const draw = () => {
-    renderer.updateDirtyChunks();
-    renderer.render(alphaRef.current);
-    frame = requestAnimationFrame(draw);
-  };
-  frame = requestAnimationFrame(draw);
-
-  return () => {
-    cancelAnimationFrame(frame);
-    observer.disconnect();
-  };
-}
-
-export function WorldView({
-  world,
-  chartsOnly,
-  groundOpacity,
-  layers,
-  alphaRef,
-  onPickAnt,
-}: WorldViewProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rendererRef = useRef<WorldRenderer | null>(null);
-  const [webglAvailable, setWebglAvailable] = useState(true);
-
+export function WorldView(props: {
+  readonly world: World;
+  readonly version: number;
+  readonly layers: LayerVisibility;
+}) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [point, setPoint] = useState<Point>(props.world.nest.home);
+  const [edits, setEdits] = useState(0);
+  const [size, setSize] = useState({ width: 800, height: 600 });
+  const camera = useCamera(canvas, props.world, size);
+  const center = useCallback(
+    (x: number, y: number) => camera.set({ ...camera.value, x, y }),
+    [camera]
+  );
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || chartsOnly) {
-      return undefined;
-    }
-    if (!supportsWebgl(canvas)) {
-      setWebglAvailable(false);
-      return undefined;
-    }
-
-    const renderer = createWorldRenderer(canvas, world);
-    rendererRef.current = renderer;
-    const stopLoop = runRenderLoop(canvas, renderer, alphaRef);
-
-    return () => {
-      stopLoop();
-      rendererRef.current = null;
-      renderer.dispose();
-    };
-  }, [world, chartsOnly, alphaRef]);
-
-  // These run after the creation effect (declaration order), so a fresh
-  // renderer always receives the current opacity and layer visibility.
+    const element = canvas.current;
+    if (!element) return;
+    const update = () =>
+      setSize({ width: element.clientWidth || 800, height: element.clientHeight || 600 });
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
-    rendererRef.current?.setTerrainOpacity(groundOpacity);
-  }, [groundOpacity, world, chartsOnly]);
-
-  useEffect(() => {
-    const renderer = rendererRef.current;
-    if (!renderer) {
-      return;
-    }
-    for (const key of Object.keys(layers) as (keyof LayerVisibility)[]) {
-      renderer.setLayerVisible(key, layers[key]);
-    }
-  }, [layers, world, chartsOnly]);
-
-  const onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    const renderer = rendererRef.current;
-    if (!canvas || !renderer) {
-      return;
-    }
-    const rect = canvas.getBoundingClientRect();
-    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
-    onPickAnt(renderer.pickAnt(ndcX, ndcY));
-  };
-
-  if (chartsOnly) {
-    return (
-      <section className="world-view" data-testid="world-view">
-        <p className="viewport-notice">Charts-only speed — rendering disabled.</p>
-      </section>
+    const element = canvas.current;
+    if (!element) return;
+    resize(element);
+    const context = element.getContext("2d");
+    if (!context) return;
+    drawWorld(
+      context,
+      props.world,
+      viewTransform(camera.value, size.width, size.height, window.devicePixelRatio || 1),
+      props.layers
     );
-  }
-
+  }, [props.world, props.version, props.layers, camera.value, size, edits]);
+  const changed = useCallback(() => setEdits((value) => value + 1), []);
   return (
-    <section className="world-view" data-testid="world-view">
-      {!webglAvailable && (
-        <p className="viewport-notice">
-          WebGL2 is unavailable in this browser; the 3D view cannot render.
-        </p>
+    <section className="world-viewport" aria-label="Map viewport">
+      <canvas
+        className="world-view"
+        ref={canvas}
+        tabIndex={0}
+        aria-label="Two-dimensional simulation"
+        onPointerDown={(event) => {
+          if (!event.shiftKey) return;
+          const bounds = event.currentTarget.getBoundingClientRect();
+          setPoint({
+            x: Math.floor(
+              camera.value.x + (event.clientX - bounds.left - bounds.width / 2) / camera.value.scale
+            ),
+            y: Math.floor(
+              camera.value.y - (event.clientY - bounds.top - bounds.height / 2) / camera.value.scale
+            ),
+          });
+        }}
+      />
+      <CameraControls world={props.world} camera={camera} size={size} />
+      <MiniMap world={props.world} camera={camera.value} size={size} onCenter={center} />
+      {isKnowledgeScenario(props.world.scenario) && (
+        <ConstructionPanel world={props.world} point={point} onChange={changed} />
       )}
-      <canvas ref={canvasRef} className="world-canvas" onClick={onClick} />
     </section>
+  );
+}
+
+function CameraControls({
+  world,
+  camera,
+  size,
+}: {
+  readonly world: World;
+  readonly camera: ReturnType<typeof useCamera>;
+  readonly size: { width: number; height: number };
+}) {
+  const fit = (surroundings: boolean) =>
+    camera.set(fitCamera(colonyBounds(world, surroundings), size.width, size.height));
+  return (
+    <div className="camera-controls">
+      <button onClick={() => fit(true)}>Home</button>
+      <button onClick={() => fit(false)}>Fit colony</button>
+      <button
+        onClick={() =>
+          camera.set(
+            fitCamera(
+              { x: 0, y: 0, width: world.grid.width, height: world.grid.height },
+              size.width,
+              size.height
+            )
+          )
+        }
+      >
+        Fit world
+      </button>
+      <span>Drag to pan · wheel to zoom · arrows to scroll</span>
+    </div>
   );
 }

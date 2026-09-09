@@ -1,69 +1,110 @@
 import { describe, expect, it } from "vitest";
-import { compareColonyOutcomes, summarizeColonyOutcomes } from "./colonyOutcome";
+import { scoreColonyOutcome, type ColonyOutcomePoint } from "./colonyOutcome";
 
-function outcome(milestone: "complete" | "cached" | "returned" | "picked" | "exited") {
-  const cached = milestone === "complete" || milestone === "cached";
-  return {
-    cacheDrained: milestone === "complete",
-    cacheGrew: cached,
-    deposited: cached,
-    returned: milestone !== "picked" && milestone !== "exited",
-    pickedUp: milestone !== "exited",
-    exited: true,
-    cacheBeforeScarcity: 1,
-    cacheAfterScarcity: milestone === "complete" ? 0 : 1,
-  };
+function trajectory(): ColonyOutcomePoint[] {
+  return Array.from({ length: 25 }, (_, index) => ({
+    taskOverrides: 0,
+    tick: index * 2000,
+    queenAlive: true,
+    queenReserve: 20,
+    workers: 4,
+    founders: index < 8 ? 4 : 0,
+    births: index,
+    workerReserve: 20,
+    broodReserve: 2,
+    broodInvestment: 4,
+    queenFed: index * 4,
+    broodFed: index * 6,
+    storedEnergy: 10,
+    residual: 0,
+  }));
 }
 
-describe("colony outcome ordering", () => {
-  it("rejects a deposit or cache result without the ordered surface trip", () => {
-    const malformed = {
-      exited: false,
-      pickedUp: true,
-      returned: true,
-      deposited: true,
-      cacheGrew: true,
-      cacheDrained: true,
-    };
-
-    const result = summarizeColonyOutcomes([malformed]);
-
-    expect(result.scores).toEqual([0]);
-    expect(result.completionCount).toBe(0);
-    expect(result.cacheCount).toBe(0);
-    expect(result.returnCount).toBe(0);
-    expect(result.pickupCount).toBe(0);
+describe("colony outcome objective", () => {
+  it("accepts continued queen care and replacement without an eight-worker target", () => {
+    expect(scoreColonyOutcome(trajectory(), 16000).viable).toBe(true);
   });
-
-  it("does not trade completed loops for partial progress in more worlds", () => {
-    const specialist = summarizeColonyOutcomes([
-      outcome("complete"),
-      outcome("complete"),
-      outcome("exited"),
-    ]);
-    const broad = summarizeColonyOutcomes([
-      outcome("cached"),
-      outcome("cached"),
-      outcome("cached"),
-    ]);
-
-    expect(specialist.completionCount).toBeGreaterThan(broad.completionCount);
-    expect(compareColonyOutcomes(specialist, broad)).toBeGreaterThan(0);
+  it("rejects queen death even when workers and accumulated births are abundant", () => {
+    const alive = trajectory(),
+      dead = trajectory();
+    Object.assign(dead.at(-1)!, {
+      queenAlive: false,
+      queenReserve: 0,
+      workers: 100,
+      births: 1000,
+      workerReserve: 1000,
+    });
+    expect(scoreColonyOutcome(dead, 16000).viable).toBe(false);
+    expect(scoreColonyOutcome(dead, 16000).score).toBeLessThan(
+      scoreColonyOutcome(alive.slice(0, 6), 16000).score
+    );
   });
+  it("cannot certify an assisted start or credit transfers before actor control", () => {
+    const reference = trajectory();
+    const assisted = reference.map((point) => ({ ...point, tick: point.tick + 4000 }));
+    expect(scoreColonyOutcome(assisted, 16000).viable).toBe(false);
+    const inherited = assisted.map((point) => ({
+      ...point,
+      queenFed: point.queenFed + 100,
+      broodFed: point.broodFed + 100,
+      births: point.births + 100,
+    }));
+    expect(scoreColonyOutcome(inherited, 16000).score).toBe(
+      scoreColonyOutcome(assisted, 16000).score
+    );
+  });
+  it("gives no credit for arbitrary stockpiles or repeated collection and dropping", () => {
+    const reference = trajectory();
+    const piles = reference.map((point) => ({
+      ...point,
+      storedEnergy: 1e9,
+      pickups: 1e9,
+      deposits: 1e9,
+      movement: 1e9,
+    }));
+    expect(scoreColonyOutcome(piles, 16000)).toMatchObject({
+      score: scoreColonyOutcome(reference, 16000).score,
+    });
+  });
+});
 
-  it("uses the worst milestone before mean progress when outcome counts tie", () => {
-    const strongerTail = summarizeColonyOutcomes([
-      { ...outcome("complete"), retrievalEnergyAfter: -2.5 },
-      { ...outcome("returned"), deposited: false },
-      { ...outcome("picked"), minLoadedEntranceDistance: 0 },
-    ]);
-    const weakerTail = summarizeColonyOutcomes([
-      { ...outcome("complete"), retrievalEnergyAfter: 2.5 },
-      { ...outcome("returned"), deposited: true },
-      { ...outcome("picked"), minLoadedEntranceDistance: 6 },
-    ]);
-
-    expect(strongerTail.mean).toBeLessThan(weakerTail.mean);
-    expect(compareColonyOutcomes(strongerTail, weakerTail)).toBeGreaterThan(0);
+describe("outcome learning credit", () => {
+  it("preserves early biological progress after extinction without calling it survival", () => {
+    const reference = trajectory()
+      .slice(0, 11)
+      .map((point) => ({
+        ...point,
+        births: 0,
+        queenFed: 0,
+        broodFed: 0,
+        workerReserve: 0,
+        broodReserve: 0,
+        broodInvestment: 0,
+      }));
+    Object.assign(reference.at(-1)!, { queenAlive: false, queenReserve: 0, workers: 0 });
+    const nourished = reference.map((point, index) => ({
+      ...point,
+      workerReserve: index < 5 ? 20 : 0,
+    }));
+    const result = scoreColonyOutcome(nourished, 16000);
+    expect(result.viable).toBe(false);
+    expect(result.score).toBeLessThan(100);
+    expect(result.score).toBeGreaterThan(scoreColonyOutcome(reference, 16000).score);
+  });
+  it("rejects surviving founders, stopped feeding, stopped recruitment and broken conservation", () => {
+    for (const replacement of [
+      { founders: 1 },
+      { queenFed: 0 },
+      { births: 0 },
+      { broodFed: 0 },
+      { residual: 1 },
+      { taskOverrides: 1 },
+      { queenReserve: -1 },
+      { workerReserve: -1 },
+      { broodInvestment: -1 },
+    ]) {
+      const series = trajectory().map((point) => ({ ...point, ...replacement }));
+      expect(scoreColonyOutcome(series, 16000).viable).toBe(false);
+    }
   });
 });

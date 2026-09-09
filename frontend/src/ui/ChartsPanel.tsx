@@ -1,59 +1,53 @@
-import { useMemo } from "react";
-import { TRAIT_LABELS, type WorldStats } from "../sim/stats";
-import { DivergingBars } from "./charts/DivergingBars";
-import { LineChart } from "./charts/LineChart";
-import { CHART } from "./charts/palette";
-import { Sparkline } from "./charts/Sparkline";
-import { type StatsHistory } from "./useSimulation";
+import { type HistoryPoint } from "./useSimulation";
 
-interface ChartsPanelProps {
-  history: StatsHistory;
-  stats: WorldStats | null;
-  /** Redraw trigger. */
-  version: number;
+interface Series {
+  readonly label: string;
+  readonly color: string;
+  readonly value: (point: HistoryPoint) => number;
 }
 
-/** Live population and descriptive trait instrumentation. */
-export function ChartsPanel({ history, stats, version }: ChartsPanelProps) {
-  const meritCorrelations = useMemo(
-    () => stats?.traitMeritCorrelation.map((estimate) => estimate.value) ?? [],
-    [stats]
-  );
+const SERIES: readonly Series[] = [
+  { label: "stored food energy", color: "#d9a441", value: (point) => point.storedEnergy },
+  { label: "living workers", color: "#ffffff", value: (point) => point.workers },
+  { label: "developing brood", color: "#83dbed", value: (point) => point.brood },
+  { label: "queen reserves", color: "#f7bc70", value: (point) => point.queenEnergy },
+  { label: "adult births", color: "#a3dd77", value: (point) => point.births },
+  { label: "worker deaths", color: "#d87575", value: (point) => point.deaths },
+  { label: "distance", color: "#64b5d8", value: (point) => point.distanceMoved },
+  { label: "living workers' turns", color: "#d87575", value: (point) => point.turns },
+  { label: "pheromone", color: "#d874d2", value: (point) => point.pheromoneDeposited },
+];
+
+function points(history: readonly HistoryPoint[], series: Series): string {
+  if (history.length === 0) return "";
+  const values = history.map(series.value);
+  const maximum = Math.max(1, ...values);
+  return values
+    .map((value, index) => {
+      const span = history[history.length - 1].tick - history[0].tick;
+      const x = span === 0 ? 0 : ((history[index].tick - history[0].tick) / span) * 100;
+      return `${x},${30 - (value / maximum) * 28}`;
+    })
+    .join(" ");
+}
+
+export function ChartsPanel({ history }: { readonly history: readonly HistoryPoint[] }) {
   return (
-    <div data-testid="charts-panel">
-      <DivergingBars
-        title="Live trait ↔ net-merit rate"
-        labels={TRAIT_LABELS}
-        values={meritCorrelations}
-        version={version}
-      />
-      <LineChart
-        title="Population"
-        version={version}
-        series={[
-          { name: "ants", series: history.population, color: CHART.series[0] },
-          { name: "eggs", series: history.eggs, color: CHART.series[1] },
-        ]}
-      />
-      <LineChart
-        title="Colonies"
-        version={version}
-        height={60}
-        series={[{ name: "colonies", series: history.colonies, color: CHART.series[3] }]}
-      />
-      <LineChart
-        title="Dominant patriline share"
-        version={version}
-        series={[{ name: "share", series: history.dominantShare, color: CHART.series[2] }]}
-      />
-      <figure className="chart">
-        <figcaption className="chart-title">Gene means</figcaption>
-        <div className="sparkline-grid">
-          {TRAIT_LABELS.map((label, i) => (
-            <Sparkline key={label} label={label} series={history.traitMeans[i]} version={version} />
-          ))}
-        </div>
-      </figure>
-    </div>
+    <section className="panel" data-testid="charts-panel">
+      <h2>Live ledgers</h2>
+      {SERIES.map((series) => (
+        <figure className="mini-chart" key={series.label}>
+          <figcaption>
+            {series.label}
+            <span>
+              {history.length ? series.value(history[history.length - 1]).toFixed(2) : "—"}
+            </span>
+          </figcaption>
+          <svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-label={series.label}>
+            <polyline points={points(history, series)} stroke={series.color} />
+          </svg>
+        </figure>
+      ))}
+    </section>
   );
 }

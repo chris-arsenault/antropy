@@ -1,17 +1,29 @@
-/** Voxel material IDs (design spec §5.2). One byte per voxel. */
-export const Material = {
-  AIR: 0,
-  TOPSOIL: 1,
-  CLAY: 2,
-  ROCK: 3,
-  FOOD: 4,
-  LOOSE_FILL: 5,
-  /** Reserved for the future ecosystem stage. */
-  WATER: 6,
-} as const;
+export enum Material {
+  AIR = 0,
+  SOIL = 1,
+  ROCK = 2,
+  FOOD = 3,
+  CACHE = 4,
+  CLAY = 5,
+  LOOSE_SOIL = 6,
+  WOOD = 7,
+}
 
-export type MaterialId = (typeof Material)[keyof typeof Material];
+/** Material identity survives excavation; food quantity is stored separately from terrain. */
+export const MATERIALS: Record<
+  Material,
+  { color: string; solid: boolean; excavationWork: number }
+> = {
+  [Material.AIR]: { color: "#18242b", solid: false, excavationWork: 0 },
+  [Material.SOIL]: { color: "#705035", solid: true, excavationWork: 1 },
+  [Material.ROCK]: { color: "#424750", solid: true, excavationWork: Infinity },
+  [Material.FOOD]: { color: "#79c84a", solid: true, excavationWork: 0 },
+  [Material.CACHE]: { color: "#d09a36", solid: true, excavationWork: 0 },
+  [Material.CLAY]: { color: "#996849", solid: true, excavationWork: 3 },
+  [Material.LOOSE_SOIL]: { color: "#aa8b59", solid: true, excavationWork: 0.4 },
+  [Material.WOOD]: { color: "#755638", solid: true, excavationWork: 4 },
+};
 
-export function isSolid(material: MaterialId): boolean {
-  return material !== Material.AIR && material !== Material.WATER;
+export function isSolid(material: Material): boolean {
+  return MATERIALS[material].solid;
 }

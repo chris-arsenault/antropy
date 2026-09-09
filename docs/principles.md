@@ -10,17 +10,28 @@ principles were derived; the [normalized design index](design/README.md) applies
 1. **Genuine evolution.** Build a persistent browser simulation where selection acting on
    heritable controllers produces behavior and colony organization. Do not author an interesting
    answer when the world can create pressure for evolution to earn it.
-2. **A living colony.** First establish one colony in the authored nest that gathers and stores
-   food, survives on it, raises brood, and replaces dead workers. Digging and genetic variation
-   remain isolated until this loop is certified.
+2. **A living colony at scale.** Establish one colony near 2,000 workers that gathers and stores
+   food, survives on it, raises brood and replaces dead workers while remaining interactive.
+   Genetic work waits for this prerequisite; population remains resource-limited, not fixed.
 3. **Attributable work.** Every result has a named cause, every claim has measurement, and every
    structural change has human authorization.
 
 A task that serves none of these goals is not current work.
 
+The current prerequisite is [physical and runtime capacity for roughly 2,000 workers](design/colony-scale.md).
+Programmed and LGP controllers are implemented; RNN-specific plans are canceled. Human review
+remains required for changed physics and scale. No earlier spatial-world certification transfers
+across the substrate change.
+
 <a id="principles-world"></a>
 
 ## Author the world, not the ant
+
+The September 8 [colony-knowledge decision](design/colony-knowledge.md) relaxes the local-only
+boundary below for programmed/LGP ants: colony-wide observed location knowledge and terrain-aware
+route acquisition are permitted. Ants select destinations and actions, retain an opaque task byte,
+and pay physical travel/interaction costs. Navigation cannot discover hidden food, choose tasks,
+or transfer resources remotely. Older local-only clauses describe the historical RNN interface.
 
 World physics, costs, pressures, and physical carriers are legitimate design. Answers, chosen
 destinations, and self-targeting actions are not. A sensor reports a fallible local fact such as
@@ -111,11 +122,12 @@ rank below both.
 ## Architectural invariants
 
 - The evolving population has no explicit fitness function or synchronized generation boundary.
-- Scoring and optimization execute only in the harness, never in the living population.
+- Evolutionary fitness scores and optimization do not select parents in the living population.
+  A controller may score its own candidate actions; those scores are not reproductive fitness.
 - Oracles and controllers share the action tuple and world resolver; no oracle-only mutation path
   exists.
-- The controller is replaceable behind `act`, `mutate`, `recombine`, and `seed`; other modules do
-  not inspect genome internals.
+- The controller is replaceable behind `seed`, `createState`, `act`, `mutate`, `recombine`, and
+  `genomeDistance`; other modules do not inspect genome internals.
 - Genome-owned quantities are not overridden by committed global constants.
 - Structural additions to the world or interface require a recorded human decision.
 - Long-horizon outcomes live in the harness ledger. Bounded deterministic mechanics belong in

@@ -1,91 +1,70 @@
 import { describe, expect, it } from "vitest";
-import { getVoxel, type VoxelGrid } from "./grid";
-import { Material, isSolid } from "./materials";
-import { generateTerrain, surfaceHeight } from "./terrain";
-import { TERRAIN, WORLD_SIZE_Y } from "./tunables";
+import { createGrid, setCell, setBacking, cellIndex } from "./grid";
+import { Material } from "./materials";
+import { isWalkable, skyLight, terrainDigest } from "./terrain";
+import { createChemicalField, depositChemical, stepChemical } from "./scent";
+import { buildEnvironment } from "./nest";
+import { terrainConfig } from "./config";
+import { createRandomState } from "./random";
 
-const LAYER_RANK: Partial<Record<number, number>> = {
-  [Material.TOPSOIL]: 0,
-  [Material.CLAY]: 1,
-  [Material.ROCK]: 2,
-};
-
-function checkColumnOrdering(grid: VoxelGrid, seed: number, x: number, z: number): void {
-  const surface = surfaceHeight(seed, x, z);
-  let previousRank = -1;
-  for (let y = grid.sizeY - 1; y >= 0; y--) {
-    const material = getVoxel(grid, x, y, z);
-    if (y > surface) {
-      expect(material).toBe(Material.AIR);
-      continue;
+describe("cellular terrain", () => {
+  it("supports stacked ledges while open air remains unwalkable", () => {
+    const grid = createGrid(16, 16);
+    for (let x = 1; x < 15; x++) {
+      setCell(grid, x, 2, Material.SOIL);
+      setCell(grid, x, 10, Material.WOOD);
     }
-    expect(isSolid(material)).toBe(true);
-    const rank = LAYER_RANK[material];
-    expect(rank).toBeDefined();
-    expect(rank as number).toBeGreaterThanOrEqual(previousRank);
-    previousRank = rank as number;
-  }
-}
-
-function materialFractions(grid: VoxelGrid): (m: number) => number {
-  const counts = new Map<number, number>();
-  for (const value of grid.data) {
-    counts.set(value, (counts.get(value) ?? 0) + 1);
-  }
-  return (m) => (counts.get(m) ?? 0) / grid.data.length;
-}
-
-describe("generateTerrain determinism", () => {
-  const grid = generateTerrain(1234);
-
-  it("is byte-identical for the same seed", () => {
-    const again = generateTerrain(1234);
-    expect(Buffer.from(again.data).equals(Buffer.from(grid.data))).toBe(true);
+    expect(isWalkable(grid, 8, 3)).toBe(true);
+    expect(isWalkable(grid, 8, 11)).toBe(true);
+    expect(isWalkable(grid, 8, 6)).toBe(false);
+    expect(skyLight(grid, 8, 3)).toBe(0);
+    expect(skyLight(grid, 8, 11)).toBe(1);
+    setBacking(grid, 8, 6, Material.CLAY);
+    expect(isWalkable(grid, 8, 6)).toBe(true);
   });
 
-  it("differs for a different seed", () => {
-    const other = generateTerrain(4321);
-    expect(Buffer.from(other.data).equals(Buffer.from(grid.data))).toBe(false);
+  it("invalidates support and illumination after material edits", () => {
+    const grid = createGrid(12, 12);
+    const original = terrainDigest(grid);
+    expect(isWalkable(grid, 5, 5)).toBe(false);
+    setCell(grid, 5, 6, Material.CLAY);
+    expect(isWalkable(grid, 5, 5)).toBe(true);
+    expect(skyLight(grid, 5, 5)).toBe(0);
+    expect(terrainDigest(grid)).not.toBe(original);
+    setCell(grid, 5, 6, Material.AIR);
+    expect(skyLight(grid, 5, 5)).toBe(1);
+    expect(isWalkable(grid, 5, 5)).toBe(false);
   });
-});
 
-describe("generateTerrain structure", () => {
-  const seed = 1234;
-  const grid = generateTerrain(seed);
-
-  it("keeps surface heights within amplitude bounds", () => {
-    for (let x = 0; x < grid.sizeX; x += 7) {
-      for (let z = 0; z < grid.sizeZ; z += 7) {
-        const h = surfaceHeight(seed, x, z);
-        expect(h).toBeGreaterThanOrEqual(TERRAIN.surfaceBase - TERRAIN.surfaceAmplitude);
-        expect(h).toBeLessThanOrEqual(TERRAIN.surfaceBase + TERRAIN.surfaceAmplitude);
-        expect(h).toBeLessThan(WORLD_SIZE_Y);
-      }
+  it("transports airborne odor through unsupported air but retains surface marks", () => {
+    const grid = createGrid(12, 12),
+      physics = { diffusion: 0.4, evaporation: 1, epsilon: 1e-8 };
+    setCell(grid, 5, 2, Material.ROCK);
+    const gas = createChemicalField(grid, physics),
+      mark = createChemicalField(grid, physics, true);
+    for (const field of [gas, mark]) {
+      depositChemical(field, cellIndex(grid, 5, 4), 1);
+      stepChemical(grid, field);
     }
+    expect(gas.values[cellIndex(grid, 5, 5)]).toBeGreaterThan(0);
+    expect(mark.values[cellIndex(grid, 5, 5)]).toBe(0);
   });
 
-  it("orders every sampled column as air, topsoil, clay, rock", { timeout: 30_000 }, () => {
-    for (let x = 0; x < grid.sizeX; x += 5) {
-      for (let z = 0; z < grid.sizeZ; z += 5) {
-        checkColumnOrdering(grid, seed, x, z);
-      }
-    }
-  });
-
-  it("makes the bottom row rock", () => {
-    for (let x = 0; x < grid.sizeX; x += 11) {
-      for (let z = 0; z < grid.sizeZ; z += 11) {
-        expect(getVoxel(grid, x, 0, z)).toBe(Material.ROCK);
-      }
-    }
-  });
-
-  it("keeps material fractions within sane bounds", () => {
-    const fraction = materialFractions(grid);
-    expect(fraction(Material.AIR)).toBeGreaterThan(0.15);
-    expect(fraction(Material.AIR)).toBeLessThan(0.6);
-    expect(fraction(Material.TOPSOIL)).toBeGreaterThan(0.02);
-    expect(fraction(Material.CLAY)).toBeGreaterThan(0.05);
-    expect(fraction(Material.ROCK)).toBeGreaterThan(0.2);
+  it("generates compact heterogeneous terrain with reproducible supported food tiers", () => {
+    const config = terrainConfig("tiered");
+    const first = buildEnvironment(config, createRandomState(101));
+    const second = buildEnvironment(config, createRandomState(101));
+    expect(terrainDigest(first.grid)).toBe(terrainDigest(second.grid));
+    expect(first.nest.chambers).toHaveLength(6);
+    expect(first.grid.cells).toContain(Material.CLAY);
+    expect(first.grid.cells).toContain(Material.LOOSE_SOIL);
+    expect(first.grid.cells).toContain(Material.WOOD);
+    expect(first.foodSources.size).toBe(config.foodCount);
+    const heights = [...first.foodSources].map((index) => Math.floor(index / first.grid.width));
+    expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(30);
+    for (const index of first.foodSources)
+      expect(
+        isWalkable(first.grid, index % first.grid.width, Math.floor(index / first.grid.width))
+      ).toBe(true);
   });
 });

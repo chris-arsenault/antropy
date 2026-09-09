@@ -136,7 +136,6 @@ export default tseslint.config(
           paths: [
             { name: "react", message: "src/sim is pure: no React (ADR-0001)." },
             { name: "react-dom", message: "src/sim is pure: no React (ADR-0001)." },
-            { name: "three", message: "src/sim is pure: no three.js (ADR-0001)." },
           ],
           patterns: [
             {

@@ -1,17 +1,16 @@
-/** Minimal repeatable-flag parser for harness commands. */
 export interface Flags {
-  values: Map<string, string[]>;
+  readonly values: Map<string, string[]>;
 }
 
-export function parseFlags(argv: string[]): Flags {
+export function parseFlags(arguments_: readonly string[]): Flags {
   const values = new Map<string, string[]>();
-  for (let i = 0; i < argv.length; i++) {
-    if (!argv[i].startsWith("--")) {
-      throw new Error(`unexpected argument: ${argv[i]}`);
-    }
-    const key = argv[i].slice(2);
-    const hasValue = i + 1 < argv.length && !argv[i + 1].startsWith("--");
-    const value = hasValue ? argv[++i] : "true";
+  for (let index = 0; index < arguments_.length; index++) {
+    const argument = arguments_[index];
+    if (!argument.startsWith("--")) throw new Error(`unexpected argument: ${argument}`);
+    const key = argument.slice(2);
+    const next = arguments_[index + 1];
+    const hasValue = next !== undefined && !next.startsWith("--");
+    const value = hasValue ? arguments_[++index] : "true";
     values.set(key, [...(values.get(key) ?? []), value]);
   }
   return { values };
@@ -21,12 +20,14 @@ export function flag(flags: Flags, key: string, fallback: string): string {
   return flags.values.get(key)?.at(-1) ?? fallback;
 }
 
-export function intFlag(flags: Flags, key: string, fallback: number): number {
-  return Number(flag(flags, key, String(fallback)));
+export function integerFlag(flags: Flags, key: string, fallback: number): number {
+  const value = Number.parseInt(flag(flags, key, String(fallback)), 10);
+  if (!Number.isFinite(value)) throw new Error(`--${key} must be an integer`);
+  return value;
 }
 
-export function seedsOf(flags: Flags, fallback: string): number[] {
+export function seedsFlag(flags: Flags, fallback: string): number[] {
   return flag(flags, "seeds", flag(flags, "seed", fallback))
     .split(",")
-    .map(Number);
+    .map((value) => Number.parseInt(value, 10));
 }

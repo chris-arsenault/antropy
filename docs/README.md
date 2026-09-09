@@ -2,21 +2,38 @@
 
 ## Start here
 
-| Need | Document |
-| --- | --- |
-| Governing goals and judgment | [Simulation principles](principles.md) |
-| Current status and complete work order | [Normalized design](design/README.md) |
-| Detailed evidence | [Certification ledger](certifications.md) |
-| Current measurements and tuned values | [Calibration record](calibration.md) |
-| Feature-level future work | [Backlog](backlog.md) |
-| Preserved supplied material | [Source archive](sources/README.md) |
+Current implementation: [colony knowledge and linear genetic programs](design/colony-knowledge.md).
+RNN-specific work is canceled. [Capacity measurements and physical settling](design/settling.md)
+are implemented for review. [Digging and colony relocation](design/construction.md) now add
+physical spoil, queen transport and multiple cache sites. [Autonomous construction pressures](design/construction-pressures.md)
+add temperature, moisture, brood transport and controller-selected work without manual orders.
+[Collective work and behavior observability](design/collective-work.md) now add persistent local
+worksites, spoil handoff, ant-authored recruitment and measured repairs for wasted food trips.
+Visual review and nursery throughput precede further progress toward
+[a sustainable 2,000-ant colony](design/colony-scale.md) before genetics.
 
-The normalized design owns current requirements. Source documents preserve original language and
-provenance; they are not parallel plans.
+| Need                                                | Document                                                 |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| Governing goals and judgment                        | [Simulation principles](principles.md)                   |
+| Current status and work order                       | [Normalized design](design/README.md)                    |
+| Programmed colony and local physics                 | [Physical colony](design/programmed-colony.md)           |
+| Learned-controller experiment and failure evidence  | [Colony training](design/colony-training.md)             |
+| Shared directional network and recent-action memory | [Directional experiment](design/directional-training.md) |
+| Matched float32 observations and conditional probes | [Sensory contract](design/colony-sensory-contract.md) |
+| Food yield, worker activity and support limitations | [Nutritional-yield experiment](design/nutritional-yield.md) |
+| Colony-outcome fitness and survival acceptance | [Outcome training](design/outcome-training.md) |
+| Private task byte and registered RNN experiments | [Task memory](design/task-memory.md) |
+| Material cells, compact nests, surface tiers and camera | [Cellular terrain](design/cellular-terrain.md) |
+| Canonical runtime boundary                          | [2D migration contract](design/2d-migration.md)          |
+| Measured evidence                                   | [Certification ledger](certifications.md)                |
+| Current numeric choices                             | [Calibration record](calibration.md)                     |
+| Feature-level future work                           | [Backlog](backlog.md)                                    |
+| Supplied and historical material                    | [Source archive](sources/README.md)                      |
+
+The normalized design records implementation guidance and current decisions. Source documents preserve provenance and
+rejected or deferred ideas; they are not a parallel implementation plan.
 
 ## Simulation principles
-
-[Open the governing principles](principles.md).
 
 - [Ordered goals](principles.md#principles-goals)
 - [Author the world, not the ant](principles.md#principles-world)
@@ -29,46 +46,34 @@ provenance; they are not parallel plans.
 
 ## Normalized design and roadmap
 
-[Open the cross-category design index](design/README.md).
-
 - [Work categories](design/README.md#design-categories)
 - [Status vocabulary](design/README.md#design-status)
 - [Current boundary](design/README.md#design-current)
 - [Cross-category implementation order](design/README.md#design-order)
 - [Changing the design](design/README.md#design-change)
 
-## Controller, genome, and embodiment
+## Canonical 2D migration
 
-[Open the controller design](design/controller.md).
+- [Experimental purpose](design/2d-migration.md#migration-purpose)
+- [Canonical world contract](design/2d-migration.md#migration-world)
+- [Restored milestone](design/2d-migration.md#migration-milestone)
+- [Verification boundary](design/2d-migration.md#migration-verification)
+- [Deleted surface](design/2d-migration.md#migration-deleted)
+
+## Controller, sensors, and embodiment
 
 - [Goal and boundary](design/controller.md#controller-goal)
 - [Controller and body contract](design/controller.md#controller-contract)
 - [Sensory surface](design/controller.md#controller-senses)
-- [Current RNN](design/controller.md#controller-rnn)
-- [Initialization and seeded competences](design/controller.md#controller-initialization)
+- [Current policies](design/controller.md#controller-policies)
+- [Initialization and future evolvable controllers](design/controller.md#controller-initialization)
 - [Memory and navigation](design/controller.md#controller-memory)
-- [Search without a target signal](design/controller.md#controller-search)
+- [Search and return logic](design/controller.md#controller-search)
 - [Linear implementation order](design/controller.md#controller-order)
 - [OBE and rejected directions](design/controller.md#controller-obe)
 - [Source provenance](design/controller.md#controller-sources)
 
-## Colony biology and survival
-
-[Open the colony-biology design](design/colony-biology.md).
-
-- [Functional goal](design/colony-biology.md#colony-goal)
-- [Energy and food economy](design/colony-biology.md#colony-energy)
-- [Queen, brood, and replacement](design/colony-biology.md#colony-brood)
-- [Homeostatic floors](design/colony-biology.md#colony-floors)
-- [Reproduction and selection channels](design/colony-biology.md#colony-selection)
-- [Linear implementation order](design/colony-biology.md#colony-order)
-- [Delivered but currently isolated systems](design/colony-biology.md#colony-delivered-later)
-- [OBE and rejected directions](design/colony-biology.md#colony-obe)
-- [Source provenance](design/colony-biology.md#colony-sources)
-
-## Environment and nest morphogenesis
-
-[Open the environment design](design/environment.md).
+## Environment and future morphogenesis
 
 - [World substrate](design/environment.md#environment-world)
 - [Authored-nest control world](design/environment.md#environment-authored-nest)
@@ -80,9 +85,19 @@ provenance; they are not parallel plans.
 - [OBE and rejected directions](design/environment.md#environment-obe)
 - [Source provenance](design/environment.md#environment-sources)
 
-## Experimentation, harness, and certification
+## Colony biology and survival
 
-[Open the experimentation design](design/experimentation.md).
+- [Functional goal](design/colony-biology.md#colony-goal)
+- [Energy and food economy](design/colony-biology.md#colony-energy)
+- [Queen, brood, and replacement](design/colony-biology.md#colony-brood)
+- [Homeostatic floors](design/colony-biology.md#colony-floors)
+- [Reproduction and selection channels](design/colony-biology.md#colony-selection)
+- [Linear implementation order](design/colony-biology.md#colony-order)
+- [Historical implementations not carried forward](design/colony-biology.md#colony-delivered-later)
+- [OBE and rejected directions](design/colony-biology.md#colony-obe)
+- [Source provenance](design/colony-biology.md#colony-sources)
+
+## Experimentation, harness, and certification
 
 - [Evidence boundary](design/experimentation.md#experimentation-boundary)
 - [Work loop](design/experimentation.md#experimentation-loop)
@@ -97,8 +112,6 @@ provenance; they are not parallel plans.
 - [Source provenance](design/experimentation.md#experimentation-sources)
 
 ## Evolutionary and advanced systems
-
-[Open the advanced-systems design](design/advanced.md).
 
 - [Continuous evolution](design/advanced.md#advanced-evolution)
 - [Selection signal and population health](design/advanced.md#advanced-signal)
@@ -115,10 +128,6 @@ provenance; they are not parallel plans.
 
 ## Source coverage
 
-[Open the source-to-design coverage map](design/source-coverage.md).
-
-- [Navigate every supplied source subsection](sources/README.md#source-sections)
-
 - [Coverage method](design/source-coverage.md#coverage-method)
 - [Foundational specification and principles](design/source-coverage.md#coverage-foundation)
 - [Appendix A](design/source-coverage.md#coverage-a)
@@ -129,11 +138,10 @@ provenance; they are not parallel plans.
 - [Appendix F](design/source-coverage.md#coverage-f)
 - [Appendix G](design/source-coverage.md#coverage-g)
 - [Appendix H](design/source-coverage.md#coverage-h)
-- [Plans, notes, and visual source](design/source-coverage.md#coverage-plans)
+- [Plans, notes, visual source, and ADR history](design/source-coverage.md#coverage-plans)
+- [Navigate every supplied source subsection](sources/README.md#source-sections)
 
 ## Feature backlog
-
-[Open the high-level backlog](backlog.md).
 
 - [Living colony and resilience](backlog.md#backlog-colony)
 - [Evolution readiness](backlog.md#backlog-evolution)
@@ -143,12 +151,14 @@ provenance; they are not parallel plans.
 
 ## Project records
 
-| Topic | Document |
-| --- | --- |
-| Architecture | [architecture.md](architecture.md) |
-| Architecture decisions | [adr/README.md](adr/README.md) |
-| Development and commands | [development.md](development.md) |
-| Calibration and measured parameter choices | [calibration.md](calibration.md) |
-| Certification and historical findings | [certifications.md](certifications.md) |
-| Changelog | [../CHANGELOG.md](../CHANGELOG.md) |
-| Agent operating guide | [../AGENTS.md](../AGENTS.md) |
+| Topic                      | Document                               |
+| -------------------------- | -------------------------------------- |
+| Architecture               | [architecture.md](architecture.md)     |
+| Architecture decisions     | [adr/README.md](adr/README.md)         |
+| Development and commands   | [development.md](development.md)       |
+| Calibration and parameters | [calibration.md](calibration.md)       |
+| Certification and findings | [certifications.md](certifications.md) |
+| Changelog                  | [../CHANGELOG.md](../CHANGELOG.md)     |
+| Agent guide                | [../AGENTS.md](../AGENTS.md)           |
+
+The [modular runtime design](design/modular-runtime.md) records the architecture audit, plugin boundaries and controlled environment configuration.

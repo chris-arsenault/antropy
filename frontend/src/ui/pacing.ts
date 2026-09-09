@@ -1,41 +1,26 @@
-export const SPEED_PRESETS = [1, 10, 100, 1000] as const;
-export type SpeedPreset = (typeof SPEED_PRESETS)[number];
+export const SPEEDS = [1, 10, 30, 60, 120, "max"] as const;
+export type Speed = (typeof SPEEDS)[number];
+export const DEFAULT_SPEED: Speed = 30;
+const FRAME_BUDGET_MS = 9;
 
-/** Speeds at which per-ant rendering is disabled and only charts update. */
-export const CHARTS_ONLY_THRESHOLD = 1000;
-
-export const BASE_TICKS_PER_SECOND = 10;
-
-export interface FrameBudget {
-  /** Hard cap on simulation work per frame, in ticks. */
-  maxTicksPerFrame: number;
-}
-
-export const DEFAULT_FRAME_BUDGET: FrameBudget = { maxTicksPerFrame: 2000 };
-
-/**
- * Wall-clock cap on simulation work per frame. When ticks cost more than the
- * budget allows, the host runs fewer ticks (effective speed drops) instead of
- * blocking the frame — the UI stays responsive at every speed setting.
- */
-export const FRAME_TIME_BUDGET_MS = 12;
-
-/**
- * Number of whole ticks to run for an animation frame. Fractional ticks are
- * carried by the caller via the returned remainder so slow speeds still
- * accumulate correctly.
- */
-export function ticksForFrame(
-  speed: SpeedPreset,
-  elapsedMs: number,
-  carry: number,
-  budget: FrameBudget = DEFAULT_FRAME_BUDGET
-): { ticks: number; carry: number } {
-  const exact = carry + (elapsedMs / 1000) * BASE_TICKS_PER_SECOND * speed;
-  const ticks = Math.min(Math.floor(exact), budget.maxTicksPerFrame);
-  return { ticks, carry: exact - Math.floor(exact) };
-}
-
-export function isChartsOnly(speed: SpeedPreset): boolean {
-  return speed >= CHARTS_ONLY_THRESHOLD;
+/** Wall-clock tick targets; bounded debt prevents catch-up bursts after a suspended tab. */
+export function createPacer(speed: Speed, start: number) {
+  let previous = start,
+    owed = 0;
+  return {
+    advance(now: number, step: () => void, clock: () => number): number {
+      const elapsed = Math.max(0, now - previous);
+      previous = now;
+      if (speed !== "max") owed = Math.min(Math.max(1, speed / 4), owed + (elapsed * speed) / 1000);
+      const deadline = clock() + FRAME_BUDGET_MS;
+      let ticks = 0;
+      while (speed === "max" || owed >= 1 - 1e-9) {
+        step();
+        ticks++;
+        if (speed !== "max") owed = Math.max(0, owed - 1);
+        if (clock() >= deadline || ticks >= 256) break;
+      }
+      return ticks;
+    },
+  };
 }

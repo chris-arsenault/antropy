@@ -1,49 +1,52 @@
-import { type Estimate } from "../sim/evolutionStats";
-import { type WorldStats } from "../sim/stats";
+import { HIDDEN_COUNT, RNN_GENOME_LENGTH } from "../sim/controller/rnn";
+import { type World } from "../sim/types";
+import { registeredParameterCount } from "../sim/controller/registeredModel";
 
-function formatEstimate(estimate: Estimate, digits = 3): string {
-  const value = estimate.value === null ? "—" : estimate.value.toFixed(digits);
-  return `${value} (n=${estimate.samples})`;
+function controllerDetails(world: World) {
+  if (world.registeredController)
+    return {
+      hidden: world.registeredController.hidden,
+      parameters: registeredParameterCount(world.registeredController),
+      tasks: world.registeredController.tasks,
+    };
+  if (world.scenario === "rnn")
+    return { hidden: HIDDEN_COUNT, parameters: RNN_GENOME_LENGTH, tasks: 0 };
+  return { hidden: 0, parameters: 0, tasks: 256 };
 }
 
-/** Live selection-information readout; an em dash means the estimator is not yet identified. */
-export function EvolutionPanel({ stats }: { stats: WorldStats | null }) {
-  if (!stats) return null;
-  const evolution = stats.evolution;
+export function EvolutionPanel({ world }: { readonly world: World }) {
+  const details = controllerDetails(world);
   return (
-    <figure className="chart" data-testid="evolution-panel">
-      <figcaption className="chart-title">Evolution health</figcaption>
-      <div className="layer-rows">
-        <div className="layer-row">
-          <span className="ratio-label">delivery heritability</span>
-          <span className="ratio-value">{formatEstimate(evolution.deliveryHeritability)}</span>
+    <section className="panel" data-testid="evolution-panel">
+      <h2>Controller and evolution</h2>
+      <dl className="metrics">
+        {world.linearGenome && (
+          <div>
+            <dt>Linear instructions</dt>
+            <dd>{world.linearGenome.instructions.length}</dd>
+          </div>
+        )}
+        <div>
+          <dt>active arm</dt>
+          <dd>{world.scenario}</dd>
         </div>
-        <div className="layer-row">
-          <span className="ratio-label">lifespan heritability</span>
-          <span className="ratio-value">{formatEstimate(evolution.lifespanHeritability)}</span>
+        <div>
+          <dt>RNN hidden units</dt>
+          <dd>{details.hidden}</dd>
         </div>
-        <div className="layer-row">
-          <span className="ratio-label">effective population</span>
-          <span className="ratio-value">
-            {formatEstimate(evolution.effectivePopulation, 1)} / census{" "}
-            {evolution.effectivePopulation.census}
-          </span>
+        <div>
+          <dt>RNN parameters</dt>
+          <dd>{details.parameters}</dd>
         </div>
-        <div className="layer-row">
-          <span className="ratio-label">genome diversity</span>
-          <span className="ratio-value">{formatEstimate(evolution.pairwiseGenomeDistance)}</span>
+        <div>
+          <dt>task values</dt>
+          <dd>{details.tasks}</dd>
         </div>
-        <div className="layer-row">
-          <span className="ratio-label">distance from founders</span>
-          <span className="ratio-value">{formatEstimate(evolution.founderGenomeDistance)}</span>
+        <div>
+          <dt>in-world selection</dt>
+          <dd>off at this rung</dd>
         </div>
-        <div className="layer-row">
-          <span className="ratio-label">founder lines represented</span>
-          <span className="ratio-value">
-            {evolution.founderLines.representedLines}/{evolution.founderLines.totalLines}
-          </span>
-        </div>
-      </div>
-    </figure>
+      </dl>
+    </section>
   );
 }

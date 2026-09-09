@@ -1,62 +1,61 @@
 # Feature backlog
 
-This is the high-level queue. Detailed implementation order, biological rationale, acceptance
-conditions, and OBE work live in [the normalized design](design/README.md). Evidence belongs in
-[certifications](certifications.md) and [calibration](calibration.md).
+The backlog stays at feature level. Detailed mechanisms and gates belong in the owning design
+document and are activated only when they support genuine evolution.
 
 <a id="backlog-colony"></a>
 
 ## Living colony and resilience
 
-- Certify survival and the value of physical food storage under scarcity.
-- Make the resulting colony state independently reviewable in the web app.
-
-Details: [colony biology BIO-03–BIO-15](design/colony-biology.md#colony-order) and
-[experimentation EXP-08–EXP-10](design/experimentation.md#experimentation-order).
+- Review implemented [capacity measurements and Y-axis settling](design/settling.md) and
+  [digging/queen/cache relocation](design/construction.md). Continue the [roughly 2,000-worker prerequisite](design/colony-scale.md)
+  through distributed storage/nursery care, population scaling and sustained replacement.
+- Broaden sustainable-region and varied-map evidence using the programmed and LGP seed.
+- Measure recovery across worker and resource shocks before adding ecological safety floors.
 
 <a id="backlog-evolution"></a>
 
 ## Evolution readiness
 
-- Admit genetic variation to the certified colony and add diverse, mutation-tolerant founder
-  portfolios.
-- Establish sustainable multi-colony founding and collapse/recovery without measured-run rescue.
-
-Details: [advanced systems ADV-04–ADV-07](design/advanced.md#advanced-order) and
-[controller CTRL-08–CTRL-09](design/controller.md#controller-order).
+- The [linear-program controller and colony knowledge](design/colony-knowledge.md) are implemented.
+  Variation operations exist; reproductive transmission and evolving populations do not yet exist.
+- Only after the 2,000-worker milestone and a genetics decision, add genome identity and parentage,
+  mutation-disabled transmission, then funded daughter-queen
+  development and founding. Multiple reproductive lineages precede live mutation and selection.
+- Establish a broad viable initialization distribution, mutation-distance calibration,
+  inheritance, ancestry, diversity, and selection measurements.
+- Admit standing variation, then demonstrate continuous in-world selection without an explicit
+  fitness function or generation boundary.
 
 <a id="backlog-morphogenesis"></a>
 
 ## Evolved environment and morphogenesis
 
-- Return excavation as optional expansion and compare dug colonies with the authored control.
-- Admit nest maintenance, seasons, weather, and stronger liabilities one mechanism at a time.
-- Add activity-scaled threats, inter-colony pressure, and richer soil/water ecology after multiple
-  colonies persist.
-
-Details: [environment ENV-08–ENV-13](design/environment.md#environment-order) and
-[advanced systems ADV-08–ADV-12](design/advanced.md#advanced-order).
+- [Autonomous programmed/LGP construction](design/construction-pressures.md), brood transport,
+  material climate and food spoilage are implemented for review. Inherited construction and
+  soil collapse remain separate later mechanisms.
+- Judge construction through colony function; record chambers, branches, caches, routes, and nest
+  geometry as descriptions rather than target shapes.
+- Add seasons, weather, predation and disease only when a named evolutionary question requires
+  them. Temperature, moisture and spoilage now provide the approved construction pressures.
 
 <a id="backlog-learning"></a>
 
 ## Learning, development, and controller diversity
 
-- Add metabolically priced within-lifetime plasticity with evolvable motivation.
-- Add genomic developmental reaction norms and observe whether morphs and task allocation emerge.
-- Implement linear genetic programming behind the controller contract and compare it with the RNN.
-
-Details: [controller CTRL-10–CTRL-12](design/controller.md#controller-order) and
-[advanced systems ADV-10–ADV-13](design/advanced.md#advanced-order).
+- RNN-specific plans are canceled; retain their results as historical evidence. A future
+  controller comparison needs a new decision and must not displace the colony-scale work.
+- Add path integration, plasticity, learned routes, reaction norms, developmental roles, or castes
+  only after inherited controller evolution works without them.
+- Preserve capability costs and prevent authored role labels from replacing evolved behavior.
 
 <a id="backlog-observation"></a>
 
 ## Observation and scale
 
-- Add event-driven observation, headless burst runs, checkpoint-linked replay, and deeper lineage
-  inspection.
-- Profile target-scale worlds and optimize scent, decay, storage layout, WASM, or GPU paths only
-  where measurements identify a bottleneck.
-- Add cloud-stored checkpoints only with an explicit platform/authentication design decision.
-
-Details: [experimentation EXP-11–EXP-13](design/experimentation.md#experimentation-order) and
-[environment ENV-14](design/environment.md#environment-order).
+- Add compact lineage, energy, behavior, diversity, and event views as their systems return.
+- Profile before parallelizing. Keep interactive rendering local and move only demonstrated batch
+  bottlenecks to worker or controller-plane execution.
+- Measure simulation throughput separately from rendered frame rate at 200, 500, 1,000 and
+  roughly 2,000 workers; preserve individual decisions, physical costs and durable state.
+- Version checkpoints at real semantic boundaries; reject incompatible worlds explicitly.

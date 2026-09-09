@@ -1,37 +1,56 @@
 import { describe, expect, it } from "vitest";
-import { BASE_TICKS_PER_SECOND, isChartsOnly, ticksForFrame } from "./pacing";
+import { createPacer } from "./pacing";
 
-describe("ticksForFrame", () => {
-  it("scales ticks with speed", () => {
-    const oneX = ticksForFrame(1, 1000, 0);
-    const tenX = ticksForFrame(10, 1000, 0);
-    expect(oneX.ticks).toBe(BASE_TICKS_PER_SECOND);
-    expect(tenX.ticks).toBe(BASE_TICKS_PER_SECOND * 10);
+describe("wall-clock tick pacing", () => {
+  it.each([30, 60, 144])("runs 10 ticks per second at %i display frames per second", (frames) => {
+    const pacer = createPacer(10, 0);
+    let ticks = 0;
+    for (let frame = 1; frame <= frames; frame++)
+      pacer.advance(
+        (frame * 1000) / frames,
+        () => ticks++,
+        () => 0
+      );
+    expect(ticks).toBe(10);
   });
-
-  it("caps ticks at the frame budget", () => {
-    const result = ticksForFrame(1000, 1000, 0, { maxTicksPerFrame: 500 });
-    expect(result.ticks).toBe(500);
+  it("runs one tick per second and starts a resumed clock without pause debt", () => {
+    let ticks = 0;
+    const step = () => ticks++;
+    const pacer = createPacer(1, 0);
+    pacer.advance(999, step, () => 0);
+    expect(ticks).toBe(0);
+    pacer.advance(1000, step, () => 0);
+    const resumed = createPacer(1, 10000);
+    resumed.advance(10001, step, () => 0);
+    expect(ticks).toBe(1);
   });
-
-  it("accumulates fractional ticks across frames via carry", () => {
-    // 16ms at 1x and 10 ticks/s is 0.16 ticks per frame.
-    let carry = 0;
-    let total = 0;
-    for (let frame = 0; frame < 100; frame++) {
-      const result = ticksForFrame(1, 16, carry);
-      carry = result.carry;
-      total += result.ticks;
-    }
-    // 100 frames * 16ms = 1.6s -> 16 ticks.
-    expect(total).toBe(16);
+  it("bounds work and catch-up debt when a tick exceeds the frame budget", () => {
+    const pacer = createPacer(120, 0);
+    let now = 10000;
+    const step = () => {
+      now += 20;
+    };
+    expect(pacer.advance(now, step, () => now)).toBe(1);
+    // At most a quarter-second of work is retained, even after a ten-second stall.
+    expect(
+      pacer.advance(
+        now,
+        () => {},
+        () => now
+      )
+    ).toBeLessThanOrEqual(30);
   });
-});
-
-describe("isChartsOnly", () => {
-  it("disables rendering only at the top preset", () => {
-    expect(isChartsOnly(1)).toBe(false);
-    expect(isChartsOnly(100)).toBe(false);
-    expect(isChartsOnly(1000)).toBe(true);
+  it("lets maximum mode batch cheap ticks while respecting the compute budget", () => {
+    const pacer = createPacer("max", 0);
+    let now = 0;
+    expect(
+      pacer.advance(
+        0,
+        () => {
+          now += 2;
+        },
+        () => now
+      )
+    ).toBe(5);
   });
 });

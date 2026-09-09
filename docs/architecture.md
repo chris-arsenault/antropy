@@ -1,84 +1,95 @@
 # Architecture
 
-Antropy is a fully client-side application. The simulation, rendering, instrumentation, and
-persistence all run in the browser; the deployed artifact is a static bundle.
+Antropy is a static browser application. The simulation is deterministic and DOM-free; React owns
+control flow around it, and Canvas renders a read-only view of its state.
 
-## Application
+## Layer boundaries
 
-- **Frontend** (`frontend/`): Vite + React + TypeScript SPA. Three.js renders the voxel world
-  and instanced ant meshes; React owns the control surface (speed controls, charts,
-  inspectors, event timeline).
-- **Simulation core** (`frontend/src/sim/`): pure TypeScript, deterministic
-  (seeded sfc32 PRNG, fixed integer ticks — [ADR-0002](adr/0002-deterministic-simulation.md)),
-  running on the main thread in a budgeted loop with a worker-portable state shape
-  ([ADR-0001](adr/0001-main-thread-simulation.md)). The behavioral controller sits behind a
-  pluggable `act`/`mutate`/`recombine`/`seed`/`genomeDistance` contract so controller models can be
-  swapped without exposing genome internals to the world.
-- **Module boundaries** (lint-enforced via ESLint import restrictions): `src/sim/` imports
-  neither React, three.js, DOM APIs, nor the other layers; `src/render/` (three.js) and
-  `src/ui/` (React, including in-house canvas charts —
-  [ADR-0003](adr/0003-custom-canvas-charts.md)) read simulation state through its public
-  surface; `src/persist/` serializes world state to IndexedDB and files.
-- **Persistence**: IndexedDB for checkpoints plus downloadable file export/import. No server
-  round-trips.
+| Layer | Path | Responsibility |
+| --- | --- | --- |
+| Simulation | `frontend/src/sim/` | Grid, world generation, fields, sensing, actions, policies, metrics |
+| Persistence | `frontend/src/persist/` | Versioned 2D checkpoint serialization, IndexedDB, file transfer |
+| UI | `frontend/src/ui/` | Canvas rendering, controls, inspector, pacing |
+| Harness | `frontend/harness/` | Comparative runs and SQLite evidence |
 
-The ant renderer instances one merged low-poly geometry with abdomen, thorax, head, six legs, and
-two antennae. Terrain rendering separates the adjustable-opacity surface skin from opaque
-subsurface tunnel walls so x-ray viewing does not erase the tunnel boundary. These are display
-mechanisms only; neither affects simulation state.
+The simulation imports no React, DOM, UI, persistence, or harness modules. UI and harness callers
+may inspect simulation state. Diagnostic interventions are explicit; production controller actions
+resolve through the shared physical boundary.
 
-The full simulation design — controller model, genome, world, energy economy, reproduction,
-regimes, and instrumentation — is decomposed in [the normalized design](design/README.md). The
-original specification is retained in the [source archive](sources/design-spec.md). As of
-v0.3.0 the world runs the liability metapopulation: colony-tagged scent channels
-(ADR-0005), scripted queen provisioning via trophallaxis, food transport, larder restock,
-and larval rearing (ADR-0006, ADR-0011), haploid males from a global pool (ADR-0007),
-structured initialization with chemotaxis, excavation, nest-plume homing, brood care,
-pickup, and heat-escape instincts (ADR-0004/0006/0008; interface ownership follows the
-[current principles](principles.md#principles-layers)),
-microclimate stress with climate-keyed egg exposure and year-round storms, physical
-hoarding, nest decay, seasonal famine troughs, and automatic continuation from survivor
-genetics on a 192×64×192 map. Measurements (tournaments, calibration, seed derivation,
-determinism checks and evolutionary-health series) run through the harness into a committed SQLite ledger
-(`frontend/harness/`, ADR-0012), never through the test tiers.
+## Runtime composition
 
-Genetic ancestry uses a world-wide monotonic identity distinct from transient ant ids, local
-patrilines, and colony scent owners. The identity follows an egg into its adult or queen state;
-durable records retain actual parents, founder line, offspring contribution, net external-food
-merit, and completed death outcomes. Checkpoints preserve those records and the controller-owned
-founder genome references used for distance measurements.
+The [modular runtime design](design/modular-runtime.md) records the independent SOLID/DRY and
+systems audits, contracts and limitations. A small typed kernel executes statically registered
+resources, chemistry, actors and lifecycle systems in explicit order. The composition root binds
+phase contexts; feature implementations own their registrations. World construction, controller
+adapters and checkpoint codecs are separate.
 
-The web app exposes two matched single-worker worlds through the scenario selector. The full-map
-arm reads all external food coordinates and a shortest-path field over the legal 3D motor graph.
-The programmed arm is a pure function of the current shipped sensor tuple. It contains no private
-state, location, map, route, target, or ant identity. Both arms turn, step, pick up, and deposit
-through the ordinary body resolver, use the same authored nest and food patch, and return food to
-the queen-core larder neighborhood. The labels distinguish full-map privilege from sensor-limited
-behavior. Feature gates and cargo capacities remain stored per world and visible in the effective-
-config panel.
+Configuration resolves independent environment mechanisms and per-world chemistry. Presets are
+conveniences at the browser/harness boundary, never physical branch conditions.
 
-The authored-nest builder carves the fixture before placing the colony and never calls the legacy
-founding excavation path. The current [environment design](design/environment.md) gives this
-control arm physical carrier families: the deep-source homing field, absorbed owner-tagged colony
-odor in nest material, colony odor transferred by contact to handled food, and configurable
-owner-tagged entrance traffic in an unlabeled pheromone field. Five scent fields expose level,
-center, down/up, vertical stereo, a direct-ahead sample in each vertical band, and phasic samples
-through the 120-input controller vector. The
-fresh programmed arm resolves those samples through the same eight outputs as the RNN. The former
-Appendix H policy remains invalid and is not exposed as a review option.
+## Simulation core
+
+The current review world is a 2,048 × 512 X/Y cell lattice. Y is height. Foreground and backing
+materials represent heterogeneous ground, exposed chamber walls and connected surface tiers.
+A compact six-room nest leaves substantial unused soil. The original layout remains a reference
+fixture on this same substrate. A seed determines terrain variation and distributed food.
+The material grids, five chemical fields, variable worker
+population, queen, staged brood, food quantities, PRNG state and economy are serializable. Integer ticks and deterministic iteration make
+checkpoint continuation reproducible.
+
+The default world runs the frozen task-register RNN; programmed controls remain selectable.
+Turning consumes a tick; translation attempts
+one adjacent unoccupied legal cell. Mandibles pick up or release a bounded food quantity one cell
+forward. Workers eat physical food and feed contacted queens or larvae over an occluded two-cell
+reach. Their reserves pay for work and upkeep. Queen-funded eggs and locally fed larvae become
+pupae and adults; starvation and age remove workers. See the [colony contract](design/programmed-colony.md)
+for the conservation equation and development rules.
+
+## Controller boundary
+
+The navigation policies receive a 33-value current-frame vector. The colony policy additionally
+receives local contact observations, neighboring fresh-air concentrations and body reserve/crop quantities. It contains body-relative openness;
+center concentrations and signed adjacent contrasts for food odor, deep nest odor, and two
+pheromones; immediate food and cache contact; carried load; attenuated light; and deterministic individual
+variation. The stateless programmed policy has no reference to the world. The map-aware diagnostic
+receives the world only in its quarantined policy module, computes a shortest path, then emits the
+same action shape as local policies.
+
+The historical generic controller contract exposes `seed`, `act`, `mutate`, `recombine`, and inspection for the historical RNN. The current runtime adapter centralizes state creation, validation and
+inspection. Persistence still uses registered models and Float32 state; arbitrary genome opacity
+is a remaining boundary, not an implemented claim.
+
+Imported registered colony models add a private byte, a learned task-write head and optional
+sensory gains to a shared 64-unit recurrent actor. Eight values are used in the current study;
+their meanings are unconstrained at runtime. Private command history and seeded sampling state
+remain per worker. The programmed colony writes its existing decision mode for monitoring.
+
+## Browser and persistence
+
+React owns scenario selection, seed selection, pacing, field-layer visibility, checkpoint
+controls, live charts, ratios, effective configuration, and the creature inspector. The Canvas
+projection uses a two-axis camera with anchored zoom, pan, fit controls and a minimap,
+and draws the material cross-section, quantified food, selected fields, oriented workers,
+carried-load color, queen reserve and brood stages. It
+does not create simulation state.
+
+Checkpoint version 9 declares `dimension: "2d"`, stores foreground/backing cells and actual nest
+geometry without regenerating the map, records resolved environment/chemistry and ordered mechanism
+versions and independent nest-generation seed, separates food quantity from nutritional energy,
+and stores imported registered models plus each worker's numeric register, recurrent state,
+command history and private random stream. Import rejects every other shape rather than
+guessing at a migration. Browser storage is IndexedDB; file export is local to the user.
+
+## Measurement harness
+
+The harness runs outside Vitest and writes summaries with seed, parameters, commit state, elapsed
+time, and outcome to `frontend/harness/ledger.db`. The colony harness measures population, queen reserves, staged brood, food transfers, deaths,
+births and energy conservation, including matched deprivation. The retained forager panel measures the
+map-aware, programmed, and recurrent arms for five complete food round trips in identical
+randomized worlds. Unit tests cover bounded mechanics, not campaign outcomes.
 
 ## Deployment
 
-- **Hosting**: the Ahara `website` module (`ahara-tf-patterns`) — S3 + CloudFront + ACM + WAF
-  at `antropy.ahara.io`. Terraform root: `infrastructure/terraform/`.
-- **State**: shared Ahara state bucket, key `projects/antropy.tfstate`.
-- **CI/CD**: the shared reusable workflow (`chris-arsenault/ahara/.github/workflows/ci.yml`)
-  reads `platform.yml` (`stack: typescript, terraform`), runs eslint/tsc/vitest/Qlty and
-  `terraform fmt`, and deploys on push to `main`.
-- **Identity**: the project's deployer role is registered in `ahara-infra`
-  (`infrastructure/terraform/control/project-antropy.tf`) with the `website` module bundle
-  and `terraform-state` policy.
-
-The project uses no ALB, database, or Cognito integration; those platform steps activate only
-if cloud-stored checkpoints or authenticated features are added later
-(see [backlog.md](backlog.md)).
+The frontend builds to static assets and deploys through the Ahara `website` module: S3,
+CloudFront, ACM, and WAF. Terraform uses the shared Ahara state bucket at
+`projects/antropy.tfstate`. The project has no application backend, database, or authentication.

@@ -1,130 +1,91 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { computeStats, TRAIT_KEYS, type WorldStats } from "../sim/stats";
-import { stepWorld, type World } from "../sim/world";
-import { createTimeSeries, pushSample, type TimeSeries } from "./charts/timeSeries";
-import { FRAME_TIME_BUDGET_MS, ticksForFrame, type SpeedPreset } from "./pacing";
+import { storedFood } from "../sim/resources";
+import { useCallback, useState } from "react";
+import { type World } from "../sim/types";
+import { overrideTask } from "../sim/taskMemory";
 
-export interface StatsHistory {
-  population: TimeSeries;
-  eggs: TimeSeries;
-  colonies: TimeSeries;
-  dominantShare: TimeSeries;
-  traitMeans: TimeSeries[];
-}
+import { DEFAULT_SPEED, type Speed } from "./pacing";
+import { useSimulationClock } from "./useSimulationClock";
 
 export interface SimulationHandle {
-  world: World;
-  tick: number;
-  running: boolean;
-  speed: SpeedPreset;
-  /** Fractional-tick interpolation factor for the renderer, updated per frame. */
-  alphaRef: { readonly current: number };
-  /** Latest instrumentation sample, republished with the tick counter. */
-  stats: WorldStats | null;
-  /** Ring-buffered chart series; object identity is stable. */
-  history: StatsHistory;
+  readonly world: World;
+  readonly version: number;
+  readonly running: boolean;
+  readonly speed: Speed;
+  readonly ticksPerSecond: number;
+  readonly millisecondsPerTick: number;
+  readonly history: readonly HistoryPoint[];
   start(): void;
   pause(): void;
-  setSpeed(speed: SpeedPreset): void;
+  setSpeed(speed: Speed): void;
+  setTask(id: number, value: number): void;
 }
 
-const UI_REFRESH_MS = 100;
-const STATS_SAMPLE_INTERVAL_TICKS = 50;
-
-function createHistory(): StatsHistory {
-  return {
-    population: createTimeSeries(),
-    eggs: createTimeSeries(),
-    colonies: createTimeSeries(),
-    dominantShare: createTimeSeries(),
-    traitMeans: TRAIT_KEYS.map(() => createTimeSeries()),
-  };
+export interface HistoryPoint {
+  readonly tick: number;
+  readonly storedEnergy: number;
+  readonly distanceMoved: number;
+  readonly turns: number;
+  readonly pheromoneDeposited: number;
+  readonly workers: number;
+  readonly brood: number;
+  readonly queenEnergy: number;
+  readonly births: number;
+  readonly deaths: number;
 }
 
-function recordSample(history: StatsHistory, stats: WorldStats): void {
-  pushSample(history.population, stats.tick, stats.population);
-  pushSample(history.eggs, stats.tick, stats.eggCount);
-  pushSample(history.colonies, stats.tick, stats.colonyCount);
-  pushSample(history.dominantShare, stats.tick, stats.dominantPatrilineShare);
-  for (let i = 0; i < history.traitMeans.length; i++) {
-    pushSample(history.traitMeans[i], stats.tick, stats.traitMeans[i]);
-  }
+function appendHistory(current: readonly HistoryPoint[], world: World): readonly HistoryPoint[] {
+  const previous = current[current.length - 1];
+  if (previous && world.tick - previous.tick < 20) return current;
+  return [
+    ...current,
+    {
+      tick: world.tick,
+      storedEnergy: storedFood(world) * world.config.foodEnergyDensity,
+      distanceMoved: world.economy.movement,
+      turns: world.ants.reduce((total, ant) => total + ant.turns, 0),
+      pheromoneDeposited: world.metrics.pheromoneDeposited,
+      workers: world.ants.length,
+      brood: world.brood.length,
+      queenEnergy: world.queen.energy,
+      births: world.metrics.workerHatches,
+      deaths: world.metrics.deaths,
+    },
+  ].slice(-300);
 }
 
-/**
- * Hosts the simulation loop on the main thread (ADR-0001): owns the World
- * produced by the factory (fresh or checkpoint-restored — remount with a new
- * key to switch), advances it inside a requestAnimationFrame budget, samples
- * instrumentation on a tick cadence, and republishes at a throttled rate.
- */
-export function useSimulation(worldFactory: () => World): SimulationHandle {
-  // The initializer runs exactly once per mount; later identity changes of
-  // `worldFactory` are irrelevant by design.
-  const [initial] = useState(() => {
-    const world = worldFactory();
-    const history = createHistory();
-    const stats = computeStats(world);
-    recordSample(history, stats);
-    return { world, history, stats };
-  });
-  const { world, history } = initial;
-
+export function useSimulation(factory: () => World): SimulationHandle {
+  const [world] = useState(factory);
+  const [version, setVersion] = useState(world.tick);
   const [running, setRunning] = useState(false);
-  const [speed, setSpeed] = useState<SpeedPreset>(1);
-  const [tick, setTick] = useState(world.tick);
-  const [stats, setStats] = useState<WorldStats | null>(initial.stats);
+  const [speed, setSpeed] = useState<Speed>(DEFAULT_SPEED);
+  const [history, setHistory] = useState<readonly HistoryPoint[]>([]);
+  const [, setEdits] = useState(0);
 
-  const frameRef = useRef(0);
-  const alphaRef = useRef(0);
-  const lastSampleRef = useRef(world.tick);
-
-  useEffect(() => {
-    if (!running) {
-      return undefined;
-    }
-    let last = performance.now();
-    let lastPublish = last;
-    let carry = 0;
-    let latest: WorldStats | null = null;
-
-    const frame = (now: number) => {
-      const budgeted = ticksForFrame(speed, now - last, carry);
-      carry = budgeted.carry;
-      last = now;
-      const deadline = performance.now() + FRAME_TIME_BUDGET_MS;
-      for (let i = 0; i < budgeted.ticks; i++) {
-        stepWorld(world);
-        if (world.tick - lastSampleRef.current >= STATS_SAMPLE_INTERVAL_TICKS) {
-          lastSampleRef.current = world.tick;
-          latest = computeStats(world);
-          recordSample(history, latest);
-        }
-        // Over-budget ticks are dropped, not deferred — effective speed
-        // degrades but the frame never blocks (FRAME_TIME_BUDGET_MS).
-        if (performance.now() > deadline) {
-          break;
-        }
-      }
-      alphaRef.current = carry;
-      if (now - lastPublish >= UI_REFRESH_MS) {
-        lastPublish = now;
-        setTick(world.tick);
-        if (latest) {
-          setStats(latest);
-        }
-      }
-      frameRef.current = requestAnimationFrame(frame);
-    };
-
-    frameRef.current = requestAnimationFrame(frame);
-    return () => {
-      cancelAnimationFrame(frameRef.current);
-      setTick(world.tick);
-    };
-  }, [running, speed, world, history]);
+  const advance = useCallback(() => {
+    setHistory((current) => appendHistory(current, world));
+    setVersion(world.tick);
+  }, [world]);
+  const throughput = useSimulationClock(world, running, speed, advance);
 
   const start = useCallback(() => setRunning(true), []);
   const pause = useCallback(() => setRunning(false), []);
-
-  return { world, tick, running, speed, alphaRef, stats, history, start, pause, setSpeed };
+  const setTask = useCallback(
+    (id: number, value: number) => {
+      overrideTask(world, id, value);
+      setEdits((current) => current + 1);
+    },
+    [world]
+  );
+  return {
+    world,
+    version,
+    running,
+    speed,
+    history,
+    start,
+    pause,
+    setSpeed,
+    setTask,
+    ...throughput,
+  };
 }

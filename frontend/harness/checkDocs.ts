@@ -7,6 +7,7 @@ const sourceIndexPath = resolve(root, "docs/sources/README.md");
 const normalizedDocuments = [
   "docs/principles.md",
   "docs/design/README.md",
+  "docs/design/2d-migration.md",
   "docs/design/controller.md",
   "docs/design/colony-biology.md",
   "docs/design/environment.md",
@@ -26,6 +27,7 @@ const sourceDocuments = [
   "docs/sources/ant-sim-appendix-e2.md",
   "docs/sources/ant-sim-appendix-f.md",
   "docs/sources/ant-sim-appendix-g.md",
+  "docs/sources/ant-sim-appendix-h.md",
   "docs/sources/seed-spec.md",
   "docs/sources/R2-PLAN.md",
   "docs/sources/R3-PLAN.md",
@@ -45,6 +47,7 @@ const indexedSourceDocuments = [
   "docs/sources/ant-sim-appendix-e2.md",
   "docs/sources/ant-sim-appendix-f.md",
   "docs/sources/ant-sim-appendix-g.md",
+  "docs/sources/ant-sim-appendix-h.md",
   "docs/sources/seed-spec.md",
 ].map((path) => resolve(root, path));
 const required = [

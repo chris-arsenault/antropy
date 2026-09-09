@@ -37,6 +37,25 @@ Current evidence lives in [the certification ledger](../certifications.md) and
 | [RNN-training review note](paste-2026-09-04_03-56-08-254Z.txt) | Source of the behavior-cloning and evaluation critique; later measurements superseded parts of its prescribed procedure |
 | [Underground-nest reference image](paste-2026-09-03_17-00-44-361Z.png) | Qualitative morphology reference only; never a shape target or certification gate |
 
+## Retired architecture records
+
+ADRs 0001–0013 describe the runtime preserved at the 2026-09-06 checkpoint tag. They moved here
+unchanged when the canonical 2D substrate replaced that implementation:
+
+- [0001 — main-thread simulation](legacy-3d-adrs/0001-main-thread-simulation.md)
+- [0002 — deterministic simulation](legacy-3d-adrs/0002-deterministic-simulation.md)
+- [0003 — custom Canvas charts](legacy-3d-adrs/0003-custom-canvas-charts.md)
+- [0004 — excavation instinct](legacy-3d-adrs/0004-excavation-instinct.md)
+- [0005 — owner-tagged scent channels](legacy-3d-adrs/0005-owner-tagged-scent-channels.md)
+- [0006 — nest scent and transport instinct](legacy-3d-adrs/0006-nest-scent-and-transport-instinct.md)
+- [0007 — global mating pool](legacy-3d-adrs/0007-global-mating-pool.md)
+- [0008 — brood-care instinct](legacy-3d-adrs/0008-brood-care-instinct.md)
+- [0009 — oracles outside the contract](legacy-3d-adrs/0009-oracles-outside-the-contract.md)
+- [0010 — derived seed portfolio](legacy-3d-adrs/0010-derived-seed-portfolio.md)
+- [0011 — liabilities and bootstrap tournament](legacy-3d-adrs/0011-liability-shapes-and-bootstrap-tournament.md)
+- [0012 — historical harness ledger](legacy-3d-adrs/0012-harness-ledger.md)
+- [0013 — historical feature gates](legacy-3d-adrs/0013-feature-config-gates.md)
+
 <a id="source-sections"></a>
 
 ## Supplied source section index

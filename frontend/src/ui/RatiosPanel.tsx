@@ -1,54 +1,67 @@
-import { RATIO_BANDS, ratioInBand, type ViabilityRatios } from "../sim/ratios";
-import { type WorldStats } from "../sim/stats";
+import { type World } from "../sim/types";
+import { energyResidual } from "../sim/resources";
 
-const RATIO_LABELS: Record<keyof ViabilityRatios, string> = {
-  tripProfitability: "R1 trip profit",
-  satiation: "R2 satiation",
-  scentHorizon: "R3 scent horizon",
-  foragingReach: "R4 reach",
-  trailOverTrip: "R5a trail/trip",
-  patchOverTrail: "R5b patch/trail",
-  digEconomics: "R6 dig cost",
-  ecosystemClosure: "R7 closure",
-};
-
-function formatRatio(value: number): string {
-  if (!Number.isFinite(value)) {
-    return "∞";
-  }
-  return value >= 100 ? value.toFixed(0) : value.toFixed(2);
-}
-
-/** Live §B.3 viability-ratio readout: out-of-band drift at a glance. */
-export function RatiosPanel({ stats }: { stats: WorldStats | null }) {
-  if (!stats) {
-    return null;
-  }
-  const keys = Object.keys(RATIO_BANDS) as (keyof ViabilityRatios)[];
+export function RatiosPanel({ world }: { readonly world: World }) {
+  const reversals = world.ants.reduce((total, ant) => total + ant.immediateTurnReversals, 0);
+  const movementFraction = world.economy.movement / Math.max(1, world.economy.workerTicks);
+  const reversalFraction = reversals / Math.max(1, world.economy.workerTicks);
+  const pickupReturnGap =
+    world.economy.completedReturns === 0
+      ? null
+      : world.economy.returnTicks / world.economy.completedReturns;
   return (
-    <figure className="chart" data-testid="ratios-panel">
-      <figcaption className="chart-title">Viability ratios (§B.3)</figcaption>
-      <div className="layer-rows">
-        {keys.map((key) => {
-          const value = stats.ratios[key];
-          const ok = ratioInBand(key, value);
-          return (
-            <div key={key} className={`layer-row ${ok ? "" : "ratio-out-of-band"}`}>
-              <span className="ratio-label">{RATIO_LABELS[key]}</span>
-              <span className="ratio-value">{formatRatio(value)}</span>
-              {!ok && <span className="ratio-flag">out of band</span>}
-            </div>
-          );
-        })}
-        <div className="layer-row">
-          <span className="ratio-label">gradient visible</span>
-          <span className="ratio-value">{(stats.gradientVisibility * 100).toFixed(0)}%</span>
+    <section className="panel" data-testid="ratios-panel">
+      <h2>Behavior ratios</h2>
+      <dl className="metrics">
+        <div>
+          <dt>movement / worker tick</dt>
+          <dd>{movementFraction.toFixed(3)}</dd>
         </div>
-        <div className="layer-row">
-          <span className="ratio-label">continuations</span>
-          <span className="ratio-value">{stats.continuations}</span>
+        <div>
+          <dt>living-worker reversals / worker tick</dt>
+          <dd>{reversalFraction.toFixed(4)}</dd>
         </div>
-      </div>
-    </figure>
+        <div>
+          <dt>mean pickup to deposit</dt>
+          <dd>{pickupReturnGap === null ? "—" : `${pickupReturnGap.toFixed(0)} ticks`}</dd>
+        </div>
+        <div>
+          <dt>active odor cells</dt>
+          <dd>{world.foodOdor.activeCount + world.nestOdor.activeCount}</dd>
+        </div>
+        <div>
+          <dt>active pheromone cells</dt>
+          <dd>{world.pheromoneA.activeCount + world.pheromoneB.activeCount}</dd>
+        </div>
+        <div>
+          <dt>deaths / eggs / hatches</dt>
+          <dd>{`${world.metrics.deaths} / ${world.metrics.workerEggs} / ${world.metrics.workerHatches}`}</dd>
+        </div>
+        <div>
+          <dt>age / starvation deaths</dt>
+          <dd>
+            {world.economy.ageDeaths} / {world.economy.starvationDeaths}
+          </dd>
+        </div>
+        <div>
+          <dt>brood deaths</dt>
+          <dd>{world.economy.broodDeaths}</dd>
+        </div>
+        <div>
+          <dt>queen / brood fed</dt>
+          <dd>
+            {world.economy.queenFed.toFixed(1)} / {world.economy.broodFed.toFixed(1)}
+          </dd>
+        </div>
+        <div>
+          <dt>external food energy harvested</dt>
+          <dd>{world.economy.harvested.toFixed(1)}</dd>
+        </div>
+        <div>
+          <dt>energy balance residual</dt>
+          <dd>{energyResidual(world).toExponential(2)}</dd>
+        </div>
+      </dl>
+    </section>
   );
 }

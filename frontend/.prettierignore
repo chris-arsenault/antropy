@@ -2,3 +2,9 @@ dist/
 coverage/
 node_modules/
 pnpm-lock.yaml
+# Preserve exact generated model/report bytes used by experiment hashes.
+harness/artifacts/**/*.json
+# Binary replay trajectories can exceed the formatter's file-size limit.
+harness/artifacts/**/*.f32
+src/sim/controller/review-colony.json
+src/sim/controller/generalization-review*.json

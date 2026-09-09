@@ -1,46 +1,46 @@
-import { type Checkpoint } from "./checkpoint";
+import { type Checkpoint2D } from "./checkpoint";
 
-const DB_NAME = "antropy";
-const STORE = "checkpoints";
+const DB_NAME = "antropy-2d";
+const STORE_NAME = "checkpoints";
 
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(STORE);
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("IndexedDB open failed"));
-  });
-}
-
-function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
+function requestResult<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed"));
   });
 }
 
-/** Store a checkpoint under a name (typed arrays clone natively). */
-export async function saveCheckpoint(name: string, checkpoint: Checkpoint): Promise<void> {
-  const db = await openDb();
+function openDatabase(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error("IndexedDB open failed"));
+  });
+}
+
+export async function saveCheckpoint(checkpoint: Checkpoint2D): Promise<void> {
+  const database = await openDatabase();
   try {
-    await requestToPromise(
-      db.transaction(STORE, "readwrite").objectStore(STORE).put(checkpoint, name)
-    );
+    const request = database
+      .transaction(STORE_NAME, "readwrite")
+      .objectStore(STORE_NAME)
+      .put(checkpoint, "latest");
+    await requestResult(request);
   } finally {
-    db.close();
+    database.close();
   }
 }
 
-export async function loadCheckpoint(name: string): Promise<Checkpoint | null> {
-  const db = await openDb();
+export async function loadCheckpoint(): Promise<Checkpoint2D | null> {
+  const database = await openDatabase();
   try {
-    const result = await requestToPromise<Checkpoint | undefined>(
-      db.transaction(STORE, "readonly").objectStore(STORE).get(name)
-    );
-    return result ?? null;
+    const request = database
+      .transaction(STORE_NAME, "readonly")
+      .objectStore(STORE_NAME)
+      .get("latest");
+    return (await requestResult<Checkpoint2D | undefined>(request)) ?? null;
   } finally {
-    db.close();
+    database.close();
   }
 }

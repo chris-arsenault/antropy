@@ -1,223 +1,147 @@
 # Experimentation, harness, and certification
 
-This document owns how Antropy asks questions, separates causes, records measurements, trains
-initial controllers, and certifies claims. Experiments may score and hard-code. The evolving
-population may not.
+This document owns how behavioral and world claims are separated, measured, and accepted.
+
+Current work follows [the 2,000-worker milestone](colony-scale.md). The programmed/LGP comparison
+is implemented; unfinished RNN plans are canceled. Neural protocols below are historical evidence,
+not pending training or prerequisites. Measure physical capacity and computational cost separately
+before genetic experiments.
 
 <a id="experimentation-boundary"></a>
 
 ## Evidence boundary
 
-Vitest covers bounded deterministic mechanics and integration invariants: conservation, sensor
-marshalling, action preconditions, configuration isolation, checkpoint round trips, and small
-fixtures. Long-horizon survival, training, controller comparisons, morphology, and stochastic
-outcomes run through the harness and write provenance to `frontend/harness/ledger.db`.
+Vitest proves bounded deterministic mechanics and integration invariants. The harness measures
+behavior over time and persists results in SQLite. Human review decides visible trajectory
+quality. None substitutes for another.
 
-The certification ledger interprets named runs against written gates. It does not turn every
-measurement into a new gate. A source document or conversation cannot make contradictory evidence
-green.
+Every result records the world seed, parameters, controller arm, tick cap, commit state, wall time,
+and summary. A single seed can prove deterministic mechanics; behavioral claims require a declared
+panel of varied worlds.
 
 <a id="experimentation-loop"></a>
 
 ## Work loop
 
-Each experiment follows one sequence:
+1. Name the colony or evolutionary question and the owning layer.
+2. State the governing inequality or predicted metric movement.
+3. Run the simplest readable policy through the production action path.
+4. Change one mechanism or parameter.
+5. Compare ratios, medians, and changes over time across seeded worlds.
+6. Stop after repeated invariance or exhausted tuning and record the structural finding.
 
-1. Classify the proposed change as world, interface, seed, parameter, or oracle work.
-2. Check interface legality and genome ownership where applicable.
-3. State the governing inequality and predicted change in the colony's master ledger.
-4. Change one mechanism, gate, or parameter axis.
-5. Measure through the smallest oracle, harness scenario, and seed distribution that answer the
-   question.
-6. Compare the prediction with the result. After two material contradictions, a stop signature,
-   or the three-configuration budget, write a structural finding rather than another tuning run.
-
-A structural finding records the invariance, mechanism hypothesis, smallest legal fix, reopened
-gates and recalibration cost, and the decision reserved for the human.
+A finding records observed invariance, mechanism hypothesis, smallest structural fix, cost of
+recalibration, and the decision needed. Do not silently change the gate to fit the result.
 
 <a id="experimentation-oracles"></a>
 
 ## Oracle ladder and parity
 
-Oracles are readable diagnostic policies driving the real body. They emit the same output tuple as
-controllers and receive the same world resolution. A sensor-limited oracle receives the shipped
-sensor vector and may use only controller state permitted by the experiment; the current programmed
-single-forager is stricter and has no private state. It never receives coordinates or a world
-reference. An omniscient oracle may use world knowledge only when measuring a world ceiling, and
-its behavior is not a training target.
+The retained immortal-forager ladder has three arms. The current programmed colony uses its own
+survival and deprivation campaign described in [the colony contract](programmed-colony.md).
+The subsequent user-authorized [colony training study](colony-training.md) is complete and failed;
+its held-out and perturbation results do not certify a neural controller. The map-aware policy answers whether the world admits repeated
+physical foraging at all. The stateless local-sensor policy answers whether available carriers
+support the same loop without privileged knowledge. The recurrent arm tests whether the current
+neural representation and initialization can close that loop. All use identical world generation
+and the same turn, move, mandible, and pheromone resolver.
 
-The ordered fault isolation is:
-
-1. **Omniscient world ceiling:** can any competent policy survive the economy?
-2. **Sensor-limited policy:** can the shipped interface express the task?
-3. **Bounded controller assays:** are inputs and outputs wired as intended?
-4. **Degraded policy:** how much sensor/actuation error can the world tolerate?
-5. **Controller cohort:** does one predetermined initialization procedure place a broad population
-   in the viable region?
-
-An oracle success and controller failure localize the remaining fault only when parity and the
-preceding mechanics checks hold.
+The oracle may inspect the map only because it is clearly named and quarantined from future
+populations. It is a ceiling and diagnostic, not a training target or permission to add map inputs.
 
 <a id="experimentation-calibration"></a>
 
 ## Calibration and comparative experiments
 
-World tuning uses dimensionless relationships rather than isolated constants: trip profitability,
-satiation, scent horizon, foraging radius, trail lifetime, excavation payback, and ecosystem
-closure. A sweep first maps viability with readable policies, then repeats the same worlds with a
-fixed controller population. Defaults belong inside the viable region, not on its zero boundary.
+`pnpm harness forager-comparison` runs all three arms on identical seeded-random layouts. The
+declared panel is seeds 1–8, five completed loads per successful arm, and a 5,000-tick cap. The
+programmed panel passes when at least 75% of its worlds complete, median programmed completion
+overhead is at most 10%, and immediate turn reversals are at most 2% of ticks. RNN completion is
+reported separately and cannot be hidden by the programmed pass.
 
-Comparative experiments change one treatment and use one master ledger. Construction comparisons
-use worker-days, net nest energy, brood survival, stockpile retention, or persistence. Liability
-ablations must remove the corresponding strategy advantage. Partial construction must show smooth
-marginal benefit before evolution is expected to cross it.
-
-Common world seeds within a comparison, independent untouched panels for final judgment, mirrored
-samples where evolution strategies are used, deterministic jitter, and explicit world/config
-provenance reduce noise without hiding variation. Behavioral claims vary worlds, food placement,
-starts, and headings.
-
-When genetic variation is off, evaluation materializes one controller genome and clones that exact
-serialized value into every comparison world. A world seed may change terrain, food, headings, and
-jitter; it must not silently select a different controller. Otherwise a multi-world score averages
-different agents and turns controller evaluation into a noise source.
+The harness also records route overhead, turn count, failed movement, pickup and deposit ticks, and
+energy cost. Those are diagnostic metrics rather than extra pass gates.
 
 <a id="experimentation-training"></a>
 
 ## Controller initialization experiments
 
-Capacity is measured, not inferred from universal approximation. Start with a state-variable
-audit, construct simple reflexes directly, then use an offline training probe when a competence is
-not hand-verifiable. Failure under direct optimization can indict capacity; easy fit clears only
-representation, not in-world selection.
+The historical recurrent experiments progressed from 24 units to the current 32+32 model. Balanced programmed frames are
+paired with their exact action frame, counterfactual jitter/handedness prevents seed-identity
+shortcuts, and DAgger rounds retain every prior off-policy dataset. Explicit competing motor heads
+remove the signed-turn dead zone. The resulting seed still completes 0/8 in run 2492, so no neural
+behavior is certified.
 
-The intended food-loop initializer will distill an accepted sensor-limited policy into the existing
-RNN. The Appendix H policy passed population ratios but failed human trajectory review with
-universal translated circles and severe entrance congestion. Its stateless replacement passes the
-matched five-return and steering-stability gates in runs 2460–2462 and now awaits trajectory review.
-Training remains blocked until that review rather than learning from another unobserved metric pass.
+Any next initialization must be evaluated as a distribution: predetermined starts on held-out
+worlds, no terminal polishing, no selection of one lucky run, and no privileged interaction space.
+Linear genetic programming is implemented as the first evolutionary substrate. RNN repair is
+canceled, and neither fitting nor a new mutation search precedes the population-scale milestone.
 
-The web comparison fixes one authored world, one persistent food patch, one larder stance, and one
-ordinary body/action path. The full-map arm establishes connectivity and action cost. The
-programmed arm sees only local sensors and a physical authored entrance-traffic trace. The short gate requires
-five genuine external pickups and five completed returns, counting both queen-crop delivery and
-physical cache placement. It rejects recycled loads, requires the final unloading stances to lie
-within one voxel, permits at most 10% slowdown, and bounds immediate turn reversals to 6% of sensor
-ticks. Runs 2460–2462 completed the sensor arm 1.8–6.9% faster than the full-map arm with no sensor
-turn reversals. After human review of the programmed trajectory, one fixed initialization procedure
-applies to each predetermined start. Acceptance comes from the whole cohort on untouched closed-loop
-worlds and a separate energy-support panel. Teacher loss remains diagnostic rather than an outcome
-gate.
-
-Behavioral assays remain diagnostics during search. A candidate that violates a designer's
-expected reflex but improves untouched colony ledgers may have found a better behavior. Hard
-rejection is reserved for mechanics and interface violations.
+The subsequent user decision authorizes [physical outcome training](outcome-training.md): real
+queen survival, recipient feeding, funded replacement and conservation replace action agreement
+as the optimizer objective. Assisted-start curricula are labeled and cannot pass the survival
+gate. Only fresh-world, long-horizon runs can establish a viable candidate; perturbation and visual
+review remain separate requirements.
 
 <a id="experimentation-robustness"></a>
 
 ## Mutational robustness and viable space
 
-Every certified initialization substrate is perturbed at increasing production mutation scales. The curve
-of retained colony performance estimates the width and flatness of the viable region. A gradual
-decline leaves evolutionary room; a cliff means the seed occupies an unstable peak even if its
-unperturbed ledger is good.
-
-The curve compares controller substrates after the smallest honest behavioral target has been
-established. It does not justify selecting the best sample from a failed cohort.
+Once a heritable controller exists, measure completion across perturbation radius and across
+unseen worlds. Report the width and occupancy of the viable region, not just the best score. A
+single optimum surrounded by failure is an unsuitable founder condition even if it passes.
 
 <a id="experimentation-resilience"></a>
 
 ## Colony resilience curve
 
-The colony-level companion to mutational robustness starts from a healthy colony, removes a
-controlled fraction of workers or energy, and measures recovery probability and time across the
-world-seed distribution. The perturbation at which recovery falls below 50% estimates the basin of
-attraction around viability.
-
-The harness records an untreated baseline before any floor mechanism. If a later mortality or
-replacement result justifies one conditional floor, rerun the identical curve and the healthy
-colony ledger so recovery is not purchased by making healthy reproduction worse or the floor
-attractive.
-
-Recovery means regaining 90% of the pre-shock worker count for a workforce shock or 90% of mean
-worker energy for an energy shock. Four worlds are sufficient for an exploratory comparison;
-certification uses at least eight, with the same warmed state reused across treatment arms. The
-largest shock recovered by at least half the worlds is the reported basin edge.
-
-The current implementation sequence uses these quantitative gates before any tuning:
-
-| Gate                        | Predeclared acceptance                                                                                                                                                                                                                                                                                                                                                                 |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mortality admission         | With mortality and queen upkeep as the only new gates, at least 6/8 worlds retain a living queen and 30 workers through 4,200 ticks—two complete 2,100-tick replacement latencies. Death cause, energy removed at death, and recycled corpse energy are attributable; no tick loses more than four bootstrap workers to an initialization artifact; energy residual is at most `1e-8`. |
-| Resource-funded replacement | A reared worker costs its genome endowment plus `COLONY.eggLayCost` plus `LARVA.rearingCost`; the current founder value is `1.0`. The first possible worker matures by tick 2,100, every birth is conserved through the brood ledger, and post-pipeline births equal or exceed natural deaths in at least 6/8 worlds without external replenishment.                                   |
-| Fixed-genome continuity     | One 24,000-tick smoke crosses the 20,000-tick founder lifespan; four new varied worlds repeat it. Every world keeps the queen alive, ends with post-4,200 births at least deaths, keeps population in `[20, 80]`, and does not lose colony energy relative to tick 4,200. Automatic continuation remains off and conservation residual remains at most `1e-8`.                         |
-| In-world selection          | On at least 16 paired continuous worlds, a heritable genome or trait change has a positive parent-offspring estimate and improves survival, reproduction, or conserved colony energy relative to both fixed-genome and neutral-parent controls; the paired 95% bootstrap interval excludes zero. No explicit fitness or offline replacement enters the population.                     |
+After a multi-worker sustainable baseline exists, restore exact snapshots into matched untreated,
+worker-loss, and resource-loss arms. Measure survival, worker ratio, resource balance, recovery
+time, brood flow, and complete-turnover persistence. Add biological floors only after the untreated
+curve exposes a specific failure.
 
 <a id="experimentation-observation"></a>
 
 ## Observation without prescription
 
-Descriptive instruments may compute chambers, voids, branches, cache and brood positions, scent
-field shape, path efficiency, route traces, caste-like groupings, and trail networks. These
-measurements explain a winning strategy but do not define success.
-
-Shortest-path and field analyzers may verify world connectivity and grade realized efficiency.
-Event detection may later identify colony births/deaths, lineage-share changes, gene excursions,
-depth and spoil records, and local resource-regime transitions, then link observers to a prior
-checkpoint. Detection never affects selection.
+Record routes, occupancy, clustering, cache locations, fields, branches, chamber shapes, lineage,
+and event traces to explain results. Do not make those forms pass conditions. Human trajectory
+review is required when aggregates can hide circling, congestion, drift, or invisible cargo.
 
 <a id="experimentation-order"></a>
 
 ## Linear implementation order
 
-| ID     | Status                                        | Work and finish                                                                                                                                                                                                                                                                                     |
-| ------ | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| EXP-01 | Delivered                                     | Deterministic simulation seeds, checkpoint provenance, bounded mechanics tests, and a parameterized harness writing git/config/run metadata to SQLite.                                                                                                                                              |
-| EXP-02 | Delivered                                     | Layer classification, interface legality tests, inequality-first tuning, stop signatures, and the five-part structural-finding discipline govern work.                                                                                                                                              |
-| EXP-03 | Delivered                                     | Shared-action oracle infrastructure, omniscient and sensor-limited policies, bounded controller assays, degradation tools, and world-versus-controller fault isolation.                                                                                                                             |
-| EXP-04 | Delivered                                     | Viability ratios, calibration sweeps, strategy tournaments, liability ablations, and interpreted calibration/certification ledgers exist.                                                                                                                                                           |
-| EXP-05 | Implemented; human review pending             | Runs 2438–2441 remain invalid. Matched runs 2460–2462 require genuine external pickups, completed crop/cache returns in the same queen-core neighborhood, and at most 6% immediate turn reversals; the sensor candidate finishes 1.8–6.9% ahead with no reversals. Human trajectory review remains. |
-| EXP-06 | Backlog, blocked                              | Wait for review of the fresh sensor-limited trajectory. Then train one predetermined initialization procedure and evaluate the whole cohort without terminal selection or controller-specific repair.                                                                                               |
-| EXP-07 | Backlog, reopened                             | Repeat the production-mutation robustness curve for the newly certified cohort. The former curve describes an invalidated controller baseline.                                                                                                                                                      |
-| EXP-08 | Delivered instrument; recertification pending | The reusable colony-resilience harness records matched shocks, conserved energy, lifecycle attribution, and demographic time series. Repeat the untreated baseline after EXP-05–EXP-07.                                                                                                             |
-| EXP-09 | Backlog, reopened                             | Rerun mortality, resource-funded replacement, and fixed-genome continuity after the controller baseline passes. Runs 1927–1963 remain historical evidence.                                                                                                                                          |
-| EXP-10 | Backlog                                       | Add standing path-efficiency measurement to food and homing trips. Keep shortest-path planning outside sensor-limited behavior.                                                                                                                                                                     |
-| EXP-11 | Delivered / backlog                           | Live completed-life heritability, effective population, genetic diversity, founder distance, and line survival are persisted with sample counts and unavailable states. Naive-versus-experienced assays remain ordered before plasticity.                                                           |
-| EXP-12 | Backlog                                       | Add event detection, lineage/genome exploration, controller-agnostic offline assay UI, headless burst execution, and checkpoint-linked replay for long evolutionary runs.                                                                                                                           |
-| EXP-13 | Backlog                                       | Before reintroducing digging, establish authored-versus-dug paired ledger scenarios and descriptive morphometrics in the harness.                                                                                                                                                                   |
-| EXP-14 | Delivered; human accepted                     | The full-map single-ant ceiling uses ordinary motor and mandible resolution. The matched run-2457 fixture completes five external pickup and underground deposit cycles by tick 944 at the same larder used by the sensor arm.                                                                      |
+| ID | Status | Finish |
+| --- | --- | --- |
+| EXP-01 | Delivered | Seeded mechanics, checkpoints, bounded tests, and ledger provenance |
+| EXP-02 | Delivered | Matched map-aware, programmed, and recurrent single-forager harness |
+| EXP-03 | Delivered | Run 2492 programmed pass and explicit recurrent failure across eight randomized worlds |
+| EXP-04 | Review gate retained | Review changed physical behavior and traffic at scale; no RNN acceptance prerequisite |
+| EXP-05 | Historical evidence; remaining RNN work canceled | Preserve neural successes under old rules and subsequent failures; LGP direction is settled |
+| EXP-06 | Implemented; visual review pending | Multi-worker ratios and time-sampled participation without luck or perfection gates |
+| EXP-07 | Measured for the programmed colony | Broad resource-economy calibration before mortality |
+| EXP-08 | Delivered harness | Held-out viability and weight perturbation measurements; no viable learned region found |
+| EXP-09 | Partly delivered | Mortality, replacement and deprivation panels exist; inheritance and selection remain off |
+| EXP-10 | Delivered | Programmed/LGP compact outcomes match at 48,000 ticks; programmed reference also passes |
+| EXP-11 | Next milestone | Capacity budgets, 200/500/1,000/2,000-worker performance measurements and sustained demographic panel |
+| EXP-12 | Delivered assessment | Initial 8/2,000-worker Node and headless Canvas probes; sustainable 2,000-worker population remains unmeasured |
 
 <a id="experimentation-obe"></a>
 
 ## OBE and invalid evidence
 
-| Direction or evidence                                                                                                                                                      | Status and reason                                                                                                                                                |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Multi-minute behavioral outcome tests in normal or slow Vitest gates                                                                                                       | **OBE.** They proved fixture-specific trajectories and made routine validation expensive. Their mechanics were retained; their claims require harness runs.      |
-| Single-ant entrance-adjacent forage assays as colony certification                                                                                                         | **Invalid.** Removing 39 workers, filling the survivor's tank, and placing food beside the mouth did not exercise the exact web population or its environment.   |
-| Fixed-seed nest-shape, brood-cohort, and storm-cache assays as current certification                                                                                       | **OBE.** World and carrier changes invalidated them. Historical measurements remain in the certification ledger.                                                 |
-| Milestone success that allows pickup before surface exit or return before surface pickup                                                                                   | **Invalid.** A round trip is an ordered physical event sequence. Corrected aggregation rejects impossible historical combinations.                               |
-| Strict field-gradient success from every voxel                                                                                                                             | **OBE as a gate.** The sealed entrance contains a local maximum while agents still complete the functional loop. Field analysis remains descriptive.             |
-| Teacher-trajectory loss as controller acceptance                                                                                                                           | **Rejected.** Similar loss produced materially different closed-loop behavior.                                                                                   |
-| More sequence epochs, rare-action weights, selected validation epochs, successful-world filtering, long recurrent chunks, or parameter noise applied to the former teacher | **OBE.** Measured sweeps did not broaden that controller cohort; this does not answer the new short-sequence target.                                             |
-| Guarded or changing-world terminal outcome search                                                                                                                          | **OBE.** It overfit consulted worlds or degraded the initial controller and solved the wrong post-Appendix-F problem.                                            |
-| Milestone reward shaping for initial food-loop training                                                                                                                    | **OBE.** It was proposed to repair outcome search; direct policy distillation is the current initializer. It remains a diagnostic pattern, not a training stage. |
-| Behavioral reflex assays as hard optimization constraints                                                                                                                  | **Rejected.** They protect the designer's decomposition instead of controller function.                                                                          |
-| Single best controller, single seed, or positive median as a population claim                                                                                              | **Rejected.** Cohort breadth and unseen-world distributions are the acceptance unit.                                                                             |
-| Auto-continue in measured runs                                                                                                                                             | **Rejected.** It masks colony death, which is the datum under study.                                                                                             |
+- Long-running simulation tests, exact tick snapshots, and multi-minute CI gates are rejected.
+- Earlier population gates that passed while creatures visibly circled or congested are invalid.
+- Old spatial-world ledger rows remain evidence about that world but cannot certify the 2D system.
+- Stale-frame imitation, non-aggregating DAgger, searching for one perfect genome, or tuning an
+  immortal world for later mortality is rejected.
 
 <a id="experimentation-sources"></a>
 
 ## Source provenance
 
-Primary source sections: [design specification §§10–13](../sources/design-spec.md),
-[Appendix A §§A.2–A.3 and A.11](../sources/ant-sim-appendix-a.md),
-[Appendix B §§B.2–B.6 and B.8](../sources/ant-sim-appendix-b.md),
-[Appendix C](../sources/ant-sim-appendix-c.md),
-[Appendix D ladders and classifier](../sources/ant-sim-appendix-d.md),
-[Appendix E](../sources/ant-sim-appendix-e.md),
-[Appendix E2](../sources/ant-sim-appendix-e2.md),
-[Appendix F §§F.1 and F.5](../sources/ant-sim-appendix-f.md),
-[Appendix G §G.3](../sources/ant-sim-appendix-g.md),
-[Appendix H](../sources/ant-sim-appendix-h.md), and both archived review notes in
-[the source index](../sources/README.md#historical-execution-sources).
+The archived appendices contain oracle ladders, layer classification, tuning stop conditions,
+comparative strategy tests, liability ablations, controller-capacity probes, resilience curves,
+heritability, effective population, and compute-budget proposals. They remain design input through
+[source coverage](source-coverage.md), with obsolete gates explicitly displaced by this protocol.
