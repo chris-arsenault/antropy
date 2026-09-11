@@ -4,10 +4,34 @@ import { runBacteria, recordMeasurement } from "./lib/bacteriaRun";
 import { createWorld } from "../src/sim/world";
 import { DEFAULT_CONFIG, type Config } from "../src/sim/config";
 import { compareCheckpoint } from "./lib/bacteriaCompetition";
+import { runEcologyAssays } from "./lib/ecologyAssays";
+import { runDefaultEcology } from "./lib/defaultEcology";
+import { runQuickPanel } from "./lib/quickPanel";
+import { runCapabilities } from "./lib/capabilityCli";
+import { runCapabilityPilots } from "./lib/capabilityPilots";
 
 const [command, ...arguments_] = process.argv.slice(2),
   flags = parseFlags(command === "sql" ? [] : arguments_);
-if (command === "bacteria-capacity") {
+if (command === "capability-pilots") {
+  runCapabilityPilots(flags);
+} else if (command === "capabilities") {
+  runCapabilities(flags);
+} else if (command === "quick-food-access") {
+  runQuickPanel(flags);
+} else if (command === "ecology-default") {
+  runDefaultEcology(
+    seedsFlag(flags, "101,102"),
+    integerFlag(flags, "ticks", 3000),
+    flag(flags, "output", "harness/artifacts/default-ecology")
+  );
+} else if (command === "ecology-causal") {
+  runEcologyAssays(
+    seedsFlag(flags, "201,202"),
+    integerFlag(flags, "ticks", 1200),
+    flag(flags, "output", "harness/artifacts/strategic-ecology"),
+    flag(flags, "mechanism", "all")
+  );
+} else if (command === "bacteria-capacity") {
   recordMeasurement(
     createWorld(integerFlag(flags, "seed", 101), {
       ...DEFAULT_CONFIG,
@@ -21,8 +45,8 @@ if (command === "bacteria-capacity") {
     "bacteria-capacity"
   );
 } else if (command === "bacteria") {
-  const regime = flag(flags, "regime", "persistent");
-  if (regime !== "persistent" && regime !== "transient") throw new Error("Invalid regime");
+  const regime = flag(flags, "regime", DEFAULT_CONFIG.regime) as Config["regime"];
+  if (!["patchy", "persistent", "transient"].includes(regime)) throw new Error("Invalid regime");
   for (const seed of seedsFlag(flags, "101"))
     runBacteria(
       seed,
@@ -57,7 +81,9 @@ if (command === "bacteria-capacity") {
 } else if (command === "bacteria-compare") {
   compareCheckpoint(
     flag(flags, "checkpoint", ""),
-    integerFlag(flags, "candidate", 2),
+    flag(flags, "candidate", "2") === "representative"
+      ? "representative"
+      : integerFlag(flags, "candidate", 2),
     seedsFlag(flags, "201,202"),
     integerFlag(flags, "ticks", 3000),
     flag(flags, "output", "harness/artifacts/bacteria")
@@ -72,4 +98,7 @@ if (command === "bacteria-capacity") {
       : db.prepare(arguments_.join(" ")).all();
   console.log(JSON.stringify(rows, null, 2));
   db.close();
-} else throw new Error("Commands: bacteria, bacteria-compare, bacteria-capacity, recent, sql");
+} else
+  throw new Error(
+    "Commands: capability-pilots, capabilities, quick-food-access, ecology-default, ecology-causal, bacteria, bacteria-compare, bacteria-capacity, recent, sql"
+  );

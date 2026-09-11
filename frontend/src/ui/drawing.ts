@@ -1,114 +1,111 @@
-import { type World, type Cell } from "../sim/types";
-import { radius } from "../sim/geometry";
+import { type World } from "../sim/types";
+import { transform, boundaryImages, type Camera, type Bounds } from "./camera";
+import { createFieldRaster, type Layers } from "./fieldRaster";
+import { createLifecycleOverlay, drawCell } from "./cellDrawing";
+import { populationColors, DEFAULT_COLOR_MODE, type ColorMode } from "./populationColors";
 
-export interface Camera {
-  x: number;
-  y: number;
-  zoom: number;
-}
-export interface Layers {
-  nutrient: boolean;
-  chemical: boolean;
-}
-export const lineageColor = (lineage: number) => `hsl(${(lineage * 137.508) % 360},75%,70%)`;
-export function transform(world: World, camera: Camera, width: number, height: number) {
-  const scale = Math.min(width / world.config.width, height / world.config.height) * camera.zoom;
-  return { scale, left: width / 2 - camera.x * scale, top: height / 2 - camera.y * scale };
-}
-function paintField(image: ImageData, world: World, layers: Layers): void {
-  for (let i = 0; i < world.nutrient.length; i++) {
-    const n = layers.nutrient
-      ? world.nutrient[i] / (world.nutrient[i] + world.config.nutrientK)
-      : 0;
-    const s = layers.chemical
-      ? world.chemical[i] / (world.chemical[i] + world.config.chemicalK)
-      : 0;
-    image.data[i * 4] = 12 + 180 * s;
-    image.data[i * 4 + 1] = 20 + 130 * n;
-    image.data[i * 4 + 2] = 28 + 140 * s + 30 * n;
-    image.data[i * 4 + 3] = 255;
-  }
-}
-function createFieldRaster() {
-  const canvas = document.createElement("canvas"),
-    ctx = canvas.getContext("2d");
-  let image: ImageData | null = null,
-    previous: World | null = null,
-    tick = -1,
-    layerKey = "";
-  return (world: World, layers: Layers): HTMLCanvasElement | null => {
-    if (!ctx) return null;
-    const key = String(layers.nutrient) + String(layers.chemical);
-    if (previous === world && tick === world.tick && layerKey === key) return canvas;
-    if (!image || canvas.width !== world.config.width || canvas.height !== world.config.height) {
-      canvas.width = world.config.width;
-      canvas.height = world.config.height;
-      image = ctx.createImageData(canvas.width, canvas.height);
+export { lineageColor } from "./cellDrawing";
+export { type Camera } from "./camera";
+export { type Layers } from "./fieldRaster";
+
+function drawSources(ctx: CanvasRenderingContext2D, world: World, scale: number): void {
+  ctx.lineWidth = 1 / scale;
+  ctx.setLineDash([3 / scale, 4 / scale]);
+  for (const deposit of world.sources) {
+    if (deposit.remaining <= 0 || deposit.foodA + deposit.foodB <= 0) continue;
+    ctx.strokeStyle = deposit.foodA > deposit.foodB ? "#a9e3b080" : "#9bcaff80";
+    for (const source of boundaryImages(deposit, deposit.radius, world.config)) {
+      ctx.beginPath();
+      ctx.arc(source.x, source.y, deposit.radius, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(source.x - 0.35, source.y);
+      ctx.lineTo(source.x + 0.35, source.y);
+      ctx.moveTo(source.x, source.y - 0.35);
+      ctx.lineTo(source.x, source.y + 0.35);
+      ctx.stroke();
     }
-    paintField(image, world, layers);
-    ctx.putImageData(image, 0, 0);
-    previous = world;
-    tick = world.tick;
-    layerKey = key;
-    return canvas;
-  };
+  }
+  ctx.setLineDash([]);
+}
+function drawGrid(ctx: CanvasRenderingContext2D, bounds: Bounds, scale: number): void {
+  ctx.strokeStyle = "#c0dcea09";
+  ctx.lineWidth = 1 / scale;
+  ctx.beginPath();
+  for (let x = 10; x < bounds.width; x += 10) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, bounds.height);
+  }
+  for (let y = 10; y < bounds.height; y += 10) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(bounds.width, y);
+  }
+  ctx.stroke();
+}
+function scaleBar(ctx: CanvasRenderingContext2D, view: Bounds, scale: number): void {
+  const raw = 90 / scale,
+    magnitude = 10 ** Math.floor(Math.log10(raw));
+  const units = [5, 2, 1].find((v) => v * magnitude <= raw)! * magnitude;
+  const x = 28,
+    y = view.height - 28;
+  ctx.fillStyle = "#08131de6";
+  ctx.fillRect(x - 10, y - 26, Math.max(units * scale + 20, 100), 43);
+  ctx.strokeStyle = "#c3d7e2";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y - 4);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + units * scale, y);
+  ctx.lineTo(x + units * scale, y - 4);
+  ctx.stroke();
+  ctx.fillStyle = "#c3d7e2";
+  ctx.font = "11px system-ui";
+  ctx.fillText(units + " world units", x, y - 9);
 }
 export function createRenderer(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d"),
-    raster = createFieldRaster();
+    raster = createFieldRaster(),
+    lifecycle = createLifecycleOverlay();
   return {
-    render(world: World, camera: Camera, layers: Layers, selected: number | null): void {
-      if (ctx) draw(ctx, world, camera, selected, raster(world, layers));
-    },
-  };
-}
-function body(ctx: CanvasRenderingContext2D, world: World, cell: Cell, selected: number | null) {
-  const r = radius(cell, world.config);
-  ctx.fillStyle = lineageColor(cell.lineage);
-  ctx.beginPath();
-  ctx.arc(cell.x, cell.y, r, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.strokeStyle = "#0d151f";
-  ctx.lineWidth = 0.13;
-  ctx.beginPath();
-  ctx.moveTo(cell.x, cell.y);
-  ctx.lineTo(cell.x + Math.cos(cell.heading) * r, cell.y + Math.sin(cell.heading) * r);
-  ctx.stroke();
-  if (cell.id === selected) {
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 0.1;
-    ctx.beginPath();
-    ctx.arc(cell.x, cell.y, r + 0.3, 0, 2 * Math.PI);
-    ctx.stroke();
-  }
-}
-function draw(
-  ctx: CanvasRenderingContext2D,
-  world: World,
-  camera: Camera,
-  selected: number | null,
-  field: HTMLCanvasElement | null
-): void {
-  const { width, height } = ctx.canvas,
-    t = transform(world, camera, width, height);
-  ctx.fillStyle = "#080f18";
-  ctx.fillRect(0, 0, width, height);
-  ctx.save();
-  ctx.translate(t.left, t.top);
-  ctx.scale(t.scale, t.scale);
-  for (const dy of [-world.config.height, 0, world.config.height])
-    for (const dx of [-world.config.width, 0, world.config.width]) {
+    render(
+      world: World,
+      camera: Camera,
+      layers: Layers,
+      selected: number | null,
+      mode: ColorMode = DEFAULT_COLOR_MODE
+    ): void {
+      if (!ctx) return;
+      const view = {
+        width: canvas.clientWidth || canvas.width,
+        height: canvas.clientHeight || canvas.height,
+      };
       ctx.save();
-      ctx.translate(dx, dy);
+      ctx.scale(canvas.width / view.width, canvas.height / view.height);
+      ctx.fillStyle = "#080f17";
+      ctx.fillRect(0, 0, view.width, view.height);
+      const t = transform(world.config, camera, view),
+        field = raster(world, layers);
+      ctx.save();
+      ctx.translate(t.left, t.top);
+      ctx.scale(t.scale, t.scale);
+      ctx.beginPath();
+      ctx.rect(0, 0, world.config.width, world.config.height);
+      ctx.clip();
       if (field) {
         ctx.imageSmoothingEnabled = true;
         ctx.drawImage(field, 0, 0);
       }
-      for (const cell of world.cells) body(ctx, world, cell, selected);
-      ctx.strokeStyle = "#8da4b344";
-      ctx.lineWidth = 0.08;
-      ctx.strokeRect(0, 0, world.config.width, world.config.height);
+      drawGrid(ctx, world.config, t.scale);
+      if (layers.nutrient) drawSources(ctx, world, t.scale);
+      lifecycle(ctx, world, t.scale);
+      const color = populationColors(world, mode, selected);
+      for (const cell of world.cells) drawCell(ctx, world, cell, selected, t.scale, color(cell));
       ctx.restore();
-    }
-  ctx.restore();
+      ctx.strokeStyle = "#7898a766";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(t.left, t.top, world.config.width * t.scale, world.config.height * t.scale);
+      scaleBar(ctx, view, t.scale);
+      ctx.restore();
+    },
+  };
 }

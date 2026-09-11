@@ -19,9 +19,11 @@ The explicit step order remains supply/transport, local observations/inference, 
 secretion, proportional uptake, maintenance/growth, contact correction and resource-funded division.
 There is no map service, task dispatcher, controller fallback or reproductive fitness selector.
 
-The physical interface owns fifteen observation channels and the three motor/chemical efforts.
+The physical interface owns local observations and physical efforts. Current dimensions and outputs
+follow the [controller contract](../design/controller.md); the original numerical interface is
+preserved in the [decision snapshot](../sources/history/2026-09-10/adr/0018-bacterial-runtime.md).
 A static controller adapter owns inference, mutation, recombination, distance, inspection and
-genome/private-state codecs. The current adapter is the 597-parameter RNN. Persistence delegates
+genome/private-state codecs. Persistence delegates
 encoding and validation to that adapter; it does not duplicate network dimensions or inspect weights.
 No dynamic plugin registry is required for a single controller.
 
@@ -30,7 +32,8 @@ must not perturb physical placement or headings by consuming body randomness. Co
 enforces capacity relationships used by physiology and checkpoint restoration. Restoration also
 checks consistency between live bodies, organism ancestry, genome ancestry and lifetime records.
 
-Checkpoint v2 explicitly preserves genetic random state and durable manual interventions.
+The current checkpoint contract follows the [world design](../design/bacteria.md). The v2
+correction introduced explicit genetic random state and durable manual interventions.
 Recent inspector events remain bounded; intervention history does not expire with that buffer.
 The UI marks intervened runs as diagnostic. Competition artifacts embed controller-owned encodings,
 genome hashes, source-checkpoint hash, source intervention history, resolved configuration and

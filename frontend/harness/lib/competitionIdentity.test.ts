@@ -21,3 +21,15 @@ it("competition identity embeds replayable genomes, checkpoint hash and source i
     identity.checkpointHash
   );
 });
+
+it("selects a representative by the declared lineage and birth-order rule", () => {
+  const world = createWorld();
+  const { identity } = prepareCompetition(checkpointToJson(world), "representative");
+  expect(identity.selection).toMatchObject({
+    genome: 1,
+    cell: 1,
+    lineage: 1,
+    lineagePopulation: 1,
+  });
+  expect(identity.ancestor.hash).toBe(identity.descendant.hash);
+});

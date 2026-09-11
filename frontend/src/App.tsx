@@ -9,6 +9,7 @@ import { StatsPanel } from "./ui/StatsPanel";
 import { Inspector } from "./ui/Inspector";
 import { PersistenceControls } from "./ui/PersistenceControls";
 import { EvolutionSettings } from "./ui/EvolutionSettings";
+import { FoodEpochSettings } from "./ui/FoodEpochSettings";
 
 export function App() {
   const [run, setRun] = useState(() => ({ id: 0, world: createWorld() }));
@@ -18,6 +19,7 @@ export function App() {
 function Simulation({ world, onRestore }: { world: World; onRestore: (world: World) => void }) {
   const sim = useSimulation(world),
     [selected, setSelected] = useState<number | null>(null);
+  const status = sim.running ? "Running" : "Paused";
   return (
     <main>
       <header>
@@ -52,12 +54,21 @@ function Simulation({ world, onRestore }: { world: World; onRestore: (world: Wor
             Live mutation{" "}
             {world.config.mutationRate + world.config.physicalMutationRate > 0 ? "on" : "off"}
           </span>
+          <span className={`run-status ${sim.running ? "is-running" : ""}`}>
+            {world.stopReason ? "Stopped" : status}
+          </span>
         </div>
       </header>
       <div className="workspace">
         <WorldView world={world} version={sim.version} selected={selected} onSelect={setSelected} />
         <aside>
-          <StatsPanel world={world} throughput={sim.throughput} />
+          <StatsPanel
+            world={world}
+            throughput={sim.throughput}
+            history={sim.history}
+            recent={sim.recent}
+            onSelect={setSelected}
+          />
           <Inspector world={world} selected={selected} onChange={sim.refresh} />
         </aside>
       </div>
@@ -109,7 +120,8 @@ function Environment({ world, onRestore }: { world: World; onRestore: (world: Wo
       <label>
         Nutrient sources{" "}
         <select value={regime} onChange={(e) => setRegime(e.target.value as Config["regime"])}>
-          <option value="persistent">Persistent patches</option>
+          <option value="patchy">Mixed finite deposits</option>
+          <option value="persistent">Long-lived finite deposits</option>
           <option value="transient">Transient patches</option>
         </select>
       </label>
@@ -118,6 +130,7 @@ function Environment({ world, onRestore }: { world: World; onRestore: (world: Wo
         Mutate at division
       </label>
       <button onClick={restart}>Apply and restart</button>
+      <FoodEpochSettings config={evolution} onChange={setEvolution} />
       <EvolutionSettings config={evolution} onChange={setEvolution} />
       <p role="status">{message}</p>
     </details>

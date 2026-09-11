@@ -85,7 +85,7 @@ it("motors share installed power and secretion requires physical precursor mater
   const w = createWorld(1, { ...DEFAULT_CONFIG, founders: 1 }),
     cell = w.cells[0];
   cell.reserve = 0;
-  cell.action = { swim: 1, turn: 1, secrete: 1 };
+  cell.action = { ...cell.action, swim: 1, turn: 1, secrete: 1 };
   moveBodies(w);
   expect(cell.action.swim ** 2 + cell.action.turn ** 2).toBeCloseTo(1, 12);
   expect(w.ledger.motors).toBeCloseTo(locomotion(cell, w.config).power * w.config.dt, 12);

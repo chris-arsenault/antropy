@@ -1,4 +1,5 @@
 import { type Ledger, type World } from "./types";
+import { MATERIAL_FIELDS } from "./types";
 import { structuralMass } from "./body";
 
 export const total = (field: Float64Array): number => field.reduce((a, b) => a + b, 0);
@@ -21,6 +22,16 @@ export function createLedger(): Ledger {
     deathMaterial: 0,
     emitted: 0,
     chemicalLoss: 0,
+    toxinEmitted: 0,
+    matrixEmitted: 0,
+    toxinLoss: 0,
+    repair: 0,
+    repaired: 0,
+    damageReceived: 0,
+    damageDeaths: 0,
+    absorbedA: 0,
+    absorbedB: 0,
+    matrixBlocked: 0,
     births: 0,
     deaths: 0,
     divisions: 0,
@@ -35,8 +46,8 @@ export function createLedger(): Ledger {
 }
 export function heldMaterial(world: World): number {
   return (
-    total(world.nutrient) +
-    total(world.chemical) +
+    MATERIAL_FIELDS.reduce((sum, key) => sum + total(world[key]), 0) +
+    world.sources.reduce((sum, source) => sum + source.foodA + source.foodB, 0) +
     world.cells.reduce((sum, cell) => sum + structuralMass(cell.body) + cell.reserve, 0)
   );
 }
@@ -55,7 +66,7 @@ export function materialBalance(world: World): number {
     l.metabolicWaste -
     l.nutrientLoss -
     l.chemicalLoss -
-    l.deathMaterial
+    l.toxinLoss
   );
 }
 export function balance(world: World): number {
@@ -65,12 +76,13 @@ export function balance(world: World): number {
     l.initial +
     l.supplied * q -
     heldEnergy(world) -
-    (l.nutrientLoss + l.chemicalLoss) * q -
+    (l.nutrientLoss + l.chemicalLoss + l.toxinLoss) * q -
     l.metabolism -
     l.learning -
     l.motors -
     l.secretion -
     l.construction -
+    l.repair -
     l.catabolismLoss -
     l.division -
     l.deathLoss

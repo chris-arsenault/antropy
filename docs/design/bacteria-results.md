@@ -1,125 +1,147 @@
-# Bacterial implementation and initial measurements
+# Current evidence and unresolved adaptation
 
-September 9, 2026. The [reviewed contract](bacteria.md) is implemented. The browser starts paused
-at tick zero with 48 RNN cells, persistent nutrient patches and live mutation. No training was used.
-The initial panel establishes resource-funded reproduction, starvation and heritable variation.
-It does not establish reliable adaptation, chemical cooperation or visually acceptable motion.
+Updated September 11, 2026. The simulation has heritable variation and consequential physical
+pressures. Actual inherited differences confer benefits through reduced toxin output, improved
+brief-food access and greater B processing. This establishes consequential behavioral and physical
+evolution in recorded contexts, not broad strategic diversity or adaptive inherited learning.
 
-These are checkpoint-v1 measurements. The subsequent [architecture correction](../adr/0018-bacterial-runtime.md)
-separates genetic draws from body randomness in checkpoint v2. The v1 mutation/control arms changed
-unrelated physical draws as well as weights; census differences therefore do not isolate mutation.
-The recorded reproduction/resource balances remain evidence for v1, and no new ecological panel
-or adaptation claim is implied by the correction. Physical parameters and founder weights are unchanged.
+<a id="evidence-capability-investigation"></a>
 
-## Default physics and founder
+## Current capability investigation
 
-The periodic world measures 80 × 60 distance units, with one field cell per unit and dt = 0.2 model
-seconds. Birth biomass is 1 resource unit and radius 0.45; division biomass is 2. Maximum speed
-is 1.5 distance units/s. Eight Gaussian nutrient sources each supply 0.3 resource units/s with
-radius parameter 3. Transient sources relocate every 60 model seconds; existing nutrient remains.
-Nutrient diffusion is 0.3 distance units²/s and decay is 0.001/s. Released chemical diffusion is
-0.15 and decay is 0.035/s. Receptor adaptation time is 2 s, with reference concentrations 0.3
-for nutrient and 0.02 for chemical. Full parameters are in each ledger row and checkpoint.
+The [registered six-area investigation](../capability-investigation.md) completed 48 short cases
+and four 10k selection pilots (108,915 ticks; about 197 seconds timed execution). Actual genotype
+895's brain gives 0.75–1 divisions per founder versus 0.375–0.5 with its ancestral brain and identical
+physical genes. Toxin/matrix production is disabled equally; better access survives that control.
+Actual genotype 1847's B-processing allele develops through paid growth and captures 52.05–52.41%
+of the B offer versus 42.33–42.69% after single-locus reversion, giving 1 versus 0.875 divisions
+per founder. These are actual evolved variants, not hand-built diagnostic winners.
 
-Maximum-speed travel across one source radius takes 2 s, versus the transient lifetime of 60 s.
-Maximum uptake is 0.2 resource units/s per unit biomass. Total source input is 2.4 units/s, so twelve
-saturated birth-sized cells could consume all incoming supply; ordinary cells are not continuously saturated.
-Per-unit-biomass motor costs are 0.015/s at full swimming effort and 0.008/s at full turning
-effort, plus 0.006/s basal maintenance per unit biomass and 0.001/s controller cost per cell.
-At birth mass, full swimming and turning cost
-0.023/s versus maximum uptake 0.2/s. Growth and division impose additional resource costs.
+The B allele grows from 12.5% of founders to 17.31–26.00% of living cells in four fixed-inheritance
+pilots. B-rich supply favors it more than A-rich supply in only one of two seeds. This limits the
+food-specific selection claim, not the controlled processing result. Constructed specialist/generalist
+payoffs reverse between A and B under current physics. The tested high-motor coordination still loses;
+conditional matrix protects more cheaply than constant secretion but adds no divisions. Actual
+recurrence, private-learning and acquired-transfer tests give no consistent benefit in their contexts.
+Full denominators, trajectory artifacts, source identities and unresolved mechanisms are in the report.
 
-The 597-parameter founder RNN encodes a nutrient-contrast turn response, reduced propulsion in
-high nutrient, contact steering and weak nutrient-associated secretion. These are ordinary mutable
-weights. Chemical inputs exist but the founder has no chemical steering response. The task byte
-is written from network output and has no kernel semantics. No external reflex, task dispatcher,
-map access or fitness scorer runs alongside the RNN.
+<a id="evidence-exported-lineage-adaptation"></a>
 
-Mutation independently perturbs each weight with probability 0.005 by a uniform value in
-[-0.12, 0.12], bounded to [-16, 16]. This averages about three changed parameters per daughter,
-so almost every birth can have a unique genotype. Distinct-genome count therefore does not measure
-meaningful strategy diversity. Hidden state and task byte reset at birth; weight ancestry persists.
+## Exported lineage adaptation
 
-## Reproduction and inherited variation
+The [registered study and detailed evidence](../overnight-study.md) uses the user's actual v5
+seed-101 export at tick 48,661. Lineage 18 contains 57.35% of living cells. Three representatives
+from ancestry branches covering 91.03% of that family win all twelve fresh-patchy contests against
+the founder (two seeds, swapped assignments, 6,000 ticks), reaching 58.43–74.10% from a 50% start.
 
-Baseline run 2815 used mutation-disabled founders for 3,000 ticks. Population changed from 48 to
-77, with 147 divisions and 118 starvation deaths. Conservation residual was below 4 × 10⁻¹⁰.
+All living members share a mutation at RNN weight 1574, hidden unit 14 → toxin output. It uses the
+existing task-derived signal to suppress toxin. Adding only that allele to the founder yields
+60.92–66.48% population share in all four matched contests. Its origin at tick 331 is an ordinary
+output-weight mutation; recurrent learned-weight transmission does not write that locus.
+Exact resolver budgets connect lower toxin/absorbed-material and repair/dissipated-energy shares
+to competitive outcomes. Detailed denominators, subsequent causal checks and limitations are in
+the study report; the current default was not tuned or replaced.
 
-The following runs lasted 6,000 ticks, or 1,200 model seconds. Each started with 48 founders and
-840 total resource units, and received 2,880 external units. A division replaces one parent with
-two daughters, so final population equals 48 + divisions - starvation deaths. Birth counts include
-both daughters. All four evolving runs reached generation 4 or 5 and ended with living cells.
+Restoring the connection to zero in observed genotype 895 loses both swapped seed-201 contests;
+the intact version reaches 61.68%/64.33%. In the actual exported community, retaining genomes raises
+lineage 18 from 57.35% to 68.57%, while replacing that family's genomes with founder genes lowers it
+to 47.97%. Both arms reset private brain state and freeze inherited change, preserving initial bodies
+and fields. Over those 6,000 ticks, retained lineage 18 spends 0.71% of absorbed material on toxin
+versus 2.15%, and 4.13% of dissipated energy on repair versus 10.57%. Runs 2899–2922 record the
+24 scientific comparisons; the local DuckDB and query report are linked in the study.
 
-| Regime | Seed | Mutating run | Living | Divisions | Starved | Mutant births | Mutation-off run | Living control |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Persistent | 101 | 2816 | 111 | 193 | 130 | 364 | 2820 | 104 |
-| Persistent | 102 | 2819 | 100 | 186 | 134 | 354 | 2823 | 98 |
-| Transient | 101 | 2817 | 91 | 203 | 160 | 382 | 2821 | 96 |
-| Transient | 102 | 2818 | 96 | 222 | 174 | 419 | 2822 | 90 |
+Fresh seed-101 reconstruction does not reproduce the full browser checkpoint. The first 291
+genotype records match, but the next birth differs by four ticks. The browser export has no source
+digest; the historical divergence cause remains unverified. Reconstructed lifetime budgets are
+therefore separate evidence, not the exported population's historical spending. Transfer experiments
+use the actual exported genotypes and do not depend on exact historical reconstruction.
 
-Final absolute energy residuals across these runs were below 3.2 × 10⁻⁹. Run 2816 emitted 20.70
-chemical units and retained 0.275 after decay, with chemical balance residual below 5 × 10⁻¹⁴.
-This establishes paid emission and transport, not useful communication. Mutation did not consistently
-increase final census relative to its matched control.
+The [follow-up strategy study](../strategy-study.md) repeats the single-allele comparison with
+toxin injury disabled but secretion costs retained. Variant shares fall to 50.00–56.15% across
+the four matched runs, versus 60.92–66.48% with injury. Toxin expenditure remains lower
+(0.60–0.77% versus 2.32–2.62% of absorbed material); injury and repair are zero. Direct savings
+persist, but do not reproduce the larger advantage in the injurious ecology. The ablation
+does not isolate self-harm from harm to neighbors or subsequent ecological feedback.
 
-## Ancestor/descendant competition
+<a id="evidence-corrected-default-ecology"></a>
 
-From persistent-seed-101 checkpoint 2816, genotype 47 was selected after counting descendant
-clades. Five living cells descended from it, the largest non-founder clade in that sample.
-This is post-hoc diagnostic selection, not proof that it was the best genotype. It was not
-installed as a new browser founder.
+## Corrected default ecology
 
-Run 2824 compared that observed genotype against ancestor 1, with mutation disabled, 24 founders
-of each, held-out seeds 201 and 202, and both assignments to the same initial positions. Each
-competition lasted 3,000 ticks. Values are final living descendants.
+Runs 2892–2897, seeds 101/102, stop at 3,000 ticks (600 model seconds). Each seed starts 48 identical
+founder genotypes in the ordinary Run configuration. Controls independently disable injury or
+matrix toxin binding while retaining secretion costs. Environment schedules and initial conditions
+match; subsequent body/genetic histories may diverge.
 
-| Regime | Seed | Assignment swapped | Ancestor | Genotype 47 |
-| --- | ---: | --- | ---: | ---: |
-| Persistent | 201 | No | 37 | 39 |
-| Persistent | 201 | Yes | 34 | 42 |
-| Persistent | 202 | No | 42 | 42 |
-| Persistent | 202 | Yes | 45 | 36 |
-| Transient | 201 | No | 39 | 34 |
-| Transient | 201 | Yes | 34 | 41 |
-| Transient | 202 | No | 38 | 41 |
-| Transient | 202 | Yes | 31 | 48 |
+| Seed | Arm | Living | Divisions | Damage deaths | Repair energy |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 101 | Default | 195 | 148 | 0 | 309.64 |
+| 101 | Injury off | 205 | 163 | 0 | 0 |
+| 101 | Binding off | 138 | 140 | 35 | 760.59 |
+| 102 | Default | 188 | 145 | 0 | 246.12 |
+| 102 | Injury off | 190 | 151 | 0 | 0 |
+| 102 | Binding off | 162 | 135 | 1 | 616.32 |
 
-Persistent totals were 158 ancestor versus 159 descendant; transient totals were 142 versus 164.
-The descendant performed better in three of four transient placements, but not every placement.
-This small panel is suggestive of an environment-dependent effect and insufficient to establish
-reliable adaptation. Longer-term persistence, independent evolutionary replicates and behavioral
-attribution are unmeasured. No additional tuning or training followed this result.
+In defaults, at least 20% matrix slowing appears by sampled tick 300, with peaks of 65/46 affected
+cells. Damage ≥20% first appears at sampled ticks 1,900/2,200, with peaks of 16/5 impaired cells.
+At 30 delivered ticks/s this means slowing around ten seconds and episodic impairment around
+one minute. Endpoint-only summaries miss episodes. Protected defaults have no toxin deaths in this
+horizon; binding removal raises injury, repair expense and deaths. Injury reduces division counts.
 
-## Capacity and verification limits
+This demonstrates physical consequences, not evolved strategies or lethal default combat.
+The toxin overlay reflects reference injury relative to repair; it does not alter sensed fields.
+Solid walls and neutral signaling are explicitly disabled for lack of demonstrated useful behavior.
 
-Run 2825 initialized 2,000 cells on the standard field, mutation disabled, for 100 ticks. On an
-Intel Core i5-8500 at 3 GHz it took 10,093.9 ms, approximately 100.94 ms/tick or 9.91 ticks/s.
-There were no births or deaths in that short interval. Initial reserves funded this load probe;
-it does not demonstrate sustainable 2,000-cell ecology. It falls below the default 30 ticks/s
-target. The 6,000-tick ecological runs took roughly 15.5–17.1 seconds each while concurrent Node
-processes ran. These timings are not browser frame-rate measurements.
+All six runs have matching before/after source digest
+`34e6c23a5f93cdb2562234a4a119122193010c7dff680c832320c87bf1530098`.
+Maximum energy/material residuals are below `7.20e-10`/`8.32e-11`. Local artifacts:
+`frontend/harness/artifacts/consequential-default-2026-09-10/`.
+Subsequent display/test changes did not alter measured simulation mechanics. The implementation
+handoff passed 69 tests in 14 files and a production build; this documentation pass runs no new ecology.
 
-Bounded tests cover conservation, field transport, receptor response, local sensor causality,
-periodic contact, paid secretion, fair uptake, inheritance, capacity pause, exact checkpoint
-continuation and tick-zero UI defaults. The user performs visual review; no browser simulation
-or development server was started. Report final build/CI results at handoff separately from
-ecological outcomes.
+<a id="evidence-earlier-evidence-and-its-limits"></a>
 
-The contact solver performs four local separation passes and is not a rigid-body solver. The
-distance ledger measures commanded propulsion displacement before contact correction, not net
-progress. Genotype and organism ancestry archives grow with cumulative births; long-duration
-memory behavior is unmeasured. The population safety cap pauses the world instead of culling.
+## Earlier evidence and its limits
 
-## Evidence and next boundary
+| Record | Conditions | What it establishes and what it does not |
+| --- | --- | --- |
+| [Initial bacteria, 2815–2825](../sources/history/2026-09-10/design/bacteria-results.md) | v1, one food, older brain/body and coupled genetic/body randomness | Reproduction and variation; mutation/control census differences are confounded. Initial 2,000-cell probe ≈9.91 ticks/s, not sustainable capacity or current throughput. |
+| [Funded bodies, 2829–2831](../sources/history/2026-09-10/design/funded-bodies.md) | v4, four stocks, one food, seed 101 at 3,000 ticks | Paid machinery and inherited learning; a census difference alone does not prove adaptive learning. |
+| [Attribution, 2832–2841](../sources/history/2026-09-10/design/evolution-attribution.md) | v4, eight arms at tick 30,507, then one predeclared descendant in eight fresh-world comparisons | Mutation-linked concentration in one seed. Representative loses all four fixed-patch comparisons and splits relocating cases; no seed/context favors it under both assignments. |
+| [Initial strategic ecology, 2842–2891](../sources/history/2026-09-10/design/strategic-ecology.md) | v5 before injury/repair correction; 40 causal cases plus barrier/default repeats | Constructed A/B, defense and matrix designs show conditional advantages; slow movement fails both travel fixtures. Initial default handoff rejected as insufficiently consequential. |
 
-Ledger rows 2815–2825 are in `frontend/harness/ledger.db`. Local generated evidence is under
-`frontend/harness/artifacts/bacteria-2026-09-09/`, grouped into baseline, evolving/control regimes,
-competition and capacity directories. Run summaries include sampled body trajectories; checkpoints
-preserve ancestry, genomes, receptor state, private memory, fields and resource accounts.
-Each ledger row records resolved parameters and source digest. During this development panel,
-formatting and module factoring continued while runs executed; no ecology parameters changed.
+The earlier user's tick-30,507/generation-13 screenshot preceded strategic ecology. Its exact
+browser state was not recoverable from screenshots alone. The controlled reproduction was similar,
+not identical. That observation cannot certify adaptation in the current finite-deposit world.
 
-The implementation and initial measurement plan ends here for human visual review. The default
-already exposes reproduction and mutation through Run and stats. Reliable adaptation and useful
-chemical interaction remain questions, rather than claimed deliverables or reasons to add more
-ecological subsystems automatically.
+Old assay counts remain attached to their old rates, sources, brain dimensions and schemas.
+Pre-correction conditional comparisons are not silently re-certified after changing injury rates.
+Detailed outcomes, unsuccessful approaches and original source digests remain in the archive and
+`frontend/harness/ledger.db`.
+
+<a id="evidence-open-conclusions"></a>
+
+## Open conclusions
+
+- The [short food-access panel](../quick-food-access-study.md) connects authored RNN propulsion to
+  actual local signals, arrival, food capture and paid reproduction. Stronger propulsion captures
+  about 35.5% of brief distant food versus 8.6%, funding one division per founder versus none.
+  Near persistent food, divisions tie while weaker swimmers survive longer at lower expenditure.
+  This constructed behavioral tradeoff does not establish evolved discovery or a high-motor-body niche.
+
+- The [food-epoch campaign](../food-epochs-study.md) completed twelve paired 150k populations and
+  48 fresh-world cohort assays. Live inheritance raised final-phase population by 26.20% and
+  biomass by 17.26% on average. Later cohorts won in both foods, with an additional 5.19 percentage
+  points of population share in B-rich contests. This establishes environment-dependent inherited
+  performance, not distinct specialists or the selection history responsible for every gain.
+- A specific toxin-reducing mutation, an evolved brain block and an observed B-processing allele
+  have causal benefits. Multiple stable strategies and population-wide specialization remain unproved.
+- Matrix protection and toxin pressure matter physically. Evolution has not been shown to select
+  matrix investment independently or useful offensive toxin production.
+- Lower physical motor investment wins all sixteen [matched motor contests](../strategy-study.md),
+  with greater motor investment extinct in every context. An economical body is viable, but a
+  compensating high-motor niche, useful signaling, strategic walls and stable coexistence remain unproved.
+- Acquired synaptic changes transmit; their adaptive value and modulation coverage remain uncertain.
+- Continuous ancestry storage and current high-population throughput require measurement before
+  claims about indefinite or large browser populations.
+- Human observation can reject visible failure; a favorable impression does not identify causal
+  genetic advantage. Follow the [experiment protocol](experimentation.md) before asserting one.

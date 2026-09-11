@@ -6,6 +6,7 @@ import { controller } from "../sim/controller";
 import { decodeGenotype } from "../sim/genetics/codec";
 import { INPUTS } from "../sim/interface";
 import { validateRelations } from "./relations";
+import { MATERIAL_FIELDS } from "../sim/types";
 
 function fail(message: string): never {
   throw new Error(`Invalid bacterial checkpoint: ${message}`);
@@ -46,16 +47,18 @@ function validateCell(value: unknown, c: Config): void {
   for (const key of BODY_PARTS) finite(value.body[key], 1e-15);
   const body = value.body as Body;
   finite(value.energy, 0, energyCapacity(body, c) + 1e-8);
+  finite(value.damage, 0, 1);
   finite(value.reserve, 0, materialCapacity(body, c) + 1e-8);
   finite(value.heading, 0, 2 * Math.PI);
   numbers(value.inputs, INPUTS, -1, 1);
   numbers(value.contacts, 4, 0, 1);
-  numbers(value.receptors, 2, 0, 1);
+  numbers(value.receptors, 4, 0, 1);
   controller.decodeState(value.brain);
   object(value.action);
   finite(value.action.swim, 0, 1);
   finite(value.action.turn, -1, 1);
   finite(value.action.secrete, 0, 1);
+  for (const key of ["toxin", "matrix", "repair"]) finite(value.action[key], 0, 1);
 }
 function validateRecords(data: Record<string, unknown>): void {
   array(data.genomes);
@@ -78,7 +81,8 @@ function validateRecords(data: Record<string, unknown>): void {
     integer(a.genome, 1);
     integer(a.born);
     if (a.ended !== null) integer(a.ended);
-    if (!["alive", "division", "starvation"].includes(String(a.cause))) fail("ancestry cause");
+    if (!["alive", "division", "starvation", "damage"].includes(String(a.cause)))
+      fail("ancestry cause");
   }
   for (const e of data.events) {
     object(e);
@@ -88,30 +92,41 @@ function validateRecords(data: Record<string, unknown>): void {
     numbers(e.values, e.values.length, 0, Number.MAX_SAFE_INTEGER);
     if (!["division", "death", "task", "override"].includes(String(e.kind))) fail("event kind");
   }
+  validateDeposits(data);
+}
+function validateDeposits(data: Record<string, unknown>): void {
+  array(data.sources);
   for (const s of data.sources) {
     object(s);
     finite(s.x);
     finite(s.y);
-    finite(s.remaining, -1e6);
+    for (const key of ["remaining", "foodA", "foodB", "rate", "wait"]) finite(s[key]);
+    finite(s.radius, 1e-15);
+  }
+  array(data.patchCenters);
+  if (data.patchCenters.length !== 3) fail("invalid landscape clusters");
+  for (const p of data.patchCenters) {
+    object(p);
+    finite(p.x);
+    finite(p.y);
   }
 }
 function validateFields(data: Record<string, unknown>): Config {
   object(data.config);
   for (const key of Object.keys(DEFAULT_CONFIG))
-    if (!(key in data.config)) fail(`missing config ${key}`);
+    if (key !== "foodEpochs" && !(key in data.config)) fail(`missing config ${key}`);
   validateConfig(data.config as Config);
   finite(data.config.width, 8, 1000000);
   finite(data.config.height, 8, 1000000);
   const size = data.config.width * data.config.height;
   if (size > 1e6) fail("field too large");
-  numbers(data.nutrient, size, 0, 1e100);
-  numbers(data.chemical, size, 0, 1e100);
+  for (const key of MATERIAL_FIELDS) numbers(data[key], size, 0, 1e100);
   return data.config as Config;
 }
 export function validateSnapshot(data: unknown): asserts data is Checkpoint {
   object(data);
-  if (data.substrate !== "bacteria-xy" || data.version !== 4)
-    fail("unsupported substrate or version; requires bacterial checkpoint v4");
+  if (data.substrate !== "bacteria-xy" || data.version !== 5)
+    fail("unsupported substrate or version; requires bacterial checkpoint v5");
   const config = validateFields(data);
   for (const key of ["tick", "nextCell", "nextGenome"]) integer(data[key]);
   integer(data.seed, -2147483648, 4294967295);

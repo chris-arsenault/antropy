@@ -13,6 +13,39 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Added recent-family, genealogy and inherited-trait views, source provenance in checkpoints,
+  configurable food-composition epochs and reusable short mechanism experiments with typed
+  resource accounting. Recorded actual evolved food-access and B-processing benefits alongside
+  failed motor, learning and food-specific selection hypotheses. Strategic diversity remains
+  unresolved; spatial food heterogeneity is an untested design hypothesis, not an approved change.
+
+- Archived the complete prior documentation tree and consolidated 38 mixed historical design
+  documents into eight current bacterial contracts. Updated principles, calibration, backlog,
+  evidence, entry points and documentation checks. Separate demonstrated physical mechanisms
+  from still-unproven adaptive differentiation; simulation behavior is unchanged by this pass.
+
+- Corrected the default injury/repair balance so toxin can cause visible impairment and reduce
+  reproduction. Default-world controls demonstrate protection from porous matrix. Scale toxin
+  brightness to injury pressure and report affected cells in stats. Disable solid walls and
+  neutral signaling by default because useful construction/communication remains undemonstrated.
+
+- Added finite, heterogeneous A/B food deposits, independently funded processing pathways,
+  local toxin damage, costly defense/repair, porous matrix barriers and conserved decomposition.
+  Expanded the local RNN to 35 inputs, 24 recurrent units and eight outputs; retained phasic reads,
+  task byte and inherited learning. Reduced random mutation to about one behavioral locus and
+  0.2 physical loci per birth. The combined ecology and its food/toxin/matrix layers are the Run
+  default. Checkpoint v5 rejects older worlds. Bounded causal results establish several conditional
+  advantages, but the proposed slow-movement advantage remains unproved.
+
+- Added exact inherited-sequence counts, founder-relative construction-target distributions and
+  founder-share histories. Histories retain their observation origin with bounded thinning.
+  Added predeclared representative descendant selection and behavioral snapshots to matched
+  ancestor/descendant assays; live reproduction never uses these diagnostic measurements.
+
+- Replaced repeated bacterial world tiles with one clipped world, bounded pan and pointer-anchored
+  zoom. Added visible energy fill, heading tips, supply markers, newborn/starvation cues, a scale
+  bar and an always-visible population chart. Periodic physics and simulation defaults are unchanged.
+
 - Replaced bacterial allocation tuples with independent construction targets and actual core,
   motor, transporter and storage material. Viscous drag, diffusion-limited uptake, construction
   and machinery maintenance couple capability to physical costs. Stored food and usable energy

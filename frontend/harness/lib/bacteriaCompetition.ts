@@ -7,6 +7,7 @@ import { type Config } from "../../src/sim/config";
 import { measure, sourceDigest } from "./bacteriaRun";
 import { openLedger, recordRun } from "./ledger";
 import { prepareCompetition } from "./competitionIdentity";
+import { competitionObservation } from "./competitionObservation";
 
 function competition(
   ancestor: Genotype,
@@ -30,7 +31,12 @@ function competition(
     c.genome = ((i + Number(swap)) % 2) + 1;
     world.ancestry.get(c.id)!.genome = c.genome;
   }
-  const result = measure(world, ticks, 100);
+  const behavior: { tick: number; groups: ReturnType<typeof competitionObservation> }[] = [];
+  const result = measure(world, ticks, 100, {
+    spatial: false,
+    progress: true,
+    onSample: (w) => behavior.push({ tick: w.tick, groups: competitionObservation(w) }),
+  });
   const counts = [1, 2].map((g) => world.cells.filter((c) => c.genome === g).length);
   return {
     seed,
@@ -40,6 +46,7 @@ function competition(
     counts,
     wallMs: result.wallMs,
     final: result.final,
+    behavior,
     series: result.series.map((s) => ({
       tick: s.tick,
       population: s.population,
@@ -49,7 +56,7 @@ function competition(
 }
 export function compareCheckpoint(
   path: string,
-  candidate: number,
+  candidate: number | "representative",
   seeds: number[],
   ticks: number,
   output: string
@@ -78,7 +85,7 @@ export function compareCheckpoint(
   const db = openLedger();
   const id = recordRun(db, {
     experiment: "bacteria-competition",
-    label: `ancestor 1 versus observed genotype ${candidate}`,
+    label: `ancestor ${identity.ancestor.id} versus observed genotype ${identity.descendant.id}`,
     driver: controller.id,
     seed: seeds[0],
     ticks,

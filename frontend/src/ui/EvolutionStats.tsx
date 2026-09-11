@@ -47,10 +47,6 @@ export function EvolutionStats({
           <dd>{stats.meanLearned.toExponential(2)}</dd>
         </div>
         <div>
-          <dt>Learning energy spent</dt>
-          <dd>{world.ledger.learning.toFixed(4)}</dd>
-        </div>
-        <div>
           <dt>Recombined births</dt>
           <dd>{world.ledger.recombinations}</dd>
         </div>

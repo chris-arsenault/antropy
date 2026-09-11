@@ -1,7 +1,7 @@
 import { type Genome, type BrainState, PARAMETERS, HIDDEN } from "./rnn";
 import { PLASTIC_LOCI } from "./plasticity";
 
-export const CONTROLLER_ID = "bacteria-rnn-19x16x5-inheritable-v3";
+export const CONTROLLER_ID = "bacteria-rnn-35x24x8-ecology-v4";
 function record(data: unknown): Record<string, unknown> {
   if (!data || typeof data !== "object" || Array.isArray(data))
     throw new Error("Invalid controller record");

@@ -2,6 +2,7 @@ import { controller, type Genome, type BrainState } from "../controller";
 import { type Config } from "../config";
 import { type RandomState } from "../random";
 import { combineVector, meanVector, mutateVector } from "./operators";
+import { BODY_PARTS } from "../body";
 
 export interface Chromosome {
   readonly behavior: Genome;
@@ -28,7 +29,7 @@ export function seedGenotype(config: Config): Genotype {
   return {
     chromosomes: Array.from({ length: config.ploidy === "haploid" ? 1 : 2 }, () => ({
       behavior: controller.seed(),
-      physical: new Float32Array(4),
+      physical: new Float32Array(BODY_PARTS.length),
     })),
   };
 }
@@ -89,7 +90,7 @@ function mutateGenotype(genotype: Genotype, rng: RandomState, config: Config): G
           scale: config.physicalMutationScale,
           kind: config.mutationKind,
         },
-        1
+        3
       ),
     })),
   };

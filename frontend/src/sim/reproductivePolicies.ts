@@ -3,6 +3,7 @@ import { moved, radius } from "./geometry";
 import { nextRandom } from "./random";
 import { type SpatialIndex } from "./spatial";
 import { scaleBody } from "./body";
+import { matrixFree } from "./matrix";
 
 interface ReproductionPolicy {
   readonly parentSurvives: boolean;
@@ -18,7 +19,12 @@ function place(world: World, parent: Cell, index: SpatialIndex, budding: boolean
     const points = budding
       ? [parent, moved(parent, angle, 2 * offset, c)]
       : [moved(parent, angle, offset, c), moved(parent, angle, -offset, c)];
-    if (points.every((p) => index.free(p, childRadius, parent.id))) return points;
+    if (
+      points.every(
+        (p) => index.free(p, childRadius, parent.id) && matrixFree(world, p, childRadius)
+      )
+    )
+      return points;
   }
   return null;
 }

@@ -1,156 +1,128 @@
-# Funded bodies and inheritable learning
+# Funded bodies, genes and inherited learning
 
-The user approved this direction after reviewing the physical-model proposal on September 9.
-Plan `49f9eee2-3e74-4eb8-8643-5e927bf32eda` replaces the allocation tuple and corrects the
-non-inherited learning implementation. This document supersedes those portions of
-[the first evolutionary extension](bacterial-evolution.md). Substantial further design changes
-require user review before implementation.
+Physical and behavioral genes are independently inherited. An organism's capacities come from
+material it has actually built, not directly from gene values.
 
-## Physical information and actual construction
+<a id="bodies-construction-and-physical-genes"></a>
 
-Four independent bounded genes specify reference newborn core size, motor abundance, transporter
-abundance and storage scaffold abundance. Zero genes reproduce the reference blueprint. Targets
-use positive exponential multipliers; they are not normalized to sum to one. Increasing motor
-target leaves the other absolute targets unchanged. Changing core size scales the whole blueprint.
+## Construction and physical genes
 
-Every cell owns four actual material stocks: core, motor, transport and storage. It also owns
-stored nutrient material and usable energy. A genotype is a construction target, never a grant
-of machinery. Actual stocks determine capabilities. Deficits toward twice the newborn blueprint
-drive physiological construction, bounded by material, usable energy and assembly rate. Available
-assembly is shared in proportion to material deficits; stock already built is retained. This is
-a resource-limited developmental law, not an evolved construction scheduler.
+Each chromosome has eight bounded float32 physical log targets in [-3,3].
 
-Each unit of new structure consumes one unit of stored material plus a configurable synthesis
-energy cost. Core and each machinery class have explicit maintenance rates. Nothing is dismantled
-or replaced automatically when a newborn inherits a different target. It grows toward its own
-blueprint using the physically inherited stocks. No material-generating developmental override exists.
+| Locus | Target | Reference newborn stock |
+| ---: | --- | ---: |
+| 0 | Core; scales the whole blueprint | 1 |
+| 1 | Motors relative to core | 0.08 |
+| 2 | Food A processing relative to core | 0.08 |
+| 3 | Storage relative to core | 0.08 |
+| 4 | Food B processing relative to core | 0.05 |
+| 5 | Defense relative to core | 0.025 |
+| 6 | Toxin machinery relative to core | 0.02 |
+| 7 | Matrix machinery relative to core | 0.02 |
 
-## Geometry, motion and acquisition
+Core target is reference core × exp(g0); other targets are core target × reference ratio × exp(gi).
+Targets are independent, not a zero-sum allocation tuple. Every actual stock has construction and
+maintenance costs. Growth shares available assembly in proportion to deficits toward twice the
+newborn target. Mutation never replaces existing stock, grants resources or skips construction.
 
-Positions and motion stay in XY. A spherical reference body has scalar volume
-`V = structuralMass/bodyDensity + storedNutrient/reserveDensity`, with radius
-`r = cbrt(3*V/(4*pi))`. Empty storage scaffolds have material cost; loading their reserves adds
-volume. This collapsible storage approximation does not model organelles or intracellular pressure.
+<a id="bodies-geometry-motion-and-uptake"></a>
 
-Viscous translational and rotational resistance are `6*pi*viscosity*r` and
-`8*pi*viscosity*r^3`. Installed motor power is motor material times power density; efficiency
-converts chemical power into useful propulsion. Maximum speed and turn rate follow the square
-roots of useful power divided by the corresponding resistance. The squared swimming and turning
-efforts share one installed power budget. Affordable expenditure reserves maintenance and solves
-the quadratic motor plus linear secretion-energy budget. There is no coasting.
+## Geometry, motion and uptake
 
-Rotational Brownian diffusion uses thermal energy divided by rotational resistance. Contact
-correction gives the smaller, more mobile body the larger displacement. The local overlap solver
-is approximate; no full fluid or rigid-body solver is introduced. The equations use the low-Reynolds
-number reference described by [Purcell](https://www.physics.brocku.ca/Courses/1P92_Kaur/SolidsFluids/Life-at-low-R/).
-Parameter magnitudes are dimensionless simulation calibration, not measured bacterial constants.
+Volume = structure/bodyDensity + reserve/reserveDensity; radius = cbrt(3V/(4π)).
+This spherical reference is used for circular XY footprints. Stored nutrient adds volume and drag.
+It does not model intracellular pressure or a resolved third spatial dimension.
 
-Transporter material supplies a saturating kinetic uptake ceiling. An unresolved near-body
-diffusion conductance `4*pi*D*r` supplies a second ceiling. Their harmonic combination represents
-serial transport limitations; the raster field still limits actual available material and shares
-it among nearby consumers. The field represents a unit-depth layer. Applying a spherical boundary
-law to that layer is an explicit coarse approximation, not a resolved 3D diffusion calculation.
-More transporters cannot create nutrient or evade a diffusion bottleneck. The receptor/transport
-motivation follows [Berg and Purcell](https://pubmed.ncbi.nlm.nih.gov/911982/).
+Translational/rotational resistance are 6πηr and 8πηr³. Installed motor power is motor stock ×
+power density. Speed and turn-rate capacities follow sqrt(efficiency×power/resistance), multiplied
+by 1−damage. Brownian rotation uses thermal energy / rotational resistance. There is no coasting.
+Greater motor investment buys power while charging material, maintenance and body drag; it is not
+automatically an advantage.
 
-Storage capacity is actual storage scaffold times a material binding capacity. Usable-energy
-capacity is proportional to core material. Catabolism consumes stored nutrient and produces usable
-energy at a finite core-dependent rate and efficiency. Spent nutrient enters a recorded waste sink.
-Sensing retains local tonic/phasic/contrast readings. Own-body channels report actual motor,
-transporter and storage capacity, and a new channel reports stored nutrient fill. Target genes do
-not masquerade as actual capability. Receptor noise and propeller morphology remain future work.
+A/B uptake each combines transporter kinetics with the near-body conductance 4πDr as serial
+limitations. Damage lowers capacity; field supply and shared storage further limit acquisition.
+More processing machinery cannot evade diffusion or create food. Using a spherical conductance
+with a unit-depth raster is a coarse approximation, not a resolved physical diffusion model.
 
-## Separate accounting and funded reproduction
+Storage capacity follows actual storage scaffold; usable-energy capacity follows core. Catabolism
+consumes reserve at a finite core-dependent rate and efficiency. Construction protects configured
+reserve/energy fractions; repair is paid before growth. Coefficients are simulation scales, not
+empirical bacterial constants. See [calibration](../calibration.md).
 
-One feedstock supplies structural material, metabolic fuel and secreted chemical. Every unit has
-a configured chemical energy content. Material and energy have separate ledgers:
+<a id="bodies-accounting"></a>
 
-```
-initial material + supplied material
-  = environmental nutrient + secreted chemical + living structure + stored nutrient
-    + metabolic waste + field decay + dead material
+## Accounting
 
-initial energy + supplied material * chemical energy per unit
-  = usable energy + chemical energy in living/environmental material
-    + metabolism + motors + learning + synthesis + secretion processing + division
-    + catabolic inefficiency + chemical energy lost through decay and death
-```
+Material balance includes environmental fields and unreleased deposit inventory, living structure,
+stored nutrient, metabolic waste and true field-loss sinks. Energy balance includes usable energy
+plus configured chemical energy in held material, and dissipated maintenance, motors, learning,
+synthesis, secretion, repair, division, catabolic inefficiency and field-loss energy.
 
-Secreted chemical consumes precursor material as well as processing energy. It retains chemical
-energy until decay but is not edible. Death and spent metabolic material enter recorded sinks;
-recycling and additional chemical species are not implicit. Initial founders and external sources
-are the only external grants, fully accounted at initialization and supply.
+Each constructed material unit costs one reserve unit plus synthesis energy. Secretions likewise
+consume reserve plus processing energy. Repair records replacement material as metabolic waste
+and separately accounts its chemical energy and repair energy. Bound toxin remains held material.
 
-Reproduction requires all actual stocks to reach twice the parent's genetic newborn blueprint,
-minimum stored food and usable energy for both resulting bodies, division energy and local space.
-Fission divides every material stock, stored nutrient and post-cost energy equally. Budding uses
-the same split but retains one body's parent identity and memory. Gene mutation changes future
-construction, not stocks transferred at birth. Placement uses the actual post-split radius;
-existing neighbors cannot be displaced to manufacture space.
+Death transfers actual structure/reserve to detritus and dissipates residual usable energy.
+Matrix decay and expired deposits also feed detritus; decomposition yields food B. These transfers
+are not new external grants. Death-material totals are throughput, not a second mass sink.
+Conservation must hold through starvation, damage, birth, secretion, decay and checkpoint restore.
 
-## Inheritable learned information
+<a id="bodies-lifetimestatic-and-lifetimedynamic-information"></a>
 
-The previous interpretation was wrong: the user requested inheritable learning, not only
-inheritable learning rules. The recurrent block is lifetime-dynamic; input/output weights and
-biases remain lifetime-static. Both categories remain genetically mutable at birth.
+## Lifetime-static and lifetime-dynamic information
 
-The expressed parent uses `W + abs(alpha)*H`. Before genetic transmission, a birth-local copy of
-each parental chromosome receives `retention * abs(expressedAlpha)*H` in its recurrent block.
-The same learned delta is added to both homologs for additive diploid expression. Weight bounds
-still apply. Crossover and mutation then operate on these learned chromosomes. The parent genome
-is not edited: another organism sharing it must not acquire that parent's experience remotely.
+| Information | Changes during life | Birth transmission |
+| --- | --- | --- |
+| Input/output weights, biases and physical targets | No | Chromosomes, then crossover/mutation |
+| Recurrent baseline weights | Registered genotype remains immutable | Baseline plus retained acquired delta, then crossover/mutation |
+| Nine plasticity coefficients | No; rule is inherited | Chromosomes, subject to behavioral mutation |
+| Acquired recurrent traces H | Paid bounded local updates | Converted into baseline-weight delta at configurable retention |
+| Hidden activity, task byte, contacts, receptors | Individual experience and body state | Newborn hidden/byte/traces/contacts reset; receptors initialized locally |
+| Actual body stocks, nutrient, energy, damage | Physiology | Resource split and inherited damage fraction |
 
-Default retention is one. Zero retention provides a non-inheriting experimental control. Offspring
-start with zero new plastic traces, hidden activity and task byte, so the learned contribution is
-present exactly once in their inherited baseline. A surviving budding parent keeps its original
-baseline and traces; successive births do not repeatedly add the same delta into its own genome.
-Inherited changes can persist through grandchildren even without further learning or mutation.
-Learning transfer and random mutation have separate counters; genetic ancestry records the source
-genome and amount of transferred learning. This is an explicit Lamarckian mechanism in an artificial
-organism, not a claim about biological bacterial memory.
+<a id="bodies-inheritable-learning"></a>
 
-Checkpoint v4 stores actual stocks, food material, usable energy, both ledgers, construction targets,
-acquired traces and learning-transfer provenance. Earlier bacterial schemas are rejected rather
-than assigning missing material or invented memory. Static/plastic inference, retention, mutation
-and existing ploidy/transmission/reproduction policies remain separately configurable.
+## Inheritable learning
 
-## Verification scope
+The parent acts with W + abs(alpha)×H. Before transmission, copies of its chromosomes receive
+retention × abs(expressedAlpha)×H in the recurrent block, within weight bounds. For additive
+diploids, the same delta enters both homologs. Parent/shared genotypes remain unchanged.
 
-Bounded mechanics must establish construction affordability, independent gene targets, diffusion
-limits, stored-food geometry, local division transfers, dual conservation, learned-weight
-transmission without double counting, and deterministic checkpoint continuation. A short harness
-panel checks reproduction and transmitted learning under the Run default and a retention-zero
-control. It does not certify adaptive learning, evolved specialization or human-visible motion.
+Default retention is one. Newborn traces and hidden state start at zero: the acquired contribution
+already resides in baseline weights exactly once. A budding parent keeps its own baseline and
+experience, without accumulating its delta again into its own genome after each birth.
+This explicit Lamarckian mechanism is an artificial inheritance choice, not a claim about bacterial
+genetic memory. Its adaptive usefulness remains unproven.
 
-## Implementation measurements
+Static learning disables new trace effects/updates and assimilation. Retention zero prevents
+transmission but leaves private plasticity active. Disabling random mutation alone does not freeze
+the inherited sequence when retention remains enabled.
 
-Ledger runs 2829–2831 use seed 101, 48 founders, persistent sources and 3,000 ticks (600 model
-seconds). All three use paid plasticity. Each run's before/after source digest agrees, and the
-three digests match (`f6985ca9716612a32f65f747d175490d0e9f8183276d34916ed0f40440e93e53`).
-Only inspector whitespace was formatted after this panel; no runtime mechanism was retuned.
+<a id="bodies-policy-composition-and-mutation"></a>
 
-| Run | Random mutation | Learning retention | Living | Divisions | Starved | Births receiving learned changes |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| 2830 | Both blocks off | 0 | 342 | 301 | 7 | 0 |
-| 2831 | Both blocks off | 1 | 352 | 305 | 1 | 610 |
-| 2829 | Both blocks on; Run default | 1 | 347 | 313 | 14 | 626 |
+## Policy composition and mutation
 
-The default constructs 547.75 material units and reaches generation four. Its living bodies have
-installed motor power from 0.0135 to 0.0369, storage capacities from 1.348 to 4.318, and radii
-from 0.412 to 0.621. These ranges include ordinary growth as well as genotype variation; they
-are not estimates of genetic variance. Mean additional acquired recurrent-weight RMS at the
-endpoint is `2.62e-5`. Transferred learning and mutation have separate counters.
+| Config dimension | Implemented options | Default |
+| --- | --- | --- |
+| Ploidy | Haploid / diploid with mean allele expression | Haploid |
+| Transmission | Clonal copies / selfing via two gametes from one diploid | Clonal |
+| Crossover | Uniform / one-point, applied within behavioral and physical vectors | Uniform |
+| Mutation distribution | Uniform / Gaussian perturbations | Gaussian |
+| Physical reproduction | Fission / budding | Fission |
+| Lifetime learning | Static / plastic | Plastic |
+| Acquired retention | Fraction [0,1] | 1 |
 
-The mutation-free retention-zero control keeps one genome identity. With retention enabled,
-acquired information creates new genotype records without random mutation. Genome identity counts
-are ancestry records, not deduplicated sequence diversity; identical siblings can have separate
-records. The ten-cell census difference is one seeded observation, not evidence of general adaptive
-learning. No candidate was selected or promoted, and the learning rule remains a weak founder rule.
+These are independent static policy modules selected by persisted configuration. Selfing requires
+diploidy. Selfing is not mating with another organism; seed/fertilize, outcrossing and multi-parent
+ancestry are not implemented. Uniform crossover is configured but unused by default clonal
+transmission.
 
-Maximum sampled energy residual is below `3.95e-9`; material residual is below `8.99e-10` in all
-three runs. Local traces and complete v4 checkpoints are under
-`frontend/harness/artifacts/funded-bodies-2026-09-09/`; the SQLite ledger is the durable index.
-The new mechanics and checkpoint continuation pass 53 bounded tests in ten files.
-The first full CI attempt stopped on inspector formatting; that whitespace was corrected natively.
-The final `make ci` and production build pass.
-Changed motion remains for human review. No browser assay, server or offline training was run.
+At birth, behavioral loci are independently selected with probability 0.0006 and scale 0.06;
+physical loci use 0.025 and scale 0.08. A haploid has 1,649 behavioral/plasticity loci and eight
+physical loci: about 0.9894 and 0.2 selected loci per child. Selection count is not guaranteed
+sequence change because of bounds and numerical effects. Weights clamp to [-16,16], plasticity
+coefficients to [-1,1], and physical targets to [-3,3].
+
+No reproductive score selects parents or filters mutations. Immutable genotype records track
+ancestry; exact inherited sequence counts are distinct from record counts and founder lineages.
+Checkpoint v5 preserves genotype schema, actual bodies, private traces and transfer provenance.

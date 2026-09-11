@@ -8,7 +8,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
   "include": ["vite.config.ts", "eslint.config.js", "harness"]
 }

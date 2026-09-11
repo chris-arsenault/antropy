@@ -104,7 +104,7 @@ it.each(["uniform", "one-point"] as const)(
     const parent = seedGenotype(config);
     parent.chromosomes[0].physical.fill(-1);
     parent.chromosomes[1].physical.fill(1);
-    expect(Array.from(express(parent).physical)).toEqual([0, 0, 0, 0]);
+    expect(express(parent).physical.every((v) => v === 0)).toBe(true);
     const offspring = inherit(parent, createRandomState(9), config);
     expect(offspring.recombined).toBe(true);
     expect(offspring.mutated).toBe(false);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type World } from "../sim/types";
-import { checkpointToJson, restoreWorld } from "../persist/checkpoint";
+import { restoreWorld } from "../persist/checkpoint";
+import { browserCheckpoint } from "./runtimeIdentity";
 import { loadLocal, saveLocal } from "../persist/db";
 
 export function PersistenceControls({
@@ -21,7 +22,7 @@ export function PersistenceControls({
   };
   const exportFile = () => {
     const url = URL.createObjectURL(
-      new Blob([checkpointToJson(world)], { type: "application/json" })
+      new Blob([browserCheckpoint(world)], { type: "application/json" })
     );
     const a = document.createElement("a");
     a.href = url;
@@ -32,7 +33,7 @@ export function PersistenceControls({
   return (
     <details className="panel">
       <summary>Save, restore and export</summary>
-      <button onClick={() => void run(() => saveLocal(checkpointToJson(world)))}>
+      <button onClick={() => void run(() => saveLocal(browserCheckpoint(world)))}>
         Save locally
       </button>
       <button onClick={() => void run(async () => onRestore(restoreWorld(await loadLocal())))}>

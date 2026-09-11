@@ -1,87 +1,73 @@
-# Feature backlog
+# Open questions and deferred features
 
-The backlog stays at feature level. Detailed mechanisms and gates belong in the owning design
-document and are activated only when they support genuine evolution.
+This backlog belongs to the bacterial simulation. Historical ant queues are preserved in the
+[reference snapshot](sources/history/2026-09-10/backlog.md), not pending prerequisites.
 
-<a id="backlog-bacteria"></a>
+<a id="backlog-evolutionary-questions"></a>
 
-## Current bacterial work
+## Evolutionary questions
 
-- [Evolutionary depth](design/funded-bodies.md): physical/behavioral chromosomes, material-funded
-  machinery, inherited acquired learning and configurable fission/budding inheritance.
-  Next extensions are physical seed/fertilize entities and multi-parent genetic ancestry,
-  environmental developmental reaction norms and evolvable mutation machinery. None is a selectable placeholder.
-  Resource-limited construction is implemented; receptor noise and propeller morphology remain
-  deferred. Substantial further designs require user review before implementation.
-- The top-down body/resource loop, RNN, local chemical interface, inheritance and live mutation
-  are implemented. The architecture correction adds isolated genetic randomness, durable
-  intervention/competition identity, controller-owned codecs and consistent checkpoint invariants.
-- Next observation work: division/death markers and a visible population history, after the
-  architecture correction. This is proposed UI work, not an additional ecology prerequisite.
-- Reliable adaptation and useful chemical interaction remain unproven. Further comparisons should
-  identify inherited behavioral differences and environmental consequences without selecting
-  reproduction through an external score. No offline training campaign is authorized.
-- Profile demonstrated throughput constraints before changing execution architecture. The initial
-  2,000-cell load probe reached about 10 ticks/s; population size does not gate genetics.
-- Address cumulative ancestry storage before claiming indefinite browser runs. Additional ecology
-  requires a named evolutionary question and a separate decision.
+- Prioritize whether inherited differences continue changing resource use, survival and reproduction
+  as the ecology develops. Use family, trait and sampled behavior views to locate stagnation; use a
+  bounded frozen-inheritance comparison when it would distinguish evolution from ecological turnover.
+- Preserve the [toxin intervention](strategy-study.md): disabling injury attenuated the measured
+  advantage of reduced secretion. Useful evolved offense remains unresolved, not a mandatory next assay.
+- Preserve the motor finding: lower physical investment won all sixteen matched contests. The
+  proposed pair is not established; obtaining its crossover is not a gate on further development.
+- Determine whether acquired-weight transmission improves descendants. The implementation exists;
+  adaptive learning is unproved, and the modulation rule lacks dedicated B/toxin channels.
+- Assess mutation supply and robustness around the common founder before assuming visible
+  strategy differentiation will arise from longer duration alone.
+- Preserve the [capability findings](capability-investigation.md): actual neural food-access and
+  physical B-processing benefits are established; tested recurrence/learning gains are not.
+  Review spatial A/B heterogeneity as the next configuration direction, using the existing deposit
+  model and a small mixed-versus-separated-food falsifier before adding new production mechanics.
+- Distinguish general colonization advantage from invasion or frequency-dependent advantage;
+  one exported community cannot establish robustness across neighborhoods or mixture ratios.
+- Food epochs are implemented and [measured](food-epochs-study.md). Assess whether repeated food
+  changes keep inherited choices consequential; the first three phases and transfer assays show
+  an advantage at the current population scale, not indefinite diversity or a specialist tradeoff.
 
-The ant backlog below is preserved history from `ant-colony-checkpoint-2026-09-09`. Its 2,000-worker
-gate, missing-inheritance statements and ant-RNN cancellation do not govern the bacterial runtime.
+<a id="backlog-conditional-extensions"></a>
 
-<a id="backlog-colony"></a>
+## Conditional extensions
 
-## Living colony and resilience
+These require a reviewed question and design, not automatic activation:
 
-- Review implemented [capacity measurements and Y-axis settling](design/settling.md) and
-  [digging/queen/cache relocation](design/construction.md). Continue the [roughly 2,000-worker prerequisite](design/colony-scale.md)
-  through distributed storage/nursery care, population scaling and sustained replacement.
-- Broaden sustainable-region and varied-map evidence using the programmed and LGP seed.
-- Measure recovery across worker and resource shocks before adding ecological safety floors.
+| Extension | Missing decision or evidence |
+| --- | --- |
+| Outcrossing, seed/fertilize and multi-parent ancestry | Physical mating/propagule lifecycle, costs and ancestry contract |
+| Environmental developmental reaction norms | Which sensed pressure changes construction, at what cost |
+| Evolvable mutation machinery or topology | Failure of the current variation/representation to support a named strategy |
+| Neutral communication | Useful causal effect beyond precursor expenditure |
+| Family cooperation through inherited chemical compatibility | Deferred idea: genes encode chemical production and sensitivity/resistance, allowing related cells to tolerate one another while chemicals harm, hinder, attack or repel susceptible competitors |
+| Solid walls or adhesion | Useful construction/attachment behavior and physical costs |
+| Dormancy, contact weapons, predation or kin recognition | Context-dependent advantage that existing mechanisms cannot express |
+| Microclimate, catastrophes or more resources | A consequential pressure beyond the implemented food-composition epochs |
 
-<a id="backlog-evolution"></a>
+The family-cooperation idea is retained for later exploration, not near-term implementation.
+Shared inherited chemistry could provide basic cooperation through mutual tolerance and collective
+protection. Chemical compatibility, rather than an explicit family-ID exemption, is a candidate
+mechanism to review. Open questions include production/resistance costs, mutation-driven changes
+in compatibility, benefits to unrelated cells with matching chemistry, and nonproducing relatives
+that benefit without contributing. No particular encoding or cooperation rule is decided yet.
 
-## Evolution readiness
+No 2,000-ant prerequisite or ant neural training campaign applies. Live bacterial genetics is
+already implemented. Solid walls and neutral signaling remain disabled defaults with documented
+reasons; all other entries here are questions rather than selectable placeholder systems.
 
-- The [linear-program controller and colony knowledge](design/colony-knowledge.md) are implemented.
-  Variation operations exist; reproductive transmission and evolving populations do not yet exist.
-- Only after the 2,000-worker milestone and a genetics decision, add genome identity and parentage,
-  mutation-disabled transmission, then funded daughter-queen
-  development and founding. Multiple reproductive lineages precede live mutation and selection.
-- Establish a broad viable initialization distribution, mutation-distance calibration,
-  inheritance, ancestry, diversity, and selection measurements.
-- Admit standing variation, then demonstrate continuous in-world selection without an explicit
-  fitness function or generation boundary.
+<a id="backlog-runtime-and-observation-limits"></a>
 
-<a id="backlog-morphogenesis"></a>
+## Runtime and observation limits
 
-## Evolved environment and morphogenesis
-
-- [Autonomous programmed/LGP construction](design/construction-pressures.md), brood transport,
-  material climate and food spoilage are implemented for review. Inherited construction and
-  soil collapse remain separate later mechanisms.
-- Judge construction through colony function; record chambers, branches, caches, routes, and nest
-  geometry as descriptions rather than target shapes.
-- Add seasons, weather, predation and disease only when a named evolutionary question requires
-  them. Temperature, moisture and spoilage now provide the approved construction pressures.
-
-<a id="backlog-learning"></a>
-
-## Learning, development, and controller diversity
-
-- RNN-specific plans are canceled; retain their results as historical evidence. A future
-  controller comparison needs a new decision and must not displace the colony-scale work.
-- Add path integration, plasticity, learned routes, reaction norms, developmental roles, or castes
-  only after inherited controller evolution works without them.
-- Preserve capability costs and prevent authored role labels from replacing evolved behavior.
-
-<a id="backlog-observation"></a>
-
-## Observation and scale
-
-- Add compact lineage, energy, behavior, diversity, and event views as their systems return.
-- Profile before parallelizing. Keep interactive rendering local and move only demonstrated batch
-  bottlenecks to worker or controller-plane execution.
-- Measure simulation throughput separately from rendered frame rate at 200, 500, 1,000 and
-  roughly 2,000 workers; preserve individual decisions, physical costs and durable state.
-- Version checkpoints at real semantic boundaries; reject incompatible worlds explicitly.
+- Measure current sustained population throughput before optimizing architecture. The old
+  2,000-cell initialization probe does not certify the current ecology.
+- Address cumulative genotype/ancestry storage before claiming indefinite browser runs.
+- Browser source provenance is implemented for new exports. The old tick-48,661 export still
+  cannot identify the cause of its early divergence from current headless reconstruction.
+- Add replay or new visual instruments only when existing state/history cannot answer a concrete
+  question. Recent families, selected-cell genealogy/genetic comparisons, inherited trait
+  distributions/trends and sampled effort are implemented. Families are viewing conventions;
+  numeric diversity and colored rims are not behavioral labels or fitness scores.
+- Preserve accounting, individual actions and deterministic continuation through any performance
+  change. No deployment or runtime change is part of the documentation consolidation.

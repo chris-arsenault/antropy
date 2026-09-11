@@ -12,6 +12,10 @@ export function blueprint(genome: Genotype, c: Config): Body {
     motor: core * c.motorRatio * Math.exp(genes[1]),
     transport: core * c.transporterRatio * Math.exp(genes[2]),
     storage: core * c.storageRatio * Math.exp(genes[3]),
+    transportB: core * c.transportBRatio * Math.exp(genes[4]),
+    defense: core * c.defenseRatio * Math.exp(genes[5]),
+    weapon: core * c.weaponRatio * Math.exp(genes[6]),
+    builder: core * c.builderRatio * Math.exp(genes[7]),
   };
 }
 export const targetBody = (world: World, cell: Cell): Body =>

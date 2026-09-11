@@ -21,7 +21,12 @@ it("resolves body contact across the periodic seam", () => {
 });
 it("bounded locomotion cannot tunnel through a stationary cell", () => {
   const w = createWorld(1, { ...DEFAULT_CONFIG, founders: 2, thermalEnergy: 0 });
-  Object.assign(w.cells[0], { x: 10, y: 20, heading: 0, action: { swim: 1, turn: 0, secrete: 0 } });
+  Object.assign(w.cells[0], {
+    x: 10,
+    y: 20,
+    heading: 0,
+    action: { ...w.cells[0].action, swim: 1, turn: 0, secrete: 0 },
+  });
   Object.assign(w.cells[1], { x: 11, y: 20, heading: 0 });
   moveBodies(w);
   expect(w.cells[0].x).toBeLessThan(w.cells[1].x);
@@ -47,7 +52,7 @@ it("a population safety limit pauses without deleting cells or manufacturing off
   expect(w.stopReason).toContain("safety limit");
 });
 it("secretion becomes visible to all receptors only on the following step", () => {
-  const w = createWorld(12, { ...DEFAULT_CONFIG, founders: 2 });
+  const w = createWorld(12, { ...DEFAULT_CONFIG, founders: 2, secretionRate: 0.06 });
   stepWorld(w);
   expect(w.ledger.emitted).toBeGreaterThan(0);
   expect(w.cells.every((c) => c.inputs[4] === 0)).toBe(true);

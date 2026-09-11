@@ -15,8 +15,8 @@ import {
   type PlasticState,
 } from "./plasticity";
 
-export const HIDDEN = 16,
-  OUTPUTS = 5,
+export const HIDDEN = 24,
+  OUTPUTS = 8,
   PARAMETERS = INPUTS * HIDDEN + HIDDEN * HIDDEN + HIDDEN + OUTPUTS * HIDDEN + OUTPUTS;
 const RECURRENT = INPUTS * HIDDEN,
   BIAS = RECURRENT + HIDDEN * HIDDEN;
@@ -42,6 +42,9 @@ const f = Math.fround;
 export function seed(): Genome {
   const w = new Float32Array(PARAMETERS);
   for (let i = 0; i < 15; i++) w[i * INPUTS + i] = 1.5;
+  [19, 20, 21, 22, 23, 25, 26, 27, 30].forEach((input, i) => {
+    w[(15 + i) * INPUTS + input] = 1.5;
+  });
   w[3 * INPUTS + 3] = 8;
   w[7 * INPUTS + 7] = 4;
   w[RECURRENT + 1 * HIDDEN + 1] = 0.5;
@@ -49,14 +52,30 @@ export function seed(): Genome {
   w[OUTPUT] = -0.6;
   w[OUTPUT + 1] = -0.2;
   w[OUTPUT + 10] = -0.4;
+  w[OUTPUT + 15] = -0.6;
+  w[OUTPUT + 19] = 0.4;
   w[OUTPUT + HIDDEN + 3] = -3;
   w[OUTPUT + HIDDEN + 11] = 1;
   w[OUTPUT + HIDDEN + 13] = -1;
+  w[18 * INPUTS + 22] = 8;
+  w[OUTPUT + HIDDEN + 18] = -3;
+  w[OUTPUT + HIDDEN + 21] = 4;
   w[OUTPUT + 2 * HIDDEN] = 0.12;
   w[OUTPUT_BIAS + 2] = -0.02;
   w[OUTPUT + 3 * HIDDEN] = 2;
   w[OUTPUT_BIAS + 3] = -1;
   w[OUTPUT_BIAS + 4] = 1;
+  w[OUTPUT + 5 * HIDDEN] = 0.12;
+  w[OUTPUT + 5 * HIDDEN + 15] = 0.12;
+  w[OUTPUT + 5 * HIDDEN + 10] = 0.08;
+  w[OUTPUT + 5 * HIDDEN + 19] = -0.4;
+  w[OUTPUT_BIAS + 5] = -0.04;
+  w[OUTPUT + 6 * HIDDEN] = 0.25;
+  w[OUTPUT + 6 * HIDDEN + 15] = 0.25;
+  w[OUTPUT + 6 * HIDDEN + 19] = -0.1;
+  w[OUTPUT_BIAS + 6] = -0.03;
+  w[OUTPUT + 7 * HIDDEN + 23] = 2;
+  w[OUTPUT_BIAS + 7] = -0.01;
   return { weights: w, plasticity: seedPlasticity() };
 }
 
@@ -95,6 +114,9 @@ export function act(
     swim: Math.max(0, Math.tanh(logits[0])),
     turn: Math.tanh(logits[1]),
     secrete: Math.max(0, Math.tanh(logits[2])),
+    toxin: Math.max(0, Math.tanh(logits[5])),
+    matrix: Math.max(0, Math.tanh(logits[6])),
+    repair: Math.max(0, Math.tanh(logits[7])),
   };
 }
 

@@ -5,17 +5,21 @@ Antropy explores evolution in embodied, resource-limited populations. The browse
 funds movement, chemical release, lifetime learning, growth and division. Daughters inherit
 behavioral and physical genes, including their parent's acquired recurrent-weight changes.
 Independent body targets require actual material, construction energy and maintenance;
-body size and stored food affect viscous drag. Starvation removes cells. There is no external
+body size and stored food affect viscous drag. The [strategic ecology](docs/design/strategic-ecology.md)
+adds two foods in finite heterogeneous deposits, toxin, costly defense and repair, porous matrix
+construction and local decomposition. Starvation and damage remove cells. There is no external
 fitness scorer or training loop.
 
-Initial measurements establish reproduction and inherited variation, with mixed evidence of
-adaptation. See [results and limits](docs/design/bacteria-results.md). Motion awaits human review.
+Measurements establish reproduction, inherited variation and consequential ecology. The first
+identified adaptation is an inherited task-to-toxin connection that reduces secretion and repair
+burden and improves competitive survival. See [results and limits](docs/design/bacteria-results.md).
+Broad strategic diversity and adaptive inherited learning remain unproved.
 The prior ant implementation is preserved at commit `780fa4e`, annotated tag
 `ant-colony-checkpoint-2026-09-09`.
 
 The retired 3D simulation is preserved at `3d-simulation-checkpoint-2026-09-06`.
 See the [current design and work order](docs/design/README.md) and
-[measured ant results](docs/certifications.md).
+[historical records](docs/sources/history/README.md).
 
 ## Quickstart
 
@@ -28,14 +32,22 @@ pnpm run build
 
 Run `make ci` from the repository root before committing.
 
-Press **Run** to begin at tick zero: 48 bacteria, persistent nutrient patches, mutation enabled,
-30 ticks per second. Green shows nutrient, magenta shows released chemical. Drag to pan, wheel to
+Press **Run** to begin at tick zero: 48 bacteria, mixed finite deposits, mutation enabled,
+30 ticks per second. Green/blue show foods A/B, red toxin and ochre porous matrix. Neutral signaling
+and solid walls are disabled by default because useful communication and wall construction have
+not been demonstrated. Stats report cells impaired by damage or slowed by matrix. Drag to pan, wheel to
 zoom, and click a cell to inspect its sensors, recurrent state and task byte. Stats remain visible.
+The display shows one framed world, with bounded panning and zoom anchored under the pointer.
+Colored cell rims identify founder lineages; inner fill shows energy and white tips show heading.
+Finite deposit markers, newborn rings, death crosses and the visible population chart explain activity.
+See the [display guide](docs/design/bacterial-display.md).
+Founder shares now retain their observed history. Stats distinguish exact inherited sequences,
+genetic construction targets and grown bodies, with changes relative to each lineage's founder.
 Stats also show physical capacity ranges and acquired learning. Environment, inheritance and
 persistence controls are available below the map. The default is haploid clonal fission with
 paid plasticity and full learned-weight retention. Diploidy, selfing, crossover, mutation operators,
 budding and learning retention are configurable. Material and usable energy have separate ledgers.
-See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v4 rejects older files.
+See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v5 rejects older files.
 
 ## Measurement
 

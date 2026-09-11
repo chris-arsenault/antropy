@@ -4,6 +4,7 @@ import { basal } from "./body";
 import { recordEvent } from "./events";
 import { observe } from "./sensors";
 import { type World, type Cell } from "./types";
+import { flow } from "./observation";
 
 export function infer(world: World, cell: Cell): void {
   const c = world.config,
@@ -17,6 +18,7 @@ export function infer(world: World, cell: Cell): void {
   if (learn) {
     cell.energy -= cost;
     world.ledger.learning += cost;
+    flow(world, cell, "learning", cost);
   }
   cell.action = controller.act(genome, cell.inputs, cell.brain, { dt: c.dt, plastic, learn });
   if (previous !== cell.brain.task) {

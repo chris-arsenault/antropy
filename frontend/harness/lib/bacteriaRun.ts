@@ -8,6 +8,8 @@ import { summary } from "../../src/sim/stats";
 import { checkpointToJson } from "../../src/persist/checkpoint";
 import { openLedger, recordRun } from "./ledger";
 import { controller } from "../../src/sim/controller";
+import { distance } from "../../src/sim/geometry";
+import { sample } from "../../src/sim/fields";
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
@@ -27,7 +29,34 @@ export function sourceDigest(): string {
   }
   return hash.digest("hex");
 }
-export function measure(world: World, ticks: number, cadence: number) {
+interface MeasurementOptions {
+  spatial?: boolean;
+  progress?: boolean;
+  onSample?: (world: World) => void;
+}
+function reportProgress(
+  world: World,
+  s: ReturnType<typeof summary>,
+  enabled: boolean | undefined
+): void {
+  if (!enabled || world.tick % 5000 !== 0) return;
+  console.log(
+    JSON.stringify({
+      progress: world.tick,
+      seed: world.seed,
+      regime: world.config.regime,
+      population: s.population,
+      generation: s.maxGeneration,
+      leader: s.lineages[0],
+    })
+  );
+}
+export function measure(
+  world: World,
+  ticks: number,
+  cadence: number,
+  options: MeasurementOptions = {}
+) {
   const series = [summary(world)],
     frames: Record<string, unknown>[] = [];
   const started = performance.now();
@@ -40,31 +69,40 @@ export function measure(world: World, ticks: number, cadence: number) {
       series.push(s);
       maxResidual = Math.max(maxResidual, Math.abs(s.energyResidual));
       maxMaterialResidual = Math.max(maxMaterialResidual, Math.abs(s.materialResidual));
-      frames.push({
-        tick: world.tick,
-        cells: world.cells.map((c) => ({
-          id: c.id,
-          x: c.x,
-          y: c.y,
-          heading: c.heading,
-          body: { ...c.body },
-          reserve: c.reserve,
-          energy: c.energy,
-          genome: c.genome,
-          lineage: c.lineage,
-          task: c.brain.task,
-          action: c.action,
-        })),
-      });
+      options.onSample?.(world);
+      reportProgress(world, s, options.progress);
+      if (options.spatial !== false)
+        frames.push({
+          tick: world.tick,
+          cells: world.cells.map((c) => ({
+            id: c.id,
+            x: c.x,
+            y: c.y,
+            heading: c.heading,
+            body: { ...c.body },
+            reserve: c.reserve,
+            energy: c.energy,
+            damage: c.damage,
+            genome: c.genome,
+            lineage: c.lineage,
+            task: c.brain.task,
+            action: c.action,
+          })),
+          sources: world.sources.map((source) => ({ ...source })),
+          toxin: Array.from(world.toxin),
+          matrix: Array.from(world.matrix),
+          boundToxin: Array.from(world.boundToxin),
+        });
     }
   }
+  const final = summary(world);
   return {
     wallMs: performance.now() - started,
     series,
     frames,
-    maxResidual,
-    maxMaterialResidual,
-    final: summary(world),
+    maxResidual: Math.max(maxResidual, Math.abs(final.energyResidual)),
+    maxMaterialResidual: Math.max(maxMaterialResidual, Math.abs(final.materialResidual)),
+    final,
   };
 }
 export function recordMeasurement(
@@ -75,11 +113,13 @@ export function recordMeasurement(
   experiment = "bacteria-evolution"
 ) {
   const digest = sourceDigest(),
-    result = measure(world, ticks, 100);
+    start = founderConditions(world),
+    result = measure(world, ticks, 100, { progress: true });
   const provenance = {
     sourceDigest: digest,
     sourceDigestAfter: sourceDigest(),
     interventions: world.interventions,
+    initialConditions: start,
   };
   const database = openLedger();
   const id = recordRun(database, {
@@ -105,6 +145,20 @@ export function recordMeasurement(
   writeFileSync(join(output, `checkpoint-${id}.json`), checkpointToJson(world));
   console.log(JSON.stringify({ id, output, ...result.final, wallMs: result.wallMs }));
   return id;
+}
+function founderConditions(world: World) {
+  return world.cells
+    .filter((c) => c.parent === null)
+    .map((c) => ({
+      id: c.id,
+      x: c.x,
+      y: c.y,
+      heading: c.heading,
+      nutrient: sample(world.nutrient, c, world.config),
+      nearestSourceDistance: world.sources.length
+        ? Math.min(...world.sources.map((s) => distance(c, s, world.config)))
+        : null,
+    }));
 }
 export function runBacteria(
   seed: number,

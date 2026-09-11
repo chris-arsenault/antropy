@@ -9,6 +9,8 @@ import { inherit, sameGenotype } from "./genetics/genotype";
 import { reproductivePolicies } from "./reproductivePolicies";
 import { type Embodied, scaleBody, structuralMass } from "./body";
 import { blueprint, divisionReady } from "./phenotype";
+import { deposit } from "./fields";
+import { flow, life } from "./observation";
 
 export function makeCell(
   world: World,
@@ -25,6 +27,7 @@ export function makeCell(
     lineage: parent?.lineage ?? id,
     generation: parent ? parent.generation + 1 : 0,
     genome,
+    damage: parent?.damage ?? 0,
     heading: nextRandom(world.rng) * 2 * Math.PI,
     ...(stocks ?? {
       body: blueprint(world.genomes.get(genome)!.genome, world.config),
@@ -33,12 +36,13 @@ export function makeCell(
     }),
     born: world.tick,
     brain: controller.createState(),
-    receptors: [0, 0],
+    receptors: [0, 0, 0, 0],
     contacts: [0, 0, 0, 0],
     inputs: new Float32Array(INPUTS),
     action: emptyAction(),
   };
   initializeReceptors(world, cell);
+  life(world, cell, "birth");
   world.ancestry.set(id, {
     id,
     parent: cell.parent,
@@ -70,8 +74,12 @@ function die(world: World, cell: Cell): void {
   world.ledger.deaths++;
   const material = structuralMass(cell.body) + cell.reserve;
   world.ledger.deathMaterial += material;
-  world.ledger.deathLoss += material * world.config.nutrientEnergy + cell.energy;
-  Object.assign(world.ancestry.get(cell.id)!, { ended: world.tick, cause: "starvation" });
+  world.ledger.deathLoss += cell.energy;
+  deposit(world.detritus, cell, material, world.config);
+  const cause = cell.damage >= 1 ? "damage" : "starvation";
+  if (cause === "damage") world.ledger.damageDeaths++;
+  life(world, cell, cause);
+  Object.assign(world.ancestry.get(cell.id)!, { ended: world.tick, cause });
   recordEvent(world, "death", cell.id, []);
 }
 export function reproduce(world: World): void {
@@ -108,7 +116,7 @@ export function reproduce(world: World): void {
 }
 function removeDead(world: World): Cell[] {
   return world.cells.filter((cell) => {
-    if (cell.energy > 1e-12) return true;
+    if (cell.energy > 1e-12 && cell.damage < 1) return true;
     die(world, cell);
     return false;
   });
@@ -134,6 +142,8 @@ function divide(world: World, cell: Cell, points: Point[], index: SpatialIndex):
   for (const daughter of daughters) index.add(daughter);
   world.ledger.divisions++;
   world.ledger.division += world.config.divisionCost;
+  flow(world, cell, "division", world.config.divisionCost);
+  life(world, cell, "division");
   recordEvent(
     world,
     "division",

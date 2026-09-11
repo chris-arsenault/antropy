@@ -1,6 +1,8 @@
 import { type World, type Cell } from "./types";
 import { BODY_PARTS, basal, energyCapacity, materialCapacity, structuralMass } from "./body";
 import { targetBody } from "./phenotype";
+import { repairCell } from "./interference";
+import { flow } from "./observation";
 
 function catabolize(world: World, cell: Cell): void {
   const c = world.config,
@@ -17,6 +19,8 @@ function catabolize(world: World, cell: Cell): void {
   cell.energy += material * useful;
   world.ledger.metabolicWaste += material;
   world.ledger.catabolismLoss += material * c.nutrientEnergy * (1 - c.catabolicEfficiency);
+  flow(world, cell, "catabolized", material);
+  flow(world, cell, "catabolic_loss", material * c.nutrientEnergy * (1 - c.catabolicEfficiency));
 }
 function construct(world: World, cell: Cell): void {
   const c = world.config,
@@ -40,6 +44,8 @@ function construct(world: World, cell: Cell): void {
   cell.energy -= quantity * c.constructionEnergy;
   world.ledger.constructedMaterial += quantity;
   world.ledger.construction += quantity * c.constructionEnergy;
+  flow(world, cell, "constructed", quantity);
+  flow(world, cell, "construction", quantity * c.constructionEnergy);
 }
 export function metabolize(world: World): void {
   for (const cell of world.cells) {
@@ -47,6 +53,8 @@ export function metabolize(world: World): void {
     const cost = Math.min(cell.energy, basal(cell, world.config));
     cell.energy -= cost;
     world.ledger.metabolism += cost;
+    flow(world, cell, "maintenance", cost);
+    repairCell(world, cell);
     construct(world, cell);
   }
 }

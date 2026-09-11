@@ -2,16 +2,30 @@ import { useCallback, useEffect, useState } from "react";
 import { type World } from "../sim/types";
 import { stepWorld } from "../sim/world";
 import { createPacer, DEFAULT_SPEED, type Speed } from "./pacing";
+import {
+  appendPoint,
+  appendSample,
+  appendRecent,
+  populationPoint,
+  type PopulationPoint,
+} from "./populationHistory";
+import { noteBrowserExecution } from "./runtimeIdentity";
 
 export function useSimulation(world: World) {
   const [running, setRunning] = useState(false),
     [speed, setSpeed] = useState<Speed>(DEFAULT_SPEED);
   const [version, setVersion] = useState(0),
     [throughput, setThroughput] = useState(0);
-  const [history, setHistory] = useState<
-    { tick: number; population: number; births: number; deaths: number }[]
-  >([]);
+  const [history, setHistory] = useState(() => [populationPoint(world)]);
+  const [recent, setRecent] = useState<PopulationPoint[]>([]);
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
+  const advanceWorld = useCallback(() => {
+    stepWorld(world);
+    if (world.tick % 100 !== 0) return;
+    const point = populationPoint(world);
+    setHistory((h) => appendSample(h, point));
+    setRecent((h) => appendRecent(h, point));
+  }, [world]);
   useEffect(() => {
     if (!running) return;
     const pacer = createPacer(speed, performance.now());
@@ -20,30 +34,17 @@ export function useSimulation(world: World) {
       ticks = 0;
     const advance = () => {
       const before = world.tick;
-      pacer.advance(
-        performance.now(),
-        () => stepWorld(world),
-        () => performance.now()
-      );
+      noteBrowserExecution(world);
+      pacer.advance(performance.now(), advanceWorld, () => performance.now());
       ticks += world.tick - before;
       if (world.tick !== before) refresh();
       if (performance.now() - started >= 1000) {
         setThroughput((ticks * 1000) / (performance.now() - started));
-        setHistory((h) =>
-          [
-            ...h,
-            {
-              tick: world.tick,
-              population: world.cells.length,
-              births: world.ledger.births,
-              deaths: world.ledger.deaths,
-            },
-          ].slice(-240)
-        );
         started = performance.now();
         ticks = 0;
       }
       if (world.stopReason) {
+        setHistory((h) => appendPoint(h, world));
         setRunning(false);
         return;
       }
@@ -51,7 +52,7 @@ export function useSimulation(world: World) {
     };
     frame = requestAnimationFrame(advance);
     return () => cancelAnimationFrame(frame);
-  }, [world, running, speed, refresh]);
+  }, [world, running, speed, refresh, advanceWorld]);
   return {
     running,
     setRunning,
@@ -60,6 +61,7 @@ export function useSimulation(world: World) {
     version,
     throughput,
     history,
+    recent,
     refresh,
   };
 }

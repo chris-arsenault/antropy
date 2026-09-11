@@ -5,13 +5,18 @@ historical execution plan. These files are evidence and provenance, not the curr
 They are intentionally retained in their source voice, including supersession claims, obsolete
 rules, old links, and measurements that later work invalidated.
 
-Current decisions and implementation order live in [the normalized design index](../design/README.md).
+Current decisions and implementation order live in [the current design index](../design/README.md).
 Current evidence lives in [the certification ledger](../certifications.md) and
 [calibration record](../calibration.md).
 
+The [September 10 documentation archive](history/README.md) preserves the preceding complete
+design tree and records which material was retained in the current bacterial contracts. The
+destination categories below describe the historical normalization, not active implementation
+owners. Their full mapping remains in the archived source-coverage document.
+
 ## Supplied design sources
 
-| Source | What it contributed | Normalized destination |
+| Source | What it contributed | Historical normalized destination |
 | --- | --- | --- |
 | [Design specification](design-spec.md) | Original controller, genome, world, colony, evolution, legibility, and technology design | All five design categories |
 | [Operating principles](ant-sim-principles.md) | Goal order, five principles, and standing invariants | [Current principles](../principles.md) |
@@ -61,7 +66,8 @@ unchanged when the canonical 2D substrate replaced that implementation:
 ## Supplied source section index
 
 This is a navigation index into the unchanged source bodies. The
-[coverage map](../design/source-coverage.md) gives each section a current owner and disposition.
+[historical coverage map](history/2026-09-10/design/source-coverage.md) records the preceding
+ant-era owners and dispositions. Current retained material is mapped in the [history guide](history/README.md).
 
 **Original design specification**
 
@@ -279,5 +285,5 @@ This is a navigation index into the unchanged source bodies. The
 
 The archived files are not edited to repair links or reconcile terminology. References from live
 documents point into this directory when the original wording matters. A new supplied source is
-added here, indexed above, and decomposed into the normalized category documents; it does not
+added here, indexed above, and incorporated only where relevant to current design owners; it does not
 become a second work queue.

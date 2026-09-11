@@ -7,13 +7,15 @@ const sourceIndexPath = resolve(root, "docs/sources/README.md");
 const normalizedDocuments = [
   "docs/principles.md",
   "docs/design/README.md",
-  "docs/design/2d-migration.md",
+  "docs/design/bacteria.md",
   "docs/design/controller.md",
-  "docs/design/colony-biology.md",
-  "docs/design/environment.md",
+  "docs/design/funded-bodies.md",
+  "docs/design/strategic-ecology.md",
   "docs/design/experimentation.md",
-  "docs/design/advanced.md",
-  "docs/design/source-coverage.md",
+  "docs/design/bacteria-results.md",
+  "docs/design/bacterial-display.md",
+  "docs/design/population-observation.md",
+  "docs/calibration.md",
   "docs/backlog.md",
 ].map((path) => resolve(root, path));
 const sourceDocuments = [

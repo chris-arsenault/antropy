@@ -1,172 +1,111 @@
 # Documentation
 
-## Start here
+The [current design and work order](design/README.md) describes the running bacterial simulation.
+Inheritance and consequential ecology are implemented; toxin savings, food access and B-processing
+benefits have been isolated in actual evolved genotypes.
+The [historical snapshot](sources/history/README.md) preserves superseded contracts and full evidence.
 
-Current direction: [top-down bacteria with heritable RNN controllers](design/bacteria.md).
-The [funded-body and inheritable-learning contract](design/funded-bodies.md) governs
-the current evolutionary extension, including constructed machinery, acquired-weight transmission
-and configurable reproduction. The [first extension](design/bacterial-evolution.md) preserves
-the superseded allocation tuple and private-only learning interpretation.
-The reviewed sensor/action contract is implemented. The browser starts bacteria paused at tick zero,
-with live mutation enabled. [Initial measurements and limits](design/bacteria-results.md) record
-reproduction, inherited variation, mixed adaptation results and capacity. Human visual review is pending.
-The ant checkpoint is preserved at `780fa4e`, tagged `ant-colony-checkpoint-2026-09-09`.
-The new [work order](design/README.md) supersedes ant construction and the 2,000-worker gate.
-Ant-specific documents below retain historical designs and measurements. The architecture and
-development guides describe the bacterial runtime.
-Canceled ant-RNN campaigns remain historical; the new bacterium RNN is a separate contract.
+| Need | Document |
+| --- | --- |
+| Runtime ownership | [Architecture](architecture.md) |
+| Commands, persistence and experiments | [Development](development.md) |
+| Exported winner investigation | [Registered adaptation study](overnight-study.md) |
+| Competing physical strategies | [Registered strategy study](strategy-study.md) |
+| Short constructed mechanism experiments | [Food-access harness and results](quick-food-access-study.md) |
+| Six mechanism areas and actual evolved capabilities | [Capability investigation and recommendation](capability-investigation.md) |
+| Families, relatives, genes and behavior | [Population observation](design/population-observation.md) |
+| Current-default long population comparison | [Six 50,000-tick runs](population-50k.md) |
+| Changing resource composition and inheritance | [Registered food-epoch campaign](food-epochs-study.md) |
+| Review status | [Certification](certifications.md) |
+| Decisions | [ADR index](adr/README.md) |
+| Original supplied sources | [Source index](sources/README.md) |
 
-| Need                                                | Document                                                 |
-| --------------------------------------------------- | -------------------------------------------------------- |
-| Governing goals and judgment                        | [Simulation principles](principles.md)                   |
-| Current status and work order                       | [Normalized design](design/README.md)                    |
-| Programmed colony and local physics                 | [Physical colony](design/programmed-colony.md)           |
-| Learned-controller experiment and failure evidence  | [Colony training](design/colony-training.md)             |
-| Shared directional network and recent-action memory | [Directional experiment](design/directional-training.md) |
-| Matched float32 observations and conditional probes | [Sensory contract](design/colony-sensory-contract.md) |
-| Food yield, worker activity and support limitations | [Nutritional-yield experiment](design/nutritional-yield.md) |
-| Colony-outcome fitness and survival acceptance | [Outcome training](design/outcome-training.md) |
-| Private task byte and registered RNN experiments | [Task memory](design/task-memory.md) |
-| Material cells, compact nests, surface tiers and camera | [Cellular terrain](design/cellular-terrain.md) |
-| Canonical runtime boundary                          | [2D migration contract](design/2d-migration.md)          |
-| Measured evidence                                   | [Certification ledger](certifications.md)                |
-| Current numeric choices                             | [Calibration record](calibration.md)                     |
-| Feature-level future work                           | [Backlog](backlog.md)                                    |
-| Supplied and historical material                    | [Source archive](sources/README.md)                      |
+The following index covers every active design, principle, calibration and backlog section.
+Historical indexes remain in the archive; they are not additional work queues.
 
-The normalized design records implementation guidance and current decisions. Source documents preserve provenance and
-rejected or deferred ideas; they are not a parallel implementation plan.
+## Current design and work order
 
-## Simulation principles
+- [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
+- [Design owners](design/README.md#design-design-owners)
+- [Current default and disabled scope](design/README.md#design-current-default-and-disabled-scope)
+- [Next decisions](design/README.md#design-next-decisions)
+- [Status and provenance](design/README.md#design-status-and-provenance)
 
-- [Ordered goals](principles.md#principles-goals)
-- [Author the world, not the ant](principles.md#principles-world)
-- [Function judges; form describes](principles.md#principles-function)
-- [Change one thing, predict, then measure](principles.md#principles-attribution)
-- [Measurements outrank plans](principles.md#principles-evidence)
-- [Classify changes by ownership](principles.md#principles-layers)
-- [Stop conditions for tuning](principles.md#principles-stop)
-- [Architectural invariants](principles.md#principles-invariants)
+## Bacterial world and lifecycle
 
-## Normalized design and roadmap
+- [Substrate and embodied state](design/bacteria.md#world-substrate-and-embodied-state)
+- [Fields and finite deposits](design/bacteria.md#world-fields-and-finite-deposits)
+- [Turn order and resource economy](design/bacteria.md#world-turn-order-and-resource-economy)
+- [Growth, death and reproduction](design/bacteria.md#world-growth-death-and-reproduction)
+- [Determinism and persistence](design/bacteria.md#world-determinism-and-persistence)
 
-- [Preserved ant work order](design/README.md#design-ant-history)
-- [Work categories](design/README.md#design-categories)
-- [Status vocabulary](design/README.md#design-status)
-- [Current boundary](design/README.md#design-current)
-- [Cross-category implementation order](design/README.md#design-order)
-- [Changing the design](design/README.md#design-change)
+## Local RNN controller
 
-## Canonical 2D migration
+- [Observation contract](design/controller.md#controller-observation-contract)
+- [Action contract](design/controller.md#controller-action-contract)
+- [Topology and founder](design/controller.md#controller-topology-and-founder)
+- [Learning and module boundary](design/controller.md#controller-learning-and-module-boundary)
 
-- [Experimental purpose](design/2d-migration.md#migration-purpose)
-- [Canonical world contract](design/2d-migration.md#migration-world)
-- [Restored milestone](design/2d-migration.md#migration-milestone)
-- [Verification boundary](design/2d-migration.md#migration-verification)
-- [Deleted surface](design/2d-migration.md#migration-deleted)
+## Funded bodies, genes and inherited learning
 
-## Controller, sensors, and embodiment
+- [Construction and physical genes](design/funded-bodies.md#bodies-construction-and-physical-genes)
+- [Geometry, motion and uptake](design/funded-bodies.md#bodies-geometry-motion-and-uptake)
+- [Accounting](design/funded-bodies.md#bodies-accounting)
+- [Lifetime-static and lifetime-dynamic information](design/funded-bodies.md#bodies-lifetimestatic-and-lifetimedynamic-information)
+- [Inheritable learning](design/funded-bodies.md#bodies-inheritable-learning)
+- [Policy composition and mutation](design/funded-bodies.md#bodies-policy-composition-and-mutation)
 
-- [Goal and boundary](design/controller.md#controller-goal)
-- [Controller and body contract](design/controller.md#controller-contract)
-- [Sensory surface](design/controller.md#controller-senses)
-- [Current policies](design/controller.md#controller-policies)
-- [Initialization and future evolvable controllers](design/controller.md#controller-initialization)
-- [Memory and navigation](design/controller.md#controller-memory)
-- [Search and return logic](design/controller.md#controller-search)
-- [Linear implementation order](design/controller.md#controller-order)
-- [OBE and rejected directions](design/controller.md#controller-obe)
-- [Source provenance](design/controller.md#controller-sources)
+## Strategic microbial ecology
 
-## Environment and future morphogenesis
+- [Resource opportunities](design/strategic-ecology.md#ecology-resource-opportunities)
+- [Toxin, defense and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
+- [Porous matrix](design/strategic-ecology.md#ecology-porous-matrix)
+- [Disabled systems](design/strategic-ecology.md#ecology-disabled-systems)
+- [Consequences and boundaries](design/strategic-ecology.md#ecology-consequences-and-boundaries)
 
-- [World substrate](design/environment.md#environment-world)
-- [Authored-nest control world](design/environment.md#environment-authored-nest)
-- [Navigation and material carriers](design/environment.md#environment-carriers)
-- [Configuration and action physics](design/environment.md#environment-config)
-- [Resources and liabilities](design/environment.md#environment-liabilities)
-- [Morphogenesis model](design/environment.md#environment-morphogenesis)
-- [Linear implementation order](design/environment.md#environment-order)
-- [OBE and rejected directions](design/environment.md#environment-obe)
-- [Source provenance](design/environment.md#environment-sources)
+## Experiments and evolutionary attribution
 
-## Colony biology and survival
+- [Evidence levels](design/experimentation.md#experiments-evidence-levels)
+- [Competing hypotheses](design/experimentation.md#experiments-competing-hypotheses)
+- [Comparison method](design/experimentation.md#experiments-comparison-method)
+- [Existing harness and provenance](design/experimentation.md#experiments-existing-harness-and-provenance)
+- [Proportionate verification](design/experimentation.md#experiments-proportionate-verification)
 
-- [Functional goal](design/colony-biology.md#colony-goal)
-- [Energy and food economy](design/colony-biology.md#colony-energy)
-- [Queen, brood, and replacement](design/colony-biology.md#colony-brood)
-- [Homeostatic floors](design/colony-biology.md#colony-floors)
-- [Reproduction and selection channels](design/colony-biology.md#colony-selection)
-- [Linear implementation order](design/colony-biology.md#colony-order)
-- [Historical implementations not carried forward](design/colony-biology.md#colony-delivered-later)
-- [OBE and rejected directions](design/colony-biology.md#colony-obe)
-- [Source provenance](design/colony-biology.md#colony-sources)
+## Current evidence and unresolved adaptation
 
-## Experimentation, harness, and certification
+- [Current capability investigation](design/bacteria-results.md#evidence-capability-investigation)
+- [Exported lineage adaptation](design/bacteria-results.md#evidence-exported-lineage-adaptation)
+- [Corrected default ecology](design/bacteria-results.md#evidence-corrected-default-ecology)
+- [Earlier evidence and its limits](design/bacteria-results.md#evidence-earlier-evidence-and-its-limits)
+- [Open conclusions](design/bacteria-results.md#evidence-open-conclusions)
 
-- [Evidence boundary](design/experimentation.md#experimentation-boundary)
-- [Work loop](design/experimentation.md#experimentation-loop)
-- [Oracle ladder and parity](design/experimentation.md#experimentation-oracles)
-- [Calibration and comparative experiments](design/experimentation.md#experimentation-calibration)
-- [Controller initialization experiments](design/experimentation.md#experimentation-training)
-- [Mutational robustness and viable space](design/experimentation.md#experimentation-robustness)
-- [Colony resilience curve](design/experimentation.md#experimentation-resilience)
-- [Observation without prescription](design/experimentation.md#experimentation-observation)
-- [Linear implementation order](design/experimentation.md#experimentation-order)
-- [OBE and invalid evidence](design/experimentation.md#experimentation-obe)
-- [Source provenance](design/experimentation.md#experimentation-sources)
+## Display and observation
 
-## Evolutionary and advanced systems
+- [World and camera](design/bacterial-display.md#display-world-and-camera)
+- [Visual meanings](design/bacterial-display.md#display-visual-meanings)
+- [Stats and history](design/bacterial-display.md#display-stats-and-history)
+- [Implementation boundary](design/bacterial-display.md#display-implementation-boundary)
 
-- [Continuous evolution](design/advanced.md#advanced-evolution)
-- [Selection signal and population health](design/advanced.md#advanced-signal)
-- [Selection instrument contract](design/advanced.md#advanced-instrument-contract)
-- [Genetic diversity and collapse resistance](design/advanced.md#advanced-genetic-floor)
-- [Avoiding evolutionary pre-lock](design/advanced.md#advanced-prelock)
-- [Within-lifetime learning](design/advanced.md#advanced-plasticity)
-- [Development, roles, and castes](design/advanced.md#advanced-development)
-- [Colonies, regimes, and ecological pressure](design/advanced.md#advanced-regimes)
-- [Alternative controller substrate](design/advanced.md#advanced-controller)
-- [Linear implementation order](design/advanced.md#advanced-order)
-- [OBE and rejected directions](design/advanced.md#advanced-obe)
-- [Source provenance](design/advanced.md#advanced-sources)
+## Population observation
 
-## Source coverage
+- [Population views and definitions](design/population-observation.md#population-independent-views)
+- [Observation boundaries and verification](design/population-observation.md#population-boundaries)
 
-- [Coverage method](design/source-coverage.md#coverage-method)
-- [Foundational specification and principles](design/source-coverage.md#coverage-foundation)
-- [Appendix A](design/source-coverage.md#coverage-a)
-- [Appendix B](design/source-coverage.md#coverage-b)
-- [Appendix C](design/source-coverage.md#coverage-c)
-- [Appendix D and digging seed](design/source-coverage.md#coverage-d)
-- [Appendix E and E2](design/source-coverage.md#coverage-e)
-- [Appendix F](design/source-coverage.md#coverage-f)
-- [Appendix G](design/source-coverage.md#coverage-g)
-- [Appendix H](design/source-coverage.md#coverage-h)
-- [Plans, notes, visual source, and ADR history](design/source-coverage.md#coverage-plans)
-- [Navigate every supplied source subsection](sources/README.md#source-sections)
+## Simulation goals and operating principles
 
-## Feature backlog
+- [Goal and evidence](principles.md#principles-goal-and-evidence)
+- [Author pressures and local carriers](principles.md#principles-author-pressures-and-local-carriers)
+- [Mechanisms before expansion](principles.md#principles-mechanisms-before-expansion)
+- [Review and working boundary](principles.md#principles-review-and-working-boundary)
+- [Durable architecture](principles.md#principles-durable-architecture)
 
-- [Current bacterial work](backlog.md#backlog-bacteria)
-- [Living colony and resilience](backlog.md#backlog-colony)
-- [Evolution readiness](backlog.md#backlog-evolution)
-- [Evolved environment and morphogenesis](backlog.md#backlog-morphogenesis)
-- [Learning, development, and controller diversity](backlog.md#backlog-learning)
-- [Observation and scale](backlog.md#backlog-observation)
+## Open questions and deferred features
 
-## Project records
+- [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
+- [Conditional extensions](backlog.md#backlog-conditional-extensions)
+- [Runtime and observation limits](backlog.md#backlog-runtime-and-observation-limits)
 
-| Topic                      | Document                               |
-| -------------------------- | -------------------------------------- |
-| Architecture               | [architecture.md](architecture.md)     |
-| Architecture decisions     | [adr/README.md](adr/README.md)         |
-| Development and commands   | [development.md](development.md)       |
-| Calibration and parameters | [calibration.md](calibration.md)       |
-| Certification and findings | [certifications.md](certifications.md) |
-| Changelog                  | [../CHANGELOG.md](../CHANGELOG.md)     |
-| Agent guide                | [../AGENTS.md](../AGENTS.md)           |
+## Current calibration
 
-The [modular runtime design](design/modular-runtime.md) preserves the ant architecture audit.
-Current boundaries follow [ADR 0018](adr/0018-bacterial-runtime.md) and the
-[bacterial architecture](architecture.md).
+- [Default scales](calibration.md#calibration-default-scales)
+- [Why the injury balance changed](calibration.md#calibration-why-the-injury-balance-changed)

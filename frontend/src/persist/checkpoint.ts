@@ -1,14 +1,20 @@
 import { type World } from "../sim/types";
+import { MATERIAL_FIELDS } from "../sim/types";
 import { controller } from "../sim/controller";
 import { encodeGenotype, decodeGenotype } from "../sim/genetics/codec";
 import { validateSnapshot } from "./validation";
 import { balance, materialBalance, total } from "../sim/accounting";
+import { provenance, restoreProvenance } from "./provenance";
 
-export function serializeWorld(world: World) {
+export function serializeWorld(world: World, exportSource?: string) {
   return {
     ...world,
-    nutrient: Array.from(world.nutrient),
-    chemical: Array.from(world.chemical),
+    exportSource,
+    provenance: provenance(world),
+    ...(Object.fromEntries(MATERIAL_FIELDS.map((key) => [key, Array.from(world[key])])) as Record<
+      (typeof MATERIAL_FIELDS)[number],
+      number[]
+    >),
     genomes: [...world.genomes.values()].map((r) => ({
       ...r,
       genome: encodeGenotype(r.genome),
@@ -22,20 +28,27 @@ export function serializeWorld(world: World) {
   };
 }
 export type Checkpoint = ReturnType<typeof serializeWorld>;
-export function checkpointToJson(world: World): string {
-  return JSON.stringify(serializeWorld(world));
+export function checkpointToJson(world: World, exportSource?: string): string {
+  return JSON.stringify(serializeWorld(world, exportSource));
 }
 
 export function restoreWorld(text: string): World {
   const data: unknown = JSON.parse(text);
   validateSnapshot(data);
+  const { provenance: history, exportSource, ...physical } = data;
+  if (
+    exportSource !== undefined &&
+    (typeof exportSource !== "string" || exportSource.length < 1 || exportSource.length > 256)
+  )
+    throw new Error("Invalid export source");
   const genomes = new Map(
     data.genomes.map((r) => [r.id, { ...r, genome: decodeGenotype(r.genome) }])
   );
   const world: World = {
-    ...data,
-    nutrient: Float64Array.from(data.nutrient),
-    chemical: Float64Array.from(data.chemical),
+    ...physical,
+    ...(Object.fromEntries(
+      MATERIAL_FIELDS.map((key) => [key, Float64Array.from(data[key])])
+    ) as Record<(typeof MATERIAL_FIELDS)[number], Float64Array>),
     genomes,
     ancestry: new Map(data.ancestry.map((a) => [a.id, a])),
     cells: data.cells.map((cell) => ({
@@ -44,6 +57,7 @@ export function restoreWorld(text: string): World {
       brain: controller.decodeState(cell.brain),
     })),
   };
+  restoreProvenance(world, history);
   const scale = Math.max(
     1,
     world.ledger.initial + world.ledger.supplied * world.config.nutrientEnergy

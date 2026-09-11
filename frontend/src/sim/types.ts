@@ -4,6 +4,15 @@ import { type BrainState } from "./controller";
 import { type Genotype } from "./genetics/genotype";
 import { type Action } from "./interface";
 import { type Body } from "./body";
+export const MATERIAL_FIELDS = [
+  "nutrient",
+  "nutrientB",
+  "chemical",
+  "toxin",
+  "matrix",
+  "boundToxin",
+  "detritus",
+] as const;
 
 export interface Point {
   x: number;
@@ -19,15 +28,21 @@ export interface Cell extends Point {
   body: Body;
   reserve: number;
   energy: number;
+  damage: number;
   born: number;
   brain: BrainState;
-  receptors: [number, number];
+  receptors: [number, number, number, number];
   contacts: number[];
   inputs: Float32Array;
   action: Action;
 }
 export interface Source extends Point {
   remaining: number;
+  radius: number;
+  foodA: number;
+  foodB: number;
+  rate: number;
+  wait: number;
 }
 export interface GenomeRecord {
   id: number;
@@ -43,7 +58,7 @@ export interface Ancestor {
   genome: number;
   born: number;
   ended: number | null;
-  cause: "alive" | "division" | "starvation";
+  cause: "alive" | "division" | "starvation" | "damage";
 }
 export interface Event {
   tick: number;
@@ -69,6 +84,16 @@ export interface Ledger {
   deathMaterial: number;
   emitted: number;
   chemicalLoss: number;
+  toxinEmitted: number;
+  matrixEmitted: number;
+  toxinLoss: number;
+  repair: number;
+  repaired: number;
+  damageReceived: number;
+  damageDeaths: number;
+  absorbedA: number;
+  absorbedB: number;
+  matrixBlocked: number;
   births: number;
   deaths: number;
   divisions: number;
@@ -88,7 +113,7 @@ export interface Intervention {
 }
 export interface World {
   substrate: "bacteria-xy";
-  version: 4;
+  version: 5;
   seed: number;
   tick: number;
   config: Config;
@@ -98,6 +123,12 @@ export interface World {
   cells: Cell[];
   nutrient: Float64Array;
   chemical: Float64Array;
+  nutrientB: Float64Array;
+  toxin: Float64Array;
+  matrix: Float64Array;
+  boundToxin: Float64Array;
+  detritus: Float64Array;
+  patchCenters: Point[];
   sources: Source[];
   genomes: Map<number, GenomeRecord>;
   nextCell: number;

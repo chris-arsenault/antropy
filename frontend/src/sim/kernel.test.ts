@@ -56,10 +56,10 @@ it("shares scarce local uptake without iteration priority", () => {
   expect(w.cells[0].reserve * 2 + total(w.nutrient)).toBeCloseTo(0.0001, 12);
 });
 it("limits secretion and motion together to the available energy", () => {
-  const w = createWorld(3, { ...DEFAULT_CONFIG, founders: 1 });
+  const w = createWorld(3, { ...DEFAULT_CONFIG, founders: 1, secretionRate: 0.06 });
   const cell = w.cells[0];
   cell.energy = 0.0015;
-  cell.action = { swim: 1, turn: 1, secrete: 1 };
+  cell.action = { ...cell.action, swim: 1, turn: 1, secrete: 1 };
   const start = cell.energy;
   moveBodies(w);
   expect(cell.energy).toBeGreaterThanOrEqual(0);

@@ -21,50 +21,111 @@ Canvas SPA and deployed on the Ahara platform.
 
 ## Current goal and boundary
 
-Current work is [top-down bacteria with heritable RNN controllers](docs/design/bacteria.md).
-The September 9 user decision supersedes the ant work order: first design sensors and actions,
-then convert the runtime. The reviewed design is implemented, including live inheritance and mutation.
-Sulion plan `d805a90c-31e7-4f20-8fb1-5b2c05d9b417` tracks the conversion and initial comparisons.
-Viable reproduction is measured; reliable adaptation remains unproven.
-The current [funded-body and inheritable-learning contract](docs/design/funded-bodies.md), plan
-`49f9eee2-3e74-4eb8-8643-5e927bf32eda`, replaces allocation tuples with material-funded machinery
-and transfers acquired recurrent changes into offspring chromosomes before crossover/mutation.
-Current checkpoints are v4. Seed/fertilize and environmental developmental reaction norms remain
-designed extensions. Substantial further design changes require user review before implementation.
-The earlier architecture correction follows [ADR 0018](docs/adr/0018-bacterial-runtime.md):
-separate environment/body/genetic random streams, controller-owned codecs, durable intervention
-provenance and matched body/ancestry invariants. Initial v1 comparisons are historical; do not
-silently upgrade their checkpoints or treat their seeded trajectories as current.
+The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
+The active contract is 35 inputs, 24 recurrent units, eight outputs, eight funded body stocks and
+checkpoint v5. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
+are implemented. Physical and behavioral mutation occur at local resource-funded reproduction;
+acquired recurrent changes can transmit into offspring chromosomes. The exported lineage-18 study
+identified a repeatable inherited advantage from lower toxin output. The subsequent
+[capability investigation](docs/capability-investigation.md) isolates an actual evolved brain's
+food-access benefit and an actual B-processing allele's paid growth/reproduction benefit. Strategic
+diversity and useful inherited learning remain unproved. Founder dominance and genome counts alone
+do not establish adaptation.
 
-The ant runtime is preserved at commit `780fa4e`, annotated tag
-`ant-colony-checkpoint-2026-09-09`, pushed to origin. Bacteria have replaced it in the browser.
-Its physical lifecycle, programmed/LGP controllers and sustained excavation are historical evidence.
-Ant construction, the 2,000-worker prerequisite and canceled ant-RNN training campaigns are not
-the new work order. Do not resume old neural experiments or apply their interfaces to bacteria.
+There is one periodic XY world. Production controllers receive local chemistry/body facts and
+private memory, with no coordinates, compass, pathfinding, lineage identity or reproductive score.
+No fallback controller, task dispatcher, offline optimizer or central parent selector runs in the
+population. The task byte remains opaque. Genotypes are immutable; acquired experience belongs to
+individuals until explicit birth-local assimilation.
 
-The bacterium has tonic/phasic nutrient and released-chemical readings, local spatial
-contrasts, body/contact sensors, a small float32 RNN, private recurrent state and an inspectable
-opaque task byte. Physical swimming, turning and chemical release have costs; uptake, growth,
-death and division are local physiology. Offspring inherit weights and receive mutations at
-resource-funded division. No fitness scorer, central reproduction selector or prescribed task
-sequence enters the living population. Genetic implementation follows the viable body/controller
-loop directly, without another colony-scale or ecology prerequisite.
+Run starts seed 101, paused at tick zero, with 48 identical founder genotypes and finite deposits
+alternating 80% A / 20% A every 50,000 ticks,
+haploid clonal fission, mutation and paid inheritable plasticity. The user reviews through Run and
+stats. Implemented systems must visibly affect this population before handoff, or have an explicit
+recorded reason to be disabled. Solid walls and neutral signaling are disabled by default because
+useful construction/communication is unproved; porous matrix remains active.
 
-There is one top-down XY world. Recover the ant substrate from its tag; do not maintain two runtime
-modes or translate old checkpoints. The bacteria contract governs current work. No queen, digging,
-backing, vertical gravity, shared map or route service is part of the bacterial interface.
+Inspect startup configuration and headless evidence rather than running browser assays. Start a
+development server only on explicit request. Substantial further designs require user review;
+routine authorized repairs and proportional checks do not require repeated permission. Seed/fertilize,
+outcrossing and environmental developmental reaction norms remain deferred.
 
-The user reviews through Run and stats. Keep review conditions as tick-zero paused defaults,
-retain useful camera/pacing controls, and inspect startup configuration instead of running browser
-assays. Start a development server only on explicit request. Current generated experiment dumps
-remain local; the preserved commit contains the ledger and test-required model, not every dump.
+The [documentation snapshot](docs/sources/history/README.md) preserves prior contracts and full
+experiment records. The ant implementation is recoverable from commit `780fa4e`, tag
+`ant-colony-checkpoint-2026-09-09`. Its construction, 2,000-worker gate and canceled training
+campaigns are history, not bacterial prerequisites. Do not restore old schemas or work orders.
+Current generated experiment dumps remain local; the ledger preserves named measurements.
+
+## Experiment operating policy
+
+Default to a small constructed experiment when testing a mechanism or a proposed strategic
+opportunity. Do not substitute long runs, cell counts, biomass or founder dominance for evidence
+that a cell senses a cue, acts on it and obtains a benefit that repays its cost.
+
+1. State the question, competing explanations, initial conditions, predicted causal chain and
+   decision the result can change before execution. Read existing negative findings first.
+2. Use the shared simulation with handcrafted diagnostic RNN weights and physical genotypes.
+   Simple biases and sensor-response connections are feasible; a programmed fallback or oracle
+   is unnecessary. Freeze mutation and specify private learning and inherited-learning settings.
+   Record funded bodies separately from genetic construction targets.
+3. Start with single-cell probes lasting hundreds of ticks. Verify actual local readings, steering,
+   displacement, uptake and expenses before testing population outcomes. A missing signal or
+   unexpressed behavior is a finding, not a reason to launch a long population run.
+4. Then use small paired populations, controlled food/exposure, swapped starting assignments and
+   a few thousand ticks. Follow resource access through costs to funded growth/divisions and
+   survival. Report percentages with explicit denominators; distinguish cumulative flow from
+   standing field coverage. Finite-food extinction is not an execution failure.
+5. Stop at the declared horizon, terminal ecological outcome or wall cap. Preserve negative and
+   incomplete results. No automatic seed expansion, parameter sweep or horizon extension.
+   Replication is justified when conflicting results or needed precision can change the decision.
+
+Use **long runs** for a question that requires many generations or long ecological timescales:
+mutation discovery, invasion/coexistence, environmental epochs or sustained turnover. First
+establish that the relevant sensory/action/physical opportunity exists in a short assay. Register
+why the horizon is needed, a small pilot, controls, total run/tick/wall budgets, stopping criteria
+and the escalation decision. Scaling from a pilot is not automatic. Broad requests to investigate
+do not imply a large factorial campaign. Constructed tradeoffs, evolved adaptations and sustained
+ecological dynamics are separate claims; no single experiment establishes all three.
+
+From `frontend`, run the reusable short food-access panel:
+
+```bash
+pnpm harness quick-food-access --stage probe --output harness/artifacts/my-experiment/probe
+pnpm harness quick-food-access --stage contest --output harness/artifacts/my-experiment/contest
+python3 harness/quick_report.py harness/artifacts/my-experiment
+```
+
+Inspect probes before starting contests. Defaults are four 300-tick probes and four contests
+capped at 3,000 ticks, one seed and swapped placement, with a 120-second per-case wall limit.
+Existing case directories are never overwritten. The local report uses matplotlib and NumPy.
+Extend `QuickScenario`/`runQuick` with fixtures and relevant observables for other mechanisms;
+reuse ordinary inference/physics and the existing ledger. Do not build another observability
+pipeline. Artifacts include exact initial/final checkpoints, configuration, source hashes,
+sensor/action/position traces, typed resource flows and stopping reasons.
+See [registration and results](docs/quick-food-access-study.md). Diagnostic genomes do not
+automatically replace browser founders, and constructed behavior is not evolved discovery.
+
+The six-area [capability study](docs/capability-investigation.md) extends the same runner with
+funded body fixtures, saved-genotype interventions and ancestry-grouped resource/exposure traces.
+`pnpm harness capabilities --case list` lists short screens; add `--stage followup` to list the
+saved-genotype comparisons. A named case runs both placements, normally 1,500 ticks, with a strict
+3,000-tick ceiling. Do not run every listed case by default. `capability-pilots` is a separately
+registered four-pilot command, not a quick smoke test. `python3 harness/capability_report.py` reads
+the completed study without advancing simulation. Keep physical opportunity, controller expression,
+accessible variation and actual evolved exploitation separate in future reports. The recommended
+next direction is spatial A/B heterogeneity; it awaits design review, not another broad sweep.
+
+Vitest checks bounded invariants, including observers not changing simulation state. Headless
+assays measure behavior; human review judges visible motion. Inspect browser startup configuration
+rather than launching browser simulations. Run `make ci` after code changes, but do not repeat
+expensive ecological panels merely for formatting or documentation changes.
 
 ## Critical rules
 
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive nineteen local chemical,
+- Author physical pressures and local carriers. Controllers receive thirty-five local chemical,
   body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
