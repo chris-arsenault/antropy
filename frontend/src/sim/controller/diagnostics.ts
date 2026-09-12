@@ -42,6 +42,10 @@ export type DiagnosticChanges = Partial<{
   recurrence: "zero";
   toxin: "off";
   matrix: "off";
+  /** Constant toxin effort in [0,1): replaces the founder's toxin response with a fixed bias. */
+  toxinEffort: number;
+  /** Steer and slow on one food only: removes the founder's input rows for the other food. */
+  chemotaxis: "A" | "B";
   toxinTaskConnection: number;
   plasticityAlpha: number;
 }>;
@@ -84,6 +88,13 @@ export function diagnosticChanges(base: Genome, changes: DiagnosticChanges): Gen
   if (changes.toxinTaskConnection !== undefined)
     w[output + 5 * HIDDEN + 14] = changes.toxinTaskConnection;
   disableEmissions(w, output, bias, changes);
+  if (changes.toxinEffort !== undefined) {
+    w.fill(0, output + 5 * HIDDEN, output + 6 * HIDDEN);
+    w[bias + 5] = Math.atanh(Math.max(0, Math.min(0.999, changes.toxinEffort)));
+  }
+  // Founder hidden units 0–3 read food A inputs 0–3; units 15–18 read food B inputs 19–22.
+  if (changes.chemotaxis === "A") w.fill(0, 15 * INPUTS, 19 * INPUTS);
+  if (changes.chemotaxis === "B") w.fill(0, 0, 4 * INPUTS);
   return genome;
 }
 

@@ -83,7 +83,9 @@ export function TraitPanel({
   recent: PopulationPoint[];
 }) {
   const traits = traitSnapshot(world),
-    [selected, setSelected] = useState<Trait>(world.config.foodEpochs ? "foodA" : "motor");
+    [selected, setSelected] = useState<Trait>(
+      world.config.foodEpochs || world.config.foodZones ? "foodA" : "motor"
+    );
   const current = traits.find((t) => t.key === selected)!;
   return (
     <div className="trait-panel">

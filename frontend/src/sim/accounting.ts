@@ -42,6 +42,14 @@ export function createLedger(): Ledger {
     turning: 0,
     taskWrites: 0,
     blockedDivisions: 0,
+    fixed: 0,
+    exuded: 0,
+    lightEnergy: 0,
+    initialOxygen: 0,
+    oxygenProduced: 0,
+    oxygenConsumed: 0,
+    oxygenExchanged: 0,
+    carbonExchanged: 0,
   };
 }
 export function heldMaterial(world: World): number {
@@ -51,9 +59,10 @@ export function heldMaterial(world: World): number {
     world.cells.reduce((sum, cell) => sum + structuralMass(cell.body) + cell.reserve, 0)
   );
 }
+/** Chemical energy of held organic material plus usable energy; inorganic carbon carries none. */
 export function heldEnergy(world: World): number {
   return (
-    heldMaterial(world) * world.config.nutrientEnergy +
+    (heldMaterial(world) - total(world.carbon)) * world.config.nutrientEnergy +
     world.cells.reduce((s, c) => s + c.energy, 0)
   );
 }
@@ -61,7 +70,8 @@ export function materialBalance(world: World): number {
   const l = world.ledger;
   return (
     l.initialMaterial +
-    l.supplied -
+    l.supplied +
+    l.carbonExchanged -
     heldMaterial(world) -
     l.metabolicWaste -
     l.nutrientLoss -
@@ -74,7 +84,8 @@ export function balance(world: World): number {
     q = world.config.nutrientEnergy;
   return (
     l.initial +
-    l.supplied * q -
+    l.supplied * q +
+    l.lightEnergy -
     heldEnergy(world) -
     (l.nutrientLoss + l.chemicalLoss + l.toxinLoss) * q -
     l.metabolism -

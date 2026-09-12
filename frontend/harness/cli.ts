@@ -9,10 +9,22 @@ import { runDefaultEcology } from "./lib/defaultEcology";
 import { runQuickPanel } from "./lib/quickPanel";
 import { runCapabilities } from "./lib/capabilityCli";
 import { runCapabilityPilots } from "./lib/capabilityPilots";
+import { runRps } from "./lib/rpsContest";
+import { runZones } from "./lib/zonesContest";
+import { runEvolve } from "./lib/evolveRun";
+import { runInvasion } from "./lib/invasion";
 
 const [command, ...arguments_] = process.argv.slice(2),
   flags = parseFlags(command === "sql" ? [] : arguments_);
-if (command === "capability-pilots") {
+if (command === "rps") {
+  runRps(flags);
+} else if (command === "zones") {
+  runZones(flags);
+} else if (command === "evolve") {
+  runEvolve(flags);
+} else if (command === "invasion") {
+  runInvasion(flags);
+} else if (command === "capability-pilots") {
   runCapabilityPilots(flags);
 } else if (command === "capabilities") {
   runCapabilities(flags);
@@ -100,5 +112,5 @@ if (command === "capability-pilots") {
   db.close();
 } else
   throw new Error(
-    "Commands: capability-pilots, capabilities, quick-food-access, ecology-default, ecology-causal, bacteria, bacteria-compare, bacteria-capacity, recent, sql"
+    "Commands: rps, zones, evolve, invasion, capability-pilots, capabilities, quick-food-access, ecology-default, ecology-causal, bacteria, bacteria-compare, bacteria-capacity, recent, sql"
   );

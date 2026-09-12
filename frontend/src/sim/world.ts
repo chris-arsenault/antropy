@@ -15,6 +15,21 @@ import { bodyRadius } from "./body";
 import { makeCell, reproduce } from "./reproduction";
 import { SpatialIndex } from "./spatial";
 
+/** Raster fields at their initial concentrations; the cycle's pools are empty when it is off. */
+function initialFields(c: Config) {
+  const area = c.width * c.height;
+  return {
+    nutrient: new Float64Array(area).fill(c.initialNutrient / 2),
+    nutrientB: new Float64Array(area).fill(c.initialNutrient / 2),
+    toxin: new Float64Array(area),
+    matrix: new Float64Array(area),
+    boundToxin: new Float64Array(area),
+    detritus: new Float64Array(area),
+    carbon: new Float64Array(area).fill(c.cycle?.initialCarbon ?? 0),
+    oxygen: new Float64Array(area).fill(c.cycle?.atmosphereOxygen ?? 0),
+    chemical: new Float64Array(area),
+  };
+}
 export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): World {
   if (!Number.isInteger(seedValue) || seedValue < -2147483648 || seedValue > 4294967295)
     throw new Error("Seed must be a 32-bit integer");
@@ -22,7 +37,7 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
   const c = structuredClone(config),
     world: World = {
       substrate: "bacteria-xy",
-      version: 5,
+      version: 6,
       seed: seedValue,
       tick: 0,
       config: c,
@@ -30,14 +45,8 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
       environmentRng: createRandomState(seedValue ^ 0x7321),
       geneticRng: createRandomState(seedValue ^ 0x6713),
       cells: [],
-      nutrient: new Float64Array(c.width * c.height).fill(c.initialNutrient / 2),
-      nutrientB: new Float64Array(c.width * c.height).fill(c.initialNutrient / 2),
-      toxin: new Float64Array(c.width * c.height),
-      matrix: new Float64Array(c.width * c.height),
-      boundToxin: new Float64Array(c.width * c.height),
-      detritus: new Float64Array(c.width * c.height),
+      ...initialFields(c),
       patchCenters: [],
-      chemical: new Float64Array(c.width * c.height),
       sources: [],
       genomes: new Map(),
       ancestry: new Map(),
@@ -54,7 +63,7 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
       x: nextRandom(world.environmentRng) * c.width,
       y: nextRandom(world.environmentRng) * c.height,
     });
-  for (let i = 0; i < c.sourceCount; i++) world.sources.push(newDeposit(world));
+  for (let i = 0; i < c.sourceCount; i++) world.sources.push(newDeposit(world, i));
   const index = new SpatialIndex(c, []);
   for (let i = 0; i < c.founders; i++) {
     const position = findStart(world, index);
@@ -64,6 +73,7 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
   }
   world.ledger.initialMaterial = heldMaterial(world);
   world.ledger.initial = heldEnergy(world);
+  world.ledger.initialOxygen = world.oxygen.reduce((s, v) => s + v, 0);
   return world;
 }
 function findStart(world: World, index: SpatialIndex) {

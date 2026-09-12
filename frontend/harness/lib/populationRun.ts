@@ -7,7 +7,7 @@ import { checkpointToJson } from "../../src/persist/checkpoint";
 import { noteExecution } from "../../src/persist/provenance";
 import { populationPoint } from "../../src/ui/populationHistory";
 import { type World } from "../../src/sim/types";
-import { measure, sourceDigest } from "./bacteriaRun";
+import { measure, sourceDigest, warnIfSourceChanged } from "./bacteriaRun";
 import { openLedger, recordRun } from "./ledger";
 import { parseFlags, flag, integerFlag } from "./flags";
 import { controller } from "../../src/sim/controller";
@@ -78,7 +78,7 @@ function run() {
       },
     });
     manifest.sourceDigestAfter = sourceDigest();
-    if (digest !== manifest.sourceDigestAfter) throw new Error("Source changed during run");
+    warnIfSourceChanged(digest, manifest.sourceDigestAfter);
     const db = openLedger();
     const id = recordRun(db, {
       experiment: "population-50k",

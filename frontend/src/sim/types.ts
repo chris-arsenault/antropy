@@ -4,6 +4,7 @@ import { type BrainState } from "./controller";
 import { type Genotype } from "./genetics/genotype";
 import { type Action } from "./interface";
 import { type Body } from "./body";
+/** Fields that hold conserved material, inorganic carbon included. */
 export const MATERIAL_FIELDS = [
   "nutrient",
   "nutrientB",
@@ -12,7 +13,11 @@ export const MATERIAL_FIELDS = [
   "matrix",
   "boundToxin",
   "detritus",
+  "carbon",
 ] as const;
+/** Fields outside the material balance, with their own ledgers. */
+export const GAS_FIELDS = ["oxygen"] as const;
+export const PERSISTED_FIELDS = [...MATERIAL_FIELDS, ...GAS_FIELDS] as const;
 
 export interface Point {
   x: number;
@@ -104,6 +109,16 @@ export interface Ledger {
   turning: number;
   taskWrites: number;
   blockedDivisions: number;
+  /** Element cycle: organic material fixed from inorganic carbon and its light energy. */
+  fixed: number;
+  exuded: number;
+  lightEnergy: number;
+  initialOxygen: number;
+  oxygenProduced: number;
+  oxygenConsumed: number;
+  oxygenExchanged: number;
+  /** Net inorganic carbon received from the atmosphere; signed, part of the material balance. */
+  carbonExchanged: number;
 }
 export interface Intervention {
   tick: number;
@@ -113,7 +128,7 @@ export interface Intervention {
 }
 export interface World {
   substrate: "bacteria-xy";
-  version: 5;
+  version: 6;
   seed: number;
   tick: number;
   config: Config;
@@ -128,6 +143,8 @@ export interface World {
   matrix: Float64Array;
   boundToxin: Float64Array;
   detritus: Float64Array;
+  carbon: Float64Array;
+  oxygen: Float64Array;
   patchCenters: Point[];
   sources: Source[];
   genomes: Map<number, GenomeRecord>;

@@ -7,6 +7,7 @@
 | [0016](0016-shared-action-boundary.md) | Oracle and local ant controllers share physical actions | Superseded by 0018 |
 | [0017](0017-harness-ledger.md) | Behavioral campaigns live in the SQLite harness | Accepted |
 | [0018](0018-bacterial-runtime.md) | Top-down bacteria, isolated random domains and controller/state boundaries | Accepted |
+| [0019](0019-single-language-kernel.md) | One TypeScript simulation kernel; reasoning outranks speed | Accepted |
 
 ADRs 0001–0013 described the retired runtime and are preserved unchanged in the
 [legacy ADR archive](../sources/legacy-3d-adrs/). They are provenance, not current constraints.

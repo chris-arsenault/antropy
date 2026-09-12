@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { type World } from "../sim/types";
 import { summary } from "../sim/stats";
 import { EvolutionStats } from "./EvolutionStats";
@@ -7,9 +8,14 @@ import { InheritedTraits } from "./InheritedTraits";
 import { LineagePanel } from "./LineagePanel";
 import { FamilyPanel } from "./FamilyPanel";
 import { TraitPanel } from "./TraitPanel";
+import { StrategyPanel } from "./StrategyPanel";
 import { FoodEpochStatus } from "./FoodEpochStatus";
 
-export function StatsPanel({
+/**
+ * The population summary costs about as much as a simulation step, so this panel re-renders only
+ * when `statsVersion` or its history props change, not on every animation frame.
+ */
+export const StatsPanel = memo(function StatsPanel({
   world,
   throughput,
   history,
@@ -17,6 +23,7 @@ export function StatsPanel({
   onSelect,
 }: {
   world: World;
+  statsVersion: number;
   throughput: number;
   history: PopulationPoint[];
   recent: PopulationPoint[];
@@ -41,6 +48,7 @@ export function StatsPanel({
         {world.config.secretionRate === 0 && " Neutral signaling disabled; no established use."}
       </p>
       <PopulationChart world={world} history={history} />
+      <StrategyPanel world={world} history={history} />
       <FamilyPanel world={world} history={recent} onSelect={onSelect} />
       <TraitPanel world={world} history={history} recent={recent} />
       <details>
@@ -72,7 +80,7 @@ export function StatsPanel({
       </details>
     </section>
   );
-}
+});
 
 function PopulationTotals({ stats: s }: { stats: ReturnType<typeof summary> }) {
   return (
@@ -112,6 +120,8 @@ function metricRows(s: ReturnType<typeof summary>, throughput: number) {
     ["Synthesis share of dissipated energy · lifetime", share(s.synthesisEnergyPercent)],
     ["Learning share of dissipated energy · lifetime", share(s.learningEnergyPercent)],
     ["Decomposing material", s.detritus.toFixed(1)],
+    ["Inorganic carbon / oxygen", `${s.carbon.toFixed(1)} / ${s.oxygen.toFixed(1)}`],
+    ["Fixed from carbon · lifetime", s.fixed.toFixed(1)],
     ["World area at half speed or less · now", share(s.matrixHalfSpeedWorldPercent, 3)],
     ["External input", s.supplied.toFixed(1)],
     ["Usable energy", s.reserves.toFixed(1)],

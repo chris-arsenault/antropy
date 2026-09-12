@@ -5,7 +5,7 @@ import { checkpointToJson } from "../../src/persist/checkpoint";
 import { stepWorld } from "../../src/sim/world";
 import { summary } from "../../src/sim/stats";
 import { controller } from "../../src/sim/controller";
-import { sourceDigest } from "./bacteriaRun";
+import { sourceDigest, warnIfSourceChanged } from "./bacteriaRun";
 import { flag, integerFlag, type Flags } from "./flags";
 import { loadStudyWorld } from "./studyWorld";
 import { StudyObserver } from "./studyObserver";
@@ -54,8 +54,7 @@ export function runStudy(flags: Flags): void {
       afterStep: fixture?.afterStep,
     });
     manifest.sourceDigestAfter = sourceDigest();
-    if (manifest.sourceDigest !== manifest.sourceDigestAfter)
-      throw new Error("Source changed during measurement");
+    warnIfSourceChanged(manifest.sourceDigest, manifest.sourceDigestAfter);
     const result = summary(world),
       db = openLedger();
     manifest.ledgerId = recordRun(db, {

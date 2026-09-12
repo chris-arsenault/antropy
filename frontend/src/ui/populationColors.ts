@@ -2,8 +2,10 @@ import { type World, type Cell } from "../sim/types";
 import { branch, relatedness } from "../observe/ancestry";
 import { comparisonTo } from "../observe/geneticDistance";
 import { traitValues, type Trait } from "../observe/traits";
+import { strategyClusters, clusterColor } from "../observe/clusters";
 
 export const COLOR_MODES = {
+  strategy: "Strategy clusters",
   family: "Recent families",
   founder: "Founder ancestry",
   relatedness: "Relatives of selected cell",
@@ -16,7 +18,7 @@ export const COLOR_MODES = {
   builder: "Inherited matrix machinery",
 } as const;
 export type ColorMode = keyof typeof COLOR_MODES;
-export const DEFAULT_COLOR_MODE: ColorMode = "family";
+export const DEFAULT_COLOR_MODE: ColorMode = "strategy";
 export const identityColor = (id: number) => `hsl(${(id * 137.508) % 360},70%,72%)`;
 const heat = (fraction: number) => `hsl(${220 - 190 * Math.min(1, Math.max(0, fraction))},75%,65%)`;
 const traitScales: Partial<Record<ColorMode, number>> = {
@@ -27,7 +29,12 @@ const traitScales: Partial<Record<ColorMode, number>> = {
   builder: 4,
 };
 
+function strategyColors(world: World): (cell: Cell) => string {
+  const ranks = new Map(strategyClusters(world).ranks.map((rank, i) => [world.cells[i].id, rank]));
+  return (cell) => clusterColor(ranks.get(cell.id) ?? 0);
+}
 export function populationColors(world: World, mode: ColorMode, selected: number | null) {
+  if (mode === "strategy") return strategyColors(world);
   const reference = world.ancestry.get(selected ?? -1);
   const genome = reference ? world.genomes.get(reference.genome)!.genome : null;
   const compare = genome ? comparisonTo(genome) : null;
@@ -51,6 +58,8 @@ export function populationColors(world: World, mode: ColorMode, selected: number
 }
 export function colorLegend(mode: ColorMode): string {
   const descriptions: Record<ColorMode, string> = {
+    strategy:
+      "Colored rim: one of three inherited-trait clusters, ranked by A share (orange lowest, blue, green highest)",
     family: "Colored rim: four-generation ancestry branch",
     founder: "Colored rim: original founder ancestry",
     relatedness:

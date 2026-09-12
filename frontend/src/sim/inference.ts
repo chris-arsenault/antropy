@@ -6,6 +6,7 @@ import { observe } from "./sensors";
 import { type World, type Cell } from "./types";
 import { flow } from "./observation";
 
+/** Observes, funds optional learning, and lets the controller choose this cell's efforts. */
 export function infer(world: World, cell: Cell): void {
   const c = world.config,
     genome = express(world.genomes.get(cell.genome)!.genome).behavior;

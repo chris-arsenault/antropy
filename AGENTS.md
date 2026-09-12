@@ -25,12 +25,12 @@ The [current design](docs/design/README.md) governs top-down bacteria with herit
 The active contract is 35 inputs, 24 recurrent units, eight outputs, eight funded body stocks and
 checkpoint v5. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
 are implemented. Physical and behavioral mutation occur at local resource-funded reproduction;
-acquired recurrent changes can transmit into offspring chromosomes. The exported lineage-18 study
-identified a repeatable inherited advantage from lower toxin output. The subsequent
-[capability investigation](docs/capability-investigation.md) isolates an actual evolved brain's
-food-access benefit and an actual B-processing allele's paid growth/reproduction benefit. Strategic
-diversity and useful inherited learning remain unproved. Founder dominance and genome counts alone
-do not establish adaptation.
+acquired recurrent changes can transmit into offspring chromosomes. The world is a thick medium with a pure-A left half and a pure-B right half; from one founder,
+populations evolve two coexisting diet clusters that occupy opposite halves and mutually invade
+from rarity ([evolution record](docs/evolve-study.md)). Earlier studies isolated single evolved
+advantages (lower toxin output, brief-food access, a B-processing allele). The toxin
+producer/resistant/sensitive cycle has not been shown to coexist. Founder dominance and genome
+counts alone do not establish adaptation; mutual invasibility does.
 
 There is one periodic XY world. Production controllers receive local chemistry/body facts and
 private memory, with no coordinates, compass, pathfinding, lineage identity or reproductive score.
@@ -39,8 +39,8 @@ population. The task byte remains opaque. Genotypes are immutable; acquired expe
 individuals until explicit birth-local assimilation.
 
 Run starts seed 101, paused at tick zero, with 48 identical founder genotypes and finite deposits
-alternating 80% A / 20% A every 50,000 ticks,
-haploid clonal fission, mutation and paid inheritable plasticity. The user reviews through Run and
+in a pure-A left half and a pure-B right half (the alternating 80% A / 20% A epoch calendar
+remains selectable), haploid clonal fission, mutation and paid inheritable plasticity. The user reviews through Run and
 stats. Implemented systems must visibly affect this population before handoff, or have an explicit
 recorded reason to be disabled. Solid walls and neutral signaling are disabled by default because
 useful construction/communication is unproved; porous matrix remains active.
@@ -171,6 +171,10 @@ expensive ecological panels merely for formatting or documentation changes.
 | `cd frontend && pnpm harness bacteria` | Run live bacterial ecology and save evidence |
 | `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
 | `cd frontend && pnpm harness bacteria-capacity` | Measure a 2,000-cell initialization load probe |
+| `cd frontend && pnpm harness rps --case pairwise` | Constructed producer/resistant/sensitive toxin contests |
+| `cd frontend && pnpm harness zones --case three-way --shares 1,0` | Constructed diet contests in zoned or mixed food worlds |
+| `cd frontend && pnpm harness evolve --world zones --seed 101` | De novo evolution with trait samples and checkpoints |
+| `cd frontend && pnpm harness invasion --checkpoint path` | Mutual-invasibility assay of a checkpoint's strategy clusters |
 | `cd frontend && pnpm harness recent`             | Read recent ledger rows                                                  |
 | `cd frontend && pnpm harness sql "..."`          | Query the measurement ledger                                             |
 | `cd frontend && pnpm run dev`                    | Local server, only when explicitly requested                             |

@@ -33,6 +33,7 @@ function pilotScenario(foodA: number, source: ReturnType<typeof capabilitySource
         founders: 16,
         sourceCount: 2,
         foodEpochs: { phaseTicks: 10000, shares: [foodA] },
+        foodZones: undefined,
         mutationRate: 0,
         physicalMutationRate: 0,
         learning: "static",

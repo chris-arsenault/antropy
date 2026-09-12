@@ -23,6 +23,7 @@ export function LineagePanel({
     families: [],
     traits: [],
     efforts: [],
+    strategies: [],
   };
   const points = appendSample(
       history.filter((p) => Array.isArray(p.lineages)),

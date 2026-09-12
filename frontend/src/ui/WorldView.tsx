@@ -135,6 +135,7 @@ export function WorldView(props: ViewProps) {
     chemical: world.config.secretionRate > 0,
     toxin: true,
     matrix: true,
+    cycle: !!world.config.cycle,
   });
   return (
     <section className="viewport">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { type World } from "../sim/types";
 import { SENSOR_NAMES } from "../sim/interface";
 import { controller } from "../sim/controller";
@@ -25,12 +25,14 @@ function EmptyInspector({ world, selected }: { world: World; selected: number | 
   );
 }
 
-export function Inspector({
+/** Re-renders with the stats cadence (`statsVersion`) or a selection change, not every frame. */
+export const Inspector = memo(function Inspector({
   world,
   selected,
   onChange,
 }: {
   world: World;
+  statsVersion: number;
   selected: number | null;
   onChange: () => void;
 }) {
@@ -92,7 +94,7 @@ export function Inspector({
       <GeneInspector world={world} cell={cell} />
     </section>
   );
-}
+});
 
 function TaskOverride({ world, id, onChange }: { world: World; id: number; onChange: () => void }) {
   const [task, setTask] = useState("0"),

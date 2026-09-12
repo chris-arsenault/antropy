@@ -1,4 +1,6 @@
 import { validateFoodEpochs, type FoodEpochs } from "./foodEpochs";
+import { validateFoodZones, type FoodZones } from "./foodZones";
+import { validateCycle, type CycleConfig } from "./cycle";
 
 export const DEFAULT_CONFIG = {
   width: 80,
@@ -7,8 +9,8 @@ export const DEFAULT_CONFIG = {
   founders: 48,
   maxPopulation: 10000,
   regime: "patchy" as "patchy" | "persistent" | "transient",
-  sourceCount: 8,
-  sourceRate: 0.3,
+  sourceCount: 24,
+  sourceRate: 0.2,
   sourceRadius: 3,
   sourceLifetime: 60,
   sourceGap: 20,
@@ -23,7 +25,9 @@ export const DEFAULT_CONFIG = {
   toxinDecay: 0.04,
   toxinK: 0.025,
   damageRate: 0.5,
+  contactDamageRate: 0,
   defenseStrength: 80,
+  immunityStrength: 1000,
   repairRate: 0.008,
   repairMaterial: 0.3,
   repairEnergy: 0.8,
@@ -58,6 +62,12 @@ export const DEFAULT_CONFIG = {
   storageMaintenance: 0.005,
   controllerCost: 0.001,
   transporterTurnover: 2.5,
+  /**
+   * Acquisition pathways (A and B processing, light harvesting) share finite membrane: each one's
+   * effective stock is its stock times its share of all three raised to this exponent. Zero keeps
+   * additive returns; one makes an even split half as effective per pathway.
+   */
+  machineryCrowding: 0,
   catabolicRate: 0.08,
   catabolicEfficiency: 0.8,
   nutrientEnergy: 4,
@@ -67,16 +77,16 @@ export const DEFAULT_CONFIG = {
   divisionCost: 0.08,
   daughterReserve: 0.3,
   daughterEnergy: 0.1,
-  viscosity: 0.0004,
+  viscosity: 0.4,
   thermalEnergy: 0.00008,
   motorPowerDensity: 0.2,
   motorEfficiency: 0.5,
   secretionRate: 0,
   secretionCost: 0.04,
-  mutationRate: 0.0006,
-  mutationScale: 0.06,
-  physicalMutationRate: 0.025,
-  physicalMutationScale: 0.08,
+  mutationRate: 0.0015,
+  mutationScale: 0.08,
+  physicalMutationRate: 0.1,
+  physicalMutationScale: 0.12,
   mutationKind: "gaussian" as "uniform" | "gaussian",
   ploidy: "haploid" as "haploid" | "diploid",
   transmission: "clonal" as "clonal" | "selfing",
@@ -85,10 +95,12 @@ export const DEFAULT_CONFIG = {
   learning: "plastic" as "static" | "plastic",
   plasticityCost: 0.002,
   learningRetention: 1,
-  foodEpochs: { phaseTicks: 50000, shares: [0.8, 0.2] },
+  foodZones: { shares: [1, 0] },
 };
-export type Config = Omit<typeof DEFAULT_CONFIG, "foodEpochs"> &
-  Partial<{ foodEpochs: FoodEpochs }>;
+export type Config = Omit<typeof DEFAULT_CONFIG, "foodZones"> &
+  Partial<{ foodEpochs: FoodEpochs; foodZones: FoodZones; cycle: CycleConfig }>;
+/** Optional configuration keys; absence is a valid persisted state, not missing data. */
+export const OPTIONAL_CONFIG = ["foodEpochs", "foodZones", "cycle"] as const;
 
 function validateNumbers(config: Config): void {
   for (const [key, value] of Object.entries(DEFAULT_CONFIG)) {
@@ -107,7 +119,8 @@ export function validateConfig(config: Config): void {
   validatePositive(config);
   validateReserves(config);
   validateEvolution(config);
-  validateFoodEpochs(config.foodEpochs);
+  validateFoodLayout(config);
+  validateCycle(config.cycle);
   for (const key of [
     "catabolicEfficiency",
     "motorEfficiency",
@@ -120,6 +133,12 @@ export function validateConfig(config: Config): void {
     throw new Error("Invalid regime");
   if (config.founders > config.maxPopulation || config.maxPopulation > 100000)
     throw new Error("Invalid population safety limit");
+}
+function validateFoodLayout(config: Config): void {
+  validateFoodEpochs(config.foodEpochs);
+  validateFoodZones(config.foodZones);
+  if (config.foodEpochs && config.foodZones)
+    throw new Error("Food epochs and food zones are alternatives; declare at most one");
 }
 function validateEvolution(c: Config): void {
   const policies = {

@@ -9,6 +9,8 @@ export const FLOW_UNITS = {
   constructed: "material",
   catabolized: "material",
   repair_material: "material",
+  fixed: "material",
+  exuded: "material",
   motors: "energy",
   synthesis: "energy",
   maintenance: "energy",

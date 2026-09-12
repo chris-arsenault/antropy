@@ -16,8 +16,26 @@ export function stencil(p: Point, c: Config): [number, number][] {
     [((iy + 1) % c.height) * c.width + ((ix + 1) % c.width), fx * fy],
   ];
 }
+/** Bilinear sample at world coordinates without allocation; same term order as `stencil`. */
+export function sampleAt(field: Float64Array, px: number, py: number, c: Config): number {
+  const x = wrap(px, c.width),
+    y = wrap(py, c.height),
+    ix = Math.floor(x),
+    iy = Math.floor(y);
+  const fx = x - ix,
+    fy = y - iy,
+    row = iy * c.width,
+    next = ((iy + 1) % c.height) * c.width,
+    right = (ix + 1) % c.width;
+  return (
+    field[row + ix] * ((1 - fx) * (1 - fy)) +
+    field[row + right] * (fx * (1 - fy)) +
+    field[next + ix] * ((1 - fx) * fy) +
+    field[next + right] * (fx * fy)
+  );
+}
 export const sample = (field: Float64Array, p: Point, c: Config): number =>
-  stencil(p, c).reduce((sum, [i, w]) => sum + field[i] * w, 0);
+  sampleAt(field, p.x, p.y, c);
 export function deposit(field: Float64Array, p: Point, amount: number, c: Config): void {
   for (const [i, w] of stencil(p, c)) field[i] += amount * w;
 }

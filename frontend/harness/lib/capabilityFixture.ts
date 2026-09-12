@@ -3,7 +3,7 @@ import { DEFAULT_CONFIG, type Config } from "../../src/sim/config";
 import { type World } from "../../src/sim/types";
 import { type Genotype } from "../../src/sim/genetics/genotype";
 import { type Genome } from "../../src/sim/controller";
-import { structuralMass } from "../../src/sim/body";
+import { BODY_PARTS, structuralMass } from "../../src/sim/body";
 import { blueprint } from "../../src/sim/phenotype";
 import { initializeReceptors } from "../../src/sim/sensors";
 import { heldEnergy, heldMaterial } from "../../src/sim/accounting";
@@ -22,7 +22,7 @@ export interface CapabilityCase {
 }
 
 export function constructed(behavior: Genome, physical: Record<number, number> = {}): Genotype {
-  const genes = new Float32Array(8);
+  const genes = new Float32Array(BODY_PARTS.length);
   for (const [i, value] of Object.entries(physical)) genes[Number(i)] = value;
   return { chromosomes: [{ behavior, physical: genes }] };
 }
@@ -47,6 +47,7 @@ function uniform(seed: number, foodB: boolean): World {
     sourceCount: 0,
     initialNutrient: 0,
     foodEpochs: undefined,
+    foodZones: undefined,
     mutationRate: 0,
     physicalMutationRate: 0,
     learningRetention: 0,
@@ -71,7 +72,7 @@ function install(w: World, test: CapabilityCase, swap: boolean): void {
     c.genome = ((i + Number(swap)) % test.variants.length) + 1;
     w.ancestry.get(c.id)!.genome = c.genome;
     if (test.mature) {
-      const body = blueprint(w.genomes.get(c.genome)!.genome, w.config);
+      const body = { ...blueprint(w.genomes.get(c.genome)!.genome, w.config) };
       const extra = structuralMass(body) - structuralMass(c.body);
       const expense = Math.max(0, extra) * w.config.constructionEnergy;
       c.reserve -= extra;

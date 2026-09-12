@@ -16,7 +16,8 @@ A cell owns position, heading, eight actual material stocks, nutrient reserve, u
 functional damage, four adaptive receptor baselines, contact state, private brain state, genotype
 reference and ancestry. Radius derives from structural and stored-food volume using a spherical
 reference approximation. Low-Reynolds-number drag motivates overdamped swimming; there is no
-inertial coasting or resolved fluid solver. Rotational Brownian perturbation uses body randomness.
+inertial coasting or resolved fluid solver. The medium is thick by design, so a lineage mostly
+stays in the neighbourhood where it was born; see [calibration](../calibration.md#calibration-residency). Rotational Brownian perturbation uses body randomness.
 
 Contact uses bounded displacement, spatial bins and four separation passes. This is an approximate
 local overlap solver, not an exact rigid-body constraint solver. More mass or storage changes
@@ -26,12 +27,14 @@ footprint and drag. Changed construction targets never grant instant capability.
 
 ## Fields and finite deposits
 
-Seven material fields are persisted: food A, food B, neutral chemical, toxin, matrix, bound toxin
-and detritus. A/B use separate processing pathways but become the same intracellular feedstock.
-Matrix and bound toxin remain local deposits; soluble fields diffuse and decay. Detritus decomposes
-into B. Transport subdivides unstable steps and preserves nonnegative material.
+Eight material fields are persisted: food A, food B, neutral chemical, toxin, matrix, bound toxin,
+detritus and inorganic carbon, plus oxygen outside the material balance. A/B use separate
+processing pathways but become the same intracellular feedstock. Matrix and bound toxin remain
+local deposits; soluble fields diffuse and decay. Detritus decomposes half into A and half into B.
+Carbon and oxygen belong to the optional [element cycle](strategic-ecology.md#ecology-element-cycle)
+and stay empty without it. Transport subdivides unstable steps and preserves nonnegative material.
 
-Eight deposits hold separate finite A/B inventories, position, radius, release rate, lifetime and
+Twenty-four deposits hold separate finite A/B inventories, position, radius, release rate, lifetime and
 arrival delay. Most arrivals fall near three seeded landscape clusters; others scatter across the
 world. Composition, size and duration vary. Depleted/expired deposits wait before replacement;
 expired inventory becomes local detritus. Resource schedules use independent environment randomness,
@@ -43,6 +46,14 @@ source geometry, arrival timing and environment random draws. Existing inventori
 food keep their composition across transitions. Absence retains mixed deposits; the resolved
 schedule persists in v5 checkpoints and its phase derives from world tick. Controllers receive
 no calendar input. See the [registered epoch experiment](../food-epochs-study.md).
+
+Optional `config.foodZones = { shares }` instead fixes composition by position: the world is
+split into equal vertical bands, deposit slot *i* always lands in band *i* mod *N* at its drawn
+offset, and a new deposit takes its band's food-A fraction. Every band therefore receives equal
+supply at every moment. Inventory, energy density, timing and random draws are unchanged; only
+the x coordinate is remapped into the slot's band. Zones and epochs are alternatives; a
+configuration declares at most one, and both persist in v5 checkpoints. Controllers receive no
+band input. See the [registered zone experiment](../zones-study.md).
 
 The initial uniform food field and initial source inventories are accounted once. Later arrivals
 enter the external-supply ledger; leaking inventory into a field is a transfer, not new supply.
@@ -103,7 +114,7 @@ Environment, body and genetic randomness have separate persisted streams. Consum
 without changing inherited information must not alter placements, headings or source schedules.
 Physical fields and ledgers use float64; observations and neural state use float32.
 
-Checkpoint v5, substrate `bacteria-xy`, stores resolved configuration, all fields/inventories,
+Checkpoint v6, substrate `bacteria-xy`, stores resolved configuration, all fields/inventories,
 body/receptor/brain state, immutable genotype records, organism/genotype ancestry, random streams,
 ledgers, bounded recent events, durable manual interventions and stop reason. Validation checks
 encodings, physical capacities, record consistency and conservation. Incompatible or incomplete
@@ -114,5 +125,8 @@ exporter's source. Legacy histories remain unknown until execution is observed. 
 reloads are labeled as mixed code, and metadata stays outside physical state and controller inputs.
 
 Persistence is local IndexedDB and explicit files. A new browser session starts at tick zero,
-not from an automatically restored checkpoint. Genotype and ancestry retention grows with births;
-indefinite-run memory use has not been established.
+not from an automatically restored checkpoint. Genotype records are retained while a living
+cell carries them, plus every founder record; once records exceed four times the population
+plus a margin, unreferenced non-founder records are pruned. Dead organisms keep their genome id
+in ancestry as provenance only, and a genome record's parent id may name a pruned record.
+Organism ancestry itself is retained in full and grows with births.

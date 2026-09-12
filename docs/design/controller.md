@@ -1,6 +1,7 @@
 # Local RNN controller
 
-One float32 Elman RNN controls every cell, with shared inherited weights and private state.
+One Elman RNN controls every cell, with shared inherited weights and private state stored as
+float32 and evaluated in double precision.
 There is no programmed fallback, task dispatcher, network ensemble or external optimizer.
 
 <a id="controller-observation-contract"></a>

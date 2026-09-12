@@ -14,6 +14,7 @@ export const TRAITS = [
   { key: "defense", label: "Defense investment", unit: "% of core", ceiling: 5 },
   { key: "weapon", label: "Toxin machinery", unit: "% of core", ceiling: 4 },
   { key: "builder", label: "Matrix machinery", unit: "% of core", ceiling: 4 },
+  { key: "photo", label: "Light harvesting", unit: "% of core", ceiling: 10 },
 ] as const;
 export type Trait = (typeof TRAITS)[number]["key"];
 export const EFFORTS = ["swim", "turn", "toxin", "matrix", "repair"] as const;
@@ -28,6 +29,7 @@ export function traitValues(world: World, genome: World["cells"][number]["genome
     defense: (100 * b.defense) / b.core,
     weapon: (100 * b.weapon) / b.core,
     builder: (100 * b.builder) / b.core,
+    photo: (100 * b.photo) / b.core,
   };
 }
 export function histogram(values: number[], ceiling: number) {

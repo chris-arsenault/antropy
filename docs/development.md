@@ -26,6 +26,25 @@ heterogeneous random compositions. Existing unscheduled saves retain that behavi
 comparisons with mutation and learning disabled. Full initial checkpoints, source digests and
 outcome series preserve their conditions; no diagnostic genotype is promoted into the browser.
 
+`pnpm harness rps --case list` describes the producer/resistant/sensitive toxin contests;
+`--case pairwise` runs three 3,000-tick pairs in both placements and `--case three-way` or
+`--case invade-<strategy>` runs a registered multigeneration pilot. Settings such as
+`--toxin-effort`, `--contact-damage`, `--defense-strength`, `--matrix off` and `--size` are
+recorded in each manifest. `python3 harness/rps_report.py <root>` plots strategy counts over time.
+See the [contest record](rps-study.md). Pilots over 3,000 ticks trace every 100 ticks.
+
+`pnpm harness zones --case list` describes the A-specialist / B-specialist / generalist diet
+contests; `--world zones|mixed`, `--shares 1,0`, `--preference off` and `--initial-nutrient`
+select the world and the constructed brains. Pairwise, `three-way` and `invade-<diet>` cases
+mirror the toxin contest. See the [zone record](zones-study.md).
+
+`pnpm harness evolve --world zones|mixed --seed N --ticks T --source-rate R` runs de novo
+evolution from the founder with per-cell trait samples every 1,000 ticks and checkpoints every
+100,000; `python3 harness/evolve_report.py <root> [k]` clusters the final populations.
+`pnpm harness invasion --checkpoint <file> --k 2 --ticks 12000` clusters a checkpoint's living
+cells and runs rare-invasion contests between the cluster medoid genotypes in a fresh zoned world.
+See the [evolution record](evolve-study.md).
+
 `pnpm harness ecology-default --seeds 101,102 --ticks 3000` measures the actual Run default,
 then removes injury and matrix toxin binding separately. Secretion costs and the initial founder
 remain unchanged in those controls. Summaries count cells with at least 20% damage or matrix
@@ -61,7 +80,9 @@ continues to diffuse, decay and be eaten.
 
 Runs save `run-ID.json` with summary series and spatial samples, and `checkpoint-ID.json` with
 complete state. The SQLite ledger stores experiment identity, resolved configuration, source digest,
-seed, outcome and elapsed time. Before/after source digests expose source changes during a run.
+seed, outcome and elapsed time. Before/after source digests expose source changes during a run;
+a run whose source changed still writes its result, checkpoint and ledger row (the process keeps
+the code it loaded) and prints a warning, so editing during long runs loses nothing.
 Generated dumps remain local; preserve named results deliberately
 when publishing rather than adding the entire historical artifact directory.
 

@@ -1,5 +1,5 @@
 import { type World } from "../sim/types";
-import { MATERIAL_FIELDS } from "../sim/types";
+import { PERSISTED_FIELDS } from "../sim/types";
 import { controller } from "../sim/controller";
 import { encodeGenotype, decodeGenotype } from "../sim/genetics/codec";
 import { validateSnapshot } from "./validation";
@@ -11,8 +11,8 @@ export function serializeWorld(world: World, exportSource?: string) {
     ...world,
     exportSource,
     provenance: provenance(world),
-    ...(Object.fromEntries(MATERIAL_FIELDS.map((key) => [key, Array.from(world[key])])) as Record<
-      (typeof MATERIAL_FIELDS)[number],
+    ...(Object.fromEntries(PERSISTED_FIELDS.map((key) => [key, Array.from(world[key])])) as Record<
+      (typeof PERSISTED_FIELDS)[number],
       number[]
     >),
     genomes: [...world.genomes.values()].map((r) => ({
@@ -47,8 +47,8 @@ export function restoreWorld(text: string): World {
   const world: World = {
     ...physical,
     ...(Object.fromEntries(
-      MATERIAL_FIELDS.map((key) => [key, Float64Array.from(data[key])])
-    ) as Record<(typeof MATERIAL_FIELDS)[number], Float64Array>),
+      PERSISTED_FIELDS.map((key) => [key, Float64Array.from(data[key])])
+    ) as Record<(typeof PERSISTED_FIELDS)[number], Float64Array>),
     genomes,
     ancestry: new Map(data.ancestry.map((a) => [a.id, a])),
     cells: data.cells.map((cell) => ({

@@ -51,6 +51,16 @@ describe("wall-clock tick pacing", () => {
         },
         () => now
       )
-    ).toBe(5);
+    ).toBe(14);
+  });
+  it("gives maximum mode a larger frame budget than paced speeds", () => {
+    let now = 0;
+    const step = () => {
+      now += 2;
+    };
+    const paced = createPacer(120, 0).advance(10000, step, () => now);
+    now = 0;
+    const maximum = createPacer("max", 0).advance(0, step, () => now);
+    expect(maximum).toBeGreaterThan(paced);
   });
 });

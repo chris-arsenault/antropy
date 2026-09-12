@@ -16,6 +16,10 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Families, relatives, genes and behavior | [Population observation](design/population-observation.md) |
 | Current-default long population comparison | [Six 50,000-tick runs](population-50k.md) |
 | Changing resource composition and inheritance | [Registered food-epoch campaign](food-epochs-study.md) |
+| Toxin immunity and the producer/resistant/sensitive cycle | [Contest record](rps-study.md) |
+| Spatial A/B zones and diet specialists | [Zone record](zones-study.md) |
+| De novo evolution and evolved-cluster invasibility | [Evolution record](evolve-study.md) |
+| Element cycle and guild emergence | [Cycle record](cycle-study.md) |
 | Review status | [Certification](certifications.md) |
 | Decisions | [ADR index](adr/README.md) |
 | Original supplied sources | [Source index](sources/README.md) |
@@ -29,6 +33,8 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Design owners](design/README.md#design-design-owners)
 - [Current default and disabled scope](design/README.md#design-current-default-and-disabled-scope)
 - [Next decisions](design/README.md#design-next-decisions)
+- [Roadmap to strategic differentiation](design/README.md#design-roadmap)
+- [Roadmap two: organism-generated selection](design/README.md#design-roadmap-2)
 - [Status and provenance](design/README.md#design-status-and-provenance)
 
 ## Bacterial world and lifecycle
@@ -58,6 +64,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Strategic microbial ecology
 
 - [Resource opportunities](design/strategic-ecology.md#ecology-resource-opportunities)
+- [Element cycle](design/strategic-ecology.md#ecology-element-cycle)
 - [Toxin, defense and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
 - [Porous matrix](design/strategic-ecology.md#ecology-porous-matrix)
 - [Disabled systems](design/strategic-ecology.md#ecology-disabled-systems)
@@ -66,6 +73,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Experiments and evolutionary attribution
 
 - [Evidence levels](design/experimentation.md#experiments-evidence-levels)
+- [Coexistence criterion](design/experimentation.md#experiments-coexistence-criterion)
 - [Competing hypotheses](design/experimentation.md#experiments-competing-hypotheses)
 - [Comparison method](design/experimentation.md#experiments-comparison-method)
 - [Existing harness and provenance](design/experimentation.md#experiments-existing-harness-and-provenance)
@@ -89,6 +97,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Population observation
 
 - [Population views and definitions](design/population-observation.md#population-independent-views)
+- [Strategy clusters](design/population-observation.md#population-strategy-clusters)
 - [Observation boundaries and verification](design/population-observation.md#population-boundaries)
 
 ## Simulation goals and operating principles
@@ -108,4 +117,6 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Current calibration
 
 - [Default scales](calibration.md#calibration-default-scales)
+- [Measured throughput](calibration.md#calibration-throughput)
+- [Why the medium is thick](calibration.md#calibration-residency)
 - [Why the injury balance changed](calibration.md#calibration-why-the-injury-balance-changed)

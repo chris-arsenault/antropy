@@ -21,6 +21,30 @@ it("restores receptor, recurrent, lineage and random state for exact continuatio
   }
   expect(checkpointToJson(restored)).toBe(checkpointToJson(world));
 });
+it("prunes genotype records no living cell carries and continues exactly after restore", () => {
+  const world = createWorld(29, {
+    ...DEFAULT_CONFIG,
+    width: 16,
+    height: 16,
+    founders: 2,
+    sourceCount: 2,
+    physicalMutationRate: 1,
+    mutationRate: 0.01,
+  });
+  for (let i = 0; i < 400; i++) {
+    stepWorld(world);
+    if (world.tick % 50 === 0) fundDivision(world);
+  }
+  expect(world.genomes.size).toBeLessThanOrEqual(4 * world.cells.length + 256);
+  expect(world.genomes.has(1)).toBe(true);
+  for (const cell of world.cells) expect(world.genomes.has(cell.genome)).toBe(true);
+  const restored = restoreWorld(checkpointToJson(world));
+  for (let i = 0; i < 20; i++) {
+    stepWorld(world);
+    stepWorld(restored);
+  }
+  expect(checkpointToJson(restored)).toBe(checkpointToJson(world));
+});
 it("continues diploid selfing and budding with the parent's private memory intact", () => {
   const world = createWorld(7, {
     ...DEFAULT_CONFIG,

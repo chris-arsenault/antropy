@@ -7,7 +7,7 @@ material it has actually built, not directly from gene values.
 
 ## Construction and physical genes
 
-Each chromosome has eight bounded float32 physical log targets in [-3,3].
+Each chromosome has nine bounded float32 physical log targets in [-3,3].
 
 | Locus | Target | Reference newborn stock |
 | ---: | --- | ---: |
@@ -19,6 +19,7 @@ Each chromosome has eight bounded float32 physical log targets in [-3,3].
 | 5 | Defense relative to core | 0.025 |
 | 6 | Toxin machinery relative to core | 0.02 |
 | 7 | Matrix machinery relative to core | 0.02 |
+| 8 | Light harvesting relative to core | `cycle.photoRatio`, 0.05 when the element cycle is on, else 0 |
 
 Core target is reference core × exp(g0); other targets are core target × reference ratio × exp(gi).
 Targets are independent, not a zero-sum allocation tuple. Every actual stock has construction and
@@ -40,7 +41,10 @@ Greater motor investment buys power while charging material, maintenance and bod
 automatically an advantage.
 
 A/B uptake each combines transporter kinetics with the near-body conductance 4πDr as serial
-limitations. Damage lowers capacity; field supply and shared storage further limit acquisition.
+limitations. Acquisition pathways (A and B processing and light harvesting) share finite
+membrane: with `machineryCrowding` above zero, each pathway's effective stock is its stock times
+its share of all three raised to that exponent, so an even split deploys half of each at
+exponent one while a single pathway deploys all of it. Zero, the default, keeps additive returns. Damage lowers capacity; field supply and shared storage further limit acquisition.
 More processing machinery cannot evade diffusion or create food. Using a spherical conductance
 with a unit-depth raster is a coarse approximation, not a resolved physical diffusion model.
 
@@ -117,9 +121,9 @@ diploidy. Selfing is not mating with another organism; seed/fertilize, outcrossi
 ancestry are not implemented. Uniform crossover is configured but unused by default clonal
 transmission.
 
-At birth, behavioral loci are independently selected with probability 0.0006 and scale 0.06;
-physical loci use 0.025 and scale 0.08. A haploid has 1,649 behavioral/plasticity loci and eight
-physical loci: about 0.9894 and 0.2 selected loci per child. Selection count is not guaranteed
+At birth, behavioral loci are independently selected with probability 0.0015 and scale 0.08;
+physical loci use 0.1 and scale 0.12. A haploid has 1,649 behavioral/plasticity loci and nine
+physical loci: about 2.5 and 0.9 selected loci per child. Selection count is not guaranteed
 sequence change because of bounds and numerical effects. Weights clamp to [-16,16], plasticity
 coefficients to [-1,1], and physical targets to [-3,3].
 

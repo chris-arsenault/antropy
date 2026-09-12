@@ -3,24 +3,34 @@ import { BODY_PARTS, basal, energyCapacity, materialCapacity, structuralMass } f
 import { targetBody } from "./phenotype";
 import { repairCell } from "./interference";
 import { flow } from "./observation";
+import { aerobicFraction, consumeOxygen, lightField, photosynthesize, returnCarbon } from "./cycle";
 
+/**
+ * Converts reserve into usable energy. With the element cycle, efficiency interpolates between
+ * anaerobic and aerobic by the oxygen available for the rate-limited demand, oxygen is consumed
+ * and the carbon returns to the inorganic pool; otherwise the material leaves as waste.
+ */
 function catabolize(world: World, cell: Cell): void {
   const c = world.config,
-    useful = c.nutrientEnergy * c.catabolicEfficiency;
+    cycle = c.cycle;
+  const rateLimit = c.catabolicRate * cell.body.core * c.dt;
+  const demand = cycle ? rateLimit * cycle.oxygenPerMaterial : 0;
+  const aerobic = aerobicFraction(world, cell, demand);
+  const efficiency = cycle
+    ? cycle.anaerobicEfficiency + (c.catabolicEfficiency - cycle.anaerobicEfficiency) * aerobic
+    : c.catabolicEfficiency;
+  const useful = c.nutrientEnergy * efficiency;
   const material = Math.max(
     0,
-    Math.min(
-      cell.reserve,
-      c.catabolicRate * cell.body.core * c.dt,
-      (energyCapacity(cell.body, c) - cell.energy) / useful
-    )
+    Math.min(cell.reserve, rateLimit, (energyCapacity(cell.body, c) - cell.energy) / useful)
   );
   cell.reserve -= material;
   cell.energy += material * useful;
-  world.ledger.metabolicWaste += material;
-  world.ledger.catabolismLoss += material * c.nutrientEnergy * (1 - c.catabolicEfficiency);
+  returnCarbon(world, cell, material);
+  if (cycle) consumeOxygen(world, cell, material * cycle.oxygenPerMaterial * aerobic);
+  world.ledger.catabolismLoss += material * c.nutrientEnergy * (1 - efficiency);
   flow(world, cell, "catabolized", material);
-  flow(world, cell, "catabolic_loss", material * c.nutrientEnergy * (1 - c.catabolicEfficiency));
+  flow(world, cell, "catabolic_loss", material * c.nutrientEnergy * (1 - efficiency));
 }
 function construct(world: World, cell: Cell): void {
   const c = world.config,
@@ -48,7 +58,9 @@ function construct(world: World, cell: Cell): void {
   flow(world, cell, "construction", quantity * c.constructionEnergy);
 }
 export function metabolize(world: World): void {
+  const light = lightField(world);
   for (const cell of world.cells) {
+    photosynthesize(world, cell, light);
     catabolize(world, cell);
     const cost = Math.min(cell.energy, basal(cell, world.config));
     cell.energy -= cost;

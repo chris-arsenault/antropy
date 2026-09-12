@@ -32,6 +32,7 @@ export function cohortWorld(
     transmission: "clonal",
     learningRetention: 0,
     foodEpochs: { phaseTicks: 50000, shares: [share] },
+    foodZones: undefined,
   });
   world.genomes.clear();
   const postIds = new Set<number>();

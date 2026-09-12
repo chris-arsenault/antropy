@@ -26,18 +26,23 @@ export function updateTraces(
   const modulation = Math.tanh(
     genes[6] * observation[1] + genes[7] * observation[5] + genes[8] * delta
   );
-  const rate = Math.abs(genes[1]) * context.dt;
+  const rate = Math.abs(genes[1]) * context.dt,
+    traces = state.traces,
+    n = before.length;
+  const g2 = genes[2],
+    g3 = genes[3],
+    g4 = genes[4],
+    g5 = genes[5];
   for (let i = 0; i < after.length; i++) {
-    const y = after[i];
-    for (let j = 0; j < before.length; j++) {
-      const index = i * before.length + j,
+    const y = after[i],
+      yy = y * y,
+      row = i * n;
+    for (let j = 0; j < n; j++) {
+      const index = row + j,
         x = before[j],
-        h = state.traces[index];
-      const hebbian = genes[2] * x * y + genes[3] * x + genes[4] * y + genes[5];
-      state.traces[index] = Math.max(
-        -1,
-        Math.min(1, h + rate * (modulation * hebbian - y * y * h))
-      );
+        h = traces[index];
+      const hebbian = g2 * x * y + g3 * x + g4 * y + g5;
+      traces[index] = Math.max(-1, Math.min(1, h + rate * (modulation * hebbian - yy * h)));
     }
   }
 }

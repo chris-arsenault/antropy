@@ -7,6 +7,14 @@ This backlog belongs to the bacterial simulation. Historical ant queues are pres
 
 ## Evolutionary questions
 
+- Residency before further evolutionary campaigns: the [toxin](rps-study.md),
+  [zone](zones-study.md) and [evolution](evolve-study.md) records all locate the block in dispersal
+  that is fast relative to replacement. Review a wider world or lower motor power so a lineage
+  born in a band mostly stays there; then rerun the de novo arms. Do not raise mutation supply
+  further; eightfold physical and fivefold behavioural supply only accelerated economy drift.
+- Recycled detritus returns as food B everywhere, which biases every world toward B processing
+  and weakens A/B partition; review whether decomposition should return the local dissolved
+  composition or an equal split.
 - Prioritize whether inherited differences continue changing resource use, survival and reproduction
   as the ecology develops. Use family, trait and sampled behavior views to locate stagnation; use a
   bounded frozen-inheritance comparison when it would distinguish evolution from ecological turnover.
@@ -60,9 +68,12 @@ reasons; all other entries here are questions rather than selectable placeholder
 
 ## Runtime and observation limits
 
-- Measure current sustained population throughput before optimizing architecture. The old
-  2,000-cell initialization probe does not certify the current ecology.
-- Address cumulative genotype/ancestry storage before claiming indefinite browser runs.
+- Acceleration must keep one implementation per rule ([ADR 0019](adr/0019-single-language-kernel.md)).
+  Compatible options: a Web Worker hosting the whole step so the browser matches headless speed
+  (message-passing for inspection, interventions and persistence across about fifteen UI
+  modules), or a smaller default world. Piecemeal ports of hot loops are rejected.
+- Genotype records are now pruned when unreferenced by living cells; organism ancestry still
+  grows with births (about 80 bytes per organism) and remains the bound on indefinite runs.
 - Browser source provenance is implemented for new exports. The old tick-48,661 export still
   cannot identify the cause of its early divergence from current headless reconstruction.
 - Add replay or new visual instruments only when existing state/history cannot answer a concrete

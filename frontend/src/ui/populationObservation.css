@@ -32,6 +32,28 @@
   color: #91abba;
   font-size: 10px;
 }
+.strategy-panel p {
+  font-size: 11px;
+}
+.strategy-scatter,
+.strategy-frequencies {
+  display: block;
+  width: 100%;
+  background: #0a1620;
+}
+.strategy-scatter text,
+.strategy-frequencies text {
+  fill: #96aebc;
+  font: 8px system-ui;
+}
+.strategy-frequencies polyline {
+  fill: none;
+  stroke-width: 2;
+}
+.strategy-table {
+  font-size: 11px;
+  margin: 6px 0;
+}
 .trait-row {
   display: grid;
   gap: 3px;

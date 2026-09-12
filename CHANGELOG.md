@@ -13,6 +13,64 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Added an optional cell-mediated element cycle (`config.cycle`): inorganic carbon and oxygen
+  fields, a ninth physical locus for light harvesting that fixes carbon into reserve and releases
+  oxygen, oxygen-dependent catabolic efficiency with carbon returned to the pool, and slow
+  atmosphere exchange of both gases. Checkpoints are v6; v5 saves are rejected. Harvesting stock
+  pays its own maintenance, a fraction of fixed material leaks into the water as food, and a
+  `machineryCrowding` lever (default 0) lets the three acquisition pathways compete for membrane.
+  Light is a finite per-raster-cell supply (`cycle.lightSupply`) gathered over a footprint
+  (`cycle.lightRadius`) that overlapping harvesters share, so harvesting income falls with
+  crowding and the world's light budget equals its deposit supply; with light unlimited per unit
+  ground, evolution arms grew past 1,200 cells. Recorded in the [cycle study](docs/cycle-study.md):
+  constructed guilds each invade from rarity; of six evolution arms, one (crowding 0.75, 93
+  generations) split into a harvester and a consumer cluster whose medoids mutually invade.
+  With crowding 0.5 constructed autotroph, heterotroph and mixotroph guilds each reproduce and
+  invade from rarity in a mixed world; without it the mixotroph fixes.
+
+- Harness runs no longer fail when source changes while they run: both digests are recorded, a
+  warning is printed, and the result, checkpoint and ledger row are written as usual.
+
+- Built, measured and removed a Rust WebAssembly kernel for inference, contacts and sensing
+  (44 versus 24 ticks/s at 1,324 cells) under ADR 0019: one TypeScript implementation per
+  physical rule outranks speed. Kept the genotype blueprint cache, a 30 frames per second budget
+  at maximum speed, and double arithmetic over float32 storage in the RNN. Exact cross-machine
+  replay is no longer an invariant.
+
+- Pruned genotype records that no living cell carries (founders retained), so checkpoints stay
+  bounded under the higher mutation supply; dead organisms keep their genome id as provenance.
+  Pilot assays may run up to 900 seconds of wall time.
+
+- Made the medium thick (viscosity 0.4), deposits dense and balanced (24 at rate 0.2), decomposition
+  symmetric (half A, half B) and mutation supply stronger (about 2.5 behavioural and 0.8 physical
+  loci per birth). Cells now stay in the band they are born in, and constructed diet specialists
+  partition the zoned world by survival alone.
+
+- Ran eight de novo evolution arms (70–127 generations, 180–660 cells, default, eightfold
+  physical and fivefold behavioural mutation supply) in zoned and mixed worlds: economy evolves,
+  band partition does not, and evolved cluster medoids do not mutually invade. Recorded the
+  shared block, dispersal fast relative to replacement, as the next design decision.
+
+- Added strategy clusters: deterministic k-means over inherited construction targets, now the
+  default map color mode, with a scatter, cluster table and cluster-size history in stats. Added
+  `evolve` (de novo runs with trait samples and checkpoints) and `invasion` (rare-invasion assay
+  between a checkpoint's cluster medoid genotypes) harness commands and a clustering report.
+
+- Added food zones: equal vertical bands with fixed composition and balanced deposit slots, now
+  the Run default as pure A and B halves; the epoch calendar stays selectable. Constructed
+  A/B-specialists each invade from rarity and persist with a generalist in the zoned world and
+  not in mixed food, recorded with a reusable diet contest command.
+
+- Added producer immunity to toxin machinery and optional contact-range toxin injury, both
+  zero in saves that predate them, with a reusable producer/resistant/sensitive contest command
+  and report. Twelve constructed settings establish all three pairwise dominances but no
+  three-way coexistence; the record explains why mobile cells give the well-mixed outcome.
+
+- Recorded the roadmap to strategic differentiation and the mutual-invasibility coexistence
+  criterion. Optimized the spatial index, contact passes, sensing and RNN inference with
+  bit-identical checkpoints, raising headless throughput about 1.7–1.9×. Bounded the browser
+  statistics refresh to 250 ms and widened the maximum-speed frame budget.
+
 - Added recent-family, genealogy and inherited-trait views, source provenance in checkpoints,
   configurable food-composition epochs and reusable short mechanism experiments with typed
   resource accounting. Recorded actual evolved food-access and B-processing benefits alongside

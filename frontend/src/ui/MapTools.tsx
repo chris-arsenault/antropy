@@ -63,6 +63,14 @@ export function MapTools({ camera, setCamera, bounds, layers, setLayers }: Props
         />{" "}
         Protective matrix · ochre
       </label>
+      <label>
+        <input
+          type="checkbox"
+          checked={layers.cycle}
+          onChange={(e) => setLayers((l) => ({ ...l, cycle: e.target.checked }))}
+        />{" "}
+        Oxygen · cyan / inorganic carbon · grey
+      </label>
     </div>
   );
 }

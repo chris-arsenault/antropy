@@ -30,6 +30,8 @@ export function summary(world: World) {
     matrix: total(world.matrix),
     boundToxin: total(world.boundToxin),
     detritus: total(world.detritus),
+    carbon: total(world.carbon),
+    oxygen: total(world.oxygen),
     depositMaterial: world.sources.reduce((s, p) => s + p.foodA + p.foodB, 0),
     meanDamage:
       world.cells.reduce((s, cell) => s + cell.damage, 0) / Math.max(1, world.cells.length),

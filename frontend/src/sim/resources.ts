@@ -1,6 +1,6 @@
 import { type World, type Cell } from "./types";
 import { sample, stencil } from "./fields";
-import { bodyRadius, materialCapacity } from "./body";
+import { bodyRadius, effectiveStock, materialCapacity } from "./body";
 import { flow } from "./observation";
 
 export function uptakeRate(
@@ -11,7 +11,8 @@ export function uptakeRate(
 ): number {
   const c = world.config;
   const kinetics =
-    (c.transporterTurnover * cell.body[pathway] * concentration) / (concentration + c.nutrientK);
+    (c.transporterTurnover * effectiveStock(cell.body, pathway, c) * concentration) /
+    (concentration + c.nutrientK);
   const diffusion = 4 * Math.PI * c.nutrientDiffusion * bodyRadius(cell, c) * concentration;
   return kinetics + diffusion > 0
     ? ((1 - cell.damage) * kinetics * diffusion) / (kinetics + diffusion)

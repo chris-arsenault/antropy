@@ -79,11 +79,31 @@ export function seed(): Genome {
   return { weights: w, plasticity: seedPlasticity() };
 }
 
+/** Weights, traces and hidden state are float32 storage; arithmetic runs in double precision. */
 function dot(w: Float32Array, offset: number, values: Float32Array, initial: number): number {
   let total = initial;
-  for (let i = 0; i < values.length; i++) total = f(total + f(w[offset + i] * values[i]));
+  for (let i = 0; i < values.length; i++) total += w[offset + i] * values[i];
   return total;
 }
+/** Recurrent contribution through the inherited weights plus the acquired trace delta. */
+function recur(
+  w: Float32Array,
+  traces: Float32Array,
+  previous: Float32Array,
+  h: number,
+  alpha: number,
+  initial: number
+): number {
+  let current = initial;
+  const offset = h * HIDDEN;
+  for (let j = 0; j < HIDDEN; j++) {
+    const index = offset + j;
+    current += (w[RECURRENT + index] + alpha * traces[index]) * previous[j];
+  }
+  return current;
+}
+const scratch = new Float32Array(HIDDEN),
+  logits = new Float64Array(OUTPUTS);
 
 export function act(
   genome: Genome,
@@ -93,22 +113,17 @@ export function act(
 ): Action {
   if (observation.length !== INPUTS) throw new Error("Incorrect sensor count");
   const w = genome.weights,
-    hidden = new Float32Array(HIDDEN);
+    previous = state.hidden,
+    hidden = scratch;
   const alpha = context.plastic ? Math.abs(genome.plasticity[0]) : 0;
   for (let h = 0; h < HIDDEN; h++) {
-    let current = dot(w, h * INPUTS, observation, w[BIAS + h]);
-    for (let j = 0; j < HIDDEN; j++) {
-      const index = h * HIDDEN + j;
-      const weight = f(w[RECURRENT + index] + f(alpha * state.traces[index]));
-      current = f(current + f(weight * state.hidden[j]));
-    }
-    hidden[h] = f(Math.tanh(current));
+    const current = dot(w, h * INPUTS, observation, w[BIAS + h]);
+    hidden[h] = Math.tanh(recur(w, state.traces, previous, h, alpha, current));
   }
-  const logits = Array.from({ length: OUTPUTS }, (_, o) =>
-    dot(w, OUTPUT + o * HIDDEN, hidden, w[OUTPUT_BIAS + o])
-  );
-  updateTraces(genome.plasticity, state, state.hidden, hidden, observation, context);
-  state.hidden = hidden;
+  for (let o = 0; o < OUTPUTS; o++)
+    logits[o] = dot(w, OUTPUT + o * HIDDEN, hidden, w[OUTPUT_BIAS + o]);
+  updateTraces(genome.plasticity, state, previous, hidden, observation, context);
+  previous.set(hidden);
   if (logits[4] >= 0) state.task = Math.round(255 / (1 + Math.exp(-logits[3])));
   return {
     swim: Math.max(0, Math.tanh(logits[0])),

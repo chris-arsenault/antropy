@@ -19,8 +19,9 @@ it("opens bacteria paused with active ecology layers and explicit disabled syste
     expect(container.textContent).toContain("Top-down bacteria");
     expect(container.textContent).toContain("Live mutation on");
     expect(container.textContent).toContain("Tick 0");
-    expect(container.textContent).toContain("Food epoch 1: new deposits contain 80% A / 20% B.");
-    expect(container.textContent).toContain("Next change at tick 50,000.");
+    expect(container.textContent).toContain(
+      "Food zones, left to right: 100% A / 0% B · 0% A / 100% B."
+    );
     expect(container.querySelector<HTMLSelectElement>(".trait-panel select")?.value).toBe("foodA");
     expect(container.querySelector('.population-chart svg[role="img"]')).not.toBeNull();
     expect(container.textContent).toContain("Opposite edges connect");
@@ -38,8 +39,11 @@ it("opens bacteria paused with active ecology layers and explicit disabled syste
     expect(container.textContent).toContain("Damage share of deaths · lifetime");
     expect(
       container.querySelector<HTMLSelectElement>(".population-color-control select")?.value
-    ).toBe("family");
+    ).toBe("strategy");
     expect(container.querySelector(".trait-panel")?.closest("details")).toBeNull();
+    expect(container.textContent).toContain("Strategy clusters");
+    // Identical founders form one cluster; further clusters appear only with inherited variation.
+    expect(container.querySelectorAll(".strategy-table tbody tr")).toHaveLength(1);
     expect(container.textContent).toContain("Recent families");
     expect(container.textContent).toContain("Recent sampled behavior");
     const family = container.querySelector<HTMLButtonElement>(".family-link")!;

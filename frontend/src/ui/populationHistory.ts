@@ -2,6 +2,7 @@ import { type World } from "../sim/types";
 import { lineageCounts } from "../sim/inheritedStats";
 import { familyCounts } from "../observe/ancestry";
 import { traitSnapshot, effortSnapshot } from "../observe/traits";
+import { strategyClusters, type StrategyCluster } from "../observe/clusters";
 
 export interface PopulationPoint {
   tick: number;
@@ -12,6 +13,7 @@ export interface PopulationPoint {
   families: [number, number][];
   traits: ReturnType<typeof traitSnapshot>;
   efforts: ReturnType<typeof effortSnapshot>;
+  strategies: StrategyCluster[];
 }
 export const populationPoint = (world: World): PopulationPoint => ({
   tick: world.tick,
@@ -22,6 +24,7 @@ export const populationPoint = (world: World): PopulationPoint => ({
   families: familyCounts(world),
   traits: traitSnapshot(world),
   efforts: effortSnapshot(world),
+  strategies: strategyClusters(world).clusters,
 });
 export function appendPoint(history: PopulationPoint[], world: World): PopulationPoint[] {
   return appendSample(history, populationPoint(world));

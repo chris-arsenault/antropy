@@ -29,6 +29,25 @@ Observed effort distributions use organism decisions sampled every 100 ticks ove
 2,000 ticks. They are sample shares, not energy shares or full lifetime histories. Inherited trait
 medians also retain a bounded trend history, so a stable population size need not hide changing traits.
 
+<a id="population-strategy-clusters"></a>
+
+## Strategy clusters
+
+Strategy clusters are the default map colors and lead the stats panel. Living cells are grouped
+by inherited construction targets alone (A share of processing, motor, core, defense, toxin and
+matrix machinery), standardized and clustered by deterministic k-means with three centres seeded
+at evenly spaced ranks of A share. Clusters are ranked by A share, so orange is the lowest-A
+cluster and green the highest at any moment. The scatter plots every living cell over A share and
+defense; circles are in the left band and squares in the right. The table gives each cluster's
+share of the population, its band occupancy and its centre traits, and the history chart draws
+cluster sizes over the opened view's lifetime, assigning each sample to that sample's own centres.
+
+Up to three clusters are formed; identical founders form one, and empty clusters are not shown,
+so the number of rows grows only as inherited variation appears. Clusters are descriptions of the
+distribution, not species, fitness classes or selection inputs. The same clustering, with two centres, drives the harness `invasion` assay,
+which takes each cluster's medoid genotype from a checkpoint and tests invasion from rarity in a
+fresh zoned world. That assay, not the panel, is the [coexistence criterion](experimentation.md#experiments-coexistence-criterion).
+
 <a id="population-boundaries"></a>
 
 ## Boundaries

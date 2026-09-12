@@ -1,4 +1,5 @@
-import { DEFAULT_CONFIG, type Config } from "../sim/config";
+import { type Config } from "../sim/config";
+import { foodLayout, withLayout, type FoodLayout } from "./foodLayout";
 
 export function FoodEpochSettings({
   config,
@@ -9,17 +10,15 @@ export function FoodEpochSettings({
 }) {
   return (
     <label>
-      <input
-        type="checkbox"
-        checked={!!config.foodEpochs}
-        onChange={(event) =>
-          onChange({
-            ...config,
-            foodEpochs: event.target.checked ? DEFAULT_CONFIG.foodEpochs : undefined,
-          })
-        }
-      />{" "}
-      Food epochs
+      Food layout{" "}
+      <select
+        value={foodLayout(config)}
+        onChange={(event) => onChange(withLayout(config, event.target.value as FoodLayout))}
+      >
+        <option value="mixed">Mixed deposits</option>
+        <option value="epochs">Alternating epochs</option>
+        <option value="zones">A-rich and B-rich halves</option>
+      </select>
     </label>
   );
 }

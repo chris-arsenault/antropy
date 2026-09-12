@@ -16,10 +16,45 @@ export function App() {
   const restore = useCallback((world: World) => setRun((r) => ({ id: r.id + 1, world })), []);
   return <Simulation key={run.id} world={run.world} onRestore={restore} />;
 }
+function RunControls({ world, sim }: { world: World; sim: ReturnType<typeof useSimulation> }) {
+  const status = sim.running ? "Running" : "Paused";
+  return (
+    <div className="run-controls">
+      <button
+        className="primary"
+        disabled={!!world.stopReason}
+        onClick={() => sim.setRunning(!sim.running)}
+      >
+        {sim.running ? "Pause" : "Run"}
+      </button>
+      <label>
+        Speed{" "}
+        <select
+          value={sim.speed}
+          onChange={(e) =>
+            sim.setSpeed(e.target.value === "max" ? "max" : (Number(e.target.value) as Speed))
+          }
+        >
+          {SPEEDS.map((speed) => (
+            <option key={speed} value={speed}>
+              {speed === "max" ? "Maximum" : speed + " ticks/s"}
+            </option>
+          ))}
+        </select>
+      </label>
+      <span>
+        Live mutation{" "}
+        {world.config.mutationRate + world.config.physicalMutationRate > 0 ? "on" : "off"}
+      </span>
+      <span className={`run-status ${sim.running ? "is-running" : ""}`}>
+        {world.stopReason ? "Stopped" : status}
+      </span>
+    </div>
+  );
+}
 function Simulation({ world, onRestore }: { world: World; onRestore: (world: World) => void }) {
   const sim = useSimulation(world),
     [selected, setSelected] = useState<number | null>(null);
-  const status = sim.running ? "Running" : "Paused";
   return (
     <main>
       <header>
@@ -27,49 +62,25 @@ function Simulation({ world, onRestore }: { world: World; onRestore: (world: Wor
           <h1>Antropy</h1>
           <p>Top-down bacteria · inherited RNN behavior</p>
         </div>
-        <div className="run-controls">
-          <button
-            className="primary"
-            disabled={!!world.stopReason}
-            onClick={() => sim.setRunning(!sim.running)}
-          >
-            {sim.running ? "Pause" : "Run"}
-          </button>
-          <label>
-            Speed{" "}
-            <select
-              value={sim.speed}
-              onChange={(e) =>
-                sim.setSpeed(e.target.value === "max" ? "max" : (Number(e.target.value) as Speed))
-              }
-            >
-              {SPEEDS.map((speed) => (
-                <option key={speed} value={speed}>
-                  {speed === "max" ? "Maximum" : speed + " ticks/s"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <span>
-            Live mutation{" "}
-            {world.config.mutationRate + world.config.physicalMutationRate > 0 ? "on" : "off"}
-          </span>
-          <span className={`run-status ${sim.running ? "is-running" : ""}`}>
-            {world.stopReason ? "Stopped" : status}
-          </span>
-        </div>
+        <RunControls world={world} sim={sim} />
       </header>
       <div className="workspace">
         <WorldView world={world} version={sim.version} selected={selected} onSelect={setSelected} />
         <aside>
           <StatsPanel
             world={world}
+            statsVersion={sim.statsVersion}
             throughput={sim.throughput}
             history={sim.history}
             recent={sim.recent}
             onSelect={setSelected}
           />
-          <Inspector world={world} selected={selected} onChange={sim.refresh} />
+          <Inspector
+            world={world}
+            statsVersion={sim.statsVersion}
+            selected={selected}
+            onChange={sim.refresh}
+          />
         </aside>
       </div>
       <div className="settings">

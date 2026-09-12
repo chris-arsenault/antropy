@@ -9,6 +9,7 @@ export const BODY_PARTS = [
   "defense",
   "weapon",
   "builder",
+  "photo",
 ] as const;
 export const BODY_NAMES: Record<(typeof BODY_PARTS)[number], string> = {
   core: "Core",
@@ -19,6 +20,7 @@ export const BODY_NAMES: Record<(typeof BODY_PARTS)[number], string> = {
   defense: "Defense",
   weapon: "Toxin machinery",
   builder: "Matrix machinery",
+  photo: "Light harvesting",
 };
 export type Body = Record<(typeof BODY_PARTS)[number], number>;
 export interface Embodied {
@@ -37,8 +39,16 @@ export const scaleBody = (body: Body, scale: number): Body => ({
   defense: body.defense * scale,
   weapon: body.weapon * scale,
   builder: body.builder * scale,
+  photo: body.photo * scale,
 });
 export const materialCapacity = (body: Body, c: Config): number => body.storage * c.storageCapacity;
+const ACQUISITION = ["transport", "transportB", "photo"] as const;
+/** Stock a pathway can actually deploy once membrane crowding by the other pathways is paid. */
+export function effectiveStock(body: Body, key: (typeof ACQUISITION)[number], c: Config): number {
+  if (c.machineryCrowding === 0) return body[key];
+  const all = ACQUISITION.reduce((s, k) => s + body[k], 0);
+  return all > 0 ? body[key] * (body[key] / all) ** c.machineryCrowding : 0;
+}
 export const energyCapacity = (body: Body, c: Config): number => body.core * c.energyCapacity;
 export const bodyVolume = (cell: Pick<Embodied, "body" | "reserve">, c: Config): number =>
   structuralMass(cell.body) / c.bodyDensity + cell.reserve / c.reserveDensity;
@@ -54,6 +64,7 @@ export function basal(cell: Embodied & { damage: number }, c: Config): number {
       b.transport * c.transporterMaintenance +
       b.storage * c.storageMaintenance +
       (b.transportB + b.defense + b.weapon + b.builder) * c.machineryMaintenance +
+      b.photo * (c.cycle?.photoMaintenance ?? c.machineryMaintenance) +
       c.controllerCost)
   );
 }

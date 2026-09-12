@@ -29,6 +29,16 @@ export function sourceDigest(): string {
   }
   return hash.digest("hex");
 }
+/**
+ * A source edit during a run is provenance, not a failure: the process keeps the code it loaded,
+ * both digests are recorded, and the result, checkpoint and ledger row are still written.
+ */
+export function warnIfSourceChanged(before: string, after: string): void {
+  if (before !== after)
+    console.error(
+      `warning: source changed during run (${before.slice(0, 12)} -> ${after.slice(0, 12)})`
+    );
+}
 interface MeasurementOptions {
   spatial?: boolean;
   progress?: boolean;

@@ -1,12 +1,12 @@
 import { type Checkpoint } from "./checkpoint";
-import { DEFAULT_CONFIG, validateConfig, type Config } from "../sim/config";
+import { DEFAULT_CONFIG, OPTIONAL_CONFIG, validateConfig, type Config } from "../sim/config";
 import { BODY_PARTS, type Body, energyCapacity, materialCapacity } from "../sim/body";
 import { createLedger } from "../sim/accounting";
 import { controller } from "../sim/controller";
 import { decodeGenotype } from "../sim/genetics/codec";
 import { INPUTS } from "../sim/interface";
 import { validateRelations } from "./relations";
-import { MATERIAL_FIELDS } from "../sim/types";
+import { PERSISTED_FIELDS } from "../sim/types";
 
 function fail(message: string): never {
   throw new Error(`Invalid bacterial checkpoint: ${message}`);
@@ -44,7 +44,8 @@ function validateCell(value: unknown, c: Config): void {
   finite(value.x, 0, Number(c.width));
   finite(value.y, 0, Number(c.height));
   object(value.body);
-  for (const key of BODY_PARTS) finite(value.body[key], 1e-15);
+  // Light harvesting is zero without the element cycle; every other stock is strictly positive.
+  for (const key of BODY_PARTS) finite(value.body[key], key === "photo" ? 0 : 1e-15);
   const body = value.body as Body;
   finite(value.energy, 0, energyCapacity(body, c) + 1e-8);
   finite(value.damage, 0, 1);
@@ -114,20 +115,24 @@ function validateDeposits(data: Record<string, unknown>): void {
 function validateFields(data: Record<string, unknown>): Config {
   object(data.config);
   for (const key of Object.keys(DEFAULT_CONFIG))
-    if (key !== "foodEpochs" && !(key in data.config)) fail(`missing config ${key}`);
+    if (!(OPTIONAL_CONFIG as readonly string[]).includes(key) && !(key in data.config))
+      fail(`missing config ${key}`);
   validateConfig(data.config as Config);
   finite(data.config.width, 8, 1000000);
   finite(data.config.height, 8, 1000000);
   const size = data.config.width * data.config.height;
   if (size > 1e6) fail("field too large");
-  for (const key of MATERIAL_FIELDS) numbers(data[key], size, 0, 1e100);
+  for (const key of PERSISTED_FIELDS) numbers(data[key], size, 0, 1e100);
   return data.config as Config;
 }
-export function validateSnapshot(data: unknown): asserts data is Checkpoint {
-  object(data);
-  if (data.substrate !== "bacteria-xy" || data.version !== 5)
-    fail("unsupported substrate or version; requires bacterial checkpoint v5");
-  const config = validateFields(data);
+const SIGNED_LEDGER = new Set(["oxygenExchanged", "carbonExchanged"]);
+function validateLedger(value: unknown): void {
+  object(value);
+  // Net atmosphere exchanges are the signed ledger entries.
+  for (const key of Object.keys(createLedger()))
+    finite(value[key], SIGNED_LEDGER.has(key) ? -Number.MAX_SAFE_INTEGER : 0);
+}
+function validateIdentity(data: Record<string, unknown>): void {
   for (const key of ["tick", "nextCell", "nextGenome"]) integer(data[key]);
   integer(data.seed, -2147483648, 4294967295);
   for (const name of ["rng", "environmentRng", "geneticRng"]) {
@@ -136,8 +141,14 @@ export function validateSnapshot(data: unknown): asserts data is Checkpoint {
     integer(rng.value, 1, 4294967295);
   }
   if (data.stopReason !== null && typeof data.stopReason !== "string") fail("stop reason");
-  object(data.ledger);
-  for (const key of Object.keys(createLedger())) finite(data.ledger[key]);
+}
+export function validateSnapshot(data: unknown): asserts data is Checkpoint {
+  object(data);
+  if (data.substrate !== "bacteria-xy" || data.version !== 6)
+    fail("unsupported substrate or version; requires bacterial checkpoint v6");
+  const config = validateFields(data);
+  validateIdentity(data);
+  validateLedger(data.ledger);
   array(data.cells);
   for (const cell of data.cells) validateCell(cell, config);
   validateRecords(data);

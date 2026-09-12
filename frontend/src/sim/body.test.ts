@@ -3,6 +3,7 @@ import { DEFAULT_CONFIG } from "./config";
 import { createWorld, stepWorld } from "./world";
 import { seedGenotype } from "./genetics/genotype";
 import { blueprint } from "./phenotype";
+import { effectiveStock } from "./body";
 import { bodyRadius, basal, locomotion, scaleBody, structuralMass } from "./body";
 import { balance, materialBalance, heldEnergy, heldMaterial, total } from "./accounting";
 import { metabolize } from "./development";
@@ -123,4 +124,13 @@ it("starvation and chemical decay preserve both ledgers through an integrated re
   expect(w.ledger.deaths).toBe(1);
   expect(Math.abs(balance(w))).toBeLessThan(1e-9);
   expect(Math.abs(materialBalance(w))).toBeLessThan(1e-9);
+});
+it("membrane crowding scales each acquisition pathway by its share of all three", () => {
+  const w = createWorld(1, { ...DEFAULT_CONFIG, founders: 1 });
+  const body = { ...w.cells[0].body, transport: 0.1, transportB: 0.1, photo: 0 };
+  expect(effectiveStock(body, "transport", w.config)).toBe(0.1);
+  const crowded = { ...w.config, machineryCrowding: 1 };
+  expect(effectiveStock(body, "transport", crowded)).toBeCloseTo(0.05, 12);
+  expect(effectiveStock({ ...body, transportB: 0 }, "transport", crowded)).toBeCloseTo(0.1, 12);
+  expect(effectiveStock(body, "photo", crowded)).toBe(0);
 });

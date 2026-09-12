@@ -178,6 +178,10 @@ causal attributions. No further interventions were added to explain each winner.
 
 ## Default disposition and next decision
 
+Superseded September 11, 2026: the [zone experiment](zones-study.md) replaced the epoch calendar
+with simultaneous A/B halves as the Run default; epochs remain selectable. The disposition below
+is the record as written at the time.
+
 Keep the tested food epochs as the default. The food mixture changes substantially, viable
 populations persist, and inherited competitive performance depends on that mixture. A prescribed
 crash/recovery curve or specialist pair is not an acceptance requirement. There is no reason from

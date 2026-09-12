@@ -3,8 +3,27 @@ import { nextRandom } from "./random";
 import { wrap, delta } from "./geometry";
 import { deposit } from "./fields";
 import { foodEpoch } from "./foodEpochs";
+import { foodZone } from "./foodZones";
 
-export function newDeposit(world: World): Source {
+/** Composition by position, by calendar, or the drawn mixture. */
+function composition(world: World, mixed: number, x: number): number {
+  const c = world.config;
+  if (c.foodZones) return foodZone(c.foodZones, x, c.width).share;
+  if (c.foodEpochs) return foodEpoch(c.foodEpochs, world.tick).share;
+  return mixed;
+}
+/**
+ * Zoned worlds give every band equal supply: deposit slot i always lands in band i mod N, at the
+ * drawn offset within that band. Unzoned worlds keep the drawn position unchanged.
+ */
+function zoned(world: World, x: number, slot: number): number {
+  const c = world.config;
+  if (!c.foodZones) return x;
+  const bands = c.foodZones.shares.length,
+    width = c.width / bands;
+  return (slot % bands) * width + (x % width);
+}
+export function newDeposit(world: World, slot = 0): Source {
   const c = world.config,
     rng = world.environmentRng;
   const random = () => nextRandom(rng);
@@ -15,13 +34,19 @@ export function newDeposit(world: World): Source {
   const rate = (c.sourceRate * (0.4 + 1.2 * random())) / Math.sqrt(duration);
   // Keep the same environment draws so composition cannot reschedule or relocate deposits.
   const mixed = random() < 0.5 ? 0.05 + 0.2 * random() : 0.75 + 0.2 * random();
-  const share = c.foodEpochs ? foodEpoch(c.foodEpochs, world.tick).share : mixed;
+  const drawn = clustered
+    ? wrap(center.x + (random() - 0.5) * c.width * 0.4, c.width)
+    : random() * c.width;
+  const y = clustered
+    ? wrap(center.y + (random() - 0.5) * c.height * 0.4, c.height)
+    : random() * c.height;
+  const radius = c.sourceRadius * (0.35 + random());
+  const x = zoned(world, drawn, slot);
+  const share = composition(world, mixed, x);
   return {
-    x: clustered ? wrap(center.x + (random() - 0.5) * c.width * 0.4, c.width) : random() * c.width,
-    y: clustered
-      ? wrap(center.y + (random() - 0.5) * c.height * 0.4, c.height)
-      : random() * c.height,
-    radius: c.sourceRadius * (0.35 + random()),
+    x,
+    y,
+    radius,
     remaining,
     rate,
     foodA: remaining * rate * share,
@@ -45,12 +70,12 @@ function leak(world: World, source: Source, amount: number, field: Float64Array)
     }
   for (const [i, weight] of entries) field[i] += (amount * weight) / total;
 }
-function advanceDeposit(world: World, source: Source): void {
+function advanceDeposit(world: World, source: Source, slot: number): void {
   const c = world.config;
   if (source.remaining <= 0) {
     source.wait -= c.dt;
     if (source.wait > 0) return;
-    Object.assign(source, newDeposit(world));
+    Object.assign(source, newDeposit(world, slot));
     world.ledger.supplied += source.foodA + source.foodB;
   }
   const total = source.foodA + source.foodB;
@@ -69,5 +94,5 @@ function advanceDeposit(world: World, source: Source): void {
   }
 }
 export function advanceDeposits(world: World): void {
-  for (const source of world.sources) advanceDeposit(world, source);
+  for (const [slot, source] of world.sources.entries()) advanceDeposit(world, source, slot);
 }

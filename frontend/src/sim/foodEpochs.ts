@@ -3,6 +3,8 @@ export interface FoodEpochs {
   readonly phaseTicks: number;
   readonly shares: readonly number[];
 }
+/** The measured alternating calendar; selectable, no longer the Run default. */
+export const DEFAULT_EPOCHS: FoodEpochs = { phaseTicks: 50000, shares: [0.8, 0.2] };
 
 export function validateFoodEpochs(value: unknown): void {
   if (value === undefined) return;

@@ -30,7 +30,7 @@ export function makeCell(
     damage: parent?.damage ?? 0,
     heading: nextRandom(world.rng) * 2 * Math.PI,
     ...(stocks ?? {
-      body: blueprint(world.genomes.get(genome)!.genome, world.config),
+      body: { ...blueprint(world.genomes.get(genome)!.genome, world.config) },
       reserve: world.config.founderReserve,
       energy: world.config.founderEnergy,
     }),
@@ -113,6 +113,19 @@ export function reproduce(world: World): void {
   }
   world.cells = result;
   if (!result.length) world.stopReason = "Population extinct";
+  pruneGenomes(world);
+}
+/**
+ * Genotype records are retained while a living cell carries them, plus every founder record.
+ * Dead organisms keep their genome id in ancestry as provenance only. Pruning runs when records
+ * exceed four times the population plus a margin, so it is deterministic and amortized.
+ */
+export function pruneGenomes(world: World): void {
+  if (world.genomes.size <= 4 * world.cells.length + 256) return;
+  const live = new Set<number>();
+  for (const cell of world.cells) live.add(cell.genome);
+  for (const [id, record] of world.genomes)
+    if (record.parent !== null && !live.has(id)) world.genomes.delete(id);
 }
 function removeDead(world: World): Cell[] {
   return world.cells.filter((cell) => {

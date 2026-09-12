@@ -6,7 +6,7 @@ import { balance, materialBalance, total } from "../../src/sim/accounting";
 import { checkpointToJson } from "../../src/persist/checkpoint";
 import { FLOW_UNITS } from "../../src/sim/observation";
 import { controller } from "../../src/sim/controller";
-import { sourceDigest } from "./bacteriaRun";
+import { sourceDigest, warnIfSourceChanged } from "./bacteriaRun";
 import { QuickObserver } from "./quickObserver";
 import { type QuickScenario, percent } from "./quickScenario";
 import { openLedger, recordRun, type RunRecord } from "./ledger";
@@ -43,8 +43,9 @@ export function validateQuickOptions(o: QuickOptions): void {
 function validateBoundedOptions(o: QuickOptions, maxTicks: number): void {
   if (!Number.isInteger(o.ticks) || o.ticks < 1 || o.ticks > maxTicks)
     throw new Error(`Experiment requires 1–${maxTicks} ticks; register long runs separately`);
-  if (!Number.isFinite(o.wallSeconds) || o.wallSeconds <= 0 || o.wallSeconds > 120)
-    throw new Error("Quick experiments require a wall cap of 1–120 seconds per case");
+  const maxWall = maxTicks > 3000 ? 900 : 120;
+  if (!Number.isFinite(o.wallSeconds) || o.wallSeconds <= 0 || o.wallSeconds > maxWall)
+    throw new Error(`Bounded experiments require a wall cap of 1–${maxWall} seconds per case`);
 }
 
 /** New scenarios reuse this runner without another observer, ledger or simulation loop. */
@@ -57,12 +58,16 @@ export function runQuick(scenario: QuickScenario, options: QuickOptions) {
 export function runSelectionPilot(
   scenario: QuickScenario,
   options: QuickOptions,
-  justification: string
+  justification: string,
+  experiment = "capability-selection-pilot"
 ) {
   validateBoundedOptions(options, 20000);
   if (!justification.trim()) throw new Error("Selection pilot requires a justification");
-  return runBounded(scenario, options, "capability-selection-pilot", justification);
+  return runBounded(scenario, options, experiment, justification);
 }
+
+/** Ten-tick frames for short cases; hundred-tick frames keep multigeneration pilot traces bounded. */
+export const frameCadence = (ticks: number): number => (ticks > 3000 ? 100 : 10);
 
 function advanceBounded(
   world: World,
@@ -70,7 +75,8 @@ function advanceBounded(
   options: QuickOptions,
   started: number
 ) {
-  const frames = [observer.frame()];
+  const frames = [observer.frame()],
+    cadence = frameCadence(options.ticks);
   let maxEnergyResidual = 0,
     maxMaterialResidual = 0;
   while (world.tick < options.ticks && !world.stopReason) {
@@ -80,7 +86,7 @@ function advanceBounded(
     observer.afterStep();
     maxEnergyResidual = Math.max(maxEnergyResidual, Math.abs(balance(world)));
     maxMaterialResidual = Math.max(maxMaterialResidual, Math.abs(materialBalance(world)));
-    if (world.tick % 10 === 0) frames.push(observer.frame());
+    if (world.tick % cadence === 0) frames.push(observer.frame());
   }
   if (frames.at(-1)!.tick !== world.tick) frames.push(observer.frame());
   return { frames, maxEnergyResidual, maxMaterialResidual };
@@ -112,6 +118,7 @@ function runBounded(
     config: world.config,
     sourceDigest: digest,
     flowUnits: FLOW_UNITS,
+    frameCadence: frameCadence(options.ticks),
     traceContract:
       "Positions at frame tick; inputs/actions from preceding inference. localInputsNow is a nonmutating current-position probe. Arrival means entering target radius, not first uptake. Food A is initial offer; B includes recycling.",
   };
@@ -153,8 +160,7 @@ function runBounded(
       },
       options.output
     );
-    if (result.sourceDigestAfter !== digest)
-      throw new Error("Source changed during quick experiment");
+    warnIfSourceChanged(digest, result.sourceDigestAfter);
     return result;
   } finally {
     observer.close();

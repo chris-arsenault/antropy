@@ -28,19 +28,66 @@ transfer panel found both general improvement and greater post-B advantage in B-
 the later [capability study](../capability-investigation.md) isolates a beneficial actual B-processing
 allele. Its short invasion pilots do not consistently favor B supply more than A supply.
 
-The recommended next direction is simultaneous spatial A/B heterogeneity, pending design review.
-Begin with the existing non-epoch deposit distribution; its local contrasts and per-type processing
-payoffs need the report's small mixed-versus-separated-food test before altering the Run default.
-No new resource species or controller input is proposed. Evolved active food preference and stable
-specialist coexistence are separate, currently unproved claims.
+Simultaneous spatial A/B heterogeneity is implemented as [food zones](bacteria.md#world-fields-and-finite-deposits):
+a pure-A band and a pure-B band with equal supply. The [zone experiment](../zones-study.md) shows
+that constructed A- and B-specialists each invade from rarity and persist with a generalist in
+that world, while a generalist beats either specialist alone and in mixed worlds. The mechanism
+is negative frequency dependence: a rare specialist has an under-exploited private resource. This
+is a constructed result; evolved food preference and evolved specialization are phase 4 claims.
+
+<a id="ecology-element-cycle"></a>
+
+## Element cycle
+
+Optional `config.cycle` turns the world into a cell-mediated cycle of one element in two states:
+inorganic carbon in the `carbon` field, and organic material in food, reserve, structure and
+detritus. An installed light-harvesting stock (physical locus 8, reference `photoRatio` × core)
+fixes local carbon at `photoRate × stock × light × C/(C+carbonK)` per second, limited by free
+storage, by carbon actually present at the body's stencil and by the light still unclaimed this
+tick on the ground within `lightRadius` of the body (`lightSupply` fixation per raster cell per
+second, gathered evenly over that footprint and claimed in body order, so harvesters whose
+footprints overlap shade one another), and releases `oxygenPerMaterial` oxygen per unit fixed
+into the `oxygen` field. The world's light budget is `lightSupply` times its area; at the
+defaults it equals the deposit supply, and it is only realized where harvesters stand. A fraction `exudation` of fixed material leaks
+into the water as dissolved food, half A and half B, instead of entering reserve: the byproduct a
+consumer can live on, present only where harvesters are dense. Harvesting stock pays
+`photoMaintenance` per unit per second rather than the general machinery rate, so an unused
+pathway is a real burden. The chemical energy of fixed material enters the energy ledger as
+light energy. Membrane crowding (`machineryCrowding`, see
+[bodies](funded-bodies.md#bodies-geometry-motion-and-uptake)) makes a cell that runs all three
+acquisition pathways deploy less of each than a specialist, so specialization has a return that
+does not depend on which food happens to be present.
+
+Catabolism consumes oxygen. Its efficiency interpolates from `anaerobicEfficiency` to the
+configured aerobic `catabolicEfficiency` by the oxygen available for the rate-limited demand at
+the body's position, so oxygen-poor water yields less usable energy per unit reserve. Respired
+and repaired material returns to the carbon field instead of leaving as waste; with the cycle
+off the waste sink applies as before. Both gases diffuse through matrix and relax toward
+atmosphere concentrations (`atmosphereOxygen`, `atmosphereCarbon`) at `exchangeRate` per second;
+net exchange is accounted, carbon inside the material balance and oxygen in its own ledger.
+
+Controllers receive no new inputs in this phase: harvesting is physiology, and the only
+behavioural cue is the existing food chemistry. The guild structure the cycle can support is
+autotrophs (harvesting stock, little transport) and heterotrophs (transport, little harvesting),
+coupled through oxygen and carbon; whether evolution finds it is the phase 1 question of the
+[roadmap](README.md#design-roadmap-2). With the cycle off no harvesting stock is built and every
+earlier result stands unchanged.
 
 <a id="ecology-toxin-defense-and-repair"></a>
 
 ## Toxin, defense and repair
 
-A local toxin diffuses and decays without ownership or producer immunity. Injury per second is
+A local toxin diffuses and decays without ownership. Injury per second is
 
-`damageRate × C/(C+toxinK) / (1+defenseStrength×defense/core)`.
+`(damageRate × C/(C+toxinK) + contactDamageRate × Σ weapon/core of touching neighbours) / protection`,
+
+with `protection = 1 + defenseStrength×defense/core + immunityStrength×weapon/core`.
+
+Installed toxin machinery therefore carries immunity, as colicin plasmids bundle toxin and
+immunity genes; a producer is protected from every producer, not only itself. Contact exposure
+has no field: it reaches only bodies within a 0.05-cell gap of a producer and cannot be sensed at a
+distance. Its default rate is zero pending the [contest record](../rps-study.md); saves that
+predate either term load with that term zero and keep their physics.
 
 Damage reduces uptake and motion by 1−damage and raises maintenance by 1+damage; unit damage kills.
 Installed defense reduces exposure damage but consumes material and maintenance whether needed or not.

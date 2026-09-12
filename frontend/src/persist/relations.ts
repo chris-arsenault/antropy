@@ -35,10 +35,13 @@ function checkAncestry(data: Checkpoint): Map<number, number> {
     const parent = checkParent(a, ancestors, data.config.reproduction === "budding");
     generations.set(a.id, parent === null ? 0 : generations.get(parent)! + 1);
     requireRelation(a.born <= data.tick && a.id < data.nextCell, "invalid ancestor time or ID");
+    // Dead organisms may reference pruned genotype records; living ones must not.
+    const genome = genomes.get(a.genome);
     requireRelation(
-      genomes.has(a.genome) && genomes.get(a.genome)!.born <= a.born,
-      "missing ancestry genome"
+      a.genome < data.nextGenome && (!genome || genome.born <= a.born),
+      "invalid ancestry genome"
     );
+    requireRelation(!live.has(a.id) || !!genome, "missing living cell genome");
     requireRelation((a.cause === "alive") === live.has(a.id), "living ancestry/body mismatch");
     checkEnd(a, data.tick);
   }
@@ -74,9 +77,10 @@ function checkGenomes(data: Checkpoint): void {
       requireRelation(g.learned === 0, "founder cannot have a learning transfer");
       continue;
     }
+    // A parent record may have been pruned once no living cell carried it.
     const parent = genomes.get(g.parent);
-    requireRelation(!!parent && g.parent < g.id, "invalid genome parent");
-    requireRelation(parent!.born <= g.born, "invalid genome ancestry time");
+    requireRelation(g.parent < g.id, "invalid genome parent");
+    requireRelation(!parent || parent.born <= g.born, "invalid genome ancestry time");
   }
 }
 function checkInterventions(data: Checkpoint): void {

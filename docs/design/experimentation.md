@@ -22,6 +22,29 @@ Many genome records can encode identical sequences. Differences in grown body si
 genetic. A founder lineage contains many genotypes; lineage dominance does not identify a winning
 variant. Generation maximum is not the count of independent selection experiments.
 
+<a id="experiments-coexistence-criterion"></a>
+
+## Coexistence criterion
+
+The project goal is evolutionary differentiation: heritable strategies that coexist because each
+does better when rare. The acceptance test is **mutual invasibility**, the standard ecological
+definition of stable coexistence.
+
+1. Identify at least two heritable phenotype clusters in a living population by clustering
+   inherited construction targets and, where relevant, controller distance. Clusters are found
+   without reference to fitness; a cluster is not a founder color or a genome-record count.
+2. Start a fresh world from common funded bodies with one cluster's representative genotypes at
+   about 10% abundance and the other at 90%, then swap. Freeze mutation and learned-weight
+   retention so only survival and local reproduction change frequencies.
+3. Both rare types must increase in frequency over at least twenty generations, and the two-type
+   mixture must persist without either falling below 5% over at least 200 generations in the
+   evolved world. Spatial mosaics and cycling frequencies both satisfy persistence; fixation of
+   one type does not.
+
+A constructed pair passing this test establishes that the world can support coexistence. An
+evolved pair passing it, from a single founder, establishes the project goal for that world.
+Neither counts, biomass nor founder dominance substitutes for either result.
+
 <a id="experiments-competing-hypotheses"></a>
 
 ## Competing hypotheses

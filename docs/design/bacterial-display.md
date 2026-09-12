@@ -25,7 +25,7 @@ select wrapped bodies. Camera actions never alter simulation state or randomness
 | Red field | Toxin injury relative to maximum reference-body repair, not receptor sensitivity |
 | Ochre deposits | Porous matrix that slows movement/transport and binds toxin |
 | Magenta, optional and initially off | Neutral signal; secretion disabled by default |
-| Colored body rim | Recent four-generation ancestry family by default; selectable founder, relatedness, genetic-distance or inherited-trait view |
+| Colored body rim | Strategy cluster by default (orange lowest A share, blue, green highest); selectable family, founder, relatedness, genetic-distance or inherited-trait view |
 | Inner filled area | Usable-energy fraction; low energy is amber |
 | Red interior | Functional damage above 20% |
 | White tip | Heading |
@@ -45,10 +45,10 @@ uses world area; damage/slowing use living population. Lifetime secretion and co
 absorbed material, and energy costs use dissipated energy. Accounting errors use total input and should
 remain near zero. Raw ledgers remain in the accounting details. Stats distinguish
 matrix slowing, damage, repair expenditure, field material, acquisition and conservation.
-The default food schedule starts A-rich and alternates every 50,000 ticks. Stats show the current
-new-deposit mixture and next change; existing food retains its composition. A-processing allocation
-is the initial trait trend when epochs are enabled. At 30 ticks/s, a phase takes about 28 minutes.
-The environment settings retain a Food epochs checkbox; unscheduled saves remain unscheduled.
+The default food layout is a pure-A left half and a pure-B right half. Stats show the band
+compositions; existing food retains its composition. A-processing allocation is the initial trait
+trend when zones or epochs are enabled. The environment settings offer mixed deposits, the
+alternating epoch calendar or zones for a new population; saves keep whichever layout they hold.
 Genetic construction targets are separate from actual grown bodies. Exact sequence diversity is
 separate from genotype record count. Founder shares and histories describe ancestry abundance,
 not fitness or behavioral classes.
@@ -70,6 +70,8 @@ task overrides persist as diagnostic interventions. All existing controls remain
 
 The default pacing target is 30 ticks/s. Display refresh and simulation rate are separate; measured
 throughput can fall below the request. Maximum means CPU-limited execution, not model-time seconds.
+The map redraws every animation frame; the stats panel and inspector refresh at most every 250 ms
+while running, and immediately on pause, stop or a manual intervention.
 The [evidence](bacteria-results.md) lists sampled onset times without promising browser throughput.
 
 <a id="display-implementation-boundary"></a>

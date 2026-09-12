@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { createWorld } from "../src/sim/world";
-import { DEFAULT_CONFIG } from "../src/sim/config";
+import { DEFAULT_CONFIG, type Config } from "../src/sim/config";
 import { foodEpoch } from "../src/sim/foodEpochs";
 import { checkpointToJson } from "../src/persist/checkpoint";
 import { noteExecution } from "../src/persist/provenance";
@@ -29,7 +29,11 @@ function prepare() {
   const directory = join(flag(flags, "output", "harness/artifacts/epochs-2026-09-11"), label);
   if (existsSync(directory))
     throw new Error("Run directory already exists; evidence is append-only");
-  const config = { ...DEFAULT_CONFIG, foodEpochs: { phaseTicks: PHASE, shares: [0.8, 0.2] } };
+  const config: Config = {
+    ...DEFAULT_CONFIG,
+    foodEpochs: { phaseTicks: PHASE, shares: [0.8, 0.2] },
+    foodZones: undefined,
+  };
   if (frozen) {
     config.mutationRate = 0;
     config.physicalMutationRate = 0;

@@ -13,7 +13,7 @@ preserved at tag `ant-colony-checkpoint-2026-09-09`.
 | `sim/deposits.ts`, `ecologyFields.ts` | Finite A/B inventories, seeded arrivals, conservative transport and reactions |
 | `sim/secretion.ts`, `interference.ts`, `matrix.ts` | Shared action affordability, toxin damage/repair, porous binding material and footprint barriers |
 | `sim/fields.ts`, `geometry.ts`, `spatial.ts` | Periodic transport and sampling, body geometry and local contact lookup |
-| `sim/sensors.ts`, `controller/rnn.ts` | Local observation and receptor adaptation; float32 inference and genome variation |
+| `sim/sensors.ts`, `controller/rnn.ts` | Local observation and receptor adaptation; RNN inference and genome variation |
 | `sim/genetics/`, `phenotype.ts` | Chromosomes, transmission/mutation policies and independent construction targets |
 | `sim/body.ts`, `development.ts`, `accounting.ts` | Actual material stocks, viscous rates, catabolism/construction and separate resource books |
 | `sim/controller/plasticity.ts`, `inference.ts` | Private synaptic traces, inherited learning rules and paid updates |
@@ -48,7 +48,11 @@ chemical energy until decay, but cannot be eaten. See [the accounting equations]
 
 The world uses float64 resource fields and physical quantities; observations, weights and hidden state
 use float32. Integer ticks, stable iteration, deterministic body perturbations and persisted random
-streams make checkpoint continuation reproducible. Source schedules, body initialization/division
+streams keep continuation deterministic on one machine. Exact cross-machine replay is not an
+invariant: the save state is the record. Weights, traces and hidden state are float32 storage
+with double arithmetic. The kernel is TypeScript only, one implementation per physical rule;
+[ADR 0019](adr/0019-single-language-kernel.md) records why a WebAssembly split was built,
+measured and removed. Source schedules, body initialization/division
 and genetic variation each have a separate persisted stream, so genetic draws cannot change
 physical headings, placement or food schedules independently of inherited behavior.
 
@@ -134,9 +138,12 @@ live outside the world and rebuild after import. UI history samples each 100 tic
 long-term trends and an unthinned recent window. No family label is a sensor or cooperation rule.
 
 The contact model uses bounded displacement and four local separation passes, not a rigid-body
-constraint solver. Long-run ancestry retention grows with births. The 2,000-cell load probe falls
-below 30 ticks/s on the measured host under the initial v1 model; it is not current capacity
-evidence. No browser throughput or visual certification is claimed.
+constraint solver; a pass that displaces no body ends resolution early, which is exact. The spatial
+index caches each body's radius at insertion and returns a reused neighbour snapshot in stable
+bin order. Long-run ancestry retention grows with births. Current headless throughput is in
+[calibration](calibration.md#calibration-throughput). In the browser, the map redraws every frame
+while population statistics and the inspector refresh at a bounded cadence. No browser throughput
+or visual certification is claimed.
 
 ## Deployment
 

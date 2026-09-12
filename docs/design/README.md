@@ -18,7 +18,10 @@ Hypotheses guide the design of opportunities and the diagnosis of inert mechanis
 winner or making a prescribed pair of strategies succeed is not the project goal or a development gate.
 
 Inheritance, mutation, acquired-weight transmission, funded reproduction and consequential ecology
-are implemented. Actual evolved genotypes have measured benefits from reduced toxin output,
+are implemented. In the current default, a single founder population evolves two coexisting diet
+specialists occupying the A and B halves of the world within about 100 generations, and the
+evolved genotypes each invade the other from rarity; see the [evolution record](../evolve-study.md).
+Earlier actual evolved genotypes have measured benefits from reduced toxin output,
 improved brief-food access and greater B-processing investment. The
 [exported-lineage investigation](../overnight-study.md) and
 [six-area capability investigation](../capability-investigation.md) use fresh transfers and targeted
@@ -48,7 +51,7 @@ remain unproved. Founder dominance alone still does not establish adaptation.
 ## Current default and disabled scope
 
 Run starts seed 101, paused at tick zero, with 48 identical founder genotypes and finite A/B
-deposits cycling between 80% A and 20% A every 50,000 ticks. Haploid clonal fission, random
+deposits in a pure-A left half and a pure-B right half. Haploid clonal fission, random
 mutation and paid inheritable plasticity remain active. The RNN is
 35 inputs → 24 recurrent units → 8 outputs. Checkpoints are v5.
 
@@ -99,6 +102,84 @@ The follow-up toxin intervention retains secretion savings but substantially att
 advantage when injury is disabled. The [motor study](../strategy-study.md) found lower investment
 won all sixteen matched contests. This limits claims about that pair; it does not block development
 until the pair succeeds. The unavailable later browser checkpoint is not a prerequisite.
+
+<a id="design-roadmap"></a>
+
+## Roadmap to strategic differentiation
+
+Reviewed September 11, 2026. The completed studies establish real evolved advantages, but every
+winner is a cost reduction, and the twelve epoch populations drift toward one economical body.
+Three structural limits explain that outcome and set the work order:
+
+- **One optimum.** Toxin injures its producer with no immunity, matrix is a shared good, and A/B
+  arrive together from the same deposits. No interaction rewards a rare type and no two niches
+  exist at once, so selection converges rather than diversifies.
+- **Small populations, slow generations.** Steady state is about 150 cells at about 5,000 ticks
+  per generation, roughly 30 generations per 150,000 ticks. Selection weaker than about 1% is
+  invisible to drift at that size, and an hour at 30 ticks/s shows about twenty generations.
+- **Behavioral mutation supply.** About one of 1,649 RNN loci changes per birth; physical loci
+  evolve far faster, which is why the isolated wins are physical or single-weight.
+
+The [coexistence criterion](experimentation.md#experiments-coexistence-criterion) is the acceptance
+test. Phases, each with a yes/no gate, in order:
+
+1. **Throughput and target.** Exact-arithmetic kernel optimization, a throttled statistics cadence
+   in the browser and this criterion. Done; numbers in [calibration](../calibration.md). The
+   500 ticks/s target was not reached; the remaining cost is float32 inference order and the
+   four-pass contact model.
+2. **Toxin with immunity.** Producers are immune to their own toxin; defense remains a separate,
+   cheaper resistance; contact-range injury added. Gate not met: all three pairwise dominances
+   hold, but every three-way pilot loses the sensitive type and fixes the resistant, the
+   well-mixed outcome. See the [contest record](../rps-study.md).
+3. **Persistent spatial A/B regions.** Pure A and B halves with balanced deposit slots, now
+   the Run default. Gate met: constructed specialists each invade from rarity and persist with
+   a generalist; the mixed control fixes the generalist. See the [zone record](../zones-study.md).
+4. **De novo evolution.** Not met in the old thin-medium world (70–127 generations, eight arms:
+   economy evolved, no partition). Met after the world was changed to a thick medium with dense
+   balanced deposits, symmetric recycling and stronger mutation supply: all three zoned seeds
+   split into A-side and B-side diet clusters from one founder by 100,000–200,000 ticks, the
+   mixed control does not, and seed 303's evolved medoid genotypes mutually invade from rarity.
+   See the [evolution record](../evolve-study.md).
+5. **Strategy-space observation.** Done: cluster colouring, scatter, table and history in Run;
+   `invasion` harness command for any checkpoint.
+6. **Behavioral differentiation.** The RNN-supply arm ran inside phase 4 and did not change the
+   outcome; the boom/bust regime was not built.
+
+Authoring a world that theory says can support coexistence is authored pressure, not forced
+coexistence: no genotype, route or winner is prescribed, and evolution must still find the
+strategies. Attribution studies of past winners and sweeps of the current ecology are paused.
+
+The block behind both early negatives was dispersal fast relative to replacement. Raising the
+medium's viscosity a thousandfold gave residency (13% of cells ever cross a band, versus 96%),
+and evolution then found the partition on its own. The toxin cycle has not been re-tested in the
+thick medium; that is the next open question, since its failure had the same cause.
+
+<a id="design-roadmap-2"></a>
+
+## Roadmap two: organism-generated selection
+
+Reviewed September 12, 2026. The zoned world proved the machinery but drew the niche itself.
+The second roadmap adds mechanisms where the organisms generate the selective environment, each
+as a configuration lever with rates, each measured in a homogeneous world against a
+mechanism-off control, each gated by mutual invasibility of whatever clusters emerge:
+
+1. **Element cycle** (implemented as `config.cycle` with `machineryCrowding`; see the
+   [ecology contract](strategic-ecology.md#ecology-element-cycle)). Measured in the
+   [cycle study](../cycle-study.md): constructed autotroph, heterotroph and mixotroph guilds each
+   invade from rarity; evolved populations at crowding 0.5 stayed mixotroph over 35–50
+   generations, and at crowding 0.75 one seed of three split into a harvester and a consumer
+   cluster by 93 generations whose medoids mutually invade.
+2. **Family chemistry**: heritable tags gating toxin immunity and matrix shelter. Planned
+   encoding: a tenth physical locus sets the share of a cell's toxin that is type B rather than
+   type A (two toxin fields under `toxinTypes: 2`, one under the default 1); installed toxin
+   machinery is immune to each type in proportion to the share it produces, so relatives
+   tolerate one another and a lineage that drifts in type is harmed by its own family. The
+   sensed toxin input becomes the susceptibility-weighted concentration.
+3. **Predation**: contact consumption of smaller cells with paid machinery.
+4. **Abiotic disturbance**: random mixing, washout and dry-down events.
+5. **Horizontal gene transfer** between touching cells.
+6. **Adhesion and division of labor**.
+7. **Quorum signaling** through the costed neutral chemical.
 
 <a id="design-status-and-provenance"></a>
 

@@ -1,6 +1,7 @@
 import { type World } from "./types";
 import { diffuse } from "./fields";
 import { advanceDeposits } from "./deposits";
+import { exchangeAtmosphere } from "./cycle";
 
 function react(world: World): void {
   const c = world.config;
@@ -21,8 +22,10 @@ function react(world: World): void {
     world.boundToxin[i] -= destroyed;
     world.ledger.toxinLoss += destroyed;
     const food = world.detritus[i] * (1 - Math.exp(-c.detritusDecay * c.dt));
+    // Decomposition returns feedstock as both foods equally; it favours neither pathway.
     world.detritus[i] -= food;
-    world.nutrientB[i] += food;
+    world.nutrient[i] += food / 2;
+    world.nutrientB[i] += food / 2;
   }
 }
 export function advanceFields(world: World): void {
@@ -52,4 +55,9 @@ export function advanceFields(world: World): void {
       world.matrix
     );
   world.ledger.toxinLoss += diffuse(world.toxin, c, c.toxinDiffusion, c.toxinDecay, world.matrix);
+  if (c.cycle) {
+    diffuse(world.carbon, c, c.cycle.carbonDiffusion, 0, world.matrix);
+    diffuse(world.oxygen, c, c.cycle.oxygenDiffusion, 0, world.matrix);
+    exchangeAtmosphere(world);
+  }
 }

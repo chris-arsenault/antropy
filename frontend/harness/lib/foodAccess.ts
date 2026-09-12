@@ -57,6 +57,7 @@ export function foodAccess(context: "persistent" | "brief"): QuickScenario {
         initialNutrient: 0,
         nutrientDecay: decay,
         foodEpochs: undefined,
+        foodZones: undefined,
         mutationRate: 0,
         physicalMutationRate: 0,
         learningRetention: 0,
