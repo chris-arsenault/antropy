@@ -12,6 +12,7 @@ import { blueprint, divisionReady } from "./phenotype";
 import { deposit } from "./fields";
 import { flow, life } from "./observation";
 import { consumePrey } from "./predation";
+import { AncestryStore } from "./ancestryStore";
 
 export function makeCell(
   world: World,
@@ -103,8 +104,7 @@ export function reproduce(world: World): void {
       result.push(cell);
       continue;
     }
-    if (population >= c.maxPopulation) {
-      world.stopReason = "Population safety limit reached";
+    if (reproductionLimit(world, population)) {
       result.push(cell);
       continue;
     }
@@ -120,6 +120,15 @@ export function reproduce(world: World): void {
   world.cells = result;
   if (!result.length) world.stopReason = "Population extinct";
   pruneGenomes(world);
+  if (world.ancestry instanceof AncestryStore && world.tick % 250 === 0) world.ancestry.compact();
+}
+function reproductionLimit(world: World, population: number): boolean {
+  if (population >= world.config.maxPopulation)
+    world.stopReason = "Population safety limit reached";
+  const births = world.config.reproduction === "budding" ? 1 : 2;
+  if (world.nextCell + births - 1 > world.config.maxAncestryRecords)
+    world.stopReason = "Ancestry memory limit reached; export this run before changing its limit";
+  return world.stopReason !== null;
 }
 /**
  * Genotype records are retained while a living cell carries them, plus every founder record.

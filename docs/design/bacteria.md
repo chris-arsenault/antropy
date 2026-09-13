@@ -8,7 +8,7 @@ own its detailed interfaces and tradeoffs.
 
 ## Substrate and embodied state
 
-One periodic 80 × 60 XY plane contains continuous circular body footprints and unit-spaced
+One periodic 320 × 240 XY plane contains continuous circular body footprints and unit-spaced
 raster fields. Neither axis is height. Sensing, transport, contact, placement and rendering agree
 at periodic seams. There is no map oracle, pathfinder, gravity axis, nest or alternate substrate.
 
@@ -16,8 +16,9 @@ A cell owns position, heading, nine actual material stocks, nutrient reserve, us
 functional damage, four adaptive receptor baselines, contact state, private brain state, genotype
 reference and ancestry. Radius derives from structural and stored-food volume using a spherical
 reference approximation. Low-Reynolds-number drag motivates overdamped swimming; there is no
-inertial coasting or resolved fluid solver. The medium is thick by design, so a lineage mostly
-stays in the neighbourhood where it was born; see [calibration](../calibration.md#calibration-residency). Rotational Brownian perturbation uses body randomness.
+inertial coasting or resolved fluid solver. Viscosity is provisionally 0.004; geography and local
+resource economics provide separation, while motors still buy useful movement. See
+[short movement probes](../spatial-probes.md). Rotational Brownian perturbation uses body randomness.
 
 Contact uses bounded displacement, spatial bins and four separation passes. This is an approximate
 local overlap solver, not an exact rigid-body constraint solver. More mass or storage changes
@@ -34,9 +35,10 @@ local deposits; soluble fields diffuse and decay. Detritus decomposes half into 
 Carbon and oxygen belong to the optional [element cycle](strategic-ecology.md#ecology-element-cycle)
 and stay empty without it. Transport subdivides unstable steps and preserves nonnegative material.
 
-Twenty-four deposits hold separate finite A/B inventories, position, radius, release rate, lifetime and
-arrival delay. Most arrivals fall near three seeded landscape clusters; others scatter across the
-world. Composition, size and duration vary. Depleted/expired deposits wait before replacement;
+Forty-eight deposits hold separate finite A/B inventories, position, radius, release rate, lifetime and
+arrival delay. The initial landscape has seven irregular abiotic centers with unequal source density.
+Sites have persistent positions, radii, richness and A/B shares; renewal timing and release vary.
+This arrangement is a revisable hypothesis, independent of occupants. Depleted/expired deposits wait before replacement;
 expired inventory becomes local detritus. Resource schedules use independent environment randomness,
 never organism need, identity or success. Controllers receive local concentrations only.
 
@@ -44,7 +46,7 @@ Optional `config.foodEpochs = { phaseTicks, shares }` replaces new deposits' ran
 with a repeating calendar of food-A fractions. It preserves total inventory, energy density,
 source geometry, arrival timing and environment random draws. Existing inventories and dissolved
 food keep their composition across transitions. When neither epochs nor zones is present, deposits have mixed compositions; the resolved
-schedule persists in v7 checkpoints and its phase derives from world tick. Controllers receive
+schedule persists in v8 checkpoints and its phase derives from world tick. Controllers receive
 no calendar input. See the [registered epoch experiment](../food-epochs-study.md).
 
 Optional `config.foodZones = { shares }` instead fixes composition by position: the world is
@@ -52,10 +54,16 @@ split into equal vertical bands, deposit slot *i* always lands in band *i* mod *
 offset, and a new deposit takes its band's food-A fraction. Each band therefore has the same number of deposit slots, while actual arrival times,
 inventory and release rates can differ. Inventory, energy density, timing and random draws are unchanged; only
 the x coordinate is remapped into the slot's band. Zones and epochs are alternatives; a
-configuration declares at most one, and both persist in v7 checkpoints. Controllers receive no
+configuration declares at most one, and both persist in v8 checkpoints. Controllers receive no
 band input. See the [registered zone experiment](../zones-study.md).
 
-The initial uniform food field and initial source inventories are accounted once. Later arrivals
+The default uniform food field is zero. Ten percent of each initial finite stock is dissolved locally
+before founders arrive, subtracting the same material from its source. The 48 founders start near
+two separated sites: the first site and the site farthest from it by periodic distance. Placement
+alternates between them, trying the other if local space fills. Both colonies share the same
+founder genotype; no later colony count or survival is prescribed. Diagnostic worlds with a single
+site or no sites retain single-site or scattered placement. Initial fields and source inventories
+are accounted once. Later arrivals
 enter the external-supply ledger; leaking inventory into a field is a transfer, not new supply.
 Persistent and transient configurations alter finite deposit lifetimes. Neither means an infinite
 spout. [Ecology](strategic-ecology.md) defines the opportunities and construction/interference effects.
@@ -117,14 +125,14 @@ Environment, body and genetic randomness have separate persisted streams. Consum
 without changing inherited information must not alter placements, headings or source schedules.
 Physical fields and ledgers use float64; observations and neural state use float32.
 
-Checkpoint v7, substrate `bacteria-xy`, stores resolved configuration, all fields/inventories
+Checkpoint v8, substrate `bacteria-xy`, stores resolved configuration, habitats, all fields/inventories
 (both toxin types and their matrix-bound pools included),
 body/receptor/brain state, immutable genotype records, organism/genotype ancestry, random streams,
 ledgers, bounded recent events, durable manual interventions and stop reason. Validation checks
 encodings, physical capacities, record consistency and conservation. Incompatible or incomplete
 older saves are rejected; no adapter invents missing state. The one allowance is a lever that
 is off when absent (`preyYield`, `transferRate`, `sharingRate`, and their ledger counters): a
-v7 save that predates the lever loads with it at zero, which leaves its physics exactly as it was.
+v8 save missing that disabled lever loads with it at zero. Versions through v7 are rejected.
 
 Optional execution metadata records source segments by tick; file exports also identify the
 exporter's source. Legacy histories remain unknown until execution is observed. Development hot
@@ -135,6 +143,14 @@ not from an automatically restored checkpoint. Genotype records are retained whi
 cell carries them, plus every founder record; once records exceed four times the population
 plus a margin, unreferenced non-founder records are pruned. Dead organisms keep their genome id
 in ancestry as provenance only, and a genome record's parent id may name a pruned record.
-Organism ancestry itself is retained in full and grows with births. Saves are manual, local
-IndexedDB holds one latest checkpoint, and chart history is not checkpointed. These are explicit
-limits for the intended days/weeks observation; see the [readiness backlog](../backlog.md#backlog-runtime-and-observation-limits).
+Organism parentage is retained in full. Older closed lifetimes move to numeric pages; living/recent
+records remain mutable objects. The default two-million-record limit pauses before a birth would
+exceed it. Dead genotype IDs remain provenance when their genotype payload is pruned; genealogical
+queries still work, while unavailable genetic comparisons are labeled.
+
+Browser checkpoints include separately versioned spatial identity, events and thinned chart samples.
+IndexedDB retains six automatic and two manual compressed recovery points within a 256 MiB budget.
+Automatic saves occur every 30 wall seconds and on pause; visibility/page-exit saves are best effort.
+A failed save pauses execution. An individual uncompressed checkpoint is limited to 192 MiB.
+No old save is deleted unless its replacement transaction commits. See
+[continuing observation](../continuing-observation.md) for measurements and remaining limits.

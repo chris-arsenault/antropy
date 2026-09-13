@@ -10,10 +10,19 @@ import { Inspector } from "./ui/Inspector";
 import { PersistenceControls } from "./ui/PersistenceControls";
 import { EvolutionSettings } from "./ui/EvolutionSettings";
 import { FoodEpochSettings } from "./ui/FoodEpochSettings";
+import { observeSpatial } from "./observe/spatialHistory";
+
+function observed(world: World): World {
+  observeSpatial(world, true);
+  return world;
+}
 
 export function App() {
-  const [run, setRun] = useState(() => ({ id: 0, world: createWorld() }));
-  const restore = useCallback((world: World) => setRun((r) => ({ id: r.id + 1, world })), []);
+  const [run, setRun] = useState(() => ({ id: 0, world: observed(createWorld()) }));
+  const restore = useCallback(
+    (world: World) => setRun((r) => ({ id: r.id + 1, world: observed(world) })),
+    []
+  );
   return <Simulation key={run.id} world={run.world} onRestore={restore} />;
 }
 function RunControls({ world, sim }: { world: World; sim: ReturnType<typeof useSimulation> }) {
@@ -49,6 +58,7 @@ function RunControls({ world, sim }: { world: World; sim: ReturnType<typeof useS
       <span className={`run-status ${sim.running ? "is-running" : ""}`}>
         {world.stopReason ? "Stopped" : status}
       </span>
+      <span role="status">{sim.recovery}</span>
     </div>
   );
 }

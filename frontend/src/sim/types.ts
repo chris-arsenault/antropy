@@ -4,6 +4,7 @@ import { type BrainState } from "./controller";
 import { type Genotype } from "./genetics/genotype";
 import { type Action } from "./interface";
 import { type Body } from "./body";
+import { type Habitat } from "./landscape";
 /** Fields that hold conserved material, inorganic carbon included. */
 export const MATERIAL_FIELDS = [
   "nutrient",
@@ -138,7 +139,7 @@ export interface Intervention {
 }
 export interface World {
   substrate: "bacteria-xy";
-  version: 7;
+  version: 8;
   seed: number;
   tick: number;
   config: Config;
@@ -158,6 +159,7 @@ export interface World {
   carbon: Float64Array;
   oxygen: Float64Array;
   patchCenters: Point[];
+  habitats: Habitat[];
   sources: Source[];
   genomes: Map<number, GenomeRecord>;
   nextCell: number;

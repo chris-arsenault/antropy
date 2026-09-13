@@ -10,12 +10,12 @@ export function FoodEpochSettings({
 }) {
   return (
     <label>
-      Food layout{" "}
+      Food composition{" "}
       <select
         value={foodLayout(config)}
         onChange={(event) => onChange(withLayout(config, event.target.value as FoodLayout))}
       >
-        <option value="mixed">Mixed deposits</option>
+        <option value="mixed">Local A/B mixtures</option>
         <option value="epochs">Alternating epochs</option>
         <option value="zones">A-rich and B-rich halves</option>
       </select>

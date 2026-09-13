@@ -47,7 +47,7 @@ it("seeded RNN turns toward higher local nutrient with mirrored responses", () =
   expect(a.turn).toBeCloseTo(-b.turn, 10);
 });
 it("shares scarce local uptake without iteration priority", () => {
-  const w = createWorld(2, { ...DEFAULT_CONFIG, founders: 2, initialNutrient: 0 });
+  const w = createWorld(2, { ...DEFAULT_CONFIG, founders: 2, initialNutrient: 0, sourceCount: 0 });
   Object.assign(w.cells[0], { x: 5, y: 5, reserve: 0 });
   Object.assign(w.cells[1], { x: 5, y: 5, reserve: 0 });
   w.nutrient[5 * w.config.width + 5] = 0.0001;

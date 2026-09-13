@@ -4,7 +4,7 @@ import { strategyClusters, clusterColor, type StrategyCluster } from "../observe
 import { type PopulationPoint } from "./populationHistory";
 import "./populationObservation.css";
 
-/** Living cells over inherited A share and defense, colored by cluster; shape marks the band. */
+/** Living cells over inherited A share and defense, colored by the current trait partition. */
 function Scatter({ world }: { world: World }) {
   const snapshot = strategyClusters(world),
     cache = new Map<number, ReturnType<typeof traitValues>>();
@@ -38,18 +38,14 @@ function Scatter({ world }: { world: World }) {
         100% A
       </text>
       <text x="162" y="124" textAnchor="middle">
-        A share of processing · circle left band, square right band
+        A share of processing
       </text>
       {world.cells.map((c, i) => {
         const t = trait(c.genome),
           x = 32 + (260 * t.foodA) / 100,
           y = 108 - (100 * t.defense) / top;
         const fill = clusterColor(snapshot.ranks[i] ?? 0);
-        return c.x < world.config.width / 2 ? (
-          <circle key={c.id} cx={x} cy={y} r="2.2" fill={fill} opacity="0.85" />
-        ) : (
-          <rect key={c.id} x={x - 2} y={y - 2} width="4" height="4" fill={fill} opacity="0.85" />
-        );
+        return <circle key={c.id} cx={x} cy={y} r="2.2" fill={fill} opacity="0.85" />;
       })}
     </svg>
   );
@@ -111,7 +107,6 @@ function ClusterRows({
         <tr>
           <th>Cluster</th>
           <th>Cells</th>
-          <th>Left band</th>
           <th>A share</th>
           <th>Motor</th>
           <th>Defense</th>
@@ -129,7 +124,6 @@ function ClusterRows({
               {c.rank + 1}
             </td>
             <td>{((100 * c.size) / Math.max(1, population)).toFixed(0)}%</td>
-            <td>{((100 * c.leftBand) / Math.max(1, c.size)).toFixed(0)}%</td>
             <td>{c.center.foodA.toFixed(1)}%</td>
             <td>{c.center.motor.toFixed(2)}%</td>
             <td>{c.center.defense.toFixed(2)}%</td>
@@ -150,10 +144,10 @@ export function StrategyPanel({ world, history }: { world: World; history: Popul
   const snapshot = strategyClusters(world);
   return (
     <div className="strategy-panel">
-      <h3>Strategy clusters</h3>
+      <h3>Trait partitions</h3>
       <p>
-        Living cells grouped by inherited construction targets. Coexisting clusters that hold
-        different bands are the observation this world is built for; a single cluster is not.
+        Three requested partitions of inherited construction targets. These are not spatial
+        populations or a species count; colors may change membership as the distribution changes.
       </p>
       <Scatter world={world} />
       <ClusterRows clusters={snapshot.clusters} population={world.cells.length} />

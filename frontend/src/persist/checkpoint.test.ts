@@ -76,5 +76,5 @@ it("rejects ant files, broken RNNs and missing ancestor records", () => {
   expect(() => restoreWorld(JSON.stringify(data))).toThrow("numeric array");
   data.genomes[0].genome.chromosomes[0].behavior.weights.push(0);
   data.ancestry = [];
-  expect(() => restoreWorld(JSON.stringify(data))).toThrow("missing cell record");
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("incomplete organism ancestry");
 });

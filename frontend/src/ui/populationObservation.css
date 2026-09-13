@@ -7,6 +7,25 @@
   background: #101e28;
   border-bottom: 1px solid #243847;
 }
+.spatial-panel {
+  padding: 12px;
+  background: #101e28;
+  border-top: 1px solid #243847;
+  font-size: 12px;
+}
+.spatial-panel details {
+  margin-top: 12px;
+}
+.spatial-panel li {
+  margin: 8px 0;
+}
+.spatial-panel button {
+  margin-left: 8px;
+}
+.spatial-panel p {
+  max-width: 85ch;
+  line-height: 1.5;
+}
 .population-color-control span,
 .trait-panel p,
 .relationship-panel p {

@@ -26,14 +26,21 @@ select wrapped bodies. Camera actions never alter simulation state or randomness
 | Red field | Toxin injury relative to maximum reference-body repair, not receptor sensitivity |
 | Ochre deposits | Porous matrix that slows movement/transport and binds toxin |
 | Magenta, optional and initially off | Neutral signal; secretion disabled by default |
-| Colored body rim | Requested inherited-trait group by default (orange lowest A share, blue, green highest); selectable family, founder, relatedness, genetic-distance or inherited-trait view |
+| Soft population region | Nearby actual cells, each contributing its own color; a viewing aggregate with no biological authority |
+| Small isolated mark | An actual ungrouped cell, kept visible at world scale |
+| Colored body rim / population color | Fixed inherited A-processing allocation by default: blue 0%, orange 100%; selectable family, founder, relatedness, genetic-distance or other trait view |
 | Inner filled area | Usable-energy fraction; low energy is amber |
 | Red interior | Functional damage above 20% |
 | White tip | Heading |
 | Pale expanding ring | Recently observed newborn |
 | Brief cross | Observed death at last rendered position |
 
-Lifecycle markers last fifteen model seconds and may miss events between rendered frames.
+Regions fade as screen scale rises from three to eight pixels per world unit. Below a three-pixel
+body radius, cells use a minimum visible mark; closer views resolve actual body geometry. Selected
+cells retain detail. Population selection and zoom-to-population are independent of color and
+physical field controls. Groups use physical distance, independent of camera zoom.
+
+Lifecycle markers at close zoom last fifteen model seconds and may miss events between rendered frames.
 They are view-local hints, not a complete replay. Solid walls are disabled in the default; ochre
 does not claim impermeable geometry.
 
@@ -46,9 +53,10 @@ uses world area; damage/slowing use living population. Lifetime secretion and co
 absorbed material, and energy costs use dissipated energy. Accounting errors use total input and should
 remain near zero. Raw ledgers remain in the accounting details. Stats distinguish
 matrix slowing, damage, repair expenditure, field material, acquisition and conservation.
-The default food layout is a pure-A left half and a pure-B right half. Stats show the band
-compositions; existing food retains its composition. A-processing allocation is the initial trait
-trend when zones or epochs are enabled. The environment settings offer mixed deposits, the
+The default food layout has uneven finite local A/B mixtures. If zones are selected, stats show
+their compositions; existing food retains its composition. A-processing allocation is the initial trait
+trend when zones or epochs are enabled; otherwise the independent trend starts with motor investment.
+The environment settings offer local mixtures, the
 alternating epoch calendar or zones for a new population; saves keep whichever layout they hold.
 Genetic construction targets are separate from actual grown bodies. Exact sequence diversity is
 separate from genotype record count. Founder shares and histories describe ancestry abundance,
@@ -61,11 +69,12 @@ Clicking a family root selects it for comparison even after division/death. Phys
 controller distance and genealogical links are independent quantities. Founder reporting remains in
 details. See the [observation contract](population-observation.md) for exact grouping and denominators.
 
-Population history retains up to 240 samples spanning the opened view's lifetime, with actual tick
-spacing and bounded thinning. It cannot reconstruct earlier unseen history and is not checkpointed.
+Population history retains up to 240 samples spanning observed history, with actual tick
+spacing and bounded thinning. It cannot reconstruct earlier unseen history and is checkpointed.
 Capture occurs every 100 simulation ticks, independent of wall-clock speed.
-These view histories do not survive restore. Manual saves, full ancestry growth and execution
-in the browser animation loop remain limits to days/weeks observation, not completed support. A separate unthinned
+Spatial history samples each 25 ticks, retains up to 240 frames and the latest 2,048 events, and
+survives browser checkpoint restore. Browse a past sample to inspect recorded population counts,
+trait means and locations; the map continues to show the current world. A separate unthinned
 2,000-tick window supplies recent family history and effort distributions. Effort bars use shares of
 sampled organism decisions, not energy costs. Trait trends show inherited population medians.
 Task byte, hidden state, genes, actual stocks and sensor/action values remain inspectable. Manual
@@ -73,7 +82,7 @@ task overrides persist as diagnostic interventions. All existing controls remain
 
 The default pacing target is 30 ticks/s. Display refresh and simulation rate are separate; measured
 throughput can fall below the request. Maximum means CPU-limited execution, not model-time seconds.
-The map redraws every animation frame; the stats panel and inspector refresh at most every 250 ms
+The timer-driven simulation redraws the map as it advances; the stats panel and inspector refresh at most every 250 ms
 while running, and immediately on pause, stop or a manual intervention.
 The [evidence](bacteria-results.md) lists sampled onset times without promising browser throughput.
 
@@ -85,8 +94,8 @@ The view owns one resize observer, reusable field raster, transient lifecycle sn
 state. Field ticks, layer changes and replaced worlds invalidate the raster; camera-only redraws
 reuse it. Rendering does not score evolution, mutate genomes or prescribe actions.
 
-The present strategy-panel prose favors groups occupying different bands. Treat it as a UI
-interpretation limitation, not the project goal; no count of colored groups certifies diversity.
+The optional trait partitions explicitly describe their requested grouping count and changing
+membership. They do not prescribe occupation of bands or certify species diversity.
 Bounded tests cover transforms, picking, raster reuse, toxin intensity and Run defaults.
 Inspect configuration and headless evidence for what is running; no browser assay or development
 server is needed for a documentation or display review.

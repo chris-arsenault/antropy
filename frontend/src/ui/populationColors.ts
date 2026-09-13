@@ -18,7 +18,7 @@ export const COLOR_MODES = {
   builder: "Inherited matrix machinery",
 } as const;
 export type ColorMode = keyof typeof COLOR_MODES;
-export const DEFAULT_COLOR_MODE: ColorMode = "strategy";
+export const DEFAULT_COLOR_MODE: ColorMode = "foodA";
 export const identityColor = (id: number) => `hsl(${(id * 137.508) % 360},70%,72%)`;
 const heat = (fraction: number) => `hsl(${220 - 190 * Math.min(1, Math.max(0, fraction))},75%,65%)`;
 const traitScales: Partial<Record<ColorMode, number>> = {
@@ -36,7 +36,7 @@ function strategyColors(world: World): (cell: Cell) => string {
 export function populationColors(world: World, mode: ColorMode, selected: number | null) {
   if (mode === "strategy") return strategyColors(world);
   const reference = world.ancestry.get(selected ?? -1);
-  const genome = reference ? world.genomes.get(reference.genome)!.genome : null;
+  const genome = reference ? world.genomes.get(reference.genome)?.genome : null;
   const compare = genome ? comparisonTo(genome) : null;
   const traits = new Map<number, ReturnType<typeof traitValues>>();
   return (cell: Cell): string => {
@@ -47,14 +47,18 @@ export function populationColors(world: World, mode: ColorMode, selected: number
       if (!traits.has(cell.genome)) traits.set(cell.genome, traitValues(world, cell.genome));
       return heat(traits.get(cell.genome)![mode as Trait] / scale);
     }
-    if (!reference || !genome) return "#60717c";
+    if (!reference) return "#60717c";
     if (mode === "relatedness") {
-      const relation = relatedness(world, reference.id, cell.id);
-      return relation ? heat(relation.links / 16) : "#46535d";
+      return relatednessColor(world, reference.id, cell.id);
     }
-    const distance = compare!(world.genomes.get(cell.genome)!.genome);
+    if (!compare) return "#60717c";
+    const distance = compare(world.genomes.get(cell.genome)!.genome);
     return mode === "physical" ? heat(distance.physical / 0.1) : heat(distance.controller / 0.01);
   };
+}
+function relatednessColor(world: World, reference: number, id: number): string {
+  const relation = relatedness(world, reference, id);
+  return relation ? heat(relation.links / 16) : "#46535d";
 }
 export function colorLegend(mode: ColorMode): string {
   const descriptions: Record<ColorMode, string> = {

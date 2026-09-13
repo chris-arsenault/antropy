@@ -1,6 +1,7 @@
 import { noteExecution } from "../persist/provenance";
 import { checkpointToJson } from "../persist/checkpoint";
 import { type World } from "../sim/types";
+import { saveObservation } from "../persist/observation";
 
 let source = "ANTROPY_SOURCE_ID";
 // HMR can mix module versions. Record that uncertainty instead of claiming an exact bundle.
@@ -12,4 +13,5 @@ if (import.meta.hot?.data) {
   });
 }
 export const noteBrowserExecution = (world: World): void => noteExecution(world, source);
-export const browserCheckpoint = (world: World): string => checkpointToJson(world, source);
+export const browserCheckpoint = (world: World): string =>
+  checkpointToJson(world, source, saveObservation(world));

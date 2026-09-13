@@ -9,9 +9,10 @@ different claims. No particular community or number of roles is prescribed.
 
 ## Resource opportunities
 
-Finite A/B deposits vary in composition, radius, leakage and lifetime. Seventy percent of arrivals
-are centered around one of three landscape clusters with bounded offsets; the remainder scatter
-uniformly. Inventory and time limit each deposit; replacement waits are exponentially distributed.
+Finite A/B deposits vary in composition, radius, leakage and lifetime. The current 48 sites occupy
+unequal local neighborhoods in a 320 × 240 world. Positions and site properties persist across
+renewal; the optional scattered layout redraws positions. Inventory and time limit each deposit;
+replacement waits are exponentially distributed.
 Patchy mode mixes short/rich and long/modest deposits. Persistent/transient modes scale lifetimes
 without changing finite-inventory semantics.
 
@@ -20,11 +21,11 @@ costs construction and maintenance. Source placement is independent of organisms
 knows which genotype should prosper. Acquisition, storage, travel and crowding can therefore have
 different costs across opportunities. The return on investment must be assessed in the relevant context rather than inferred from body cost alone.
 
-The default uses [food zones](bacteria.md#world-fields-and-finite-deposits): a pure-A left half
-and a pure-B right half with equal numbers of deposit slots, not identical instantaneous supply.
-The hypothesis is that local resource differences and slow dispersal let alternative processing
-investments repay their cost. Constructed comparisons and the later regional inherited diet
-differences are proof points; they do not prescribe two permanent species. See the corrected
+The default uses [unequal local opportunities](spatial-ecology.md) and capable movement. The
+hypothesis is that lower mean density and larger density variation preserve distinct local histories
+without making movement universally slow. The earlier food halves remain selectable. Constructed
+comparisons and their regional inherited diet differences are proof points about that older world;
+they do not prescribe two permanent species. See the corrected
 [zone](../zones-study.md) and [evolution](../evolve-study.md) records.
 
 The selectable [food-epoch schedule](../food-epochs-study.md) instead changes incoming composition
@@ -170,7 +171,7 @@ exists. Defense also protects against other types. The sensed toxin is discounte
 protection, and matrix binds both types with shared capacity. With one type the tint is silent;
 historical ecological results retain their original conditions. Contact exposure
 has no field: it reaches only bodies within a 0.05-cell gap of a producer and cannot be sensed at a
-distance. Its default rate is zero pending the [contest record](../rps-study.md); older checkpoint versions are rejected under the current v7 contract.
+distance. Its default rate is zero pending the [contest record](../rps-study.md); older checkpoint versions are rejected under the current v8 contract.
 
 Damage reduces uptake and motion by 1−damage and raises maintenance by 1+damage; unit damage kills.
 Installed defense reduces exposure damage but consumes material and maintenance whether needed or not.

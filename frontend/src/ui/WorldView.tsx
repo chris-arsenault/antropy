@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useCallback,
   useRef,
   useState,
   type RefObject,
@@ -11,6 +12,8 @@ import { createRenderer, type Layers } from "./drawing";
 import { fitCamera, panBy, zoomAt, pickCell, type Camera } from "./camera";
 import { MapTools, MapLegend } from "./MapTools";
 import { COLOR_MODES, DEFAULT_COLOR_MODE, type ColorMode } from "./populationColors";
+import { pickPopulation, DEFAULT_POPULATION_VIEW, type PopulationView } from "./populationDrawing";
+import { SpatialPanel } from "./SpatialPanel";
 
 interface ViewProps {
   world: World;
@@ -19,13 +22,15 @@ interface ViewProps {
   onSelect: (id: number | null) => void;
 }
 interface CanvasProps extends ViewProps {
+  populationView: PopulationView;
+  onSelectPopulation: (id: number | null) => void;
   colorMode: ColorMode;
   camera: Camera;
   layers: Layers;
   setCamera: Dispatch<SetStateAction<Camera>>;
 }
 function useDrawing(canvas: RefObject<HTMLCanvasElement | null>, props: CanvasProps) {
-  const { world, version, camera, layers, selected, colorMode } = props;
+  const { world, version, camera, layers, selected, colorMode, populationView } = props;
   const render = useRef<(() => void) | null>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
   useEffect(() => {
@@ -34,10 +39,10 @@ function useDrawing(canvas: RefObject<HTMLCanvasElement | null>, props: CanvasPr
     renderer.current ??= createRenderer(el);
     render.current = () => {
       resizeCanvas(el);
-      renderer.current?.render(world, camera, layers, selected, colorMode);
+      renderer.current?.render(world, camera, layers, selected, colorMode, populationView);
     };
     render.current();
-  }, [canvas, world, version, camera, layers, selected, colorMode]);
+  }, [canvas, world, version, camera, layers, selected, colorMode, populationView]);
   useEffect(() => {
     const el = canvas.current;
     if (!el) return;
@@ -81,6 +86,15 @@ function useWheel(canvas: RefObject<HTMLCanvasElement | null>, props: CanvasProp
 }
 function selectCell(el: HTMLCanvasElement, props: CanvasProps, x: number, y: number) {
   const rect = el.getBoundingClientRect();
+  if (props.populationView.regions)
+    props.onSelectPopulation(
+      pickPopulation(
+        props.world,
+        props.camera,
+        { width: el.clientWidth, height: el.clientHeight },
+        { x: x - rect.left, y: y - rect.top }
+      )
+    );
   props.onSelect(
     pickCell(
       props.world,
@@ -130,6 +144,12 @@ export function WorldView(props: ViewProps) {
   const { world } = props;
   const [camera, setCamera] = useState<Camera>(fitCamera(world.config));
   const [colorMode, setColorMode] = useState<ColorMode>(DEFAULT_COLOR_MODE);
+  const [populationView, setPopulationView] = useState(DEFAULT_POPULATION_VIEW);
+  const selectPopulation = useCallback(
+    (selected: number | null) => setPopulationView((v) => ({ ...v, selected })),
+    []
+  );
+  const focusPopulation = useCallback((x: number, y: number) => setCamera({ x, y, zoom: 8 }), []);
   const [layers, setLayers] = useState<Layers>({
     nutrient: true,
     chemical: world.config.secretionRate > 0,
@@ -159,14 +179,30 @@ export function WorldView(props: ViewProps) {
         layers={layers}
         setLayers={setLayers}
       />
+      <label>
+        <input
+          type="checkbox"
+          checked={populationView.regions}
+          onChange={(e) => setPopulationView((v) => ({ ...v, regions: e.target.checked }))}
+        />{" "}
+        Population regions
+      </label>
       <WorldCanvas
         {...props}
         camera={camera}
         setCamera={setCamera}
         layers={layers}
         colorMode={colorMode}
+        populationView={populationView}
+        onSelectPopulation={selectPopulation}
       />
       <MapLegend colorMode={colorMode} />
+      <SpatialPanel
+        world={world}
+        selected={populationView.selected}
+        onSelect={selectPopulation}
+        onFocus={focusPopulation}
+      />
     </section>
   );
 }

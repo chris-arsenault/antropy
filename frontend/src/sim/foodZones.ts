@@ -23,3 +23,8 @@ export function foodZone(zones: FoodZones, x: number, width: number) {
   const index = Math.min(zones.shares.length - 1, Math.floor((x / width) * zones.shares.length));
   return { index, share: zones.shares[index] };
 }
+/** Assign a source slot to a band while retaining its within-band offset. */
+export function foodZoneX(zones: FoodZones, x: number, width: number, slot: number): number {
+  const bandWidth = width / zones.shares.length;
+  return (slot % zones.shares.length) * bandWidth + (x % bandWidth);
+}

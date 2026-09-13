@@ -22,6 +22,7 @@ function addBranch(world: World, index: Map<number, Branch>, id: number) {
   const generation = previous === null ? 0 : previous.generation + 1;
   const family = generation % FAMILY_GENERATIONS === 0 ? id : previous!.family;
   index.set(id, { generation, family });
+  if (index.size > 8192) index.delete(index.keys().next().value!);
 }
 
 export function branch(world: World, id: number): Branch {
@@ -40,6 +41,7 @@ export function branch(world: World, id: number): Branch {
 
 export function relatedness(world: World, a: number, b: number) {
   if (!world.ancestry.has(a) || !world.ancestry.has(b)) return null;
+  if (world.ancestry.get(a)!.lineage !== world.ancestry.get(b)!.lineage) return null;
   let left: number | null = a,
     right: number | null = b;
   let leftDepth = branch(world, a).generation,

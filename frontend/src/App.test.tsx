@@ -2,6 +2,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
 import { App } from "./App";
+import "fake-indexeddb/auto";
 
 it("opens bacteria paused with active ecology layers and explicit disabled systems", async () => {
   vi.stubGlobal(
@@ -19,10 +20,10 @@ it("opens bacteria paused with active ecology layers and explicit disabled syste
     expect(container.textContent).toContain("Top-down bacteria");
     expect(container.textContent).toContain("Live mutation on");
     expect(container.textContent).toContain("Tick 0");
-    expect(container.textContent).toContain(
-      "Food zones, left to right: 100% A / 0% B · 0% A / 100% B."
-    );
-    expect(container.querySelector<HTMLSelectElement>(".trait-panel select")?.value).toBe("foodA");
+    expect(container.textContent).toContain("occupied regions");
+    expect(container.textContent).toContain("Browse retained spatial samples");
+    expect(container.textContent).not.toContain("NaN");
+    expect(container.querySelector<HTMLSelectElement>(".trait-panel select")?.value).toBe("motor");
     expect(container.querySelector('.population-chart svg[role="img"]')).not.toBeNull();
     expect(container.textContent).toContain("Opposite edges connect");
     expect(container.textContent).toContain("Inherited construction targets");
@@ -39,7 +40,7 @@ it("opens bacteria paused with active ecology layers and explicit disabled syste
     expect(container.textContent).toContain("Damage share of deaths · lifetime");
     expect(
       container.querySelector<HTMLSelectElement>(".population-color-control select")?.value
-    ).toBe("strategy");
+    ).toBe("foodA");
     expect(container.querySelector(".trait-panel")?.closest("details")).toBeNull();
     expect(container.textContent).toContain("Strategy clusters");
     // Identical founders form one cluster; further clusters appear only with inherited variation.
@@ -50,6 +51,15 @@ it("opens bacteria paused with active ecology layers and explicit disabled syste
     await act(async () => family.click());
     expect(container.textContent).toContain("Family and relatedness");
     expect(container.textContent).toContain("Ancestry links");
+    const overlay = Array.from(container.querySelectorAll<HTMLInputElement>("input")).find(
+      (input) => input.parentElement?.textContent?.includes("Population regions")
+    )!;
+    await act(async () => overlay.click());
+    expect(overlay.checked).toBe(false);
+    expect(container.querySelectorAll(".map-tools input:checked")).toHaveLength(3);
+    expect(
+      container.querySelector<HTMLSelectElement>(".population-color-control select")?.value
+    ).toBe("foodA");
   } finally {
     await act(async () => root.unmount());
     vi.unstubAllGlobals();

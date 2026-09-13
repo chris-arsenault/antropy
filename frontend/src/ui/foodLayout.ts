@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, type Config } from "../sim/config";
+import { type Config } from "../sim/config";
 import { DEFAULT_EPOCHS } from "../sim/foodEpochs";
 
 export type FoodLayout = "mixed" | "epochs" | "zones";
@@ -13,6 +13,6 @@ export function withLayout(config: Config, layout: FoodLayout): Config {
   delete rest.foodEpochs;
   delete rest.foodZones;
   if (layout === "epochs") return { ...rest, foodEpochs: DEFAULT_EPOCHS };
-  if (layout === "zones") return { ...rest, foodZones: DEFAULT_CONFIG.foodZones };
+  if (layout === "zones") return { ...rest, foodZones: { shares: [1, 0] } };
   return rest;
 }

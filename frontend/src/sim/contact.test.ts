@@ -11,7 +11,7 @@ import { fundDivision } from "./testSupport";
 it("resolves body contact across the periodic seam", () => {
   const w = createWorld(1, { ...DEFAULT_CONFIG, founders: 2 });
   Object.assign(w.cells[0], { x: 0.1, y: 20 });
-  Object.assign(w.cells[1], { x: 79.9, y: 20 });
+  Object.assign(w.cells[1], { x: w.config.width - 0.1, y: 20 });
   resolveContacts(w);
   expect(distance(w.cells[0], w.cells[1], w.config)).toBeCloseTo(
     radius(w.cells[0], w.config) + radius(w.cells[1], w.config),
@@ -50,6 +50,15 @@ it("a population safety limit pauses without deleting cells or manufacturing off
   expect(w.cells).toHaveLength(1);
   expect(w.ledger.births).toBe(0);
   expect(w.stopReason).toContain("safety limit");
+});
+it("pauses before ancestry capacity would lose a birth and keeps existing records", () => {
+  const w = createWorld(5, { ...DEFAULT_CONFIG, founders: 1, maxAncestryRecords: 2 });
+  fundDivision(w);
+  reproduce(w);
+  expect(w.cells).toHaveLength(1);
+  expect(w.ancestry.size).toBe(1);
+  expect(w.ledger.births).toBe(0);
+  expect(w.stopReason).toContain("Ancestry memory limit");
 });
 it("secretion becomes visible to all receptors only on the following step", () => {
   const w = createWorld(12, { ...DEFAULT_CONFIG, founders: 2, secretionRate: 0.06 });

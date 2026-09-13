@@ -133,4 +133,4 @@ coefficients to [-1,1], and physical targets to [-3,3].
 
 No reproductive score selects parents or filters mutations. Immutable genotype records track
 ancestry; exact inherited sequence counts are distinct from record counts and founder lineages.
-Checkpoint v7 preserves genotype schema, actual bodies, private traces and transfer provenance.
+Checkpoint v8 preserves genotype schema, actual bodies, private traces and transfer provenance.

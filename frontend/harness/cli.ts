@@ -13,10 +13,16 @@ import { runRps } from "./lib/rpsContest";
 import { runZones } from "./lib/zonesContest";
 import { runEvolve } from "./lib/evolveRun";
 import { runInvasion } from "./lib/invasion";
+import { runSpatialProbe } from "./lib/spatialProbes";
+import { runContinuationCheck } from "./lib/continuationCheck";
 
 const [command, ...arguments_] = process.argv.slice(2),
   flags = parseFlags(command === "sql" ? [] : arguments_);
-if (command === "rps") {
+if (command === "continuation-check") {
+  runContinuationCheck(flags);
+} else if (command === "spatial-probe") {
+  runSpatialProbe(flags);
+} else if (command === "rps") {
   runRps(flags);
 } else if (command === "zones") {
   runZones(flags);
@@ -48,6 +54,7 @@ if (command === "rps") {
     createWorld(integerFlag(flags, "seed", 101), {
       ...DEFAULT_CONFIG,
       founders: integerFlag(flags, "population", 2000),
+      resourceLayout: "scattered",
       mutationRate: 0,
       physicalMutationRate: 0,
     }),
@@ -112,5 +119,5 @@ if (command === "rps") {
   db.close();
 } else
   throw new Error(
-    "Commands: rps, zones, evolve, invasion, capability-pilots, capabilities, quick-food-access, ecology-default, ecology-causal, bacteria, bacteria-compare, bacteria-capacity, recent, sql"
+    "Commands: continuation-check, spatial-probe, rps, zones, evolve, invasion, capability-pilots, capabilities, quick-food-access, ecology-default, ecology-causal, bacteria, bacteria-compare, bacteria-capacity, recent, sql"
   );

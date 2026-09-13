@@ -12,6 +12,8 @@ preserved at tag `ant-colony-checkpoint-2026-09-09`.
 | `sim/config.ts`, `types.ts`, `world.ts` | Resolved parameters, durable world shape, initialization and step order |
 | `sim/cycle.ts`, `chemotype.ts`, `predation.ts`, `disturbance.ts`, `transfer.ts`, `sharing.ts` | Optional element cycle, toxin types, damage-related feeding, disturbance, gene transfer and reserve exchange |
 | `sim/deposits.ts`, `ecologyFields.ts` | Finite A/B inventories, seeded arrivals, conservative transport and reactions |
+| `sim/landscape.ts`, `ancestryStore.ts` | Abiotic renewal sites and compact complete organism parentage |
+| `observe/spatialGroups.ts`, `spatialHistory.ts` | Camera-independent population grouping, identity, ancestry links and bounded spatial records |
 | `sim/secretion.ts`, `interference.ts`, `matrix.ts` | Shared action affordability, toxin damage/repair, porous binding material and footprint barriers |
 | `sim/fields.ts`, `geometry.ts`, `spatial.ts` | Periodic transport and sampling, body geometry and local contact lookup |
 | `sim/sensors.ts`, `controller/rnn.ts` | Local observation and receptor adaptation; RNN inference and genome variation |
@@ -87,23 +89,33 @@ genomes for measurement; they never select reproduction in a living population.
 
 ## Browser and persistence
 
-The browser creates the same default configuration as the harness: seed 101, 48 founders, a thick medium and finite deposits in pure-A/pure-B halves, haploid clonal fission, physical/behavioral mutation, paid plasticity and full
+The browser creates the same default configuration as the harness: seed 101, 48 founders near
+two separated sites in a 320 × 240 world, viscosity 0.004 and 48 finite local renewal sites, haploid clonal fission, physical/behavioral mutation, paid plasticity and full
 acquired-weight retention on.
 It starts paused at tick zero and does not silently restore a saved
 run. Run and always-visible stats expose the experiment. Green/blue food, red toxin and ochre
 porous matrix layers are enabled, with drag pan, wheel zoom, fit and cell selection. Neutral
 signaling and solid walls are disabled by default for the reasons in the current ecology contract.
 
-Checkpoint version 7 declares substrate `bacteria-xy`. It preserves fields, source state, resolved
+Checkpoint version 8 declares substrate `bacteria-xy`. It preserves fields, habitats, source state, resolved
 configuration, PRNG streams, all live body/receptor/brain states, genome and organism ancestry,
 resource ledgers, recent diagnostic events, durable manual intervention history and stop reason.
 Import validates physical parameter relationships, matching body/ancestry records and lifetimes,
 controller-owned encodings, actual stock capacities, chromosome counts and both resource balances.
 It rejects older bacterial versions and ant files rather than
 inventing missing history or random state. IndexedDB uses a separate bacterial database.
-No backend or hosted data transfer is involved. Saves are manual and IndexedDB holds one latest
-checkpoint. Chart history is view-local; organism ancestry grows with births. Recovery, retained
-observation and sustained resource use need a design for the intended days/weeks run.
+No backend or hosted data transfer is involved. Compressed recovery keeps six automatic and two
+manual points within 256 MiB, with transactional replacement. The UI saves every 30 seconds,
+on pause and best-effort on visibility/page exit. An automatic-save failure pauses execution.
+Restore is explicit and starts paused. Browser checkpoint metadata includes bounded observation
+history and a run identity; headless physical checkpoints can omit that independent projection.
+
+Closed lifetimes older than the most recent 2,048 organism IDs compact into float64 pages. Each
+record keeps parent, founder lineage, genotype ID, birth/end tick and cause; its ID is implicit.
+Living/recent records stay mutable, decoded closed records are immutable. Unchanged page encodings
+are cached and a parsed checkpoint shares one decoded ancestry store across validation and restore.
+The default two-million-record limit pauses before losing a birth. The genotype pruning contract
+is unchanged. Browser timing and memory limits remain in [continuing observation](continuing-observation.md).
 
 ## Measurements and limits
 
@@ -126,8 +138,8 @@ Each mounted view owns one resize observer and reusable Canvas/raster buffers. C
 reuse the field image; only field ticks, layer changes or a replaced world invalidate it.
 The [display contract](design/bacterial-display.md) renders one clipped world. Pure camera helpers
 own clamping, anchored zoom and visible-body picking. Field rasterization and cell/lifecycle painting
-have separate modules. Recent lifecycle snapshots and population history are bounded view state;
-they do not change or extend the checkpoint or simulation event schema.
+have separate modules. Recent lifecycle snapshots are transient. Population and spatial histories
+are bounded observer state, saved separately from physical events in browser checkpoints.
 Inherited statistics compare genetic construction targets with each lineage's actual founder
 genotype. Sequence hashes only select equality buckets; exact chromosome comparison resolves
 collisions and homolog permutations. Genome record IDs remain separate ancestry identities.
@@ -143,10 +155,11 @@ long-term trends and an unthinned recent window. No family label is a sensor or 
 The contact model uses bounded displacement and four local separation passes, not a rigid-body
 constraint solver; a pass that displaces no body ends resolution early, which is exact. The spatial
 index caches each body's radius at insertion and returns a reused neighbour snapshot in stable
-bin order. Long-run ancestry retention grows with births. Current headless throughput is in
+bin order. Parentage remains complete within the explicit memory limit. Current headless throughput is in
 [calibration](calibration.md#calibration-throughput). In the browser, the map redraws every frame
 while population statistics and the inspector refresh at a bounded cadence. No browser throughput
-or visual certification is claimed.
+or visual certification is claimed. A bounded timer advances physics independently of animation
+callbacks, preventing accumulated catch-up bursts; browser throttling and device sleep can still stop it.
 
 ## Deployment
 

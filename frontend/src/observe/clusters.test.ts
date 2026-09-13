@@ -19,7 +19,7 @@ it("separates two constructed processing splits into ranked clusters without tou
   w.genomes.set(3, { ...founder, id: 3, genome: variant(-1.4, 0.8) });
   for (const [i, cell] of w.cells.entries()) {
     cell.genome = i % 2 ? 2 : 3;
-    cell.x = i % 2 ? 10 : 70;
+    cell.x = w.config.width * (i % 2 ? 0.125 : 0.875);
   }
   const before = checkpointToJson(w);
   const snapshot = strategyClusters(w, 2);

@@ -5,11 +5,19 @@ import { encodeGenotype, decodeGenotype } from "../sim/genetics/codec";
 import { validateSnapshot } from "./validation";
 import { balance, materialBalance, total } from "../sim/accounting";
 import { provenance, restoreProvenance } from "./provenance";
+import { AncestryStore } from "../sim/ancestryStore";
+import { checkpointAncestry } from "./checkpointAncestry";
+import { restoreObservation, type SavedObservation } from "./observation";
 
-export function serializeWorld(world: World, exportSource?: string) {
+export function serializeWorld(
+  world: World,
+  exportSource?: string,
+  observation?: SavedObservation
+) {
   return {
     ...world,
     exportSource,
+    observation,
     provenance: provenance(world),
     ...(Object.fromEntries(PERSISTED_FIELDS.map((key) => [key, Array.from(world[key])])) as Record<
       (typeof PERSISTED_FIELDS)[number],
@@ -19,7 +27,10 @@ export function serializeWorld(world: World, exportSource?: string) {
       ...r,
       genome: encodeGenotype(r.genome),
     })),
-    ancestry: [...world.ancestry.values()],
+    ancestry:
+      world.ancestry instanceof AncestryStore && world.ancestry.hasPages
+        ? world.ancestry.packed()
+        : [...world.ancestry.values()],
     cells: world.cells.map((cell) => ({
       ...cell,
       inputs: Array.from(cell.inputs),
@@ -28,14 +39,18 @@ export function serializeWorld(world: World, exportSource?: string) {
   };
 }
 export type Checkpoint = ReturnType<typeof serializeWorld>;
-export function checkpointToJson(world: World, exportSource?: string): string {
-  return JSON.stringify(serializeWorld(world, exportSource));
+export function checkpointToJson(
+  world: World,
+  exportSource?: string,
+  observation?: SavedObservation
+): string {
+  return JSON.stringify(serializeWorld(world, exportSource, observation));
 }
 
 export function restoreWorld(text: string): World {
   const data: unknown = JSON.parse(text);
   validateSnapshot(data);
-  const { provenance: history, exportSource, ...physical } = data;
+  const { provenance: history, exportSource, observation, ...physical } = data;
   if (
     exportSource !== undefined &&
     (typeof exportSource !== "string" || exportSource.length < 1 || exportSource.length > 256)
@@ -50,7 +65,7 @@ export function restoreWorld(text: string): World {
       PERSISTED_FIELDS.map((key) => [key, Float64Array.from(data[key])])
     ) as Record<(typeof PERSISTED_FIELDS)[number], Float64Array>),
     genomes,
-    ancestry: new Map(data.ancestry.map((a) => [a.id, a])),
+    ancestry: checkpointAncestry(data),
     cells: data.cells.map((cell) => ({
       ...cell,
       inputs: Float32Array.from(cell.inputs),
@@ -58,6 +73,7 @@ export function restoreWorld(text: string): World {
     })),
   };
   restoreProvenance(world, history);
+  restoreObservation(world, observation);
   const scale = Math.max(
     1,
     world.ledger.initial + world.ledger.supplied * world.config.nutrientEnergy

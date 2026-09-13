@@ -3,7 +3,7 @@ import { nextRandom } from "./random";
 import { wrap, delta } from "./geometry";
 import { deposit } from "./fields";
 import { foodEpoch } from "./foodEpochs";
-import { foodZone } from "./foodZones";
+import { foodZone, foodZoneX } from "./foodZones";
 
 /** Composition by position, by calendar, or the drawn mixture. */
 function composition(world: World, mixed: number, x: number): number {
@@ -19,9 +19,7 @@ function composition(world: World, mixed: number, x: number): number {
 function zoned(world: World, x: number, slot: number): number {
   const c = world.config;
   if (!c.foodZones) return x;
-  const bands = c.foodZones.shares.length,
-    width = c.width / bands;
-  return (slot % bands) * width + (x % width);
+  return foodZoneX(c.foodZones, x, c.width, slot);
 }
 export function newDeposit(world: World, slot = 0): Source {
   const c = world.config,
@@ -40,19 +38,48 @@ export function newDeposit(world: World, slot = 0): Source {
   const y = clustered
     ? wrap(center.y + (random() - 0.5) * c.height * 0.4, c.height)
     : random() * c.height;
-  const radius = c.sourceRadius * (0.35 + random());
-  const x = zoned(world, drawn, slot);
-  const share = composition(world, mixed, x);
+  return localDeposit(world, slot, { x: drawn, y, remaining, rate, mixed }, random);
+}
+function localDeposit(
+  world: World,
+  slot: number,
+  drawn: { x: number; y: number; remaining: number; rate: number; mixed: number },
+  random: () => number
+): Source {
+  const c = world.config;
+  const { remaining, rate, mixed, y } = drawn;
+  const habitat = world.habitats[slot] ?? {
+    x: drawn.x,
+    y,
+    radius: c.sourceRadius * (0.35 + random()),
+    share: mixed,
+    richness: 1,
+  };
+  const radius = habitat.radius;
+  const x = world.habitats[slot] ? habitat.x : zoned(world, habitat.x, slot);
+  const share = composition(world, habitat.share, x);
+  const localRate = rate * habitat.richness;
   return {
     x,
-    y,
+    y: habitat.y,
     radius,
     remaining,
-    rate,
-    foodA: remaining * rate * share,
-    foodB: remaining * rate * (1 - share),
+    rate: localRate,
+    foodA: remaining * localRate * share,
+    foodB: remaining * localRate * (1 - share),
     wait: 0,
   };
+}
+/** Move material from finite source stock into its local field before founders arrive. */
+export function primeDeposits(world: World): void {
+  if (world.config.resourceLayout !== "localized") return;
+  for (const source of world.sources) {
+    const fraction = world.config.sourcePriming;
+    leak(world, source, source.foodA * fraction, world.nutrient);
+    leak(world, source, source.foodB * fraction, world.nutrientB);
+    source.foodA *= 1 - fraction;
+    source.foodB *= 1 - fraction;
+  }
 }
 function leak(world: World, source: Source, amount: number, field: Float64Array): void {
   const c = world.config,

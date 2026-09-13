@@ -3,6 +3,34 @@
 This backlog serves [hypothesis-led world design and days/weeks observation](design/README.md).
 Historical ant queues and completed outcome-gate roadmaps are not pending prerequisites.
 
+The implemented candidate is [sparse spatial ecology and long observation](design/spatial-ecology.md):
+the world and movement economy changed together with spatial population observation. Viscosity,
+food density and geometry remain adjustable. The first irregular patch arrangement is a
+revisable hypothesis; the enduring goal is a large, uneven world with capable movement and legible
+local populations. Implementation phases and acceptance live in that design document.
+
+<a id="backlog-plan-carryover"></a>
+
+## Requirements migrated from earlier plans
+
+The [September 13 closeout](design/plan-closeout.md) accounts for every unfinished phase of the
+three remaining ant plans and all skipped phases in closed plans. Obsolete certifications and
+training campaigns are retired without claiming success. Surviving work has these dispositions:
+
+| Requirement | Owner and condition |
+| --- | --- |
+| Movement, food lifetime and body/controller coordination | Spatial design phases 1–3. Compare useful displacement, local sensing, travel expenses, food access and funded reproduction; earlier failed motor contests do not justify resuming their conditional invasion/discovery campaigns. |
+| Uneven renewal and temporary resource opportunities | Spatial landscape design. Consider local variability, including the earlier boom/bust proposal, only when it creates a useful opportunity. No required synchronized global schedule. |
+| Distinguish inherited benefit from drift or initial advantage | Conditional diagnostic after a live observation or configuration question warrants it. Record candidate choice, inherited target versus actual body, matched ancestor/descendant or reversion controls, initial denominators and uncertainty. No standing multi-seed evolution certification. |
+| Heritability, mutation load and effective population | Optional instruments if they answer a concrete question. Define estimands for clonal reproduction, overlapping generations and the sampling interval before presenting them; do not copy ant-colony estimates or equate genome count with useful diversity. |
+| Observable demographics, ancestry and trait change | Spatial design phases 4–6. Preserve births, deaths, lineage shares and inherited/body distinctions alongside spatial founding, movement, mergers and losses. Follow descendants even when a viewing group changes. |
+| Durable continuation and measured execution costs | Spatial design phases 1, 2 and 6 plus the runtime limits below. Measure spatial field cost and accumulated history. The old shared-Wasm inference pool and isolation headers are OBE under ADR 0019; coherent execution placement remains a measured design choice. |
+| Honest motion review and handoff | Spatial design phases 3, 5 and 7. Diagnose actual sensing/action/physical paths, retain negative results, preserve independent UI controls, run CI and obtain human trajectory review. Old missing visual evidence remains missing. |
+
+These are design obligations or conditional questions, not authorization to run all listed assays.
+Mating, seed/fertilize and multi-parent ancestry remain conditional extensions below; the retired
+ant admission sequence and roughly 2,000-worker gate impose no new prerequisite.
+
 <a id="backlog-evolutionary-questions"></a>
 
 ## Evolutionary questions
@@ -12,7 +40,8 @@ ecological purpose, existing proof point, competing explanation and smallest mis
 settings on those grounds, not by the number of clusters produced in a long run.
 
 - Local resource differences and residency can make food-processing choices matter. The A/B halves
-  and thick medium are implemented; symmetric recycling has already replaced the old B-only return.
+  and thick medium were earlier defaults; local renewal sites and viscosity 0.004 now replace them.
+  Symmetric recycling has already replaced the old B-only return.
   The question is how much environmental structure suits the observation world, not how to complete
   another A/B certification campaign.
 - Bodies repeatedly evolved smaller and less costly in recorded studies. Determine whether this
@@ -62,16 +91,16 @@ recognition, cooperation or strategic roles. No new feature is justified solely 
 
 Days or weeks of user observation is an intended use, not currently verified unattended operation.
 A durable design must preserve the ongoing world and enough of its history to understand change.
-This is the next operational prerequisite, separate from ecological experiments:
+The implementation and remaining operational checks are separate from ecological experiments:
 
 | Requirement | Current implementation and gap |
 | --- | --- |
-| Continue after interruption | Manual IndexedDB save/restore and file export exist. IndexedDB keeps one latest checkpoint; there is no automatic recovery checkpoint. A new session starts at tick zero. |
-| Bounded storage and memory | Unreferenced genotype records are pruned, but organism ancestry grows with every birth and is serialized in full. Long-duration save sizes, memory and latency are unmeasured. |
-| Preserve observation | Charts retain up to 240 thinned samples plus a short recent window in the opened view. They are not checkpointed; resuming cannot reconstruct earlier charts. |
-| Sustained execution | The browser steps in its animation loop on the main thread. Background-tab behavior, device interruptions and sustained responsiveness have not been tested for this use. |
-| Useful throughput | Short headless measurements do not establish browser performance after days of births. Measure at representative accumulated state, not only with a large initial census. |
-| Honest visual interpretation | The map defaults to three requested trait groups, not a discovered species count. Its present strategy-panel wording still encourages a regional-cluster outcome; revise that UI interpretation with observation work. |
+| Continue after interruption | Six automatic and two manual compressed recovery points, plus file export; transactional retention tested with emulated IndexedDB. Actual browser termination, quota and suspension behavior still need review. A new session starts at tick zero; restore is explicit. |
+| Bounded storage and memory | Complete ancestry compacts into numeric pages; default limit two million records, with safe pause. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. Synthetic accumulated-state costs are measured; browser peak memory and an archive beyond the limit remain open. |
+| Preserve observation | Browser checkpoints retain 240 thinned spatial frames, 2,048 recent events, 240 chart samples and a short recent window. Dropped events are counted. Complete replay and unobserved history remain unavailable. |
+| Sustained execution | Bounded timers replace animation-only stepping on the main thread. Background throttling and sleep can still stop execution. Days/weeks responsiveness is unverified. |
+| Useful throughput | The 500-tick default and 100,000/two-million-record synthetic fixtures are measured in the continuation record. Actual browser render/save responsiveness under accumulated load remains a human operational check. |
+| Honest visual interpretation | Fixed inherited A/B colors and spatial regions replace requested trait clusters as the default map. Independent controls and zoom transitions are tested. The user accepted the current world after the startup and recovery fixes; future motion and legibility changes require human review. |
 | Exact continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
 
 Design recovery, history retention and ancestry storage together, then validate their operational
@@ -81,4 +110,5 @@ test can assess durability without spending an ecological campaign on it.
 
 Acceleration must retain one implementation per physical rule
 ([ADR 0019](adr/0019-single-language-kernel.md)). Worker placement and other runtime changes need a
-measured bottleneck and coherent ownership boundary; none is selected by this documentation revision.
+measured bottleneck and coherent ownership boundary. The current implementation keeps main-thread
+ownership; [continuation measurements](continuing-observation.md) state its limits.

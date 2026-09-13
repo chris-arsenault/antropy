@@ -4,11 +4,16 @@ The [current design and work order](design/README.md) prepares a world where div
 and adaptation are likely during the user's days/weeks observation. Hypotheses and small proof
 points guide settings; a pre-evolved community is not the deliverable. Read the
 [corrected ecological analysis](analysis-correction.md) before reusing September 12–13 conclusions.
-Continuity, storage and retained observation still need preparation for long live runs.
+Rolling recovery, compact parentage and retained spatial observation are implemented; actual
+days/weeks browser operation remains unverified.
 The [historical snapshot](sources/history/README.md) preserves superseded contracts and full evidence.
 
 | Need | Document |
 | --- | --- |
+| World hypothesis and implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
+| Short movement and local reproduction controls | [Spatial probes](spatial-probes.md) |
+| Recovery, accumulated-state measurements and limits | [Continuing observation](continuing-observation.md) |
+| Earlier plans, OBE decisions and migrated work | [Plan closeout](design/plan-closeout.md) |
 | Corrected frequencies and withdrawn coexistence passes | [Analysis correction and durable endpoint evidence](analysis-correction.md) |
 | Days/weeks continuation, storage and observation | [Runtime readiness limits](backlog.md#backlog-runtime-and-observation-limits) |
 | Runtime ownership | [Architecture](architecture.md) |
@@ -46,6 +51,15 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Earlier roadmap: findings retained, outcome gates retired](design/README.md#design-roadmap)
 - [Earlier roadmap two: opportunities and unresolved questions](design/README.md#design-roadmap-2)
 - [Status and provenance](design/README.md#design-status-and-provenance)
+
+## Sparse spatial ecology
+
+- [Intent and preserved semantics](design/spatial-ecology.md#spatial-intent)
+- [First landscape hypothesis](design/spatial-ecology.md#spatial-landscape)
+- [Movement and local resource economy](design/spatial-ecology.md#spatial-movement)
+- [Population observation and rendering](design/spatial-ecology.md#spatial-observation)
+- [Continuation and retained history](design/spatial-ecology.md#spatial-continuation)
+- [Work sequence and acceptance](design/spatial-ecology.md#spatial-work-sequence)
 
 ## Bacterial world and lifecycle
 
@@ -115,6 +129,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Population views and definitions](design/population-observation.md#population-independent-views)
 - [Strategy clusters](design/population-observation.md#population-strategy-clusters)
+- [Spatial grouping, identity and event uncertainty](design/population-observation.md#population-spatial-groups)
 - [Observation boundaries and verification](design/population-observation.md#population-boundaries)
 
 ## Simulation goals and operating principles
@@ -127,6 +142,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 ## Open questions and deferred features
 
+- [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)
 - [Runtime and observation limits](backlog.md#backlog-runtime-and-observation-limits)
@@ -135,5 +151,5 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Default scales](calibration.md#calibration-default-scales)
 - [Measured throughput](calibration.md#calibration-throughput)
-- [Why the medium is thick](calibration.md#calibration-residency)
+- [Earlier thick-medium calibration](calibration.md#calibration-residency)
 - [Why the injury balance changed](calibration.md#calibration-why-the-injury-balance-changed)

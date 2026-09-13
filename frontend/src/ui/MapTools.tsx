@@ -89,6 +89,10 @@ export function MapLegend({ colorMode }: { colorMode: ColorMode }) {
         <span>Red field: toxin pressure · ochre deposits slow motion and bind toxin</span>
       </div>
       <p>Drag to pan · wheel to zoom at pointer · click to inspect. Opposite edges connect.</p>
+      <p>
+        Soft regions show neighboring cells. Isolated dots remain visible; zoom reveals body
+        details. Food sites and cell populations are separate. Color does not establish adaptation.
+      </p>
     </div>
   );
 }

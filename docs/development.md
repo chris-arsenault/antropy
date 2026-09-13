@@ -14,9 +14,9 @@ on explicit request. The default UI starts a new bacterial population paused at 
 
 ## Ecological measurements
 
-The current default is [strategic ecology](design/strategic-ecology.md): a thick medium, 24 finite
-deposit slots split between pure-A and pure-B halves, local interference and live inheritance.
-[50k-tick food epochs](food-epochs-study.md) remain selectable instead of zones. `--regime patchy` selects
+The current default is [spatial ecology](design/spatial-ecology.md): 320 × 240 world units,
+viscosity 0.004, 48 finite local renewal sites, local interference and live inheritance.
+[50k-tick food epochs](food-epochs-study.md) and food zones remain selectable. `--regime patchy` selects
 the default lifetime distribution explicitly; persistent/transient
 now select longer/shorter finite deposit lifetimes. Neither is an infinite spout.
 Composition layout is independent of that lifetime setting. Select mixed deposits in the
@@ -82,7 +82,8 @@ recombined gametes from the same parent; `--reproduction budding` keeps the pare
 or haploid selfing are rejected. These flags select implemented mechanisms, not external trainers.
 The default
 step is 0.2 model seconds. Source schedules use an independent random stream, making equal-seed
-mutation controls comparable. Transient patches relocate the supply locations; existing nutrient
+mutation controls comparable. In the localized layout renewal preserves site positions; the
+optional scattered layout redraws them. Existing nutrient
 continues to diffuse, decay and be eaten.
 
 Runs save `run-ID.json` with summary series and spatial samples, and `checkpoint-ID.json` with
@@ -175,7 +176,7 @@ founders or changes reproduction into a scored selection process.
 pnpm harness bacteria-capacity --population 2000 --ticks 100 --output harness/artifacts/bacteria-capacity
 ```
 
-This initializes the requested bodies on the standard field. It measures load, not the environment's
+This initializes the requested bodies with scattered placement on the standard field. It measures load, not the environment's
 ability to sustain that census. It does not resize supply or grant continuing free resources.
 The [initial measurements](design/bacteria-results.md) report the resulting throughput limit.
 
@@ -184,9 +185,18 @@ The [initial measurements](design/bacteria-results.md) report the resulting thro
 The UI supports explicit local save/restore and file import/export. Checkpoints preserve both
 ancestry graphs, fields, separate environment/body/genetic random streams, receptor state, private
 recurrent/task/plastic state, actual machinery, nutrient material, usable energy and durable manual
-interventions. The current schema is version 7. Older bacterial versions and ant files are rejected explicitly;
-missing optional-off v7 lever values may default to zero.
-Saves are manual and IndexedDB keeps one latest checkpoint. New sessions do not auto-load a checkpoint. Initial v1 experiment files remain historical evidence.
+interventions. The current schema is version 8. Older bacterial versions and ant files are rejected explicitly;
+missing optional-off v8 lever values may default to zero.
+Browser checkpoints also retain spatial populations, sampled events and charts. Six automatic and
+two manual compressed recovery points share a 256 MiB IndexedDB budget. Saves run every 30 seconds
+while running and on pause; restores are explicit and paused. Full parentage compacts into numeric
+pages with a two-million-record default limit. See [continuation measurements and limits](continuing-observation.md).
+Initial v1 experiment files remain historical evidence.
+
+The registered `pnpm harness spatial-probe --case near --ticks 300 --output <new-directory>`
+uses the shared quick runner. Read its [controls and results](spatial-probes.md) before selecting
+a case or horizon. `pnpm harness continuation-check --output <new-directory>` performs the
+separately registered startup and synthetic storage checks; it is not an ecological campaign.
 
 Select a cell to inspect all thirty-five input channels, actual stocks versus construction targets, inherited loci,
 acquired traces, hidden values, resolved physical efforts and

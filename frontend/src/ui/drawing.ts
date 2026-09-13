@@ -1,8 +1,13 @@
 import { type World } from "../sim/types";
 import { transform, boundaryImages, type Camera, type Bounds } from "./camera";
 import { createFieldRaster, type Layers } from "./fieldRaster";
-import { createLifecycleOverlay, drawCell } from "./cellDrawing";
+import { createLifecycleOverlay } from "./cellDrawing";
 import { populationColors, DEFAULT_COLOR_MODE, type ColorMode } from "./populationColors";
+import {
+  drawPopulationCells,
+  DEFAULT_POPULATION_VIEW,
+  type PopulationView,
+} from "./populationDrawing";
 
 export { lineageColor } from "./cellDrawing";
 export { type Camera } from "./camera";
@@ -72,7 +77,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       camera: Camera,
       layers: Layers,
       selected: number | null,
-      mode: ColorMode = DEFAULT_COLOR_MODE
+      mode: ColorMode = DEFAULT_COLOR_MODE,
+      populationView: PopulationView = DEFAULT_POPULATION_VIEW
     ): void {
       if (!ctx) return;
       const view = {
@@ -97,9 +103,9 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       }
       drawGrid(ctx, world.config, t.scale);
       if (layers.nutrient) drawSources(ctx, world, t.scale);
-      lifecycle(ctx, world, t.scale);
+      if (t.scale >= 5) lifecycle(ctx, world, t.scale);
       const color = populationColors(world, mode, selected);
-      for (const cell of world.cells) drawCell(ctx, world, cell, selected, t.scale, color(cell));
+      drawPopulationCells(ctx, world, t.scale, selected, color, populationView);
       ctx.restore();
       ctx.strokeStyle = "#7898a766";
       ctx.lineWidth = 1;

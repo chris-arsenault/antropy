@@ -24,7 +24,7 @@ export function InheritedTraits({ stats }: { stats: Stats }) {
             <tr key={t.part}>
               <td>{BODY_NAMES[t.part]}</td>
               <td>{t.target ? `${t.target.p10.toFixed(3)}–${t.target.p90.toFixed(3)}` : "—"}</td>
-              <td>{t.relative ? `${((t.relative.mean - 1) * 100).toFixed(1)}%` : "—"}</td>
+              <td>{relativeChange(t.relative?.mean)}</td>
             </tr>
           ))}
         </tbody>
@@ -45,4 +45,7 @@ export function InheritedTraits({ stats }: { stats: Stats }) {
       </p>
     </div>
   );
+}
+function relativeChange(ratio: number | undefined): string {
+  return ratio !== undefined && Number.isFinite(ratio) ? `${((ratio - 1) * 100).toFixed(1)}%` : "—";
 }

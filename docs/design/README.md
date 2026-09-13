@@ -1,6 +1,7 @@
 # Current design and work order
 
-Updated September 13, 2026 after review of the project's purpose and saved experiment results.
+Updated September 13, 2026 after review of the project's purpose, saved experiment results and
+the accepted spatial ecology direction.
 The [reference snapshot](../sources/history/README.md) preserves earlier designs and work orders.
 
 <a id="design-goal-and-present-evidence"></a>
@@ -31,6 +32,7 @@ shares. See the [corrected analysis](../analysis-correction.md) and [evidence](b
 
 | Document | Owns |
 | --- | --- |
+| [Sparse spatial ecology](spatial-ecology.md) | Implemented world hypothesis, movement retuning, spatial populations, multiscale observation and handoff |
 | [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
 | [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
 | [Bodies and inheritance](funded-bodies.md) | Physical costs, genes and lifetime/inherited learning |
@@ -42,50 +44,48 @@ shares. See the [corrected analysis](../analysis-correction.md) and [evidence](b
 
 [Principles](../principles.md) govern decisions. [Architecture](../architecture.md) maps owners;
 [calibration](../calibration.md) records scales; [backlog](../backlog.md) owns unresolved work.
+The [plan closeout](plan-closeout.md) records OBE dispositions and migrated requirements from
+earlier plans. Current runtime documents describe implemented behavior; the spatial design records
+the accepted direction, its provisional calibration and the completed user review.
 
 <a id="design-current-default-and-disabled-scope"></a>
 
 ## Current default and disabled scope
 
-Run starts seed 101, paused at tick zero, with 48 cells carrying the same founder genotype in an
-80 × 60 periodic plane. Viscosity is 0.4. Twenty-four finite deposit slots are assigned equally
-to a pure-A left half and a pure-B right half; individual deposits vary in size, timing and rate.
-Initial dissolved food is mixed, and decomposition returns equal A/B. Haploid clonal fission,
+Run starts seed 101, paused at tick zero, with 48 cells carrying the same founder genotype in a
+320 × 240 periodic plane. Viscosity is 0.004. Forty-eight finite renewal sites have unequal richness,
+local A/B mixtures and variable release. The initial arrangement uses seven irregular abiotic
+centers; founders occupy two separated resource neighborhoods. Uniform food is zero; 10% of initial
+finite stock is dissolved locally. Decomposition returns equal A/B. Haploid clonal fission,
 physical/behavioral mutation and paid inheritable plasticity are active. The RNN has 35 inputs,
-24 recurrent units and eight outputs. Checkpoints are v7 with ten physical loci.
+24 recurrent units and eight outputs. Checkpoints are v8 with ten physical loci.
 
 Toxin secretion, producer immunity, defense, repair and porous matrix are active. Contact injury,
 predation, two-type toxin chemistry, the element cycle, membrane crowding, disturbance, gene
 transfer, reserve sharing, neutral signaling and solid walls are off by default. They are
-implemented experimental settings, not a combined tested ecosystem. Mixed deposits and food epochs
+implemented experimental settings, not a combined tested ecosystem. Food zones and epochs
 remain selectable. Do not silently enable all mechanisms or replace the founder with a diagnostic
 or evolved winner. A reviewed world may enable an opportunity without requiring its evolved outcome.
 
-The A/B halves are a deliberately simple configuration for local resource differences. They are
-not a commitment to a two-species product. Changing that default requires a reason tied to the
-world's opportunities and a configuration review, not a desire to obtain a particular picture.
+The irregular resource arrangement is the first candidate for local differences and consequential
+transit. Its geometry and parameters can change when measurements or human observation warrant it.
+No population-region count is an acceptance criterion.
 
 <a id="design-next-decisions"></a>
 
 ## Next decisions
 
-1. Use the corrected evidence to choose a coherent observation world. For each proposed active
-   mechanism, name the opportunity, its cost, a competing explanation and the small existing or
-   missing proof point. Consider interactions between mechanisms; seven independent experiments
-   do not establish that enabling all seven produces a useful world.
-2. Resolve readiness for days or weeks of user observation. Current saves are manual, IndexedDB
-   holds one latest save, organism ancestry grows with every birth, and charts are view-local.
-   Execution runs in the browser animation loop. Memory, save/restore latency, history retention,
-   interruptions and sustained throughput need proportionate checks and a durable design.
-3. Hand over a reviewed starting world with active settings, known limits and useful observation
-   controls. Leave mutation and ordinary reproduction to explore it. Do not populate authored
-   factions or require a successful long evolution campaign before the user begins.
-4. Let observations guide later diagnosis. If a mechanism appears inert, or one cheap body appears
-   universally favored, ask what opportunity is missing and use a bounded comparison that could
-   change the design. Do not chase every extinct lineage or explain every winning mutation.
+1. Review [continuation limits and measurements](../continuing-observation.md) before depending on
+   unattended execution. Rolling recovery and compact parentage are implemented; actual browser
+   suspension, quota behavior and days/weeks responsiveness remain unverified.
+2. Watch the starting world. Ordinary mutation, reproduction and local physical interaction determine
+   what persists. Later observations can justify focused diagnosis without making every extinct
+   lineage a defect to repair or every surviving group a demonstrated adaptation.
 
-This revision changes documentation and saved-result reporting only. It does not change the
-default world, implement long-run storage, start a server or authorize a new campaign.
+The user accepted the world after the two-colony startup and recovery identity fixes. Sulion records
+all seven phases completed on September 13, 2026. Acceptance does not establish long-term ecology
+or browser endurance; [short controls](../spatial-probes.md) establish only the specified physical
+opportunities. No development server or long evolution campaign was started for handoff.
 
 <a id="design-roadmap"></a>
 
@@ -144,6 +144,8 @@ funded bodies `49f9eee2-3e74-4eb8-8643-5e927bf32eda`;
 attribution `ea5aa160-3b74-4728-b117-4959140c919f`;
 strategic ecology `c8d33225-63e2-4e48-960e-4ed88bbe4a87`;
 default correction `e04af0f4-38dd-4a84-acd5-989bf2c22b0e`.
-Their completed status records work performed, not a certified ecosystem.
+Their completed status records work performed, not a certified ecosystem. The three remaining
+paused ant plans are canceled by the [September 13 closeout](plan-closeout.md); their unfinished
+certifications remain unfulfilled and surviving requirements have explicit backlog owners.
 The ant implementation remains recoverable from tag `ant-colony-checkpoint-2026-09-09`, commit
 `780fa4e`. It is not an additional runtime or a prerequisite.

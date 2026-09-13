@@ -13,6 +13,23 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Seed new sparse worlds with two separated starting colonies of the same founder genotype.
+  Existing saved populations retain their placement.
+- Fix recovery in browsers without `crypto.randomUUID`; run and checkpoint IDs now use
+  `crypto.getRandomValues`, with an end-to-end persistence regression test.
+
+- Added a provisional sparse spatial world: 320 × 240 units, 48 unequal finite renewal sites,
+  local startup food and viscosity 0.004. Short transit controls support local travel and
+  reproduction, with starvation across a larger gap; long-term ecological outcomes remain open.
+- Added spatial population regions, visible dispersers, stable inherited A/B colors, population
+  selection, close cell detail and retained spatial samples. Groups are observer conventions,
+  with explicit uncertainty around founding, migration and dissolution.
+- Added checkpoint v8 with local landscapes, complete parentage in compact pages and versioned
+  observer history. Rolling compressed recovery keeps six automatic and two manual points.
+  Memory/storage limits pause execution; older checkpoints are rejected. Synthetic storage
+  checks are recorded. The user accepted the world after review; days/weeks browser endurance
+  remains unverified.
+
 - Revised project purpose and active documentation: prepare a world where diverse ecosystems
   and adaptation are likely during days/weeks of user observation, using hypotheses and small
   proof points. Retired prescribed coexistence gates; recorded continuity, storage and history gaps.

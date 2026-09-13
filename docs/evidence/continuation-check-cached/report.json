@@ -1,0 +1,45 @@
+{
+  "id": 3479,
+  "sourceDigest": "0601a7dd92e47ad5de981c2700beb1d72274a71c53d8b7a6f4e804d50ee4a9de",
+  "sourceDigestAfter": "0601a7dd92e47ad5de981c2700beb1d72274a71c53d8b7a6f4e804d50ee4a9de",
+  "registration": "docs/continuing-observation.md",
+  "startup": null,
+  "ancestry": [
+    {
+      "count": 100000,
+      "insertedMs": 40.755652,
+      "serializeMs": 196.89542500000002,
+      "repeatSerializeMs": 16.745649000000014,
+      "restoreMs": 113.00695200000007,
+      "bytes": 6505442,
+      "compressed": 552773,
+      "activeRecords": 2048,
+      "memory": {
+        "rss": 199892992,
+        "heapTotal": 107749376,
+        "heapUsed": 43789040,
+        "external": 12775924,
+        "arrayBuffers": 10316427
+      },
+      "wallMs": 409.255131
+    },
+    {
+      "count": 2000000,
+      "insertedMs": 1312.162092,
+      "serializeMs": 3753.980334,
+      "repeatSerializeMs": 310.55098799999996,
+      "restoreMs": 1681.0333189999992,
+      "bytes": 128164949,
+      "compressed": 10879610,
+      "activeRecords": 2048,
+      "memory": {
+        "rss": 1053696000,
+        "heapTotal": 667475968,
+        "heapUsed": 558818512,
+        "external": 203216679,
+        "arrayBuffers": 200761867
+      },
+      "wallMs": 7964.254179999999
+    }
+  ]
+}

@@ -1,12 +1,13 @@
 import { DEFAULT_CONFIG, validateConfig, type Config } from "./config";
 import { type World } from "./types";
-import { createRandomState, nextRandom } from "./random";
+import { createRandomState } from "./random";
 import { seedGenotype } from "./genetics/genotype";
 import { advanceFields } from "./ecologyFields";
 import { disturb } from "./disturbance";
 import { transferGenes } from "./transfer";
 import { shareReserves } from "./sharing";
-import { newDeposit } from "./deposits";
+import { newDeposit, primeDeposits } from "./deposits";
+import { createLandscape, founderPosition } from "./landscape";
 import { damageCells } from "./interference";
 import { infer } from "./inference";
 import { moveBodies, resolveContacts } from "./movement";
@@ -17,6 +18,7 @@ import { blueprint } from "./phenotype";
 import { bodyRadius } from "./body";
 import { makeCell, reproduce } from "./reproduction";
 import { SpatialIndex } from "./spatial";
+import { AncestryStore } from "./ancestryStore";
 
 /** Raster fields at their initial concentrations; the cycle's pools are empty when it is off. */
 function initialFields(c: Config) {
@@ -42,7 +44,7 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
   const c = structuredClone(config),
     world: World = {
       substrate: "bacteria-xy",
-      version: 7,
+      version: 8,
       seed: seedValue,
       tick: 0,
       config: c,
@@ -52,9 +54,10 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
       cells: [],
       ...initialFields(c),
       patchCenters: [],
+      habitats: [],
       sources: [],
       genomes: new Map(),
-      ancestry: new Map(),
+      ancestry: new AncestryStore(),
       nextCell: 1,
       nextGenome: 2,
       events: [],
@@ -63,12 +66,9 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
       ledger: createLedger(),
     };
   world.genomes.set(1, { id: 1, parent: null, born: 0, genome: seedGenotype(c), learned: 0 });
-  for (let i = 0; i < 3; i++)
-    world.patchCenters.push({
-      x: nextRandom(world.environmentRng) * c.width,
-      y: nextRandom(world.environmentRng) * c.height,
-    });
+  createLandscape(world);
   for (let i = 0; i < c.sourceCount; i++) world.sources.push(newDeposit(world, i));
+  primeDeposits(world);
   const index = new SpatialIndex(c, []);
   for (let i = 0; i < c.founders; i++) {
     const position = findStart(world, index);
@@ -90,10 +90,7 @@ function findStart(world: World, index: SpatialIndex) {
     world.config
   );
   for (let attempt = 0; attempt < 10000; attempt++) {
-    const p = {
-      x: nextRandom(world.rng) * world.config.width,
-      y: nextRandom(world.rng) * world.config.height,
-    };
+    const p = founderPosition(world, world.cells.length + Math.floor(attempt / 100));
     if (index.free(p, r, -1)) return p;
   }
   throw new Error("Founder placement exceeds physical capacity");

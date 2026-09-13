@@ -7,6 +7,8 @@ import { decodeGenotype } from "../sim/genetics/codec";
 import { INPUTS } from "../sim/interface";
 import { validateRelations } from "./relations";
 import { PERSISTED_FIELDS } from "../sim/types";
+import { type PackedAncestry } from "../sim/ancestryStore";
+import { checkpointAncestry } from "./checkpointAncestry";
 
 function fail(message: string): never {
   throw new Error(`Invalid bacterial checkpoint: ${message}`);
@@ -65,7 +67,6 @@ function validateCell(value: unknown, c: Config): void {
 }
 function validateRecords(data: Record<string, unknown>): void {
   array(data.genomes);
-  array(data.ancestry);
   array(data.events);
   array(data.sources);
   for (const r of data.genomes) {
@@ -76,7 +77,24 @@ function validateRecords(data: Record<string, unknown>): void {
     finite(r.learned, 0, 32);
     decodeGenotype(r.genome);
   }
-  for (const a of data.ancestry) {
+  validateAncestryRecords(data);
+  for (const e of data.events) {
+    object(e);
+    integer(e.tick);
+    integer(e.cell, 1);
+    array(e.values);
+    numbers(e.values, e.values.length, 0, Number.MAX_SAFE_INTEGER);
+    if (!["division", "death", "task", "override"].includes(String(e.kind))) fail("event kind");
+  }
+  validateDeposits(data);
+}
+function validateAncestryRecords(data: Record<string, unknown>): void {
+  const ancestry = checkpointAncestry(data);
+  const expected = Array.isArray(data.ancestry)
+    ? data.ancestry.length
+    : (data.ancestry as PackedAncestry).count;
+  if (ancestry.size !== expected) fail("duplicate identities");
+  for (const a of ancestry.values()) {
     object(a);
     integer(a.id, 1);
     idOrNull(a.parent);
@@ -87,15 +105,6 @@ function validateRecords(data: Record<string, unknown>): void {
     if (!["alive", "division", "starvation", "damage", "disturbance"].includes(String(a.cause)))
       fail("ancestry cause");
   }
-  for (const e of data.events) {
-    object(e);
-    integer(e.tick);
-    integer(e.cell, 1);
-    array(e.values);
-    numbers(e.values, e.values.length, 0, Number.MAX_SAFE_INTEGER);
-    if (!["division", "death", "task", "override"].includes(String(e.kind))) fail("event kind");
-  }
-  validateDeposits(data);
 }
 function validateDeposits(data: Record<string, unknown>): void {
   array(data.sources);
@@ -107,11 +116,27 @@ function validateDeposits(data: Record<string, unknown>): void {
     finite(s.radius, 1e-15);
   }
   array(data.patchCenters);
-  if (data.patchCenters.length !== 3) fail("invalid landscape clusters");
+  const c = data.config as Config;
+  const regions = c.resourceLayout === "localized" ? c.landscapeRegions : 3;
+  if (data.patchCenters.length !== regions) fail("invalid landscape regions");
   for (const p of data.patchCenters) {
     object(p);
     finite(p.x);
     finite(p.y);
+  }
+  validateHabitats(data, c);
+}
+function validateHabitats(data: Record<string, unknown>, c: Config): void {
+  array(data.habitats);
+  const count = c.resourceLayout === "localized" ? c.sourceCount : 0;
+  if (data.habitats.length !== count) fail("invalid habitat count");
+  for (const h of data.habitats) {
+    object(h);
+    finite(h.x, 0, c.width);
+    finite(h.y, 0, c.height);
+    finite(h.radius, 1e-15);
+    finite(h.richness, 1e-15);
+    finite(h.share, 0, 1);
   }
 }
 /** Levers whose absence in a save means off (zero); their physics is unchanged when off. */
@@ -148,6 +173,8 @@ function validateLedger(value: unknown): void {
 }
 function validateIdentity(data: Record<string, unknown>): void {
   for (const key of ["tick", "nextCell", "nextGenome"]) integer(data[key]);
+  if (Number(data.nextCell) > (data.config as Config).maxAncestryRecords + 1)
+    fail("ancestry limit");
   integer(data.seed, -2147483648, 4294967295);
   for (const name of ["rng", "environmentRng", "geneticRng"]) {
     const rng = data[name];
@@ -158,8 +185,8 @@ function validateIdentity(data: Record<string, unknown>): void {
 }
 export function validateSnapshot(data: unknown): asserts data is Checkpoint {
   object(data);
-  if (data.substrate !== "bacteria-xy" || data.version !== 7)
-    fail("unsupported substrate or version; requires bacterial checkpoint v7");
+  if (data.substrate !== "bacteria-xy" || data.version !== 8)
+    fail("unsupported substrate or version; requires bacterial checkpoint v8");
   const config = validateFields(data);
   validateIdentity(data);
   validateLedger(data.ledger);

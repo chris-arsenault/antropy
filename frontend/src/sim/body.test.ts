@@ -96,6 +96,7 @@ it("motors share installed power and secretion requires physical precursor mater
 it("physical mutations inherit real stocks rather than materializing a newly specified body", () => {
   const w = createWorld(7, {
     ...DEFAULT_CONFIG,
+    sourceCount: 0,
     founders: 1,
     mutationRate: 0,
     physicalMutationRate: 1,

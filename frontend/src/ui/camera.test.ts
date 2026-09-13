@@ -41,7 +41,7 @@ it("anchors wheel zoom at the pointer, including after resize clamps a stale cam
   expect(reset).toEqual(fitCamera(bounds));
 });
 it("picks visible seam fragments but cannot select through the outside margin", () => {
-  const world = createWorld(1, { ...DEFAULT_CONFIG, founders: 1 }),
+  const world = createWorld(1, { ...DEFAULT_CONFIG, ...bounds, founders: 1 }),
     cell = world.cells[0];
   cell.x = 0.1;
   cell.y = 30;

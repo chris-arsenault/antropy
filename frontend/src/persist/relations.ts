@@ -1,6 +1,7 @@
 import { type Checkpoint } from "./checkpoint";
 import { type Ancestor } from "../sim/types";
 import { decodeGenotype } from "../sim/genetics/codec";
+import { checkpointAncestry } from "./checkpointAncestry";
 
 function requireRelation(condition: boolean, message: string): void {
   if (!condition) throw new Error(`Invalid bacterial checkpoint: ${message}`);
@@ -26,14 +27,13 @@ function checkParent(
   );
   return parent!.id;
 }
-function checkAncestry(data: Checkpoint): Map<number, number> {
-  const ancestors = new Map(data.ancestry.map((a) => [a.id, a]));
+function checkAncestry(data: Checkpoint, ancestors: Map<number, Ancestor>): Uint32Array {
   const live = new Set(data.cells.map((c) => c.id));
-  const generations = new Map<number, number>();
+  const generations = new Uint32Array(data.nextCell);
   const genomes = new Map(data.genomes.map((g) => [g.id, g]));
-  for (const a of [...data.ancestry].sort((a, b) => a.id - b.id)) {
+  for (const a of ancestors.values()) {
     const parent = checkParent(a, ancestors, data.config.reproduction === "budding");
-    generations.set(a.id, parent === null ? 0 : generations.get(parent)! + 1);
+    generations[a.id] = parent === null ? 0 : generations[parent] + 1;
     requireRelation(a.born <= data.tick && a.id < data.nextCell, "invalid ancestor time or ID");
     // Dead organisms may reference pruned genotype records; living ones must not. A genotype
     // born after its organism is only possible through gene transfer.
@@ -57,14 +57,17 @@ function checkEnd(a: Ancestor, tick: number): void {
       "invalid ancestor end time"
     );
 }
-function checkCells(data: Checkpoint, generations: Map<number, number>): void {
-  const ancestors = new Map(data.ancestry.map((a) => [a.id, a]));
+function checkCells(
+  data: Checkpoint,
+  generations: Uint32Array,
+  ancestors: Map<number, Ancestor>
+): void {
   for (const c of data.cells) {
     const a = ancestors.get(c.id);
     requireRelation(!!a, "missing cell record");
     for (const key of ["parent", "lineage", "genome", "born"] as const)
       requireRelation(c[key] === a![key], `inconsistent cell ${key}`);
-    requireRelation(c.generation === generations.get(c.id), "inconsistent cell generation");
+    requireRelation(c.generation === generations[c.id], "inconsistent cell generation");
   }
 }
 function checkGenomes(data: Checkpoint): void {
@@ -85,8 +88,7 @@ function checkGenomes(data: Checkpoint): void {
     requireRelation(!parent || parent.born <= g.born, "invalid genome ancestry time");
   }
 }
-function checkInterventions(data: Checkpoint): void {
-  const ancestors = new Map(data.ancestry.map((a) => [a.id, a]));
+function checkInterventions(data: Checkpoint, ancestors: Map<number, Ancestor>): void {
   let previousTick = 0;
   for (const intervention of data.interventions) {
     const a = ancestors.get(intervention.cell);
@@ -103,7 +105,7 @@ function checkInterventions(data: Checkpoint): void {
   }
 }
 export function validateRelations(data: Checkpoint): void {
-  for (const records of [data.genomes, data.ancestry, data.cells])
+  for (const records of [data.genomes, data.cells])
     requireRelation(
       new Set(records.map((r) => r.id)).size === records.length,
       "duplicate identities"
@@ -113,7 +115,9 @@ export function validateRelations(data: Checkpoint): void {
     "population exceeds safety limit"
   );
   requireRelation(data.sources.length === data.config.sourceCount, "inconsistent source count");
-  checkCells(data, checkAncestry(data));
+  const ancestors = checkpointAncestry(data);
+  requireRelation(ancestors.size === data.nextCell - 1, "incomplete organism ancestry");
+  checkCells(data, checkAncestry(data, ancestors), ancestors);
   checkGenomes(data);
-  checkInterventions(data);
+  checkInterventions(data, ancestors);
 }

@@ -10,11 +10,11 @@ Historical calibration is preserved in the [snapshot](sources/history/2026-09-10
 
 | Quantity | Default |
 | --- | --- |
-| World / timestep / founders | 80 × 60 periodic XY / 0.2 model seconds / 48 |
+| World / timestep / founders | 320 × 240 periodic XY / 0.2 model seconds / 48 |
 | Brain | 35 inputs, 24 recurrent units, 8 outputs |
-| Finite deposits | 24; rate scale 0.2, radius scale 3, lifetime scale 60 s, mean replacement wait 20 s |
-| Food layout | Zones: pure-A left half, pure-B right half, 12 deposit slots each; epochs (80% A / 20% A, 50,000 ticks) selectable |
-| Initial dissolved food | Total 0.15 per raster cell, split equally A/B |
+| Finite deposits | 48; rate scale 0.2, radius scale 3, lifetime scale 600 s, mean renewal wait 120 s |
+| Food layout | Fixed local sites around seven unevenly populated centers; spread 18 units; site radius 0.6–1.6 times scale, richness 0.3–2.3, A share 5–95%; zones and epochs selectable |
+| Initial dissolved food | Zero uniform food; 10% of finite initial source stock transferred into its local field |
 | Food diffusion / decay | 0.3 / 0.001 |
 | Toxin diffusion / decay / receptor K | 0.12 / 0.04 / 0.025 |
 | Injury / maximum repair rate | 0.5 / 0.008 per second |
@@ -28,12 +28,12 @@ Historical calibration is preserved in the [snapshot](sources/history/2026-09-10
 | Founder reserve / usable energy | 0.8 / 0.5 |
 | Core / motor / A processing / storage stock | 1 / 0.08 / 0.08 / 0.08 |
 | B processing / defense / toxin / matrix stock | 0.05 / 0.025 / 0.02 / 0.02 |
-| Body and reserve density / viscosity | 4 / 0.4 (a thick medium: cells move about 3 units per 1,000 ticks and 13% cross a band in their lifetime, versus 22 units and 96% at 0.0004) |
+| Body and reserve density / viscosity | 4 / 0.004; a provisional setting supported by the short transit controls below |
 | Motor power density / efficiency | 0.2 / 0.5 |
 | Behavioral mutation probability / scale | 0.0015 / 0.08 (about 2.5 loci per birth) |
 | Physical mutation probability / scale | 0.1 / 0.12 (about 1.0 selected loci per birth, including the optional harvesting and tint loci) |
 | Decomposition | Detritus returns half as food A and half as food B |
-| Abiotic disturbance (`config.disturbance`, off by default) | meanInterval 2,000 s (10,000 ticks); radius 10 (about 6.5% of the default world); mortality 0.9; mixing 1 |
+| Abiotic disturbance (`config.disturbance`, off by default) | meanInterval 2,000 s (10,000 ticks); radius 10 (about 0.41% of the world); mortality 0.9; mixing 1 |
 | Horizontal gene transfer | `transferRate` 0; the [transfer study](transfer-study.md) runs at 0.001 per touching pair per second |
 | Reserve sharing | `sharingRate` 0; the [sharing study](sharing-study.md) runs at 0.05 per second |
 | Neutral chemical signal | `secretionRate` 0 (off); the [signal study](signal-study.md) runs at 0.02 |
@@ -43,8 +43,11 @@ Historical calibration is preserved in the [snapshot](sources/history/2026-09-10
 | Element cycle (`config.cycle`, off by default) | light 0.5; lightSupply 0.001 fixation per raster cell per second gathered over a radius-2 footprint of 13 raster cells, so an isolated harvester can fix at most 0.013/s and the whole world offers 4.8/s, equal to the deposit supply; photoRate 0.3; photoRatio 0.05; carbonK 0.3; oxygenK 0.05; oxygenPerMaterial 1; anaerobicEfficiency 0.25; atmosphere oxygen 0.2 and carbon 1; exchangeRate 0.0001/s; initialCarbon 1; carbon/oxygen diffusion 0.3/0.5. With light unlimited per unit ground, harvesting income was density-independent and three evolution arms passed 800–1,200 cells by 85,000 ticks; a one-raster cap of 0.01 let three more arms pass 800–1,400 by 70,000–90,000 because 4,800 raster cells offered ten times the deposit supply. Under the footprint supply a lone half-core three-fold harvester divides about every 3,000 ticks on light alone and 48 of them plateau near 45–60 cells in the default world |
 | Learned-weight retention | 1 |
 | UI target / population safety ceiling | 30 ticks/s / 10,000 cells, pause on limit |
+| Ancestry / recovery limits | 2,000,000 organism records; six automatic and two manual saves; 256 MiB total compressed, 192 MiB individual uncompressed |
 
-The element-cycle row combines current constants with historical probe results. Those probes
+The element-cycle row combines current constants with historical 80 × 60-world probe results;
+its 4.8/s supply and plateau estimates describe that older area, not the current world. The same
+optional light density offers 76.8/s over the larger raster. Those probes
 used since-removed harvesting costs; their exact survival/division outcomes are not current
 calibration guarantees. Default settings leave the cycle off. Review the corrected cycle record
 before using those findings to select an observation configuration.
@@ -56,6 +59,10 @@ Ploidy, transmission, crossover, reproduction and plasticity policies are descri
 <a id="calibration-throughput"></a>
 
 ## Measured throughput
+
+For the new world, the initial frozen-mutation/learning 100-tick load check took 1.62 seconds
+and the eleven field arrays occupied 6,758,400 bytes. See [current continuation checks](continuing-observation.md).
+The timings below describe earlier, smaller worlds.
 
 Measured September 11, 2026 on the development host with Node 24, single-threaded, from tick zero.
 Checkpoint hashes at the end of each run were identical before and after the kernel optimization,
@@ -91,7 +98,13 @@ throughput, memory use or checkpoint latency over days or weeks.
 
 <a id="calibration-residency"></a>
 
-## Why the medium is thick
+## Earlier thick-medium calibration
+
+This table records why the previous default was changed to 0.4. The spatial redesign supersedes
+that setting and its compensating food density. In the [new short controls](spatial-probes.md),
+a founder 18 units from finite food reached it and divided at 0.004; at 0.4 it did neither by
+1,500 ticks. A 70-unit start starved before arrival. These aligned-start probes support a physical
+opportunity, not reliable navigation, evolved dispersal or a permanent viscosity target.
 
 Measured September 12, 2026 over 6,000 ticks from the seed-101 default with mutation off, tracking
 every cell that lived at least 500 ticks. Displacement is per 1,000 ticks of life; crossing is

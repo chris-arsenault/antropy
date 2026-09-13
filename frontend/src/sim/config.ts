@@ -2,19 +2,25 @@ import { validateFoodEpochs, type FoodEpochs } from "./foodEpochs";
 import { validateFoodZones, type FoodZones } from "./foodZones";
 import { validateCycle, type CycleConfig } from "./cycle";
 import { validateDisturbance, type DisturbanceConfig } from "./disturbance";
+import { validateLandscape } from "./landscape";
 
 export const DEFAULT_CONFIG = {
-  width: 80,
-  height: 60,
+  width: 320,
+  height: 240,
   dt: 0.2,
   founders: 48,
   maxPopulation: 10000,
+  maxAncestryRecords: 2000000,
   regime: "patchy" as "patchy" | "persistent" | "transient",
-  sourceCount: 24,
+  sourceCount: 48,
+  resourceLayout: "localized" as "localized" | "scattered",
+  landscapeRegions: 7,
+  landscapeSpread: 18,
+  sourcePriming: 0.1,
   sourceRate: 0.2,
   sourceRadius: 3,
-  sourceLifetime: 60,
-  sourceGap: 20,
+  sourceLifetime: 600,
+  sourceGap: 120,
   transportBRatio: 0.05,
   defenseRatio: 0.025,
   weaponRatio: 0.02,
@@ -59,7 +65,7 @@ export const DEFAULT_CONFIG = {
   matrixCapacity: 0.15,
   matrixBinding: 2,
   detritusDecay: 0.015,
-  initialNutrient: 0.15,
+  initialNutrient: 0,
   nutrientDiffusion: 0.3,
   nutrientDecay: 0.001,
   chemicalDiffusion: 0.15,
@@ -98,7 +104,7 @@ export const DEFAULT_CONFIG = {
   divisionCost: 0.08,
   daughterReserve: 0.3,
   daughterEnergy: 0.1,
-  viscosity: 0.4,
+  viscosity: 0.004,
   thermalEnergy: 0.00008,
   motorPowerDensity: 0.2,
   motorEfficiency: 0.5,
@@ -116,9 +122,8 @@ export const DEFAULT_CONFIG = {
   learning: "plastic" as "static" | "plastic",
   plasticityCost: 0.002,
   learningRetention: 1,
-  foodZones: { shares: [1, 0] },
 };
-export type Config = Omit<typeof DEFAULT_CONFIG, "foodZones"> &
+export type Config = typeof DEFAULT_CONFIG &
   Partial<{
     foodEpochs: FoodEpochs;
     foodZones: FoodZones;
@@ -149,6 +154,7 @@ export function validateConfig(config: Config): void {
   validateCycle(config.cycle);
   validateDisturbance(config.disturbance);
   validateChemistry(config);
+  validateLandscape(config);
   for (const key of [
     "catabolicEfficiency",
     "motorEfficiency",
@@ -159,8 +165,17 @@ export function validateConfig(config: Config): void {
     if (config[key] > 1) throw new Error(`Invalid fractional parameter: ${key}`);
   if (!["patchy", "persistent", "transient"].includes(config.regime))
     throw new Error("Invalid regime");
+  validateLimits(config);
+}
+function validateLimits(config: Config): void {
   if (config.founders > config.maxPopulation || config.maxPopulation > 100000)
     throw new Error("Invalid population safety limit");
+  if (
+    !Number.isInteger(config.maxAncestryRecords) ||
+    config.maxAncestryRecords < config.founders ||
+    config.maxAncestryRecords > 5000000
+  )
+    throw new Error("Invalid ancestry memory limit");
 }
 function validateChemistry(config: Config): void {
   if (config.toxinTypes !== 1 && config.toxinTypes !== 2)

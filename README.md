@@ -18,8 +18,11 @@ fitness scorer or training loop.
 Measurements establish reproduction, inherited variation and several context-specific advantages.
 The thick-medium food-zone studies support local diet specialization. The newer coexistence
 claims were overstated and are [corrected here](docs/analysis-correction.md). These are world-design
-proof points, not a finished ecosystem. Days/weeks operational readiness remains unresolved:
-saves are manual, ancestry grows with births, and view history is not saved.
+proof points, not a finished ecosystem. The new starting world is sixteen times larger in area,
+with unequal local resource opportunities and lower viscosity. [Short probes](docs/spatial-probes.md)
+support affordable local transit and failure across larger gaps under their stated conditions.
+Rolling recovery, compact parentage and retained spatial history are implemented;
+[days/weeks browser operation remains unverified](docs/continuing-observation.md).
 See the [current work order](docs/design/README.md) and [results and limits](docs/design/bacteria-results.md).
 The prior ant implementation is preserved at commit `780fa4e`, annotated tag
 `ant-colony-checkpoint-2026-09-09`.
@@ -38,14 +41,17 @@ pnpm run build
 
 Run `make ci` from the repository root before committing.
 
-Press **Run** to begin at tick zero: 48 bacteria, finite deposits supplying A on the left and B
-on the right, mutation enabled, with a target of 30 ticks per second. Green/blue show foods A/B, red toxin and ochre porous matrix. Neutral signaling
+Press **Run** to begin at tick zero: 48 bacteria in two separated starting colonies in a 320 × 240 world,
+48 finite renewal sites with local A/B mixtures, mutation enabled, and a target of 30 ticks per second.
+Green/blue show foods A/B, red toxin and ochre porous matrix. Neutral signaling
 and solid walls are disabled by default because useful communication and wall construction have
 not been demonstrated. Stats report cells impaired by damage or slowed by matrix. Drag to pan, wheel to
 zoom, and click a cell to inspect its sensors, recurrent state and task byte. Stats remain visible.
 The display shows one framed world, with bounded panning and zoom anchored under the pointer.
-Colored cell rims show inherited-trait groups by default, with family and founder views selectable;
-these groups are not certified species or strategies. The inner fill shows energy and white tips show heading.
+Soft regions summarize nearby cells at world scale; isolated cells remain visible. Zoom reveals
+their actual bodies. Default colors show inherited A/B allocation on a fixed scale, with family,
+founder and other trait views selectable. Select a population to inspect it or browse retained
+spatial samples. The inner fill shows energy and white tips show heading.
 Finite deposit markers, newborn rings, death crosses and the visible population chart explain activity.
 See the [display guide](docs/design/bacterial-display.md).
 Founder shares now retain their observed history. Stats distinguish exact inherited sequences,
@@ -54,7 +60,9 @@ Stats also show physical capacity ranges and acquired learning. Environment, inh
 persistence controls are available below the map. The default is haploid clonal fission with
 paid plasticity and full learned-weight retention. Diploidy, selfing, crossover, mutation operators,
 budding and learning retention are configurable. Material and usable energy have separate ledgers.
-See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v7 rejects older versions.
+See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v8 rejects older versions.
+Recovery saves every 30 seconds while running and on pause; restores start paused. Export a file
+for a separate copy. Browser suspension can interrupt execution; storage failures pause it visibly.
 
 ## Measurement
 

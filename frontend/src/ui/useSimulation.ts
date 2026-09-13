@@ -7,32 +7,43 @@ import {
   appendSample,
   appendRecent,
   populationPoint,
-  type PopulationPoint,
+  populationHistory,
 } from "./populationHistory";
 import { noteBrowserExecution } from "./runtimeIdentity";
+import { observeSpatial } from "../observe/spatialHistory";
+import { useRecovery } from "./useRecovery";
 
 /** Population statistics are recomputed at most this often while running; the map redraws every frame. */
 export const STATS_INTERVAL_MS = 250;
 
+function useWorldSamples(world: World) {
+  const [history, setHistory] = useState(() => populationHistory(world).history);
+  const [recent, setRecent] = useState(() => populationHistory(world).recent);
+  const advanceWorld = useCallback(() => {
+    stepWorld(world);
+    observeSpatial(world);
+    if (world.tick % 100 !== 0) return;
+    const point = populationPoint(world);
+    const record = populationHistory(world);
+    record.history = appendSample(record.history, point);
+    record.recent = appendRecent(record.recent, point);
+    setHistory(record.history);
+    setRecent(record.recent);
+  }, [world]);
+  return { history, recent, setHistory, advanceWorld };
+}
 export function useSimulation(world: World) {
   const [running, setRunning] = useState(false),
     [speed, setSpeed] = useState<Speed>(DEFAULT_SPEED);
+  const recovery = useRecovery(world, running, setRunning);
   const [version, setVersion] = useState(0),
     [statsVersion, setStatsVersion] = useState(0),
     [throughput, setThroughput] = useState(0);
-  const [history, setHistory] = useState(() => [populationPoint(world)]);
-  const [recent, setRecent] = useState<PopulationPoint[]>([]);
+  const { history, recent, setHistory, advanceWorld } = useWorldSamples(world);
   const refresh = useCallback(() => {
     setVersion((v) => v + 1);
     setStatsVersion((v) => v + 1);
   }, []);
-  const advanceWorld = useCallback(() => {
-    stepWorld(world);
-    if (world.tick % 100 !== 0) return;
-    const point = populationPoint(world);
-    setHistory((h) => appendSample(h, point));
-    setRecent((h) => appendRecent(h, point));
-  }, [world]);
   useEffect(() => {
     if (!running) return;
     const pacer = createPacer(speed, performance.now());
@@ -56,19 +67,21 @@ export function useSimulation(world: World) {
         ticks = 0;
       }
       if (world.stopReason) {
-        setHistory((h) => appendPoint(h, world));
+        const record = populationHistory(world);
+        record.history = appendPoint(record.history, world);
+        setHistory(record.history);
         setRunning(false);
         refresh();
         return;
       }
-      frame = requestAnimationFrame(advance);
+      frame = window.setTimeout(advance, 16);
     };
-    frame = requestAnimationFrame(advance);
+    frame = window.setTimeout(advance, 16);
     return () => {
-      cancelAnimationFrame(frame);
+      clearTimeout(frame);
       setStatsVersion((v) => v + 1);
     };
-  }, [world, running, speed, refresh, advanceWorld]);
+  }, [world, running, speed, refresh, advanceWorld, setHistory]);
   return {
     running,
     setRunning,
@@ -80,5 +93,6 @@ export function useSimulation(world: World) {
     history,
     recent,
     refresh,
+    recovery,
   };
 }

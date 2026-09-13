@@ -67,6 +67,11 @@ it("rejects ancestry marked alive without its body", () => {
   data.cells = [];
   expect(() => restoreWorld(JSON.stringify(data))).toThrow("ancestry/body mismatch");
 });
+it("rejects a checkpoint that drops an organism's parentage record", () => {
+  const data = JSON.parse(checkpointToJson(createWorld(1, { ...DEFAULT_CONFIG, founders: 2 })));
+  data.ancestry.pop();
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("incomplete organism ancestry");
+});
 it("rejects impossible reserve configurations at creation", () => {
   expect(() => createWorld(1, { ...DEFAULT_CONFIG, founderReserve: 4 })).toThrow("Founder reserve");
   expect(() => createWorld(1, { ...DEFAULT_CONFIG, daughterReserve: 4 })).toThrow(
@@ -76,9 +81,9 @@ it("rejects impossible reserve configurations at creation", () => {
 it("rejects v1 state rather than inventing genetic randomness and intervention history", () => {
   const data = JSON.parse(checkpointToJson(createWorld()));
   data.version = 1;
-  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v7");
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v8");
   data.version = 6;
-  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v7");
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v8");
 });
 it("controller codecs preserve exact genome and private state without sharing arrays", () => {
   const genome = controller.seed(),

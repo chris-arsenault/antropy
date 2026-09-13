@@ -28,12 +28,22 @@ what could remove its advantage. Development prepares this unresolved live exper
 not certify a finished ecosystem in the harness, prescribe a number of surviving groups, or
 require a long campaign to prove the user's future run has already delivered its value.
 
+The implemented starting hypothesis is [sparse spatial ecology](docs/design/spatial-ecology.md): a genuinely
+large, uneven world with capable movement and legible local populations. It changes the simulation
+and its display. Retune viscosity, food density, dimensions and resource geometry together; preserve
+intent and physical semantics rather than exact numerical settings. The first irregular patch
+arrangement is a revisable hypothesis, not a permanent layout target. The design's work
+sequence records implementation and its human review gate; [plan closeout](docs/design/plan-closeout.md) and the
+[backlog](docs/backlog.md#backlog-plan-carryover) own disposition of earlier unfinished work.
+
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
 The active contract is 35 inputs, 24 recurrent units, eight outputs, nine funded body stocks, ten
-physical loci and checkpoint v7. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
+physical loci and checkpoint v8. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
 are implemented. Physical and behavioral mutation occur at local resource-funded reproduction;
-acquired recurrent changes can transmit into offspring chromosomes. The current default is a thick
-medium with a pure-A left half and a pure-B right half. Recorded populations developed inherited
+acquired recurrent changes can transmit into offspring chromosomes. The default is 320 × 240 units,
+viscosity 0.004, and 48 finite local renewal sites with unequal richness and mixed A/B composition.
+Uniform initial food is zero; initial local food comes from finite deposit stock. Earlier
+thick-medium A/B-half populations developed inherited
 diet differences concentrated in opposite halves; two of three evolved pairs increased share in
 both short rare-start contests ([evolution record](docs/evolve-study.md)). These are proof points
 for local selection, not certification of lasting coexistence. The newer campaign's claimed
@@ -47,19 +57,21 @@ No fallback controller, task dispatcher, offline optimizer or central parent sel
 population. The task byte remains opaque. Genotypes are immutable; acquired experience belongs to
 individuals until explicit birth-local assimilation.
 
-Run starts seed 101, paused at tick zero, with 48 identical founder genotypes and finite deposits
-in a pure-A left half and a pure-B right half (the alternating 80% A / 20% A epoch calendar
-remains selectable), haploid clonal fission, mutation and paid inheritable plasticity. The user reviews through Run and
+Run starts seed 101, paused at tick zero, with 48 identical founder genotypes split between two
+separated resource neighborhoods; most opportunities start unoccupied. New default worlds must
+start with at least two spatial colonies. Food zones and epochs remain selectable.
+Haploid clonal fission, mutation and paid inheritable plasticity remain active. The user reviews through Run and
 stats. Active systems need an ecological purpose and a physical opportunity proof point; evolved
 exploitation is not required before user observation. Record reasons for disabled systems.
 Contact injury, predation, two-type toxin, element cycling, membrane crowding, disturbance, gene
 transfer, sharing, solid walls and neutral signaling are off by default; porous matrix remains
 active. Do not silently enable every experimental mechanism or seed diagnostic winners.
 
-Days/weeks readiness is an intended requirement, not implemented assurance. Saves are manual,
-IndexedDB holds one latest save, organism ancestry grows with births, and chart history is local
-to the opened view. See [runtime and observation limits](docs/backlog.md#backlog-runtime-and-observation-limits).
-Prepare durable continuation and observation separately from ecological opportunity checks.
+Automatic recovery retains six automatic and two manual compressed IndexedDB saves, within 256 MiB.
+Checkpoints retain bounded spatial/chart history and complete organism parentage in compact pages.
+Execution pauses visibly at memory/storage limits; ancestry defaults to a two-million-record limit.
+See [continuing observation](docs/continuing-observation.md) for measurements and remaining browser
+limits. These provisions do not assure uninterrupted days/weeks operation or enduring ecology.
 
 Inspect startup configuration and headless evidence rather than running browser assays. Start a
 development server only on explicit request. Substantial further designs require user review;

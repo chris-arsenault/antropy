@@ -7,12 +7,13 @@ export function RelationshipPanel({ world, selected }: { world: World; selected:
   if (!reference) return null;
   const family = branch(world, reference.id).family,
     origin = familyOrigin(world, family);
-  const compare = comparisonTo(world.genomes.get(reference.genome)!.genome);
+  const genotype = world.genomes.get(reference.genome)?.genome;
+  const compare = genotype ? comparisonTo(genotype) : null;
   const rows = world.cells
     .map((cell) => ({
       cell,
       relation: relatedness(world, reference.id, cell.id),
-      distance: compare(world.genomes.get(cell.genome)!.genome),
+      distance: compare?.(world.genomes.get(cell.genome)!.genome),
     }))
     .sort(
       (a, b) =>
@@ -48,8 +49,8 @@ export function RelationshipPanel({ world, selected }: { world: World; selected:
                 <small>F{branch(world, cell.id).family}</small>
               </td>
               <td>{relation ? relation.links : "unrecorded"}</td>
-              <td>{distance.physical.toExponential(1)}</td>
-              <td>{distance.controller.toExponential(1)}</td>
+              <td>{distance?.physical.toExponential(1) ?? "not retained"}</td>
+              <td>{distance?.controller.toExponential(1) ?? "not retained"}</td>
             </tr>
           ))}
         </tbody>
