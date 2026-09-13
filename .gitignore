@@ -12,3 +12,6 @@ test-results/
 target/
 .DS_Store
 .sulion-paste/
+# Experiment dumps stay local; the ledger keeps named measurements.
+frontend/harness/artifacts/
+__pycache__/
