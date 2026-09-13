@@ -1,4 +1,8 @@
-# Current-default 50,000-tick comparison
+# September 11 default: 50,000-tick comparison
+
+This record uses the default at execution, before later viscosity, supply and immunity changes.
+Its findings are historical proof points, not measurements of today's Run configuration or
+readiness for days/weeks observation. See the [current work order](design/README.md).
 
 Registered September 11, 2026 before reading endpoints. Plan:
 `d12c4609-52b6-49a8-b739-6f730dd13801`.

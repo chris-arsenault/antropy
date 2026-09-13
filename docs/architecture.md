@@ -10,6 +10,7 @@ preserved at tag `ant-colony-checkpoint-2026-09-09`.
 | Module | Responsibility |
 | --- | --- |
 | `sim/config.ts`, `types.ts`, `world.ts` | Resolved parameters, durable world shape, initialization and step order |
+| `sim/cycle.ts`, `chemotype.ts`, `predation.ts`, `disturbance.ts`, `transfer.ts`, `sharing.ts` | Optional element cycle, toxin types, damage-related feeding, disturbance, gene transfer and reserve exchange |
 | `sim/deposits.ts`, `ecologyFields.ts` | Finite A/B inventories, seeded arrivals, conservative transport and reactions |
 | `sim/secretion.ts`, `interference.ts`, `matrix.ts` | Shared action affordability, toxin damage/repair, porous binding material and footprint barriers |
 | `sim/fields.ts`, `geometry.ts`, `spatial.ts` | Periodic transport and sampling, body geometry and local contact lookup |
@@ -35,10 +36,11 @@ There is no runtime plugin registry or alternate substrate. See [ADR 0018](adr/0
 
 ## Kernel order
 
-A world step executes supply and field transport, then every cell's observation and RNN inference
+A world step executes supply and field transport, optional disturbance, then every cell's observation and RNN inference
 against the same chemical snapshot. Paid motion and contact resolution precede local secretion.
 Toxin exposure changes functional damage. Simultaneous uptake shares both foods and intracellular
-storage. Catabolism, maintenance, paid repair and construction precede contact correction, death and local division. Daughters first act next tick.
+storage. Optional light fixation, catabolism, maintenance, paid repair and construction precede contact
+correction, optional gene transfer/reserve sharing, death with optional feeding, and local division. Daughters first act next tick.
 
 Inference first funds optional learning. Movement reserves basal maintenance before allocating
 quadratic motor and linear secretion expenditure. Nutrient material, built core/machinery, usable
@@ -64,8 +66,8 @@ plus nine plasticity loci are heritable. Founder weights encode a small
 nutrient response; there is no controller fallback, pathfinder or task dispatcher.
 
 Genotypes contain one or two chromosomes, each with behavioral and physical blocks. Diploid
-expression is additive. Eight independent physical genes target core, motor, A/B processing, storage, defense,
-toxin machinery and matrix machinery. Only actual material stocks affect capabilities. Growth consumes material and usable
+expression is additive. Ten physical loci encode nine construction targets (core, motor, A/B processing, storage, defense,
+toxin, matrix and light harvesting) plus a toxin tint. Only actual material stocks affect capabilities. Growth consumes material and usable
 energy; inherited target mutations do not grant machinery. Actual volume includes stored food and
 sets translational/rotational drag and thermal angular diffusion.
 Static policy tables select clonal/selfing transmission, uniform/one-point crossover,
@@ -85,22 +87,23 @@ genomes for measurement; they never select reproduction in a living population.
 
 ## Browser and persistence
 
-The browser creates the same default configuration as the harness: seed 101, 48 founders, mixed
-finite deposits, haploid clonal fission, physical/behavioral mutation, paid plasticity and full
+The browser creates the same default configuration as the harness: seed 101, 48 founders, a thick medium and finite deposits in pure-A/pure-B halves, haploid clonal fission, physical/behavioral mutation, paid plasticity and full
 acquired-weight retention on.
 It starts paused at tick zero and does not silently restore a saved
 run. Run and always-visible stats expose the experiment. Green/blue food, red toxin and ochre
 porous matrix layers are enabled, with drag pan, wheel zoom, fit and cell selection. Neutral
 signaling and solid walls are disabled by default for the reasons in the current ecology contract.
 
-Checkpoint version 5 declares substrate `bacteria-xy`. It preserves fields, source state, resolved
+Checkpoint version 7 declares substrate `bacteria-xy`. It preserves fields, source state, resolved
 configuration, PRNG streams, all live body/receptor/brain states, genome and organism ancestry,
 resource ledgers, recent diagnostic events, durable manual intervention history and stop reason.
 Import validates physical parameter relationships, matching body/ancestry records and lifetimes,
 controller-owned encodings, actual stock capacities, chromosome counts and both resource balances.
-It rejects versions 1–4 and ant files rather than
+It rejects older bacterial versions and ant files rather than
 inventing missing history or random state. IndexedDB uses a separate bacterial database.
-No backend or hosted data transfer is involved.
+No backend or hosted data transfer is involved. Saves are manual and IndexedDB holds one latest
+checkpoint. Chart history is view-local; organism ancestry grows with births. Recovery, retained
+observation and sustained resource use need a design for the intended days/weeks run.
 
 ## Measurements and limits
 

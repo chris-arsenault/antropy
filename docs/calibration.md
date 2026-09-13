@@ -13,7 +13,7 @@ Historical calibration is preserved in the [snapshot](sources/history/2026-09-10
 | World / timestep / founders | 80 × 60 periodic XY / 0.2 model seconds / 48 |
 | Brain | 35 inputs, 24 recurrent units, 8 outputs |
 | Finite deposits | 24; rate scale 0.2, radius scale 3, lifetime scale 60 s, mean replacement wait 20 s |
-| Food layout | Zones: pure-A left half, pure-B right half, four deposit slots each; epochs (80% A / 20% A, 50,000 ticks) selectable |
+| Food layout | Zones: pure-A left half, pure-B right half, 12 deposit slots each; epochs (80% A / 20% A, 50,000 ticks) selectable |
 | Initial dissolved food | Total 0.15 per raster cell, split equally A/B |
 | Food diffusion / decay | 0.3 / 0.001 |
 | Toxin diffusion / decay / receptor K | 0.12 / 0.04 / 0.025 |
@@ -31,18 +31,23 @@ Historical calibration is preserved in the [snapshot](sources/history/2026-09-10
 | Body and reserve density / viscosity | 4 / 0.4 (a thick medium: cells move about 3 units per 1,000 ticks and 13% cross a band in their lifetime, versus 22 units and 96% at 0.0004) |
 | Motor power density / efficiency | 0.2 / 0.5 |
 | Behavioral mutation probability / scale | 0.0015 / 0.08 (about 2.5 loci per birth) |
-| Physical mutation probability / scale | 0.1 / 0.12 (about 0.8 loci per birth) |
+| Physical mutation probability / scale | 0.1 / 0.12 (about 1.0 selected loci per birth, including the optional harvesting and tint loci) |
 | Decomposition | Detritus returns half as food A and half as food B |
 | Abiotic disturbance (`config.disturbance`, off by default) | meanInterval 2,000 s (10,000 ticks); radius 10 (about 6.5% of the default world); mortality 0.9; mixing 1 |
 | Horizontal gene transfer | `transferRate` 0; the [transfer study](transfer-study.md) runs at 0.001 per touching pair per second |
-| Adhesion and sharing | `sharingRate` 0; the [sharing study](sharing-study.md) runs at 0.05 per second |
-| Quorum signal | `secretionRate` 0 (neutral chemical off); the [signal study](signal-study.md) runs at 0.02 |
-| Predation | `preyYield` 0 (contact kills feed detritus only); the [predation study](predation-study.md) runs at 0.5 |
+| Reserve sharing | `sharingRate` 0; the [sharing study](sharing-study.md) runs at 0.05 per second |
+| Neutral chemical signal | `secretionRate` 0 (off); the [signal study](signal-study.md) runs at 0.02 |
+| Predation | `preyYield` 0 (dead material feeds detritus only); the [predation study](predation-study.md) runs at 0.5 |
 | Family chemistry | `toxinTypes` 1 (one toxin, tint silent); 2 splits toxin and immunity by the heritable tint |
-| Membrane crowding | `machineryCrowding` 0 (additive pathway returns); the [cycle study](cycle-study.md) runs at 0.5 and 0.75, where constructed guilds each invade from rarity, and at 1 the founder mixotroph stops reproducing |
+| Membrane crowding | `machineryCrowding` 0 (additive pathway returns); the [cycle study](cycle-study.md) runs at 0.5 and 0.75, with version-specific results in the corrected study; these are not certified guild-coexistence settings |
 | Element cycle (`config.cycle`, off by default) | light 0.5; lightSupply 0.001 fixation per raster cell per second gathered over a radius-2 footprint of 13 raster cells, so an isolated harvester can fix at most 0.013/s and the whole world offers 4.8/s, equal to the deposit supply; photoRate 0.3; photoRatio 0.05; carbonK 0.3; oxygenK 0.05; oxygenPerMaterial 1; anaerobicEfficiency 0.25; atmosphere oxygen 0.2 and carbon 1; exchangeRate 0.0001/s; initialCarbon 1; carbon/oxygen diffusion 0.3/0.5. With light unlimited per unit ground, harvesting income was density-independent and three evolution arms passed 800–1,200 cells by 85,000 ticks; a one-raster cap of 0.01 let three more arms pass 800–1,400 by 70,000–90,000 because 4,800 raster cells offered ten times the deposit supply. Under the footprint supply a lone half-core three-fold harvester divides about every 3,000 ticks on light alone and 48 of them plateau near 45–60 cells in the default world |
 | Learned-weight retention | 1 |
 | UI target / population safety ceiling | 30 ticks/s / 10,000 cells, pause on limit |
+
+The element-cycle row combines current constants with historical probe results. Those probes
+used since-removed harvesting costs; their exact survival/division outcomes are not current
+calibration guarantees. Default settings leave the cycle off. Review the corrected cycle record
+before using those findings to select an observation configuration.
 
 Actual speed, radius and uptake are body-dependent; they are not fixed global phenotype values.
 Ploidy, transmission, crossover, reproduction and plasticity policies are described in
@@ -69,7 +74,7 @@ require changing float32 evaluation order or the four-pass contact model, which 
 In the browser, population statistics cost about as much as one step (6–10 ms) and previously ran
 every animation frame; they now refresh at most every 250 ms while the map redraws every frame,
 and maximum speed uses a 28 ms frame budget (about 30 frames per second). Browser throughput is
-not certified; expect maximum speed to reach roughly four fifths of the headless rate.
+not certified; the earlier four-fifths-of-headless estimate was not a browser measurement.
 
 A Rust WebAssembly kernel for inference, contacts and sensing was measured on September 12,
 2026 at 44 ticks/s versus 24 for the evolved seed-303 checkpoint (1,324 cells) and about 20%
@@ -79,9 +84,10 @@ only about 15% of a tick left parallelizable, so threads were never worth buildi
 medium default at 1,300 cells runs at roughly 25 ticks/s headless with per-operation float32
 rounding removed from the RNN.
 
-Generation time in the default is about 5,000 ticks at steady state, set by turnover rather than
-growth: at carrying capacity, births match deaths and the founder rarely dies of anything but
-starvation. Faster generations follow from higher mortality in the ecology, not from tuning growth.
+An earlier default estimate was about 5,000 ticks per generation at steady state. Generation
+timing depends on bodies, supply, mortality and crowding; it is not a current fixed conversion
+between ticks and generations. These short measurements do not establish sustained browser
+throughput, memory use or checkpoint latency over days or weeks.
 
 <a id="calibration-residency"></a>
 
@@ -99,10 +105,10 @@ the share of cells that entered the other half of the world during their life.
 | 0.4 | 8, 0.3 | 3.5 | 4.9 | 12% | 1,499 | 30.1% |
 | 0.4 | 24, 0.2 | 3.0 | 4.5 | 13% | 1,686 | 30.2% |
 
-At the old viscosity a lineage foraged across the whole world within one generation, which made
-every local interaction global: toxin became area denial and band-limited food could not select
-on diet. At 0.4 a lineage born in a band mostly stays there while chemotaxis still finds the
-denser deposits, and the constructed diet specialists partition the zoned world by survival alone.
+The sampled crossing fractions support the narrower finding that higher viscosity reduces
+dispersal within a cell's observed life. This motivates local selection; it does not prove that
+every interaction was global in the old world. At 0.4 cells mostly stay in their starting band,
+and separate constructed diet contests show regional sorting without authored food preference.
 Motor energy is unchanged because the same power buys less speed; deposits were made denser and
 supply raised so slow cells have local food and the population is about 340 rather than 170.
 
@@ -112,9 +118,11 @@ supply raised so slow cells have local food and the population is about 340 rath
 
 The original strategic ecology used injury 0.05 and repair 0.08. Near zero damage, founder repair
 was approximately 0.24 × damage per second, enough to suppress ordinary exposure almost completely.
-Current rates make injury faster than repair under sufficiently concentrated toxin. For reference
-defense, concentration 0.0019 yields approximately 0.0118 injury/s against 0.008 maximum repair/s.
+These were the September 10 rates before producer immunity. At concentration 0.0019, defense
+alone gave about 0.0118 injury/s against 0.008 maximum repair/s. Current founder immunity raises
+the protection divisor from 3 to 23, reducing that example to about 0.00153 injury/s. Actual
+exposure, effort and available resources determine the damage balance in the current run.
 
-The [default ablations](design/bacteria-results.md) establish consequences under these scales.
+The [September 10 ablations](design/bacteria-results.md) establish consequences in that version.
 This is not proof of an optimal balance, real toxicity constants or evolved investment. Future
 calibration must state a prediction, preserve conditions and stop when tuning fails structurally.

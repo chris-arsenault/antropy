@@ -68,8 +68,9 @@ Each constructed material unit costs one reserve unit plus synthesis energy. Sec
 consume reserve plus processing energy. Repair records replacement material as metabolic waste
 and separately accounts its chemical energy and repair energy. Bound toxin remains held material.
 
-Death transfers actual structure/reserve to detritus and dissipates residual usable energy.
-Matrix decay and expired deposits also feed detritus; decomposition yields food B. These transfers
+Death transfers actual structure/reserve to detritus, with optional damage-related feeding
+redirecting some to living neighbors, and dissipates residual usable energy. Matrix decay and
+expired deposits also feed detritus; decomposition returns equal food A and food B. These transfers
 are not new external grants. Death-material totals are throughput, not a second mass sink.
 Conservation must hold through starvation, damage, birth, secretion, decay and checkpoint restore.
 
@@ -79,7 +80,8 @@ Conservation must hold through starvation, damage, birth, secretion, decay and c
 
 | Information | Changes during life | Birth transmission |
 | --- | --- | --- |
-| Input/output weights, biases and physical targets | No | Chromosomes, then crossover/mutation |
+| Input/output weights and biases | No | Chromosomes, then crossover/mutation |
+| Physical targets and toxin tint | Optional contact transfer creates a new genotype; existing stock is unchanged | Current chromosomes, then crossover/mutation |
 | Recurrent baseline weights | Registered genotype remains immutable | Baseline plus retained acquired delta, then crossover/mutation |
 | Nine plasticity coefficients | No; rule is inherited | Chromosomes, subject to behavioral mutation |
 | Acquired recurrent traces H | Paid bounded local updates | Converted into baseline-weight delta at configurable retention |
@@ -131,4 +133,4 @@ coefficients to [-1,1], and physical targets to [-3,3].
 
 No reproductive score selects parents or filters mutations. Immutable genotype records track
 ancestry; exact inherited sequence counts are distinct from record counts and founder lineages.
-Checkpoint v5 preserves genotype schema, actual bodies, private traces and transfer provenance.
+Checkpoint v7 preserves genotype schema, actual bodies, private traces and transfer provenance.

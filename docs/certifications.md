@@ -2,7 +2,20 @@
 
 ## Current bacterial simulation
 
-The user is watching the current run and reports that it looks interesting, while remaining
+The project now prepares conditions for the user's days/weeks observation using hypotheses and
+small proof points. It does not require an agent to produce a certified ecosystem before handoff.
+The September 12–13 coexistence claims are [corrected](analysis-correction.md): positive count
+growth was repeatedly mistaken for frequency advantage, and the old duration gate was not met.
+Retiring that gate as the work order does not validate its earlier passes.
+
+Current startup uses the thick-medium A/B world, v7 checkpoints and identical founder genotypes.
+The newer experimental mechanisms remain off by default. Long-duration recovery, storage and
+retained observation are [explicit readiness gaps](backlog.md#backlog-runtime-and-observation-limits).
+No days/weeks browser operation or new human visual acceptance is certified here.
+
+## Earlier bacterial reviews
+
+During the earlier September 10 review, the user reported that the run looked interesting, while remaining
 unsure whether it shows evolution. The supplied tick-48,661 checkpoint subsequently enabled
 an [identified inherited advantage](overnight-study.md), independently of visual impressions.
 
@@ -18,7 +31,7 @@ signaling are disabled by default because useful behavior has not been demonstra
 assay was run and counters do not certify trajectories.
 
 The September 11 population-observation change passed `make ci` with 78 bounded tests. Recent
-families are the default view; genealogical/genetic comparisons and inherited trait/effort
+families were the default view at that revision; genealogical/genetic comparisons and inherited trait/effort
 distributions are implemented. The [observation contract](design/population-observation.md) records
 the saved-export projection and its limits. This verifies reporting and unchanged continuation;
 it is not a new ecological experiment or human visual acceptance. Identifying each winning trait

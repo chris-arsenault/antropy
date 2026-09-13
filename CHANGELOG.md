@@ -13,10 +13,17 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
-- Measured roadmap two: 24 evolution arms across the seven levers (element cycle, family
-  chemistry, predation, disturbance, gene transfer, sharing, signal) in the homogeneous mixed
-  world; 16 produced clusters that mutually invade or both persist from rarity. Predation and gene transfer pass
-  in every seed; predation's evolved axis is toxin machinery itself. Records under `docs/*-study.md`.
+- Revised project purpose and active documentation: prepare a world where diverse ecosystems
+  and adaptation are likely during days/weeks of user observation, using hypotheses and small
+  proof points. Retired prescribed coexistence gates; recorded continuity, storage and history gaps.
+- Corrected the seven-mechanism campaign analysis from saved results. Three of 24 evolved pairs
+  increase share both ways at the endpoint, one nearly unchanged, rather than the reported 16
+  coexistence passes. Gene transfer has none, predation two. These are not lasting-coexistence
+  results. Reports now show denominators and share changes; source-linked audits preserve the
+  corrected data. See [analysis correction](docs/analysis-correction.md).
+- Recorded 24 evolution arms across element cycle, typed toxin, predation, disturbance, gene
+  transfer, sharing and signal in patchy mixed-deposit worlds. Physical effects are retained
+  evidence; named ecological roles and long-run readiness remain separate questions.
 - Persistence: levers absent from a save load as off, rounding noise of one unit in the last
   place is tolerated on bounded values, and genotype records born after their organism are
   allowed when transfer is on. Repair and secretion no longer let a reserve go negative.
@@ -30,7 +37,7 @@ All notable user-visible changes are recorded here.
 - Added abiotic disturbance (`config.disturbance`, off by default): random discs are mixed and
   thinned at a memoryless interval, deaths recorded as `disturbance`.
 
-- Added predation (`preyYield`, default 0): a fraction of a contact-killed cell's material feeds
+- Added predation (`preyYield`, default 0): a fraction of a damage-killed cell's material feeds
   the toxin-bearing neighbours touching it instead of detritus, accounted as `preyed`.
 
 - Added family chemistry (`toxinTypes: 2`, default 1): a tenth physical locus tints a cell's
@@ -48,10 +55,9 @@ All notable user-visible changes are recorded here.
   (`cycle.lightRadius`) that overlapping harvesters share, so harvesting income falls with
   crowding and the world's light budget equals its deposit supply; with light unlimited per unit
   ground, evolution arms grew past 1,200 cells. Recorded in the [cycle study](docs/cycle-study.md):
-  constructed guilds each invade from rarity; of six evolution arms, one (crowding 0.75, 93
-  generations) split into a harvester and a consumer cluster whose medoids mutually invade.
-  With crowding 0.5 constructed autotroph, heterotroph and mixotroph guilds each reproduce and
-  invade from rarity in a mixed world; without it the mixotroph fixes.
+  fixation and cost effects occur, but the reported evolved harvester/consumer coexistence was
+  incorrect and used since-removed costs. Some constructed guilds reproduce while losing
+  population share; the corrected study preserves the exact configuration-specific outcomes.
 
 - Harness runs no longer fail when source changes while they run: both digests are recorded, a
   warning is printed, and the result, checkpoint and ledger row are written as usual.
@@ -62,13 +68,13 @@ All notable user-visible changes are recorded here.
   at maximum speed, and double arithmetic over float32 storage in the RNN. Exact cross-machine
   replay is no longer an invariant.
 
-- Pruned genotype records that no living cell carries (founders retained), so checkpoints stay
-  bounded under the higher mutation supply; dead organisms keep their genome id as provenance.
+- Pruned genotype records that no living cell carries (founders retained), reducing genome storage
+  under higher mutation supply; total checkpoints still grow with organism ancestry; dead organisms keep their genome id as provenance.
   Pilot assays may run up to 900 seconds of wall time.
 
 - Made the medium thick (viscosity 0.4), deposits dense and balanced (24 at rate 0.2), decomposition
-  symmetric (half A, half B) and mutation supply stronger (about 2.5 behavioural and 0.8 physical
-  loci per birth). Cells now stay in the band they are born in, and constructed diet specialists
+  symmetric (half A, half B) and mutation supply stronger (about 2.5 behavioural and, with ten physical loci, 1.0 physical
+  loci selected per birth). Cells now stay in the band they are born in, and constructed diet specialists
   partition the zoned world by survival alone.
 
 - Ran eight de novo evolution arms (70–127 generations, 180–660 cells, default, eightfold
@@ -91,16 +97,16 @@ All notable user-visible changes are recorded here.
   and report. Twelve constructed settings establish all three pairwise dominances but no
   three-way coexistence; the record explains why mobile cells give the well-mixed outcome.
 
-- Recorded the roadmap to strategic differentiation and the mutual-invasibility coexistence
-  criterion. Optimized the spatial index, contact passes, sensing and RNN inference with
+- Historically recorded a roadmap with coexistence outcome gates, retired by the September 13
+  purpose revision because development prepares opportunities for the user's ongoing run. Optimized the spatial index, contact passes, sensing and RNN inference with
   bit-identical checkpoints, raising headless throughput about 1.7–1.9×. Bounded the browser
   statistics refresh to 250 ms and widened the maximum-speed frame budget.
 
 - Added recent-family, genealogy and inherited-trait views, source provenance in checkpoints,
   configurable food-composition epochs and reusable short mechanism experiments with typed
   resource accounting. Recorded actual evolved food-access and B-processing benefits alongside
-  failed motor, learning and food-specific selection hypotheses. Strategic diversity remains
-  unresolved; spatial food heterogeneity is an untested design hypothesis, not an approved change.
+  failed motor, learning and food-specific selection hypotheses. At that stage spatial food heterogeneity was an untested next hypothesis; it was subsequently
+  implemented. Neither stage establishes a finished diverse ecosystem.
 
 - Archived the complete prior documentation tree and consolidated 38 mixed historical design
   documents into eight current bacterial contracts. Updated principles, calibration, backlog,

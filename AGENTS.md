@@ -21,16 +21,25 @@ Canvas SPA and deployed on the Ahara platform.
 
 ## Current goal and boundary
 
+Build a world where a diverse ecosystem and evolutionary adaptation are likely, for the user to
+run for days or weeks and watch. Use hypotheses and small proof points to establish opportunities:
+what cells can sense or physically exploit, what a choice costs, when it can repay that cost, and
+what could remove its advantage. Development prepares this unresolved live experiment. It does
+not certify a finished ecosystem in the harness, prescribe a number of surviving groups, or
+require a long campaign to prove the user's future run has already delivered its value.
+
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
 The active contract is 35 inputs, 24 recurrent units, eight outputs, nine funded body stocks, ten
 physical loci and checkpoint v7. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
 are implemented. Physical and behavioral mutation occur at local resource-funded reproduction;
-acquired recurrent changes can transmit into offspring chromosomes. The world is a thick medium with a pure-A left half and a pure-B right half; from one founder,
-populations evolve two coexisting diet clusters that occupy opposite halves and mutually invade
-from rarity ([evolution record](docs/evolve-study.md)). Earlier studies isolated single evolved
-advantages (lower toxin output, brief-food access, a B-processing allele). The toxin
-producer/resistant/sensitive cycle has not been shown to coexist. Founder dominance and genome
-counts alone do not establish adaptation; mutual invasibility does.
+acquired recurrent changes can transmit into offspring chromosomes. The current default is a thick
+medium with a pure-A left half and a pure-B right half. Recorded populations developed inherited
+diet differences concentrated in opposite halves; two of three evolved pairs increased share in
+both short rare-start contests ([evolution record](docs/evolve-study.md)). These are proof points
+for local selection, not certification of lasting coexistence. The newer campaign's claimed
+16/24 coexistence passes were incorrect; read the [correction](docs/analysis-correction.md).
+Earlier studies isolated benefits from toxin savings, brief-food access and a B-processing allele.
+Counts, chosen clusters and isolated advantages do not establish a diverse lasting ecosystem.
 
 There is one periodic XY world. Production controllers receive local chemistry/body facts and
 private memory, with no coordinates, compass, pathfinding, lineage identity or reproductive score.
@@ -41,9 +50,16 @@ individuals until explicit birth-local assimilation.
 Run starts seed 101, paused at tick zero, with 48 identical founder genotypes and finite deposits
 in a pure-A left half and a pure-B right half (the alternating 80% A / 20% A epoch calendar
 remains selectable), haploid clonal fission, mutation and paid inheritable plasticity. The user reviews through Run and
-stats. Implemented systems must visibly affect this population before handoff, or have an explicit
-recorded reason to be disabled. Solid walls and neutral signaling are disabled by default because
-useful construction/communication is unproved; porous matrix remains active.
+stats. Active systems need an ecological purpose and a physical opportunity proof point; evolved
+exploitation is not required before user observation. Record reasons for disabled systems.
+Contact injury, predation, two-type toxin, element cycling, membrane crowding, disturbance, gene
+transfer, sharing, solid walls and neutral signaling are off by default; porous matrix remains
+active. Do not silently enable every experimental mechanism or seed diagnostic winners.
+
+Days/weeks readiness is an intended requirement, not implemented assurance. Saves are manual,
+IndexedDB holds one latest save, organism ancestry grows with births, and chart history is local
+to the opened view. See [runtime and observation limits](docs/backlog.md#backlog-runtime-and-observation-limits).
+Prepare durable continuation and observation separately from ecological opportunity checks.
 
 Inspect startup configuration and headless evidence rather than running browser assays. Start a
 development server only on explicit request. Substantial further designs require user review;
@@ -60,6 +76,11 @@ ledger preserves named measurements, and a report a study document links to is c
 
 ## Experiment operating policy
 
+The [current work order](docs/design/README.md) supersedes earlier coexistence gates and roadmap
+pass counts. A failed named prediction stays negative even if unrelated trait variation appears.
+Never extend a horizon, sweep seeds or add mechanisms merely to produce a desired community.
+The user's continuing live run is distinct from an agent experiment campaign.
+
 Default to a small constructed experiment when testing a mechanism or a proposed strategic
 opportunity. Do not substitute long runs, cell counts, biomass or founder dominance for evidence
 that a cell senses a cue, acts on it and obtains a benefit that repays its cost.
@@ -68,15 +89,20 @@ that a cell senses a cue, acts on it and obtains a benefit that repays its cost.
    decision the result can change before execution. Read existing negative findings first.
 2. Use the shared simulation with handcrafted diagnostic RNN weights and physical genotypes.
    Simple biases and sensor-response connections are feasible; a programmed fallback or oracle
-   is unnecessary. Freeze mutation and specify private learning and inherited-learning settings.
+   is unnecessary. Freeze mutation and specify private learning, inherited-learning and contact
+   gene-transfer settings. Physiological opportunities need a physical response, not an invented
+   neural cue.
    Record funded bodies separately from genetic construction targets.
 3. Start with single-cell probes lasting hundreds of ticks. Verify actual local readings, steering,
    displacement, uptake and expenses before testing population outcomes. A missing signal or
    unexpressed behavior is a finding, not a reason to launch a long population run.
-4. Then use small paired populations, controlled food/exposure, swapped starting assignments and
+4. When needed, use small paired populations, controlled food/exposure, swapped starting assignments and
    a few thousand ticks. Follow resource access through costs to funded growth/divisions and
    survival. Report percentages with explicit denominators; distinguish cumulative flow from
-   standing field coverage. Finite-food extinction is not an execution failure.
+   standing field coverage. Compare group shares with their own initial whole-population
+   denominators; more descendants alone is not invasion. Divisions per founder are not generations.
+   Chosen k-means groups are descriptive partitions, not demonstrated strategies. Finite-food
+   extinction is not an execution failure.
 5. Stop at the declared horizon, terminal ecological outcome or wall cap. Preserve negative and
    incomplete results. No automatic seed expansion, parameter sweep or horizon extension.
    Replication is justified when conflicting results or needed precision can change the decision.
@@ -114,8 +140,9 @@ saved-genotype comparisons. A named case runs both placements, normally 1,500 ti
 3,000-tick ceiling. Do not run every listed case by default. `capability-pilots` is a separately
 registered four-pilot command, not a quick smoke test. `python3 harness/capability_report.py` reads
 the completed study without advancing simulation. Keep physical opportunity, controller expression,
-accessible variation and actual evolved exploitation separate in future reports. The recommended
-next direction is spatial A/B heterogeneity; it awaits design review, not another broad sweep.
+accessible variation and actual evolved exploitation separate in future reports. Spatial A/B
+heterogeneity is now implemented. Its later proof points and the current world-design direction are in the [work order](docs/design/README.md); the study's old next-step
+recommendation is historical, not an instruction to repeat it.
 
 Vitest checks bounded invariants, including observers not changing simulation state. Headless
 assays measure behavior; human review judges visible motion. Inspect browser startup configuration

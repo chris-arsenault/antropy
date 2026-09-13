@@ -40,9 +40,13 @@ thick medium, mixed deposits, no cycle, default mutation. Control: the same with
 
 Failure of 2 with 1 succeeding means the tint's selection is weak at this mutation supply and
 toxin effort, which is a finding about the founder's toxin effort, not a reason to author family
-identity. The gate is the general one: whatever clusters emerge must mutually invade.
+identity. The original registration also required any resulting clusters to increase when rare;
+that outcome gate is historical and superseded by the current world-design purpose.
 
 ## Results
+
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+The questions and predictions above preserve the original registration, not the current work order.
 
 ### Constructed contests
 
@@ -99,21 +103,18 @@ Family chemistry on at contact injury 10, mixed world, three seeds, 150,000 tick
 one-type control at the same contact injury (`evolve-2026-09-13/families/`, ledger rows for the
 four arms). Toxin effort, machinery, defense and tint were all free to evolve.
 
-| Arm | Cells, generations | Tint p10 / p50 / p90 | Toxin machinery % of core p10 / p50 / p90 | Deaths (by contact) | k = 2 clusters (n, A share %, machinery %, tint %) | Rare invasion (final cells, divisions per founder) |
+| Arm | Cells, maximum generation | Tint p10 / p50 / p90 | Toxin machinery % of core p10 / p50 / p90 | Deaths (attributed to damage) | k = 2 clusters (n, A share %, machinery %, tint %) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- | --- | --- | --- | --- |
-| 101 families | 390, 104 | 0.41 / 0.51 / 0.58 | 4.9 / 7.3 / 11.9 | 14,169 (8,181) | 247 at 42 / 8.8 / 48 versus 143 at 60 / 6.0 / 54 | 13 (8.0) and 16 (10.6): mutual |
-| 202 families | 457, 120 | 0.47 / 0.55 / 0.61 | 3.2 / 7.9 / 11.0 | 21,504 (11,887) | 346 at 51 / 8.4 / 56 versus 111 at 63 / 4.7 / 48 | 17 (12.4) and 74 (41.3): mutual |
-| 303 families | 409, 103 | 0.45 / 0.55 / 0.63 | 2.3 / 4.1 / 5.9 | 13,674 (8,488) | 134 at 52 / 4.6 / 50 versus 275 at 68 / 4.2 / 56 | 0 (1.3) and 41 (15.3): one way |
+| 101 families | 390, 104 | 0.41 / 0.51 / 0.58 | 4.9 / 7.3 / 11.9 | 14,169 (8,181) | 247 at 42 / 8.8 / 48 versus 143 at 60 / 6.0 / 54 | 13/132 (9.85%) and 16/145 (11.03%): one declines |
+| 202 families | 457, 120 | 0.47 / 0.55 / 0.61 | 3.2 / 7.9 / 11.0 | 21,504 (11,887) | 346 at 51 / 8.4 / 56 versus 111 at 63 / 4.7 / 48 | 17/195 (8.72%) and 74/179 (41.34%): one declines |
+| 303 families | 409, 103 | 0.45 / 0.55 / 0.63 | 2.3 / 4.1 / 5.9 | 13,674 (8,488) | 134 at 52 / 4.6 / 50 versus 275 at 68 / 4.2 / 56 | 0/130 (0.00%) and 41/119 (34.45%): one declines |
 | 101 one type | 494, 90 | silent | 4.4 / 6.5 / 8.4 | 13,365 (4,507) | 293 at 47 / 6.6 versus 201 at 65 / 6.2 | no assay: one cell in the saved endpoint carries a secretion effort of −1.5 × 10⁹, an overflow from dividing by a reserve of −3 × 10⁻²⁰ (rounding), which the restore rejects; the division is now clamped and the arm is not rerun |
 
-Contact injury made toxin machinery the most strongly selected trait in every arm: the founder's
-2% of core became 4–8% at the median and up to 12%, and contact kills were more than half of all
-deaths with family chemistry on (a third in the one-type control). Prediction 2 fails on its
-named axis: the tint stayed unimodal around 0.5 in every arm, with a spread of 0.41–0.63 that
-drifts rather than splits. The general gate passes in two arms of three: seed 101's and seed
-202's clusters, which differ on diet, body size and toxin machinery, each invade the other from
-10%; seed 303's smaller-machinery cluster does not. Family chemistry did not produce families;
-it did not prevent the diet-and-body-size partition that every mixed-world arm produces, and it
-raised contact mortality. The constructed contests explain why the tint has no purchase: two
-families of opposite tint each hold ground but neither can take it, so a lineage that drifts in
-tint gains nothing until it is already common.
+The founder's toxin machinery target of 2% of core became 4–8% at the median and up to 12%.
+Damage deaths were more than half of all deaths with family chemistry on, versus a third in the
+one-type control; the recorded counter does not separate field from contact injury. Prediction 2
+fails on its named axis: tint stayed unimodal around 0.5, with no separate compatibility groups.
+All rare groups began at 7/64 (10.94%); no pair gained share in both directions, so the former
+two-of-three pass is withdrawn. The constructed family comparisons are compatible with a cost
+of being rare, but do not isolate the cause of the evolved tint distribution. Typed chemistry
+changes susceptibility; useful kin cooperation and lasting chemical territories remain hypotheses.

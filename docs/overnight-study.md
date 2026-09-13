@@ -202,8 +202,11 @@ not reconstruct the user's 57.35% takeover, nor do they establish that inherited
   not establish coexistence, invasion from rarity, adaptive physical specialization, useful learning
   inheritance or separately beneficial offensive secretion. Reversion covers one observed background.
 
-The next recommendation is a small physical-effect comparison: retain secretion cost but remove
+At the close of this study, the recommendation was a small physical-effect comparison: retain secretion cost but remove
 toxin injury in the single-allele contest, then test mixture frequency if that result warrants it.
 This separates saving precursor from escaping toxin pressure before designing additional competition.
 Do not automatically add family chemistry, new food systems or another optimizer. The current result
 is real adaptation toward lower waste, while the desired range of strategic alternatives remains open.
+That injury comparison was subsequently recorded in the [strategy study](strategy-study.md).
+Further work follows the [current world-design direction](design/README.md), not an automatic
+continuation of this older recommendation.

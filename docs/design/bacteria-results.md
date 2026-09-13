@@ -1,9 +1,34 @@
-# Current evidence and unresolved adaptation
+# Evidence for world-design decisions
 
-Updated September 11, 2026. The simulation has heritable variation and consequential physical
-pressures. Actual inherited differences confer benefits through reduced toxin output, improved
-brief-food access and greater B processing. This establishes consequential behavioral and physical
-evolution in recorded contexts, not broad strategic diversity or adaptive inherited learning.
+Updated September 13, 2026. These findings help prepare a world where diverse strategies and
+adaptation are likely during the user's days/weeks observation. They do not certify a completed
+ecosystem or prescribe which organisms that run should produce. Older measurements retain their
+recorded conditions; they are not automatically current-default measurements.
+
+<a id="evidence-world-design-proof-points"></a>
+
+## World-design proof points and corrected claims
+
+The [analysis correction](../analysis-correction.md) recalculates saved contest frequencies without
+advancing simulation. The newer seven-mechanism campaign reported 16/24 coexistence passes. Only
+three endpoint pairs increased share in both directions, one almost unchanged; no lasting
+coexistence follows. Gene transfer has no such pair, predation two, and the cycle one near tie.
+The reported harvester/consumer pair loses share in one direction and used since-removed costs.
+
+The [thick-medium zoned study](../evolve-study.md) retains meaningful evidence: inherited diet
+differences concentrated in opposite regions, with both rare groups gaining endpoint share in
+two of three seeds. This supports local selection as a physical opportunity. Several settings
+changed together, so the whole result cannot be attributed solely to viscosity. It is not a
+two-species product specification or an established prediction of the user's long run.
+
+Light fixation, transfer, sharing and disturbance have measurable physical effects, while useful
+communication, division of labor, chemical family roles and active hunting remain unestablished.
+Separate a mechanism's opportunity from its evolved exploitation. The current default leaves
+these newer mechanisms off; see the [resolved scope](README.md#design-current-default-and-disabled-scope).
+
+The former 20/200-generation coexistence gate was not demonstrated and is retired as a work order.
+The next preparation concerns coherent ecological opportunities and durable long observation,
+not running until an arbitrary number of groups passes that gate.
 
 <a id="evidence-capability-investigation"></a>
 
@@ -65,9 +90,11 @@ does not isolate self-harm from harm to neighbors or subsequent ecological feedb
 
 <a id="evidence-corrected-default-ecology"></a>
 
-## Corrected default ecology
+## September 10 default ecology, before later world changes
 
-Runs 2892–2897, seeds 101/102, stop at 3,000 ticks (600 model seconds). Each seed starts 48 identical
+Runs 2892–2897 used the September 10 default, before thicker medium, immunity and revised supply.
+They establish consequences in that version, not current timing or current toxin mortality.
+Seeds 101/102 stop at 3,000 ticks (600 model seconds). Each seed starts 48 identical
 founder genotypes in the ordinary Run configuration. Controls independently disable injury or
 matrix toxin binding while retaining secretion costs. Environment schedules and initial conditions
 match; subsequent body/genetic histories may diverge.
@@ -134,14 +161,16 @@ Detailed outcomes, unsuccessful approaches and original source digests remain in
   points of population share in B-rich contests. This establishes environment-dependent inherited
   performance, not distinct specialists or the selection history responsible for every gain.
 - A specific toxin-reducing mutation, an evolved brain block and an observed B-processing allele
-  have causal benefits. Multiple stable strategies and population-wide specialization remain unproved.
-- Matrix protection and toxin pressure matter physically. Evolution has not been shown to select
-  matrix investment independently or useful offensive toxin production.
+  have causal benefits in their recorded contexts. Later regional diet specialization is observed;
+  lasting ecological diversity remains unresolved.
+- Matrix protection and toxin pressure matter physically. Later damage/feeding arms show rising
+  toxin machinery and some positive rare-start endpoints; independent causal attribution to
+  offensive behavior and useful evolved matrix construction remain unresolved.
 - Lower physical motor investment wins all sixteen [matched motor contests](../strategy-study.md),
   with greater motor investment extinct in every context. An economical body is viable, but a
   compensating high-motor niche, useful signaling, strategic walls and stable coexistence remain unproved.
 - Acquired synaptic changes transmit; their adaptive value and modulation coverage remain uncertain.
-- Continuous ancestry storage and current high-population throughput require measurement before
-  claims about indefinite or large browser populations.
+- Days/weeks observation needs durable recovery, bounded storage, retained history and sustained
+  performance. The [backlog](../backlog.md#backlog-runtime-and-observation-limits) names the current gaps.
 - Human observation can reject visible failure; a favorable impression does not identify causal
   genetic advantage. Follow the [experiment protocol](experimentation.md) before asserting one.

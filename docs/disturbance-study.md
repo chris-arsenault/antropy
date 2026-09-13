@@ -1,4 +1,4 @@
-# Abiotic disturbance: colonisers against holders
+# Local disturbance and recolonization opportunity
 
 Registered September 13, 2026 as phase 4 of
 [roadmap two](design/README.md#design-roadmap-2), before reading any endpoint. Sulion plan
@@ -38,20 +38,25 @@ brain and body traits the existing capability assays already showed to be expres
 
 ## Results
 
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+The questions and predictions above preserve the original registration, not the current work order.
+
 Three arms completed (`evolve-2026-09-13/disturbance/`), 11–14 events each over 150,000 ticks
 killing 316–424 cells of 7,600–9,700 deaths: at the defaults disturbance is a minor mortality
 and the population rebuilt the emptied discs between events.
 
-| Arm | Cells, generations | Motor % of core p10 / p50 / p90 | Core (founder = 1) p10 / p50 / p90 | k = 2 clusters (n, A share %, motor %, core %) | Rare invasion (final cells, divisions per founder) |
+| Arm | Cells, maximum generation | Motor % of core p10 / p50 / p90 | Core (founder = 1) p10 / p50 / p90 | k = 2 clusters (n, A share %, motor %, core %) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- | --- | --- | --- |
-| 101 | 972, 51 | 3.9 / 5.5 / 6.6 | 0.28 / 0.38 / 0.54 | 573 at 55 / 4.8 / 45 versus 399 at 57 / 6.2 / 33 | 15 (7.3) and 42 (12.3): mutual |
-| 202 | 931, 64 | 3.7 / 5.2 / 6.9 | 0.26 / 0.35 / 0.46 | 673 at 43 / 5.2 / 32 versus 258 at 51 / 5.3 / 44 | 46 (15.9) and 10 (5.4): mutual, the second weakly |
-| 303 | 762, 54 | 3.6 / 4.6 / 6.1 | 0.27 / 0.38 / 0.62 | 434 at 51 / 4.2 / 50 versus 328 at 70 / 5.6 / 31 | 7 (4.4) and 119 (25.6): one way |
+| 101 | 972, 51 | 3.9 / 5.5 / 6.6 | 0.28 / 0.38 / 0.54 | 573 at 55 / 4.8 / 45 versus 399 at 57 / 6.2 / 33 | 15/283 (5.30%) and 42/272 (15.44%): one declines |
+| 202 | 931, 64 | 3.7 / 5.2 / 6.9 | 0.26 / 0.35 / 0.46 | 673 at 43 / 5.2 / 32 versus 258 at 51 / 5.3 / 44 | 46/224 (20.54%) and 10/241 (4.15%): one declines |
+| 303 | 762, 54 | 3.6 / 4.6 / 6.1 | 0.27 / 0.38 / 0.62 | 434 at 51 / 4.2 / 50 versus 328 at 70 / 5.6 / 31 | 7/255 (2.75%) and 119/267 (44.57%): one declines |
 
 Prediction 1 fails: motor investment stayed unimodal (the founder's 8% fell to 4–7% in every
 arm, as in undisturbed arms) and the clusters split on diet and body size, the axes every
-mixed-world arm produces. Prediction 3 holds weakly: 51–64 generations against 45–50 in the
-undisturbed mixed arms at the same horizon, with populations a third larger because emptied
-ground refills. The general gate passes in two arms of three. At this interval and radius
-disturbance adds turnover without changing what is selected; a stronger regime is a lever
-setting, not a new mechanism, and is not run here.
+mixed-world comparisons describe. All rare groups began at 7/64 (10.94%), and no pair gained
+share in both directions; the former two-of-three pass is withdrawn. The reported 51–64 maximum
+generations versus 45–50 in other arms is not a matched estimate of disturbance's effect because
+those controls differ in other settings. Disturbance demonstrably kills cells and mixes chemistry.
+A colonizer/holder advantage, faster evolution caused by disturbance, and unchanged selection
+were not established. A small recolonization comparison could test the proposed opportunity
+without requiring evolution to produce named roles.

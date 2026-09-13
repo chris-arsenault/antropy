@@ -1,6 +1,11 @@
 # antropy
 
-Antropy explores evolution in embodied, resource-limited populations. The browser runs
+Antropy builds a world where diverse ecosystems and evolutionary adaptation are likely to arise.
+The intended use is to run a population for days or weeks and watch its history unfold. Development
+uses hypotheses and small physical proof points to prepare that world, without prescribing species,
+precomputing a winning community or requiring an agent coexistence campaign before handoff.
+
+The browser runs
 [top-down bacteria with heritable RNN controllers](docs/design/bacteria.md). Local nutrient uptake
 funds movement, chemical release, lifetime learning, growth and division. Daughters inherit
 behavioral and physical genes, including their parent's acquired recurrent-weight changes.
@@ -10,16 +15,17 @@ adds two foods in finite heterogeneous deposits, toxin, costly defense and repai
 construction and local decomposition. Starvation and damage remove cells. There is no external
 fitness scorer or training loop.
 
-Measurements establish reproduction, inherited variation and consequential ecology. The first
-identified adaptation is an inherited task-to-toxin connection that reduces secretion and repair
-burden and improves competitive survival. See [results and limits](docs/design/bacteria-results.md).
-Broad strategic diversity and adaptive inherited learning remain unproved.
+Measurements establish reproduction, inherited variation and several context-specific advantages.
+The thick-medium food-zone studies support local diet specialization. The newer coexistence
+claims were overstated and are [corrected here](docs/analysis-correction.md). These are world-design
+proof points, not a finished ecosystem. Days/weeks operational readiness remains unresolved:
+saves are manual, ancestry grows with births, and view history is not saved.
+See the [current work order](docs/design/README.md) and [results and limits](docs/design/bacteria-results.md).
 The prior ant implementation is preserved at commit `780fa4e`, annotated tag
 `ant-colony-checkpoint-2026-09-09`.
 
 The retired 3D simulation is preserved at `3d-simulation-checkpoint-2026-09-06`.
-See the [current design and work order](docs/design/README.md) and
-[historical records](docs/sources/history/README.md).
+See the [historical records](docs/sources/history/README.md).
 
 ## Quickstart
 
@@ -32,13 +38,14 @@ pnpm run build
 
 Run `make ci` from the repository root before committing.
 
-Press **Run** to begin at tick zero: 48 bacteria, mixed finite deposits, mutation enabled,
-30 ticks per second. Green/blue show foods A/B, red toxin and ochre porous matrix. Neutral signaling
+Press **Run** to begin at tick zero: 48 bacteria, finite deposits supplying A on the left and B
+on the right, mutation enabled, with a target of 30 ticks per second. Green/blue show foods A/B, red toxin and ochre porous matrix. Neutral signaling
 and solid walls are disabled by default because useful communication and wall construction have
 not been demonstrated. Stats report cells impaired by damage or slowed by matrix. Drag to pan, wheel to
 zoom, and click a cell to inspect its sensors, recurrent state and task byte. Stats remain visible.
 The display shows one framed world, with bounded panning and zoom anchored under the pointer.
-Colored cell rims identify founder lineages; inner fill shows energy and white tips show heading.
+Colored cell rims show inherited-trait groups by default, with family and founder views selectable;
+these groups are not certified species or strategies. The inner fill shows energy and white tips show heading.
 Finite deposit markers, newborn rings, death crosses and the visible population chart explain activity.
 See the [display guide](docs/design/bacterial-display.md).
 Founder shares now retain their observed history. Stats distinguish exact inherited sequences,
@@ -47,12 +54,13 @@ Stats also show physical capacity ranges and acquired learning. Environment, inh
 persistence controls are available below the map. The default is haploid clonal fission with
 paid plasticity and full learned-weight retention. Diploidy, selfing, crossover, mutation operators,
 budding and learning retention are configurable. Material and usable energy have separate ledgers.
-See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v5 rejects older files.
+See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v7 rejects older versions.
 
 ## Measurement
 
-The bounded test suite checks mechanics and deterministic invariants. Ecological measurements
-belong in the harness ledger:
+The bounded test suite checks mechanics and deterministic invariants. Choose a hypothesis and a
+small probe before launching an ecological measurement. Saved measurements belong in the harness
+ledger; they support a configuration decision rather than completing the user's long observation:
 
 ```bash
 cd frontend

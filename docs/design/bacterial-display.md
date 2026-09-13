@@ -1,8 +1,9 @@
 # Display and observation
 
-Run and stats are the primary review path. The browser starts the current ecology paused at tick
-zero; it does not automatically import an older checkpoint. Intended visible mechanisms must be
-default, or explicitly disabled with a reason.
+Run and stats are the user's observation path for the intended days/weeks population. The browser
+starts the current ecology paused at tick zero; it does not automatically import a checkpoint.
+Default mechanisms need an ecological purpose and opportunity proof point, not a pre-evolved
+outcome. Experimental mechanisms remain disabled until the observation configuration is reviewed.
 
 <a id="display-world-and-camera"></a>
 
@@ -25,7 +26,7 @@ select wrapped bodies. Camera actions never alter simulation state or randomness
 | Red field | Toxin injury relative to maximum reference-body repair, not receptor sensitivity |
 | Ochre deposits | Porous matrix that slows movement/transport and binds toxin |
 | Magenta, optional and initially off | Neutral signal; secretion disabled by default |
-| Colored body rim | Strategy cluster by default (orange lowest A share, blue, green highest); selectable family, founder, relatedness, genetic-distance or inherited-trait view |
+| Colored body rim | Requested inherited-trait group by default (orange lowest A share, blue, green highest); selectable family, founder, relatedness, genetic-distance or inherited-trait view |
 | Inner filled area | Usable-energy fraction; low energy is amber |
 | Red interior | Functional damage above 20% |
 | White tip | Heading |
@@ -62,7 +63,9 @@ details. See the [observation contract](population-observation.md) for exact gro
 
 Population history retains up to 240 samples spanning the opened view's lifetime, with actual tick
 spacing and bounded thinning. It cannot reconstruct earlier unseen history and is not checkpointed.
-Capture occurs every 100 simulation ticks, independent of wall-clock speed. A separate unthinned
+Capture occurs every 100 simulation ticks, independent of wall-clock speed.
+These view histories do not survive restore. Manual saves, full ancestry growth and execution
+in the browser animation loop remain limits to days/weeks observation, not completed support. A separate unthinned
 2,000-tick window supplies recent family history and effort distributions. Effort bars use shares of
 sampled organism decisions, not energy costs. Trait trends show inherited population medians.
 Task byte, hidden state, genes, actual stocks and sensor/action values remain inspectable. Manual
@@ -82,6 +85,8 @@ The view owns one resize observer, reusable field raster, transient lifecycle sn
 state. Field ticks, layer changes and replaced worlds invalidate the raster; camera-only redraws
 reuse it. Rendering does not score evolution, mutate genomes or prescribe actions.
 
+The present strategy-panel prose favors groups occupying different bands. Treat it as a UI
+interpretation limitation, not the project goal; no count of colored groups certifies diversity.
 Bounded tests cover transforms, picking, raster reuse, toxin intensity and Run defaults.
 Inspect configuration and headless evidence for what is running; no browser assay or development
 server is needed for a documentation or display review.

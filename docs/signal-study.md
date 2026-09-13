@@ -27,20 +27,24 @@ thick medium, mixed deposits, defaults otherwise. Control: the undisturbed mixed
 
 ## Results
 
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+The questions and predictions above preserve the original registration, not the current work order.
+
 Three arms completed (`evolve-2026-09-13/signal/`). Total signal emitted over 150,000 ticks was
 64, 76 and 28 material units against 1,000–1,300 units of toxin and 95,000 of absorbed food: the
-founder's secretion effort is near zero and nothing raised it. Prediction 1's first branch
-holds: the signal decays to nothing, because it costs and returns nothing until a behaviour that
-reads it exists, and no such behaviour arose in 48–54 generations.
+founder's secretion effort is near zero and reported output remained small. This does not by
+itself show secretion evolved to zero, establish that receivers never responded, or identify
+cost as the reason for low output. Those claims need behavioral or cost interventions.
 
-| Arm | Cells, generations | Signal emitted | k = 2 clusters (n, A share %, core %) | Rare invasion (final cells, divisions per founder) |
+| Arm | Cells, maximum generation | Signal emitted | k = 2 clusters (n, A share %, core %) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- | --- | --- |
-| 101 | 846, 53 | 64 | 273 at 48 / 62 versus 573 at 58 / 39 | 8 (3.0) and 59 (15.0): one way |
-| 202 | 757, 54 | 76 | 506 at 46 / 44 versus 251 at 53 / 54 | 69 (17.0) and 20 (9.3): mutual |
-| 303 | 756, 48 | 28 | 314 at 56 / 51 versus 442 at 62 / 46 | 8 (4.7) and 78 (19.6): one way |
+| 101 | 846, 53 | 64 | 273 at 48 / 62 versus 573 at 58 / 39 | 8/328 (2.44%) and 59/243 (24.28%): one declines |
+| 202 | 757, 54 | 76 | 506 at 46 / 44 versus 251 at 53 / 54 | 69/276 (25.00%) and 20/300 (6.67%): one declines |
+| 303 | 756, 48 | 28 | 314 at 56 / 51 versus 442 at 62 / 46 | 8/269 (2.97%) and 78/225 (34.67%): one declines |
 
-The clusters are the diet-and-body-size pair every mixed-world arm produces, and one arm of
-three passes the general gate. The phase closes as a negative with the cost as the named cause:
-a costed signal with no receiver is a tax, and quorum behaviour would have to arrive before the
-signal does. Making the signal free would remove the cost but also the only reason a signal
-carries information about who is near; that trade is a design decision, not a rate.
+All rare groups began at 7/64 (10.94%); no pair gained share in both directions. The former
+one-of-three pass is withdrawn. Useful communication was not demonstrated. Low output is a
+negative finding about this setup, with cost, founder expression and accessible variation as
+competing explanations. Cost is not the only possible source of local information: production,
+transport and decay determine what a receiver can sense. If signaling matters to the proposed
+world, a short cue/response/benefit probe is more informative than another search for clusters.

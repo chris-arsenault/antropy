@@ -1,7 +1,9 @@
 # Strategic microbial ecology
 
-The purpose is context-dependent inherited strategies with costs and benefits that can be tested.
-This document owns active pressures, not a promise that the current population has evolved them.
+This document owns the physical opportunities in a world intended for days/weeks observation.
+Use hypotheses and small proof points to choose a coherent set of pressures. An implemented
+mechanism, an expressed behavior, a conditional benefit and an evolved ecological role are
+different claims. No particular community or number of roles is prescribed.
 
 <a id="ecology-resource-opportunities"></a>
 
@@ -16,24 +18,35 @@ without changing finite-inventory semantics.
 A/B are substitutable metabolic resources with separate funded processing pathways. Supporting both
 costs construction and maintenance. Source placement is independent of organisms, and no patch
 knows which genotype should prosper. Acquisition, storage, travel and crowding can therefore have
-different costs across opportunities. A successful economical/slow niche is still unestablished.
+different costs across opportunities. The return on investment must be assessed in the relevant context rather than inferred from body cost alone.
 
-The default [food-epoch schedule](../food-epochs-study.md) changes incoming A/B composition at
-fixed tick boundaries without changing total supply. It tests whether changing processing demand
-creates an inherited advantage beyond general cost reduction. Existing food and recycled B buffer
-transitions, so neither an immediate population dip nor a subsequent recovery is prescribed.
-New deposits alternate between 80% A and 20% A every 50,000 ticks. Each phase uses a fixed incoming
-fraction; removing `foodEpochs` restores heterogeneous random deposit compositions. The completed
-transfer panel found both general improvement and greater post-B advantage in B-rich contests;
-the later [capability study](../capability-investigation.md) isolates a beneficial actual B-processing
-allele. Its short invasion pilots do not consistently favor B supply more than A supply.
+The default uses [food zones](bacteria.md#world-fields-and-finite-deposits): a pure-A left half
+and a pure-B right half with equal numbers of deposit slots, not identical instantaneous supply.
+The hypothesis is that local resource differences and slow dispersal let alternative processing
+investments repay their cost. Constructed comparisons and the later regional inherited diet
+differences are proof points; they do not prescribe two permanent species. See the corrected
+[zone](../zones-study.md) and [evolution](../evolve-study.md) records.
 
-Simultaneous spatial A/B heterogeneity is implemented as [food zones](bacteria.md#world-fields-and-finite-deposits):
-a pure-A band and a pure-B band with equal supply. The [zone experiment](../zones-study.md) shows
-that constructed A- and B-specialists each invade from rarity and persist with a generalist in
-that world, while a generalist beats either specialist alone and in mixed worlds. The mechanism
-is negative frequency dependence: a rare specialist has an under-exploited private resource. This
-is a constructed result; evolved food preference and evolved specialization are phase 4 claims.
+The selectable [food-epoch schedule](../food-epochs-study.md) instead changes incoming composition
+between 80% A and 20% A every 50,000 ticks, with total supply settings unchanged. Existing food
+and balanced recycled A/B buffer transitions. When neither epochs nor zones is configured, deposit
+compositions are independently mixed. The older epoch comparison found inherited benefits with an
+environment-dependent component; its exact outcomes belong to its earlier physics.
+
+For a configuration review, use these opportunity hypotheses rather than an outcome scorecard:
+
+| Opportunity | Cost or competing explanation | Useful proof point |
+| --- | --- | --- |
+| Local resource differences | Dispersal or mixed recycling can erase local advantage | Local readings, residence and paid uptake differ by resource context |
+| Movement toward brief food | Motor expenditure may exceed the captured food's value | Short food-access contrasts connect movement to net funded growth |
+| Toxin/defense/repair | Immunity or shared matrix may shield everyone; attack may not pay | Matched exposure and expenditure with and without the relevant effect |
+| Light versus organic food | Combined pathways may be cheap; light can saturate locally | Fixation, respiration and a paid allocation tradeoff in the selected constants |
+| Sharing or gene transfer | Transfers may homogenize differences or benefit noncontributors | Actual recipient benefit and donor cost, with identity and trait changes distinguished |
+| Disturbed space | No useful cue or advantage to arriving earlier | Local recolonization access and expenses under paired conditions |
+| Neutral chemical information | Weak output, no useful response, or costs without return | A sensed cue changes ordinary RNN behavior and repays its cost |
+
+These are examples of the link a test should establish, not seven mandatory assays. Reuse existing
+evidence when its conditions apply. None requires a long run to produce a named ecological role.
 
 <a id="ecology-element-cycle"></a>
 
@@ -64,25 +77,25 @@ off the waste sink applies as before. Both gases diffuse through matrix and rela
 atmosphere concentrations (`atmosphereOxygen`, `atmosphereCarbon`) at `exchangeRate` per second;
 net exchange is accounted, carbon inside the material balance and oxygen in its own ledger.
 
-Controllers receive no new inputs in this phase: harvesting is physiology, and the only
-behavioural cue is the existing food chemistry. The guild structure the cycle can support is
-autotrophs (harvesting stock, little transport) and heterotrophs (transport, little harvesting),
-coupled through oxygen and carbon; whether evolution finds it is the phase 1 question of the
-[roadmap](README.md#design-roadmap-2). With the cycle off no harvesting stock is built and every
-earlier result stands unchanged.
+Controllers receive no new gas or light inputs: harvesting is physiology, while existing local
+chemistry/body inputs remain available. Light-focused and organic-food-focused bodies are possible
+diagnostic designs, not established evolved guilds or mandatory roles. The [cycle study](../cycle-study.md)
+records physical effects and the limits of its older cost settings. With the cycle off no harvesting
+stock is built; this does not revalidate results from other changed versions.
 
 <a id="ecology-predation"></a>
 
 ## Predation
 
-Optional `preyYield` (default 0) turns contact killing into eating. When a cell dies of damage,
+Optional `preyYield` (default 0) redirects some material from damage deaths to nearby cells. When a cell dies of damage,
 the fraction `preyYield` of its material (structure and reserve) enters the reserves of the
 toxin-bearing neighbours touching it, split by their toxin machinery per core and capped by each
 one's storage; the remainder, and every starvation death, becomes detritus as before. Nothing is
 created: the ledger records the eaten material as `preyed`, and the corpse's chemical energy
-follows the material. A predator is therefore any cell with toxin machinery in a world with
-contact injury; no new stock, locus or input exists, and whether killing pays is a property of
-the yield, the machinery's cost and how often bodies touch in a thick medium.
+follows the material. The code does not distinguish contact injury from field injury as the cause of a damage death,
+or identify the killer. Living toxin-equipped neighbors can feed without having delivered the
+fatal injury. No new stock, locus or input exists. Whether this repays aggression, immunity or
+opportunistic feeding is a hypothesis about yield, costs and encounters, not demonstrated hunting.
 
 <a id="ecology-disturbance"></a>
 
@@ -94,8 +107,8 @@ centre with `radius`, moves every dissolved field inside (foods, signal, both to
 carbon, oxygen; not matrix or what it binds) toward its disc mean by `mixing`, and kills each
 cell inside with probability `mortality`, its material going to detritus as any death does and
 its cause recorded as `disturbance`. Nothing enters or leaves the world. Disturbance opens ground
-and erases local chemistry, so it selects for reaching and filling empty space against holding
-occupied space; the balance depends on the interval and radius, not on who is present.
+and erases local chemistry, which could change the value of reaching empty space relative to holding occupied space.
+That tradeoff depends on local cues, costs, interval and radius and remains unestablished.
 
 <a id="ecology-gene-transfer"></a>
 
@@ -112,25 +125,24 @@ sharing ground share genes.
 
 <a id="ecology-sharing"></a>
 
-## Adhesion and sharing
+## Reserve sharing
 
 Optional `sharingRate` (default 0) makes touching cells exchange stored nutrient. Each touching
 pair, each tick, moves reserve from the richer to the poorer by the fraction
 `1 − exp(−sharingRate × dt)` of half their difference, capped by the receiver's storage, and the
 ledger records it as `shared`. Nothing is created. A gatherer feeds whoever touches it, so the
-lever rewards staying with cells that gather in turn and is exploited by cells that only
-receive; together with matrix, which keeps bodies in place, it is the material basis on which a
-division of labour between touching cells could pay. Whether one evolves is the
-[sharing study's](../sharing-study.md) question.
+mechanism could change the return on gathering and contact. Matrix adds drag but does not attach
+cells. Sharing adds no adhesion rule or heritable donation choice. Division of labor and exploitation
+are hypotheses, not consequences established by the [sharing study](../sharing-study.md).
 
 <a id="ecology-signal"></a>
 
-## Quorum signal
+## Neutral chemical signal
 
 The neutral chemical (`secretionRate`, default 0) is a costed secretion cells sense through four
 inputs (level, change, and two gradients) and that has no physical effect. With the rate above
-zero it is a quorum signal: its local concentration tracks how many secreting cells are near,
-and the controller may condition any effort on it. The [signal study](../signal-study.md) turns
+zero, local concentration depends on nearby secretion, transport and decay. The controller can
+condition effort on it, but concentration alone is not a cell count or demonstrated quorum behavior. The [signal study](../signal-study.md) turns
 it on and asks whether evolved populations use it.
 
 <a id="ecology-toxin-defense-and-repair"></a>
@@ -152,16 +164,13 @@ immunity genes; a producer is protected from every producer, not only itself.
 in the `toxin` and `toxinB` fields. Physical locus 9, the tint, sets through a logistic the share
 of a cell's toxin that is type B, and immunity applies per type in proportion to the share
 produced: `protection_X = 1 + defenseStrength×defense/core + immunityStrength×weapon×share_X/core`.
-Injury sums each type's field and contact exposure over its own protection. Relatives share a
-tint and tolerate one another; a lineage that drifts in tint is harmed by its own family, and two
-families of different tint deny ground to each other with the same machinery. Nothing identifies
-kin: the sensed toxin input is each type's concentration discounted by the cell's protection
-against it relative to an undefended cell, so a producer barely senses its family's toxin and
-senses a foreign type in full. The matrix binds both types, sharing its capacity evenly. With
-one type the tint is silent and every earlier result stands. Contact exposure
+Injury sums each type's field and contact exposure over its own protection. Shared tint can
+produce chemical compatibility, but no family identity, guaranteed tolerance or cooperation rule
+exists. Defense also protects against other types. The sensed toxin is discounted by the cell's
+protection, and matrix binds both types with shared capacity. With one type the tint is silent;
+historical ecological results retain their original conditions. Contact exposure
 has no field: it reaches only bodies within a 0.05-cell gap of a producer and cannot be sensed at a
-distance. Its default rate is zero pending the [contest record](../rps-study.md); saves that
-predate either term load with that term zero and keep their physics.
+distance. Its default rate is zero pending the [contest record](../rps-study.md); older checkpoint versions are rejected under the current v7 contract.
 
 Damage reduces uptake and motion by 1−damage and raises maintenance by 1+damage; unit damage kills.
 Installed defense reduces exposure damage but consumes material and maintenance whether needed or not.
@@ -170,8 +179,9 @@ Damage fraction survives division. No newborn healing grant exists.
 
 Current injury/maximum-repair rates are 0.5/0.008 per model second. The previous 0.05/0.08 pair
 let the founder erase most injury while it was visually negligible. This correction changes
-timescales, not founder weights, food supply or sensing. At concentration 0.0019, reference-body
-injury is approximately 0.0118/s, above maximum repair. These are authored model rates.
+timescales, not founder weights, food supply or sensing. At concentration 0.0019, unprotected field injury is approximately 0.0353/s; current founder
+defense and immunity give divisor 23, or about 0.00153/s before repair. This is a rate comparison
+under one-type chemistry, not a current exposure measurement. These are authored model rates.
 
 <a id="ecology-porous-matrix"></a>
 
@@ -194,7 +204,11 @@ transport. Construction and retention therefore have costs as well as benefits.
 | System | Default | Reason and experimental boundary |
 | --- | --- | --- |
 | Solid matrix walls | `matrixMode: "porous"` | Ordinary deposits never approached the 1.5 hard-barrier threshold in the initial default. Strategic wall building is unproved. |
-| Neutral signaling | `secretionRate: 0` | The founder has no established motor use of signal; useful communication is unproved. |
+| Neutral signaling | `secretionRate: 0` | Useful cue/response benefit is unestablished. |
+| Element cycle and membrane crowding | no `cycle`; `machineryCrowding: 0` | Experimental physiology and cost tradeoffs; simplified settings need review for the observation world. |
+| Typed toxin | `toxinTypes: 1` | Chemical compatibility is experimental; distinct family roles were not established. |
+| Contact injury and predation | `contactDamageRate: 0`, `preyYield: 0` | Feeding/damage opportunities exist in fixtures; integrated observation settings remain to be reviewed. |
+| Disturbance, transfer and sharing | no `disturbance`; `transferRate: 0`, `sharingRate: 0` | Physical effects exist; their inclusion needs a coherent ecological purpose and settings. |
 
 Experimental `matrixMode: "solid"` enables swept body-footprint entry checks, contact displacement
 checks and blocked local offspring placement. Builders have no exemption; embedded cells may move
@@ -209,14 +223,16 @@ Toxin and matrix remain active chemical actions even with neutral signal disable
 
 ## Consequences and boundaries
 
-[Current measurements](bacteria-results.md) show episodic visible injury, reduced reproduction,
-matrix slowing and protection in ordinary Run worlds. Removing binding produces toxin deaths and
-higher repair expenditure. Protected defaults have no toxin deaths over the measured horizon.
+[Recorded September 10 measurements](bacteria-results.md#evidence-corrected-default-ecology) show
+injury, reduced reproduction and matrix protection in that earlier default. Later viscosity,
+immunity and supply changes prevent treating those exact timings or death counts as current.
+The mechanisms remain implemented; current observations should be interpreted under their own settings.
 
 Those results do not demonstrate evolved offense/defense, stable strategy coexistence, strategic
 construction, a slow-cell niche or useful inherited learning. Conditional advantages of hand-built
 diagnostic variants belong to their recorded test conditions. Do not promote those variants into
 the live default or imply that evolution found them.
 
-Contact weapons, predation, dormancy, kin recognition, adhesion, new life stages, outcrossing,
-microclimate and further resource species require a separately reviewed causal purpose.
+Further mechanisms such as dormancy, adhesion, new life stages or outcrossing require a reviewed
+ecological purpose. Activating existing experimental mechanisms also needs a coherent configuration
+decision. It does not require a certified evolved community before user observation.

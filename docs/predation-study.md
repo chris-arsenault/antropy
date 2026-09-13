@@ -1,4 +1,4 @@
-# Predation: contact kills that feed the killer
+# Predation: damaged cells can feed touching neighbors
 
 Registered September 13, 2026 as phase 3 of
 [roadmap two](design/README.md#design-roadmap-2), before reading any endpoint. Sulion plan
@@ -35,6 +35,11 @@ arm of the family study (`families/mixed-101-rate0.2-contact10`), which differs 
 
 ## Results
 
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+The questions and predictions above preserve the original registration, not the current work order.
+The code shares a damage-killed cell's material among living toxin-equipped neighbors; it does
+not attribute the kill to an attacker or demonstrate pursuit of prey.
+
 ### Constructed contests
 
 64-cell thick world, contact injury 10, effort 0.003, 20,000 ticks; yield 0 figures are the
@@ -47,11 +52,11 @@ family study's record at the same setting.
 | resistant rare | not run | 52 / 4 / 33 (5.6 / 2.7 / 3.6) |
 | sensitive rare | 71 / 16 / 4 (4.1 / 3.6 / 3.0) | 78 / 12 / 0 (4.2 / 2.8 / 3.0) |
 
-Prediction 1 held in direction: the producer became the leading strategy when all three start
-together and the rare sensitive went extinct instead of holding, while the rare producer still
-grew from 7. Predation therefore pays the killer and tilts the cycle toward it; it does not by
-itself widen coexistence, and the resistant's rare invasion (4 from 7) is marginal at either
-yield. Artifacts: `rps-2026-09-13/prey05-64`.
+Prediction 1 is mixed. The producer leads from the three-way start, but its rare-start divisions
+fall from 3.6 to 3.4 per founder and its final share is 9/96 = 9.38%, below 7/64 = 10.94%.
+The rare resistant ends at 4/89 = 4.49%, also a decline; the rare sensitive goes extinct.
+Feeding occurs, but the claimed continuing rare-producer invasion is false.
+Artifacts: `rps-2026-09-13/prey05-64`.
 
 ### Evolution arms
 
@@ -62,21 +67,22 @@ the material it received vanished with it. The bug is fixed and covered by a tes
 are kept as a preview (populations 486–560, 85–94 generations, toxin machinery 4–7% of core
 against the founder's 2%, 2,800–3,000 units eaten) and rerun as `predation2/`. The family
 study's one-type contact-10 arm is the control (toxin machinery 4.4 / 6.5 / 8.4% of core at the
-10th, 50th and 90th percentiles after 90 generations, contact kills a third of deaths).
+10th, 50th and 90th percentiles after 90 generations, damage deaths are a third of deaths (field and contact causes are not separated)).
 
 The rerun (`evolve-2026-09-13/predation2/`, balances clean):
 
-| Arm | Cells, generations | Machinery % of core p10 / p50 / p90 | Eaten | Deaths (by contact) | k = 2 clusters (n, A share %, core %, machinery %) | Rare invasion (final cells, divisions per founder) |
+| Arm | Cells, maximum generation | Machinery % of core p10 / p50 / p90 | Eaten | Deaths (attributed to damage) | k = 2 clusters (n, A share %, core %, machinery %) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- | --- | --- | --- | --- |
-| 101 | 487, 92 | 10.0 / 14.1 / 19.0 | 2,859 | 12,910 (4,466) | 240 at 43 / 39 / 16.0 versus 247 at 45 / 49 / 12.1 | 28 (12.0) and 34 (12.6): mutual |
-| 202 | 579, 82 | 7.3 / 11.2 / 14.7 | 2,975 | 13,435 (5,027) | 302 at 65 / 33 / 12.5 versus 277 at 71 / 41 / 8.8 | 64 (18.0) and 21 (10.6): mutual |
-| 303 | 469, 100 | 6.6 / 9.6 / 18.4 | 3,589 | 11,287 (5,069) | 237 at 63 / 58 / 8.4 versus 232 at 75 / 43 / 14.6 | 24 (13.0) and 27 (7.6): mutual |
+| 101 | 487, 92 | 10.0 / 14.1 / 19.0 | 2,859 | 12,910 (4,466) | 240 at 43 / 39 / 16.0 versus 247 at 45 / 49 / 12.1 | 28/185 (15.14%) and 34/192 (17.71%): both increase |
+| 202 | 579, 82 | 7.3 / 11.2 / 14.7 | 2,975 | 13,435 (5,027) | 302 at 65 / 33 / 12.5 versus 277 at 71 / 41 / 8.8 | 64/232 (27.59%) and 21/256 (8.20%): one declines |
+| 303 | 469, 100 | 6.6 / 9.6 / 18.4 | 3,589 | 11,287 (5,069) | 237 at 63 / 58 / 8.4 versus 232 at 75 / 43 / 14.6 | 24/192 (12.50%) and 27/165 (16.36%): both increase |
 
-Prediction 2 holds. Toxin machinery is the most strongly selected trait in every arm, at
-roughly twice the control's level (medians 10–14% of core against 6.5%), and in every arm the
-two clusters differ on it (16 against 12, 12.5 against 8.8, 8.4 against 14.6) alongside diet
-and body size; every pair mutually invades from 10%. Predation is the second lever after gene
-transfer to pass the gate in all three seeds, and the only one whose evolved axis is the lever's
-own trait: hunters with more machinery and smaller or larger bodies coexist with less-armed
-cells. Eaten material (2,900–3,600 units) is about 3% of intake, so the selection runs through
-the kills' effect on neighbours as much as through the meal.
+All rare groups began at 7/64 (10.94%). Two pairs increase in both directions at the endpoint;
+the third does not. The former all-seed pass and established hunter/prey interpretation are
+withdrawn. Toxin machinery medians rose to 10–14% of core versus 6.5% in the recorded control,
+and the chosen groups differ in machinery as well as diet and body size. This is compatible
+with an opportunity for toxin investment, but neither its isolated advantage nor distinct hunting
+and fleeing roles was demonstrated. The control checkpoint has the restoration defect recorded
+in the family study. Eaten material is about 3% of intake; that fraction alone cannot apportion
+selection between food gains, neighbor removal and immunity. A small matched test could inform
+world design without requiring a lasting predator/prey pair.

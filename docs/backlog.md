@@ -1,84 +1,84 @@
 # Open questions and deferred features
 
-This backlog belongs to the bacterial simulation. Historical ant queues are preserved in the
-[reference snapshot](sources/history/2026-09-10/backlog.md), not pending prerequisites.
+This backlog serves [hypothesis-led world design and days/weeks observation](design/README.md).
+Historical ant queues and completed outcome-gate roadmaps are not pending prerequisites.
 
 <a id="backlog-evolutionary-questions"></a>
 
 ## Evolutionary questions
 
-- Residency before further evolutionary campaigns: the [toxin](rps-study.md),
-  [zone](zones-study.md) and [evolution](evolve-study.md) records all locate the block in dispersal
-  that is fast relative to replacement. Review a wider world or lower motor power so a lineage
-  born in a band mostly stays there; then rerun the de novo arms. Do not raise mutation supply
-  further; eightfold physical and fivefold behavioural supply only accelerated economy drift.
-- Recycled detritus returns as food B everywhere, which biases every world toward B processing
-  and weakens A/B partition; review whether decomposition should return the local dissolved
-  composition or an equal split.
-- Prioritize whether inherited differences continue changing resource use, survival and reproduction
-  as the ecology develops. Use family, trait and sampled behavior views to locate stagnation; use a
-  bounded frozen-inheritance comparison when it would distinguish evolution from ecological turnover.
-- Preserve the [toxin intervention](strategy-study.md): disabling injury attenuated the measured
-  advantage of reduced secretion. Useful evolved offense remains unresolved, not a mandatory next assay.
-- Preserve the motor finding: lower physical investment won all sixteen matched contests. The
-  proposed pair is not established; obtaining its crossover is not a gate on further development.
-- Determine whether acquired-weight transmission improves descendants. The implementation exists;
-  adaptive learning is unproved, and the modulation rule lacks dedicated B/toxin channels.
-- Assess mutation supply and robustness around the common founder before assuming visible
-  strategy differentiation will arise from longer duration alone.
-- Preserve the [capability findings](capability-investigation.md): actual neural food-access and
-  physical B-processing benefits are established; tested recurrence/learning gains are not.
-  Review spatial A/B heterogeneity as the next configuration direction, using the existing deposit
-  model and a small mixed-versus-separated-food falsifier before adding new production mechanics.
-- Distinguish general colonization advantage from invasion or frequency-dependent advantage;
-  one exported community cannot establish robustness across neighborhoods or mixture ratios.
-- Food epochs are implemented and [measured](food-epochs-study.md). Assess whether repeated food
-  changes keep inherited choices consequential; the first three phases and transfer assays show
-  an advantage at the current population scale, not indefinite diversity or a specialist tradeoff.
+The next design decision is a coherent world to observe. For each candidate mechanism, state its
+ecological purpose, existing proof point, competing explanation and smallest missing test. Select
+settings on those grounds, not by the number of clusters produced in a long run.
+
+- Local resource differences and residency can make food-processing choices matter. The A/B halves
+  and thick medium are implemented; symmetric recycling has already replaced the old B-only return.
+  The question is how much environmental structure suits the observation world, not how to complete
+  another A/B certification campaign.
+- Bodies repeatedly evolved smaller and less costly in recorded studies. Determine whether this
+  reflects a plausible economical strategy or a structural lack of situations that repay size and
+  machinery. Do not impose a size cost solely to stop the observed outcome.
+- Toxin, immunity, defense, repair and matrix interact. Binding may shield competitors as well as
+  builders. Damage-related feeding may change that balance. A short benefit/cost comparison is
+  more useful for choosing settings than requiring hunter/prey or producer/resistant/sensitive roles.
+- Light fixation and gas exchange offer an additional material route. Current simplified settings
+  differ from the evolution study; use a small physiological check if considering activation.
+- Sharing, typed toxin, transfer and disturbance have implemented physical effects. Their named
+  ecological roles remain uncertain. The [corrected analysis](analysis-correction.md) withdraws
+  the claimed coexistence passes; it does not make those mechanisms useless.
+- The neutral signal remains quiet in the recorded arms. Cost, weak founder output and missing
+  receiver behavior are competing explanations; no causal diagnosis has selected among them.
+- Paid acquired-weight transmission exists, but its adaptive usefulness remains uncertain.
+  It need not be proved broadly before user observation; investigate only if it changes a design
+  choice or explains an observed limitation.
+- Food epochs are selectable and have recorded environment-dependent inherited benefits. They
+  are another way to vary opportunities, not a requirement to evolve permanent specialist factions.
+
+Existing negative results limit their exact hypotheses. Do not turn every unresolved mechanism
+into a required experiment or keep tuning until a desired role appears.
 
 <a id="backlog-conditional-extensions"></a>
 
 ## Conditional extensions
 
-These require a reviewed question and design, not automatic activation:
+These are unimplemented choices requiring a reviewed purpose and design:
 
-| Extension | Missing decision or evidence |
+| Extension | Missing decision |
 | --- | --- |
-| Outcrossing, seed/fertilize and multi-parent ancestry | Physical mating/propagule lifecycle, costs and ancestry contract |
-| Environmental developmental reaction norms | Which sensed pressure changes construction, at what cost |
-| Evolvable mutation machinery or topology | Failure of the current variation/representation to support a named strategy |
-| Neutral communication | Useful causal effect beyond precursor expenditure |
-| Family cooperation through inherited chemical compatibility | Deferred idea: genes encode chemical production and sensitivity/resistance, allowing related cells to tolerate one another while chemicals harm, hinder, attack or repel susceptible competitors |
-| Solid walls or adhesion | Useful construction/attachment behavior and physical costs |
-| Dormancy, contact weapons, predation or kin recognition | Context-dependent advantage that existing mechanisms cannot express |
-| Microclimate, catastrophes or more resources | A consequential pressure beyond the implemented food-composition epochs |
+| Outcrossing, seed/fertilize and multi-parent ancestry | Local lifecycle, costs and durable parentage |
+| Environmental developmental reaction norms | Which local pressure changes construction and what pays for it |
+| Evolvable mutation machinery or neural topology | A demonstrated representation or variation limitation |
+| Physical adhesion | Attachment, detachment, forces and costs; reserve sharing alone adds none |
+| Dormancy or additional life stages | An opportunity current physiology cannot express |
+| Additional resource species or microclimates | A useful pressure beyond the current material, gas and food mechanisms |
 
-The family-cooperation idea is retained for later exploration, not near-term implementation.
-Shared inherited chemistry could provide basic cooperation through mutual tolerance and collective
-protection. Chemical compatibility, rather than an explicit family-ID exemption, is a candidate
-mechanism to review. Open questions include production/resistance costs, mutation-driven changes
-in compatibility, benefits to unrelated cells with matching chemistry, and nonproducing relatives
-that benefit without contributing. No particular encoding or cooperation rule is decided yet.
-
-No 2,000-ant prerequisite or ant neural training campaign applies. Live bacterial genetics is
-already implemented. Solid walls and neutral signaling remain disabled defaults with documented
-reasons; all other entries here are questions rather than selectable placeholder systems.
+Contact injury, predation, typed toxin, gene transfer, reserve sharing and local disturbance are
+already implemented optional mechanisms. Their existence is distinct from demonstrated kin
+recognition, cooperation or strategic roles. No new feature is justified solely by an inactive label.
 
 <a id="backlog-runtime-and-observation-limits"></a>
 
 ## Runtime and observation limits
 
-- Acceleration must keep one implementation per rule ([ADR 0019](adr/0019-single-language-kernel.md)).
-  Compatible options: a Web Worker hosting the whole step so the browser matches headless speed
-  (message-passing for inspection, interventions and persistence across about fifteen UI
-  modules), or a smaller default world. Piecemeal ports of hot loops are rejected.
-- Genotype records are now pruned when unreferenced by living cells; organism ancestry still
-  grows with births (about 80 bytes per organism) and remains the bound on indefinite runs.
-- Browser source provenance is implemented for new exports. The old tick-48,661 export still
-  cannot identify the cause of its early divergence from current headless reconstruction.
-- Add replay or new visual instruments only when existing state/history cannot answer a concrete
-  question. Recent families, selected-cell genealogy/genetic comparisons, inherited trait
-  distributions/trends and sampled effort are implemented. Families are viewing conventions;
-  numeric diversity and colored rims are not behavioral labels or fitness scores.
-- Preserve accounting, individual actions and deterministic continuation through any performance
-  change. No deployment or runtime change is part of the documentation consolidation.
+Days or weeks of user observation is an intended use, not currently verified unattended operation.
+A durable design must preserve the ongoing world and enough of its history to understand change.
+This is the next operational prerequisite, separate from ecological experiments:
+
+| Requirement | Current implementation and gap |
+| --- | --- |
+| Continue after interruption | Manual IndexedDB save/restore and file export exist. IndexedDB keeps one latest checkpoint; there is no automatic recovery checkpoint. A new session starts at tick zero. |
+| Bounded storage and memory | Unreferenced genotype records are pruned, but organism ancestry grows with every birth and is serialized in full. Long-duration save sizes, memory and latency are unmeasured. |
+| Preserve observation | Charts retain up to 240 thinned samples plus a short recent window in the opened view. They are not checkpointed; resuming cannot reconstruct earlier charts. |
+| Sustained execution | The browser steps in its animation loop on the main thread. Background-tab behavior, device interruptions and sustained responsiveness have not been tested for this use. |
+| Useful throughput | Short headless measurements do not establish browser performance after days of births. Measure at representative accumulated state, not only with a large initial census. |
+| Honest visual interpretation | The map defaults to three requested trait groups, not a discovered species count. Its present strategy-panel wording still encourages a regional-cluster outcome; revise that UI interpretation with observation work. |
+| Exact continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
+
+Design recovery, history retention and ancestry storage together, then validate their operational
+properties proportionately. Do not discard scientific parentage silently to bound memory. Do not
+add a backend, second simulation, or hosted storage without review. A small synthetic storage/load
+test can assess durability without spending an ecological campaign on it.
+
+Acceleration must retain one implementation per physical rule
+([ADR 0019](adr/0019-single-language-kernel.md)). Worker placement and other runtime changes need a
+measured bottleneck and coherent ownership boundary; none is selected by this documentation revision.

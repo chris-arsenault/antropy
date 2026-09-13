@@ -14,14 +14,14 @@ on explicit request. The default UI starts a new bacterial population paused at 
 
 ## Ecological measurements
 
-The current default is [strategic ecology](design/strategic-ecology.md): finite deposits,
-two foods, local interference and [50k-tick food epochs](food-epochs-study.md). New deposits
-alternate between 80% A and 20% A without changing total supply. `--regime patchy` selects
+The current default is [strategic ecology](design/strategic-ecology.md): a thick medium, 24 finite
+deposit slots split between pure-A and pure-B halves, local interference and live inheritance.
+[50k-tick food epochs](food-epochs-study.md) remain selectable instead of zones. `--regime patchy` selects
 the default lifetime distribution explicitly; persistent/transient
 now select longer/shorter finite deposit lifetimes. Neither is an infinite spout.
-Composition scheduling is independent of that lifetime setting. Disable Food epochs in the
-environment settings, or omit `foodEpochs` from a resolved simulation configuration, to use
-heterogeneous random compositions. Existing unscheduled saves retain that behavior.
+Composition layout is independent of that lifetime setting. Select mixed deposits in the
+environment settings, or omit both `foodEpochs` and `foodZones` from the resolved configuration,
+to use heterogeneous random compositions. Saved configurations preserve their selected layout.
 `pnpm harness ecology-causal --seeds 201,202 --ticks 1200` runs declared small diagnostic
 comparisons with mutation and learning disabled. Full initial checkpoints, source digests and
 outcome series preserve their conditions; no diagnostic genotype is promoted into the browser.
@@ -30,7 +30,11 @@ outcome series preserve their conditions; no diagnostic genotype is promoted int
 `--case pairwise` runs three 3,000-tick pairs in both placements and `--case three-way` or
 `--case invade-<strategy>` runs a registered multigeneration pilot. Settings such as
 `--toxin-effort`, `--contact-damage`, `--defense-strength`, `--matrix off` and `--size` are
-recorded in each manifest. `python3 harness/rps_report.py <root>` plots strategy counts over time.
+recorded in each manifest. `python3 harness/rps_report.py <root>` plots group counts and reports initial/final shares with percentage-point changes.
+Use its `--audit OUTPUT_JSON` option with one or more roots to export saved endpoint frequencies
+recursively without traces, plots or simulation; output must be a new file. See the
+[analysis correction](analysis-correction.md). Run `python3 harness/rps_report_test.py` for the
+frequency-denominator regression checks.
 See the [contest record](rps-study.md). Pilots over 3,000 ticks trace every 100 ticks.
 
 `pnpm harness zones --case list` describes the A-specialist / B-specialist / generalist diet
@@ -42,7 +46,10 @@ mirror the toxin contest. See the [zone record](zones-study.md).
 evolution from the founder with per-cell trait samples every 1,000 ticks and checkpoints every
 100,000; `python3 harness/evolve_report.py <root> [k]` clusters the final populations.
 `pnpm harness invasion --checkpoint <file> --k 2 --ticks 12000` clusters a checkpoint's living
-cells and runs rare-invasion contests between the cluster medoid genotypes in a fresh zoned world.
+cells and runs rare-start contests between representative genotypes in a fresh world. The default
+assay layout is mixed; use `--world zones --shares 1,0` for pure bands. The source's optional
+mechanisms are inherited, but dimensions, deposit count and initial bodies follow contest settings.
+Read manifests before comparing results. These endpoints do not certify persistent coexistence.
 See the [evolution record](evolve-study.md).
 
 `pnpm harness ecology-default --seeds 101,102 --ticks 3000` measures the actual Run default,
@@ -177,9 +184,9 @@ The [initial measurements](design/bacteria-results.md) report the resulting thro
 The UI supports explicit local save/restore and file import/export. Checkpoints preserve both
 ancestry graphs, fields, separate environment/body/genetic random streams, receptor state, private
 recurrent/task/plastic state, actual machinery, nutrient material, usable energy and durable manual
-interventions. The current schema is version 5. Versions 1–4
-bacterial files and ant files are rejected explicitly; they lack the corrected state contract.
-New sessions do not auto-load a checkpoint. Initial v1 experiment files remain historical evidence.
+interventions. The current schema is version 7. Older bacterial versions and ant files are rejected explicitly;
+missing optional-off v7 lever values may default to zero.
+Saves are manual and IndexedDB keeps one latest checkpoint. New sessions do not auto-load a checkpoint. Initial v1 experiment files remain historical evidence.
 
 Select a cell to inspect all thirty-five input channels, actual stocks versus construction targets, inherited loci,
 acquired traces, hidden values, resolved physical efforts and
@@ -188,6 +195,11 @@ and stats label the population a diagnostic run. Field layers, inspection
 and performance measurements do not enter the RNN.
 
 ## Verification boundary
+
+The intended days/weeks user run is not an agent experiment budget. Prepare its continuity,
+storage and observation through the [readiness work](backlog.md#backlog-runtime-and-observation-limits).
+Small hypothesis-driven probes support ecological settings; do not launch a long campaign to
+produce a chosen community before handoff. No such campaign is required by this documentation.
 
 ESLint limits cyclomatic and cognitive complexity to 10, files to 400 lines and functions to 75.
 Vitest covers bounded conservation, sensor causality, contact, inheritance, UI defaults and exact

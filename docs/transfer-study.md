@@ -31,19 +31,27 @@ Control: the undisturbed mixed arms of the [evolution record](evolve-study.md).
 
 ## Results
 
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+The questions and predictions above preserve the original registration, not the current work order.
+
 Three arms completed (`evolve-2026-09-13/transfer/`) with 8,726, 7,455 and 12,044 transfers
 over 150,000 ticks, the expected order (prediction 1). Populations were larger than the
 undisturbed mixed arms (774–947 cells) and generations similar (55–62).
 
-| Arm | Cells, generations | Transfers | k = 2 clusters (n, A share %, core %, machinery %) | Rare invasion (final cells, divisions per founder) |
+| Arm | Cells, maximum generation | Transfers | k = 2 clusters (n, A share %, core %, machinery %) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- | --- | --- |
-| 101 | 913, 62 | 8,726 | 304 at 49 / 45 / 1.7 versus 609 at 59 / 42 / 2.2 | 41 (9.1) and 12 (7.3): mutual |
-| 202 | 774, 55 | 7,455 | 273 at 59 / 42 / 2.8 versus 501 at 64 / 53 / 2.0 | 71 (22.3) and 21 (6.0): mutual |
-| 303 | 947, 58 | 12,044 | 517 at 53 / 32 / 2.3 versus 430 at 56 / 40 / 2.0 | 79 (17.7) and 20 (12.0): mutual |
+| 101 | 913, 62 | 8,726 | 304 at 49 / 45 / 1.7 versus 609 at 59 / 42 / 2.2 | 41/314 (13.06%) and 12/270 (4.44%): one direction declines |
+| 202 | 774, 55 | 7,455 | 273 at 59 / 42 / 2.8 versus 501 at 64 / 53 / 2.0 | 71/271 (26.20%) and 21/279 (7.53%): one direction declines |
+| 303 | 947, 58 | 12,044 | 517 at 53 / 32 / 2.3 versus 430 at 56 / 40 / 2.0 | 79/345 (22.90%) and 20/381 (5.25%): one direction declines |
 
-The general gate passes in all three arms, the first lever to do so. Transfer did not
-homogenise the population (prediction 3 does not apply); the clusters still split on diet and
-body size, with the between-cluster differences smaller than in arms without transfer (A share
-gaps of 3–10 points against 10–17), which is what a locus moving between clusters should do.
-Whether membership cuts across lineage (prediction 2's second clause) is not measured here: the
-cluster report carries no lineage field, and adding one is a reporting change for a later pass.
+Every rare group started at 7/64 (10.94%). None of the three pairs increased share in both
+directions; the former all-seed pass is withdrawn. Transfer events establish that physical genes
+can travel through contact. The reported diet/body variation does not establish distinct roles:
+the analysis requested two groups rather than testing whether two modes exist. Smaller gaps
+are compatible with mixing but do not isolate its effect.
+
+Transfer remains enabled in these contests. The observer tracks descendants of the initial
+groups, whose genes can change by contact, so ancestry persistence would not prove persistence
+of the initial strategies. Whether traits spread across unrelated families was not measured.
+The useful proof point is actual transfer; its effect on ecological opportunities remains a
+world-design hypothesis rather than a completed coexistence result.

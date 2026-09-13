@@ -8,6 +8,9 @@ default and no assay score selects parents.
 
 ## Question and mechanism
 
+This is the original registration. Interpretations were corrected September 13; the current
+[work order](design/README.md) uses these as world-design proof points, not species-count gates.
+
 The food-epoch calendar changes composition for everyone at once, so at any moment there is one
 best processing allocation. Coexisting specialists need both resources available at the same time
 in different places. [Food zones](design/bacteria.md#world-fields-and-finite-deposits) split the
@@ -48,7 +51,8 @@ Living cells, first and swapped placement, 0.9/0.1 bands unless stated.
 | mixed, preference | 65 v 95; 65 v 101 | 21 v 139; 27 v 139 | 52 v 106; 54 v 107 |
 | pure 1/0 zones, preference | 80 v 80; 80 v 83 | 54 v 106; 59 v 106 | 44 v 117; 45 v 115 |
 
-The two specialists coexist in any zoned world and the B-specialist wins the mixed world, where
+The two specialists remain present at the endpoints of these zoned contests; the B-specialist
+has more cells in the mixed contests, where
 recycled detritus makes B ubiquitous. A generalist beats either specialist alone everywhere: the
 uptake law is diffusion-limited, so returns to processing stock are concave and a generalist's
 idle stock costs little. Pairwise contests therefore cannot show partitioning; the three-way and
@@ -73,23 +77,23 @@ Counts A-specialist / B-specialist / generalist. Rare invaders start at 7 of 64.
 | mixed, 901 | invade B-specialist | 19/7/38 | 2/17/161 | 4.6 |
 | mixed, 901 | invade generalist | 38/19/7 | 52/56/66 | **9.1** |
 
-In the zoned world both rare specialists invade at two to three times the residents' per-founder
-division rate and all three diets persist to the horizon at both seeds; the rare generalist
-invades weakly at one seed and not at the other. In the mixed world the generalist takes over
-from any start and rare specialists do not invade. Band occupancy traces show A-specialists
-mostly in the A band (for example 54 left versus 26 right at 6,000 ticks) and B-specialists in
-the B band. The mechanism is negative frequency dependence: a rare specialist has an
-under-exploited private resource that neither the other specialist nor a boundary generalist
-fully consumes. **The phase 3 gate is met.**
+Both rare specialists gain share in the zoned contests: A ends at 24/172 (13.95%) and
+41/163 (25.15%), B at 62/173 (35.84%) and 32/159 (20.13%), from 7/64 (10.94%). The generalist
+ends at 22/180 (12.22%) in seed 901 and 10/158 (6.33%) in seed 902. In mixed food the rare
+specialists lose share and the generalist gains it. All three remain at the equal-start zoned
+endpoints. Band occupancy favors the corresponding foods. These are useful short proof points
+for a spatial resource opportunity, compatible with frequency-dependent advantage; they do not
+establish lasting coexistence or the former phase 3 gate.
 
 ## Default disposition and limits
 
 The Run default now uses pure A/B halves (`foodZones: { shares: [1, 0] }`) in place of the epoch
 calendar; the calendar remains selectable in the environment settings and in configuration. The
-default world is 80 × 60, so each band is 40 cells wide with four of the eight deposit slots.
+current default world is 80 × 60 with 12 of 24 deposit slots per band. These earlier assays
+used eight slots and a different medium; their exact outcomes are specific to that setup.
 The initial mixed meal is retained in the default; it delays but does not remove the zone effect.
 
-Limits: the specialists here have constructed preferences, and a founder population has neither
-the processing split nor the steering change. Whether evolution finds them is the phase 4
-question. The generalist's advantage in mixed food and the B bias from recycling are structural
-and unchanged. Two seeds and one world size are a screen, not a general statistical claim.
+Limits: these specialists have constructed preferences. The later [evolution study](evolve-study.md)
+records diet differences from identical founders under revised world settings. Recycling now
+returns equal A/B, so the older B bias is not a current rule. Two seeds and one assay size are a
+screen. The A/B layout is a simple way to provide local differences, not a required final ecosystem.

@@ -1,10 +1,10 @@
-# Experiments and evolutionary attribution
+# Experiments for world design
 
-The objective is consequential inherited differentiation in a population whose ecology can remain
-dynamic. World-design hypotheses describe why different choices could succeed in different
-conditions. Attribution experiments answer narrower questions when useful; explaining each winner
-or proving a prescribed strategy crossover is not a development gate. Run length and visual variety
-alone do not establish adaptation.
+The objective is a world where diverse survival strategies and adaptation are likely, for the user
+to observe over days or weeks. Experiments support decisions about that world through hypotheses
+and small proof points. They do not precompute a desired community or certify that the user's
+future run has already delivered its value. A lack of certified coexistence does not forbid
+opening a well-motivated world; run length and visual variety alone do not establish adaptation.
 
 <a id="experiments-evidence-levels"></a>
 
@@ -24,26 +24,31 @@ variant. Generation maximum is not the count of independent selection experiment
 
 <a id="experiments-coexistence-criterion"></a>
 
-## Coexistence criterion
+## Frequency comparisons and the retired coexistence gate
 
-The project goal is evolutionary differentiation: heritable strategies that coexist because each
-does better when rare. The acceptance test is **mutual invasibility**, the standard ecological
-definition of stable coexistence.
+Rare-start comparisons can investigate a specific hypothesis about competition. They are not the
+project's acceptance test. Report initial and final group counts divided by the corresponding
+whole population, plus their difference in percentage points. Seven cells out of 64 growing to
+12 out of 270 is a decline from 10.94% to 4.44%, not successful invasion. Divisions per founder
+are cumulative reproduction, not generation count or frequency advantage.
 
-1. Identify at least two heritable phenotype clusters in a living population by clustering
-   inherited construction targets and, where relevant, controller distance. Clusters are found
-   without reference to fitness; a cluster is not a founder color or a genome-record count.
-2. Start a fresh world from common funded bodies with one cluster's representative genotypes at
-   about 10% abundance and the other at 90%, then swap. Freeze mutation and learned-weight
-   retention so only survival and local reproduction change frequencies.
-3. Both rare types must increase in frequency over at least twenty generations, and the two-type
-   mixture must persist without either falling below 5% over at least 200 generations in the
-   evolved world. Spatial mosaics and cycling frequencies both satisfy persistence; fixation of
-   one type does not.
+The existing `invasion` command places both groups in a fresh world on common funded bodies.
+It tests colonization from unequal starting numbers, not entry into an equilibrated resident
+community. Mutation and learning are disabled, but gene transfer remains active if the source
+checkpoint enables it. Results then track descendants whose traits may change. The command runs
+one placement per rare type by default; exchanging which type is rare is not replication across
+starting positions. Chosen k-means partitions do not prove separate strategies.
 
-A constructed pair passing this test establishes that the world can support coexistence. An
-evolved pair passing it, from a single founder, establishes the project goal for that world.
-Neither counts, biomass nor founder dominance substitutes for either result.
+Only claim mutual frequency increase if both directions actually increase. A positive endpoint
+alone establishes neither statistical repeatability nor continuing coexistence. Claims about
+frequency dependence need comparable contexts and trajectories that distinguish relative advantage
+from startup transients and placement. Declare the horizon needed for that question in advance.
+
+Historical note: the September 11 contract required frequency increases over 20 generations and
+persistence above 5% for 200 generations. The reported assays did not demonstrate those conditions.
+On September 13 the user retired coexistence certification as the work order: development should
+establish opportunities for their own continuing run. The [analysis correction](../analysis-correction.md)
+withdraws the false passes; changing the work order does not retroactively validate them.
 
 <a id="experiments-competing-hypotheses"></a>
 
@@ -51,11 +56,11 @@ Neither counts, biomass nor founder dominance substitutes for either result.
 
 | Hypothesis | Causal prediction | Current status / competing explanation |
 | --- | --- | --- |
-| A/B processing specialization | Reversing food composition reverses the preferred investment | Current constructed specialist/generalist tradeoff; actual B-processing allele improves B uptake and divisions. Broader food-specific invasion is inconsistent |
+| A/B processing specialization | Reversing food composition reverses the preferred investment | Constructed processing tradeoff and an actual B-processing benefit; later zoned runs show regional diet differences, with persistent diversity unresolved |
 | Fast exploration versus economical residence | Distant short opportunities repay speed; local persistent food can repay lower movement cost | Actual evolved brain improves brief-food access with body genes fixed; authored reserve braking sacrifices that access. Coordinated high motors still lose |
-| Toxin investment | Suppressing susceptible neighbors repays secretion but resistant neighbors remove that advantage | Constructed producer comparisons support the mechanism under older rates; no evolved offense established |
-| Defense investment | Protection repays maintenance under exposure, loses value without exposure | Current short fixtures show repair/capture tradeoff, tied divisions; evolved defense not isolated |
-| Porous matrix | Binding protection can repay construction and drag under exposure | Default binding matters; constant builder loses, constructed toxin-triggered builder protects cheaply but ties divisions. Evolved construction unproved |
+| Toxin investment | Suppressing susceptible neighbors repays secretion but resistant neighbors remove that advantage | Constructed damage/feeding comparisons and rising evolved machinery are proof points; offensive behavior and its isolated benefit remain unresolved |
+| Defense investment | Protection repays maintenance under exposure, loses value without exposure | Recorded short fixtures show repair/capture tradeoff, tied divisions; evolved defense not isolated |
+| Porous matrix | Binding protection can repay construction and drag under exposure | Binding mattered in the September 10 default; constructed toxin-triggered building protected cheaply but tied divisions. Evolved construction unproved |
 | Inherited learning | Transferred acquired weights improve offspring relative to retention-zero controls | Transmission exists; actual sampled-parent transfer and private-learning tests show no consistent benefit in uniform B |
 | Founder dominance | Advantage transfers with genotype across starting positions or depends reproducibly on ecological context | Predeclared v4 representative lacked a repeatable fresh-world advantage |
 
@@ -88,7 +93,7 @@ an established population or neighborhood dependence. Testing that alternative r
 matched setup, not reinterpretation of the same endpoint. No assay score enters living reproduction
 and no diagnostic winner automatically replaces browser founders.
 
-Mutation-off/retention-zero freezes inherited sequence under clonal transmission but still permits
+With contact gene transfer also off, mutation-off/retention-zero freezes sequence under clonal transmission but still permits
 private plasticity. Static learning is a different intervention. Environment random streams match;
 body and genetic histories may diverge as a consequence of changed behavior or birth timing.
 
@@ -126,12 +131,25 @@ claims; the actual exported genotypes can still be tested in declared fresh-worl
 
 ## Proportionate verification
 
+Before a test, state the world-design decision, competing hypotheses, starting bodies and genomes,
+the proposed local cue/action/resource/cost chain, and what observation would change the decision.
+For physiological mechanisms, test the actual physical response without inventing a neural cue.
+Start with a constructed cell or small matched pair using ordinary RNNs and physics. Verify that
+the action is expressible and the opportunity can repay its cost before asking whether generations
+of mutation discover it. Existing proof points can suffice; do not rerun them for a new heading.
+
 Use the reusable [short food-access harness](../quick-food-access-study.md) for constructed
 mechanism probes and small paired contests. The repository [agent guide](../../AGENTS.md)
 defines short-versus-long experiment policy. Hundreds of ticks can expose a missing signal or
 ineffective action; thousands can connect access and costs to growth. Many-generation runs are
 reserved for questions about inherited discovery or sustained ecological dynamics after the
 opportunity itself is established. Do not expand replication or duration automatically.
+
+The user's days/weeks observation is a different activity from those agent experiments. Prepare
+continuation, storage and observation for that use; do not replace it with an unattended search
+for a satisfactory ecosystem. A longer agent run needs a question that short tests cannot answer,
+an explicit budget and stop conditions, and authorization within the task. No fixed generation
+count, strategy count or demand to attribute every adaptation governs handoff.
 
 Vitest covers bounded deterministic mechanics and integration invariants. Ecological behavior belongs
 in short named harness comparisons with falsifiable predictions. Human review judges motion through

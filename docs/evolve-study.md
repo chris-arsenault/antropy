@@ -53,6 +53,10 @@ drift, not partition. Neither failure authorizes tuning the world toward the pre
 
 ## Results
 
+The interpretation was corrected September 13; see the [endpoint audit](analysis-correction.md).
+Original questions and predictions are retained as registration history. Coexistence gates no
+longer govern development, and the previous claimed passes did not meet their own protocol.
+
 All runs completed their horizons. Every manifest reads `failed` because observation and
 harness files (`src/observe`, `src/ui`, `harness/lib`) were edited while the runs were in flight
 and the end-of-run source digest no longer matched; kernel and persistence files were last
@@ -104,7 +108,7 @@ by single steps at these population sizes.
 
 ## Second campaign: the thick medium
 
-After the first campaign, the world was changed rather than the conclusion accepted. The
+After the first campaign's negative result, a second configuration was tested. The
 [residency measurement](calibration.md#calibration-residency) showed that at the old viscosity
 96% of cells crossed into the other half of the world during their life; at viscosity 0.4 only
 13% do, while division and turnover rise. The new default is that viscosity, 24 balanced
@@ -142,22 +146,23 @@ Every zoned seed evolves two diet clusters on opposite halves from one founder, 
 preference constructed and no genotype introduced; the mixed control does not. The split begins
 between 50,000 and 100,000 ticks and widens through 200,000. Bodies still shrink (core targets
 20–30% of the founder), so economy evolution continues alongside partition rather than instead
-of it. Predictions 1 and 3 of the registration hold in this world.
+of it. The regional diet prediction is supported in this world. Several settings changed together;
+these runs do not isolate population size, viscosity or mutation supply as the cause.
 
 Mutual invasibility of the actual evolved medoid genotypes at 200,000 ticks (`pnpm harness
-invasion --k 2 --founders 48 --sources 20 --wall 600`, fresh pure-band world, invader 7 of 48;
+invasion --k 2 --founders 48 --sources 20 --wall 600`, fresh pure-band world, invader 5 of 48, corrected from the previously reported 7;
 cells at 12,000 ticks and divisions per founder, invader v resident):
 
 | Source | B-side cluster rare | A-side cluster rare | Verdict |
 | --- | --- | --- | --- |
-| zones-303 (27% v 85% A) | 260 cells, 70.4 v 34.4 | 221 cells, 74.4 v 30.4 | **mutual invasion** |
-| zones-202 (41% v 69% A) | 267 cells, 82.8 v 36.3 | 101 cells, 49.0 v 49.2 | B-specialist invades; A-side grows but holds frequency |
-| zones-101 (53% v 76% A) | 13 cells, 2.8 v 45.3 | 155 cells, 299 v 3 | A-specialist invades; B side not yet specialised |
+| zones-303 (27% v 85% A) | 260 cells, 70.4 v 34.4 | 221 cells, 74.4 v 30.4 | **both endpoint shares increase** |
+| zones-202 (41% v 69% A) | 267 cells, 82.8 v 36.3 | 101 cells, 49.0 v 49.2 | B-side gains share; A-side falls from 10.42% to 9.11% |
+| zones-101 (53% v 76% A) | 13 cells, 2.8 v 45.3 | 894 cells, 299 v 3 | A-side gains share; B-side falls to 1.37% |
 
-Seed 303, the furthest along, meets the [coexistence criterion](design/experimentation.md#experiments-coexistence-criterion)
-with genotypes that evolved from one founder: each rare type doubles the resident's per-founder
-division rate and rises to a quarter of the population within 12,000 ticks. Seeds 202 and 101
-are earlier on the same trajectory.
+Seed 303's rare groups rise from 10.42% to 26.97% and 25.85% in the two fresh-world contests.
+That is positive endpoint evidence from evolved genotypes, not completion of the former
+[coexistence criterion](design/experimentation.md#experiments-coexistence-criterion). Seeds 202
+and 101 do not show both increases at this checkpoint; a common future trajectory is unproved.
 
 At the 250,000-tick endpoint (94–110 generations) the splits are sharper: seed 101 45% v 79% A
 (120/515 v 483/29 cells in the A/B halves), seed 202 36% v 80% (146/681 v 479/16), seed 303
@@ -165,31 +170,34 @@ At the 250,000-tick endpoint (94–110 generations) the splits are sharper: seed
 
 | Source | B-side cluster rare | A-side cluster rare | Verdict |
 | --- | --- | --- | --- |
-| zones-101 (45% v 79% A) | 191 cells, 67.8 v 42.9 | 241 cells, 84.2 v 42.8 | **mutual invasion** |
-| zones-202 (36% v 80% A) | 302 cells, 93.6 v 37.5 | 62 cells, 46.6 v 48.0 | B-specialist invades; A-side holds |
-| zones-303 (30% v 87% A) | 343 cells, 98.0 v 36.4 | 154 cells, 64.0 v 39.3 | **mutual invasion** |
+| zones-101 (45% v 79% A) | 191 cells, 67.8 v 42.9 | 241 cells, 84.2 v 42.8 | **both endpoint shares increase** |
+| zones-202 (36% v 80% A) | 302 cells, 93.6 v 37.5 | 62 cells, 46.6 v 48.0 | B-side gains share; A-side falls to 5.58% |
+| zones-303 (30% v 87% A) | 343 cells, 98.0 v 36.4 | 154 cells, 64.0 v 39.3 | **both endpoint shares increase** |
 
-Two of three seeds pass the criterion in both directions with evolved genotypes; the third
-passes in one direction and is neutral in the other. All three populations hold both clusters
-at the endpoint with each above 37% of the population, in opposite halves. **The phase 4 gate is
-met in the current default world.** Prediction 4 is also answered: the split is physical (the
-A/B processing loci) and arises without a constructed steering preference; whether steering
-preferences have also evolved is not measured here.
+Two of three endpoint pairs increase population share both ways: seed 101 ends at 17.90% and
+23.02%, seed 303 at 31.88% and 14.81%, from 5/48 (10.42%) in each contest. Seed 202's second
+direction declines, rather than holding neutral. Both groups remain above 37% in the three source populations at the endpoint. These source
+counts differ from the later rare-start contest populations.
+
+The physical diet differences and regional occupancy are retained findings. Steering preferences
+were not measured, and the historical duration requirements were not demonstrated. The claim
+that the phase 4 coexistence gate was met is withdrawn.
 
 ## Finding and next decision
 
-The world now exhibits the behaviour the project exists for: from one founder, mutation and
-local resource-funded reproduction produce two heritable diet strategies that occupy different
-regions and each invade the other from rarity. What changed was not the evolutionary model but
-the physical world: cells that stay where they are born make local selection possible. Open
-next: re-test the toxin producer/resistant/sensitive cycle in the thick medium, since its
-failure had the same cause; measure whether steering preferences evolve alongside the physical
-split; and decide whether the continuing shrinkage of core targets (to a fifth of the founder)
-needs a cost of its own.
+The runs support the hypothesis that residency and spatial resource differences can make
+inherited processing choices consequential. They do not finish the project's purpose by
+delivering two predetermined strategies. Viscosity, supply, recycling and mutation were changed
+together, so the result cannot be attributed solely to the medium.
+
+For world design, retain the local-selection opportunity and the continuing shrinkage of body
+targets as a possible limitation. The thick-medium toxin follow-ups are now in the family and
+predation studies. No new campaign or imposed cost is required merely to achieve a particular
+community; the intended long observation belongs to the user's live population.
 
 The first-campaign record follows unchanged.
 
-**First campaign, old world: the phase 4 gate is not met.** The zoned world can hold constructed specialists but the
+**First campaign, old world: no regional diet split was observed.** The zoned world can hold constructed specialists but the
 founder population has not evolved them in 70–127 generations, with or without an eightfold
 physical mutation supply or a threefold larger population. The block is residency: differential
 survival by band cannot select on diet while every cell forages across both bands.

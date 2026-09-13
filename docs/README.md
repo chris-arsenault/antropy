@@ -1,12 +1,16 @@
 # Documentation
 
-The [current design and work order](design/README.md) describes the running bacterial simulation.
-Inheritance and consequential ecology are implemented; toxin savings, food access and B-processing
-benefits have been isolated in actual evolved genotypes.
+The [current design and work order](design/README.md) prepares a world where diverse ecosystems
+and adaptation are likely during the user's days/weeks observation. Hypotheses and small proof
+points guide settings; a pre-evolved community is not the deliverable. Read the
+[corrected ecological analysis](analysis-correction.md) before reusing September 12–13 conclusions.
+Continuity, storage and retained observation still need preparation for long live runs.
 The [historical snapshot](sources/history/README.md) preserves superseded contracts and full evidence.
 
 | Need | Document |
 | --- | --- |
+| Corrected frequencies and withdrawn coexistence passes | [Analysis correction and durable endpoint evidence](analysis-correction.md) |
+| Days/weeks continuation, storage and observation | [Runtime readiness limits](backlog.md#backlog-runtime-and-observation-limits) |
 | Runtime ownership | [Architecture](architecture.md) |
 | Commands, persistence and experiments | [Development](development.md) |
 | Exported winner investigation | [Registered adaptation study](overnight-study.md) |
@@ -14,18 +18,18 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Short constructed mechanism experiments | [Food-access harness and results](quick-food-access-study.md) |
 | Six mechanism areas and actual evolved capabilities | [Capability investigation and recommendation](capability-investigation.md) |
 | Families, relatives, genes and behavior | [Population observation](design/population-observation.md) |
-| Current-default long population comparison | [Six 50,000-tick runs](population-50k.md) |
+| Earlier-default long population comparison | [Six 50,000-tick runs](population-50k.md) |
 | Changing resource composition and inheritance | [Registered food-epoch campaign](food-epochs-study.md) |
 | Toxin immunity and the producer/resistant/sensitive cycle | [Contest record](rps-study.md) |
 | Spatial A/B zones and diet specialists | [Zone record](zones-study.md) |
 | De novo evolution and evolved-cluster invasibility | [Evolution record](evolve-study.md) |
-| Element cycle and guild emergence | [Cycle record](cycle-study.md) |
-| Family chemistry and kin tolerance | [Family record](family-study.md) |
-| Predation through contact killing | [Predation record](predation-study.md) |
+| Element-cycle opportunities and limits | [Cycle record](cycle-study.md) |
+| Typed toxin and compatibility | [Family record](family-study.md) |
+| Damage-related feeding | [Predation record](predation-study.md) |
 | Abiotic disturbance and colonisation | [Disturbance record](disturbance-study.md) |
 | Horizontal gene transfer | [Transfer record](transfer-study.md) |
-| Adhesion, sharing and division of labour | [Sharing record](sharing-study.md) |
-| Quorum signal | [Signal record](signal-study.md) |
+| Reserve sharing and its limits | [Sharing record](sharing-study.md) |
+| Neutral chemical signal | [Signal record](signal-study.md) |
 | Review status | [Certification](certifications.md) |
 | Decisions | [ADR index](adr/README.md) |
 | Original supplied sources | [Source index](sources/README.md) |
@@ -39,8 +43,8 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Design owners](design/README.md#design-design-owners)
 - [Current default and disabled scope](design/README.md#design-current-default-and-disabled-scope)
 - [Next decisions](design/README.md#design-next-decisions)
-- [Roadmap to strategic differentiation](design/README.md#design-roadmap)
-- [Roadmap two: organism-generated selection](design/README.md#design-roadmap-2)
+- [Earlier roadmap: findings retained, outcome gates retired](design/README.md#design-roadmap)
+- [Earlier roadmap two: opportunities and unresolved questions](design/README.md#design-roadmap-2)
 - [Status and provenance](design/README.md#design-status-and-provenance)
 
 ## Bacterial world and lifecycle
@@ -74,28 +78,29 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Predation](design/strategic-ecology.md#ecology-predation)
 - [Abiotic disturbance](design/strategic-ecology.md#ecology-disturbance)
 - [Horizontal gene transfer](design/strategic-ecology.md#ecology-gene-transfer)
-- [Adhesion and sharing](design/strategic-ecology.md#ecology-sharing)
-- [Quorum signal](design/strategic-ecology.md#ecology-signal)
+- [Reserve sharing](design/strategic-ecology.md#ecology-sharing)
+- [Neutral chemical signal](design/strategic-ecology.md#ecology-signal)
 - [Toxin, defense and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
 - [Family chemistry](design/strategic-ecology.md#ecology-family-chemistry)
 - [Porous matrix](design/strategic-ecology.md#ecology-porous-matrix)
 - [Disabled systems](design/strategic-ecology.md#ecology-disabled-systems)
 - [Consequences and boundaries](design/strategic-ecology.md#ecology-consequences-and-boundaries)
 
-## Experiments and evolutionary attribution
+## Experiments for world design
 
 - [Evidence levels](design/experimentation.md#experiments-evidence-levels)
-- [Coexistence criterion](design/experimentation.md#experiments-coexistence-criterion)
+- [Frequency comparisons and the retired coexistence gate](design/experimentation.md#experiments-coexistence-criterion)
 - [Competing hypotheses](design/experimentation.md#experiments-competing-hypotheses)
 - [Comparison method](design/experimentation.md#experiments-comparison-method)
 - [Existing harness and provenance](design/experimentation.md#experiments-existing-harness-and-provenance)
 - [Proportionate verification](design/experimentation.md#experiments-proportionate-verification)
 
-## Current evidence and unresolved adaptation
+## Evidence for world-design decisions
 
+- [World-design proof points and corrected claims](design/bacteria-results.md#evidence-world-design-proof-points)
 - [Current capability investigation](design/bacteria-results.md#evidence-capability-investigation)
 - [Exported lineage adaptation](design/bacteria-results.md#evidence-exported-lineage-adaptation)
-- [Corrected default ecology](design/bacteria-results.md#evidence-corrected-default-ecology)
+- [September 10 default ecology, before later changes](design/bacteria-results.md#evidence-corrected-default-ecology)
 - [Earlier evidence and its limits](design/bacteria-results.md#evidence-earlier-evidence-and-its-limits)
 - [Open conclusions](design/bacteria-results.md#evidence-open-conclusions)
 

@@ -1,4 +1,4 @@
-# Element cycle: guild emergence in a homogeneous world
+# Element cycle: light and organic-food opportunities
 
 Registered September 13, 2026 as phase 1 of
 [roadmap two](design/README.md#design-roadmap-2), before reading any endpoint. Sulion plan
@@ -7,7 +7,7 @@ Registered September 13, 2026 as phase 1 of
 ## Question
 
 With the [element cycle](design/strategic-ecology.md#ecology-element-cycle) on, does a single
-founder population in a homogeneous world (mixed deposits, no zones, thick medium) split into
+founder population in a mixed-deposit world (no fixed bands, thick medium) split into
 guilds that the organisms themselves make necessary, and do the evolved guilds pass the
 [coexistence criterion](design/experimentation.md#experiments-coexistence-criterion)?
 
@@ -51,9 +51,9 @@ founder), rather than by reading the evolution endpoint:
 | 0.5, 0.05 | 34 / 27 / 30 | 14 (1.0) | 12 (0.71) | 21 (2.0) |
 | 0.5, 0.2 | 47 / 90 / 121 | 19 (1.7) | 35 (6.0) | 60 (8.0) |
 
-Crowding 1 stops reproduction altogether (surviving founders only). Crowding 0.5 at the default
-supply is the first setting where all three constructed guilds reproduce and each invades from
-10%; the autotroph is the weakest guild, and the mixotroph is no longer dominant when rare.
+Crowding 1 stops reproduction altogether (surviving founders only). At crowding 0.5 and supply 0.2 all guilds reproduce, but the corrected endpoints are
+19/158 (12.03%), 35/322 (10.87%) and 60/356 (16.85%) from 10.94% each. The heterotroph does
+not gain share. The original all-guild invasion claim was a count-versus-frequency error.
 
 4. Density-independent light: three arms launched at that setting (seeds 101, 202, 303, 150,000
    ticks) reached 1,221, 988 and 785 cells by 85,000, 80,000 and 115,000 ticks and were still
@@ -92,8 +92,9 @@ supply is the first setting where all three constructed guilds reproduce and eac
 | 0.0006, radius 2 | 1 / 45 / 76 | 1 (1.0) | 12 (5.0) | 34 (5.7) |
 | 0.001, radius 2 | 27 / 51 / 106 | 9 (1.6) | 8 (4.6) | 49 (7.7) |
 
-The last row is the launched setting: each guild reproduces and invades from 10%, the autotroph
-being the weakest and the only guild that lives on the light budget alone. Artifacts:
+The last row is the launched setting. Each guild reproduces, but the rare autotroph ends at
+9/128 (7.03%), heterotroph at 8/200 (4.00%) and mixotroph at 49/209 (23.44%), from 10.94%
+each. Only the mixotroph gains share; the original all-guild invasion interpretation is withdrawn. Artifacts:
 `frontend/harness/artifacts/zones-2026-09-13/guilds*`.
 
 ## Predictions, recorded before results
@@ -113,6 +114,11 @@ reason to draw a niche.
 
 ## Results
 
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+Original questions and predictions remain registration history. The evolution arms below used
+harvesting maintenance and exudation that have since been removed; they do not validate the
+current simplified cycle. Mixed deposits are spatially patchy, not a homogeneous environment.
+
 ### Crowding 0.5, 150,000 ticks
 
 Three cycle arms and the control completed (`evolve-2026-09-13/cycle3/` and
@@ -125,19 +131,17 @@ absorbed was exudate.
 | Prediction | Outcome |
 | --- | --- |
 | 1. Bimodal harvesting investment, anticorrelated with transport | No. Inherited harvesting rose from 5.0% of core to medians of 7.1, 8.6 and 5.9% (90th percentiles 8.5, 11.5 and 7.9%) with correlation to transport +0.03, +0.39 and −0.41; k-means at k = 2 splits on core size and A share, not harvesting, and at k = 3 the most harvesting-rich cluster (seed 202, 90 cells at 11.2%) still carries the founder's transport. Every lineage remains a mixotroph. |
-| 2. Cluster medoids mutually invade | Seed 101 yes: both k = 2 medoids (core 74% and A share 53% versus core 54% and A share 60%) invade from 10% (28 and 58 cells, 3.9 and 11.6 divisions per founder). Seeds 202 and 303 one way only (the second medoid ends at 3 and 7 cells). `invasion-2026-09-13/cycle-*-k2`. |
+| 2. Cluster medoids mutually invade | No pair increases share both ways. Seed 101: 28/398 (7.04%) and 58/328 (17.68%); seed 202: 67/214 (31.31%) and 3/234 (1.28%); seed 303: 32/148 (21.62%) and 7/129 (5.43%). Each starts at 7/64 (10.94%). |
 | 3. Carbon below and oxygen above atmosphere | Opposite sign. Carbon ends at 6.2–6.3 per raster cell against an atmosphere of 1, oxygen at 0.045–0.060 against 0.2: the population respires deposit food faster than it fixes, and the slow exchange (0.0001/s) lets the imbalance accumulate. The organisms run the cycle, as heterotrophs. |
 | 4. Control has no harvesting axis | By construction; the control's k = 2 clusters split on core (48% versus 64%) and A share (52 versus 56%). |
 
-The constructed guild contests establish that the autotroph, heterotroph and mixotroph niches
-exist under these constants; the evolved populations did not partition them within 35–50
-generations. The registered failure clause applies: a mixotroph dominates because holding both
-pathways is cheap relative to light at crowding 0.5. Constructed contests at crowding 0.75 (same
-light, 12,000 ticks) make the mixotroph the weakest guild while every guild still invades:
-three-way 33 / 73 / 49, autotroph rare 12 cells (1.0 divisions per founder), heterotroph rare
-30 (4.6), mixotroph rare 26 (3.7). At crowding 1 the mixotroph makes 0.05–0.29 divisions per
-founder and the contest world stops turning over. The next arms ran at crowding 0.75 for
-250,000 ticks (`cycle4/`).
+Light acquisition and respiration are active, but the evolved populations did not separate
+into light-only and food-only roles within the recorded 35–50 maximum generations. Cheap combined
+pathways are one possible explanation, not an isolated cause. The subsequent constructed
+crowding-0.75 contests ended at 12/108 (11.11%), 30/180 (16.67%) and 26/188 (13.83%) for the
+three rare guilds from 10.94%. All increase at the endpoint, with the autotroph nearly unchanged.
+This is a short configuration-specific opportunity check, not stable guild coexistence.
+The next recorded arms used crowding 0.75 for 250,000 ticks (`cycle4/`).
 
 ### Crowding 0.75, 250,000 ticks
 
@@ -148,32 +152,32 @@ kept and no ledger row, to free the source tree. Light supplied a fifth to a qua
 organic input; carbon ended at 6.2–6.4 and oxygen at 0.02–0.06 per raster cell, the same net
 respiration as before.
 
-| Seed | k = 2 clusters (size, harvesting % of core, A share %, core %) | Rare invasion (final cells, divisions per founder) |
+| Seed | k = 2 clusters (size, harvesting % of core, A share %, core %) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- |
-| 101 | 281 cells at 13.0 / 40 / 47 versus 295 at 5.7 / 57 / 50; A-share bimodality 0.575 | Harvester 40 (10.0); consumer 26 (11.4): mutual |
-| 202 | 195 at 6.7 / 39 / 39 versus 615 at 8.9 / 51 / 58 | Small B-leaning cluster 96 (27.0); majority cluster 11 (2.1) from 7: both persist, axis is diet and body size |
-| 303 | 166 at 5.9 / 58 / 91 versus 113 at 5.7 / 62 / 73 | 19 (4.3) and 12 (5.3) from 7: both persist, neither axis is light |
+| 101 | 281 cells at 13.0 / 40 / 47 versus 295 at 5.7 / 57 / 50; A-share bimodality 0.575 | 40/148 (27.03%); 26/409 (6.36%): consumer share declines |
+| 202 | 195 at 6.7 / 39 / 39 versus 615 at 8.9 / 51 / 58 | 96/263 (36.50%); 11/176 (6.25%): one declines |
+| 303 | 166 at 5.9 / 58 / 91 versus 113 at 5.7 / 62 / 73 | 19/76 (25.00%); 12/109 (11.01%): both increase, second nearly unchanged |
 
-Seed 101 is the first evolved harvester–consumer pair: one cluster more than doubled its
-inherited harvesting stock while shifting to food B and a smaller body, the other kept the
-founder's pigment and moved toward food A, and each invades the other from 10% in a fresh
-mixed world. It took about 90 generations; at 50 generations the same arm showed only drift.
-Seeds 202 and 303 had not split on the harvesting axis by 54–68 generations, and their clusters
-differ on diet and body size, as in the crowding-0.5 arms.
+Seed 101 has different harvesting investments in the chosen groups, alongside food processing
+and body differences. Both still have harvesting and transport. It is not an established
+harvester/consumer coexistence result: the lower-harvesting group's share declines from 10.94%
+to 6.36%. Seed 303 is the only positive endpoint pair of the six cycle arms, and its weaker
+direction gains just 0.072 percentage points. No lasting coexistence or cause of the differences
+is established. The maximum generation counts do not explain the between-seed outcomes by themselves.
 
-### Structural finding
+### Physical opportunity and limits
 
 Under a per-area light supply the marginal return on pigment is zero once a cell's footprint is
 claimed, while transport near a deposit keeps paying, so the harvester niche is empty lit ground
 away from deposits and selection for it acts through where cells end up as much as through
-what they build. The seed-101 split shows the route exists; whether it is reached in a given
-arm within 250,000 ticks depends on generation count (populations of 150–300 cells give 50
-generations, not 90). The constants that changed during calibration (`photoMaintenance`,
-`exudation`, `lightSupply`, `lightRadius`, `machineryCrowding`, the carbon pool) are all
-recorded levers; none was needed by the original registration. After review the mechanism was
-simplified again: `photoMaintenance` and `exudation` were removed (harvesting pays the general
-machinery maintenance; fixed material all enters reserve), and the constructed guild contest was
-repeated at the simplified defaults (below). The light budget, footprint and crowding levers
-stay. The general gate, mutual invasibility of whatever clusters emerge, was met on the diet and
-body-size axes in the crowding-0.5 seed-101 arm and in all three crowding-0.75 arms; the
-harvesting axis was a prediction, not the gate, and no further arms are run to chase it.
+what they build. This is a physical hypothesis about the capped return, not proof of an evolved
+role. Calibration changed several constants and stopped multiple runs; it is not a controlled
+demonstration that generation count caused discovery.
+
+After review, `photoMaintenance` and `exudation` were removed. Harvesting now pays general
+machinery maintenance and all fixed material enters reserve. In the saved simplified contests,
+rare autotrophs end at 28/154 (18.18%), heterotrophs at 15/248 (6.05%), and mixotrophs at
+60/334 (17.96%), from 7/64 (10.94%). The heterotroph loses share. The light budget, footprint
+and crowding remain physical opportunities, but neither the old nor simplified assays certify
+three coexisting guilds. The former general-gate passes are withdrawn. World design can use
+the fixation and cost proof points without another campaign to obtain a desired guild count.

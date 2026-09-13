@@ -1,6 +1,6 @@
 # Population observation
 
-The goal is consequential inheritance in a population whose ecology can continue changing.
+The goal is to observe a world where diverse strategies and adaptation can emerge over days or weeks.
 Hypotheses guide opportunities and diagnose inert mechanisms; proving a prescribed strategy pair
 or identifying each successful mutation is not a gate on development. Existing negative experiments
 remain evidence about their particular bodies, controllers and environments.
@@ -9,7 +9,7 @@ remain evidence about their particular bodies, controllers and environments.
 
 ## Independent views
 
-Recent families are the default map colors and population-share chart. For the initial observation
+Recent families are a selectable map view and population-share chart; trait groups are the current map default. For the initial observation
 scale, a family is an ancestry branch rooted at generation 0, 4, 8, and so on. Membership follows
 parent links to the most recent such root. IDs are the root organism IDs, deterministic across
 imports and unrelated to mutations, abundance or analysis sampling. Four generations is a viewing
@@ -34,8 +34,7 @@ medians also retain a bounded trend history, so a stable population size need no
 ## Strategy clusters
 
 Strategy clusters are the default map colors and lead the stats panel. Living cells are grouped
-by inherited construction targets alone (A share of processing, motor, core, defense, toxin and
-matrix machinery), standardized and clustered by deterministic k-means with three centres seeded
+by inherited traits (A share of processing, motor, core, defense, toxin, matrix, harvesting and toxin tint), standardized and clustered by deterministic k-means with three centres seeded
 at evenly spaced ranks of A share. Clusters are ranked by A share, so orange is the lowest-A
 cluster and green the highest at any moment. The scatter plots every living cell over A share and
 defense; circles are in the left band and squares in the right. The table gives each cluster's
@@ -43,10 +42,13 @@ share of the population, its band occupancy and its centre traits, and the histo
 cluster sizes over the opened view's lifetime, assigning each sample to that sample's own centres.
 
 Up to three clusters are formed; identical founders form one, and empty clusters are not shown,
-so the number of rows grows only as inherited variation appears. Clusters are descriptions of the
-distribution, not species, fitness classes or selection inputs. The same clustering, with two centres, drives the harness `invasion` assay,
-which takes each cluster's medoid genotype from a checkpoint and tests invasion from rarity in a
-fresh zoned world. That assay, not the panel, is the [coexistence criterion](experimentation.md#experiments-coexistence-criterion).
+so nonempty groups can appear as inherited variation appears. Three is the requested grouping
+count, not a discovered number of modes or ecological strategies. A continuous spread can be
+partitioned this way. Rank colors can change membership over time as centers change; a color is
+not a stable species identity. The same clustering, with two centers by default, supplies the
+harness `invasion` command with representative genotypes for fresh-world rare-start comparisons.
+That assay defaults to mixed deposits unless explicitly configured otherwise and does not
+certify coexistence. See [frequency-comparison limits](experimentation.md#experiments-coexistence-criterion).
 
 <a id="population-boundaries"></a>
 
@@ -54,7 +56,7 @@ fresh zoned world. That assay, not the panel, is the [coexistence criterion](exp
 
 An observer projection owns grouping, distance caches and view history. It does not alter worlds,
 genomes, random streams, actions, survival or reproduction. No family label enters a sensor or grants
-cooperation. Ancestry and genome records already retained by v5 checkpoints are sufficient to rebuild
+cooperation. Ancestry and genome records retained by current v7 checkpoints are sufficient to rebuild
 groups; view sampling history begins when a world is opened. No persistence migration or new physics
 is required. Existing zoom, field layers, founder reporting and inspection remain available.
 
@@ -69,4 +71,5 @@ family held 4.4% of the whole population. These are subdivisions of recorded anc
 of 78 distinct strategies. Serializing before/after projection produced identical world data, and
 restoring the checkpoint reconstructed identical family counts. The bounded integration checks also
 cover unchanged deterministic continuation and default UI access. View history cannot reconstruct
-what happened before the saved tick.
+what happened before the saved tick. Days/weeks observation therefore needs a durable history
+and continuation design; the present bounded chart is not a long-duration record.

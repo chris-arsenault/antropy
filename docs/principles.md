@@ -7,14 +7,21 @@ oracle ladders and implementation gates are preserved in the [archive](sources/h
 
 ## Goal and evidence
 
-The goal is genuine evolution in embodied populations: inherited differences influence survival
-and reproduction through local physical interactions. There is no external reproductive fitness
-score or synchronized generation boundary. A working population and visible novelty are necessary
-observations, not evidence of adaptive differentiation by themselves.
+Build a world in which a diverse ecosystem and evolutionary adaptation are likely to arise,
+then let the user run it for days or weeks and watch what happens. Inherited differences must
+affect survival and reproduction through local physical interactions. There is no external
+fitness score, synchronized generation boundary or prescribed set of organisms.
 
-Long-term ecological dynamics and consequential inherited choices are the development objective.
-Hypotheses establish why a world could support differing strategies and help diagnose stagnation.
-They do not require attribution of each winning mutation or success of a prescribed strategy pair.
+Development prepares the conditions for that continuing observation. It does not finish the
+project by evolving a selected community in the harness. A particular number of populations,
+a successful coexistence assay or an impressive endpoint is not the product or its acceptance test.
+The user's live population remains an unresolved experiment: its niches, adaptations, losses and
+succession are for observation, not outcomes to precompute and deliver.
+
+Use hypotheses and small proof points to establish plausible opportunities: why different choices
+could repay their costs in different circumstances, whether cells can express those choices, and
+what would erase the opportunity. Evidence can justify a world without proving that evolution has
+already exploited every opportunity. Neither diversity nor indefinite novelty can be guaranteed.
 
 Separate implemented mechanics, measured causal effects, constructed strategy comparisons and
 adaptation of an observed inherited variant. Preserve negative results and version-specific limits.
@@ -43,26 +50,33 @@ matched conditions with recorded provenance. Scale investigation to the decision
 
 When repeated material changes fail to alter the claimed outcome, stop tuning and record the
 structural finding. Do not add sensors, training or environmental complexity without naming the
-missing information or pressure. More simulation detail is justified by an evolutionary question,
-not by a desire for more activity.
+missing information or pressure. More simulation detail needs an evolutionary purpose.
 
-Behavior and shape are descriptions. Do not reward prescribed trajectories, walls or lineage
-dominance as substitutes for resource-funded reproductive success. Evolutionary opportunities
+Do not turn a failed prediction into a pass because an unrelated trait spread appeared. Do not
+add mechanisms, extend horizons or search seeds merely to obtain a chosen number of surviving
+groups. A negative probe should narrow a hypothesis or inform a design decision. Opportunities
 should permit conditional advantages rather than one universally better trait.
 
 <a id="principles-review-and-working-boundary"></a>
 
 ## Review and working boundary
 
-A retained default system must have observable consequences, or an explicit reason to be disabled.
-Executing code or accumulating secretion totals does not make a feature ready for review.
-The user observes through Run and stats. Preserve controls, but make intended review conditions
-the tick-zero defaults.
+A retained default system needs a stated ecological purpose and evidence that its physical
+opportunity exists, or an explicit reason to be disabled. It does not need an evolved example of
+the hoped-for strategy before the user can observe it. Executing code or accumulating secretion
+totals alone does not establish a useful opportunity. The user observes through Run and stats;
+make the reviewed world configuration the tick-zero default and explain active and disabled systems.
 
-Use bounded mechanics tests and proportionate headless causal assays. Inspect the browser's startup
+Readiness for days or weeks is also an operational responsibility: continuation after interruption,
+bounded memory and storage, useful retained observation, and measured performance as births
+accumulate. An ecological result does not establish that readiness. Record current limits and
+address them before describing unattended long observation as supported.
+
+Use bounded mechanics tests and proportionate headless causal assays. Inspect browser startup
 configuration rather than running a browser simulation. Start servers only on explicit request.
-Substantial new designs require user review before implementation; authorized routine fixes do not
-require repeated approval. Current longer observation does not authorize an unattended new campaign.
+Substantial new designs require user review; authorized routine fixes do not require repeated
+approval. The user's intended long live run is distinct from an agent research campaign; neither
+a documentation task nor that intended use authorizes launching a campaign now.
 
 <a id="principles-durable-architecture"></a>
 

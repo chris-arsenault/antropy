@@ -12,7 +12,7 @@ One periodic 80 × 60 XY plane contains continuous circular body footprints and 
 raster fields. Neither axis is height. Sensing, transport, contact, placement and rendering agree
 at periodic seams. There is no map oracle, pathfinder, gravity axis, nest or alternate substrate.
 
-A cell owns position, heading, eight actual material stocks, nutrient reserve, usable energy,
+A cell owns position, heading, nine actual material stocks, nutrient reserve, usable energy,
 functional damage, four adaptive receptor baselines, contact state, private brain state, genotype
 reference and ancestry. Radius derives from structural and stored-food volume using a spherical
 reference approximation. Low-Reynolds-number drag motivates overdamped swimming; there is no
@@ -27,8 +27,8 @@ footprint and drag. Changed construction targets never grant instant capability.
 
 ## Fields and finite deposits
 
-Eight material fields are persisted: food A, food B, neutral chemical, toxin, matrix, bound toxin,
-detritus and inorganic carbon, plus oxygen outside the material balance. A/B use separate
+Ten material fields are persisted: food A, food B, neutral chemical, two toxin types, matrix,
+two bound-toxin pools, detritus and inorganic carbon, plus oxygen outside the material balance. A/B use separate
 processing pathways but become the same intracellular feedstock. Matrix and bound toxin remain
 local deposits; soluble fields diffuse and decay. Detritus decomposes half into A and half into B.
 Carbon and oxygen belong to the optional [element cycle](strategic-ecology.md#ecology-element-cycle)
@@ -43,16 +43,16 @@ never organism need, identity or success. Controllers receive local concentratio
 Optional `config.foodEpochs = { phaseTicks, shares }` replaces new deposits' random composition
 with a repeating calendar of food-A fractions. It preserves total inventory, energy density,
 source geometry, arrival timing and environment random draws. Existing inventories and dissolved
-food keep their composition across transitions. Absence retains mixed deposits; the resolved
-schedule persists in v5 checkpoints and its phase derives from world tick. Controllers receive
+food keep their composition across transitions. When neither epochs nor zones is present, deposits have mixed compositions; the resolved
+schedule persists in v7 checkpoints and its phase derives from world tick. Controllers receive
 no calendar input. See the [registered epoch experiment](../food-epochs-study.md).
 
 Optional `config.foodZones = { shares }` instead fixes composition by position: the world is
 split into equal vertical bands, deposit slot *i* always lands in band *i* mod *N* at its drawn
-offset, and a new deposit takes its band's food-A fraction. Every band therefore receives equal
-supply at every moment. Inventory, energy density, timing and random draws are unchanged; only
+offset, and a new deposit takes its band's food-A fraction. Each band therefore has the same number of deposit slots, while actual arrival times,
+inventory and release rates can differ. Inventory, energy density, timing and random draws are unchanged; only
 the x coordinate is remapped into the slot's band. Zones and epochs are alternatives; a
-configuration declares at most one, and both persist in v5 checkpoints. Controllers receive no
+configuration declares at most one, and both persist in v7 checkpoints. Controllers receive no
 band input. See the [registered zone experiment](../zones-study.md).
 
 The initial uniform food field and initial source inventories are accounted once. Later arrivals
@@ -66,13 +66,14 @@ spout. [Ecology](strategic-ecology.md) defines the opportunities and constructio
 
 Each tick is 0.2 model seconds:
 
-1. Advance deposits, field reactions and transport.
+1. Advance deposits, field reactions and transport, then any configured local disturbance.
 2. Form each cell's local observation and run its RNN against the same chemical snapshot.
 3. Pay affordable swimming, turning and secretion; resolve movement/contact and deposit chemicals.
 4. Apply local toxin injury.
 5. Allocate supply-limited A/B uptake simultaneously across consumers and shared intracellular space.
-6. Catabolize reserve, pay maintenance, repair damage and construct missing machinery.
-7. Correct contact, remove dead cells and attempt local funded reproduction.
+6. Apply optional light fixation and oxygen-dependent catabolism; pay maintenance, repair damage and construct missing machinery.
+7. Correct contact, apply optional gene transfer and reserve sharing, remove dead cells with any
+   configured damage-related feeding, and attempt local funded reproduction.
 
 Learning is paid during inference. Motion reserves due basal expenditure before solving the shared
 quadratic-motor/linear-secretion energy budget. All secretions share precursor reserve. Damage
@@ -80,8 +81,10 @@ reduces uptake and locomotion and raises maintenance. No same-tick secretion lea
 cell's observation through iteration order. Daughters first act on the following tick.
 
 Material and usable energy have distinct ledgers. Initial founders and accounted external deposits
-are the only material grants. Catabolism dissipates energy and records spent material as waste.
-Dead structure/reserve returns as detritus; residual usable energy is lost. Recycling does not
+supply material in the default. Optional element cycling adds an accounted atmospheric carbon
+exchange and light energy input. Catabolism dissipates energy; spent material leaves as waste
+or returns to carbon when the cycle is on. Dead structure/reserve returns as detritus or feeds
+eligible neighbors when damage-related feeding is on; residual usable energy is lost. Recycling does not
 recover dissipated energy. See [accounting](funded-bodies.md#bodies-accounting).
 
 <a id="world-growth-death-and-reproduction"></a>
@@ -121,9 +124,9 @@ ledgers, bounded recent events, durable manual interventions and stop reason. Va
 encodings, physical capacities, record consistency and conservation. Incompatible or incomplete
 older saves are rejected; no adapter invents missing state. The one allowance is a lever that
 is off when absent (`preyYield`, `transferRate`, `sharingRate`, and their ledger counters): a
-save that predates the lever loads with it at zero, which leaves its physics exactly as it was.
+v7 save that predates the lever loads with it at zero, which leaves its physics exactly as it was.
 
-Optional v5 execution metadata records source segments by tick; file exports also identify the
+Optional execution metadata records source segments by tick; file exports also identify the
 exporter's source. Legacy histories remain unknown until execution is observed. Development hot
 reloads are labeled as mixed code, and metadata stays outside physical state and controller inputs.
 
@@ -132,4 +135,6 @@ not from an automatically restored checkpoint. Genotype records are retained whi
 cell carries them, plus every founder record; once records exceed four times the population
 plus a margin, unreferenced non-founder records are pruned. Dead organisms keep their genome id
 in ancestry as provenance only, and a genome record's parent id may name a pruned record.
-Organism ancestry itself is retained in full and grows with births.
+Organism ancestry itself is retained in full and grows with births. Saves are manual, local
+IndexedDB holds one latest checkpoint, and chart history is not checkpointed. These are explicit
+limits for the intended days/weeks observation; see the [readiness backlog](../backlog.md#backlog-runtime-and-observation-limits).

@@ -1,32 +1,29 @@
 # Current design and work order
 
-Updated September 11, 2026. This section describes the running bacterial simulation.
-The [reference snapshot](../sources/history/README.md) preserves the previous design tree,
-including ant work orders, superseded bacterial contracts and detailed experiment records.
+Updated September 13, 2026 after review of the project's purpose and saved experiment results.
+The [reference snapshot](../sources/history/README.md) preserves earlier designs and work orders.
 
 <a id="design-goal-and-present-evidence"></a>
 
 ## Goal and present evidence
 
-Observe inherited behavioral and physical differences changing survival and reproductive success
-inside a resource-limited world. The population has no external fitness scorer, parent selector,
-synchronized generation boundary or automatic rescue. Biological motivation guides the model;
-faithful bacterial physiology is not claimed.
+Build a world where a diverse ecosystem and evolutionary adaptation are likely to occur, ready
+for the user to run for days or weeks and watch. Organisms should encounter changing opportunities
+through food, space, neighbors and their own effects on the environment. Different inherited choices
+should sometimes repay their costs. No species list, strategy count or final community is prescribed.
 
-The objective is consequential evolution in a population whose ecology remains dynamic over time.
-Hypotheses guide the design of opportunities and the diagnosis of inert mechanisms. Explaining every
-winner or making a prescribed pair of strategies succeed is not the project goal or a development gate.
+Development uses hypotheses and small proof points to make those opportunities credible. It does
+not need to evolve and certify a finished ecosystem before handoff. Long observation is the intended
+use of the simulation, not a harness task to exhaust in advance. Broad diversity is an aspiration
+supported by world design, not an outcome that can be guaranteed or inferred from colored groups.
 
-Inheritance, mutation, acquired-weight transmission, funded reproduction and consequential ecology
-are implemented. In the current default, a single founder population evolves two coexisting diet
-specialists occupying the A and B halves of the world within about 100 generations, and the
-evolved genotypes each invade the other from rarity; see the [evolution record](../evolve-study.md).
-Earlier actual evolved genotypes have measured benefits from reduced toxin output,
-improved brief-food access and greater B-processing investment. The
-[exported-lineage investigation](../overnight-study.md) and
-[six-area capability investigation](../capability-investigation.md) use fresh transfers and targeted
-reversions to distinguish those effects. Broad strategic diversity and adaptive inherited learning
-remain unproved. Founder dominance alone still does not establish adaptation.
+The runtime supports resource-funded bodies, local RNN decisions, inheritance, mutation, paid
+learning, births and deaths. Earlier isolated variants gained from food access, B processing and
+lower toxin expense. The thick-medium A/B studies found inherited diet differences concentrated
+in different regions; two of three endpoint pairs gained population share in both rare-start
+contests. These are useful proof points for local selection, not certification of lasting diversity.
+The newer seven-mechanism campaign overstated its results by confusing growing counts with growing
+shares. See the [corrected analysis](../analysis-correction.md) and [evidence](bacteria-results.md).
 
 <a id="design-design-owners"></a>
 
@@ -34,185 +31,119 @@ remain unproved. Founder dominance alone still does not establish adaptation.
 
 | Document | Owns |
 | --- | --- |
-| [World and lifecycle](bacteria.md) | Substrate, resources, turn order, physical reproduction and persistence |
-| [Controller](controller.md) | Exact sensors/actions, recurrence, task byte and controller boundary |
-| [Bodies and inheritance](funded-bodies.md) | Physical costs, genes, lifetime learning and transmission policies |
-| [Strategic ecology](strategic-ecology.md) | Food opportunities, toxin, defense, repair, porous matrix and disabled systems |
-| [Experimentation](experimentation.md) | World-design hypotheses, proportionate diagnosis and optional adaptation attribution |
-| [Population observation](population-observation.md) | Recent families, genealogy, separate genetic distances, inherited traits and sampled behavior |
-| [Evidence](bacteria-results.md) | Current outcomes, historical limits and unresolved conclusions |
-| [Display](bacterial-display.md) | Run defaults, visual meanings and observation limits |
+| [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
+| [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
+| [Bodies and inheritance](funded-bodies.md) | Physical costs, genes and lifetime/inherited learning |
+| [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
+| [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
+| [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
+| [Evidence](bacteria-results.md) | Recorded findings and version-specific limits |
+| [Display](bacterial-display.md) | Run defaults, visible meanings and observation limits |
 
-[Principles](../principles.md) govern decisions. [Architecture](../architecture.md) maps modules;
-[calibration](../calibration.md) records current scales; [backlog](../backlog.md) owns deferred work.
+[Principles](../principles.md) govern decisions. [Architecture](../architecture.md) maps owners;
+[calibration](../calibration.md) records scales; [backlog](../backlog.md) owns unresolved work.
 
 <a id="design-current-default-and-disabled-scope"></a>
 
 ## Current default and disabled scope
 
-Run starts seed 101, paused at tick zero, with 48 identical founder genotypes and finite A/B
-deposits in a pure-A left half and a pure-B right half. Haploid clonal fission, random
-mutation and paid inheritable plasticity remain active. The RNN is
-35 inputs → 24 recurrent units → 8 outputs. Checkpoints are v5.
+Run starts seed 101, paused at tick zero, with 48 cells carrying the same founder genotype in an
+80 × 60 periodic plane. Viscosity is 0.4. Twenty-four finite deposit slots are assigned equally
+to a pure-A left half and a pure-B right half; individual deposits vary in size, timing and rate.
+Initial dissolved food is mixed, and decomposition returns equal A/B. Haploid clonal fission,
+physical/behavioral mutation and paid inheritable plasticity are active. The RNN has 35 inputs,
+24 recurrent units and eight outputs. Checkpoints are v7 with ten physical loci.
 
-Toxin injury, repair and porous matrix have measured consequences in the default.
-Solid walls and neutral signaling are disabled there: useful wall construction and communication
-have not been established. Their experimental configurations remain available. This is an explicit
-simulation setting, not merely a hidden display layer.
+Toxin secretion, producer immunity, defense, repair and porous matrix are active. Contact injury,
+predation, two-type toxin chemistry, the element cycle, membrane crowding, disturbance, gene
+transfer, reserve sharing, neutral signaling and solid walls are off by default. They are
+implemented experimental settings, not a combined tested ecosystem. Mixed deposits and food epochs
+remain selectable. Do not silently enable all mechanisms or replace the founder with a diagnostic
+or evolved winner. A reviewed world may enable an opportunity without requiring its evolved outcome.
 
-Implemented systems must visibly affect the Run population before handoff or have a recorded reason
-to be disabled. The user reviews through Run and stats. Do not introduce a browser assay or request
-repeated permission for routine repairs. Substantial new designs require review before implementation.
+The A/B halves are a deliberately simple configuration for local resource differences. They are
+not a commitment to a two-species product. Changing that default requires a reason tied to the
+world's opportunities and a configuration review, not a desire to obtain a particular picture.
 
 <a id="design-next-decisions"></a>
 
 ## Next decisions
 
-1. Use the default recent-family view, inherited trait distributions/trends and sampled behavior to
-   distinguish continuing population change from a permanent founder-color label. Genealogical and
-   genetic comparisons are separate views; family splits alone do not establish adaptation.
-2. Assess whether the existing ecology keeps offering consequential inherited choices as resources,
-   neighbors and population composition change. Stable abundance need not mean static evolution,
-   and continuous turnover is not required at every moment.
-3. If observations reveal persistent stagnation or an inert mechanism, choose one bounded diagnostic
-   that distinguishes a world limitation from insufficient variation or controller expression.
-   A matched frozen-inheritance control can test the contribution of inherited change without
-   identifying the exact winning trait. The completed [food-epoch campaign](../food-epochs-study.md)
-   found a 26.20% mean final-phase population advantage across twelve paired seeds. Fresh-world
-   post-B cohorts averaged 71.80% share in A-rich food and 76.99% in B-rich food, establishing
-   inherited improvement with an environment-dependent component. No experiment is still running.
-4. Propose the smallest pressure or inheritance change supported by that diagnosis for design review.
-   Do not tune toward a required fast/slow crossover or preserve a particular family by intervention.
+1. Use the corrected evidence to choose a coherent observation world. For each proposed active
+   mechanism, name the opportunity, its cost, a competing explanation and the small existing or
+   missing proof point. Consider interactions between mechanisms; seven independent experiments
+   do not establish that enabling all seven produces a useful world.
+2. Resolve readiness for days or weeks of user observation. Current saves are manual, IndexedDB
+   holds one latest save, organism ancestry grows with every birth, and charts are view-local.
+   Execution runs in the browser animation loop. Memory, save/restore latency, history retention,
+   interruptions and sustained throughput need proportionate checks and a durable design.
+3. Hand over a reviewed starting world with active settings, known limits and useful observation
+   controls. Leave mutation and ordinary reproduction to explore it. Do not populate authored
+   factions or require a successful long evolution campaign before the user begins.
+4. Let observations guide later diagnosis. If a mechanism appears inert, or one cheap body appears
+   universally favored, ask what opportunity is missing and use a bounded comparison that could
+   change the design. Do not chase every extinct lineage or explain every winning mutation.
 
-The [short food-access panel](../quick-food-access-study.md) established a constructed behavioral
-tradeoff. The completed [capability investigation](../capability-investigation.md) rejects the tested
-reserve-braking recipe as a universal improvement, then isolates actual evolved behavioral and
-physical benefits. Four selection pilots show growth of a rare B-processing allele, but no consistent
-B-specific frequency advantage across both seeds. No experiment is still running.
-
-The next recommendation is simultaneous spatial A/B resource heterogeneity, starting with the
-existing random deposit compositions before new physics. Review that configuration direction and
-its four-case mixed-versus-separated-food falsifier. Current epochs, founders and controller remain
-unchanged. Do not require high-motor success, evolved offense or adaptive learning before proceeding;
-their negative or unresolved dispositions remain in the capability report.
-
-The bounded [adaptation campaign](../overnight-study.md) preserves the current default and founder.
-There is no ant population-scale gate, ant-RNN recovery campaign or pending conversion.
-The follow-up toxin intervention retains secretion savings but substantially attenuates the
-advantage when injury is disabled. The [motor study](../strategy-study.md) found lower investment
-won all sixteen matched contests. This limits claims about that pair; it does not block development
-until the pair succeeds. The unavailable later browser checkpoint is not a prerequisite.
+This revision changes documentation and saved-result reporting only. It does not change the
+default world, implement long-run storage, start a server or authorize a new campaign.
 
 <a id="design-roadmap"></a>
 
-## Roadmap to strategic differentiation
+## Earlier roadmap: findings retained, outcome gates retired
 
-Reviewed September 11, 2026. The completed studies establish real evolved advantages, but every
-winner is a cost reduction, and the twelve epoch populations drift toward one economical body.
-Three structural limits explain that outcome and set the work order:
+The September 11 roadmap used prescribed coexistence gates. That work order is superseded by the
+purpose above; its studies remain evidence for particular configurations:
 
-- **One optimum.** Toxin injures its producer with no immunity, matrix is a shared good, and A/B
-  arrive together from the same deposits. No interaction rewards a rare type and no two niches
-  exist at once, so selection converges rather than diversifies.
-- **Small populations, slow generations.** Steady state is about 150 cells at about 5,000 ticks
-  per generation, roughly 30 generations per 150,000 ticks. Selection weaker than about 1% is
-  invisible to drift at that size, and an hour at 30 ticks/s shows about twenty generations.
-- **Behavioral mutation supply.** About one of 1,649 RNN loci changes per birth; physical loci
-  evolve far faster, which is why the isolated wins are physical or single-weight.
+| Work | Retained finding | Limit |
+| --- | --- | --- |
+| Kernel and stats performance | Faster headless execution and less frequent UI statistics | Current days/weeks browser readiness is unmeasured |
+| Toxin immunity/contact injury | Damage and protection can change payoffs in constructed contests | No required producer/resistant/sensitive cycle; persistence was overstated |
+| A/B regions | Constructed diet choices respond differently to food layout | An authored regional opportunity, not a target species count |
+| Thick medium and evolution | Slower dispersal supports residency; recorded diet differences correlate with region | Several world parameters changed together; no isolated attribution of the whole result to viscosity |
+| Trait grouping and contests | Saved genotypes can be compared and distributions viewed | Chosen k-means groups are not evidence of distinct strategies |
+| Behavioral mutation experiment | More variation alone did not produce the proposed split in the older world | No instruction to continue tuning until it does |
 
-The [coexistence criterion](experimentation.md#experiments-coexistence-criterion) is the acceptance
-test. Phases, each with a yes/no gate, in order:
-
-1. **Throughput and target.** Exact-arithmetic kernel optimization, a throttled statistics cadence
-   in the browser and this criterion. Done; numbers in [calibration](../calibration.md). The
-   500 ticks/s target was not reached; the remaining cost is float32 inference order and the
-   four-pass contact model.
-2. **Toxin with immunity.** Producers are immune to their own toxin; defense remains a separate,
-   cheaper resistance; contact-range injury added. Gate not met: all three pairwise dominances
-   hold, but every three-way pilot loses the sensitive type and fixes the resistant, the
-   well-mixed outcome. See the [contest record](../rps-study.md).
-3. **Persistent spatial A/B regions.** Pure A and B halves with balanced deposit slots, now
-   the Run default. Gate met: constructed specialists each invade from rarity and persist with
-   a generalist; the mixed control fixes the generalist. See the [zone record](../zones-study.md).
-4. **De novo evolution.** Not met in the old thin-medium world (70–127 generations, eight arms:
-   economy evolved, no partition). Met after the world was changed to a thick medium with dense
-   balanced deposits, symmetric recycling and stronger mutation supply: all three zoned seeds
-   split into A-side and B-side diet clusters from one founder by 100,000–200,000 ticks, the
-   mixed control does not, and seed 303's evolved medoid genotypes mutually invade from rarity.
-   See the [evolution record](../evolve-study.md).
-5. **Strategy-space observation.** Done: cluster colouring, scatter, table and history in Run;
-   `invasion` harness command for any checkpoint.
-6. **Behavioral differentiation.** The RNN-supply arm ran inside phase 4 and did not change the
-   outcome; the boom/bust regime was not built.
-
-Authoring a world that theory says can support coexistence is authored pressure, not forced
-coexistence: no genotype, route or winner is prescribed, and evolution must still find the
-strategies. Attribution studies of past winners and sweeps of the current ecology are paused.
-
-The block behind both early negatives was dispersal fast relative to replacement. Raising the
-medium's viscosity a thousandfold gave residency (13% of cells ever cross a band, versus 96%),
-and evolution then found the partition on its own. The toxin cycle has not been re-tested in the
-thick medium; that is the next open question, since its failure had the same cause.
+See the [toxin](../rps-study.md), [zone](../zones-study.md) and [evolution](../evolve-study.md)
+records. The former 20-generation invasion and 200-generation persistence requirements were not
+demonstrated by the reported assays. Retiring them as development gates does not turn those assays
+into stronger evidence. No outstanding experiment is required merely to complete the old roadmap.
 
 <a id="design-roadmap-2"></a>
 
-## Roadmap two: organism-generated selection
+## Earlier roadmap two: opportunities and unresolved questions
 
-Reviewed September 12, 2026. The zoned world proved the machinery but drew the niche itself.
-The second roadmap adds mechanisms where the organisms generate the selective environment, each
-as a configuration lever with rates, each measured in a homogeneous world against a
-mechanism-off control, each gated by mutual invasibility of whatever clusters emerge:
+The seven mechanisms are candidates for world design, not seven mandatory stages or a scorecard.
+Their saved results are corrected in the [audit](../analysis-correction.md). Mixed deposits have
+spatially varying positions and compositions; the experiments were not spatially uniform worlds.
 
-1. **Element cycle** (implemented as `config.cycle` with `machineryCrowding`; see the
-   [ecology contract](strategic-ecology.md#ecology-element-cycle)). Measured in the
-   [cycle study](../cycle-study.md): constructed autotroph, heterotroph and mixotroph guilds each
-   invade from rarity; evolved populations at crowding 0.5 stayed mixotroph over 35–50
-   generations, and at crowding 0.75 one seed of three split into a harvester and a consumer
-   cluster by 93 generations whose medoids mutually invade.
-2. **Family chemistry** (implemented as `toxinTypes: 2`; see the
-   [ecology contract](strategic-ecology.md#ecology-family-chemistry)): a tenth physical locus
-   tints a cell's toxin between two types, immunity follows the type produced, and the sensed
-   toxin is what the cell is susceptible to. Registered in the [family study](../family-study.md).
-3. **Predation** (implemented as `preyYield`; see the
-   [ecology contract](strategic-ecology.md#ecology-predation)): a contact-killed cell feeds the
-   toxin-bearing neighbours touching it. Measured in the
-   [predation study](../predation-study.md): all three arms split on toxin machinery, diet and
-   body size, and every pair mutually invades.
-4. **Abiotic disturbance** (implemented as `config.disturbance`; see the
-   [ecology contract](strategic-ecology.md#ecology-disturbance)): random discs mixed and thinned
-   at a memoryless interval. Measured in the [disturbance study](../disturbance-study.md): more
-   turnover, the usual diet-and-body-size clusters, gate met in two arms of three.
-5. **Horizontal gene transfer** (implemented as `transferRate`; see the
-   [ecology contract](strategic-ecology.md#ecology-gene-transfer)): touching cells copy one
-   physical locus. Measured in the [transfer study](../transfer-study.md): gate met in all
-   three arms with smaller between-cluster gaps.
-6. **Adhesion and division of labor** (implemented as `sharingRate`; see the
-   [ecology contract](strategic-ecology.md#ecology-sharing)): touching cells share stored
-   nutrient. Measured in the [sharing study](../sharing-study.md): more and smaller cells, no
-   gatherer/receiver split, gate met in one arm of three.
-7. **Quorum signaling** through the costed neutral chemical (`secretionRate`, already
-   implemented; see the [ecology contract](strategic-ecology.md#ecology-signal)). Measured in
-   the [signal study](../signal-study.md): secretion stays near zero; negative.
+| Mechanism | Opportunity to consider | What the studies leave open |
+| --- | --- | --- |
+| [Element cycle](../cycle-study.md) | Light versus organic food acquisition; organisms change local gases | Most evolve mixotrophy; the reported harvester/consumer coexistence is unsupported and used since-removed costs |
+| [Typed toxin](../family-study.md) | Chemical compatibility changes the costs of neighboring producers | Tint did not split into separate modes; kin cooperation was not established |
+| [Predation](../predation-study.md) | Material from damaged neighbors can repay toxin investment | Two endpoint pairs gained share both ways; active hunting and persistent prey roles were not shown |
+| [Disturbance](../disturbance-study.md) | Open space could favor recolonization in some circumstances | Mortality occurs; a colonizer/holder tradeoff was not shown |
+| [Gene transfer](../transfer-study.md) | Physical traits can spread through contact as well as descent | Ancestry-group counts cannot show persistence of unchanged strategies; no pair gained share both ways |
+| [Reserve sharing](../sharing-study.md) | Transfers could change the value of gathering and contact | Food moves, but no adhesion or division of labor was demonstrated |
+| [Neutral signal](../signal-study.md) | Local chemical information could support conditional behavior | Secretion stayed low; communication and the cause of its absence are unresolved |
 
-Across the seven levers, 24 evolution arms in the homogeneous mixed world produced coexisting
-clusters that mutually invade or both persist from rarity in 16, always including the diet and
-body-size axes; predation is the one lever whose own trait became a cluster axis, and the
-element cycle's harvesting axis appeared in one arm of six. See the
-[changelog](../../CHANGELOG.md).
+Small tests should address the missing physical or behavioral link when that link matters to a
+configuration choice. A hypothesis that fails on its named mechanism stays negative even if another
+trait varies. A costly signal remaining quiet, or a family going extinct, is information rather
+than a reason to manufacture a favorable endpoint.
 
 <a id="design-status-and-provenance"></a>
 
 ## Status and provenance
 
-Implemented means code and bounded checks exist. Measured means a named experiment establishes
-an outcome for its recorded conditions. Human observation addresses visible behavior. Adaptation
-requires an inherited advantage with an identified causal basis; none of these statuses substitutes
-for another.
+Implemented means the mechanism exists. A proof point demonstrates a particular link under stated
+conditions. An observed adaptation is a stronger claim about an inherited benefit. Operational
+readiness concerns preserving and observing the user's continuing run. None substitutes for another.
 
-Completed plans: bacterial conversion `d805a90c-31e7-4f20-8fb1-5b2c05d9b417`;
+Historical implementation plans: bacterial conversion `d805a90c-31e7-4f20-8fb1-5b2c05d9b417`;
 funded bodies `49f9eee2-3e74-4eb8-8643-5e927bf32eda`;
 attribution `ea5aa160-3b74-4728-b117-4959140c919f`;
 strategic ecology `c8d33225-63e2-4e48-960e-4ed88bbe4a87`;
 default correction `e04af0f4-38dd-4a84-acd5-989bf2c22b0e`.
-Documentation consolidation: `1dca00f8-0b66-46cc-9533-de7c46062e45`.
-The ant implementation is recoverable from `ant-colony-checkpoint-2026-09-09`, commit `780fa4e`.
+Their completed status records work performed, not a certified ecosystem.
+The ant implementation remains recoverable from tag `ant-colony-checkpoint-2026-09-09`, commit
+`780fa4e`. It is not an additional runtime or a prerequisite.

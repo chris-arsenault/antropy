@@ -1,4 +1,4 @@
-# Adhesion and sharing: a division of labour between touching cells
+# Reserve sharing between touching cells
 
 Registered September 13, 2026 as phase 6 of
 [roadmap two](design/README.md#design-roadmap-2), before reading any endpoint. Sulion plan
@@ -31,21 +31,26 @@ half its reserve gap in about 14 s (70 ticks). Control: the undisturbed mixed ar
 
 ## Results
 
+Interpretation corrected September 13 from [saved endpoint shares](analysis-correction.md).
+The questions and predictions above preserve the original registration, not the current work order.
+
 Three arms completed (`evolve-2026-09-13/sharing/`). Shared material was 6,077, 6,635 and 6,086
-units against 95,000–97,000 absorbed, about 6% of intake (prediction 1 holds at a modest level).
+units against 95,000–97,000 absorbed, about 6% of intake, below prediction 1's rough 10% target.
+This is cumulative transfer, which can count the same material repeatedly.
 Populations were the largest of any lever (849–1,042 cells) with the smallest bodies (median
 core 0.25–0.36 of the founder's).
 
-| Arm | Cells, generations | Shared | k = 2 clusters (n, A share %, core %, transport gap) | Rare invasion (final cells, divisions per founder) |
+| Arm | Cells, maximum generation | Shared | k = 2 clusters (n, A share %, core %, transport gap) | Rare-start endpoints (group/total, share) |
 | --- | --- | --- | --- | --- |
-| 101 | 983, 66 | 6,077 | 596 at 53 / 28 versus 387 at 63 / 35 | 9 (2.6) and 199 (48.3): one way |
-| 202 | 1,042, 59 | 6,635 | 399 at 52 / 28 versus 643 at 60 / 24 | 4 (12.1) and 112 (21.7): one way |
-| 303 | 849, 60 | 6,086 | 368 at 53 / 40 versus 481 at 63 / 34 | 22 (10.4) and 47 (15.1): mutual |
+| 101 | 983, 66 | 6,077 | 596 at 53 / 28 versus 387 at 63 / 35 | 9/309 (2.91%) and 199/320 (62.19%): one declines |
+| 202 | 1,042, 59 | 6,635 | 399 at 52 / 28 versus 643 at 60 / 24 | 4/429 (0.93%) and 112/401 (27.93%): one declines |
+| 303 | 849, 60 | 6,086 | 368 at 53 / 40 versus 481 at 63 / 34 | 22/299 (7.36%) and 47/310 (15.16%): one declines |
 
 Prediction 2 fails on its named axes: transport and motor investment stayed unimodal, so no
 gatherer/receiver or stayer/leaver split appeared; the clusters are the diet-and-body-size pair.
-Sharing's visible effect is demographic: more, smaller cells, because a poorer neighbour is
-topped up from a richer one and the storage that pays for a large body pays less. The gate
-passes in one arm of three, the weakest showing of the seven levers. Prediction 3 is not what
-happened either: nobody fixed as a cheat, because with every cell both giving and receiving
-there is no heritable way to receive without giving at this rate.
+All rare groups began at 7/64 (10.94%); no pair gained share in both directions. The former
+one-of-three pass is withdrawn. More, smaller cells were observed, but the claimed explanation
+through reduced storage value was not isolated by matched interventions. No adhesion mechanism
+was added, and no division of labor was demonstrated. Sharing is symmetric in the reserve
+difference, but evolved gathering or contact behavior could still change who gives and receives.
+The absence of a cheat role here does not prove such a role impossible.

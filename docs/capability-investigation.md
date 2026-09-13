@@ -1,5 +1,10 @@
 # Bacterial capability investigation
 
+Historical study, September 11. Its recommendation below was subsequently implemented as food
+zones and investigated in the [evolution study](evolve-study.md). It is not an outstanding work
+order. The current [purpose and preparation](design/README.md) use hypotheses and small proof
+points for the user's days/weeks observation; this study's findings retain their original context.
+
 The current model supports two additional useful evolved capabilities: an observed brain improves
 brief-food access with body genes held constant, and an observed physical allele improves funded
 B processing and reproduction. Together with the earlier toxin-suppression result, this is evidence

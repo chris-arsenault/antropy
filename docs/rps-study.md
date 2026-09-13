@@ -35,8 +35,8 @@ The three constructed strategies share the founder brain, core and every other t
 `pnpm harness rps --case pairwise` runs the three pairs at 3,000 ticks in both placements on a
 32-cell world with three replenishing deposits and 24 founders. `three-way` and `invade-<strategy>`
 are 10,000–20,000-tick pilots; `--size 64 --founders 64 --sources 8` selects the larger world.
-Mutation and learning are off. Gate: all three strategies persist together with spatial mosaics
-or cycling frequencies.
+Mutation and learning are off. The original target was persistence of all three strategies;
+it is retained as study history, not a current development gate.
 
 ## Pairwise results
 
@@ -95,8 +95,8 @@ The producer/resistant/sensitive cycle exists pairwise but does not coexist in t
 structural reason is mobility: cells cross the 64-cell world in a few hundred ticks, so a
 producer front reaches every sensitive refuge within one generation, and the sensitive-beats-
 resistant advantage (about 30% more cells at 3,000 ticks) is far slower than producer-kills-
-sensitive. Spatially structured coexistence needs a replacement rate slow relative to dispersal,
-which swimming chemotactic cells do not provide. The gate for this phase is not met.
+sensitive. The hypothesized missing condition was dispersal slow enough relative to replacement for local
+neighborhoods to persist. These assays did not establish the proposed three-way persistence.
 
 What the phase did establish:
 
@@ -110,11 +110,11 @@ What the phase did establish:
 
 Addendum, September 13, 2026: in the thick medium (viscosity 0.4) at contact injury 10 and
 effort 0.003, the 64-cell three-way ended 40 / 16 / 45 at 20,000 ticks with all three present
-throughout, and a rare producer grew from 7 to 14 cells while a rare sensitive held 4
-(`rps-2026-09-13/c10e003-64`). Residency was the missing ingredient named below; the cycle now
-persists in a constructed world, though rare invasion is only established for the producer.
+throughout. The rare producer grew from 7/64 (10.94%) to 14/96 (14.58%); the rare sensitive
+fell to 4/91 (4.40%) (`rps-2026-09-13/c10e003-64`). This is short persistence from an equal
+start and a positive producer endpoint, not certification of a lasting cycle or its causal basis.
 
-Recommended follow-up, not executed here: reduce dispersal relative to replacement, either by
-larger worlds with sparser deposits so that local patches persist for several generations, or by
-letting evolution find sessile matrix-bound strategies. Phase 3 (persistent spatial A/B regions)
-is a resource-partitioning route to coexistence that does not depend on this cycle and is next.
+The earlier recommendation to reduce dispersal was followed by the thick-medium work. Further
+contests belong in the [family](family-study.md) and [predation](predation-study.md) records,
+with corrected frequency interpretations. No outstanding task requires obtaining this cycle:
+use the interaction proof points to inform the observation world's opportunities.
