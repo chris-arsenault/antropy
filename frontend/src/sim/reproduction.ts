@@ -11,6 +11,7 @@ import { type Embodied, scaleBody, structuralMass } from "./body";
 import { blueprint, divisionReady } from "./phenotype";
 import { deposit } from "./fields";
 import { flow, life } from "./observation";
+import { consumePrey } from "./predation";
 
 export function makeCell(
   world: World,
@@ -70,17 +71,22 @@ function inherited(world: World, parent: Cell): number {
   world.genomes.set(id, { id, parent: parent.genome, born: world.tick, genome, learned });
   return id;
 }
-function die(world: World, cell: Cell): void {
+type DeathCause = "starvation" | "damage" | "disturbance";
+function die(world: World, cell: Cell, index: SpatialIndex | null, cause: DeathCause): void {
   world.ledger.deaths++;
   const material = structuralMass(cell.body) + cell.reserve;
   world.ledger.deathMaterial += material;
   world.ledger.deathLoss += cell.energy;
-  deposit(world.detritus, cell, material, world.config);
-  const cause = cell.damage >= 1 ? "damage" : "starvation";
+  const eaten = index ? consumePrey(world, cell, material, index) : 0;
+  deposit(world.detritus, cell, material - eaten, world.config);
   if (cause === "damage") world.ledger.damageDeaths++;
   life(world, cell, cause);
   Object.assign(world.ancestry.get(cell.id)!, { ended: world.tick, cause });
   recordEvent(world, "death", cell.id, []);
+}
+/** Records a death imposed from outside the cell's physiology; the caller removes the cell. */
+export function perish(world: World, cell: Cell, cause: "disturbance"): void {
+  die(world, cell, null, cause);
 }
 export function reproduce(world: World): void {
   const c = world.config,
@@ -128,9 +134,10 @@ export function pruneGenomes(world: World): void {
     if (record.parent !== null && !live.has(id)) world.genomes.delete(id);
 }
 function removeDead(world: World): Cell[] {
+  const index = world.config.preyYield > 0 ? new SpatialIndex(world.config, world.cells) : null;
   return world.cells.filter((cell) => {
     if (cell.energy > 1e-12 && cell.damage < 1) return true;
-    die(world, cell);
+    die(world, cell, index, cell.damage >= 1 ? "damage" : "starvation");
     return false;
   });
 }

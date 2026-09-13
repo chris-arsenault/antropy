@@ -114,11 +114,14 @@ Environment, body and genetic randomness have separate persisted streams. Consum
 without changing inherited information must not alter placements, headings or source schedules.
 Physical fields and ledgers use float64; observations and neural state use float32.
 
-Checkpoint v6, substrate `bacteria-xy`, stores resolved configuration, all fields/inventories,
+Checkpoint v7, substrate `bacteria-xy`, stores resolved configuration, all fields/inventories
+(both toxin types and their matrix-bound pools included),
 body/receptor/brain state, immutable genotype records, organism/genotype ancestry, random streams,
 ledgers, bounded recent events, durable manual interventions and stop reason. Validation checks
 encodings, physical capacities, record consistency and conservation. Incompatible or incomplete
-older saves are rejected; no adapter invents missing state.
+older saves are rejected; no adapter invents missing state. The one allowance is a lever that
+is off when absent (`preyYield`, `transferRate`, `sharingRate`, and their ledger counters): a
+save that predates the lever loads with it at zero, which leaves its physics exactly as it was.
 
 Optional v5 execution metadata records source segments by tick; file exports also identify the
 exporter's source. Legacy histories remain unknown until execution is observed. Development hot

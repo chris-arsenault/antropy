@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { createWorld } from "../../src/sim/world";
 import { DEFAULT_CONFIG, type Config } from "../../src/sim/config";
 import { DEFAULT_CYCLE, type CycleConfig } from "../../src/sim/cycle";
+import { DEFAULT_DISTURBANCE } from "../../src/sim/disturbance";
 import { type World } from "../../src/sim/types";
 import { checkpointToJson } from "../../src/persist/checkpoint";
 import { noteExecution } from "../../src/persist/provenance";
@@ -33,6 +34,20 @@ export interface EvolveSettings {
   cycle: CycleConfig | null;
   /** Membrane crowding exponent for acquisition pathways. */
   crowding: number;
+  /** Family chemistry: 1 toxin type or 2. */
+  toxinTypes: 1 | 2;
+  /** Contact injury rate per unit neighbour toxin machinery; the default is off. */
+  contactDamageRate: number;
+  /** Predation: fraction of a contact-killed cell eaten by touching producers; the default is off. */
+  preyYield: number;
+  /** Abiotic disturbance at the documented defaults, or off. */
+  disturbance: boolean;
+  /** Horizontal gene transfer probability per touching pair per second; the default is off. */
+  transferRate: number;
+  /** Reserve sharing rate between touching cells; the default is off. */
+  sharingRate: number;
+  /** Neutral signal secretion rate per unit core at full effort; the default is off. */
+  secretionRate: number;
   checkpointEvery: number;
   output: string;
 }
@@ -52,6 +67,13 @@ export function evolveSettings(flags: Flags): EvolveSettings {
     mutationScale: number("mutation-scale", DEFAULT_CONFIG.mutationScale),
     cycle: flag(flags, "cycle", cycleDefault) === "on" ? cycleFlags(flags) : null,
     crowding: number("crowding", DEFAULT_CONFIG.machineryCrowding),
+    toxinTypes: number("toxin-types", DEFAULT_CONFIG.toxinTypes) === 2 ? 2 : 1,
+    contactDamageRate: number("contact-damage", DEFAULT_CONFIG.contactDamageRate),
+    preyYield: number("prey-yield", DEFAULT_CONFIG.preyYield),
+    disturbance: flag(flags, "disturbance", "off") === "on",
+    transferRate: number("transfer-rate", DEFAULT_CONFIG.transferRate),
+    sharingRate: number("sharing-rate", DEFAULT_CONFIG.sharingRate),
+    secretionRate: number("secretion-rate", DEFAULT_CONFIG.secretionRate),
     checkpointEvery: integerFlag(flags, "checkpoint-every", 100000),
     output: flag(flags, "output", "harness/artifacts/evolve"),
   };
@@ -65,10 +87,18 @@ export function evolveConfig(s: EvolveSettings): Config {
     mutationRate: s.mutationRate,
     mutationScale: s.mutationScale,
     machineryCrowding: s.crowding,
+    toxinTypes: s.toxinTypes,
+    contactDamageRate: s.contactDamageRate,
+    preyYield: s.preyYield,
+    transferRate: s.transferRate,
+    sharingRate: s.sharingRate,
+    secretionRate: s.secretionRate,
   };
   if (s.world === "mixed") delete config.foodZones;
   if (s.cycle) config.cycle = s.cycle;
   else delete config.cycle;
+  if (s.disturbance) config.disturbance = DEFAULT_DISTURBANCE;
+  else delete config.disturbance;
   return config;
 }
 function cycleLabel(s: EvolveSettings): string {
@@ -116,16 +146,34 @@ function sample(world: World) {
       weapon: t.weapon,
       builder: t.builder,
       photo: t.photo,
+      tint: t.tint,
       damage: c.damage,
     };
   });
   return { tick: world.tick, population: cells.length, cells };
 }
 
+/** Run label: the world, seed and supply, then every lever that departs from its default. */
+function runLabel(s: EvolveSettings): string {
+  const levers: [string, boolean][] = [
+    [`-crowd${s.crowding}`, s.crowding > 0],
+    ["-families", s.toxinTypes === 2],
+    [`-contact${s.contactDamageRate}`, s.contactDamageRate > 0],
+    [`-prey${s.preyYield}`, s.preyYield > 0],
+    ["-disturbed", s.disturbance],
+    [`-hgt${s.transferRate}`, s.transferRate > 0],
+    [`-share${s.sharingRate}`, s.sharingRate > 0],
+    [`-signal${s.secretionRate}`, s.secretionRate > 0],
+  ];
+  const suffix = levers
+    .filter(([, on]) => on)
+    .map(([text]) => text)
+    .join("");
+  return `${s.world}-${s.seed}-rate${s.sourceRate}${mutationLabel(s)}${cycleLabel(s)}${suffix}`;
+}
 export function runEvolve(flags: Flags): void {
   const s = evolveSettings(flags),
-    crowding = s.crowding ? `-crowd${s.crowding}` : "",
-    label = `${s.world}-${s.seed}-rate${s.sourceRate}${mutationLabel(s)}${cycleLabel(s)}${crowding}`;
+    label = runLabel(s);
   const directory = join(s.output, label);
   if (existsSync(directory)) throw new Error("Choose a new output; evidence is append-only");
   mkdirSync(directory, { recursive: true });

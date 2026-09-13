@@ -24,7 +24,7 @@ function paintField(image: ImageData, world: World, layers: Layers): void {
     const n = concentration(world.nutrient, i, world.config.nutrientK, layers.nutrient);
     const s = concentration(world.chemical, i, world.config.chemicalK, layers.chemical);
     const b = concentration(world.nutrientB, i, world.config.nutrientK, layers.nutrient);
-    const t = layers.toxin ? toxinIntensity(world.toxin[i], world.config) : 0;
+    const t = layers.toxin ? toxinIntensity(world.toxin[i] + world.toxinB[i], world.config) : 0;
     const m = concentration(world.matrix, i, 0.15, layers.matrix);
     const o = showCycle ? concentration(world.oxygen, i, cycle!.oxygenK, true) : 0;
     const k = showCycle ? concentration(world.carbon, i, cycle!.carbonK, true) : 0;

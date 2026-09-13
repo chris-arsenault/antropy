@@ -2,6 +2,7 @@ import { type World, type Cell } from "./types";
 import { deposit } from "./fields";
 import { basal } from "./body";
 import { flow } from "./observation";
+import { typeShares } from "./chemotype";
 
 function amounts(world: World, cell: Cell): number[] {
   const c = world.config,
@@ -20,7 +21,7 @@ export function affordActions(world: World, cell: Cell): void {
   a.swim /= effort;
   a.turn /= effort;
   const requested = amounts(world, cell).reduce((s, q) => s + q, 0);
-  const precursor = Math.min(1, cell.reserve / Math.max(requested, 1e-30));
+  const precursor = Math.min(1, Math.max(0, cell.reserve) / Math.max(requested, 1e-30));
   a.secrete *= precursor;
   a.toxin *= precursor;
   a.matrix *= precursor;
@@ -48,8 +49,10 @@ export function emitActions(world: World, cell: Cell): void {
   const q = amounts(world, cell),
     c = world.config;
   cell.reserve = Math.max(0, cell.reserve - q.reduce((s, v) => s + v, 0));
+  const [shareA, shareB] = typeShares(world, cell);
   deposit(world.chemical, cell, q[0], c);
-  deposit(world.toxin, cell, q[1], c);
+  deposit(world.toxin, cell, q[1] * shareA, c);
+  if (shareB > 0) deposit(world.toxinB, cell, q[1] * shareB, c);
   deposit(world.matrix, cell, q[2], c);
   world.ledger.emitted += q[0];
   world.ledger.toxinEmitted += q[1];

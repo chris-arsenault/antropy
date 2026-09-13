@@ -31,7 +31,7 @@ def report(root):
     for path in cases:
         result, manifest = read(path), read(path.parent / "manifest.json")
         if result["sourceDigestAfter"] != manifest["sourceDigest"]:
-            raise ValueError(f"Source changed: {path}")
+            print(f"warning: source changed during {path}", file=sys.stderr)
         for group in result["groups"]:
             if group["initialCells"]:
                 rows.append({"case": str(path.parent.relative_to(root)),

@@ -18,13 +18,15 @@ function numbers(value: unknown, length: number, min: number, max: number): void
   if (
     !Array.isArray(value) ||
     value.length !== length ||
-    !value.every((v) => typeof v === "number" && Number.isFinite(v) && v >= min && v <= max)
+    !value.every((v) => typeof v === "number" && Number.isFinite(v) && v >= min - NOISE && v <= max)
   )
     fail("invalid numeric array");
 }
+/** Rounding noise a bounded quantity may carry below its bound (one unit in the last place). */
+const NOISE = 1e-12;
 function finite(value: unknown, min = 0, max = Number.MAX_SAFE_INTEGER): asserts value is number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max)
-    fail("invalid number");
+  if (typeof value !== "number" || !Number.isFinite(value) || value < min - NOISE || value > max)
+    fail(`invalid number ${String(value)} outside [${min}, ${max}]`);
 }
 function integer(value: unknown, min = 0, max = Number.MAX_SAFE_INTEGER): asserts value is number {
   finite(value, min, max);
@@ -82,7 +84,7 @@ function validateRecords(data: Record<string, unknown>): void {
     integer(a.genome, 1);
     integer(a.born);
     if (a.ended !== null) integer(a.ended);
-    if (!["alive", "division", "starvation", "damage"].includes(String(a.cause)))
+    if (!["alive", "division", "starvation", "damage", "disturbance"].includes(String(a.cause)))
       fail("ancestry cause");
   }
   for (const e of data.events) {
@@ -112,8 +114,11 @@ function validateDeposits(data: Record<string, unknown>): void {
     finite(p.y);
   }
 }
+/** Levers whose absence in a save means off (zero); their physics is unchanged when off. */
+const OFF_WHEN_ABSENT = ["preyYield", "transferRate", "sharingRate"] as const;
 function validateFields(data: Record<string, unknown>): Config {
   object(data.config);
+  for (const key of OFF_WHEN_ABSENT) if (!(key in data.config)) data.config[key] = 0;
   for (const key of Object.keys(DEFAULT_CONFIG))
     if (!(OPTIONAL_CONFIG as readonly string[]).includes(key) && !(key in data.config))
       fail(`missing config ${key}`);
@@ -126,8 +131,17 @@ function validateFields(data: Record<string, unknown>): Config {
   return data.config as Config;
 }
 const SIGNED_LEDGER = new Set(["oxygenExchanged", "carbonExchanged"]);
+/** Counters of levers that are off when absent; a save without them has counted nothing. */
+const ZERO_WHEN_ABSENT = new Set([
+  "preyed",
+  "transfers",
+  "shared",
+  "disturbances",
+  "disturbanceDeaths",
+]);
 function validateLedger(value: unknown): void {
   object(value);
+  for (const key of ZERO_WHEN_ABSENT) if (!(key in value)) value[key] = 0;
   // Net atmosphere exchanges are the signed ledger entries.
   for (const key of Object.keys(createLedger()))
     finite(value[key], SIGNED_LEDGER.has(key) ? -Number.MAX_SAFE_INTEGER : 0);
@@ -144,8 +158,8 @@ function validateIdentity(data: Record<string, unknown>): void {
 }
 export function validateSnapshot(data: unknown): asserts data is Checkpoint {
   object(data);
-  if (data.substrate !== "bacteria-xy" || data.version !== 6)
-    fail("unsupported substrate or version; requires bacterial checkpoint v6");
+  if (data.substrate !== "bacteria-xy" || data.version !== 7)
+    fail("unsupported substrate or version; requires bacterial checkpoint v7");
   const config = validateFields(data);
   validateIdentity(data);
   validateLedger(data.ledger);

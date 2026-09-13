@@ -10,7 +10,6 @@ export const FLOW_UNITS = {
   catabolized: "material",
   repair_material: "material",
   fixed: "material",
-  exuded: "material",
   motors: "energy",
   synthesis: "energy",
   maintenance: "energy",
@@ -20,6 +19,9 @@ export const FLOW_UNITS = {
   catabolic_loss: "energy",
   division: "energy",
   damage: "fraction",
+  preyed: "material",
+  shared_out: "material",
+  shared_in: "material",
   repaired: "fraction",
 } as const;
 export type FlowChannel = keyof typeof FLOW_UNITS;
@@ -37,7 +39,7 @@ export interface LifeFact {
   readonly parent: number | null;
   readonly lineage: number;
   readonly genome: number;
-  readonly kind: "birth" | "division" | "starvation" | "damage";
+  readonly kind: "birth" | "division" | "starvation" | "damage" | "disturbance";
   readonly x: number;
   readonly y: number;
 }

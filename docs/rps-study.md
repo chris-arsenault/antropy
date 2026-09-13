@@ -108,6 +108,12 @@ What the phase did establish:
 - The founder's matrix is a complete shield against diffusive toxin; matrix production and
   toxin production interact strongly and are not independent strategies.
 
+Addendum, September 13, 2026: in the thick medium (viscosity 0.4) at contact injury 10 and
+effort 0.003, the 64-cell three-way ended 40 / 16 / 45 at 20,000 ticks with all three present
+throughout, and a rare producer grew from 7 to 14 cells while a rare sensitive held 4
+(`rps-2026-09-13/c10e003-64`). Residency was the missing ingredient named below; the cycle now
+persists in a constructed world, though rare invasion is only established for the producer.
+
 Recommended follow-up, not executed here: reduce dispersal relative to replacement, either by
 larger worlds with sparser deposits so that local patches persist for several generations, or by
 letting evolution find sessile matrix-bound strategies. Phase 3 (persistent spatial A/B regions)

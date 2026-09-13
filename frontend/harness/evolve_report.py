@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-TRAITS = ["foodA", "motor", "core", "defense", "weapon", "builder", "photo"]
+TRAITS = ["foodA", "motor", "core", "defense", "weapon", "builder", "photo", "tint"]
 
 
 def read(path):

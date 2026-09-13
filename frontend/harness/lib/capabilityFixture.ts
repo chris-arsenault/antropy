@@ -3,7 +3,7 @@ import { DEFAULT_CONFIG, type Config } from "../../src/sim/config";
 import { type World } from "../../src/sim/types";
 import { type Genotype } from "../../src/sim/genetics/genotype";
 import { type Genome } from "../../src/sim/controller";
-import { BODY_PARTS, structuralMass } from "../../src/sim/body";
+import { PHYSICAL_LOCI, structuralMass } from "../../src/sim/body";
 import { blueprint } from "../../src/sim/phenotype";
 import { initializeReceptors } from "../../src/sim/sensors";
 import { heldEnergy, heldMaterial } from "../../src/sim/accounting";
@@ -22,7 +22,7 @@ export interface CapabilityCase {
 }
 
 export function constructed(behavior: Genome, physical: Record<number, number> = {}): Genotype {
-  const genes = new Float32Array(BODY_PARTS.length);
+  const genes = new Float32Array(PHYSICAL_LOCI);
   for (const [i, value] of Object.entries(physical)) genes[Number(i)] = value;
   return { chromosomes: [{ behavior, physical: genes }] };
 }

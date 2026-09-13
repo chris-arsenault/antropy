@@ -6,44 +6,52 @@ import { distance } from "./geometry";
 import { SpatialIndex } from "./spatial";
 import { flow } from "./observation";
 import { returnCarbon } from "./cycle";
+import { protection, typeShares } from "./chemotype";
 
-/**
- * Injury divisor: paid defense protects against any toxin, and installed toxin machinery carries
- * its own immunity, as colicin plasmids bundle toxin and immunity genes. Neither is ownership;
- * a producer is protected from every producer's toxin, not only its own.
- */
-export function protection(cell: Cell, c: Config): number {
-  return (
-    1 +
-    (c.defenseStrength * cell.body.defense + c.immunityStrength * cell.body.weapon) / cell.body.core
-  );
-}
+/** Injury divisor against type A toxin, the only type when `toxinTypes` is 1. */
+export const protectionA = (cell: Cell, c: Config): number => protection(cell, c, 1);
 const CONTACT_GAP = 0.05;
+/** Bodies within a small gap of each other; the range of contact toxin and of predation. */
+export function touching(a: Cell, b: Cell, index: SpatialIndex, c: Config): boolean {
+  return distance(a, b, c) <= index.radius(a) + index.radius(b) + CONTACT_GAP;
+}
 /**
- * Contact-range exposure: the summed toxin machinery per core of touching neighbours. Colicins
- * act on adjacent cells; this exposure cannot be sensed at a distance and needs no field.
+ * Contact-range exposure per toxin type: the summed toxin machinery per core of touching
+ * neighbours, split by each neighbour's tint. Colicins act on adjacent cells; this exposure
+ * cannot be sensed at a distance and needs no field.
  */
-function contactExposure(world: World, cell: Cell, index: SpatialIndex): number {
+function contactExposure(world: World, cell: Cell, index: SpatialIndex): [number, number] {
   const c = world.config,
-    near = index.near(cell);
-  let total = 0;
+    near = index.near(cell),
+    total: [number, number] = [0, 0];
   for (let i = 0; i < near.length; i++) {
     const other = near[i];
     if (other === cell || other.body.weapon <= 0) continue;
-    if (distance(cell, other, c) <= index.radius(cell) + index.radius(other) + CONTACT_GAP)
-      total += other.body.weapon / other.body.core;
+    if (touching(cell, other, index, c)) {
+      const shares = typeShares(world, other),
+        machinery = other.body.weapon / other.body.core;
+      total[0] += machinery * shares[0];
+      total[1] += machinery * shares[1];
+    }
   }
-  return c.contactDamageRate * total;
+  return [c.contactDamageRate * total[0], c.contactDamageRate * total[1]];
+}
+/** Field exposure of one toxin type, before protection. */
+function fieldExposure(concentration: number, c: Config): number {
+  return (c.damageRate * concentration) / (concentration + c.toxinK);
 }
 export function damageCells(world: World): void {
   const c = world.config;
   const index = c.contactDamageRate > 0 ? new SpatialIndex(c, world.cells) : null;
   for (const cell of world.cells) {
-    const toxin = sample(world.toxin, cell, c);
+    const shares = typeShares(world, cell),
+      contact = index ? contactExposure(world, cell, index) : [0, 0];
     const exposure =
-      (c.damageRate * toxin) / (toxin + c.toxinK) +
-      (index ? contactExposure(world, cell, index) : 0);
-    const damage = Math.min(1 - cell.damage, (c.dt * exposure) / protection(cell, c));
+      (fieldExposure(sample(world.toxin, cell, c), c) + contact[0]) /
+        protection(cell, c, shares[0]) +
+      (fieldExposure(sample(world.toxinB, cell, c), c) + contact[1]) /
+        protection(cell, c, shares[1]);
+    const damage = Math.min(1 - cell.damage, c.dt * exposure);
     cell.damage += damage;
     world.ledger.damageReceived += damage;
     flow(world, cell, "damage", damage);
@@ -62,8 +70,10 @@ export function repairCell(world: World, cell: Cell): void {
   const material = repaired * mass * c.repairMaterial;
   const energy = repaired * mass * c.repairEnergy;
   cell.damage -= repaired;
-  cell.reserve -= material;
-  cell.energy -= energy;
+  // The material is a product of three factors bounded by reserve; rounding can overshoot by
+  // one unit in the last place, which must not leave a negative reserve behind.
+  cell.reserve = Math.max(0, cell.reserve - material);
+  cell.energy = Math.max(0, cell.energy - energy);
   returnCarbon(world, cell, material);
   world.ledger.repair += energy + material * c.nutrientEnergy;
   world.ledger.repaired += repaired;

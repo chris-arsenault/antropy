@@ -26,10 +26,6 @@ export interface CycleConfig {
   readonly photoRate: number;
   /** Reference newborn harvesting stock relative to core. */
   readonly photoRatio: number;
-  /** Maintenance energy per unit harvesting stock per second; pigments and repair are costly. */
-  readonly photoMaintenance: number;
-  /** Fraction of fixed material that leaks into the water as dissolved food instead of reserve. */
-  readonly exudation: number;
   /** Half-saturation carbon concentration for fixation. */
   readonly carbonK: number;
   /** Half-saturation oxygen concentration for aerobic catabolism. */
@@ -55,8 +51,6 @@ export const DEFAULT_CYCLE: CycleConfig = {
   lightRadius: 2,
   photoRate: 0.3,
   photoRatio: 0.05,
-  photoMaintenance: 0.05,
-  exudation: 0.3,
   carbonK: 0.3,
   oxygenK: 0.05,
   oxygenPerMaterial: 1,
@@ -78,8 +72,8 @@ export function validateCycle(value: unknown): void {
   const cycle = value as Record<string, unknown>;
   const bad = Object.keys(DEFAULT_CYCLE).find((key) => !nonNegative(cycle[key]));
   if (bad) throw new Error(`Invalid element cycle: ${bad}`);
-  const overOne = ["anaerobicEfficiency", "exudation"].find((key) => (cycle[key] as number) > 1);
-  if (overOne) throw new Error(`Invalid element cycle: ${overOne}`);
+  if ((cycle.anaerobicEfficiency as number) > 1)
+    throw new Error("Invalid element cycle: anaerobicEfficiency");
   const zeroK = ["carbonK", "oxygenK"].find((key) => (cycle[key] as number) <= 0);
   if (zeroK) throw new Error(`Invalid element cycle: ${zeroK}`);
 }
@@ -168,19 +162,12 @@ export function photosynthesize(world: World, cell: Cell, light: Float64Array | 
     fixed += take;
   }
   if (fixed <= 0) return;
-  // Exudate is dissolved organic material any transporter can eat: the byproduct that feeds a
-  // consumer guild, split across both foods so neither pathway is privileged.
-  const exuded = fixed * cycle.exudation;
-  cell.reserve += fixed - exuded;
-  deposit(world.nutrient, cell, exuded / 2, c);
-  deposit(world.nutrientB, cell, exuded / 2, c);
+  cell.reserve += fixed;
   deposit(world.oxygen, cell, fixed * cycle.oxygenPerMaterial, c);
   world.ledger.fixed += fixed;
-  world.ledger.exuded += exuded;
   world.ledger.lightEnergy += fixed * c.nutrientEnergy;
   world.ledger.oxygenProduced += fixed * cycle.oxygenPerMaterial;
   flow(world, cell, "fixed", fixed);
-  flow(world, cell, "exuded", exuded);
 }
 
 function relax(field: Float64Array, target: number, factor: number): number {

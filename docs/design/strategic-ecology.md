@@ -48,12 +48,10 @@ tick on the ground within `lightRadius` of the body (`lightSupply` fixation per 
 second, gathered evenly over that footprint and claimed in body order, so harvesters whose
 footprints overlap shade one another), and releases `oxygenPerMaterial` oxygen per unit fixed
 into the `oxygen` field. The world's light budget is `lightSupply` times its area; at the
-defaults it equals the deposit supply, and it is only realized where harvesters stand. A fraction `exudation` of fixed material leaks
-into the water as dissolved food, half A and half B, instead of entering reserve: the byproduct a
-consumer can live on, present only where harvesters are dense. Harvesting stock pays
-`photoMaintenance` per unit per second rather than the general machinery rate, so an unused
-pathway is a real burden. The chemical energy of fixed material enters the energy ledger as
-light energy. Membrane crowding (`machineryCrowding`, see
+defaults it equals the deposit supply, and it is only realized where harvesters stand. Fixed
+material enters reserve; harvesting stock pays the general machinery maintenance like any other
+pathway, and the chemical energy of fixed material enters the energy ledger as light energy.
+Membrane crowding (`machineryCrowding`, see
 [bodies](funded-bodies.md#bodies-geometry-motion-and-uptake)) makes a cell that runs all three
 acquisition pathways deploy less of each than a specialist, so specialization has a return that
 does not depend on which food happens to be present.
@@ -73,6 +71,68 @@ coupled through oxygen and carbon; whether evolution finds it is the phase 1 que
 [roadmap](README.md#design-roadmap-2). With the cycle off no harvesting stock is built and every
 earlier result stands unchanged.
 
+<a id="ecology-predation"></a>
+
+## Predation
+
+Optional `preyYield` (default 0) turns contact killing into eating. When a cell dies of damage,
+the fraction `preyYield` of its material (structure and reserve) enters the reserves of the
+toxin-bearing neighbours touching it, split by their toxin machinery per core and capped by each
+one's storage; the remainder, and every starvation death, becomes detritus as before. Nothing is
+created: the ledger records the eaten material as `preyed`, and the corpse's chemical energy
+follows the material. A predator is therefore any cell with toxin machinery in a world with
+contact injury; no new stock, locus or input exists, and whether killing pays is a property of
+the yield, the machinery's cost and how often bodies touch in a thick medium.
+
+<a id="ecology-disturbance"></a>
+
+## Abiotic disturbance
+
+Optional `config.disturbance` stirs and thins random discs of the world. Events arrive
+memorylessly at `meanInterval` model seconds from the environment stream; each strikes a random
+centre with `radius`, moves every dissolved field inside (foods, signal, both toxins, detritus,
+carbon, oxygen; not matrix or what it binds) toward its disc mean by `mixing`, and kills each
+cell inside with probability `mortality`, its material going to detritus as any death does and
+its cause recorded as `disturbance`. Nothing enters or leaves the world. Disturbance opens ground
+and erases local chemistry, so it selects for reaching and filling empty space against holding
+occupied space; the balance depends on the interval and radius, not on who is present.
+
+<a id="ecology-gene-transfer"></a>
+
+## Horizontal gene transfer
+
+Optional `transferRate` (default 0) lets touching cells of different genotypes exchange
+physical loci. Each touching pair, each tick, with probability `1 − exp(−transferRate × dt)`, the
+recipient's chromosomes take the donor's expressed value at one random physical locus, and the
+recipient carries a new immutable genotype record whose parent is its previous one. Its body is
+unchanged; only its construction targets and tint are. Behavioural loci live inside the
+controller and are not transferred. Transfer breaks the tie between a trait and the lineage
+that evolved it, so a trait can spread through contact faster than by descent, and families
+sharing ground share genes.
+
+<a id="ecology-sharing"></a>
+
+## Adhesion and sharing
+
+Optional `sharingRate` (default 0) makes touching cells exchange stored nutrient. Each touching
+pair, each tick, moves reserve from the richer to the poorer by the fraction
+`1 − exp(−sharingRate × dt)` of half their difference, capped by the receiver's storage, and the
+ledger records it as `shared`. Nothing is created. A gatherer feeds whoever touches it, so the
+lever rewards staying with cells that gather in turn and is exploited by cells that only
+receive; together with matrix, which keeps bodies in place, it is the material basis on which a
+division of labour between touching cells could pay. Whether one evolves is the
+[sharing study's](../sharing-study.md) question.
+
+<a id="ecology-signal"></a>
+
+## Quorum signal
+
+The neutral chemical (`secretionRate`, default 0) is a costed secretion cells sense through four
+inputs (level, change, and two gradients) and that has no physical effect. With the rate above
+zero it is a quorum signal: its local concentration tracks how many secreting cells are near,
+and the controller may condition any effort on it. The [signal study](../signal-study.md) turns
+it on and asks whether evolved populations use it.
+
 <a id="ecology-toxin-defense-and-repair"></a>
 
 ## Toxin, defense and repair
@@ -84,7 +144,21 @@ A local toxin diffuses and decays without ownership. Injury per second is
 with `protection = 1 + defenseStrength×defense/core + immunityStrength×weapon/core`.
 
 Installed toxin machinery therefore carries immunity, as colicin plasmids bundle toxin and
-immunity genes; a producer is protected from every producer, not only itself. Contact exposure
+immunity genes; a producer is protected from every producer, not only itself.
+
+<a id="ecology-family-chemistry"></a>
+
+**Family chemistry** (`toxinTypes: 2`, default 1) splits the toxin into two chemical types held
+in the `toxin` and `toxinB` fields. Physical locus 9, the tint, sets through a logistic the share
+of a cell's toxin that is type B, and immunity applies per type in proportion to the share
+produced: `protection_X = 1 + defenseStrength×defense/core + immunityStrength×weapon×share_X/core`.
+Injury sums each type's field and contact exposure over its own protection. Relatives share a
+tint and tolerate one another; a lineage that drifts in tint is harmed by its own family, and two
+families of different tint deny ground to each other with the same machinery. Nothing identifies
+kin: the sensed toxin input is each type's concentration discounted by the cell's protection
+against it relative to an undefended cell, so a producer barely senses its family's toxin and
+senses a foreign type in full. The matrix binds both types, sharing its capacity evenly. With
+one type the tint is silent and every earlier result stands. Contact exposure
 has no field: it reaches only bodies within a 0.05-cell gap of a producer and cannot be sensed at a
 distance. Its default rate is zero pending the [contest record](../rps-study.md); saves that
 predate either term load with that term zero and keep their physics.

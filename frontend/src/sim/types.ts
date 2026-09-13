@@ -10,8 +10,10 @@ export const MATERIAL_FIELDS = [
   "nutrientB",
   "chemical",
   "toxin",
+  "toxinB",
   "matrix",
   "boundToxin",
+  "boundToxinB",
   "detritus",
   "carbon",
 ] as const;
@@ -63,7 +65,7 @@ export interface Ancestor {
   genome: number;
   born: number;
   ended: number | null;
-  cause: "alive" | "division" | "starvation" | "damage";
+  cause: "alive" | "division" | "starvation" | "damage" | "disturbance";
 }
 export interface Event {
   tick: number;
@@ -96,6 +98,15 @@ export interface Ledger {
   repaired: number;
   damageReceived: number;
   damageDeaths: number;
+  /** Material of contact-killed cells eaten by touching predators. */
+  preyed: number;
+  /** Abiotic disturbance events and the cells they killed. */
+  disturbances: number;
+  disturbanceDeaths: number;
+  /** Physical loci copied between touching cells. */
+  transfers: number;
+  /** Stored nutrient moved between touching cells. */
+  shared: number;
   absorbedA: number;
   absorbedB: number;
   matrixBlocked: number;
@@ -111,7 +122,6 @@ export interface Ledger {
   blockedDivisions: number;
   /** Element cycle: organic material fixed from inorganic carbon and its light energy. */
   fixed: number;
-  exuded: number;
   lightEnergy: number;
   initialOxygen: number;
   oxygenProduced: number;
@@ -128,7 +138,7 @@ export interface Intervention {
 }
 export interface World {
   substrate: "bacteria-xy";
-  version: 6;
+  version: 7;
   seed: number;
   tick: number;
   config: Config;
@@ -140,8 +150,10 @@ export interface World {
   chemical: Float64Array;
   nutrientB: Float64Array;
   toxin: Float64Array;
+  toxinB: Float64Array;
   matrix: Float64Array;
   boundToxin: Float64Array;
+  boundToxinB: Float64Array;
   detritus: Float64Array;
   carbon: Float64Array;
   oxygen: Float64Array;

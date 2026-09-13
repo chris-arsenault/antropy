@@ -5,6 +5,7 @@ import { type World } from "../sim/types";
 import { controller } from "../sim/controller";
 import { createRandomState } from "../sim/random";
 import { seedGenotype } from "../sim/genetics/genotype";
+import { PHYSICAL_LOCI } from "../sim/body";
 import { checkpointToJson, restoreWorld } from "../persist/checkpoint";
 import {
   branch,
@@ -68,7 +69,7 @@ it("keeps physical distance independent of controller distance", () => {
   const a = seedGenotype(DEFAULT_CONFIG),
     physical = seedGenotype(DEFAULT_CONFIG);
   physical.chromosomes[0].physical[1] = 0.2;
-  expect(geneticDistance(a, physical).physical).toBeCloseTo(0.2 / Math.sqrt(8));
+  expect(geneticDistance(a, physical).physical).toBeCloseTo(0.2 / Math.sqrt(PHYSICAL_LOCI));
   expect(geneticDistance(a, physical).controller).toBe(0);
   const behavioral = {
     chromosomes: [

@@ -3,24 +3,37 @@ import { diffuse } from "./fields";
 import { advanceDeposits } from "./deposits";
 import { exchangeAtmosphere } from "./cycle";
 
-function react(world: World): void {
+/** Matrix binds free toxin of one type up to `capacity`, releases the excess, and destroys bound toxin. */
+function bindToxin(
+  world: World,
+  i: number,
+  capacity: number,
+  free: Float64Array,
+  bound: Float64Array
+): void {
   const c = world.config;
+  const released = Math.max(0, bound[i] - capacity);
+  bound[i] -= released;
+  free[i] += released;
+  const binding =
+    Math.min(free[i], Math.max(0, capacity - bound[i])) * (1 - Math.exp(-c.matrixBinding * c.dt));
+  free[i] -= binding;
+  bound[i] += binding;
+  const destroyed = bound[i] * (1 - Math.exp(-c.toxinDecay * c.dt));
+  bound[i] -= destroyed;
+  world.ledger.toxinLoss += destroyed;
+}
+function react(world: World): void {
+  const c = world.config,
+    typed = c.toxinTypes === 2;
   for (let i = 0; i < world.matrix.length; i++) {
     const decayed = world.matrix[i] * (1 - Math.exp(-c.matrixDecay * c.dt));
     world.matrix[i] -= decayed;
     world.detritus[i] += decayed;
-    const capacity = world.matrix[i] * c.matrixCapacity;
-    const released = Math.max(0, world.boundToxin[i] - capacity);
-    world.boundToxin[i] -= released;
-    world.toxin[i] += released;
-    const bound =
-      Math.min(world.toxin[i], Math.max(0, capacity - world.boundToxin[i])) *
-      (1 - Math.exp(-c.matrixBinding * c.dt));
-    world.toxin[i] -= bound;
-    world.boundToxin[i] += bound;
-    const destroyed = world.boundToxin[i] * (1 - Math.exp(-c.toxinDecay * c.dt));
-    world.boundToxin[i] -= destroyed;
-    world.ledger.toxinLoss += destroyed;
+    // Both toxin types share the matrix's binding capacity, split evenly when two exist.
+    const capacity = (world.matrix[i] * c.matrixCapacity) / (typed ? 2 : 1);
+    bindToxin(world, i, capacity, world.toxin, world.boundToxin);
+    if (typed) bindToxin(world, i, capacity, world.toxinB, world.boundToxinB);
     const food = world.detritus[i] * (1 - Math.exp(-c.detritusDecay * c.dt));
     // Decomposition returns feedstock as both foods equally; it favours neither pathway.
     world.detritus[i] -= food;
@@ -55,6 +68,14 @@ export function advanceFields(world: World): void {
       world.matrix
     );
   world.ledger.toxinLoss += diffuse(world.toxin, c, c.toxinDiffusion, c.toxinDecay, world.matrix);
+  if (c.toxinTypes === 2)
+    world.ledger.toxinLoss += diffuse(
+      world.toxinB,
+      c,
+      c.toxinDiffusion,
+      c.toxinDecay,
+      world.matrix
+    );
   if (c.cycle) {
     diffuse(world.carbon, c, c.cycle.carbonDiffusion, 0, world.matrix);
     diffuse(world.oxygen, c, c.cycle.oxygenDiffusion, 0, world.matrix);

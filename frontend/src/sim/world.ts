@@ -3,6 +3,9 @@ import { type World } from "./types";
 import { createRandomState, nextRandom } from "./random";
 import { seedGenotype } from "./genetics/genotype";
 import { advanceFields } from "./ecologyFields";
+import { disturb } from "./disturbance";
+import { transferGenes } from "./transfer";
+import { shareReserves } from "./sharing";
 import { newDeposit } from "./deposits";
 import { damageCells } from "./interference";
 import { infer } from "./inference";
@@ -22,8 +25,10 @@ function initialFields(c: Config) {
     nutrient: new Float64Array(area).fill(c.initialNutrient / 2),
     nutrientB: new Float64Array(area).fill(c.initialNutrient / 2),
     toxin: new Float64Array(area),
+    toxinB: new Float64Array(area),
     matrix: new Float64Array(area),
     boundToxin: new Float64Array(area),
+    boundToxinB: new Float64Array(area),
     detritus: new Float64Array(area),
     carbon: new Float64Array(area).fill(c.cycle?.initialCarbon ?? 0),
     oxygen: new Float64Array(area).fill(c.cycle?.atmosphereOxygen ?? 0),
@@ -37,7 +42,7 @@ export function createWorld(seedValue = 101, config: Config = DEFAULT_CONFIG): W
   const c = structuredClone(config),
     world: World = {
       substrate: "bacteria-xy",
-      version: 6,
+      version: 7,
       seed: seedValue,
       tick: 0,
       config: c,
@@ -96,12 +101,15 @@ function findStart(world: World, index: SpatialIndex) {
 export function stepWorld(world: World): void {
   if (world.stopReason) return;
   advanceFields(world);
+  disturb(world);
   for (const cell of world.cells) infer(world, cell);
   moveBodies(world);
   damageCells(world);
   absorb(world);
   metabolize(world);
   resolveContacts(world);
+  transferGenes(world);
+  shareReserves(world);
   reproduce(world);
   world.tick++;
 }

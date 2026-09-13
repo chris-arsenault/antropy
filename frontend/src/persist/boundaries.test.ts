@@ -76,9 +76,9 @@ it("rejects impossible reserve configurations at creation", () => {
 it("rejects v1 state rather than inventing genetic randomness and intervention history", () => {
   const data = JSON.parse(checkpointToJson(createWorld()));
   data.version = 1;
-  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v6");
-  data.version = 5;
-  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v6");
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v7");
+  data.version = 6;
+  expect(() => restoreWorld(JSON.stringify(data))).toThrow("checkpoint v7");
 });
 it("controller codecs preserve exact genome and private state without sharing arrays", () => {
   const genome = controller.seed(),

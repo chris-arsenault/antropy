@@ -169,17 +169,36 @@ mechanism-off control, each gated by mutual invasibility of whatever clusters em
    invade from rarity; evolved populations at crowding 0.5 stayed mixotroph over 35–50
    generations, and at crowding 0.75 one seed of three split into a harvester and a consumer
    cluster by 93 generations whose medoids mutually invade.
-2. **Family chemistry**: heritable tags gating toxin immunity and matrix shelter. Planned
-   encoding: a tenth physical locus sets the share of a cell's toxin that is type B rather than
-   type A (two toxin fields under `toxinTypes: 2`, one under the default 1); installed toxin
-   machinery is immune to each type in proportion to the share it produces, so relatives
-   tolerate one another and a lineage that drifts in type is harmed by its own family. The
-   sensed toxin input becomes the susceptibility-weighted concentration.
-3. **Predation**: contact consumption of smaller cells with paid machinery.
-4. **Abiotic disturbance**: random mixing, washout and dry-down events.
-5. **Horizontal gene transfer** between touching cells.
-6. **Adhesion and division of labor**.
-7. **Quorum signaling** through the costed neutral chemical.
+2. **Family chemistry** (implemented as `toxinTypes: 2`; see the
+   [ecology contract](strategic-ecology.md#ecology-family-chemistry)): a tenth physical locus
+   tints a cell's toxin between two types, immunity follows the type produced, and the sensed
+   toxin is what the cell is susceptible to. Registered in the [family study](../family-study.md).
+3. **Predation** (implemented as `preyYield`; see the
+   [ecology contract](strategic-ecology.md#ecology-predation)): a contact-killed cell feeds the
+   toxin-bearing neighbours touching it. Measured in the
+   [predation study](../predation-study.md): all three arms split on toxin machinery, diet and
+   body size, and every pair mutually invades.
+4. **Abiotic disturbance** (implemented as `config.disturbance`; see the
+   [ecology contract](strategic-ecology.md#ecology-disturbance)): random discs mixed and thinned
+   at a memoryless interval. Measured in the [disturbance study](../disturbance-study.md): more
+   turnover, the usual diet-and-body-size clusters, gate met in two arms of three.
+5. **Horizontal gene transfer** (implemented as `transferRate`; see the
+   [ecology contract](strategic-ecology.md#ecology-gene-transfer)): touching cells copy one
+   physical locus. Measured in the [transfer study](../transfer-study.md): gate met in all
+   three arms with smaller between-cluster gaps.
+6. **Adhesion and division of labor** (implemented as `sharingRate`; see the
+   [ecology contract](strategic-ecology.md#ecology-sharing)): touching cells share stored
+   nutrient. Measured in the [sharing study](../sharing-study.md): more and smaller cells, no
+   gatherer/receiver split, gate met in one arm of three.
+7. **Quorum signaling** through the costed neutral chemical (`secretionRate`, already
+   implemented; see the [ecology contract](strategic-ecology.md#ecology-signal)). Measured in
+   the [signal study](../signal-study.md): secretion stays near zero; negative.
+
+Across the seven levers, 24 evolution arms in the homogeneous mixed world produced coexisting
+clusters that mutually invade or both persist from rarity in 16, always including the diet and
+body-size axes; predation is the one lever whose own trait became a cluster axis, and the
+element cycle's harvesting axis appeared in one arm of six. See the
+[changelog](../../CHANGELOG.md).
 
 <a id="design-status-and-provenance"></a>
 

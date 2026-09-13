@@ -4,6 +4,7 @@ import { radius, wrap } from "./geometry";
 import { sample, sampleAt } from "./fields";
 import { energyCapacity, materialCapacity } from "./body";
 import { targetBody } from "./phenotype";
+import { protection, typeShares } from "./chemotype";
 
 /** Front, rear, left and right perimeter points; the same arithmetic as `moved`. */
 function perimeter(cell: Cell, c: Config): Float64Array {
@@ -16,20 +17,38 @@ function perimeter(cell: Cell, c: Config): Float64Array {
   });
   return points;
 }
+type Reader = (x: number, y: number) => number;
+const fieldReader =
+  (field: Float64Array, c: Config): Reader =>
+  (x, y) =>
+    sampleAt(field, x, y, c);
+/**
+ * Toxin as the cell is hurt by it. With one toxin type this is the raw field; with two, each type
+ * is discounted by the cell's protection against it relative to an undefended cell, so a producer
+ * barely senses its own family's toxin and senses a foreign type in full.
+ */
+function toxinReader(world: World, cell: Cell): Reader {
+  const c = world.config;
+  if (c.toxinTypes === 1) return fieldReader(world.toxin, c);
+  const shares = typeShares(world, cell),
+    bare = protection(cell, c, 0),
+    weightA = bare / protection(cell, c, shares[0]),
+    weightB = bare / protection(cell, c, shares[1]);
+  return (x, y) =>
+    weightA * sampleAt(world.toxin, x, y, c) + weightB * sampleAt(world.toxinB, x, y, c);
+}
 function chemicalReads(
-  world: World,
   cell: Cell,
-  field: Float64Array,
+  read: Reader,
   k: number,
   baseline: number,
   p: Float64Array
 ): number[] {
-  const c = world.config,
-    center = sample(field, cell, c);
-  const front = sampleAt(field, p[0], p[1], c),
-    rear = sampleAt(field, p[2], p[3], c),
-    left = sampleAt(field, p[4], p[5], c),
-    right = sampleAt(field, p[6], p[7], c);
+  const center = read(cell.x, cell.y);
+  const front = read(p[0], p[1]),
+    rear = read(p[2], p[3]),
+    left = read(p[4], p[5]),
+    right = read(p[6], p[7]);
   const tonic = center / (center + k);
   return [
     tonic,
@@ -43,7 +62,7 @@ export function initializeReceptors(world: World, cell: Cell): void {
     n = sample(world.nutrient, cell, c),
     s = sample(world.chemical, cell, c),
     b = sample(world.nutrientB, cell, c),
-    t = sample(world.toxin, cell, c);
+    t = toxinReader(world, cell)(cell.x, cell.y);
   cell.receptors = [
     n / (n + c.nutrientK),
     s / (s + c.chemicalK),
@@ -54,11 +73,29 @@ export function initializeReceptors(world: World, cell: Cell): void {
 export function observe(world: World, cell: Cell): Float32Array {
   const c = world.config,
     r = perimeter(cell, c);
-  const nutrient = chemicalReads(world, cell, world.nutrient, c.nutrientK, cell.receptors[0], r);
-  const chemical = chemicalReads(world, cell, world.chemical, c.chemicalK, cell.receptors[1], r);
-  const foodB = chemicalReads(world, cell, world.nutrientB, c.nutrientK, cell.receptors[2], r);
-  const toxin = chemicalReads(world, cell, world.toxin, c.toxinK, cell.receptors[3], r);
-  const matrix = chemicalReads(world, cell, world.matrix, c.matrixBarrier, 0, r);
+  const nutrient = chemicalReads(
+    cell,
+    fieldReader(world.nutrient, c),
+    c.nutrientK,
+    cell.receptors[0],
+    r
+  );
+  const chemical = chemicalReads(
+    cell,
+    fieldReader(world.chemical, c),
+    c.chemicalK,
+    cell.receptors[1],
+    r
+  );
+  const foodB = chemicalReads(
+    cell,
+    fieldReader(world.nutrientB, c),
+    c.nutrientK,
+    cell.receptors[2],
+    r
+  );
+  const toxin = chemicalReads(cell, toxinReader(world, cell), c.toxinK, cell.receptors[3], r);
+  const matrix = chemicalReads(cell, fieldReader(world.matrix, c), c.matrixBarrier, 0, r);
   const alpha = 1 - Math.exp(-c.dt / c.receptorTau);
   cell.receptors[0] += alpha * nutrient[1];
   cell.receptors[1] += alpha * chemical[1];

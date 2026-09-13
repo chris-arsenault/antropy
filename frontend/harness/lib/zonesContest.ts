@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { createWorld } from "../../src/sim/world";
 import { DEFAULT_CONFIG } from "../../src/sim/config";
 import { DEFAULT_CYCLE, type CycleConfig } from "../../src/sim/cycle";
+import { DEFAULT_DISTURBANCE, type DisturbanceConfig } from "../../src/sim/disturbance";
 import { controller } from "../../src/sim/controller";
 import { diagnosticChanges } from "../../src/sim/controller/diagnostics";
 import { type Genotype } from "../../src/sim/genetics/genotype";
@@ -42,6 +43,18 @@ export interface ZoneSettings {
   crowding: number;
   /** External deposit release rate. */
   sourceRate: number;
+  /** Family chemistry: 1 toxin type or 2. */
+  toxinTypes: 1 | 2;
+  /** Contact injury rate and predation yield, inherited from a checkpoint by the invasion assay. */
+  contactDamageRate: number;
+  preyYield: number;
+  /** Abiotic disturbance constants, inherited from a checkpoint by the invasion assay. */
+  disturbance: DisturbanceConfig | null;
+  /** Horizontal gene transfer rate, inherited from a checkpoint by the invasion assay. */
+  transferRate: number;
+  /** Reserve sharing and signal secretion rates, inherited from a checkpoint by the invasion assay. */
+  sharingRate: number;
+  secretionRate: number;
   /** Harvesting stock of the constructed autotroph guild as a multiple of the founder's ratio. */
   autotrophPhoto: number;
   /** Core of the constructed autotroph guild as a multiple of the founder's. */
@@ -79,6 +92,15 @@ export function zoneSettings(flags: Flags): ZoneSettings {
     cycle: flag(flags, "cycle", "off") === "on" ? cycleFlags(flags) : null,
     crowding: Number(flag(flags, "crowding", String(DEFAULT_CONFIG.machineryCrowding))),
     sourceRate: Number(flag(flags, "source-rate", String(DEFAULT_CONFIG.sourceRate))),
+    toxinTypes: Number(flag(flags, "toxin-types", String(DEFAULT_CONFIG.toxinTypes))) === 2 ? 2 : 1,
+    contactDamageRate: Number(
+      flag(flags, "contact-damage", String(DEFAULT_CONFIG.contactDamageRate))
+    ),
+    preyYield: Number(flag(flags, "prey-yield", String(DEFAULT_CONFIG.preyYield))),
+    disturbance: flag(flags, "disturbance", "off") === "on" ? DEFAULT_DISTURBANCE : null,
+    transferRate: Number(flag(flags, "transfer-rate", String(DEFAULT_CONFIG.transferRate))),
+    sharingRate: Number(flag(flags, "sharing-rate", String(DEFAULT_CONFIG.sharingRate))),
+    secretionRate: Number(flag(flags, "secretion-rate", String(DEFAULT_CONFIG.secretionRate))),
     autotrophPhoto: Number(flag(flags, "autotroph-photo", "3")),
     autotrophCore: Number(flag(flags, "autotroph-core", "0.5")),
   };
@@ -180,6 +202,13 @@ export function zoneScenario(
         cycle: s.cycle ?? undefined,
         machineryCrowding: s.crowding,
         sourceRate: s.sourceRate,
+        toxinTypes: s.toxinTypes,
+        contactDamageRate: s.contactDamageRate,
+        preyYield: s.preyYield,
+        disturbance: s.disturbance ?? undefined,
+        transferRate: s.transferRate,
+        sharingRate: s.sharingRate,
+        secretionRate: s.secretionRate,
         mutationRate: 0,
         physicalMutationRate: 0,
         learning: "static",

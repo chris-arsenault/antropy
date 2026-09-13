@@ -22,6 +22,9 @@ export const BODY_NAMES: Record<(typeof BODY_PARTS)[number], string> = {
   builder: "Matrix machinery",
   photo: "Light harvesting",
 };
+/** Physical locus after the body stocks: the toxin tint of family chemistry. */
+export const TINT_LOCUS = BODY_PARTS.length;
+export const PHYSICAL_LOCI = BODY_PARTS.length + 1;
 export type Body = Record<(typeof BODY_PARTS)[number], number>;
 export interface Embodied {
   body: Body;
@@ -63,8 +66,7 @@ export function basal(cell: Embodied & { damage: number }, c: Config): number {
       b.motor * c.motorMaintenance +
       b.transport * c.transporterMaintenance +
       b.storage * c.storageMaintenance +
-      (b.transportB + b.defense + b.weapon + b.builder) * c.machineryMaintenance +
-      b.photo * (c.cycle?.photoMaintenance ?? c.machineryMaintenance) +
+      (b.transportB + b.defense + b.weapon + b.builder + b.photo) * c.machineryMaintenance +
       c.controllerCost)
   );
 }

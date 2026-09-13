@@ -62,6 +62,13 @@ export function runInvasion(flags: Flags): void {
     cycle: world.config.cycle ?? null,
     crowding: world.config.machineryCrowding,
     sourceRate: world.config.sourceRate,
+    toxinTypes: world.config.toxinTypes,
+    contactDamageRate: world.config.contactDamageRate,
+    preyYield: world.config.preyYield,
+    disturbance: world.config.disturbance ?? null,
+    transferRate: world.config.transferRate,
+    sharingRate: world.config.sharingRate,
+    secretionRate: world.config.secretionRate,
   };
   for (const variant of variants)
     runZoneCase(

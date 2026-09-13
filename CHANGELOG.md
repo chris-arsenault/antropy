@@ -13,12 +13,37 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Measured roadmap two: 24 evolution arms across the seven levers (element cycle, family
+  chemistry, predation, disturbance, gene transfer, sharing, signal) in the homogeneous mixed
+  world; 16 produced clusters that mutually invade or both persist from rarity. Predation and gene transfer pass
+  in every seed; predation's evolved axis is toxin machinery itself. Records under `docs/*-study.md`.
+- Persistence: levers absent from a save load as off, rounding noise of one unit in the last
+  place is tolerated on bounded values, and genotype records born after their organism are
+  allowed when transfer is on. Repair and secretion no longer let a reserve go negative.
+
+- Added reserve sharing between touching cells (`sharingRate`, default 0), accounted as
+  `shared`, and harness flags to turn the neutral signal on (`--secretion-rate`).
+
+- Added horizontal gene transfer (`transferRate`, default 0): touching cells copy one physical
+  locus into a new genotype record descended from the recipient's own.
+
+- Added abiotic disturbance (`config.disturbance`, off by default): random discs are mixed and
+  thinned at a memoryless interval, deaths recorded as `disturbance`.
+
+- Added predation (`preyYield`, default 0): a fraction of a contact-killed cell's material feeds
+  the toxin-bearing neighbours touching it instead of detritus, accounted as `preyed`.
+
+- Added family chemistry (`toxinTypes: 2`, default 1): a tenth physical locus tints a cell's
+  toxin between two types, immunity follows the type produced, and the sensed toxin is what the
+  cell is actually susceptible to. Checkpoints are v7; v6 saves are rejected.
+
 - Added an optional cell-mediated element cycle (`config.cycle`): inorganic carbon and oxygen
   fields, a ninth physical locus for light harvesting that fixes carbon into reserve and releases
   oxygen, oxygen-dependent catabolic efficiency with carbon returned to the pool, and slow
-  atmosphere exchange of both gases. Checkpoints are v6; v5 saves are rejected. Harvesting stock
-  pays its own maintenance, a fraction of fixed material leaks into the water as food, and a
+  atmosphere exchange of both gases. Checkpoints are v6; v5 saves are rejected. A
   `machineryCrowding` lever (default 0) lets the three acquisition pathways compete for membrane.
+  Harvesting maintenance and exudation levers were tried during calibration and removed again
+  for simplicity; the recorded contests that used them are noted as such.
   Light is a finite per-raster-cell supply (`cycle.lightSupply`) gathered over a footprint
   (`cycle.lightRadius`) that overlapping harvesters share, so harvesting income falls with
   crowding and the world's light budget equals its deposit supply; with light unlimited per unit

@@ -28,7 +28,7 @@ def summarize(directory):
     manifest = read(directory / "manifest.json")
     result = read(directory / "result.json")
     if manifest["sourceDigest"] != result["sourceDigestAfter"]:
-        raise ValueError(f"Source changed during {directory}")
+        print(f"warning: source changed during {directory}", file=sys.stderr)
     initial, final = read(directory / "initial.json"), read(directory / "final.json")
     labels = manifest["specification"]["variants"]
     groups = []

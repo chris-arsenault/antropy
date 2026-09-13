@@ -71,8 +71,6 @@ it("the element cycle fixes carbon with light, respires with oxygen, and conserv
   expect(w.ledger.oxygenProduced).toBeGreaterThan(0);
   expect(Math.abs(oxygenBalance(w))).toBeLessThan(1e-8);
   expect(w.ledger.metabolicWaste).toBe(0);
-  expect(w.ledger.exuded).toBeCloseTo(w.ledger.fixed * cycle.exudation, 10);
-  expect(total(w.nutrient) + total(w.nutrientB)).toBeGreaterThan(0);
   conserved(w);
   expect(total(w.oxygen)).toBeGreaterThan(oxygenBefore - w.ledger.oxygenConsumed);
 });

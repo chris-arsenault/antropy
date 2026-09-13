@@ -1,6 +1,6 @@
 import { controller } from "../controller";
 import { type Chromosome, type Genotype } from "./genotype";
-import { BODY_PARTS } from "../body";
+import { PHYSICAL_LOCI } from "../body";
 
 export function encodeGenotype(genome: Genotype): unknown {
   return {
@@ -16,7 +16,7 @@ function decodeChromosome(value: unknown): Chromosome {
   const c = value as Record<string, unknown>;
   if (
     !Array.isArray(c.physical) ||
-    c.physical.length !== BODY_PARTS.length ||
+    c.physical.length !== PHYSICAL_LOCI ||
     !c.physical.every((v) => typeof v === "number" && Number.isFinite(v) && Math.abs(v) <= 3)
   )
     throw new Error("Invalid physical genes");

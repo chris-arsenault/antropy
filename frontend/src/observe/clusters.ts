@@ -14,6 +14,7 @@ export const CLUSTER_TRAITS = [
   "weapon",
   "builder",
   "photo",
+  "tint",
 ] as const;
 export type ClusterTrait = (typeof CLUSTER_TRAITS)[number];
 export type Point = number[];

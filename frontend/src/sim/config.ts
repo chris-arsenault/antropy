@@ -1,6 +1,7 @@
 import { validateFoodEpochs, type FoodEpochs } from "./foodEpochs";
 import { validateFoodZones, type FoodZones } from "./foodZones";
 import { validateCycle, type CycleConfig } from "./cycle";
+import { validateDisturbance, type DisturbanceConfig } from "./disturbance";
 
 export const DEFAULT_CONFIG = {
   width: 80,
@@ -28,6 +29,26 @@ export const DEFAULT_CONFIG = {
   contactDamageRate: 0,
   defenseStrength: 80,
   immunityStrength: 1000,
+  /**
+   * Family chemistry: 1 keeps one toxin; 2 splits it into types A and B by a heritable tint,
+   * with immunity only to the type a cell produces (see sim/chemotype.ts).
+   */
+  toxinTypes: 1 as 1 | 2,
+  /**
+   * Predation: the fraction of a contact-killed cell's material that feeds the toxin-bearing
+   * neighbours touching it instead of detritus (see sim/predation.ts). Zero keeps them apart.
+   */
+  preyYield: 0,
+  /**
+   * Horizontal gene transfer: probability per touching pair per second that a cell copies one
+   * physical locus from its neighbour (see sim/transfer.ts). Zero disables it.
+   */
+  transferRate: 0,
+  /**
+   * Adhesion and sharing: the rate per second at which touching cells close the gap between
+   * their stored nutrient (see sim/sharing.ts). Zero disables it.
+   */
+  sharingRate: 0,
   repairRate: 0.008,
   repairMaterial: 0.3,
   repairEnergy: 0.8,
@@ -98,9 +119,14 @@ export const DEFAULT_CONFIG = {
   foodZones: { shares: [1, 0] },
 };
 export type Config = Omit<typeof DEFAULT_CONFIG, "foodZones"> &
-  Partial<{ foodEpochs: FoodEpochs; foodZones: FoodZones; cycle: CycleConfig }>;
+  Partial<{
+    foodEpochs: FoodEpochs;
+    foodZones: FoodZones;
+    cycle: CycleConfig;
+    disturbance: DisturbanceConfig;
+  }>;
 /** Optional configuration keys; absence is a valid persisted state, not missing data. */
-export const OPTIONAL_CONFIG = ["foodEpochs", "foodZones", "cycle"] as const;
+export const OPTIONAL_CONFIG = ["foodEpochs", "foodZones", "cycle", "disturbance"] as const;
 
 function validateNumbers(config: Config): void {
   for (const [key, value] of Object.entries(DEFAULT_CONFIG)) {
@@ -121,6 +147,8 @@ export function validateConfig(config: Config): void {
   validateEvolution(config);
   validateFoodLayout(config);
   validateCycle(config.cycle);
+  validateDisturbance(config.disturbance);
+  validateChemistry(config);
   for (const key of [
     "catabolicEfficiency",
     "motorEfficiency",
@@ -133,6 +161,12 @@ export function validateConfig(config: Config): void {
     throw new Error("Invalid regime");
   if (config.founders > config.maxPopulation || config.maxPopulation > 100000)
     throw new Error("Invalid population safety limit");
+}
+function validateChemistry(config: Config): void {
+  if (config.toxinTypes !== 1 && config.toxinTypes !== 2)
+    throw new Error("toxinTypes must be 1 or 2");
+  if (!(config.preyYield >= 0 && config.preyYield <= 1))
+    throw new Error("preyYield must lie in [0, 1]");
 }
 function validateFoodLayout(config: Config): void {
   validateFoodEpochs(config.foodEpochs);

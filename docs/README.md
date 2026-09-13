@@ -20,6 +20,12 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Spatial A/B zones and diet specialists | [Zone record](zones-study.md) |
 | De novo evolution and evolved-cluster invasibility | [Evolution record](evolve-study.md) |
 | Element cycle and guild emergence | [Cycle record](cycle-study.md) |
+| Family chemistry and kin tolerance | [Family record](family-study.md) |
+| Predation through contact killing | [Predation record](predation-study.md) |
+| Abiotic disturbance and colonisation | [Disturbance record](disturbance-study.md) |
+| Horizontal gene transfer | [Transfer record](transfer-study.md) |
+| Adhesion, sharing and division of labour | [Sharing record](sharing-study.md) |
+| Quorum signal | [Signal record](signal-study.md) |
 | Review status | [Certification](certifications.md) |
 | Decisions | [ADR index](adr/README.md) |
 | Original supplied sources | [Source index](sources/README.md) |
@@ -65,7 +71,13 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Resource opportunities](design/strategic-ecology.md#ecology-resource-opportunities)
 - [Element cycle](design/strategic-ecology.md#ecology-element-cycle)
+- [Predation](design/strategic-ecology.md#ecology-predation)
+- [Abiotic disturbance](design/strategic-ecology.md#ecology-disturbance)
+- [Horizontal gene transfer](design/strategic-ecology.md#ecology-gene-transfer)
+- [Adhesion and sharing](design/strategic-ecology.md#ecology-sharing)
+- [Quorum signal](design/strategic-ecology.md#ecology-signal)
 - [Toxin, defense and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
+- [Family chemistry](design/strategic-ecology.md#ecology-family-chemistry)
 - [Porous matrix](design/strategic-ecology.md#ecology-porous-matrix)
 - [Disabled systems](design/strategic-ecology.md#ecology-disabled-systems)
 - [Consequences and boundaries](design/strategic-ecology.md#ecology-consequences-and-boundaries)

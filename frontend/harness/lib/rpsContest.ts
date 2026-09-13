@@ -12,6 +12,7 @@ import { diagnosticChanges } from "../../src/sim/controller/diagnostics";
 import { type Genotype } from "../../src/sim/genetics/genotype";
 import { type World } from "../../src/sim/types";
 import { constructed } from "./capabilityFixture";
+import { TINT_LOCUS } from "../../src/sim/body";
 import { type QuickScenario } from "./quickScenario";
 import { runQuick, runSelectionPilot } from "./quickRun";
 import { type Flags, flag, integerFlag } from "./flags";
@@ -32,9 +33,15 @@ export interface RpsSettings {
   founders: number;
   sources: number;
   sourceRate: number;
+  /** Fraction of a contact-killed cell's material that feeds the touching producers. */
+  preyYield: number;
 }
-export type Strategy = "producer" | "resistant" | "sensitive";
+export type Strategy = "producer" | "resistant" | "sensitive" | "family-a" | "family-b";
 export const STRATEGIES: Strategy[] = ["producer", "resistant", "sensitive"];
+/** Family chemistry: two producer families of opposite tint and a sensitive non-producer. */
+export const FAMILIES: Strategy[] = ["family-a", "family-b", "sensitive"];
+const isFamilyCase = (strategies: Strategy[]) =>
+  strategies.some((s) => s === "family-a" || s === "family-b");
 
 export function rpsSettings(flags: Flags): RpsSettings {
   const number = (key: string, fallback: number) => {
@@ -58,19 +65,24 @@ export function rpsSettings(flags: Flags): RpsSettings {
     founders: integerFlag(flags, "founders", 24),
     sources: integerFlag(flags, "sources", 3),
     sourceRate: number("source-rate", DEFAULT_CONFIG.sourceRate),
+    preyYield: number("prey-yield", DEFAULT_CONFIG.preyYield),
   };
 }
 
 const ABSENT = -3;
+const TINTS: Partial<Record<Strategy, number>> = { "family-a": -3, "family-b": 3 };
 /** Same founder brain and core; toxin effort and two physical targets define each strategy. */
 export function strategyGenotype(strategy: Strategy, s: RpsSettings): Genotype {
   const matrix = s.matrix === "off" ? ("off" as const) : undefined;
   const brain = diagnosticChanges(controller.seed(), { matrix });
   switch (strategy) {
     case "producer":
+    case "family-a":
+    case "family-b":
       return constructed(diagnosticChanges(brain, { toxinEffort: s.toxinEffort }), {
         5: ABSENT,
         6: Math.log(s.producerWeapon),
+        [TINT_LOCUS]: TINTS[strategy] ?? 0,
       });
     case "resistant":
       return constructed(diagnosticChanges(brain, { toxin: "off" }), {
@@ -150,6 +162,8 @@ export function rpsScenario(
         contactDamageRate: s.contactDamageRate,
         toxinDecay: s.toxinDecay,
         toxinDiffusion: s.toxinDiffusion,
+        toxinTypes: isFamilyCase(strategies) ? 2 : 1,
+        preyYield: s.preyYield,
         mutationRate: 0,
         physicalMutationRate: 0,
         learning: "static",
@@ -196,6 +210,13 @@ function selectCases(which: string, s: RpsSettings, flags: Flags) {
   const ticks = integerFlag(flags, "ticks", 10000);
   if (which === "three-way")
     return [{ scenario: rpsScenario("three-way", STRATEGIES, s), ticks, swap: false }];
+  if (which === "families")
+    return [{ scenario: rpsScenario("families", FAMILIES, s), ticks, swap: false }];
+  if (which.startsWith("family-invade-")) {
+    const rare = which.slice("family-invade-".length) as Strategy;
+    if (!FAMILIES.includes(rare)) throw new Error(`Unknown family case: ${which}`);
+    return [{ scenario: rpsScenario(which, FAMILIES, s, rare), ticks, swap: false }];
+  }
   const rare = which.startsWith("invade-") ? (which.slice("invade-".length) as Strategy) : null;
   if (rare === null || !STRATEGIES.includes(rare)) throw new Error(`Unknown rps case: ${which}`);
   return [{ scenario: rpsScenario(which, STRATEGIES, s, rare), ticks, swap: false }];
@@ -211,6 +232,7 @@ export function runRps(flags: Flags): void {
         "pairwise: producer-sensitive, resistant-producer, sensitive-resistant; both placements, 3,000 ticks",
         "three-way: all three strategies together, 10,000 ticks (pilot)",
         "invade-<strategy>: that strategy starts at 10% among the other two, 10,000 ticks (pilot)",
+        "families / family-invade-<family-a|family-b|sensitive>: two producer families of opposite tint and a sensitive, toxinTypes 2",
         `settings: ${JSON.stringify(s)}`,
       ].join("\n")
     );

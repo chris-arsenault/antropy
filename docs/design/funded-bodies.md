@@ -7,7 +7,8 @@ material it has actually built, not directly from gene values.
 
 ## Construction and physical genes
 
-Each chromosome has nine bounded float32 physical log targets in [-3,3].
+Each chromosome has ten bounded float32 physical loci in [-3,3]: nine log construction targets
+and a toxin tint.
 
 | Locus | Target | Reference newborn stock |
 | ---: | --- | ---: |
@@ -20,6 +21,7 @@ Each chromosome has nine bounded float32 physical log targets in [-3,3].
 | 6 | Toxin machinery relative to core | 0.02 |
 | 7 | Matrix machinery relative to core | 0.02 |
 | 8 | Light harvesting relative to core | `cycle.photoRatio`, 0.05 when the element cycle is on, else 0 |
+| 9 | Toxin tint: logistic share of type B in the toxin produced, and the immunity split with it (silent unless `toxinTypes` is 2) | 0.5 |
 
 Core target is reference core × exp(g0); other targets are core target × reference ratio × exp(gi).
 Targets are independent, not a zero-sum allocation tuple. Every actual stock has construction and
@@ -122,8 +124,8 @@ ancestry are not implemented. Uniform crossover is configured but unused by defa
 transmission.
 
 At birth, behavioral loci are independently selected with probability 0.0015 and scale 0.08;
-physical loci use 0.1 and scale 0.12. A haploid has 1,649 behavioral/plasticity loci and nine
-physical loci: about 2.5 and 0.9 selected loci per child. Selection count is not guaranteed
+physical loci use 0.1 and scale 0.12. A haploid has 1,649 behavioral/plasticity loci and ten
+physical loci: about 2.5 and 1.0 selected loci per child. Selection count is not guaranteed
 sequence change because of bounds and numerical effects. Weights clamp to [-16,16], plasticity
 coefficients to [-1,1], and physical targets to [-3,3].
 

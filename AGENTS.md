@@ -22,8 +22,8 @@ Canvas SPA and deployed on the Ahara platform.
 ## Current goal and boundary
 
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
-The active contract is 35 inputs, 24 recurrent units, eight outputs, eight funded body stocks and
-checkpoint v5. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
+The active contract is 35 inputs, 24 recurrent units, eight outputs, nine funded body stocks, ten
+physical loci and checkpoint v7. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
 are implemented. Physical and behavioral mutation occur at local resource-funded reproduction;
 acquired recurrent changes can transmit into offspring chromosomes. The world is a thick medium with a pure-A left half and a pure-B right half; from one founder,
 populations evolve two coexisting diet clusters that occupy opposite halves and mutually invade

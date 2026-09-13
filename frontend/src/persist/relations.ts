@@ -35,10 +35,12 @@ function checkAncestry(data: Checkpoint): Map<number, number> {
     const parent = checkParent(a, ancestors, data.config.reproduction === "budding");
     generations.set(a.id, parent === null ? 0 : generations.get(parent)! + 1);
     requireRelation(a.born <= data.tick && a.id < data.nextCell, "invalid ancestor time or ID");
-    // Dead organisms may reference pruned genotype records; living ones must not.
+    // Dead organisms may reference pruned genotype records; living ones must not. A genotype
+    // born after its organism is only possible through gene transfer.
     const genome = genomes.get(a.genome);
     requireRelation(
-      a.genome < data.nextGenome && (!genome || genome.born <= a.born),
+      a.genome < data.nextGenome &&
+        (!genome || genome.born <= a.born || data.config.transferRate > 0),
       "invalid ancestry genome"
     );
     requireRelation(!live.has(a.id) || !!genome, "missing living cell genome");

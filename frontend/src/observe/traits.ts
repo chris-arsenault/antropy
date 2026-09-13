@@ -1,5 +1,6 @@
 import { type World } from "../sim/types";
 import { blueprint } from "../sim/phenotype";
+import { tint } from "../sim/chemotype";
 import { distribution } from "../sim/inheritedStats";
 
 export const TRAITS = [
@@ -15,14 +16,17 @@ export const TRAITS = [
   { key: "weapon", label: "Toxin machinery", unit: "% of core", ceiling: 4 },
   { key: "builder", label: "Matrix machinery", unit: "% of core", ceiling: 4 },
   { key: "photo", label: "Light harvesting", unit: "% of core", ceiling: 10 },
+  { key: "tint", label: "Toxin tint", unit: "% type B", ceiling: 100 },
 ] as const;
 export type Trait = (typeof TRAITS)[number]["key"];
 export const EFFORTS = ["swim", "turn", "toxin", "matrix", "repair"] as const;
 export type Effort = (typeof EFFORTS)[number];
 
 export function traitValues(world: World, genome: World["cells"][number]["genome"]) {
-  const b = blueprint(world.genomes.get(genome)!.genome, world.config);
+  const record = world.genomes.get(genome)!.genome,
+    b = blueprint(record, world.config);
   return {
+    tint: 100 * tint(record),
     core: (100 * b.core) / world.config.birthMass,
     motor: (100 * b.motor) / b.core,
     foodA: (100 * b.transport) / (b.transport + b.transportB),

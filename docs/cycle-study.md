@@ -170,5 +170,10 @@ what they build. The seed-101 split shows the route exists; whether it is reache
 arm within 250,000 ticks depends on generation count (populations of 150–300 cells give 50
 generations, not 90). The constants that changed during calibration (`photoMaintenance`,
 `exudation`, `lightSupply`, `lightRadius`, `machineryCrowding`, the carbon pool) are all
-recorded levers; none was needed by the original registration, and the mechanism could be
-simplified again if the harvester niche were carried by light alone.
+recorded levers; none was needed by the original registration. After review the mechanism was
+simplified again: `photoMaintenance` and `exudation` were removed (harvesting pays the general
+machinery maintenance; fixed material all enters reserve), and the constructed guild contest was
+repeated at the simplified defaults (below). The light budget, footprint and crowding levers
+stay. The general gate, mutual invasibility of whatever clusters emerge, was met on the diet and
+body-size axes in the crowding-0.5 seed-101 arm and in all three crowding-0.75 arms; the
+harvesting axis was a prediction, not the gate, and no further arms are run to chase it.
