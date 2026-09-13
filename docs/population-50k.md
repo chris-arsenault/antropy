@@ -70,7 +70,7 @@ Live populations exceeded their controls at 85%, 100% and 75% of late samples re
 Late population correlations were 0.91, 0.83 and 0.92: inherited change altered outcomes while
 both arms still shared much of the ecological rise/fall pattern.
 
-![Population and inherited construction trends](../frontend/harness/artifacts/population-50k-2026-09-11/population-trends.png)
+![Population and inherited construction trends](evidence/population-50k-2026-09-11/population-trends.png)
 
 The lower chart shows absolute inherited stock targets, which also change when the core target
 changes. It does not equate motor target with speed or motor allocation. Core-normalized motor

@@ -109,7 +109,7 @@ advantages from 15.92% to 40.26%. The final biomass interval was +13.75% to +20.
 contributed to the census difference but did not account for the whole benefit. Mean inherited
 core target fell to 95.56% of founder core; frozen targets stayed unchanged.
 
-![All twelve paired population trajectories](../frontend/harness/artifacts/epochs-2026-09-11/epoch-populations.png)
+![All twelve paired population trajectories](evidence/epochs-2026-09-11/epoch-populations.png)
 
 The resource change reached the cells. Mean food-A absorption share moved from 73.01% to 18.41%
 and back to 72.72% in the live arm; the frozen arm followed almost the same composition. The
@@ -166,7 +166,7 @@ points. All initial resource/body stocks were matched and private memory was res
 inherited information, including its capacity for new private learning, carries the performance
 difference. A rebound in the source world's ecology cannot explain a fresh-world transfer result.
 
-![Fresh-world inherited cohort comparisons](../frontend/harness/artifacts/epochs-2026-09-11/epoch-assays.png)
+![Fresh-world inherited cohort comparisons](evidence/epochs-2026-09-11/epoch-assays.png)
 
 This establishes **general inherited improvement with an additional environment-dependent
 advantage** in the tested cohorts. It does not establish distinct A/B specialists, a cost of
@@ -204,7 +204,7 @@ choices consequential; do not add catastrophes or force family turnover merely t
 look dramatic. Stable strategic diversity remains unestablished.
 
 The complete campaign executed **4,320,000 world ticks across 72 simulations**. Local
-[analysis](../frontend/harness/artifacts/epochs-2026-09-11/analysis.json), per-run manifests,
+[analysis](evidence/epochs-2026-09-11/analysis.json), per-run manifests,
 phase checkpoints, source hashes and figures are retained alongside the SQLite ledger.
 
 `make ci` passed all 89 bounded tests in 20 files, lint, formatting, TypeScript, documentation

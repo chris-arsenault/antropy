@@ -315,10 +315,10 @@ Maximum conservation residuals are below 1e-8% of their initial energy/material 
 
 Local evidence:
 
-- [Generated tables](../frontend/harness/artifacts/capabilities-2026-09-11/tables.md) and
-  [machine-readable analysis](../frontend/harness/artifacts/capabilities-2026-09-11/analysis.json).
-- [Evolved trajectories and paid body growth](../frontend/harness/artifacts/capabilities-2026-09-11/evolved-capabilities.png).
-- [Selection trajectories](../frontend/harness/artifacts/capabilities-2026-09-11/selection-pilots.png).
+- [Generated tables](evidence/capabilities-2026-09-11/tables.md) and
+  [machine-readable analysis](evidence/capabilities-2026-09-11/analysis.json).
+- [Evolved trajectories and paid body growth](evidence/capabilities-2026-09-11/evolved-capabilities.png).
+- [Selection trajectories](evidence/capabilities-2026-09-11/selection-pilots.png).
 - Actual source checkpoint identities and selection rules are embedded in follow-up manifests;
   source files were not changed. No experimental winner entered the browser population.
 

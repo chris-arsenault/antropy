@@ -54,7 +54,9 @@ The [documentation snapshot](docs/sources/history/README.md) preserves prior con
 experiment records. The ant implementation is recoverable from commit `780fa4e`, tag
 `ant-colony-checkpoint-2026-09-09`. Its construction, 2,000-worker gate and canceled training
 campaigns are history, not bacterial prerequisites. Do not restore old schemas or work orders.
-Current generated experiment dumps remain local; the ledger preserves named measurements.
+Current generated experiment dumps remain local (`frontend/harness/artifacts/` is ignored); the
+ledger preserves named measurements, and a report a study document links to is copied into
+`docs/evidence/`.
 
 ## Experiment operating policy
 

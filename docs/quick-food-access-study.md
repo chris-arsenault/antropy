@@ -117,7 +117,7 @@ retain early access while reducing post-feeding expenditure? A small weight inte
 the same fixtures can test that before any mutation-discovery campaign. No such intervention,
 extra seed panel or production change was run here.
 
-![Initial food and sampled founder trajectories](../frontend/harness/artifacts/quick-food-2026-09-11/trajectories.png)
+![Initial food and sampled founder trajectories](evidence/quick-food-2026-09-11/trajectories.png)
 
 Paths show the initial founders only, through tick 300 or their earlier division/death; ten-tick
 segments do not certify smooth motion. Source hash during every case:
