@@ -1,0 +1,74 @@
+.chemical-panel td {
+  font-variant-numeric: tabular-nums;
+}
+.chemical-panel th {
+  font-size: 10px;
+}
+.chemical-panel td:not(:first-child) {
+  text-align: right;
+}
+.chemical-panel td button {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  text-align: left;
+  min-width: 104px;
+  padding: 6px;
+  border-color: transparent;
+}
+.chemical-panel button span:not(.chemical-bar) {
+  float: right;
+  font-size: 11px;
+  color: #bec8d4;
+}
+.chemical-panel button[aria-pressed="true"] {
+  border-color: #d7acf0;
+}
+.chemical-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  border: 0;
+  appearance: none;
+  background: #263144;
+}
+.chemical-bar::-webkit-progress-bar {
+  background: #263144;
+}
+.chemical-bar::-webkit-progress-value {
+  background: #c792e6;
+}
+.chemical-bar::-moz-progress-bar {
+  background: #c792e6;
+}
+.chemical-panel details table {
+  font-size: 10px;
+}
+.chemical-panel details label {
+  display: block;
+  margin-top: 10px;
+}
+.chemical-legend {
+  padding: 6px 14px;
+  background: #101e28;
+}
+.chemical-legend p {
+  margin: 4px 0;
+  font-size: 11px;
+}
+.field-ramp {
+  display: inline-block;
+  width: 72px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #08121a, #5baea6);
+}
+.field-ramp.potential {
+  background: linear-gradient(90deg, #3966cb, #ecb04c);
+}
+.field-ramp.chemical {
+  background: linear-gradient(90deg, #08121a, #d4a4ee);
+}

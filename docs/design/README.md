@@ -1,7 +1,11 @@
 # Current design and work order
 
-Updated September 13, 2026 after review of the project's purpose, saved experiment results and
-the accepted spatial ecology direction.
+Updated September 15, 2026. [Computable chemistry](chemistry/computational-foundation.md),
+[ADR 0022](../adr/0022-computable-chemistry.md) and the [root plan](../../DIGITAL-CHEMISTRY-PLAN.md)
+govern the redesign: artificial rules composed over the chemical manifold, designed for their
+execution cost. M0 formulas and the old M2 expansion are superseded as prescriptions.
+[Runtime numerical design](chemistry/numerical-engine.md), [measurements](chemistry/reliability-results.md)
+and [migration dispositions](chemistry/numerical-migration.md) retain earlier implementation evidence.
 The [reference snapshot](../sources/history/README.md) preserves earlier designs and work orders.
 
 <a id="design-goal-and-present-evidence"></a>
@@ -18,6 +22,11 @@ not need to evolve and certify a finished ecosystem before handoff. Long observa
 use of the simulation, not a harness task to exhaust in advance. Broad diversity is an aspiration
 supported by world design, not an outcome that can be guaranteed or inferred from colored groups.
 
+The runtime now uses a smooth 256-species chemical space, fixed funded machinery, generic reactions,
+membrane compatibility and bounded dense extracellular arrays. Short constructed tests show several
+physical opportunities, with negative results and operating limits retained in the validation record.
+Earlier chemical mechanisms and checkpoints have been replaced; their results below are historical.
+
 The runtime supports resource-funded bodies, local RNN decisions, inheritance, mutation, paid
 learning, births and deaths. Earlier isolated variants gained from food access, B processing and
 lower toxin expense. The thick-medium A/B studies found inherited diet differences concentrated
@@ -32,6 +41,8 @@ shares. See the [corrected analysis](../analysis-correction.md) and [evidence](b
 
 | Document | Owns |
 | --- | --- |
+| [Computational foundation](chemistry/computational-foundation.md) | Governing mathematical design, composed manifold operations and cost-first selection |
+| [Digital chemistry](chemistry/README.md) | Chemical identity, fixed machinery, implementation records and replacement decisions |
 | [Sparse spatial ecology](spatial-ecology.md) | Implemented world hypothesis, movement retuning, spatial populations, multiscale observation and handoff |
 | [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
 | [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
@@ -46,46 +57,60 @@ shares. See the [corrected analysis](../analysis-correction.md) and [evidence](b
 [calibration](../calibration.md) records scales; [backlog](../backlog.md) owns unresolved work.
 The [plan closeout](plan-closeout.md) records OBE dispositions and migrated requirements from
 earlier plans. Current runtime documents describe implemented behavior; the spatial design records
-the accepted direction, its provisional calibration and the completed user review.
+the accepted direction and prior calibration. Chemistry changes require a new motion review.
 
 <a id="design-current-default-and-disabled-scope"></a>
 
 ## Current default and disabled scope
 
-Run starts seed 101, paused at tick zero, with 48 cells carrying the same founder genotype in a
-320 × 240 periodic plane. Viscosity is 0.004. Forty-eight finite renewal sites have unequal richness,
-local A/B mixtures and variable release. The initial arrangement uses seven irregular abiotic
-centers; founders occupy two separated resource neighborhoods. Uniform food is zero; 10% of initial
-finite stock is dissolved locally. Decomposition returns equal A/B. Haploid clonal fission,
-physical/behavioral mutation and paid inheritable plasticity are active. The RNN has 35 inputs,
-24 recurrent units and eight outputs. Checkpoints are v8 with ten physical loci.
+Run starts seed 101, paused at tick zero, with 48 cells of the same founder genotype in two
+separated resource neighborhoods of a 320 × 240 periodic world. Forty-eight finite renewal sites
+have unequal richness, local mixtures and variable release. Chemistry seed 101 resolves initial
+source IDs 0 and 80; decomposition uses ID 186. These are ordinary locations in the generated space,
+not biological roles. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
-Toxin secretion, producer immunity, defense, repair and porous matrix are active. Contact injury,
-predation, two-type toxin chemistry, the element cycle, membrane crowding, disturbance, gene
-transfer, reserve sharing, neutral signaling and solid walls are off by default. They are
-implemented experimental settings, not a combined tested ecosystem. Food zones and epochs
-remain selectable. Do not silently enable all mechanisms or replace the founder with a diagnostic
-or evolved winner. A reviewed world may enable an opportunity without requiring its evolved outcome.
+The controller has 39 inputs, 24 recurrent units and nine outputs. Fifteen funded stocks support
+four receptors, four transporters and four enzymes plus core, motor and storage. Physical
+checkpoints use v12 after M1's definition change; the outer observation package remains v11.
+Generic stress, compatibility, repair and impedance replace named toxin/defense/
+matrix pathways. Source zones and epochs remain selectable. Disturbance and typed machinery
+transfer are experimental options, disabled by default. Light input and binding remain deferred.
 
-The irregular resource arrangement is the first candidate for local differences and consequential
-transit. Its geometry and parameters can change when measurements or human observation warrant it.
-No population-region count is an acceptance criterion.
+The irregular resource arrangement is a revisable hypothesis. No region count or evolved community
+is an acceptance criterion. Do not seed a diagnostic or evolved winner into the default.
+
+The [resource-economy model](chemistry/resource-economy.md) governs current supply calibration:
+delivery-aware source selection, mean renewal gap 1,200 model seconds and washout 0.001/second.
+It calculates budgets and a spatial reference without advancing organisms. Short checks show
+repeated local reproduction and both ordinary starting colonies reproducing; a weak isolated
+site still fails. This prepares an evolutionary opportunity, not an evolved community.
 
 <a id="design-next-decisions"></a>
 
 ## Next decisions
 
-1. Review [continuation limits and measurements](../continuing-observation.md) before depending on
-   unattended execution. Rolling recovery and compact parentage are implemented; actual browser
-   suspension, quota behavior and days/weeks responsiveness remain unverified.
-2. Watch the starting world. Ordinary mutation, reproduction and local physical interaction determine
-   what persists. Later observations can justify focused diagnosis without making every extinct
-   lineage a defect to repair or every surviving group a demonstrated adaptation.
+M0's selected laws and M1's canonical compiler are implemented. M1's subsequent correction
+carries composition through row redistribution and CSR local delivery, compiles enzyme engagement,
+and separates material/installed dependencies from geographic movement. The same core workload
+measures 7.17/15.73 ms at 48/2,000 cells; the heaviest 2,000-cell tick is still 39.55 ms.
+See [the correction](../specs/digital-chemistry/validation.md#manifold-composition-correction).
+Ordinary stepping still uses the earlier spatial/biological pipeline. M2 must integrate the
+composed spatial owners; M3/M4 must replace live machinery and paid expression together.
+The measurements below describe the
+previous runtime and do not establish replacement performance or ecological readiness.
 
-The user accepted the world after the two-colony startup and recovery identity fixes. Sulion records
-all seven phases completed on September 13, 2026. Acceptance does not establish long-term ecology
-or browser endurance; [short controls](../spatial-probes.md) establish only the specified physical
-opportunities. No development server or long evolution campaign was started for handoff.
+The sole Rust/WASM engine integrates physical chemistry, evolution, worker WebGL2 rendering,
+recovery and current experiments. Short probes establish supplied growth, finite-reserve
+exhaustion and several conditional chemical effects. Batched rendering and periodic-index optimization
+bring the actual software-rendered browser to 54 ticks/s at 2,000 varied cells and 32.6 during the
+constructed growth workload. Headless means are 61.3 and 35.9 respectively. Growth still has little
+headroom, and cold saves are measured separately. Human motion acceptance, the user's device limits,
+colonization and days/weeks persistence remain open observations.
+
+Review [continuation limits](../continuing-observation.md) before depending on unattended execution.
+The previous spatial implementation was accepted after two-colony and recovery-identity fixes;
+that acceptance does not cover this new chemistry's motion or browser endurance. No days/weeks
+ecological campaign is required to finish development.
 
 <a id="design-roadmap"></a>
 

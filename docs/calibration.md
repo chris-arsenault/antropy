@@ -1,141 +1,97 @@
 # Current calibration
 
-Source of truth: [sim/config.ts](../frontend/src/sim/config.ts). Each harness record stores its
-resolved configuration. These are authored simulation scales, not empirical bacterial constants.
-Historical calibration is preserved in the [snapshot](sources/history/2026-09-10/calibration.md).
+[Configuration](../engine/src/config.rs) and the persisted chemical definition specify authored
+model scales. [Numerical design](design/chemistry/numerical-engine.md) and [measurements](design/chemistry/numerical-results.md)
+record formula selection, rejected candidates and measured limits.
+The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibration.md) is historical.
 
 <a id="calibration-default-scales"></a>
 
 ## Default scales
 
-| Quantity | Default |
+| Quantity | Current value |
 | --- | --- |
-| World / timestep / founders | 320 × 240 periodic XY / 0.2 model seconds / 48 |
-| Brain | 35 inputs, 24 recurrent units, 8 outputs |
-| Finite deposits | 48; rate scale 0.2, radius scale 3, lifetime scale 600 s, mean renewal wait 120 s |
-| Food layout | Fixed local sites around seven unevenly populated centers; spread 18 units; site radius 0.6–1.6 times scale, richness 0.3–2.3, A share 5–95%; zones and epochs selectable |
-| Initial dissolved food | Zero uniform food; 10% of finite initial source stock transferred into its local field |
-| Food diffusion / decay | 0.3 / 0.001 |
-| Toxin diffusion / decay / receptor K | 0.12 / 0.04 / 0.025 |
-| Injury / maximum repair rate | 0.5 / 0.008 per second |
-| Contact injury rate | 0 (off) per second per unit neighbour weapon/core |
-| Protection divisor | 1 + 80 × actual defense/core + 1000 × actual toxin machinery/core |
-| Matrix decay / drag / binding capacity / binding rate | 0.003 / 8 / 0.15 / 2 |
-| Hard barrier | Threshold 1.5; disabled by porous mode |
-| Neutral secretion | 0, disabled; optional transport constants retained |
-| Food chemical energy / catabolic efficiency | 4 per material unit / 0.8 |
-| Construction energy | 0.5 per new material unit |
-| Founder reserve / usable energy | 0.8 / 0.5 |
-| Core / motor / A processing / storage stock | 1 / 0.08 / 0.08 / 0.08 |
-| B processing / defense / toxin / matrix stock | 0.05 / 0.025 / 0.02 / 0.02 |
-| Body and reserve density / viscosity | 4 / 0.004; a provisional setting supported by the short transit controls below |
+| World / timestep / founders | 320 × 240 periodic XY / 0.2 model seconds / 48 in two colonies |
+| Controller | 39 inputs, 24 recurrent units, nine outputs |
+| Machinery | Four receptor, four transporter, four unary-enzyme slots; fifteen funded stocks |
+| Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
+| Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
+| Compact affinity support / minimum susceptibility | R=3 coordinate units / 0.05 |
+| Finite sources | 48 around seven unequal regions, spread 18; rate scale 0.2, radius 3, lifetime scale 600 s, mean renewal wait 1,200 s |
+| Source bootstrap | IDs 0 and 80 for chemistry seed 101, ranked by deliverable potential; 10% finite stock dissolved locally |
+| Extracellular washout | 0.001 per second for every species; half-life 693 model seconds |
+| Field mesh / physiology interval | 2 world units / 0.8 model seconds; no abundance cutoff |
+| Founder homeostasis | Membrane matches retained product; export begins near 75% storage fill |
+| Movement / diffusion impedance coefficients | 0.5 / 1 |
+| Viscosity / thermal energy | 0.004 / 0.00008 |
+| Transport turnover / work | 2.5 per installed stock per second / 0.05 per material |
+| Enzyme turnover / downhill capture efficiency | 2.5 per installed stock per second / 0.8 |
+| Construction work / growth rate | 0.5 per material plus potential deficit / 0.06 |
+| Founder internal matter / usable energy | 0.8 / 0.5 |
+| Core / motor / storage stock | 1 / 0.08 / 0.08 |
+| Each receptor / transporter / enzyme stock | 0.01 / 0.04 / 0.04 |
+| Body / inventory density | 4 / 4 |
+| Injury / maximum repair rate / stress K | 0.01 / 0.008 per second / 0.3 |
+| Repair material / energy per injury | 0.3 / 0.8 |
 | Motor power density / efficiency | 0.2 / 0.5 |
-| Behavioral mutation probability / scale | 0.0015 / 0.08 (about 2.5 loci per birth) |
-| Physical mutation probability / scale | 0.1 / 0.12 (about 1.0 selected loci per birth, including the optional harvesting and tint loci) |
-| Decomposition | Detritus returns half as food A and half as food B |
-| Abiotic disturbance (`config.disturbance`, off by default) | meanInterval 2,000 s (10,000 ticks); radius 10 (about 0.41% of the world); mortality 0.9; mixing 1 |
-| Horizontal gene transfer | `transferRate` 0; the [transfer study](transfer-study.md) runs at 0.001 per touching pair per second |
-| Reserve sharing | `sharingRate` 0; the [sharing study](sharing-study.md) runs at 0.05 per second |
-| Neutral chemical signal | `secretionRate` 0 (off); the [signal study](signal-study.md) runs at 0.02 |
-| Predation | `preyYield` 0 (dead material feeds detritus only); the [predation study](predation-study.md) runs at 0.5 |
-| Family chemistry | `toxinTypes` 1 (one toxin, tint silent); 2 splits toxin and immunity by the heritable tint |
-| Membrane crowding | `machineryCrowding` 0 (additive pathway returns); the [cycle study](cycle-study.md) runs at 0.5 and 0.75, with version-specific results in the corrected study; these are not certified guild-coexistence settings |
-| Element cycle (`config.cycle`, off by default) | light 0.5; lightSupply 0.001 fixation per raster cell per second gathered over a radius-2 footprint of 13 raster cells, so an isolated harvester can fix at most 0.013/s and the whole world offers 4.8/s, equal to the deposit supply; photoRate 0.3; photoRatio 0.05; carbonK 0.3; oxygenK 0.05; oxygenPerMaterial 1; anaerobicEfficiency 0.25; atmosphere oxygen 0.2 and carbon 1; exchangeRate 0.0001/s; initialCarbon 1; carbon/oxygen diffusion 0.3/0.5. With light unlimited per unit ground, harvesting income was density-independent and three evolution arms passed 800–1,200 cells by 85,000 ticks; a one-raster cap of 0.01 let three more arms pass 800–1,400 by 70,000–90,000 because 4,800 raster cells offered ten times the deposit supply. Under the footprint supply a lone half-core three-fold harvester divides about every 3,000 ticks on light alone and 48 of them plateau near 45–60 cells in the default world |
-| Learned-weight retention | 1 |
-| UI target / population safety ceiling | 30 ticks/s / 10,000 cells, pause on limit |
-| Ancestry / recovery limits | 2,000,000 organism records; six automatic and two manual saves; 256 MiB total compressed, 192 MiB individual uncompressed |
+| Behavioral mutation probability / scale | 0.0015 / 0.08 |
+| Physical mutation probability / scale | 0.1 / 0.12; includes fixed-slot chemical alleles |
+| Decomposition | Built material becomes ID 186; internal species retain identity |
+| Horizontal transfer / disturbance | Rate zero / absent by default |
+| UI pacing / population ceiling | Requested 30 ticks/s / pause at 10,000 cells |
+| Field nodes / ancestry ceiling | 19,200 default; maximum 80,000 / 2,000,000 organism records |
+| Recovery retention | Six automatic and two manual saves; 256 MiB compressed total, 192 MiB individual raw |
 
-The element-cycle row combines current constants with historical 80 × 60-world probe results;
-its 4.8/s supply and plateau estimates describe that older area, not the current world. The same
-optional light density offers 76.8/s over the larger raster. Those probes
-used since-removed harvesting costs; their exact survival/division outcomes are not current
-calibration guarantees. Default settings leave the cycle off. Review the corrected cycle record
-before using those findings to select an observation configuration.
+Potential is stored in chemical matter and generic biomass; usable energy is a separate stock.
+Transport, upkeep, motor work, repair and reaction losses dissipate energy. No automatic catabolism
+converts an untyped reserve. Ploidy, birth-local assimilation and expression are described in
+[bodies](design/funded-bodies.md). Parameters remain revisable hypotheses, not empirical constants.
 
-Actual speed, radius and uptake are body-dependent; they are not fixed global phenotype values.
-Ploidy, transmission, crossover, reproduction and plasticity policies are described in
-[bodies and inheritance](design/funded-bodies.md).
+The [analytical resource economy](design/chemistry/resource-economy.md) derives the current
+source and turnover settings. Positive local growth budgets coexist with an unaffordable
+uniform-background reference. Both daughters at one finite site reproduce; an isolated weak
+site remains unable to support its resident. The actual default starts with 48 cells and reaches
+74 after 600 ticks, with 26 divisions and no deaths. These are bounded viability findings.
 
 <a id="calibration-throughput"></a>
 
 ## Measured throughput
 
-For the new world, the initial frozen-mutation/learning 100-tick load check took 1.62 seconds
-and the eleven field arrays occupied 6,758,400 bytes. See [current continuation checks](continuing-observation.md).
-The timings below describe earlier, smaller worlds.
+The [integrated numerical record](design/chemistry/numerical-results.md) measures 217 ticks/s at
+48 cells, 59.9 at 2,000 varied cells and 33.4 during the growing 2,000-cell load. These include
+packed rendering preparation, census and inspection. GPU execution, browser suspension and
+days/weeks endurance remain unmeasured. Earlier TypeScript quantization results are historical.
 
-Measured September 11, 2026 on the development host with Node 24, single-threaded, from tick zero.
-Checkpoint hashes at the end of each run were identical before and after the kernel optimization,
-so trajectories are bit-for-bit unchanged.
-
-| Configuration | Before | After |
-| --- | ---: | ---: |
-| Seed 101 default, 2,500 ticks, ending at 196 cells | 130 ticks/s | 215 ticks/s |
-| Seed 7, 300 founders, source rate 1.0, 600 ticks, ending at 418 cells | 50 ticks/s | 94 ticks/s |
-| Seed 9 default with solid matrix and signaling, 1,500 ticks, 192 cells | 143 ticks/s | 228 ticks/s |
-
-Remaining cost at about 440 cells is roughly a quarter RNN inference, a quarter contact resolution
-and neighbour lookup, and the rest sensing, uptake, growth and fields. Further exact speedups would
-require changing float32 evaluation order or the four-pass contact model, which are physics changes.
-
-In the browser, population statistics cost about as much as one step (6–10 ms) and previously ran
-every animation frame; they now refresh at most every 250 ms while the map redraws every frame,
-and maximum speed uses a 28 ms frame budget (about 30 frames per second). Browser throughput is
-not certified; the earlier four-fifths-of-headless estimate was not a browser measurement.
-
-A Rust WebAssembly kernel for inference, contacts and sensing was measured on September 12,
-2026 at 44 ticks/s versus 24 for the evolved seed-303 checkpoint (1,324 cells) and about 20%
-faster at 450–550 cells, then removed under [ADR 0019](adr/0019-single-language-kernel.md):
-the split boundary made the physics harder to reason about, and the profile after it showed
-only about 15% of a tick left parallelizable, so threads were never worth building. The thick-
-medium default at 1,300 cells runs at roughly 25 ticks/s headless with per-operation float32
-rounding removed from the RNN.
-
-An earlier default estimate was about 5,000 ticks per generation at steady state. Generation
-timing depends on bodies, supply, mortality and crowding; it is not a current fixed conversion
-between ticks and generations. These short measurements do not establish sustained browser
-throughput, memory use or checkpoint latency over days or weeks.
+See [continuation](continuing-observation.md) and the validation record for final operating checks.
+Historical A/B throughput figures do not apply to this larger chemical state.
 
 <a id="calibration-residency"></a>
 
-## Earlier thick-medium calibration
+## Motion and residency
 
-This table records why the previous default was changed to 0.4. The spatial redesign supersedes
-that setting and its compensating food density. In the [new short controls](spatial-probes.md),
-a founder 18 units from finite food reached it and divided at 0.004; at 0.4 it did neither by
-1,500 ticks. A 70-unit start starved before arrival. These aligned-start probes support a physical
-opportunity, not reliable navigation, evolved dispersal or a permanent viscosity target.
-
-Measured September 12, 2026 over 6,000 ticks from the seed-101 default with mutation off, tracking
-every cell that lived at least 500 ticks. Displacement is per 1,000 ticks of life; crossing is
-the share of cells that entered the other half of the world during their life.
-
-| Viscosity | Deposits, rate | Median displacement | 90th percentile | Crossed a band | Median life, ticks | Motor share of dissipated energy |
-| ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| 0.0004 | 8, 0.3 | 22.4 | 46.6 | 96% | 3,125 | 29.7% |
-| 0.004 | 8, 0.3 | 15.0 | 29.2 | 75% | 2,116 | 29.5% |
-| 0.04 | 8, 0.3 | 8.0 | 13.2 | 41% | 1,900 | 29.4% |
-| 0.4 | 8, 0.3 | 3.5 | 4.9 | 12% | 1,499 | 30.1% |
-| 0.4 | 24, 0.2 | 3.0 | 4.5 | 13% | 1,686 | 30.2% |
-
-The sampled crossing fractions support the narrower finding that higher viscosity reduces
-dispersal within a cell's observed life. This motivates local selection; it does not prove that
-every interaction was global in the old world. At 0.4 cells mostly stay in their starting band,
-and separate constructed diet contests show regional sorting without authored food preference.
-Motor energy is unchanged because the same power buys less speed; deposits were made denser and
-supply raised so slow cells have local food and the population is about 340 rather than 170.
+The physical geography remains sparse and uneven. Viscosity 0.004 is provisional; making all cells
+slow is not the intended mechanism for spatial differentiation. Earlier TypeScript 300-tick ordinary-founder
+controls used resident, nearby and empty conditions. The resident and nearby cells survived; the
+nearby cell did not enter the resource target by the horizon. The empty control died at tick 291.
+These results do not establish successful transit or colonization. Earlier A/B transit successes
+remain [historical](spatial-probes.md), not evidence for the current chemistry.
 
 <a id="calibration-why-the-injury-balance-changed"></a>
 
-## Why the injury balance changed
+## Chemistry and injury selection
 
-The original strategic ecology used injury 0.05 and repair 0.08. Near zero damage, founder repair
-was approximately 0.24 × damage per second, enough to suppress ordinary exposure almost completely.
-These were the September 10 rates before producer immunity. At concentration 0.0019, defense
-alone gave about 0.0118 injury/s against 0.008 maximum repair/s. Current founder immunity raises
-the protection divisor from 3 to 23, reducing that example to about 0.00153 injury/s. Actual
-exposure, effort and available resources determine the damage balance in the current run.
+In the first TypeScript implementation, the stress surface made the selected nutrient pair too harmful. A replacement with sharper
+peaks failed the unchanged continuity bound and was rejected. The accepted smooth additive surface
+and the same source-selection criterion resolved IDs 0/15. A fixed local sensitivity set tested
+injury rates 0.0075, 0.01 and 0.0125 with finite-resource and empty controls for 300 ticks.
+The middle rate retained paid acquisition and construction with limited injury. This is a short
+nutrition proof point; it neither selects an evolved founder nor proves indefinite survival.
 
-The [September 10 ablations](design/bacteria-results.md) establish consequences in that version.
-This is not proof of an optimal balance, real toxicity constants or evolved investment. Future
-calibration must state a prediction, preserve conditions and stop when tuning fails structurally.
+The later [viability diagnosis](design/chemistry/viability.md) isolated constitutive export
+and an incompatible retained product as avoidable losses. Retention and membrane compatibility
+permit repeated funded reproduction without changing injury, repair, transport or resource rates.
+Startup retains 24 founders per initial deposit. Reducing this to four was not supported
+by the causal evidence and invalidated the earlier performance comparison. The weaker isolated
+deposit contracted in that historical configuration. The current resource-economy record above
+supersedes its rates and source selection. No community composition or successful evolutionary
+endpoint is prescribed.

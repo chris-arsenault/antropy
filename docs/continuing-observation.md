@@ -1,118 +1,92 @@
 # Continuing observation
 
-The v8 implementation adds rolling recovery and retained spatial history. This prepares the
-client for longer observation; it does not establish days or weeks of uninterrupted execution.
-The simulation can go extinct, hit a declared safety limit, or be suspended by the browser.
+The Rust/WASM system supports a continuing local run with worker rendering, checkpoint recovery
+and bounded observation history. Days/weeks ecological persistence and browser endurance remain
+unverified. Development establishes physical opportunities; it does not precompute the user's
+future community.
 
-## Operational check registration — September 13, 2026
+The September 14 [reliability evidence](design/chemistry/reliability-results.md) adds browser
+retention, save-concurrency and presentation measurements. The older headless figures below
+retain their original scope. The repaired actual browser sustains 54 ticks/s at 2,000 varied cells
+and 32.6 during constructed growth, using software graphics, full layers and expanded diagnostics.
+Presentation rates are approximately 15 and 9 frames/s. Cold saves interrupt stepping; these
+figures do not certify the user's device or unattended days/weeks operation.
 
-Question: does accumulated parentage make saving and restoring impractical before the declared
-memory limit, and can the new default advance with its ordinary mutation and learning enabled?
-These are execution checks, not evolutionary experiments.
+## Measured operating workload
 
-Run one seed-101 startup check capped at 500 ticks or 60 wall seconds, stopping on extinction or
-any simulation stop. Record accounting residuals, births, living cells, occupancy, elapsed time,
-serialization and restore time. Compare the next five ticks of original and restored state exactly.
-No seed expansion or horizon extension follows a favorable result.
+[Current measurements](design/chemistry/numerical-results.md), ledger 3666–3668, use 100 ticks
+after ten warm-up ticks, 320 × 240 units, mesh 2, all 256 external channels, distinct genomes
+and private learning. Packed five-layer rendering preparation, 25-tick census and selected
+inspection are included.
 
-Separately build synthetic linear ancestry fixtures with 100,000 and 2,000,000 lifetime records.
-Only one living organism remains; this is not a population produced by the simulation. Compact
-every 4,096 inserted records. Measure insertion, serialization, gzip size, restore and sampled
-parentage equality, process memory and retained observer history. No physical ticks are advanced.
-Each fixture has a 60-second wall budget; the entire command is capped at 180 seconds. A failure
-changes storage design or its declared limit, not ecological tuning. Reuse the harness ledger and
-source digest; save the measurement summary locally.
+| Constructed load | Mean ticks/s | Lowest 20-tick window |
+| --- | ---: | ---: |
+| 48 cells | 217.1 | 192.9 |
+| 2,000 varied cells | 59.9 | 59.3 |
+| 2,000 cells with funded growth/division | 33.4 | 31.0 |
 
-Further browser responsiveness, actual suspension recovery and human motion review remain separate
-checks. A Node timing and emulated IndexedDB test cannot certify those browser behaviors.
+All pass the 30-tick minimum. The 60-tick target is narrowly missed at the resting 2,000-cell
+load and not met during growth. GPU uploads/execution and browser rendering are excluded.
+The growth fixture is an explicitly funded computation load, not a viable ecosystem.
+Default startup separately retained 36 of 48 cells at tick 600 with one division
+(ledger 3663). After [resource-economy calibration](design/chemistry/resource-economy.md),
+the same 600-tick horizon reaches 74 cells with 26 divisions and no deaths (3777).
+These short checks do not establish endurance or colonization.
 
-The first check (ledger 3478) found 3.75-second serialization and 26.11-second restore at two million
-records. The storage revision caches unchanged closed pages, decodes byte strings with an indexed
-loop and shares one decoded ancestry store across validation and restoration. One follow-up repeats
-only the same two synthetic fixtures, adds repeated-save timing/equality, and retains the same wall
-budgets. It does not repeat or extend the ecological startup check.
-
-## Results and limits
-
-Ledger 3478, before the two-colony startup revision: the seed-101 default reached 500 ticks in 8.07 seconds with 122 living cells,
-148 daughter births, no stop, and one observed spatial group. These are startup measurements, not
-an occupancy target or evidence of long-term viability. Energy/material residuals were
-9.25e-11 / 2.29e-11. The 9.32 MB checkpoint serialized in 108 ms and restored in 92 ms; the next
-five physical ticks matched exactly. The initial three seeded sites are close enough to become one
-observed neighborhood. Persistent colonization of distant opportunities was not tested.
-
-User review subsequently required at least two starting colonies. New worlds now seed separated
-existing food sites; the earlier startup census above does not describe that revised initialization.
-Saved worlds retain their positions. Bounded initialization tests check two distinct occupied groups,
-all 48 founders accounted for, and a common founder genotype.
-
-Ledger 3479, revised storage, no physical ticks:
-
-| Synthetic ancestry | First serialization | Repeated serialization | Restore | JSON / gzip |
-| --- | ---: | ---: | ---: | ---: |
-| 100,000 records | 197 ms | 17 ms | 113 ms | 6.51 / 0.55 MB |
-| 2,000,000 records | 3,754 ms | 311 ms | 1,681 ms | 128.16 / 10.88 MB |
-
-Repeated serialization matched byte for byte. Sampled parentage at the beginning, middle and
-end matched after restoration; bounded tests also compare all 10,000 records of a smaller fixture.
-Raw closed records use six float64 values each, about 96 MB for two million. Cached base64 adds
-memory; serialization and restore temporarily hold additional copies. Process RSS at the final
-two-million fixture was 1,053,696,000 bytes, with both worlds, two JSON strings and earlier fixture
-allocations present. This is neither isolated live-world memory nor a measured browser peak.
-
-The [original generated report](evidence/continuation-check/report.json) and
-[storage follow-up](evidence/continuation-check-cached/report.json) retain source digests and exact
-figures. No automatic horizon or seed expansion followed these checks.
+Earlier TypeScript measurements, including the 52.6-tick/s default and quantization work,
+remain in [population performance](design/chemistry/population-performance.md).
+They do not describe the current engine.
 
 ## Recovery behavior
 
-Every 30 wall seconds while running, and after a pause, the UI captures a same-version checkpoint.
-Visibility/page-exit handlers make an additional best-effort attempt. IndexedDB stores gzip blobs
-and metadata; replacement and retention happen in one transaction. It keeps six automatic and two
-manual points across all runs, within 256 MiB. A single raw checkpoint is limited to 192 MiB.
-Failed automatic saving pauses execution and reports the error; older completed points remain.
-Export a separate file through the UI when an independent copy is needed.
+The worker saves every 30 wall seconds while running and on pause; visibility/page-exit attempts
+are best effort. IndexedDB transactions retain six automatic and two manual compressed packages
+within 256 MiB. Each raw physical checkpoint is limited to 192 MiB. Failed saves pause the
+simulation and preserve the last good save and live world. Explicit restore starts paused.
 
-A reported recovery failure exposed browsers without `crypto.randomUUID`. Both run and recovery
-identities now use UUIDs built from `crypto.getRandomValues`, independently of simulation randomness.
-The regression test removes `randomUUID` and checks checkpoint capture, IndexedDB save, restore,
-retained run identity and unchanged physical state.
+V11 physical bytes contain chemistry, sources, bodies, installed machinery identity, neural state, inherited genomes, parentage,
+random streams, integration clock, ledgers and interventions. Gzip packages separately include
+bounded observations and execution provenance. Old physical schemas are rejected; no adapter
+guesses missing chemistry. The previous manual-save store is untouched and never used as fallback.
+Run IDs work without `crypto.randomUUID`.
+Save, export and restore serialize before allocating snapshots; busy automatic saves are skipped.
+The Save panel's **Export runtime report** downloads local scalar breadcrumbs independently of the
+worker. It can preserve the last recorded tick/build/fault after reload, but cannot recover the
+physical state of a killed process without a valid checkpoint.
 
-Restores are explicit and paused. They preserve source provenance, complete parentage and bounded
-observer history. A browser checkpoint with no observation payload begins observation at its saved
-tick; missing history is not reconstructed. v7 and older scientific states are rejected rather
-than reinterpreted; the older IndexedDB manual-save store remains untouched.
+## Memory and history limits
 
-The default ancestry limit is two million organism records and the live population safety ceiling
-is 10,000. Reproduction pauses before exceeding either, without dropping parentage or deleting cells.
-These are finite safety budgets, not carrying capacity or guarantees of a run duration. Continuing
-beyond an ancestry limit needs an explicit configuration/storage decision; exporting alone does
-not make an already-full world resume. Genotype pruning retains living and founder genomes, so
-some dead organisms have parentage but no remaining genotype for genetic-distance comparison.
+Defaults stop at 10,000 living cells or two million ancestor records. These are operating limits,
+not biological carrying capacities. Complete ancestry uses 56-byte resident records with compact
+binary serialization. Full dead non-founder genotype payloads can be pruned independently.
 
-Timer-based pacing avoids relying on animation callbacks and caps accumulated debt after a pause.
-It cannot make a sleeping device execute or prevent browser throttling, tab eviction or storage
-eviction. Compressed IndexedDB round trips, retention and failed-transaction preservation are tested
-with fake-indexeddb; pacer tests bound suspension catch-up. Actual browser suspension recovery,
-quota failure presentation, render responsiveness and days/weeks endurance remain unverified.
+A registered two-million-record synthetic history used 406 MiB WASM high-water memory, down
+from 906 MiB before removing string allocation and redundant snapshot copies. The raw physical
+file was 68.1 MB and its browser gzip package 11.1 MB. That measurement includes temporary
+snapshots and two worlds during verification; it is not steady browser memory or an ecological run.
+Large combined population/field loads use more memory.
 
-## Human handoff
+Physical state contains the most recent 512 ordinary events plus up to 4,096 explicit manual
+interventions. Exhausting the intervention budget rejects another manual edit before it changes
+the world. Observations retain 240 thinned chart/spatial samples, 81 recent behavior samples and
+2,048 recent spatial events.
+Old unobserved motion is not reconstructed. Exports preserve retained data but do not reset
+ancestry limits or remove memory costs.
 
-Review the same tick-zero default through Run. At world scale, occupied neighborhoods and empty
-gaps should be easy to distinguish, including individual dispersers. Zoom into a population and
-check that its soft region resolves into constituent cells with readable headings and motion.
-Pan across a periodic seam, change a field layer independently of population colors, and inspect
-a cell and its population. Judge circling, jitter and congestion directly.
+The field allocation is bounded by geometry (default 160 × 120 nodes × 256 float32 amounts).
+There is no sparse-block-count ceiling or quantization setting. Very large state can hit the
+raw checkpoint/storage budget before another configured ceiling. The error remains visible.
 
-During ordinary observation, confirm a recovery point appears, pause, and explicitly restore it:
-tick, population and retained samples should continue from that point, paused.
-These checks concern operation and legibility, not a chosen number of populations or coexistence.
-No browser server was started by the agent.
+## Human review and completion boundary
 
-Implementation validation: `make ci` passed all 139 bounded tests across 31 files, lint,
-formatting, TypeScript, documentation checks and Terraform formatting. `make build` produced the
-SPA successfully. These checks include observer non-interference, periodic grouping, population
-picking and zoom detail, independent controls, exact restored continuation, full small-fixture
-parentage equality, failed recovery writes and ancestry-limit pauses. The user accepted the world
-after the two-colony startup and recovery identity fixes on September 13, 2026, and closed all
-seven phases. This acceptance does not establish days/weeks browser endurance.
+Use the existing server's Run view to judge occupied neighborhoods and gaps, moving dispersers,
+headings, seams, independent field controls, zoom from regions into cells, and chemistry inspection.
+A recovery should restore tick, population, ancestry and retained samples. These visual and device
+checks on the user's device remain open. Isolated Chromium operational checks are recorded in
+the reliability evidence, separately from human motion acceptance.
+
+Timers cannot overcome tab throttling, sleep, eviction or a failed browser process. Worker ownership
+keeps physical work and snapshot serialization off React's thread, but saves still interrupt that
+worker's stepping while encoding. GPU/context recovery and IndexedDB have bounded integration
+tests; those do not certify a particular browser/device. The [backlog](backlog.md#backlog-runtime-and-observation-limits)
+retains enduring observation requirements.

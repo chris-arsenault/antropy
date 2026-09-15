@@ -1,0 +1,792 @@
+[
+  {
+    "reference": "harness/artifacts/digital-chemistry/fidelity-probes-finer/barrier-removed",
+    "candidate": "harness/artifacts/digital-chemistry/fidelity-probes-default/barrier-removed",
+    "tick": 300,
+    "referenceResolution": 1e-30,
+    "resolution": 1e-24,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 0,
+      "y": 0,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 0,
+      "heading": 0,
+      "body": 0,
+      "inventory": 0,
+      "energy": 0,
+      "born": 0,
+      "brain": 0,
+      "receptors": 0,
+      "contacts": 0,
+      "inputs": 3.155443620884047e-29,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "15": {
+        "l1": 1.1435593134241608e-21,
+        "maximum": 2.0918118133049658e-23
+      },
+      "129": {
+        "l1": 2.9451331654899115e-22,
+        "maximum": 1.1775094000933634e-24
+      },
+      "142": {
+        "l1": 1.4943614118427798e-21,
+        "maximum": 3.9568118215608745e-23
+      },
+      "183": {
+        "l1": 7.592670901366919e-22,
+        "maximum": 5.709368054432698e-24
+      },
+      "184": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "185": {
+        "l1": 2.1856707011573732e-21,
+        "maximum": 2.5750329834491264e-23
+      },
+      "128": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "130": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "131": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "132": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "133": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "134": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "135": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "136": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "137": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "138": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "139": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "140": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "141": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "143": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "176": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "177": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "178": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "179": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "180": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "181": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "182": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "186": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "187": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "188": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "189": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "190": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "191": {
+        "l1": 0.0,
+        "maximum": 0
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 0,
+      "y": 0,
+      "heading": 0,
+      "energy": 0,
+      "inventory": 0,
+      "body": 0,
+      "damage": 0,
+      "stressLoad": 0,
+      "impedance": 0,
+      "localMixture": 1.950879896889866e-23,
+      "speedCeiling": 0,
+      "mobility": 0,
+      "action": 0,
+      "inputs": 3.155443620884047e-29,
+      "localInputsNow": 6.310887241768094e-29,
+      "targetDistance": 0
+    },
+    "fieldL1Error": 5.877371833109997e-21,
+    "physicalLedgerMaximumAbsoluteError": 0.0,
+    "numericalMaterial": 6.2837512346168754e-21,
+    "numericalEnergy": 2.381786264269763e-20,
+    "withinAbsoluteTolerance": true
+  },
+  {
+    "reference": "harness/artifacts/digital-chemistry/fidelity-probes-finer/barrier-stopped",
+    "candidate": "harness/artifacts/digital-chemistry/fidelity-probes-default/barrier-stopped",
+    "tick": 300,
+    "referenceResolution": 1e-30,
+    "resolution": 1e-24,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 0,
+      "y": 0,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 0,
+      "heading": 0,
+      "body": 0,
+      "inventory": 4.0389678347315804e-28,
+      "energy": 0,
+      "born": 0,
+      "brain": 0,
+      "receptors": 0,
+      "contacts": 0,
+      "inputs": 0,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "15": {
+        "l1": 3.6791313020309593e-22,
+        "maximum": 9.150986359947411e-24
+      },
+      "129": {
+        "l1": 2.9451332146107547e-22,
+        "maximum": 1.17741462700673e-24
+      },
+      "142": {
+        "l1": 1.3875504575044978e-21,
+        "maximum": 3.5169567392369544e-23
+      },
+      "183": {
+        "l1": 7.592670475311914e-22,
+        "maximum": 5.7094122061178765e-24
+      },
+      "184": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "185": {
+        "l1": 2.2456588356451188e-21,
+        "maximum": 2.3821997262726072e-23
+      },
+      "128": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "130": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "131": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "132": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "133": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "134": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "135": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "136": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "137": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "138": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "139": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "140": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "141": {
+        "l1": 2.1382117680737565e-50,
+        "maximum": 1.0691058840368783e-50
+      },
+      "143": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "176": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "177": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "178": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "179": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "180": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "181": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "182": {
+        "l1": 8.210733189403225e-48,
+        "maximum": 5.473822126268817e-48
+      },
+      "186": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "187": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "188": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "189": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "190": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "191": {
+        "l1": 0.0,
+        "maximum": 0
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 0,
+      "y": 0,
+      "heading": 0,
+      "energy": 0,
+      "inventory": 4.0389678347315804e-28,
+      "body": 0,
+      "damage": 0,
+      "stressLoad": 0,
+      "impedance": 0,
+      "localMixture": 1.729370311876549e-23,
+      "speedCeiling": 0,
+      "mobility": 0,
+      "action": 0,
+      "inputs": 8.271805336669372e-24,
+      "localInputsNow": 8.271805336669372e-24,
+      "targetDistance": 0
+    },
+    "fieldL1Error": 5.0549027923449796e-21,
+    "physicalLedgerMaximumAbsoluteError": 0.0,
+    "numericalMaterial": 5.174368328962581e-21,
+    "numericalEnergy": 1.5014831521622588e-20,
+    "withinAbsoluteTolerance": true
+  },
+  {
+    "reference": "harness/artifacts/digital-chemistry/fidelity-probes-finer/crossfeeding-coupled",
+    "candidate": "harness/artifacts/digital-chemistry/fidelity-probes-default/crossfeeding-coupled",
+    "tick": 300,
+    "referenceResolution": 1e-30,
+    "resolution": 1e-24,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 0,
+      "y": 0,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 0,
+      "heading": 0,
+      "body": 0,
+      "inventory": 1.3173027653245357e-25,
+      "energy": 0,
+      "born": 0,
+      "brain": 0,
+      "receptors": 0,
+      "contacts": 0,
+      "inputs": 0,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "112": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "128": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "144": {
+        "l1": 1.099245485900547e-23,
+        "maximum": 4.6044233315940017e-26
+      },
+      "184": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "200": {
+        "l1": 2.1811624574894975e-21,
+        "maximum": 1.8027335283093593e-23
+      },
+      "208": {
+        "l1": 2.301371600057928e-22,
+        "maximum": 7.56490543190013e-24
+      },
+      "224": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "240": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "160": {
+        "l1": 1.1084275759628104e-29,
+        "maximum": 6.823974321609897e-30
+      },
+      "168": {
+        "l1": 1.744759852114776e-57,
+        "maximum": 1.2213318961836067e-57
+      },
+      "192": {
+        "l1": 7.708176595306741e-48,
+        "maximum": 5.395723616714713e-48
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 0,
+      "y": 0,
+      "heading": 0,
+      "energy": 0,
+      "inventory": 1.3173027653245357e-25,
+      "body": 0,
+      "damage": 0,
+      "stressLoad": 0,
+      "impedance": 0,
+      "localMixture": 8.037156639466533e-24,
+      "speedCeiling": 0,
+      "mobility": 0,
+      "action": 0,
+      "inputs": 0,
+      "localInputsNow": 0,
+      "targetDistance": 0
+    },
+    "fieldL1Error": 2.4222920834385714e-21,
+    "physicalLedgerMaximumAbsoluteError": 0.0,
+    "numericalMaterial": 2.483180001374104e-21,
+    "numericalEnergy": 3.0877289223180464e-21,
+    "withinAbsoluteTolerance": true
+  },
+  {
+    "reference": "harness/artifacts/digital-chemistry/fidelity-probes-finer/crossfeeding-export-off",
+    "candidate": "harness/artifacts/digital-chemistry/fidelity-probes-default/crossfeeding-export-off",
+    "tick": 300,
+    "referenceResolution": 1e-30,
+    "resolution": 1e-24,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 0,
+      "y": 0,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 0,
+      "heading": 0,
+      "body": 0,
+      "inventory": 1.2037062152420224e-35,
+      "energy": 0,
+      "born": 0,
+      "brain": 0,
+      "receptors": 0,
+      "contacts": 0,
+      "inputs": 0,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "112": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "144": {
+        "l1": 1.1683926152311516e-23,
+        "maximum": 1.550963648536927e-25
+      },
+      "184": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "200": {
+        "l1": 9.271950199996035e-22,
+        "maximum": 5.758550877917691e-24
+      },
+      "224": {
+        "l1": 0.0,
+        "maximum": 0
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 0,
+      "y": 0,
+      "heading": 0,
+      "energy": 0,
+      "inventory": 7.888609052210118e-31,
+      "body": 0,
+      "damage": 0,
+      "stressLoad": 0,
+      "impedance": 0,
+      "localMixture": 3.453872856772777e-24,
+      "speedCeiling": 0,
+      "mobility": 0,
+      "action": 0,
+      "inputs": 0,
+      "localInputsNow": 0,
+      "targetDistance": 0
+    },
+    "fieldL1Error": 9.38878946151915e-22,
+    "physicalLedgerMaximumAbsoluteError": 0.0,
+    "numericalMaterial": 9.843801035884263e-22,
+    "numericalEnergy": 1.2861154626136506e-21,
+    "withinAbsoluteTolerance": true
+  },
+  {
+    "reference": "harness/artifacts/digital-chemistry/fidelity-probes-finer/degradation-active",
+    "candidate": "harness/artifacts/digital-chemistry/fidelity-probes-default/degradation-active",
+    "tick": 300,
+    "referenceResolution": 1e-30,
+    "resolution": 1e-24,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 0,
+      "y": 0,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 0,
+      "heading": 0,
+      "body": 0,
+      "inventory": 0,
+      "energy": 0,
+      "born": 0,
+      "brain": 0,
+      "receptors": 0,
+      "contacts": 0,
+      "inputs": 0,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "15": {
+        "l1": 4.620184851366408e-23,
+        "maximum": 2.8516067434900275e-24
+      },
+      "184": {
+        "l1": 3.9394476672837943e-23,
+        "maximum": 1.3234889800848443e-23
+      },
+      "240": {
+        "l1": 2.7542341502134236e-22,
+        "maximum": 1.1274447589369728e-24
+      },
+      "71": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "72": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "183": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "255": {
+        "l1": 0.0,
+        "maximum": 0
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 0,
+      "y": 0,
+      "heading": 0,
+      "energy": 0,
+      "inventory": 0,
+      "body": 0,
+      "damage": 0,
+      "stressLoad": 0,
+      "impedance": 0,
+      "localMixture": 1.0153338562170806e-24,
+      "speedCeiling": 0,
+      "mobility": 0,
+      "action": 0,
+      "inputs": 0,
+      "localInputsNow": 0,
+      "targetDistance": 0
+    },
+    "fieldL1Error": 3.610197402078444e-22,
+    "physicalLedgerMaximumAbsoluteError": 0.0,
+    "numericalMaterial": 3.77370223861334e-22,
+    "numericalEnergy": 6.088860186760075e-22,
+    "withinAbsoluteTolerance": true
+  },
+  {
+    "reference": "harness/artifacts/digital-chemistry/fidelity-probes-finer/degradation-self-reaction",
+    "candidate": "harness/artifacts/digital-chemistry/fidelity-probes-default/degradation-self-reaction",
+    "tick": 300,
+    "referenceResolution": 1e-30,
+    "resolution": 1e-24,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 0,
+      "y": 0,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 0,
+      "heading": 0,
+      "body": 0,
+      "inventory": 0,
+      "energy": 0,
+      "born": 0,
+      "brain": 0,
+      "receptors": 0,
+      "contacts": 0,
+      "inputs": 0,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "15": {
+        "l1": 4.6972736012020537e-23,
+        "maximum": 2.851594121715544e-24
+      },
+      "184": {
+        "l1": 1.1787323728880644e-23,
+        "maximum": 1.6543612251060553e-24
+      },
+      "240": {
+        "l1": 2.7539719522204945e-22,
+        "maximum": 1.1273297097561815e-24
+      },
+      "72": {
+        "l1": 0.0,
+        "maximum": 0
+      },
+      "255": {
+        "l1": 0.0,
+        "maximum": 0
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 0,
+      "y": 0,
+      "heading": 0,
+      "energy": 0,
+      "inventory": 0,
+      "body": 0,
+      "damage": 0,
+      "stressLoad": 0,
+      "impedance": 0,
+      "localMixture": 1.0152524001656407e-24,
+      "speedCeiling": 0,
+      "mobility": 0,
+      "action": 0,
+      "inputs": 0,
+      "localInputsNow": 0,
+      "targetDistance": 0
+    },
+    "fieldL1Error": 3.3415725496295063e-22,
+    "physicalLedgerMaximumAbsoluteError": 0.0,
+    "numericalMaterial": 3.7734314673982655e-22,
+    "numericalEnergy": 6.088722986942779e-22,
+    "withinAbsoluteTolerance": true
+  }
+]

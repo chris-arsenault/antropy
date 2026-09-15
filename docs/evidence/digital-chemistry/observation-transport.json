@@ -1,0 +1,20 @@
+{
+  "id": 3680,
+  "wasmDigest": "0b3e7aed763f661dcb165f98fed3e007b031c291762e445859b6366375edb409",
+  "legacy": {
+    "steps": 20,
+    "wallMs": 493.64079799999996,
+    "millisecondsPerPublication": 24.6820399,
+    "lastPayloadJsonBytes": 1010079,
+    "stop": "horizon"
+  },
+  "revisioned": {
+    "steps": 20,
+    "wallMs": 8.35886800000003,
+    "millisecondsPerPublication": 0.41794340000000146,
+    "lastPayloadJsonBytes": 9210,
+    "stop": "horizon"
+  },
+  "equalPhysics": true,
+  "equalDisplays": true
+}

@@ -1,0 +1,65 @@
+//! The sole physical kernel, shared by browser WebAssembly and headless assays.
+mod abi;
+pub mod accounting;
+pub mod ancestry;
+#[cfg(test)]
+mod boundary_tests;
+mod catalog;
+pub mod census;
+mod chemical_observation;
+pub mod chemical_operators;
+pub mod chemical_products;
+pub mod chemical_profiles;
+pub mod chemistry;
+pub mod chemistry_atlas;
+pub mod commands;
+pub mod composed;
+pub mod config;
+pub mod controller;
+pub mod diagnostics;
+pub mod disk;
+pub mod economy;
+mod economy_report;
+#[cfg(test)]
+mod economy_tests;
+pub mod field;
+pub mod field_reductions;
+pub mod fixtures;
+mod genealogy;
+#[cfg(test)]
+mod genealogy_tests;
+pub mod genetics;
+pub mod interaction;
+pub mod inventory;
+pub mod lifecycle;
+pub mod machinery_parameters;
+#[cfg(test)]
+mod mechanism_tests;
+pub mod metabolism;
+pub mod movement;
+mod numeric;
+pub mod observation;
+pub mod opportunities;
+pub mod organism;
+mod population_diagnostics;
+mod presentation;
+pub mod random;
+mod refitting;
+mod relationships;
+mod render;
+pub mod sensing;
+pub mod sources;
+pub mod spatial_energy;
+mod spatial_flux;
+mod spatial_kernel;
+pub mod spatial_numeric;
+pub mod spatial_rounding;
+pub mod spatial_step;
+mod startup_probe;
+mod storage_diagnostics;
+mod study_commands;
+mod study_trace;
+mod trace;
+pub mod transport;
+pub mod world;
+mod world_validation;

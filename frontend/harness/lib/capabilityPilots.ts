@@ -1,7 +1,7 @@
 import { mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { createWorld } from "../../src/sim/world";
-import { DEFAULT_CONFIG } from "../../src/sim/config";
+import { loadEngine } from "../numerical/engine";
+import { assignPopulation } from "./engineFixtures";
 import { ancestralProcessing } from "./capabilityFixture";
 import { type QuickScenario } from "./quickScenario";
 import { capabilitySources } from "./capabilitySources";
@@ -9,60 +9,74 @@ import { runSelectionPilot } from "./quickRun";
 import { type Flags, flag } from "./flags";
 
 const JUSTIFICATION =
-  "The short assay establishes an observed B-processing allele's benefit, but it was present in only one of 184 source cells. Test whether it increases from 12.5% under replenished B versus A over several generations, without mutation or private/retained learning. Fixed 10000-tick horizon; no extension.";
+  "Test whether a specified current-schema machinery variant increases from 12.5% under two replenished source compositions over several generations. Requires separately registered short causal evidence; historical B-processing results do not qualify. No mutation or private/retained learning. Four fixed 10000-tick pilots, no extension.";
 
-function pilotScenario(foodA: number, source: ReturnType<typeof capabilitySources>): QuickScenario {
+function pilotScenario(
+  first: number,
+  source: Awaited<ReturnType<typeof capabilitySources>>
+): QuickScenario {
   return {
-    name: `processing-invasion-${foodA ? "A" : "B"}`,
+    name: `processing-invasion-source${first ? 0 : 1}`,
     hypothesis: JUSTIFICATION,
     specification: {
       source: source.provenance,
       initialVariantPercent: 12.5,
-      variants: { 1: "actual 1847", 2: "1847 ancestral processing targets" },
+      variants: {
+        2: "trait-selected living genotype",
+        3: "ancestral import/enzyme alleles and targets",
+      },
       nutrientDenominator:
         "Continuing supply: uptake/initial inventory percentages are intentionally null; inspect input ledger.",
     },
     target: { x: 16, y: 16, radius: 0 },
-    offeredFoodA: 0,
-    offeredFoodB: 0,
-    create(seed) {
-      const w = createWorld(seed, {
-        ...DEFAULT_CONFIG,
+    create(engine, seed) {
+      const w = engine.create(seed, {
+        ...source.config,
         width: 32,
         height: 32,
         founders: 16,
         sourceCount: 2,
-        foodEpochs: { phaseTicks: 10000, shares: [foodA] },
-        foodZones: undefined,
+        sourceEpochs: {
+          phaseTicks: 10000,
+          mixtures: [source.config.sourceSpecies.map((_, i) => Number(i === (first ? 0 : 1)))],
+        },
+        sourceZones: null,
         mutationRate: 0,
         physicalMutationRate: 0,
+        transmission: "clonal",
+        transferRate: 0,
         learning: "static",
         learningRetention: 0,
       });
-      const genomes = [source.processing, ancestralProcessing(source.processing)];
-      for (const [i, genome] of genomes.entries()) {
-        const id = i + 1;
-        w.genomes.set(id, { id, parent: null, born: 0, learned: 0, genome });
-      }
-      w.nextGenome = 3;
-      for (const [i, c] of w.cells.entries()) {
-        c.genome = i % 8 === 0 ? 1 : 2;
-        w.ancestry.get(c.id)!.genome = c.genome;
-      }
+      assignPopulation(
+        w,
+        [
+          { label: "specified processing variant", genotype: source.processing },
+          {
+            label: "ancestral processing",
+            genotype: ancestralProcessing(source.processing, source.ancestor),
+          },
+        ],
+        (i) => (i % 8 === 0 ? 0 : 1)
+      );
       return w;
     },
   };
 }
-export function runCapabilityPilots(flags: Flags): void {
-  const root = flag(flags, "output", "harness/artifacts/capability-pilots-2026-09-11");
-  const source = capabilitySources();
+export async function runCapabilityPilots(flags: Flags): Promise<void> {
+  const root = flag(flags, "output", "harness/artifacts/chemical-capability-pilots");
+  if (!flags.values.has("justification"))
+    throw new Error(
+      "Provide --justification linking new short causal evidence and the pilot registration"
+    );
+  const source = await capabilitySources(flags, await loadEngine());
   mkdirSync(root, { recursive: true });
   for (const seed of [702, 703])
-    for (const foodA of [1, 0]) {
+    for (const first of [1, 0]) {
       if (readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory()).length >= 4)
         throw new Error("Four-pilot budget exhausted");
-      const scenario = pilotScenario(foodA, source);
-      runSelectionPilot(
+      const scenario = pilotScenario(first, source);
+      await runSelectionPilot(
         scenario,
         {
           seed,
@@ -71,7 +85,7 @@ export function runCapabilityPilots(flags: Flags): void {
           swap: false,
           output: join(root, `${scenario.name}-${seed}`),
         },
-        JUSTIFICATION
+        `${JUSTIFICATION} ${flag(flags, "justification", "")}`
       );
     }
 }

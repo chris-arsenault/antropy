@@ -2,225 +2,132 @@
 
 ## Prerequisites and checks
 
-Use Node from `.node-version`, pnpm from `frontend/package.json`, and Terraform 1.12 or newer
-for infrastructure checks. Install frontend dependencies with `pnpm install` from `frontend/`.
+Use Node from `.node-version`, pnpm from `frontend/package.json`, Terraform 1.12 or newer,
+and the Rust toolchain/wasm32 target declared in `rust-toolchain.toml`.
+Install frontend dependencies with `pnpm install` in `frontend/`. Run `make ci` at the root for
+Rust formatting/Clippy/tests, ESLint, formatting, TypeScript, bounded WASM/React tests,
+documentation and Terraform formatting; `make build`
+produces the SPA and WASM asset. `node frontend/scripts/build-engine.mjs` rebuilds the
+engine for an already-running server without starting another server. Authored changes, including formatting, use native patch operations.
 
-Run `make ci` from the repository root for lint, format check, TypeScript, bounded Vitest tests,
-documentation checks and Terraform formatting. `make build` produces the static SPA.
-Agents edit authored files through native patch operations, including formatting changes.
+`cd frontend && pnpm run dev` starts port 26000. Agents start it only on explicit request.
+The browser starts a paused new world; current operation is described in
+[continuation](continuing-observation.md). No cloud resources are needed for development.
 
-`cd frontend && pnpm run dev` starts the LAN-reachable server on port 26000. Agents start it only
-on explicit request. The default UI starts a new bacterial population paused at tick zero.
+## Chemistry and experiment boundaries
 
-## Ecological measurements
+The [digital chemistry contract](design/chemistry/README.md) governs current v11 checkpoints and
+schema-v3 evidence. Historical studies preserve their original results, not executable current
+registrations. Read [numerical evidence](design/chemistry/numerical-results.md) before selecting a new comparison.
+Register the question, competing explanation, conditions, horizons, wall budget and stopping decision.
+Do not rerun every migrated campaign or search for a chosen community.
 
-The current default is [spatial ecology](design/spatial-ecology.md): 320 × 240 world units,
-viscosity 0.004, 48 finite local renewal sites, local interference and live inheritance.
-[50k-tick food epochs](food-epochs-study.md) and food zones remain selectable. `--regime patchy` selects
-the default lifetime distribution explicitly; persistent/transient
-now select longer/shorter finite deposit lifetimes. Neither is an infinite spout.
-Composition layout is independent of that lifetime setting. Select mixed deposits in the
-environment settings, or omit both `foodEpochs` and `foodZones` from the resolved configuration,
-to use heterogeneous random compositions. Saved configurations preserve their selected layout.
-`pnpm harness ecology-causal --seeds 201,202 --ticks 1200` runs declared small diagnostic
-comparisons with mutation and learning disabled. Full initial checkpoints, source digests and
-outcome series preserve their conditions; no diagnostic genotype is promoted into the browser.
-
-`pnpm harness rps --case list` describes the producer/resistant/sensitive toxin contests;
-`--case pairwise` runs three 3,000-tick pairs in both placements and `--case three-way` or
-`--case invade-<strategy>` runs a registered multigeneration pilot. Settings such as
-`--toxin-effort`, `--contact-damage`, `--defense-strength`, `--matrix off` and `--size` are
-recorded in each manifest. `python3 harness/rps_report.py <root>` plots group counts and reports initial/final shares with percentage-point changes.
-Use its `--audit OUTPUT_JSON` option with one or more roots to export saved endpoint frequencies
-recursively without traces, plots or simulation; output must be a new file. See the
-[analysis correction](analysis-correction.md). Run `python3 harness/rps_report_test.py` for the
-frequency-denominator regression checks.
-See the [contest record](rps-study.md). Pilots over 3,000 ticks trace every 100 ticks.
-
-`pnpm harness zones --case list` describes the A-specialist / B-specialist / generalist diet
-contests; `--world zones|mixed`, `--shares 1,0`, `--preference off` and `--initial-nutrient`
-select the world and the constructed brains. Pairwise, `three-way` and `invade-<diet>` cases
-mirror the toxin contest. See the [zone record](zones-study.md).
-
-`pnpm harness evolve --world zones|mixed --seed N --ticks T --source-rate R` runs de novo
-evolution from the founder with per-cell trait samples every 1,000 ticks and checkpoints every
-100,000; `python3 harness/evolve_report.py <root> [k]` clusters the final populations.
-`pnpm harness invasion --checkpoint <file> --k 2 --ticks 12000` clusters a checkpoint's living
-cells and runs rare-start contests between representative genotypes in a fresh world. The default
-assay layout is mixed; use `--world zones --shares 1,0` for pure bands. The source's optional
-mechanisms are inherited, but dimensions, deposit count and initial bodies follow contest settings.
-Read manifests before comparing results. These endpoints do not certify persistent coexistence.
-See the [evolution record](evolve-study.md).
-
-`pnpm harness ecology-default --seeds 101,102 --ticks 3000` measures the actual Run default,
-then removes injury and matrix toxin binding separately. Secretion costs and the initial founder
-remain unchanged in those controls. Summaries count cells with at least 20% damage or matrix
-slowing, and spatial samples preserve positions, damage, deposits and interference fields.
-The default uses porous matrix (`matrixMode: "porous"`) and disables neutral signaling
-(`secretionRate: 0`). Optional solid barriers require `matrixMode: "solid"`; optional signaling
-requires a positive secretion rate. Both are experimental, not advertised default behaviors.
-
-From `frontend/`:
+From `frontend/`, list constructed opportunities without advancing physics:
 
 ```bash
-pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime persistent --output harness/artifacts/bacteria-study
-pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime transient --output harness/artifacts/bacteria-study
-pnpm harness bacteria --seeds 101,102 --ticks 6000 --regime persistent --mutation false --learning-retention 0 --output harness/artifacts/bacteria-control
-pnpm harness recent --n 5
-pnpm harness sql "SELECT id, experiment, summary FROM runs ORDER BY id DESC LIMIT 5"
+pnpm harness chemical-opportunities --case list
+pnpm harness capabilities --case list
+pnpm harness rps --case list
+pnpm harness zones --case list
 ```
 
-Each run starts from the same founder RNN and resolved default parameters. Mutation changes innate
-behavioral and physical loci only at birth; there is no offline training or score-based parent selection.
-`--mutation false` disables both random mutation blocks; acquired learning can still change offspring
-genomes. `--learning-retention 0` disables that transfer; the default is one (full retention).
-Use both flags with clonal transmission for a fixed-genome control. `--learning static` disables
-new acquired synaptic effects and their cost, but preserves learning already encoded in inherited
-weights. `--ploidy diploid --transmission selfing --crossover one-point` selects
-recombined gametes from the same parent; `--reproduction budding` keeps the parent alive.
-`--mutation-kind uniform` selects uniform instead of Gaussian perturbations. Unknown policy IDs
-or haploid selfing are rejected. These flags select implemented mechanisms, not external trainers.
-The default
-step is 0.2 model seconds. Source schedules use an independent random stream, making equal-seed
-mutation controls comparable. In the localized layout renewal preserves site positions; the
-optional scattered layout redraws them. Existing nutrient
-continues to diffuse, decay and be eaten.
+A named chemical opportunity defaults to 300 ticks (emissions 100), with a 30-second per-case cap.
+The quick runner records exact initial/final checkpoints, resolved settings, source hashes,
+local sensors/actions, typed transfers and stopping reasons. Reports use Matplotlib/NumPy locally:
+`python3 harness/quick_report.py <root>`. Capability, RPS and population readers dispatch by
+evidence schema and reject mixed old/new roots. No hosted artifact service is involved.
 
-Runs save `run-ID.json` with summary series and spatial samples, and `checkpoint-ID.json` with
-complete state. The SQLite ledger stores experiment identity, resolved configuration, source digest,
-seed, outcome and elapsed time. Before/after source digests expose source changes during a run;
-a run whose source changed still writes its result, checkpoint and ledger row (the process keeps
-the code it loaded) and prints a warning, so editing during long runs loses nothing.
-Generated dumps remain local; preserve named results deliberately
-when publishing rather than adding the entire historical artifact directory.
+## Active command families
 
-## Descendant comparison
+| Entry point | Current use |
+| --- | --- |
+| `bacteria --seed N --ticks T --wall-seconds S` | Ordinary population measurement, not external training |
+| `bacteria-capacity --output NEW_DIRECTORY` | Fixed registered 48/2000/2000-growth computation loads, all 256 channels; not carrying capacity |
+| `quick-food-access --stage probe` / `contest` | Generic finite-source sensing/access and paired controls |
+| `spatial-probe --case near --ticks 300` | Ordinary founder resident/transit/empty controls; inspect results before extending |
+| `chemical-opportunities --case NAME` | Registered allocation, stress, feeding, emission, corpse and barrier probes |
+| `capabilities --case NAME` | Funded-body/control screens; follow-ups need explicit current checkpoint/candidate |
+| `capability-pilots` | Separately justified selection pilots, not a smoke test |
+| `ecology-causal` / `ecology-default` | Generic diagnostics / current-world injury and movement-impedance ablations |
+| `rps --case NAME` | Constructed production, compatibility and susceptible variants; no required cycle |
+| `zones --case NAME --world zones --shares 1,0` | Source-mixture and equal-machinery allocation comparisons |
+| `evolve --seed N --ticks T --wall-seconds S --justification REGISTRATION` | Registered de novo run with generic trait samples and checkpoint provenance |
+| `invasion --checkpoint PATH --k 2 --ticks T` | Descriptive-cluster representatives in rare-start comparisons |
+| `bacteria-compare --checkpoint PATH --candidate ID` | Explicit observed genotype versus its ancestor, swapped assignments |
+| `continuation-check --output NEW_DIRECTORY` | Registered startup, ancestry and chemical-load checks |
+| `recent --n 5` / `sql "SELECT ..."` | Read the retained SQLite ledger |
 
-Use a saved bacterial checkpoint and an explicitly identified genotype:
+Prefix entries with `pnpm harness`; use new output directories for append-only evidence.
+Generic configuration flags include `--chemistry-seed`, `--source-species` (comma-separated IDs),
+`--source-rate`, `--washout`, `--viscosity`, `--damage-rate`, `--transfer-rate` and
+`--disturbance on` on commands that use generic configuration. Named old-chemistry flags fail.
+Read each command's settings before using flags from another family.
+
+Source zones/epochs use share vectors over resolved IDs. Equal total matter can supply different
+potential energy; preserve both quantities. The old `--regime` switch is rejected. Brief versus persistent food-access fixtures use an
+explicit finite pulse and registered washout; general world configuration uses physical source lifetimes. Geography and chemical generation use independent randomness.
+
+`bacteria` retains ploidy, transmission, crossover, mutation-kind, reproduction, learning and
+learning-retention options. Mutation-off plus retention-zero freezes inheritance under clonal
+transmission only when contact transfer is also off. Static learning is a distinct intervention.
+No diagnostic or observed winner automatically replaces the browser founder.
+
+## Studies, cohorts and batches
+
+All saved-genotype paths require explicit v11 binary checkpoints or browser packages. There is no default historical export,
+hardcoded successful genotype or old-schema adapter. A short study invocation is:
 
 ```bash
-pnpm harness bacteria-compare --checkpoint harness/artifacts/bacteria-study/checkpoint-ID.json --candidate 47 --seeds 201,202 --ticks 3000 --output harness/artifacts/bacteria-competition
+pnpm exec tsx harness/lib/studyCli.ts --checkpoint CURRENT.bin --run NEW_NAME --ticks 2 --wall-seconds 30 --output harness/artifacts/my-study
+python3 harness/study_sql.py load harness/artifacts/my-study/NEW_NAME harness/artifacts/my-study/study.duckdb
+python3 harness/study_report.py harness/artifacts/my-study/study.duckdb harness/artifacts/my-study/report.json
 ```
 
-Replace the path and candidate with values from that run. The assay compares the original ancestor
-with the selected observed whole-organism genotype, both mutation blocks and learned-weight transfer
-disabled and clonal transmission fixed, in both nutrient regimes. Each seed runs
-both assignments of genotypes to the same founder positions. Candidate selection is a diagnostic
-choice; the assay never installs a winner in the browser. Record selection method and held-out seeds.
-A surviving mutant or increased genome count alone does not establish adaptation. Artifacts embed
-both whole-organism genome encodings/hashes, source-checkpoint hash and manual interventions,
-so the compared chromosomes remain identifiable after the input file is moved. Source history is
-preserved even though the competition itself starts new bodies. Both genotypes receive the same
-reference founder material stocks; differing construction targets develop through paid growth.
-The assay does not copy a candidate's acquired traces or mature body from the source checkpoint.
+Runs beyond 3,000 ticks require `--justification` referencing the declared question, short evidence,
+horizon and stopping criteria. Batch scripts pass their explicit registration through this gate.
+The two-tick example checks tooling; it cannot assess adaptation. Use registered durations for
+scientific comparisons. Study mode `contest` takes explicit candidate and optional ancestor ID;
+`--part behavior|physical|whole` selects the inherited component. Resume interventions require
+an explicit living lineage, reset private state and retain installed machinery until paid refitting.
+Knockouts are `none`, `damage` and `movement-impedance`; binding is absent.
 
-`--candidate representative` uses the declared attribution rule: largest founder lineage, then its
-middle living descendant sorted by birth tick and organism ID. The artifact embeds the selected
-organism and rule. The ancestor follows that genotype's parent chain to its founder. Competition
-series also store sampled resolved motor/chemical efforts, energy, stored food and nutrient readings;
-these are census snapshots, not individual lifetime energy balances. See the
-[historical attribution panel](sources/history/2026-09-10/design/evolution-attribution.md) before interpreting founder dominance.
+The observer writes schema-v3 lifecycle, census, body, environment, genotype, exposure and
+species/product flow tables. Python DuckDB loads completed manifests transactionally and refuses
+mixed physical schemas. Reports include SQL, source hashes and explicit whole-population,
+organism-time and resource-flow denominators. A null frequency denominator at extinction stays null.
 
-## Queryable adaptation studies
+`harness/study_variants.py` requires checkpoint, ancestor, candidate, part and output. It appends
+diagnostic knock-in/reversion catalog records and leaves observed cells unchanged. Machinery
+alleles include investment and complete coordinates/direction/offset. Provenance gives the new
+comparison IDs. These generated records are not observed mutations.
 
-The [registered study](overnight-study.md) uses the actual exported browser population. Its CLI
-runs the same `stepWorld` kernel with an optional observer; it does not run a browser or train brains.
-From `frontend/`:
+Standalone `harness/epochRun.ts` takes `--phase-ticks` and runs three phases; `epochAssay.ts`
+requires `--pre` and `--post` with identical chemistry/physical configuration. It samples 24
+individual-weighted genomes per cohort. Source share and assignment swaps are separate controls.
+`populationRun.ts` and epoch/evolution tools retain live/frozen inheritance comparisons and
+report wall-capped runs as incomplete.
 
-```bash
-pnpm exec tsx harness/lib/studyCli.ts --checkpoint ../.sulion-paste/bacteria-101-48661.json --run full-101 --seed 101 --ticks 50000
-python harness/study_sql.py load harness/artifacts/adaptation-2026-09-10/full-101 harness/artifacts/adaptation-2026-09-10/study.duckdb
-python harness/study_sql.py query harness/artifacts/adaptation-2026-09-10/study.duckdb "SELECT run, channel, sum(amount) FROM flows GROUP BY run, channel"
-python harness/study_report.py harness/artifacts/adaptation-2026-09-10/study.duckdb harness/artifacts/adaptation-2026-09-10/report.json
-```
+Python epoch, cohort and strategy batch scripts require explicit output, seeds, registration and
+wall budgets; horizons and current checkpoint inputs are explicit. Use their `--help` for required
+arguments. They do not authorize the campaigns they can execute. Current strategy panels use
+chemical injury or motor/scheduled-resource questions. Historical batch defaults are removed.
 
-Use a new `--run` name for each measurement; existing evidence directories are rejected.
-`--frozen true` disables both mutation blocks and acquired-weight inheritance while retaining private
-plasticity. `--mode contest --candidate 895 --seed 201 --swap true --ticks 6000` starts common founder
-bodies in the exported patchy environment and assigns ancestor/candidate to alternating positions.
-`--part behavior` or `physical` retains that candidate component and replaces the other with founder
-genes. `--mode resume` preserves the exported community, resets all private brain state in both arms
-and freezes further inheritance changes. `--replace founder` replaces the living lineage-18 genomes;
-`behavior` and `physical` retain only that inherited component. Bodies and fields stay funded and intact.
-`--knockout damage` or `binding` removes that physical effect while retaining costs. These are diagnostic
-interventions recorded in run flags, not browser defaults or population-selected policies.
+## Persistence, reporting and verification
 
-`schema.json` specifies versioned SQL column types and dimensional flow channels. `flows.jsonl`
-aggregates exact resolver transactions by organism/channel in 100-tick windows. `life.jsonl` records
-birth/division/death identities; `census.jsonl` records sampled living state; `genomes.jsonl` preserves
-encoded inherited records. `exposure.jsonl` integrates pre-step exposure over acting organism-seconds.
-Its action/sensor integrals describe the previous resolved decision at each step, including zero
-newborn action. `environment.jsonl` samples coverage and conservation residuals. No movement trace
-or field raster stream is needed for these hypotheses. Organism and genome IDs are local to each run.
+Checkpoint v11 preserves chemical definitions, inventories, installed stocks and identity, immutable genes,
+private state, random streams, ledgers, complete parentage and bounded browser history. Older
+versions are rejected. Recovery retains six automatic/two manual points within 256 MiB and
+pauses on failure; raw snapshots are limited to 192 MiB. Field amounts use float32 with explicit rounding accounts; mesh geometry bounds allocation. Browser suspension, quota behavior and long-run responsiveness remain open.
 
-The importer requires Python DuckDB (tested 1.5.2), accepts only completed manifests and uses a
-transaction plus unique run IDs. Empty tables retain their declared types. Local generated JSONL
-is bounded in memory, not duration; the CLI caps each run at 50,000 ticks. The existing SQLite ledger
-remains the run registry. Query reports embed the SQL and analysis-source hash. Raw amounts remain
-available for balances; ecological claims use world-area, organism-time and resource-budget shares.
+The cell inspector exposes 39 local inputs, stocks/targets, chemical mixtures, U/D/I/S properties,
+membrane compatibility, actual transfers, private recurrence and task state. Manual interventions
+remain diagnostic and durable. Views never select reproduction or feed hidden information to RNNs.
 
-The [registered motor/toxin panel](strategy-study.md) uses `python harness/strategy_batch.py toxin`
-and `python harness/strategy_batch.py motor` from `frontend/`. These fixed panel names are
-append-only, with two concurrent processes and 6,000/20,000-tick horizons. Individual new assays
-can use `studyCli.ts --mode motor --environment scheduled --lifetime 100 --spacing 24 --ticks 20000`
-with a fresh `--run` and `--output`. The calendar supplies equal A/B material independently of
-organisms; its complete finite-deposit schedule is retained in the manifest. Only motor construction
-targets differ between variants. `bodies.jsonl` records actual motor/core stocks and speed ceilings.
-`python harness/strategy_report.py harness/artifacts/strategies-2026-09-10` loads completed runs
-into local DuckDB and writes the query-bearing report. None of these diagnostics replaces browser
-founders or changes reproduction into a scored selection process.
-
-## Capacity
-
-```bash
-pnpm harness bacteria-capacity --population 2000 --ticks 100 --output harness/artifacts/bacteria-capacity
-```
-
-This initializes the requested bodies with scattered placement on the standard field. It measures load, not the environment's
-ability to sustain that census. It does not resize supply or grant continuing free resources.
-The [initial measurements](design/bacteria-results.md) report the resulting throughput limit.
-
-## Persistence and diagnostic inspection
-
-The UI supports explicit local save/restore and file import/export. Checkpoints preserve both
-ancestry graphs, fields, separate environment/body/genetic random streams, receptor state, private
-recurrent/task/plastic state, actual machinery, nutrient material, usable energy and durable manual
-interventions. The current schema is version 8. Older bacterial versions and ant files are rejected explicitly;
-missing optional-off v8 lever values may default to zero.
-Browser checkpoints also retain spatial populations, sampled events and charts. Six automatic and
-two manual compressed recovery points share a 256 MiB IndexedDB budget. Saves run every 30 seconds
-while running and on pause; restores are explicit and paused. Full parentage compacts into numeric
-pages with a two-million-record default limit. See [continuation measurements and limits](continuing-observation.md).
-Initial v1 experiment files remain historical evidence.
-
-The registered `pnpm harness spatial-probe --case near --ticks 300 --output <new-directory>`
-uses the shared quick runner. Read its [controls and results](spatial-probes.md) before selecting
-a case or horizon. `pnpm harness continuation-check --output <new-directory>` performs the
-separately registered startup and synthetic storage checks; it is not an ecological campaign.
-
-Select a cell to inspect all thirty-five input channels, actual stocks versus construction targets, inherited loci,
-acquired traces, hidden values, resolved physical efforts and
-task history. Manual register changes remain logged even after the recent-event buffer rolls over,
-and stats label the population a diagnostic run. Field layers, inspection
-and performance measurements do not enter the RNN.
-
-## Verification boundary
-
-The intended days/weeks user run is not an agent experiment budget. Prepare its continuity,
-storage and observation through the [readiness work](backlog.md#backlog-runtime-and-observation-limits).
-Small hypothesis-driven probes support ecological settings; do not launch a long campaign to
-produce a chosen community before handoff. No such campaign is required by this documentation.
-
-ESLint limits cyclomatic and cognitive complexity to 10, files to 400 lines and functions to 75.
-Vitest covers bounded conservation, sensor causality, contact, inheritance, UI defaults and exact
-checkpoint continuation. Multi-generation results belong in the harness ledger. Human review
-judges trajectories; agents inspect browser startup configuration without running browser assays.
-
-The current ant-free runtime replaces the tagged implementation. Historical ant documents and
-ledger rows remain evidence, but their retired training commands are not available in this checkout.
-Recover those tools from `ant-colony-checkpoint-2026-09-09` when explicitly needed.
+Rust tests and Vitest verify bounded mechanics and integration; ecological outcomes belong in the ledger.
+Human review judges motion. The user's days/weeks observation is not an agent experiment budget.
+Historical ant tools remain recoverable from their tag, not executable compatibility paths here.
 
 ## Deployment
 
-`scripts/deploy.sh` is parameterless. It builds the frontend and applies the static-site Terraform
-root. The shared workflow performs deployment from `main`; local development needs no cloud resources.
+`scripts/deploy.sh` is parameterless and builds/applies the static-site Terraform root.
+The shared workflow deploys main. Deployment is separate authorization from local implementation.

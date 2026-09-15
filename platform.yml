@@ -1,5 +1,8 @@
 project: antropy
 prefix: antropy
 stack:
+  - rust
   - typescript
   - terraform
+rust_dir: engine
+typescript_dir: frontend

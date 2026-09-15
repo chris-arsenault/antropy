@@ -1,17 +1,87 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { stepWorld } from "../../src/sim/world";
-import { type World } from "../../src/sim/types";
-import { balance, materialBalance, total } from "../../src/sim/accounting";
-import { checkpointToJson } from "../../src/persist/checkpoint";
-import { FLOW_UNITS } from "../../src/sim/observation";
-import { controller } from "../../src/sim/controller";
-import { sourceDigest, warnIfSourceChanged } from "./bacteriaRun";
+import { type EngineWorld } from "../../src/engine/client";
+import { type Definition, type Summary } from "../../src/engine/types";
+import { loadEngine, captureEngine } from "../numerical/engine";
 import { QuickObserver } from "./quickObserver";
 import { type QuickScenario, percent } from "./quickScenario";
 import { openLedger, recordRun, type RunRecord } from "./ledger";
 
-function saveQuickLedger(record: RunRecord, output: string): void {
+export interface QuickOptions {
+  seed: number;
+  ticks: number;
+  swap: boolean;
+  probe?: "fast" | "slow";
+  wallSeconds: number;
+  output: string;
+}
+export function validateQuickOptions(o: QuickOptions): void {
+  validateBoundedOptions(o, 3000);
+}
+function validateBoundedOptions(o: QuickOptions, maxTicks: number): void {
+  validateSeed(o.seed);
+  if (!Number.isInteger(o.ticks) || o.ticks < 1 || o.ticks > maxTicks)
+    throw new Error(`Experiment requires 1–${maxTicks} ticks; register long runs separately`);
+  const maxWall = maxTicks > 3000 ? 900 : 120;
+  if (!Number.isFinite(o.wallSeconds) || o.wallSeconds <= 0 || o.wallSeconds > maxWall)
+    throw new Error(`Bounded experiments require a wall cap of 1–${maxWall} seconds per case`);
+}
+export function runQuick(scenario: QuickScenario, options: QuickOptions) {
+  validateQuickOptions(options);
+  return runBounded(scenario, options, "quick-mechanism", null);
+}
+export function runSelectionPilot(
+  scenario: QuickScenario,
+  options: QuickOptions,
+  justification: string,
+  experiment = "capability-selection-pilot"
+) {
+  validateBoundedOptions(options, 20000);
+  if (!justification.trim()) throw new Error("Selection pilot requires a justification");
+  return runBounded(scenario, options, experiment, justification);
+}
+export const frameCadence = (ticks: number): number => (ticks > 3000 ? 100 : 10);
+
+function advance(
+  world: EngineWorld,
+  observer: QuickObserver,
+  options: QuickOptions,
+  scenario: QuickScenario
+) {
+  const started = performance.now(),
+    frames = [observer.frame()],
+    cadence = frameCadence(options.ticks);
+  let summary = world.command<Summary>("summary"),
+    error: string | null = null;
+  let maxEnergyResidual = Math.abs(summary.energyResidual),
+    maxMaterialResidual = Math.abs(summary.materialResidual);
+  try {
+    while (
+      summary.tick < options.ticks &&
+      !summary.stopReason &&
+      performance.now() - started < options.wallSeconds * 1000
+    ) {
+      scenario.beforeStep?.(world, summary.tick);
+      world.step();
+      summary = world.command<Summary>("summary");
+      maxEnergyResidual = Math.max(maxEnergyResidual, Math.abs(summary.energyResidual));
+      maxMaterialResidual = Math.max(maxMaterialResidual, Math.abs(summary.materialResidual));
+      if (summary.tick % cadence === 0) frames.push(observer.frame());
+    }
+    if (frames.at(-1)!.tick !== summary.tick) frames.push(observer.frame());
+  } catch (failure) {
+    error = String(failure);
+  }
+  return {
+    summary,
+    frames,
+    error,
+    maxEnergyResidual,
+    maxMaterialResidual,
+    wallMs: performance.now() - started,
+  };
+}
+function record(record: RunRecord, output: string) {
   const db = openLedger();
   try {
     const id = recordRun(db, record);
@@ -28,141 +98,116 @@ function saveQuickLedger(record: RunRecord, output: string): void {
     db.close();
   }
 }
-
-export interface QuickOptions {
-  seed: number;
-  ticks: number;
-  swap: boolean;
-  probe?: "fast" | "slow";
-  wallSeconds: number;
-  output: string;
-}
-export function validateQuickOptions(o: QuickOptions): void {
-  validateBoundedOptions(o, 3000);
-}
-function validateBoundedOptions(o: QuickOptions, maxTicks: number): void {
-  if (!Number.isInteger(o.ticks) || o.ticks < 1 || o.ticks > maxTicks)
-    throw new Error(`Experiment requires 1–${maxTicks} ticks; register long runs separately`);
-  const maxWall = maxTicks > 3000 ? 900 : 120;
-  if (!Number.isFinite(o.wallSeconds) || o.wallSeconds <= 0 || o.wallSeconds > maxWall)
-    throw new Error(`Bounded experiments require a wall cap of 1–${maxWall} seconds per case`);
-}
-
-/** New scenarios reuse this runner without another observer, ledger or simulation loop. */
-export function runQuick(scenario: QuickScenario, options: QuickOptions) {
-  validateQuickOptions(options);
-  return runBounded(scenario, options, "quick-mechanism", null);
-}
-
-/** Separate entry point requires a registered reason for a multigeneration pilot. */
-export function runSelectionPilot(
+function manifest(
   scenario: QuickScenario,
   options: QuickOptions,
-  justification: string,
-  experiment = "capability-selection-pilot"
-) {
-  validateBoundedOptions(options, 20000);
-  if (!justification.trim()) throw new Error("Selection pilot requires a justification");
-  return runBounded(scenario, options, experiment, justification);
-}
-
-/** Ten-tick frames for short cases; hundred-tick frames keep multigeneration pilot traces bounded. */
-export const frameCadence = (ticks: number): number => (ticks > 3000 ? 100 : 10);
-
-function advanceBounded(
-  world: World,
-  observer: QuickObserver,
-  options: QuickOptions,
-  started: number
-) {
-  const frames = [observer.frame()],
-    cadence = frameCadence(options.ticks);
-  let maxEnergyResidual = 0,
-    maxMaterialResidual = 0;
-  while (world.tick < options.ticks && !world.stopReason) {
-    if (performance.now() - started >= options.wallSeconds * 1000) break;
-    observer.beforeStep();
-    stepWorld(world);
-    observer.afterStep();
-    maxEnergyResidual = Math.max(maxEnergyResidual, Math.abs(balance(world)));
-    maxMaterialResidual = Math.max(maxMaterialResidual, Math.abs(materialBalance(world)));
-    if (world.tick % cadence === 0) frames.push(observer.frame());
-  }
-  if (frames.at(-1)!.tick !== world.tick) frames.push(observer.frame());
-  return { frames, maxEnergyResidual, maxMaterialResidual };
-}
-
-function runBounded(
-  scenario: QuickScenario,
-  options: QuickOptions,
+  definition: Definition,
+  sourceDigest: string,
+  binaryDigest: string,
   experiment: string,
   justification: string | null
 ) {
-  const world = scenario.create(options.seed, options.swap, options.probe);
-  mkdirSync(options.output); // Refuse to overwrite any existing evidence, including failed runs.
-  const digest = sourceDigest(),
-    started = performance.now();
-  const save = (name: string, value: unknown) =>
-    writeFileSync(join(options.output, name), JSON.stringify(value));
-  const params = {
-    schemaVersion: 1,
+  return {
+    schemaVersion: 3,
+    checkpointVersion: definition.version,
     experiment,
     justification,
     scenario: scenario.name,
     hypothesis: scenario.hypothesis,
     specification: scenario.specification,
     target: scenario.target,
-    offeredFoodA: scenario.offeredFoodA,
-    offeredFoodB: scenario.offeredFoodB ?? 0,
+    chemistry: definition.chemistry,
+    config: definition.config,
     options,
-    config: world.config,
-    sourceDigest: digest,
-    flowUnits: FLOW_UNITS,
+    sourceDigest,
+    binaryDigest,
     frameCadence: frameCadence(options.ticks),
+    checkpointFormat: "Versioned Rust binary; use the archived engine.wasm for exact continuation",
+    flowUnits: {
+      imported: "material",
+      exported: "material",
+      reaction: "material transformed from species to product",
+      motors: "usable energy",
+      constructed: "built material",
+      construction: "dissipated energy",
+    },
     traceContract:
-      "Positions at frame tick; inputs/actions from preceding inference. localInputsNow is a nonmutating current-position probe. Arrival means entering target radius, not first uptake. Food A is initial offer; B includes recycling.",
+      "Positions at frame tick; inputs/actions from preceding inference. localInputsNow probes a copy at the current position. Cumulative uptake may include recycling. Descendants remain in their initial founder-genotype group; no parental selection uses these observations.",
   };
-  save("manifest.json", params);
-  writeFileSync(join(options.output, "initial.json"), checkpointToJson(world));
-  const observer = new QuickObserver(world, scenario);
+}
+async function runBounded(
+  scenario: QuickScenario,
+  options: QuickOptions,
+  experiment: string,
+  justification: string | null
+) {
+  mkdirSync(options.output); // Existing evidence, including failed runs, is never overwritten.
+  const engine = await loadEngine(),
+    world = scenario.create(engine, options.seed, options.swap, options.probe);
+  const save = (name: string, value: unknown) =>
+    writeFileSync(join(options.output, name), JSON.stringify(value));
+  let observer: QuickObserver | null = null;
   try {
-    const { frames, maxEnergyResidual, maxMaterialResidual } = advanceBounded(
-      world,
-      observer,
+    const definition = world.command<Definition>("definition");
+    const params = manifest(
+      scenario,
       options,
-      started
+      definition,
+      engine.sourceDigest,
+      captureEngine(options.output, engine),
+      experiment,
+      justification
     );
+    save("manifest.json", params);
+    save("initial-environment.json", world.command("environment"));
+    save("initial-field.json", world.command("field", { kind: "material" }));
+    writeFileSync(join(options.output, "initial.bin"), world.snapshot());
+    observer = new QuickObserver(world, scenario);
+    const measured = advance(world, observer, options, scenario),
+      s = measured.summary;
     const result = {
-      ticks: world.tick,
-      completed: world.tick === options.ticks,
-      stop: world.stopReason ?? (world.tick < options.ticks ? "wall cap" : "horizon"),
-      wallMs: performance.now() - started,
+      ticks: s.tick,
+      completed: s.tick === options.ticks && !measured.error,
+      stop: measured.error ?? s.stopReason ?? (s.tick < options.ticks ? "wall cap" : "horizon"),
+      wallMs: measured.wallMs,
       groups: observer.result(),
-      foodARemainingPercent: percent(total(world.nutrient), scenario.offeredFoodA),
-      nutrientDecayPercentOfferedA: percent(world.ledger.nutrientLoss, scenario.offeredFoodA),
-      maxEnergyResidualPercent: percent(maxEnergyResidual, world.ledger.initial),
-      maxMaterialResidualPercent: percent(maxMaterialResidual, world.ledger.initialMaterial),
-      sourceDigestAfter: sourceDigest(),
+      final: s,
+      environment: world.command("environment"),
+      washedOutMaterial: s.ledger.washedOut,
+      maxEnergyResidualPercent: percent(
+        measured.maxEnergyResidual,
+        s.ledger.initialEnergy + s.ledger.suppliedEnergy
+      ),
+      maxMaterialResidualPercent: percent(
+        measured.maxMaterialResidual,
+        s.ledger.initialMaterial + s.ledger.supplied
+      ),
+      sourceDigestAfter: engine.sourceDigest,
     };
     save("result.json", result);
-    save("traces.json", frames);
-    writeFileSync(join(options.output, "final.json"), checkpointToJson(world));
-    saveQuickLedger(
+    save("traces.json", measured.frames);
+    writeFileSync(join(options.output, "final.bin"), world.snapshot());
+    record(
       {
         experiment,
         label: scenario.name,
-        driver: controller.id,
-        seed: world.seed,
-        ticks: world.tick,
+        driver: "chemical-rnn-wasm",
+        seed: definition.seed,
+        ticks: s.tick,
         params,
         summary: result,
         wallMs: result.wallMs,
       },
       options.output
     );
-    warnIfSourceChanged(digest, result.sourceDigestAfter);
+    if (measured.error) throw new Error(measured.error);
     return result;
   } finally {
-    observer.close();
+    observer?.close();
+    world.dispose();
   }
+}
+
+function validateSeed(seed: number) {
+  if (!Number.isSafeInteger(seed) || seed < 0 || seed > 4294967295) throw new Error("Invalid seed");
 }

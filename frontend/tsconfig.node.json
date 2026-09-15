@@ -10,5 +10,6 @@
     "esModuleInterop": true,
     "types": ["node", "vite/client"]
   },
-  "include": ["vite.config.ts", "eslint.config.js", "harness"]
+  "include": ["vite.config.ts", "eslint.config.js", "harness"],
+  "exclude": ["harness/artifacts"]
 }

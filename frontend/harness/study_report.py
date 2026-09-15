@@ -122,7 +122,10 @@ def report(database, output):
     result = {"query_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "database": str(database), "queries": QUERIES}
     with duckdb.connect(database, read_only=True) as db:
-        for name, query in QUERIES.items():
+        from chemistry_queries import queries_for
+        queries, version = queries_for(db, QUERIES)
+        result.update(queries=queries, schemaVersion=version)
+        for name, query in queries.items():
             cursor = db.execute(query)
             columns = [item[0] for item in cursor.description]
             result[name] = [dict(zip(columns, row)) for row in cursor.fetchall()]

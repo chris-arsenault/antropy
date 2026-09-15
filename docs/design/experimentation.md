@@ -56,13 +56,13 @@ withdraws the false passes; changing the work order does not retroactively valid
 
 | Hypothesis | Causal prediction | Current status / competing explanation |
 | --- | --- | --- |
-| A/B processing specialization | Reversing food composition reverses the preferred investment | Constructed processing tradeoff and an actual B-processing benefit; later zoned runs show regional diet differences, with persistent diversity unresolved |
-| Fast exploration versus economical residence | Distant short opportunities repay speed; local persistent food can repay lower movement cost | Actual evolved brain improves brief-food access with body genes fixed; authored reserve braking sacrifices that access. Coordinated high motors still lose |
-| Toxin investment | Suppressing susceptible neighbors repays secretion but resistant neighbors remove that advantage | Constructed damage/feeding comparisons and rising evolved machinery are proof points; offensive behavior and its isolated benefit remain unresolved |
-| Defense investment | Protection repays maintenance under exposure, loses value without exposure | Recorded short fixtures show repair/capture tradeoff, tied divisions; evolved defense not isolated |
-| Porous matrix | Binding protection can repay construction and drag under exposure | Binding mattered in the September 10 default; constructed toxin-triggered building protected cheaply but tied divisions. Evolved construction unproved |
-| Inherited learning | Transferred acquired weights improve offspring relative to retention-zero controls | Transmission exists; actual sampled-parent transfer and private-learning tests show no consistent benefit in uniform B |
-| Founder dominance | Advantage transfers with genotype across starting positions or depends reproducibly on ecological context | Predeclared v4 representative lacked a repeatable fresh-world advantage |
+| Source-dependent machinery returns | Changing source identity reverses which allocation repays its cost | Constructed equal-matter/equal-potential allocation probes reverse construction advantage; evolved specialization remains open |
+| Affordable exploration | Nearby resources repay movement before reserves expire | Current nearby founder survives 300 ticks but does not enter the target; successful colonization is not established |
+| Stress and compatibility | Matched membranes suffer less under the same internal/external exposure | Controlled exposure probes support differential injury, with a positive susceptibility floor |
+| Chemical degradation | Uptake and conversion reduce obstructing material | Conversion reduces return at death; tested alive-cell external clearance did not improve |
+| Cross-feeding | Donor intermediate supports recipient processing and construction | Export/processing ablations support recipient benefit and donor cost, not cooperation |
+| Detectable emission | Paid release changes a receptor and ordinary RNN action | Constructed cue response exists; communication benefit remains unproved |
+| Inherited learning | Transmitted acquired changes improve descendants in a specified context | Transmission is implemented; historical negative findings do not establish current chemical benefit |
 
 Competing explanations include first access, crowding, local depletion, drift, mutation supply,
 fixed iteration effects and accumulated private experience. A failing hypothesis stays a finding;
@@ -102,7 +102,7 @@ body and genetic histories may diverge as a consequence of changed behavior or b
 ## Existing harness and provenance
 
 `pnpm harness bacteria` measures a population. `ecology-default` compares the actual default
-with injury disabled and with matrix binding disabled, retaining secretion costs. `ecology-causal`
+with injury disabled and with movement impedance disabled, retaining other physical costs. `ecology-causal`
 uses declared ordinary RNN diagnostic genomes. `bacteria-compare` compares a saved candidate with
 its ancestor on fresh worlds. Current persistent/transient modes both use finite deposits.
 
@@ -112,12 +112,13 @@ and local artifacts. Exact code/configuration versions determine which results t
 The current default assay preserves spatial damage and interference fields as well as cells.
 Commands and artifact contracts are in [development](../development.md).
 
-The [capability investigation](../capability-investigation.md) records 48 short cases and four
+The historical [capability investigation](../capability-investigation.md) records 48 short cases and four
 separately justified selection pilots, including actual genotype interventions. `capabilities`
 extends `QuickScenario`/`runQuick`; `runSelectionPilot` shares the runner but requires a reason and
 a distinct 20k ceiling. Ancestry grouping survives descendant genome changes. Body/exposure traces
 and nonmutating sensor probes support direct causal inspection. The report preserves all six areas,
-the failed rare-variant prediction and reusable commands. Do not treat completed panels as default
+the failed rare-variant prediction. Migrated follow-ups require explicit v11 inputs; those earlier
+outcomes do not transfer to current chemistry. Do not treat completed panels as default
 regression tests or promote authored variants into production.
 
 The [exported-population study](../overnight-study.md) adds optional resolver facts, 100-tick
@@ -158,5 +159,5 @@ cannot certify adaptation, nor should verification become an expanding side proj
 
 Change one mechanism, state its governing inequality and stop on repeated contradictory results.
 Preserve negative findings and source conditions. Do not resume ant training or begin an offline
-bacterial optimizer without a new decision. The [current results](bacteria-results.md) delimit
+bacterial optimizer without a new decision. The [chemical validation](chemistry/validation.md) and [historical results](bacteria-results.md) delimit
 what is known before any next experiment.

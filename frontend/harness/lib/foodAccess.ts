@@ -1,36 +1,13 @@
-import { DEFAULT_CONFIG } from "../../src/sim/config";
-import { createWorld } from "../../src/sim/world";
-import { type World } from "../../src/sim/types";
-import { travelGenome } from "../../src/sim/controller/diagnostics";
-import { initializeReceptors } from "../../src/sim/sensors";
-import { heldEnergy, heldMaterial, total } from "../../src/sim/accounting";
+import { type EngineConfig, type Genotype, type Definition } from "../../src/engine/types";
+import { frozen, install, pulse } from "./engineFixtures";
 import { type QuickScenario } from "./quickScenario";
 
-function installVariants(w: World): void {
-  const base = w.genomes.get(1)!;
-  for (const [i, speed] of (["fast", "slow"] as const).entries()) {
-    const genome = {
-      chromosomes: base.genome.chromosomes.map((c) => ({
-        physical: c.physical.slice(),
-        behavior: travelGenome(speed),
-      })),
-    };
-    w.genomes.set(i + 1, { ...base, id: i + 1, genome });
-  }
-  w.nextGenome = 3;
-}
-
-function placeFood(w: World): void {
-  for (let y = 0; y < 32; y++)
-    for (let x = 0; x < 32; x++)
-      w.nutrient[y * 32 + x] = Math.exp(-((x - 16) ** 2 + (y - 16) ** 2) / 8);
-  const factor = 96 / total(w.nutrient);
-  for (let i = 0; i < w.nutrient.length; i++) w.nutrient[i] *= factor;
-}
-
-export function foodAccess(context: "persistent" | "brief"): QuickScenario {
+export function foodAccess(
+  context: "persistent" | "brief",
+  overrides: Partial<EngineConfig> = {}
+): QuickScenario {
   const distance = context === "persistent" ? 4 : 8;
-  const decay = context === "persistent" ? DEFAULT_CONFIG.nutrientDecay : Math.log(2) / 24;
+  const washout = context === "persistent" ? (overrides.washout ?? 0.0005) : Math.log(2) / 24;
   return {
     name: `food-access-${context}`,
     hypothesis:
@@ -38,45 +15,50 @@ export function foodAccess(context: "persistent" | "brief"): QuickScenario {
     specification: {
       context,
       distance,
-      foodHalfLifeTicks: Math.log(2) / (decay * DEFAULT_CONFIG.dt),
+      washoutPerModelSecond: washout,
       patchSigma: 2,
       initialHeadingOffsetRadians: Math.PI / 4,
-      variants: { 1: "fast propulsion bias 1", 2: "slow propulsion bias 0.15" },
+      variants: ["fast: swim logit +0.3", "slow: swim logit -0.55"],
       limitations:
-        "Constructed strategies, bundled opportunity contexts, no evolved discovery; recycled food B remains active.",
+        "Constructed strategies and bundled opportunity contexts; no evolved discovery. Ordinary chemical transformations and corpse release remain active.",
     },
     target: { x: 16, y: 16, radius: 2 },
-    offeredFoodA: 96,
-    create(seed, swap, probe) {
-      const w = createWorld(seed, {
-        ...DEFAULT_CONFIG,
+    create(engine, seed, swap, probe) {
+      const world = engine.create(seed, {
+        ...overrides,
+        ...frozen,
         width: 32,
         height: 32,
         founders: probe ? 1 : 16,
         sourceCount: 0,
-        initialNutrient: 0,
-        nutrientDecay: decay,
-        foodEpochs: undefined,
-        foodZones: undefined,
-        mutationRate: 0,
-        physicalMutationRate: 0,
-        learningRetention: 0,
-        learning: "static",
+        sourceEpochs: null,
+        sourceZones: null,
+        washout,
       });
-      installVariants(w);
-      placeFood(w);
-      for (const [i, cell] of w.cells.entries()) {
-        const angle = (2 * Math.PI * i) / 16;
-        cell.x = 16 + distance * Math.cos(angle);
-        cell.y = 16 + distance * Math.sin(angle);
-        cell.heading = angle + Math.PI + Math.PI / 4;
-        cell.genome = probe ? Number(probe === "slow") + 1 : ((i + Number(swap)) % 2) + 1;
-        w.ancestry.get(cell.id)!.genome = cell.genome;
-        initializeReceptors(w, cell);
+      try {
+        const definition = world.command<Definition>("definition");
+        const genotype = world.command<Genotype>("genotype", { id: 1 });
+        pulse(world, [[definition.config.sourceSpecies[0], 96]], [16, 16], 2);
+        const variants = [
+          { label: "fast", genotype, changes: { swimBiasDelta: 0.3 } },
+          { label: "slow", genotype, changes: { swimBiasDelta: -0.55 } },
+        ];
+        const assignments = Array.from({ length: probe ? 1 : 16 }, (_, i) => {
+          const angle = (2 * Math.PI * i) / 16;
+          return {
+            cell: i + 1,
+            variant: probe ? Number(probe === "slow") : (i + Number(swap)) % 2,
+            x: 16 + distance * Math.cos(angle),
+            y: 16 + distance * Math.sin(angle),
+            heading: angle + Math.PI + Math.PI / 4,
+          };
+        });
+        install(world, variants, assignments);
+        return world;
+      } catch (error) {
+        world.dispose();
+        throw error;
       }
-      w.ledger.initial = heldEnergy(w);
-      w.ledger.initialMaterial = heldMaterial(w);
-      return w;
     },
   };
 }

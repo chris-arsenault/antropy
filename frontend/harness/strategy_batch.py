@@ -1,50 +1,35 @@
-"""Run the registered screening panels; each run is bounded and append-only.
-
-From frontend: python harness/strategy_batch.py toxin|motor
-Two worker processes share no world state. Output logs are generated artifacts.
-"""
-import concurrent.futures
-import itertools
-import subprocess
-import sys
-from pathlib import Path
-
-OUTPUT = Path("harness/artifacts/strategies-2026-09-10")
+"""Registered chemical-injury or motor comparisons using explicit current organisms."""
+from batch_support import parser, execute, seeds
 
 
-def panel(kind):
-    if kind == "toxin":
-        for seed, swap in itertools.product([201, 202], ["false", "true"]):
-            yield f"toxin-off-{seed}-{swap}", [
-                "--mode", "contest", "--knockout", "damage", "--ticks", "6000",
-                "--checkpoint", "harness/artifacts/adaptation-2026-09-10/variants/diagnostic-knockin.json",
-                "--seed", str(seed), "--swap", swap,
-            ]
-    elif kind == "motor":
-        for lifetime, spacing, seed, swap in itertools.product(
-            [100, 1000], [2, 24], [301, 302], ["false", "true"]
-        ):
-            yield f"motor-{lifetime}-{spacing}-{seed}-{swap}", [
-                "--mode", "motor", "--environment", "scheduled", "--ticks", "20000",
-                "--lifetime", str(lifetime), "--spacing", str(spacing),
-                "--seed", str(seed), "--swap", swap,
-            ]
-    else:
-        raise ValueError("Expected toxin or motor")
-
-
-def run(item):
-    name, flags = item
-    command = ["pnpm", "exec", "tsx", "harness/lib/studyCli.ts", "--run", name,
-               "--output", str(OUTPUT), *flags]
-    with (OUTPUT / f"{name}.log").open("x") as log:
-        result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=1800)
-    if result.returncode:
-        raise RuntimeError(f"{name} failed: inspect its log")
-    print(f"complete {name}", flush=True)
+def main():
+    p = parser(__doc__)
+    p.add_argument("panel", choices=["injury", "motor"])
+    p.add_argument("--checkpoint", required=True)
+    p.add_argument("--candidate", type=int, required=True)
+    p.add_argument("--ancestor", type=int, default=1)
+    p.add_argument("--ticks", type=int, required=True)
+    p.add_argument("--lifetime", type=int, default=100)
+    p.add_argument("--spacing", type=int, default=2)
+    args = p.parse_args()
+    if not 1 <= args.ticks <= 50000:
+        p.error("Study horizon must be 1..50000")
+    jobs = []
+    for seed in seeds(args):
+        for swap in (False, True):
+            # Injury needs both ordinary exposure and its ablation, with matching placement.
+            for knockout in (["none", "damage"] if args.panel == "injury" else ["none"]):
+                label = f"{args.panel}-{knockout}-{seed}-{str(swap).lower()}"
+                flags = ["--run", label, "--mode", "contest" if args.panel == "injury" else "motor",
+                         "--checkpoint", args.checkpoint, "--candidate", str(args.candidate),
+                         "--ancestor", str(args.ancestor), "--ticks", str(args.ticks),
+                         "--seed", str(seed), "--swap", str(swap).lower(), "--knockout", knockout]
+                if args.panel == "motor":
+                    flags += ["--environment", "scheduled", "--lifetime", str(args.lifetime),
+                              "--spacing", str(args.spacing)]
+                jobs.append((label, "harness/lib/studyCli.ts", flags))
+    execute(args, jobs)
 
 
 if __name__ == "__main__":
-    OUTPUT.mkdir(parents=True, exist_ok=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-        list(pool.map(run, panel(sys.argv[1])))
+    main()

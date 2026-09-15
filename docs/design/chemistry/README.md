@@ -1,0 +1,122 @@
+# General-purpose digital chemistry
+
+Status: computational design revised September 15, 2026; M0 arithmetic and M1 representation
+implemented, ordinary-world replacement pending.
+[Computable chemistry](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
+govern formula selection and the [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) tracks integration.
+Design rules around shared manifold reductions, vector fields, diffusion plus drift and bounded
+transformations. Physics supplies concepts; reproducing a known physical process is not the target.
+
+[Numerical runtime record](numerical-engine.md), [reliability evidence](reliability-results.md) and
+[migration dispositions](numerical-migration.md) describe the prior implementation. M1 now supplies
+v4 profiles and physical checkpoint v12. The canonical v2 compiler serves the composed kernels
+and atlas; its unchanged 2,000-cell core measures 18.48 ms/tick. Live integration remains pending. M2's experimental
+operators failed their performance gate and have not replaced World stepping. Older findings below
+remain version-specific evidence, not required formulas or certified replacement behavior.
+
+The runtime replaces named chemical systems with one material-conserving substrate:
+256 chemical species, local mixtures, paid transport, unary reactions and inherited machinery.
+Food, waste, chemical attack, communication and barriers describe how organisms use that
+substrate. They are not species categories or separate action systems.
+
+## Read this design
+
+| Document | Responsibility |
+| --- | --- |
+| [Computational foundation](computational-foundation.md) | Governing design: composed chemical-space computation, accounts, costs and decision ownership |
+| [Current specification responsibilities](../../specs/digital-chemistry/README.md) | Current contracts and explicitly historical M0 equations/evidence |
+| [Substrate and accounting](substrate.md) | Chemical properties, generation constraints, fields, sources, turnover, reactions, construction and death |
+| [Machinery and controllers](machinery.md) | Fixed slots, funded capacities, local observations/actions, mutation and inheritance |
+| [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
+| [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
+| [Current measurements](numerical-results.md) | Bounded mechanism, capacity, default startup and storage results |
+| [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
+| [Reliability evidence](reliability-results.md) | Current browser failures/limits, chemical-space revision and ordinary habitat checks |
+| [Installed machinery](installed-machinery.md) | Inherited targets, retained function and paid refitting in physical schema 11 |
+| [Diagnostic continuity](diagnostic-continuity.md) | Genealogy, inherited/body comparisons and bounded recent/longitudinal observations |
+| [Migration and retirement](numerical-migration.md) | Current commands, reports, retained semantics and removed implementations |
+| [Historical performance and fidelity](performance.md) | Previous TypeScript quantization choices and evidence |
+| [Performance at the retained population scale](population-performance.md) | Restored 48-founder workload, larger synthetic load and exact computation optimizations |
+| [Reproductive viability](viability.md) | Small causal life-cycle probes, founder homeostasis and ordinary-world support |
+
+The supplied [chemistry proposal](sources/chemistry-proposal.txt) and
+[migration appendix](sources/migration-proposal.txt) are preserved verbatim here. They came from
+`paste-2026-09-13_09-43-25-834Z.txt` and `paste-2026-09-13_09-43-34-823Z.txt`, respectively.
+These copies preserve the supplied text, including historical interpretations; the reviewed
+recommendations in this directory distinguish those interpretations from current evidence.
+
+The user's accompanying clarification makes four requirements explicit: small fixed heritable
+machinery slots; assimilation of any internal chemical into generic biomass using usable energy;
+one slow first-order extracellular washout rate for all chemicals; and validated property-space
+generation that includes useful combinations, especially high impedance with low diffusion.
+The appendix replaces the original chemical viscosity property with environmental impedance
+and adds inherited membrane compatibility. These amendments are included throughout this design.
+
+## Purpose retained
+
+Prepare a world where diverse ecological relationships and evolutionary adaptation are plausible,
+then leave their actual history to the user's days or weeks of observation. Small experiments
+should establish causal opportunities and costs. They should not deliver a pre-evolved community,
+prescribe a population count or turn every possible ecological role into an acceptance gate.
+
+Retain the large periodic XY world, uneven finite local opportunities, open or marginal
+space, useful movement and at least two starting colonies of the same founder genotype. Later
+colonies, migration, divergence and extinction remain consequences of individual cell activity.
+The current source geometry and numerical settings are revisable hypotheses. Neither a particular
+geometric metaphor nor uniformly slow movement is a permanent design constraint.
+
+World generation must not inspect organism success. Controllers receive local receptor and body
+readings, private memory and contact; they receive no chemical-property table, coordinates,
+lineage identity, destination or fitness score. A chemical-space coordinate is a machinery gene,
+not an organism's position or a geographic compass.
+
+## Prior implementation choices
+
+These choices resolved omissions in the earlier implementation. They are versioned reference
+behavior; the computational foundation governs revised formulas and coherent consumer changes.
+
+| Decision | Implemented first version | Reason |
+| --- | --- | --- |
+| Slot counts | Four receptors, four transporters and four enzymes per chromosome | Accommodates several local cues and import/export/reaction choices without evolving genome length |
+| Machinery control | Fixed slot-indexed neural channels; 39 inputs, 24 recurrent units, nine outputs; enzymes constitutive | Makes the controller boundary explicit without named chemical actions |
+| New capabilities | Retarget and reinvest in existing slots through local mutation; no insertion/deletion | Keeps genome architecture bounded; existing slots can become quiet and later become useful |
+| Biomass energy | One fixed energy density for built material, equal to the configured decomposition species' potential | Closes the construction/death energy cycle without requiring a biomass ingredient |
+| Assimilation | Any internal species pays assembly energy and any uphill energy gap; excess chemical potential becomes heat | Prevents generic construction from granting free energy or bypassing metabolism |
+| Chemical stress | Apply compatibility-weighted stress to extracellular exposure and internal concentration | Avoids free immunity while storing or manufacturing harmful compounds |
+| Corpse return | Release internal species unchanged; convert built matter locally to the decomposition species | Separates death from capture of its resources; requires no killer reward or new detritus chemistry |
+| Field representation | Bounded node-major float32 arrays, no abundance cutoff, explicit roundoff accounts | Cost remains bounded when diffusion spreads all 256 species |
+| Validation | Check property coverage and a few causal mechanisms before an integrated starting-world pilot | Establishes physical possibilities without selecting an evolutionary endpoint |
+
+Four slots per class is a bounded first architecture, not an assertion of sufficient lifetime
+evolvability. Numerical rates, affinity width, property ranges, investment costs and generator
+coverage thresholds remain calibration choices. The companion documents state their semantics
+and proposed checks; implementation must persist the actual resolved values.
+
+## Findings from review
+
+The chemistry and appendix fit the existing local, funded-cell architecture. They require a
+substantial replacement of fields, metabolism, body genes and neural channels, but no second
+runtime, external optimizer or additional conceptual layer for each ecological role.
+
+Two details deserve explicit limits. First, conservation of material alone does not prevent
+energy creation when low-potential matter becomes biomass and later decomposes into a
+higher-potential species. The proposed biomass energy rule closes that gap. Second, positive
+diffusion and exponential washout do not keep every small concentration exactly zero. Sparse
+storage is an implementation strategy, not a guarantee of bounded occupied field entries.
+
+Unary chemistry can express transformations and exchange, but cannot express chemical binding,
+multi-substrate dependence or extracellular neutralization. A cheap route to a low-potential
+product might also outperform longer metabolic chains. Machinery cost and heterogeneous supply
+make alternatives possible; they do not establish that cross-feeding or persistent diversity
+will emerge. Measure a missing link before adding a new reaction class.
+
+## Decision and implementation boundary
+
+The user authorized all phases of the implementation plan. The complete replacement and short
+constructed opportunities are implemented; final integration status belongs to that plan.
+The runtime retains one chemical economy and rejects older checkpoints. Historical studies retain
+their original evidence. Headless 2,000-cell growing loads exceed 30 ticks/s; that result excludes
+GPU presentation. Actual software-rendered browser loads exposed a separate throughput limit.
+Small probes show supplied growth and reproduction; ordinary habitats show accessible uptake and
+growth. Transit, human motion acceptance and days/weeks persistence remain unresolved. The
+reliability plan remains the authority for completion rather than these individual positive checks.

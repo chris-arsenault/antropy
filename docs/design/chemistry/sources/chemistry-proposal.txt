@@ -1,0 +1,512 @@
+# General-Purpose Digital Chemistry
+
+## Goal
+
+Replace Antropy's named environmental chemicals and dedicated chemical mechanics with a small general-purpose chemical system.
+
+The world should not intrinsically contain concepts such as food A, food B, toxin, signal, carbon, oxygen, or matrix. Instead, it contains chemical species with low-level physical properties. Cells evolve ways to sense, transport, and transform those species.
+
+Higher-level ecological roles should emerge from use:
+
+* a chemical becomes a **food** when an organism can obtain useful energy or material from it;
+* a chemical becomes a **waste product** when it is produced by metabolism and discarded;
+* a chemical becomes a **toxin** when its physical properties harm organisms exposed to it;
+* a chemical becomes a **signal** when organisms benefit from sensing it;
+* chemistry becomes **matrix-like** when accumulated material changes local mobility or transport;
+* one organism's waste may become another organism's resource.
+
+The system should remain deterministic, locally causal, materially accountable, and evolvable through small mutations.
+
+---
+
+## 1. Chemical space
+
+There are 256 possible chemical species.
+
+Each species is represented by one byte, interpreted as a coordinate in a 16 × 16 chemical space:
+
+```text
+species byte = XXXX YYYY
+
+x = high nibble  // 0–15
+y = low nibble   // 0–15
+```
+
+Chemical identity is therefore a position `(x, y)` rather than an arbitrary lookup key.
+
+Nearby positions generally have related physical properties and similar affinity for the same cellular machinery. Small genetic mutations can therefore produce small chemical changes.
+
+The chemical space is bounded rather than circular. Mutations or transformations crossing an edge reflect back into the valid range.
+
+---
+
+## 2. Chemical properties
+
+Each chemical coordinate has a small set of intrinsic physical properties derived from deterministic smooth functions over the 2D chemical space.
+
+Initial properties:
+
+```text
+U(x, y)  chemical potential
+D(x, y)  diffusion coefficient
+V(x, y)  viscosity contribution
+S(x, y)  membrane-stress contribution
+```
+
+These functions are part of the world's chemistry definition and remain fixed for the lifetime of a world.
+
+They should be generated from a small set of low-frequency 2D basis functions with persisted coefficients. This produces a continuous but nontrivial chemical landscape without defining 256 species individually.
+
+The complete chemistry can therefore be visualized as four 16 × 16 heatmaps.
+
+### Chemical potential
+
+`U` represents stored chemical energy.
+
+High-potential chemicals can release usable energy when transformed into lower-potential chemicals. Creating a higher-potential chemical requires cellular energy.
+
+### Diffusion
+
+`D` determines how rapidly a species spreads through open space.
+
+### Viscosity
+
+`V` determines how strongly accumulated extracellular chemistry impedes movement and local transport.
+
+At position `p`:
+
+```text
+viscosityLoad(p) = Σ concentration(s, p) × V(s)
+```
+
+Mobility and field transport use a bounded monotonic function such as:
+
+```text
+mobility = 1 / (1 + viscosityLoad)
+```
+
+Low concentrations therefore slow movement slightly. Large accumulations can become effectively wall-like without introducing a separate wall chemical or thresholded wall mechanic.
+
+### Membrane stress
+
+`S` represents a chemical's direct adverse interaction with cells.
+
+```text
+stressLoad(p) = Σ concentration(s, p) × S(s)
+```
+
+Stress produces bounded physiological damage through the existing damage/accounting model.
+
+Organisms can avoid, tolerate, export, or chemically transform harmful compounds. There is no intrinsic toxin category.
+
+---
+
+## 3. Environmental chemical fields
+
+Each world location may contain multiple chemical species.
+
+The representation should be sparse:
+
+```text
+position:
+    species 17  → 0.42
+    species 93  → 1.70
+    species 201 → 0.08
+```
+
+Only species with nonzero local concentration require storage.
+
+Each species diffuses according to `D(species)`, modified by local viscosity.
+
+Chemical fields contain conserved material except where explicitly exchanged with an external world source or sink.
+
+World resource patches become generic chemical sources. A source specifies:
+
+```text
+species
+location / region
+supply rate or finite inventory
+```
+
+The simulation may therefore begin with several externally supplied chemical species without assigning them biological roles.
+
+---
+
+## 4. Shared chemical affinity
+
+Receptors, transporters, and enzymes all use the same chemical-affinity rule.
+
+Each piece of cellular machinery has a target coordinate `(x, y)`.
+
+Its affinity for a chemical decreases smoothly with Euclidean distance in chemical space:
+
+```text
+distance = sqrt((x1-x2)^2 + (y1-y2)^2)
+
+affinity = exp(-(distance² / 2σ²))
+```
+
+`σ` is a global chemistry constant in the initial design.
+
+Specificity is therefore not independently evolvable in v1. This keeps the search space small while preserving gradual mutation.
+
+A mutation moving a target from `(5, 7)` to `(6, 7)` changes what the machinery interacts with rather than replacing its function with an unrelated one.
+
+---
+
+## 5. Chemical receptors
+
+Cells sense chemistry through general-purpose receptor slots.
+
+A receptor contains:
+
+```text
+targetSpecies: (x, y)
+```
+
+For the local chemical mixture, receptor activation is the affinity-weighted sum:
+
+```text
+activation =
+    Σ concentration(s) × affinity(targetSpecies, s)
+```
+
+Each receptor can expose the same existing spatial/temporal observations:
+
+```text
+local level
+temporal change
+body-relative gradient X
+body-relative gradient Y
+```
+
+The controller therefore receives information such as:
+
+> "chemistry near my receptor centered on `(6, 11)` is increasing to my left"
+
+rather than:
+
+> "toxin A is increasing to my left."
+
+Receptor target coordinates are heritable and mutable.
+
+The number of receptor slots and their mapping into the controller remain part of the controller/genome design rather than the chemistry model itself.
+
+---
+
+## 6. Internal chemical inventory
+
+Cells maintain a sparse internal chemical inventory using the same 256 species.
+
+Transported chemicals enter this inventory before metabolism.
+
+Internal chemical quantity is limited by the cell's existing storage capacity.
+
+The cell therefore has three distinct forms of state:
+
+```text
+chemical inventory
+usable cellular energy
+built cellular material / machinery
+```
+
+Chemical identity is retained while material remains in the chemical inventory.
+
+---
+
+## 7. Transporters
+
+Transporters move chemicals across the membrane.
+
+Each transporter has:
+
+```text
+targetSpecies: (x, y)
+direction: import | export
+capacity
+```
+
+Transfer applies to nearby species according to the shared affinity function.
+
+Conceptually:
+
+```text
+flux(s) =
+    transporterAmount
+    × transportRate
+    × affinity(targetSpecies, s)
+    × availableConcentration(s)
+```
+
+Flux is bounded by available external/internal material, storage capacity, and transport capacity.
+
+Transport consumes usable cellular energy proportional to transferred amount. This prevents selective concentration and chemical sorting from being free.
+
+Transporters provide the general mechanisms previously represented by separate uptake and secretion systems.
+
+---
+
+## 8. Enzymes and unary reactions
+
+The initial chemistry supports one reaction form:
+
+```text
+A → B
+```
+
+An enzyme contains:
+
+```text
+substrateCenter: (x, y)
+productOffset: (dx, dy)
+catalyticCapacity
+```
+
+For any internal species `A` near the enzyme's substrate center:
+
+```text
+B = reflect(A + productOffset)
+```
+
+The same enzyme therefore acts on a neighborhood of chemically related substrates and moves each by the same vector through chemical space.
+
+Example:
+
+```text
+enzyme:
+    substrate center = (5, 8)
+    product offset   = (+2, -1)
+```
+
+may strongly convert:
+
+```text
+(5,8) → (7,7)
+```
+
+while also converting nearby species such as:
+
+```text
+(5,9) → (7,8)
+(4,8) → (6,7)
+```
+
+at lower affinity.
+
+This creates evolvable reaction families rather than exact hardcoded reaction pairs.
+
+### Reaction rate
+
+The first implementation should use simple first-order kinetics:
+
+```text
+reactionAmount(s) =
+    enzymeAmount
+    × catalyticRate
+    × affinity(substrateCenter, s)
+    × internalAmount(s)
+    × dt
+```
+
+The actual amount is clamped by available substrate and available energy for endergonic reactions.
+
+Michaelis-Menten saturation, inhibition, cofactors, and multi-substrate kinetics are intentionally omitted from the initial model.
+
+---
+
+## 9. Reaction energy
+
+For:
+
+```text
+A → B
+```
+
+the chemical energy difference is:
+
+```text
+ΔU = U(A) - U(B)
+```
+
+### Exergonic reaction
+
+If:
+
+```text
+ΔU > 0
+```
+
+the reaction releases energy.
+
+The cell captures:
+
+```text
+captured = ΔU × amount × η
+```
+
+where `η < 1` is a global conversion efficiency.
+
+The remainder leaves the modeled chemical system as waste heat.
+
+### Endergonic reaction
+
+If:
+
+```text
+ΔU < 0
+```
+
+the cell must supply:
+
+```text
+required = (-ΔU × amount) / η
+```
+
+from usable cellular energy.
+
+The reaction cannot proceed beyond the amount the cell can fund.
+
+This allows organisms to synthesize higher-potential compounds while preventing free energetic cycles.
+
+For any closed reaction cycle, inefficiency guarantees a net energy loss.
+
+---
+
+## 10. Matter conservation
+
+Chemical transformations conserve chemical material exactly:
+
+```text
+1 unit A → 1 unit B
+```
+
+Reaction identity and energy change, but chemical quantity does not.
+
+Transport also conserves material between internal and external inventories.
+
+External world sources and sinks are explicitly accounted boundary flows.
+
+Existing built cellular material remains a separate conserved material stock. Chemical inventory can be assimilated into cellular material using the existing construction economy, consuming the required usable energy.
+
+On death, cellular material returns to the environment through a configured decomposition species in chemical space. This is a world boundary rule analogous to choosing the chemical composition of external resource sources; it does not assign that species a biological role.
+
+---
+
+## 11. Evolutionary continuity
+
+Chemical machinery should mutate locally.
+
+Typical mutations include:
+
+```text
+receptor target:
+    (5,7) → (6,7)
+
+transporter target:
+    (12,3) → (12,4)
+
+enzyme substrate:
+    (8,8) → (7,8)
+
+enzyme product offset:
+    (+2,-1) → (+1,-1)
+
+machinery investment:
+    small quantitative change
+```
+
+Large jumps may exist at a much lower mutation probability, but local mutation should dominate.
+
+Because both chemical properties and machinery affinity vary smoothly through the same 2D space, nearby mutations generally produce nearby functional effects.
+
+---
+
+## 12. Intended emergent interpretations
+
+No simulation component assigns these meanings, but the system should permit them to arise:
+
+### Food
+
+A chemical becomes food when a cell imports it and can convert it into lower-potential products while capturing useful energy and/or assimilating its material.
+
+### Waste
+
+A chemical becomes waste when a cell produces and exports it because retaining or further processing it is not advantageous.
+
+### Cross-feeding
+
+One species may consume another species' exported metabolic product.
+
+### Toxin
+
+A chemical becomes toxic when its membrane-stress properties reduce survival or reproduction of exposed organisms.
+
+### Detoxification
+
+A cell may import or encounter a stressful chemical and transform it into a less stressful species.
+
+### Signal
+
+A chemical becomes a signal when producing it and sensing its local concentration changes behavior in a way that improves reproductive success.
+
+The chemical itself needs no signal-specific physical effect.
+
+### Matrix / barrier
+
+Cells may produce slowly diffusing, high-viscosity compounds. Local accumulation can reduce movement and diffusion enough to form persistent spatial structure.
+
+### Energy storage or synthesis
+
+Cells may spend energy moving material uphill in chemical potential, retain the resulting compound, and later recover some of that energy through a downhill reaction.
+
+---
+
+## 13. Initial scope
+
+The first implementation should include:
+
+* 256 species in a 16 × 16 chemical space;
+* sparse extracellular chemical mixtures;
+* sparse intracellular chemical inventories;
+* smooth fixed chemical-property functions;
+* chemical potential;
+* species-dependent diffusion;
+* viscosity effects;
+* membrane stress;
+* shared fixed-width affinity;
+* general receptors;
+* import/export transporters;
+* unary enzymatic transformations;
+* conserved chemical matter;
+* explicit reaction energy accounting;
+* local mutation of chemical machinery.
+
+This is sufficient to test whether metabolic niches, cross-feeding, chemical interference, environmental modification, and signaling-like behavior can arise from one common substrate.
+
+---
+
+## 14. Deferred extensions
+
+Extensions should be justified by an observed limitation of the unary chemistry.
+
+Likely future candidates include:
+
+```text
+A + B → C
+```
+
+for true multi-substrate chemistry, cofactors, neutralization, and reactions between products of different organisms.
+
+Other possible later extensions include evolvable receptor/enzyme bandwidth, passive membrane permeability, chemical binding, catalysts that operate extracellularly, and more complex molecular conservation.
+
+These are not prerequisites for the initial chemistry.
+
+---
+
+## Design principle
+
+The chemistry should contain **properties and transformations, not biological meanings**.
+
+The world defines a continuous chemical landscape. Cells evolve where to sense it, where to move material within it, and how to transform one region of it into another.
+
+Ecological concepts such as resource, waste, toxin, signal, metabolism, cross-feeding, and barrier formation should describe what evolved systems *do*, not what the simulation says a chemical *is*.

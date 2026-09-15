@@ -1,0 +1,255 @@
+import { useState } from "react";
+import { type Bridge } from "./bridge";
+import { type Definition, type Inspection, type CellState } from "./types";
+import { ChemicalAtlas } from "./ChemicalAtlas";
+import { Table, numberText as n } from "./Table";
+import { CellGenealogy } from "./CellGenealogy";
+
+const MACHINERY = ["Receptor", "Transporter", "Enzyme"].flatMap((part) =>
+  Array.from({ length: 4 }, (_, i) => part + " " + i)
+);
+const PARTS = ["Core", "Motor", "Storage", ...MACHINERY];
+const INPUTS = [
+  ...Array.from({ length: 4 }, (_, i) =>
+    ["level", "change", "forward", "left"].map((v) => "Receptor " + i + " " + v)
+  ).flat(),
+  ...MACHINERY.map((p) => "Built " + p),
+  "Usable energy",
+  "Growth",
+  "Front contact",
+  "Left contact",
+  "Rear contact",
+  "Right contact",
+  "Task byte",
+  "Built motor capacity",
+  "Built storage capacity",
+  "Internal inventory fill",
+  "Damage",
+];
+interface Props {
+  bridge: Bridge;
+  inspection: Inspection | null;
+  definition: Definition;
+  error: (e: unknown) => void;
+}
+
+export function Inspector({ bridge, inspection: p, definition, error }: Props) {
+  if (!p)
+    return (
+      <section className="panel">
+        <h2>Cell inspector</h2>
+        <p>Click a cell to inspect its chemistry, funded body and inherited behavior.</p>
+      </section>
+    );
+  return (
+    <section className="panel">
+      <h2>Cell {p.ancestor.id}</h2>
+      <p>
+        Founder ancestry {p.ancestor.lineage} · born at tick {p.ancestor.born} · {p.ancestor.cause}
+      </p>
+      <CellGenealogy inspection={p} bridge={bridge} error={error} />
+      <Relationships inspection={p} bridge={bridge} error={error} />
+      {p.cell ? (
+        <>
+          <CellDetails inspection={p} definition={definition} />
+          {p.cell.machineryGenome !== p.cell.genome && (
+            <details>
+              <summary>Installed machinery awaiting paid refit</summary>
+              <p>
+                Genome {p.cell.genome} supplies inherited instructions. Receptors, transporters and
+                enzymes still use installed genome {p.cell.machineryGenome} until the cell can pay
+                the construction work to refit its existing material.
+              </p>
+              <pre>{JSON.stringify(p.installedChemistry, null, 2)}</pre>
+            </details>
+          )}
+          <Task bridge={bridge} id={p.cell.id} error={error} />
+        </>
+      ) : (
+        <>
+          <p>
+            This cell has ended. Its recorded parent and children remain available; its full private
+            state is no longer retained.
+          </p>
+          {p.genotype && (
+            <details>
+              <summary>Retained inherited genome</summary>
+              <pre>{JSON.stringify(p.genotype, null, 2)}</pre>
+            </details>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+function Relationships({ inspection: p, bridge, error }: Omit<Props, "definition">) {
+  if (!p) return null;
+  const r = p.relationships;
+  return (
+    <details open>
+      <summary>Nearest recorded relatives</summary>
+      <p>
+        {r.population ? ((100 * r.kin) / r.population).toFixed(1) : "0"}% of living cells share a
+        recorded ancestor.
+      </p>
+      <Table
+        columns={["Cell / family", "Ancestry links", "Physical distance", "RNN distance"]}
+        rows={r.rows.map((row) => [
+          <button
+            key={row.cell}
+            onClick={() => bridge.call("inspect", { cell: row.cell }).catch(error)}
+          >
+            {row.cell} / F{row.family}
+          </button>,
+          row.links ?? "unrelated",
+          row.physical === null ? "genome not retained" : n(row.physical),
+          row.controller === null ? "genome not retained" : n(row.controller),
+        ])}
+      />
+      <p>
+        Nearest by ancestry links. Genetic distances describe inherited differences; they do not
+        measure behavior or benefit.
+      </p>
+    </details>
+  );
+}
+function CellDetails({
+  inspection: p,
+  definition,
+}: {
+  inspection: Inspection;
+  definition: Definition;
+}) {
+  const c = p.cell!;
+  return (
+    <>
+      <p>
+        Generation {c.generation} · genotype {c.genome} · task byte {c.brain.task}
+      </p>
+      <p>
+        Usable energy {n(c.energy)} · built material {n(c.body.reduce((a, b) => a + b, 0))} ·
+        internal material {n(c.inventory.material)} · damage {(100 * c.damage).toFixed(1)}%
+      </p>
+      <p>
+        Swim {n(c.action.swim)} · turn {n(c.action.turn)} · repair {n(c.action.repair)}. Stress load{" "}
+        {n(p.exposure)} · impedance {n(p.impedance)} · mobility {n(p.mobility)}.
+      </p>
+      <Chemistry inspection={p} definition={definition} />
+      <details>
+        <summary>Local inputs and private recurrent state</summary>
+        <Table
+          columns={["Input", "Value"]}
+          rows={INPUTS.map((name, i) => [name, n(c.inputs[i])])}
+        />
+        <pre>{JSON.stringify({ hidden: c.brain.hidden, events: p.events }, null, 2)}</pre>
+      </details>
+      <details>
+        <summary>Funded body and inherited genes</summary>
+        <p>
+          Genotype inherited learning change {n(p.genotype?.learned)}. Chromosomes:{" "}
+          {p.genotype?.chromosomes.length}. Constructed stocks and newborn targets are separate.
+        </p>
+        <Table
+          columns={["Stock", "Built", "Newborn target"]}
+          rows={PARTS.map((part, i) => [part, n(c.body[i]), n(p.blueprint?.[i])])}
+        />
+        <pre>{JSON.stringify({ inherited: p.genotype, acquired: c.brain.traces }, null, 2)}</pre>
+      </details>
+    </>
+  );
+}
+function Chemistry({
+  inspection: p,
+  definition,
+}: {
+  inspection: Inspection;
+  definition: Definition;
+}) {
+  const c = p.cell!,
+    genes = p.expressed!.chemistry;
+  const slots = [...genes.receptors, ...genes.transporters, ...genes.enzymes];
+  const operation = (i: number) => {
+    if (i < 4) return "sense";
+    if (i < 8)
+      return (
+        (genes.transporters[i - 4].export ? "export" : "import") +
+        " · effort " +
+        n(c.action.transport[i - 4])
+      );
+    const e = genes.enzymes[i - 8];
+    return "offset " + e.dx + ", " + e.dy;
+  };
+  const species = c.inventory.amounts
+    .map((inside, s) => ({ inside, s, outside: p.local![s] }))
+    .filter((v) => v.inside + v.outside > 0);
+  return (
+    <div>
+      <h3>Chemistry</h3>
+      <p>
+        Membrane ({n(genes.membrane.x)}, {n(genes.membrane.y)})
+      </p>
+      <Table
+        columns={["Slot", "Target", "Operation", "Stock"]}
+        rows={slots.map((g, i) => [
+          MACHINERY[i],
+          n(g.x) + ", " + n(g.y),
+          operation(i),
+          n(c.body[i + 3]),
+        ])}
+      />
+      <ChemicalAtlas definition={definition} machinery={genes} />
+      <details>
+        <summary>Local and internal mixtures · {species.length} species</summary>
+        <Table
+          columns={["ID", "Inside · amount", "Outside · concentration", "U / D / I / S"]}
+          rows={species.map((v) => [
+            v.s,
+            n(v.inside),
+            n(v.outside),
+            (["potential", "diffusion", "impedance", "stress"] as const)
+              .map((key) => n(definition.chemistry.properties[v.s][key]))
+              .join(" / "),
+          ])}
+        />
+      </details>
+      <Transfers cell={c} />
+    </div>
+  );
+}
+function Transfers({ cell }: { cell: CellState }) {
+  const columns = ["imported", "exported", "consumed", "produced"] as const;
+  const species = cell.chemicalFlows.imported
+    .map((_, s) => s)
+    .filter((s) => columns.some((key) => cell.chemicalFlows[key][s] > 0));
+  return (
+    <details>
+      <summary>Cumulative chemical flows · this cell’s lifetime</summary>
+      <Table
+        columns={["ID", ...columns]}
+        rows={species.map((s) => [s, ...columns.map((key) => n(cell.chemicalFlows[key][s]))])}
+      />
+    </details>
+  );
+}
+function Task({ bridge, id, error }: { bridge: Bridge; id: number; error: (e: unknown) => void }) {
+  const [value, setValue] = useState(0);
+  return (
+    <details>
+      <summary>Diagnostic task override</summary>
+      <label>
+        Byte{" "}
+        <input
+          type="number"
+          min="0"
+          max="255"
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+        />
+      </label>
+      <button onClick={() => bridge.call("task", { cell: id, value }).catch(error)}>
+        Set byte
+      </button>
+      <p>Overrides are recorded as manual interventions.</p>
+    </details>
+  );
+}

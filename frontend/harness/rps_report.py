@@ -61,8 +61,9 @@ def audit(roots, output):
             "sourceDigestAfter": result.get("sourceDigestAfter"),
             "sourceChanged": manifest.get("sourceDigest") != result.get("sourceDigestAfter"),
             "case": path.parent.name, "ticks": result["ticks"], "stop": result["stop"],
-            "completed": result["completed"], "seed": manifest.get("seed"),
-            "rare": spec.get("rare"), "variants": spec["variants"],
+            "completed": result["completed"], "seed": manifest.get("options", {}).get("seed", manifest.get("seed")),
+            "inputSchemaVersion": manifest.get("schemaVersion", 1),
+            "rare": spec.get("rare"), "variants": spec.get("variants"),
             "settings": spec.get("settings"),
             "groups": frequencies(result["groups"]),
         })
@@ -99,6 +100,9 @@ def series(directory):
 
 
 def report(root):
+    from chemistry_report import dispatch
+    if dispatch(root, "contests"):
+        return
     cases = sorted(p.parent for p in root.glob("*/result.json"))
     if not cases:
         raise ValueError("No rps results under case directories")

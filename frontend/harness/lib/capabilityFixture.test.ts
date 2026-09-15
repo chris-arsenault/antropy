@@ -1,37 +1,50 @@
-import { expect, it } from "vitest";
+// @vitest-environment node
+import { beforeAll, expect, it } from "vitest";
+import { type Engine } from "../../src/engine/client";
+import { type CellState, type Summary } from "../../src/engine/types";
+import { loadEngine } from "../numerical/engine";
 import { capabilityScreens } from "./capabilityCases";
 import { capabilityScenario } from "./capabilityFixture";
-import { heldMaterial, heldEnergy, balance } from "../../src/sim/accounting";
-import { controller } from "../../src/sim/controller";
-import { diagnosticChanges } from "../../src/sim/controller/diagnostics";
-import { INPUTS } from "../../src/sim/interface";
-import { HIDDEN } from "../../src/sim/controller/rnn";
-
-it("funds mature stocks without a genotype-dependent initial material or energy grant", () => {
-  for (const test of capabilityScreens().filter((c) => c.mature)) {
-    const a = capabilityScenario(test).create(701, false),
-      b = capabilityScenario(test).create(701, true);
-    expect(heldMaterial(a)).toBeCloseTo(heldMaterial(b), 10);
-    expect(heldEnergy(a) + a.ledger.construction).toBeCloseTo(
-      heldEnergy(b) + b.ledger.construction,
-      10
-    );
-    expect(balance(a)).toBeCloseTo(0, 10);
-    const packets = a.cells.map((c) =>
-      Object.values(c.body).reduce((sum, v) => sum + v, c.reserve)
-    );
-    expect(Math.max(...packets) - Math.min(...packets)).toBeLessThan(1e-12);
+import { behaviorChange } from "./engineFixtures";
+import { chemicalContext } from "./chemicalGenotypes";
+let engine: Engine;
+beforeAll(async () => {
+  engine = await loadEngine();
+});
+it("funds mature targets without genotype-dependent grants", () => {
+  for (const test of capabilityScreens(engine).filter((c) => c.mature)) {
+    const a = capabilityScenario(test).create(engine, 701, false),
+      b = capabilityScenario(test).create(engine, 701, true);
+    try {
+      const x = a.command<Summary>("summary"),
+        y = b.command<Summary>("summary");
+      expect(x.heldMaterial).toBeCloseTo(y.heldMaterial, 10);
+      expect(x.heldEnergy + x.ledger.flows.construction).toBeCloseTo(
+        y.heldEnergy + y.ledger.flows.construction,
+        10
+      );
+      expect(x.energyResidual).toBeCloseTo(0, 9);
+      const frame = a.command<{ cells: { cell: CellState }[] }>("assayFrame");
+      const packets = frame.cells.map(({ cell }) =>
+        cell.body.reduce((sum, v) => sum + v, cell.inventory.material)
+      );
+      expect(Math.max(...packets) - Math.min(...packets)).toBeLessThan(1e-12);
+      if (test.key.startsWith("motor-"))
+        expect(frame.cells[1].cell.body[1] / frame.cells[0].cell.body[1]).toBeCloseTo(4, 10);
+    } finally {
+      a.dispose();
+      b.dispose();
+    }
   }
 });
-
-it("recurrent ablation preserves feed-forward weights and the input genome", () => {
-  const base = controller.seed(),
-    copy = base.weights.slice();
-  const changed = diagnosticChanges(base, { recurrence: "zero" });
-  const start = INPUTS * HIDDEN,
-    end = start + HIDDEN * HIDDEN;
-  expect(base.weights).toEqual(copy);
-  expect(changed.weights.slice(0, start)).toEqual(copy.slice(0, start));
-  expect(changed.weights.slice(start, end).every((w) => w === 0)).toBe(true);
-  expect(changed.weights.slice(end)).toEqual(copy.slice(end));
+it("recurrent ablation preserves feed-forward weights and its source genome", () => {
+  const base = chemicalContext(engine).genotype,
+    copy = structuredClone(base);
+  const changed = behaviorChange(engine, base, { recurrence: "zero" });
+  const before = base.chromosomes[0].behavior.weights,
+    after = changed.chromosomes[0].behavior.weights;
+  expect(base).toEqual(copy);
+  expect(after.slice(0, 39 * 24)).toEqual(before.slice(0, 39 * 24));
+  expect(after.slice(39 * 24, 39 * 24 + 24 * 24).every((w) => w === 0)).toBe(true);
+  expect(after.slice(39 * 24 + 24 * 24)).toEqual(before.slice(39 * 24 + 24 * 24));
 });

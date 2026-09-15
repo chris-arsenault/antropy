@@ -116,6 +116,20 @@ label input:not([type="checkbox"]):not([type="file"]) {
 .viewport canvas:active {
   cursor: grabbing;
 }
+.world-canvas {
+  position: relative;
+}
+.world-scale {
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  border-top: 2px solid #d3e4e9;
+  padding-top: 4px;
+  white-space: nowrap;
+  font-size: 11px;
+  pointer-events: none;
+  text-shadow: 0 1px 3px #000;
+}
 .map-tools {
   padding: 10px 12px;
   font-size: 11px;

@@ -10,8 +10,11 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 
 | Need | Document |
 | --- | --- |
-| World hypothesis and implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
-| Short movement and local reproduction controls | [Spatial probes](spatial-probes.md) |
+| Governing computable chemistry and active work | [Computational foundation](design/chemistry/computational-foundation.md), [ADR 0022](adr/0022-computable-chemistry.md), [root plan](../DIGITAL-CHEMISTRY-PLAN.md), [current specification](specs/digital-chemistry/README.md) |
+| Chemical system, implementation and current evidence | [Digital chemistry](design/chemistry/README.md), [numerical contract](design/chemistry/numerical-engine.md), [measurements](design/chemistry/numerical-results.md), [migration and retirement](design/chemistry/numerical-migration.md) |
+| World hypothesis and prior implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
+| Analytical resource budgets, source calibration and current viability checks | [Resource economy](design/chemistry/resource-economy.md) |
+| Historical A/B movement and local reproduction controls | [Spatial probes](spatial-probes.md) |
 | Recovery, accumulated-state measurements and limits | [Continuing observation](continuing-observation.md) |
 | Earlier plans, OBE decisions and migrated work | [Plan closeout](design/plan-closeout.md) |
 | Corrected frequencies and withdrawn coexistence passes | [Analysis correction and durable endpoint evidence](analysis-correction.md) |
@@ -23,6 +26,8 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Short constructed mechanism experiments | [Food-access harness and results](quick-food-access-study.md) |
 | Six mechanism areas and actual evolved capabilities | [Capability investigation and recommendation](capability-investigation.md) |
 | Families, relatives, genes and behavior | [Population observation](design/population-observation.md) |
+| Sidebar migration, restored genealogy and remaining display gaps | [Diagnostic continuity](design/chemistry/diagnostic-continuity.md) |
+| Immutable WASM/worker ownership, sharing rules and transport measurements | [Data-sharing contract](design/chemistry/data-ownership.md) |
 | Earlier-default long population comparison | [Six 50,000-tick runs](population-50k.md) |
 | Changing resource composition and inheritance | [Registered food-epoch campaign](food-epochs-study.md) |
 | Toxin immunity and the producer/resistant/sensitive cycle | [Contest record](rps-study.md) |
@@ -39,8 +44,22 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Decisions | [ADR index](adr/README.md) |
 | Original supplied sources | [Source index](sources/README.md) |
 
+Study records in the table above, except the current numerical chemistry and continuation
+record, retain pre-chemistry evidence. Their commands are historical; current invocations live in
+Development. Original contracts are preserved in the pre-chemistry snapshot.
+
 The following index covers every active design, principle, calibration and backlog section.
 Historical indexes remain in the archive; they are not additional work queues.
+
+## Computable chemistry
+
+- [Design rules for computation](design/chemistry/computational-foundation.md#design-the-rules-for-their-computation)
+- [Chemical and geographic domains](design/chemistry/computational-foundation.md#two-domains-with-different-jobs)
+- [Composed field and transport operations](design/chemistry/computational-foundation.md#compose-the-calculation-end-to-end)
+- [Machinery on chemical space](design/chemistry/computational-foundation.md#machinery-is-computation-on-chemical-space)
+- [Accounting and consistency](design/chemistry/computational-foundation.md#consistency-belongs-to-the-designed-system)
+- [Acceptance before integration](design/chemistry/computational-foundation.md#acceptance-before-integration)
+- [Computable artificial rules](principles.md#principles-computable-rules)
 
 ## Current design and work order
 
@@ -88,16 +107,16 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Strategic microbial ecology
 
 - [Resource opportunities](design/strategic-ecology.md#ecology-resource-opportunities)
-- [Element cycle](design/strategic-ecology.md#ecology-element-cycle)
-- [Predation](design/strategic-ecology.md#ecology-predation)
+- [Metabolic chains and external energy](design/strategic-ecology.md#ecology-element-cycle)
+- [Injury, death and resource capture](design/strategic-ecology.md#ecology-predation)
 - [Abiotic disturbance](design/strategic-ecology.md#ecology-disturbance)
 - [Horizontal gene transfer](design/strategic-ecology.md#ecology-gene-transfer)
-- [Reserve sharing](design/strategic-ecology.md#ecology-sharing)
-- [Neutral chemical signal](design/strategic-ecology.md#ecology-signal)
-- [Toxin, defense and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
+- [Export, uptake and recipient benefit](design/strategic-ecology.md#ecology-sharing)
+- [Detectable emissions](design/strategic-ecology.md#ecology-signal)
+- [Stress, compatibility and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
 - [Family chemistry](design/strategic-ecology.md#ecology-family-chemistry)
-- [Porous matrix](design/strategic-ecology.md#ecology-porous-matrix)
-- [Disabled systems](design/strategic-ecology.md#ecology-disabled-systems)
+- [Accumulation, impedance and degradation](design/strategic-ecology.md#ecology-porous-matrix)
+- [Optional and deferred scope](design/strategic-ecology.md#ecology-disabled-systems)
 - [Consequences and boundaries](design/strategic-ecology.md#ecology-consequences-and-boundaries)
 
 ## Experiments for world design
@@ -112,7 +131,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Evidence for world-design decisions
 
 - [World-design proof points and corrected claims](design/bacteria-results.md#evidence-world-design-proof-points)
-- [Current capability investigation](design/bacteria-results.md#evidence-capability-investigation)
+- [Pre-chemistry capability investigation](design/bacteria-results.md#evidence-capability-investigation)
 - [Exported lineage adaptation](design/bacteria-results.md#evidence-exported-lineage-adaptation)
 - [September 10 default ecology, before later changes](design/bacteria-results.md#evidence-corrected-default-ecology)
 - [Earlier evidence and its limits](design/bacteria-results.md#evidence-earlier-evidence-and-its-limits)
@@ -122,6 +141,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [World and camera](design/bacterial-display.md#display-world-and-camera)
 - [Visual meanings](design/bacterial-display.md#display-visual-meanings)
+- [Chemical map audit](design/bacterial-display.md#display-chemistry-map-audit)
 - [Stats and history](design/bacterial-display.md#display-stats-and-history)
 - [Implementation boundary](design/bacterial-display.md#display-implementation-boundary)
 
@@ -151,5 +171,5 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Default scales](calibration.md#calibration-default-scales)
 - [Measured throughput](calibration.md#calibration-throughput)
-- [Earlier thick-medium calibration](calibration.md#calibration-residency)
-- [Why the injury balance changed](calibration.md#calibration-why-the-injury-balance-changed)
+- [Motion and residency](calibration.md#calibration-residency)
+- [Chemistry and injury selection](calibration.md#calibration-why-the-injury-balance-changed)

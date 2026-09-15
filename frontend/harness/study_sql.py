@@ -16,11 +16,17 @@ def load(directory, database):
     if manifest["status"] != "complete":
         raise ValueError("Incomplete runs cannot enter completed evidence tables")
     schema = json.loads((directory / "schema.json").read_text())
-    if schema["version"] != 1:
+    if schema["version"] not in (1, 2, 3):
         raise ValueError("Unsupported study schema")
     with duckdb.connect(database) as db:
         db.execute("BEGIN TRANSACTION")
         db.execute("CREATE TABLE IF NOT EXISTS runs (run VARCHAR PRIMARY KEY, manifest JSON)")
+        versions = {json.loads(row[0]).get("schemaVersion", 1)
+                    for row in db.execute("SELECT manifest FROM runs").fetchall()}
+        if versions and versions != {schema["version"]}:
+            raise ValueError("Separate databases are required for historical and current study schemas")
+        if manifest.get("schemaVersion", 1) != schema["version"]:
+            raise ValueError("Manifest and table schema disagree")
         db.execute("INSERT INTO runs VALUES (?, ?)", [manifest["run"], json.dumps(manifest)])
         for table, columns in schema["tables"].items():
             definition = ", ".join(f'"{key}" {kind}' for key, kind in columns.items())

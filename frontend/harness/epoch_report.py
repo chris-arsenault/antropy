@@ -11,7 +11,8 @@ import statistics
 import sys
 from pathlib import Path
 
-from epoch_batch import SEEDS
+# Historical v1 campaign only. Current reports discover explicit v2 run manifests.
+SEEDS = tuple(101 * i for i in range(1, 13))
 from population_report import compare_initial, late_budget, mean, pct, traits
 
 
@@ -198,6 +199,9 @@ def plot_assays(root, result):
 
 
 def main(root):
+    from chemistry_report import dispatch
+    if dispatch(root, "epochs"):
+        return
     runs = [run_summary(root, seed, arm) for seed in SEEDS for arm in ("live", "frozen")]
     comparisons = pairs(root, runs)
     result = {

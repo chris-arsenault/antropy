@@ -1,108 +1,77 @@
-import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { createWorld } from "../../src/sim/world";
-import { controller } from "../../src/sim/controller";
-import { type Genotype } from "../../src/sim/genetics/genotype";
-import { type Config } from "../../src/sim/config";
-import { measure, sourceDigest } from "./bacteriaRun";
-import { openLedger, recordRun } from "./ledger";
+import { type Definition } from "../../src/engine/types";
+import { loadEngine } from "../numerical/engine";
+import { checkpointSource } from "./checkpointSource";
+import { runRecorded, readFrame } from "./longRun";
+import { assignPopulation } from "./engineFixtures";
 import { prepareCompetition } from "./competitionIdentity";
 import { competitionObservation } from "./competitionObservation";
 
-function competition(
-  ancestor: Genotype,
-  descendant: Genotype,
-  config: Config,
-  seed: number,
-  ticks: number,
-  swap: boolean
-) {
-  const world = createWorld(seed, {
-    ...config,
-    mutationRate: 0,
-    physicalMutationRate: 0,
-    transmission: "clonal",
-    learningRetention: 0,
-  });
-  world.genomes.get(1)!.genome = ancestor;
-  world.genomes.set(2, { id: 2, parent: null, born: 0, genome: descendant, learned: 0 });
-  world.nextGenome = 3;
-  for (const [i, c] of world.cells.entries()) {
-    c.genome = ((i + Number(swap)) % 2) + 1;
-    world.ancestry.get(c.id)!.genome = c.genome;
-  }
-  const behavior: { tick: number; groups: ReturnType<typeof competitionObservation> }[] = [];
-  const result = measure(world, ticks, 100, {
-    spatial: false,
-    progress: true,
-    onSample: (w) => behavior.push({ tick: w.tick, groups: competitionObservation(w) }),
-  });
-  const counts = [1, 2].map((g) => world.cells.filter((c) => c.genome === g).length);
-  return {
-    seed,
-    regime: config.regime,
-    config: world.config,
-    swap,
-    counts,
-    wallMs: result.wallMs,
-    final: result.final,
-    behavior,
-    series: result.series.map((s) => ({
-      tick: s.tick,
-      population: s.population,
-      genomes: s.genomes,
-    })),
-  };
-}
-export function compareCheckpoint(
+/** Compare observed inherited genotypes on common founder bodies in the source physics. */
+export async function compareCheckpoint(
   path: string,
   candidate: number | "representative",
   seeds: number[],
   ticks: number,
   output: string
-): void {
-  const digest = sourceDigest();
-  const { saved, ancestor, descendant, identity } = prepareCompetition(
-    readFileSync(path, "utf8"),
-    candidate
-  );
-  const results = [];
-  for (const regime of ["persistent", "transient"] as const)
+): Promise<void> {
+  if (ticks < 1 || ticks > 3000)
+    throw new Error(
+      "This comparison has a 3000-tick ceiling; register longer invasion work separately"
+    );
+  const engine = await loadEngine(),
+    source = await checkpointSource(engine, path);
+  try {
+    const { ancestor, descendant, identity } = prepareCompetition(source.world, candidate),
+      config = source.world.command<Definition>("definition").config;
+    mkdirSync(output, { recursive: true });
     for (const seed of seeds)
-      for (const swap of [false, true])
-        results.push(
-          competition(ancestor, descendant, { ...saved.config, regime }, seed, ticks, swap)
-        );
-  const params = {
-    config: saved.config,
-    candidate,
-    path,
-    seeds,
-    identity,
-    sourceDigest: digest,
-    sourceDigestAfter: sourceDigest(),
-  };
-  const db = openLedger();
-  const id = recordRun(db, {
-    experiment: "bacteria-competition",
-    label: `ancestor ${identity.ancestor.id} versus observed genotype ${identity.descendant.id}`,
-    driver: controller.id,
-    seed: seeds[0],
-    ticks,
-    params,
-    summary: { results },
-    wallMs: results.reduce((s, r) => s + r.wallMs, 0),
-  });
-  db.close();
-  mkdirSync(output, { recursive: true });
-  writeFileSync(
-    join(output, `competition-${id}.json`),
-    JSON.stringify({ id, ...params, results }, null, 2)
-  );
-  console.log(
-    JSON.stringify({
-      id,
-      results: results.map(({ seed, regime, swap, counts }) => ({ seed, regime, swap, counts })),
-    })
-  );
+      for (const swap of [false, true]) {
+        const world = engine.create(seed, {
+          ...config,
+          mutationRate: 0,
+          physicalMutationRate: 0,
+          transmission: "clonal",
+          transferRate: 0,
+          learningRetention: 0,
+        });
+        try {
+          const groups = new Map(
+            readFrame(world).cells.map((c, i) => [c.lineage, (i + Number(swap)) % 2])
+          );
+          assignPopulation(
+            world,
+            [
+              { label: "ancestor", genotype: ancestor },
+              { label: "observed descendant", genotype: descendant },
+            ],
+            (i) => (i + Number(swap)) % 2
+          );
+          const label = `compare-${seed}-${swap}`;
+          runRecorded(engine, world, {
+            directory: join(output, label),
+            experiment: "bacteria-competition",
+            label,
+            ticks,
+            cadence: 100,
+            checkpointEvery: 1000,
+            wallSeconds: 120,
+            provenance: {
+              source: source.provenance,
+              identity,
+              swap,
+              initialCounts: competitionObservation(world, groups).map((g) => g.population),
+              interpretation:
+                "Frozen mutation and inherited learning; private learning and complete source physics retained. Historical regime labels had no numerical-kernel meaning.",
+            },
+            observation: (w) => ({ groups: competitionObservation(w, groups) }),
+          });
+        } finally {
+          world.dispose();
+        }
+      }
+  } finally {
+    source.world.dispose();
+  }
 }

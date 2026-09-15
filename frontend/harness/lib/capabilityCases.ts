@@ -1,23 +1,33 @@
-import { controller } from "../../src/sim/controller";
+import { type Engine } from "../../src/engine/client";
+import { type Genotype } from "../../src/engine/types";
 import {
-  constantEfforts,
-  travelGenome,
-  diagnosticChanges,
-} from "../../src/sim/controller/diagnostics";
-import { constructed, type CapabilityCase } from "./capabilityFixture";
+  allocationGenome,
+  membraneGenome,
+  detoxGenome,
+  stressSpecies,
+  chemicalContext,
+  type ChemicalContext,
+} from "./chemicalGenotypes";
+import { type CapabilityCase } from "./capabilityFixture";
 
-function movementCases(): CapabilityCase[] {
-  const fast = travelGenome("fast");
+function motor(base: Genotype, factor: number) {
+  const g = structuredClone(base);
+  for (const c of g.chromosomes) c.physical[1] = factor - 1;
+  return g;
+}
+function movementCases(c: ChemicalContext): CapabilityCase[] {
+  const genotype = c.genotype;
   return (["persistent", "brief"] as const).flatMap((context) => [
     {
       key: `propulsion-${context}`,
       context,
-      hypothesis: "Reserve-dependent propulsion preserves intake and lowers motor expense",
+      hypothesis: "Inventory-dependent propulsion preserves intake and lowers motor expense",
       variants: [
-        { label: "fast", genome: constructed(fast) },
+        { label: "fast", genotype, changes: { swimBiasDelta: 0.3 } },
         {
-          label: "reserve brake 0.6",
-          genome: constructed(diagnosticChanges(fast, { reserveBrake: 0.6 })),
+          label: "inventory brake 0.6",
+          genotype,
+          changes: { swimBiasDelta: 0.3, inventoryBrake: 0.6 },
         },
       ],
     },
@@ -26,19 +36,17 @@ function movementCases(): CapabilityCase[] {
       context,
       mature: true,
       hypothesis:
-        "Coordinated motor investment can change the speed versus construction/maintenance tradeoff",
+        "Coordinated motor investment changes speed versus construction and maintenance costs",
       variants: [
         {
           label: "half motor, gain sqrt(2)",
-          genome: constructed(diagnosticChanges(fast, { motorGain: Math.sqrt(2) }), {
-            1: Math.log(0.5),
-          }),
+          genotype: motor(genotype, 0.5),
+          changes: { swimBiasDelta: 0.3, motorGain: Math.sqrt(2) },
         },
         {
           label: "double motor, gain 1/sqrt(2)",
-          genome: constructed(diagnosticChanges(fast, { motorGain: 1 / Math.sqrt(2) }), {
-            1: Math.log(2),
-          }),
+          genotype: motor(genotype, 2),
+          changes: { swimBiasDelta: 0.3, motorGain: 1 / Math.sqrt(2) },
         },
       ],
     },
@@ -47,76 +55,55 @@ function movementCases(): CapabilityCase[] {
       context,
       hypothesis: "Baseline recurrence contributes beyond phasic receptors and local contrast",
       variants: [
-        { label: "intact fast", genome: constructed(fast) },
+        { label: "intact fast", genotype, changes: { swimBiasDelta: 0.3 } },
         {
           label: "recurrent block zero",
-          genome: constructed(diagnosticChanges(fast, { recurrence: "zero" })),
+          genotype,
+          changes: { swimBiasDelta: 0.3, recurrence: "zero" },
         },
       ],
     },
   ]);
 }
-
-function processingCases(): CapabilityCase[] {
-  return (["uniformA", "uniformB"] as const).map((context) => ({
+function processingCases(c: ChemicalContext): CapabilityCase[] {
+  return (["uniform0", "uniform1"] as const).map((context) => ({
     key: `processing-${context}`,
     context,
     mature: true,
-    hypothesis: "Matched total processing stock yields substrate-dependent uptake and division",
+    hypothesis: "Equal total import/enzyme stocks yield substrate-dependent acquisition and growth",
     variants: [
-      {
-        label: "A-biased 0.11 A / 0.02 B",
-        genome: constructed(constantEfforts({}), {
-          2: Math.log(0.11 / 0.08),
-          4: Math.log(0.02 / 0.05),
-        }),
-      },
-      {
-        label: "B-biased 0.02 A / 0.11 B",
-        genome: constructed(constantEfforts({}), {
-          2: Math.log(0.02 / 0.08),
-          4: Math.log(0.11 / 0.05),
-        }),
-      },
+      { label: "75% first-source investment", genotype: allocationGenome(0.75, c) },
+      { label: "25% first-source investment", genotype: allocationGenome(0.25, c) },
     ],
   }));
 }
-
-function protectionCases(): CapabilityCase[] {
-  return [0, 0.003].flatMap((toxin) => [
+function protectionCases(c: ChemicalContext): CapabilityCase[] {
+  return [0, 0.1].flatMap((concentration) => [
     {
-      key: `defense-${toxin ? "toxic" : "clean"}`,
-      context: "uniformA" as const,
-      toxin,
-      mature: true,
-      hypothesis: "Defense repays its material and maintenance costs under exposure",
+      key: `compatibility-${concentration ? "exposed" : "clean"}`,
+      context: "uniform0" as const,
+      exposure: { species: stressSpecies(c), concentration },
+      hypothesis: "Membrane compatibility reduces matched exposure without universal immunity",
       variants: [
-        { label: "reference defense", genome: constructed(constantEfforts({ repair: 1 })) },
-        {
-          label: "fourfold defense",
-          genome: constructed(constantEfforts({ repair: 1 }), { 5: Math.log(4) }),
-        },
+        { label: "compatible membrane", genotype: membraneGenome(true, c) },
+        { label: "distant membrane", genotype: membraneGenome(false, c) },
       ],
     },
     {
-      key: `matrix-${toxin ? "toxic" : "clean"}`,
-      context: "uniformA" as const,
-      toxin,
-      hypothesis: "Local matrix protection can repay secretion; neighbors may share its benefit",
+      key: `detoxification-${concentration ? "exposed" : "clean"}`,
+      context: "uniform0" as const,
+      exposure: { species: stressSpecies(c), concentration },
+      hypothesis:
+        "Paid import and transformation reduce injury relative to an isoenergetic self-reaction",
       variants: [
-        { label: "nonbuilder", genome: constructed(constantEfforts({ repair: 1 })) },
-        {
-          label: "matrix effort 0.1",
-          genome: constructed(constantEfforts({ repair: 1, matrix: 0.1 })),
-        },
+        { label: "detoxifying offset", genotype: detoxGenome(true, c) },
+        { label: "zero offset", genotype: detoxGenome(false, c) },
       ],
     },
   ]);
 }
-
-export function capabilityScreens(): CapabilityCase[] {
-  return [...movementCases(), ...processingCases(), ...protectionCases()];
+export function capabilityScreens(engine: Engine): CapabilityCase[] {
+  const c = chemicalContext(engine);
+  return [...movementCases(c), ...processingCases(c), ...protectionCases(c)];
 }
-
-/** Shared seed source for subsequent small interventions; no optimizer or winner filtering. */
-export const founderGenotype = () => constructed(controller.seed());
+export const founderGenotype = (engine: Engine) => chemicalContext(engine).genotype;

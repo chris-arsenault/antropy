@@ -18,6 +18,9 @@ def read(path):
 
 
 def report(root):
+    from chemistry_report import dispatch
+    if dispatch(root, "quick"):
+        return
     cases = sorted(root.glob("*/*/result.json"))
     if not cases:
         raise ValueError("No quick experiment results under stage/case directories")

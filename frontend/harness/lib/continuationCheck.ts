@@ -1,156 +1,204 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { gzipSync } from "node:zlib";
-import { createWorld, stepWorld } from "../../src/sim/world";
-import { DEFAULT_CONFIG } from "../../src/sim/config";
-import { AncestryStore } from "../../src/sim/ancestryStore";
-import { checkpointToJson, restoreWorld } from "../../src/persist/checkpoint";
-import { saveObservation } from "../../src/persist/observation";
-import { observeSpatial } from "../../src/observe/spatialHistory";
-import { balance, materialBalance } from "../../src/sim/accounting";
-import { sourceDigest } from "./bacteriaRun";
+import { type Engine, type EngineWorld } from "../../src/engine/client";
+import { type Definition, type ObservationState, type Summary } from "../../src/engine/types";
+import { encodePackage, decodePackage } from "../../src/engine/package";
+import { emptySpatial, observe } from "../../src/engine/observation";
+import { loadEngine, captureEngine } from "../numerical/engine";
 import { openLedger, recordRun } from "./ledger";
 import { flag, type Flags } from "./flags";
 
-function elapsed(start: number): number {
-  return performance.now() - start;
+const elapsed = (start: number) => performance.now() - start;
+function budget(start: number) {
+  if (elapsed(start) > 60000) throw new Error("Registered 60-second storage case budget reached");
 }
-function budget(start: number): void {
-  if (elapsed(start) > 60000) throw new Error("Registered 60-second operational budget reached");
-}
-function fillAncestry(store: AncestryStore, count: number, started: number): void {
-  for (let id = 1; id <= count; id++) {
-    store.set(id, {
-      id,
-      parent: id === 1 ? null : id - 1,
-      lineage: 1,
-      genome: 1,
-      born: id - 1,
-      ended: id === count ? null : id,
-      cause: id === count ? "alive" : "division",
-    });
-    if (id % 4096 === 0) {
-      store.compact();
-      budget(started);
-    }
-  }
-  store.compact();
-}
-function ancestry(count: number) {
-  const started = performance.now();
-  const world = createWorld(101, {
-    ...DEFAULT_CONFIG,
-    width: 16,
-    height: 16,
+function makeWorld(engine: Engine, name: string) {
+  if (name === "default") return engine.create();
+  const history = name.startsWith("ancestry-");
+  const world = engine.create(101, {
+    width: history ? 24 : 64,
+    height: history ? 24 : 64,
     founders: 1,
     sourceCount: 0,
   });
-  const store = world.ancestry as AncestryStore;
-  fillAncestry(store, count, started);
-  Object.assign(world.cells[0], {
-    id: count,
-    parent: count - 1,
-    born: count - 1,
-    generation: count - 1,
-  });
-  world.nextCell = count + 1;
-  world.tick = count;
-  const insertedMs = elapsed(started),
-    beforeSave = performance.now();
-  // Synthetic history deliberately omits ecological observation claims.
-  const text = checkpointToJson(world);
-  const serializeMs = elapsed(beforeSave),
-    compressed = gzipSync(text).byteLength;
-  const beforeRepeat = performance.now();
-  const repeated = checkpointToJson(world);
-  const repeatSerializeMs = elapsed(beforeRepeat);
-  if (repeated !== text) throw new Error("Cached ancestry changed serialization");
+  try {
+    if (history) world.command("historyFixture", { count: Number(name.slice(9)) });
+    else world.command("fieldFixture", { kind: name });
+    return world;
+  } catch (error) {
+    world.dispose();
+    throw error;
+  }
+}
+async function packageCheck(
+  engine: Engine,
+  world: EngineWorld,
+  observation: ObservationState,
+  path: string,
+  started: number
+) {
+  const definition = world.command<Definition>("definition"),
+    summary = world.command<Summary>("summary");
+  const beforeSave = performance.now(),
+    snapshot = world.snapshot(),
+    serializeMs = elapsed(beforeSave);
   budget(started);
+  const beforeCompression = performance.now();
+  const blob = await encodePackage(snapshot, {
+    seed: definition.seed,
+    tick: summary.tick,
+    observation,
+  });
+  const compressMs = elapsed(beforeCompression);
+  writeFileSync(join(path, "checkpoint.antropy.gz"), new Uint8Array(await blob.arrayBuffer()));
   const beforeRestore = performance.now(),
-    restored = restoreWorld(text);
+    decoded = await decodePackage(blob),
+    restored = engine.restore(decoded.snapshot);
   const restoreMs = elapsed(beforeRestore);
-  for (const id of [1, Math.floor(count / 2), count])
-    if (JSON.stringify(restored.ancestry.get(id)) !== JSON.stringify(store.get(id)))
-      throw new Error("Accumulated ancestry mismatch");
-  budget(started);
-  return {
-    count,
-    insertedMs,
-    serializeMs,
-    repeatSerializeMs,
-    restoreMs,
-    bytes: Buffer.byteLength(text),
-    compressed,
-    activeRecords: store.packed().active.length,
-    memory: process.memoryUsage(),
-    wallMs: elapsed(started),
-  };
-}
-function startup() {
-  const world = createWorld(),
-    started = performance.now();
-  observeSpatial(world);
-  while (world.tick < 500 && !world.stopReason && elapsed(started) < 60000) {
-    stepWorld(world);
-    observeSpatial(world);
+  try {
+    if (Buffer.compare(snapshot, restored.snapshot()) !== 0)
+      throw new Error("Physical restore mismatch");
+    if (JSON.stringify(observation) !== JSON.stringify(decoded.metadata.observation))
+      throw new Error("Retained observation mismatch");
+    budget(started);
+    const beforeContinuation = performance.now();
+    for (let i = 0; i < 3; i++) {
+      world.step();
+      restored.step();
+    }
+    const continuationMs = elapsed(beforeContinuation);
+    if (Buffer.compare(world.snapshot(), restored.snapshot()) !== 0)
+      throw new Error("Physical continuation mismatch");
+    budget(started);
+    return {
+      bytes: snapshot.length,
+      compressed: blob.size,
+      serializeMs,
+      compressMs,
+      restoreMs,
+      continuationMs,
+      exactContinuation: true,
+    };
+  } finally {
+    restored.dispose();
   }
-  const runtimeMs = elapsed(started),
-    beforeSave = performance.now();
-  const text = checkpointToJson(world, sourceDigest(), saveObservation(world));
-  const serializeMs = elapsed(beforeSave),
-    beforeRestore = performance.now();
-  const restored = restoreWorld(text),
-    restoreMs = elapsed(beforeRestore);
-  const result = {
-    ticks: world.tick,
-    runtimeMs,
-    living: world.cells.length,
-    births: world.ledger.births,
-    stop: world.stopReason,
-    energyResidual: balance(world),
-    materialResidual: materialBalance(world),
-    regions: observeSpatial(world).regions.length,
-    serializeMs,
-    restoreMs,
-    bytes: Buffer.byteLength(text),
-  };
-  for (let i = 0; i < 5; i++) {
-    stepWorld(world);
-    stepWorld(restored);
-  }
-  if (checkpointToJson(world) !== checkpointToJson(restored))
-    throw new Error("Startup continuation mismatch");
-  return result;
 }
-export function runContinuationCheck(flags: Flags): void {
+async function storageCase(engine: Engine, name: string, root: string) {
+  const path = join(root, name);
+  mkdirSync(path);
+  const started = performance.now(),
+    world = makeWorld(engine, name),
+    insertedMs = elapsed(started);
+  try {
+    const initial = world.command<Summary>("summary"),
+      censusStart = performance.now();
+    const spatial = emptySpatial();
+    observe(world, spatial);
+    const censusMs = elapsed(censusStart);
+    const observation: ObservationState = {
+      runId: `synthetic-${name}`,
+      spatial,
+      history: [],
+      recent: [],
+      executions: [{ digest: engine.sourceDigest, tick: initial.tick }],
+    };
+    const inspectStart = performance.now();
+    world.command("inspect", { cell: name.startsWith("ancestry-") ? Number(name.slice(9)) : 1 });
+    const inspectionMs = elapsed(inspectStart);
+    const renderStart = performance.now(),
+      frame = world.render(5, 0, 6, true);
+    const renderBytes = frame.cells.byteLength + frame.field.byteLength + frame.markers.byteLength;
+    const renderMs = elapsed(renderStart),
+      stepMs: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      const start = performance.now();
+      world.step();
+      stepMs.push(elapsed(start));
+      budget(started);
+    }
+    const storage = await packageCheck(engine, world, observation, path, started);
+    const result = {
+      name,
+      insertedMs,
+      censusMs,
+      inspectionMs,
+      renderMs,
+      renderBytes,
+      stepMs,
+      storage,
+      initial,
+      final: world.command<Summary>("summary"),
+      memoryBytes: engine.memoryBytes,
+      wallMs: elapsed(started),
+    };
+    writeFileSync(join(path, "result.json"), JSON.stringify(result, null, 2));
+    console.log(
+      JSON.stringify({
+        name,
+        wallMs: result.wallMs,
+        censusMs,
+        inspectionMs,
+        ...storage,
+        memoryBytes: result.memoryBytes,
+      })
+    );
+    return result;
+  } finally {
+    world.dispose();
+  }
+}
+export async function runContinuationCheck(flags: Flags): Promise<void> {
   const output = flag(flags, "output", "harness/artifacts/continuation-check");
-  mkdirSync(output, { recursive: false });
-  const digest = sourceDigest(),
-    started = performance.now();
-  const summary = {
-    startup: flag(flags, "storage-only", "false") === "true" ? null : startup(),
-    ancestry: [ancestry(100000), ancestry(2000000)],
-  };
+  mkdirSync(output);
+  const started = performance.now(),
+    engine = await loadEngine(),
+    binaryDigest = captureEngine(output, engine);
+  const chemicalOnly = flag(flags, "chemical-only", "false") === "true";
+  const storageOnly = flag(flags, "storage-only", "false") === "true";
+  const cases = [
+    ...(chemicalOnly ? [] : ["ancestry-100000", "ancestry-2000000"]),
+    "empty",
+    "patchy",
+    "widespread",
+    "dense",
+    ...(chemicalOnly || storageOnly ? [] : ["default"]),
+  ];
+  const results = [];
   const params = {
-    sourceDigest: digest,
-    sourceDigestAfter: sourceDigest(),
-    registration: "docs/continuing-observation.md",
+    schemaVersion: 3,
+    sourceDigest: engine.sourceDigest,
+    binaryDigest,
+    registration: "docs/design/chemistry/numerical-engine.md",
+    wallSecondsPerCase: 60,
+    interpretation:
+      "Synthetic storage and bounded continuation; no evolutionary or endurance claim",
   };
-  const db = openLedger();
-  const id = recordRun(db, {
-    experiment: "continuation-check",
-    label: "Synthetic storage and 500-tick startup; not evolution evidence",
-    driver: "bacteria-xy",
-    seed: 101,
-    ticks: summary.startup ? summary.startup.ticks + 5 : 0,
-    params,
-    summary,
-    wallMs: elapsed(started),
-  });
-  db.close();
-  writeFileSync(
-    join(output, "report.json"),
-    JSON.stringify({ id, ...params, ...summary }, null, 2)
-  );
-  console.log(JSON.stringify({ id, ...summary }));
+  let failure: string | null = null;
+  try {
+    for (const name of cases) results.push(await storageCase(engine, name, output));
+  } catch (error) {
+    failure = String(error);
+  }
+  const summary = { results, failure },
+    db = openLedger();
+  try {
+    const id = recordRun(db, {
+      experiment: "continuation-check",
+      label: "Numerical chemistry storage",
+      driver: "wasm",
+      seed: 101,
+      ticks: results.length * 8,
+      params,
+      summary,
+      wallMs: elapsed(started),
+    });
+    writeFileSync(
+      join(output, "report.json"),
+      JSON.stringify({ id, ...params, ...summary }, null, 2)
+    );
+    console.log(JSON.stringify({ id, cases: results.length, failure }));
+  } finally {
+    db.close();
+  }
+  if (failure) throw new Error(failure);
 }

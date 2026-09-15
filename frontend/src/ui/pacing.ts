@@ -11,17 +11,17 @@ export function createPacer(speed: Speed, start: number) {
     owed = 0;
   const budget = speed === "max" ? MAX_FRAME_BUDGET_MS : FRAME_BUDGET_MS;
   return {
-    advance(now: number, step: () => void, clock: () => number): number {
+    advance(now: number, step: () => void | boolean, clock: () => number): number {
       const elapsed = Math.max(0, now - previous);
       previous = now;
       if (speed !== "max") owed = Math.min(Math.max(1, speed / 4), owed + (elapsed * speed) / 1000);
       const deadline = clock() + budget;
       let ticks = 0;
       while (speed === "max" || owed >= 1 - 1e-9) {
-        step();
+        const continued = step();
         ticks++;
         if (speed !== "max") owed = Math.max(0, owed - 1);
-        if (clock() >= deadline || ticks >= 256) break;
+        if (continued === false || clock() >= deadline || ticks >= 256) break;
       }
       return ticks;
     },

@@ -1,70 +1,71 @@
-import { describe, expect, it } from "vitest";
+// @vitest-environment node
+import { beforeAll, expect, it } from "vitest";
+import { type Engine } from "../../src/engine/client";
+import { type CellState, type Summary } from "../../src/engine/types";
+import { loadEngine } from "../numerical/engine";
 import { foodAccess } from "./foodAccess";
 import { QuickObserver } from "./quickObserver";
 import { validateQuickOptions } from "./quickRun";
-import { checkpointToJson } from "../../src/persist/checkpoint";
-import { balance, materialBalance, total } from "../../src/sim/accounting";
-import { stepWorld } from "../../src/sim/world";
-import { flow, life } from "../../src/sim/observation";
+let engine: Engine;
+beforeAll(async () => {
+  engine = await loadEngine();
+});
 
-describe("short mechanism fixtures", () => {
-  it("swaps only genotype assignment and ancestry, with equal funded food and bodies", () => {
-    const scenario = foodAccess("brief"),
-      a = scenario.create(701, false),
-      b = scenario.create(701, true);
-    expect(total(a.nutrient)).toBeCloseTo(96, 10);
-    expect(total(foodAccess("persistent").create(701, false).nutrient)).toBeCloseTo(96, 10);
-    expect(a.cells.filter((c) => c.genome === 1)).toHaveLength(8);
-    for (const c of b.cells) {
-      c.genome = 3 - c.genome;
-      b.ancestry.get(c.id)!.genome = c.genome;
-    }
-    expect(checkpointToJson(a)).toBe(checkpointToJson(b));
-    expect(balance(a)).toBeCloseTo(0, 10);
-    expect(materialBalance(a)).toBeCloseTo(0, 10);
-  });
-  it("observation leaves inference, physics and accounting unchanged", () => {
-    const scenario = foodAccess("brief"),
-      a = scenario.create(701, false),
-      b = scenario.create(701, false);
-    const observer = new QuickObserver(a, scenario);
+it("swaps assignments with equal positions, funded packets and finite food", () => {
+  const scenario = foodAccess("brief"),
+    a = scenario.create(engine, 701, false),
+    b = scenario.create(engine, 701, true);
+  try {
+    const environment = a.command<{ extracellular: { amount: number } }>("environment");
+    expect(environment.extracellular.amount).toBeCloseTo(96, 5);
+    expect(a.command("environment")).toEqual(b.command("environment"));
+    const ac = a.command<{ cells: CellState[] }>("frame").cells,
+      bc = b.command<{ cells: CellState[] }>("frame").cells;
+    expect(ac.filter((c) => c.genome === 2)).toHaveLength(8);
+    ac.forEach((c, i) => {
+      expect(c.genome + bc[i].genome).toBe(5);
+      expect([c.x, c.y, c.heading, c.energy]).toEqual([
+        bc[i].x,
+        bc[i].y,
+        bc[i].heading,
+        bc[i].energy,
+      ]);
+    });
+    expect(a.command<Summary>("summary").materialResidual).toBeCloseTo(0, 9);
+    expect(a.command<Summary>("summary").energyResidual).toBeCloseTo(0, 9);
+  } finally {
+    a.dispose();
+    b.dispose();
+  }
+});
+it("records the causal trace without changing physics or neural memory", () => {
+  const scenario = foodAccess("brief"),
+    a = scenario.create(engine, 701, false),
+    b = engine.restore(a.snapshot());
+  const observer = new QuickObserver(a, scenario);
+  try {
     observer.frame();
-    for (let i = 0; i < 20; i++) {
-      observer.beforeStep();
-      stepWorld(a);
-      stepWorld(b);
-      observer.afterStep();
+    for (let i = 0; i < 16; i++) {
+      a.step();
+      b.step();
       observer.frame();
     }
+    expect(a.snapshot()).toEqual(b.snapshot());
+    const groups = observer.result(),
+      total = a.command<Summary>("summary").ledger.flows;
+    expect(groups.reduce((n, g) => n + g.flows.imported, 0)).toBeCloseTo(total.imported, 10);
+    expect(groups.reduce((n, g) => n + g.flows.motors, 0)).toBeCloseTo(total.motors, 10);
+  } finally {
     observer.close();
-    expect(checkpointToJson(a)).toBe(checkpointToJson(b));
-    expect(balance(a)).toBeCloseTo(0, 9);
-    expect(materialBalance(a)).toBeCloseTo(0, 9);
-    expect(a.ledger.toxinEmitted + a.ledger.matrixEmitted + a.ledger.emitted).toBe(0);
-  });
-  it("refuses an unbounded or long experiment", () => {
-    const options = { seed: 1, swap: false, output: "unused", ticks: 3000, wallSeconds: 120 };
-    expect(() => validateQuickOptions(options)).not.toThrow();
-    for (const ticks of [0, -1, 3001, 1.5, NaN])
-      expect(() => validateQuickOptions({ ...options, ticks })).toThrow();
-    expect(() => validateQuickOptions({ ...options, wallSeconds: Infinity })).toThrow();
-  });
-  it("keeps descendant flows and births in the initial ancestry group after genome changes", () => {
-    const scenario = foodAccess("brief"),
-      world = scenario.create(701, false);
-    const observer = new QuickObserver(world, scenario);
-    const cell = world.cells[0],
-      initialGenome = cell.genome;
-    world.genomes.set(999, { ...world.genomes.get(initialGenome)!, id: 999 });
-    cell.genome = 999;
-    flow(world, cell, "food_a", 2);
-    life(world, cell, "birth");
-    observer.beforeStep();
-    const result = observer.result().find((g) => g.genome === initialGenome)!;
-    expect(result.flows.food_a).toBe(2);
-    expect(result.birthsPerInitialCell).toBe(1 / result.initialCells);
-    expect(result.living).toBe(result.initialCells);
-    expect(observer.frame().cells[0].group).toBe(initialGenome);
-    observer.close();
-  });
+    a.dispose();
+    b.dispose();
+  }
+});
+it("rejects unbounded or unregistered long experiments", () => {
+  const options = { seed: 1, swap: false, output: "unused", ticks: 3000, wallSeconds: 120 };
+  expect(() => validateQuickOptions(options)).not.toThrow();
+  for (const ticks of [0, -1, 3001, 1.5, NaN])
+    expect(() => validateQuickOptions({ ...options, ticks })).toThrow();
+  expect(() => validateQuickOptions({ ...options, wallSeconds: Infinity })).toThrow();
+  expect(() => validateQuickOptions({ ...options, seed: -1 })).toThrow();
 });

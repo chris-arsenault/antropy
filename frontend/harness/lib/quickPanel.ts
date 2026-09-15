@@ -4,7 +4,7 @@ import { flag, type Flags } from "./flags";
 import { foodAccess } from "./foodAccess";
 import { runQuick, validateQuickOptions } from "./quickRun";
 
-export function runQuickPanel(flags: Flags): void {
+export async function runQuickPanel(flags: Flags): Promise<void> {
   const stage = flag(flags, "stage", "probe");
   if (!["probe", "contest"].includes(stage)) throw new Error("Stage must be probe or contest");
   const options = {
@@ -27,7 +27,7 @@ export function runQuickPanel(flags: Flags): void {
           }))
         : [false, true].map((swap) => ({ swap, label: String(swap) }));
     for (const test of cases)
-      runQuick(scenario, {
+      await runQuick(scenario, {
         ...options,
         ...test,
         output: join(options.output, `${context}-${test.label}`),

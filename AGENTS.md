@@ -1,7 +1,7 @@
 # Agent Guide
 
 Antropy is a browser-based 2D artificial-life simulation built as a Vite, React, TypeScript, and
-Canvas SPA and deployed on the Ahara platform.
+worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara platform.
 
 ## Read first
 
@@ -11,13 +11,32 @@ Canvas SPA and deployed on the Ahara platform.
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
 | Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
-| Current measurements | [docs/design/bacteria-results.md](docs/design/bacteria-results.md) |
+| Current measurements | [docs/design/chemistry/reliability-results.md](docs/design/chemistry/reliability-results.md) |
 | Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
 | Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
 | Architecture decisions | [docs/adr/README.md](docs/adr/README.md)                                         |
 | Platform integration   | [../ahara/INTEGRATION.md](../ahara/INTEGRATION.md)                               |
 | Ahara standards        | [../ahara-standards/standards/README.md](../ahara-standards/standards/README.md) |
+
+## Governing mathematical direction
+
+[Computable chemistry](docs/design/chemistry/computational-foundation.md) and
+[ADR 0022](docs/adr/0022-computable-chemistry.md) govern the current redesign. Design artificial
+rules for composed operations over the 16×16 chemical manifold: shared reductions, geographic
+vector fields, diffusion plus drift, local recognition and bounded product mappings. Physics
+supplies language, not required equations. Select rules, accounts, bounds and measured cost
+together; optimizing a conventional physical solver after selecting it is insufficient.
+Preserve discrete chemicals, genome/RNN cells, funded capabilities, explicit material/work
+accounts and immutable sharing. The earlier M0 equations and canceled M2 expansion are reference
+records. Reopened M0 now has selected revision-4 laws, reusable Rust arithmetic and passing core
+cost/CI evidence in the root plan and current specifications. M1's composition correction now
+uses CSR local delivery, a single destination-row stencil, compiled engagement and separate
+material/geographic lifetimes. Installed changes retain unaffected operators. The same core
+workload measures 7.17/15.73 ms at 48/2,000 cells; this does not establish intended performance
+or live integration. M2 spatial integration follows. Historical M0/M1 step files
+must not be replayed. Ordinary World still executes the earlier spatial/biological pipeline;
+the M0 arithmetic proof does not establish browser integration, viability or evolution.
 
 ## Current goal and boundary
 
@@ -37,19 +56,24 @@ sequence records implementation and its human review gate; [plan closeout](docs/
 [backlog](docs/backlog.md#backlog-plan-carryover) own disposition of earlier unfinished work.
 
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
-The active contract is 35 inputs, 24 recurrent units, eight outputs, nine funded body stocks, ten
-physical loci and checkpoint v8. Finite A/B deposits, toxin injury, paid defense/repair, porous matrix and decomposition
-are implemented. Physical and behavioral mutation occur at local resource-funded reproduction;
-acquired recurrent changes can transmit into offspring chromosomes. The default is 320 × 240 units,
-viscosity 0.004, and 48 finite local renewal sites with unequal richness and mixed A/B composition.
-Uniform initial food is zero; initial local food comes from finite deposit stock. Earlier
-thick-medium A/B-half populations developed inherited
-diet differences concentrated in opposite halves; two of three evolved pairs increased share in
-both short rare-start contests ([evolution record](docs/evolve-study.md)). These are proof points
-for local selection, not certification of lasting coexistence. The newer campaign's claimed
-16/24 coexistence passes were incorrect; read the [correction](docs/analysis-correction.md).
-Earlier studies isolated benefits from toxin savings, brief-food access and a B-processing allele.
-Counts, chosen clusters and isolated advantages do not establish a diverse lasting ecosystem.
+The active contract is 39 inputs, 24 recurrent units, nine outputs, fifteen funded stocks,
+four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v12.
+[Digital chemistry](docs/design/chemistry/README.md) replaces A/B processing, named toxins,
+matrix binding, automatic catabolism, sharing, prey yield and the carbon/oxygen cycle.
+A persisted smooth 16 × 16 chemical manifold supplies potential, diffusion, impedance and stress.
+Finite sources, paid transport/reactions, generic biomass, washout and death close the resource books.
+Chemical definition version 4 adds validated shared profiles to the joint diffusion/impedance
+coverage. M1's canonical compiler serves the composed kernels and atlas, with live machinery
+integration still pending; World stepping
+still uses the earlier spatial and biological rules. Inherited target changes
+retain installed machinery identity until paid refitting; birth never grants replacement stock.
+
+Physical and behavioral mutation occur at local resource-funded reproduction; acquired recurrent
+changes can transmit into offspring chromosomes. The default is 320 × 240 units, viscosity 0.004,
+48 finite unequal renewal sites and two colonies. New [measurements](docs/design/chemistry/numerical-results.md)
+contains constructed opportunities and negative findings, not evolved-community certification.
+Historical A/B studies and their [corrected analysis](docs/analysis-correction.md) retain their
+original meaning and do not establish current chemical behavior.
 
 There is one periodic XY world. Production controllers receive local chemistry/body facts and
 private memory, with no coordinates, compass, pathfinding, lineage identity or reproductive score.
@@ -59,23 +83,31 @@ individuals until explicit birth-local assimilation.
 
 Run starts seed 101, paused at tick zero, with 48 identical founder genotypes split between two
 separated resource neighborhoods; most opportunities start unoccupied. New default worlds must
-start with at least two spatial colonies. Food zones and epochs remain selectable.
+start with at least two spatial colonies. Generic source zones and epochs remain selectable.
 Haploid clonal fission, mutation and paid inheritable plasticity remain active. The user reviews through Run and
 stats. Active systems need an ecological purpose and a physical opportunity proof point; evolved
 exploitation is not required before user observation. Record reasons for disabled systems.
-Contact injury, predation, two-type toxin, element cycling, membrane crowding, disturbance, gene
-transfer, sharing, solid walls and neutral signaling are off by default; porous matrix remains
-active. Do not silently enable every experimental mechanism or seed diagnostic winners.
+Optional disturbance and complete typed machinery transfer are disabled by default. Binding,
+nonchemical light input, multiple-substrate reactions and variable genome structure remain deferred.
+Retired chemistry flags and checkpoints must fail explicitly; do not preserve a second economy.
+The [runtime numerical record](docs/design/chemistry/numerical-engine.md) and
+[migration dispositions](docs/design/chemistry/numerical-migration.md) describe the sole Rust/WASM
+kernel, worker rendering and prior evidence migration. The computational foundation governs
+new formula selection and the root plan tracks its integration. Older TypeScript implementation records are history.
 
 Automatic recovery retains six automatic and two manual compressed IndexedDB saves, within 256 MiB.
-Checkpoints retain bounded spatial/chart history and complete organism parentage in compact pages.
+Checkpoints retain bounded spatial/chart history and complete organism parentage in compact numeric records.
 Execution pauses visibly at memory/storage limits; ancestry defaults to a two-million-record limit.
 See [continuing observation](docs/continuing-observation.md) for measurements and remaining browser
 limits. These provisions do not assure uninterrupted days/weeks operation or enduring ecology.
 
-Inspect startup configuration and headless evidence rather than running browser assays. Start a
-development server only on explicit request. Substantial further designs require user review;
-routine authorized repairs and proportional checks do not require repeated permission. Seed/fertilize,
+The implementer owns numerical methods, resolution, optimization and tuning within the stated
+digital-chemistry and ecological semantics. Reason from the intended behavior, validate tradeoffs,
+and deliver a usable system at a minimum of 30 ticks/second; do not turn ordinary engineering
+choices into user approval gates. Preserve measured negative findings and state operating limits.
+The user already keeps a development server running. Inspect startup configuration and headless
+evidence; browser operational checks require a registered purpose and use an isolated session on
+the existing server. Do not start another server. Seed/fertilize,
 outcrossing and environmental developmental reaction norms remain deferred.
 
 The [documentation snapshot](docs/sources/history/README.md) preserves prior contracts and full
@@ -86,7 +118,18 @@ Current generated experiment dumps remain local (`frontend/harness/artifacts/` i
 ledger preserves named measurements, and a report a study document links to is copied into
 `docs/evidence/`.
 
+The founder retains construction feedstock until storage is nearly full and has a membrane
+compatible with its main retained metabolic product. These are mutable starting alleles, not
+physical exemptions. [Numerical probes](docs/design/chemistry/numerical-results.md) establish supplied
+funded reproduction and empty-source exhaustion; they do not establish sustained diversity or adaptation.
+
 ## Experiment operating policy
+
+Model resource budgets before using runs to discover them. The
+[resource-economy command and derivation](docs/design/chemistry/resource-economy.md) calculate
+delivery limits, maintenance, reaction/assembly/repair, source turnover and conditional
+machinery returns without advancing ticks. Use those predictions to choose bounded checks;
+positive calculated surplus is not proof of controller expression or evolved benefit.
 
 The [current work order](docs/design/README.md) supersedes earlier coexistence gates and roadmap
 pass counts. A failed named prediction stays negative even if unrelated trait variation appears.
@@ -142,7 +185,8 @@ Extend `QuickScenario`/`runQuick` with fixtures and relevant observables for oth
 reuse ordinary inference/physics and the existing ledger. Do not build another observability
 pipeline. Artifacts include exact initial/final checkpoints, configuration, source hashes,
 sensor/action/position traces, typed resource flows and stopping reasons.
-See [registration and results](docs/quick-food-access-study.md). Diagnostic genomes do not
+The earlier [registration and results](docs/quick-food-access-study.md) remain historical; new
+chemical runs use schema v3 and the numerical-engine registration. Diagnostic genomes do not
 automatically replace browser founders, and constructed behavior is not evolved discovery.
 
 The six-area [capability study](docs/capability-investigation.md) extends the same runner with
@@ -152,21 +196,26 @@ saved-genotype comparisons. A named case runs both placements, normally 1,500 ti
 3,000-tick ceiling. Do not run every listed case by default. `capability-pilots` is a separately
 registered four-pilot command, not a quick smoke test. `python3 harness/capability_report.py` reads
 the completed study without advancing simulation. Keep physical opportunity, controller expression,
-accessible variation and actual evolved exploitation separate in future reports. Spatial A/B
-heterogeneity is now implemented. Its later proof points and the current world-design direction are in the [work order](docs/design/README.md); the study's old next-step
-recommendation is historical, not an instruction to repeat it.
+accessible variation and actual evolved exploitation separate in future reports. Follow-ups require
+explicit current-schema checkpoint/candidate inputs. Old campaign outcomes and default input paths
+must not become new chemical evidence. The [work order](docs/design/README.md) governs current work.
 
-Vitest checks bounded invariants, including observers not changing simulation state. Headless
+Rust and Vitest check bounded invariants, including observers not changing simulation state. Headless
 assays measure behavior; human review judges visible motion. Inspect browser startup configuration
 rather than launching browser simulations. Run `make ci` after code changes, but do not repeat
 expensive ecological panels merely for formatting or documentation changes.
 
 ## Critical rules
 
+- The [data-sharing contract](docs/design/chemistry/data-ownership.md) is immutable without an
+  explicit user decision. Rust owns physical state; the same worker renders borrowed WASM views.
+  Never serialize/copy full fields or population/private-state frames for rendering. Preserve
+  scalar stepping, bounded revisioned observations and backpressure when adding diagnostics.
+  CI ownership tests and runtime guards must remain enabled; a feature is not an exception.
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive thirty-five local chemical,
+- Author physical pressures and local carriers. Controllers receive thirty-nine local chemical,
   body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
@@ -182,7 +231,7 @@ expensive ecological panels merely for formatting or documentation changes.
   `genomeDistance`. Code outside a controller does not inspect genome internals.
 - Keep Vitest bounded to deterministic mechanics and integration invariants. Ecological and
   long-horizon results belong in `frontend/harness/ledger.db`.
-- Use pnpm, TypeScript, React, Canvas, and Vitest. ESLint limits complexity to 10, files to 400
+- Use Rust/WASM, pnpm, TypeScript, React, worker WebGL2, Rust tests and Vitest. ESLint limits complexity to 10, files to 400
   lines, and functions to 75 lines.
 - Run `make ci` before handoff after changing files. Start a development server only when the user
   explicitly asks.
@@ -195,9 +244,9 @@ expensive ecological panels merely for formatting or documentation changes.
 
 | Path                        | Purpose                                                               |
 | --------------------------- | --------------------------------------------------------------------- |
-| `frontend/src/sim/`         | Deterministic bodies, fields, sensing, RNN, resource economy and inheritance |
-| `frontend/src/ui/`          | Canvas view, field controls, charts, inspector, and simulation pacing |
-| `frontend/src/persist/`     | Current 2D checkpoints, IndexedDB, and file import/export             |
+| `engine/src/` | Sole Rust kernel: bodies, fields, local RNN, resource economy, inheritance and binary state |
+| `frontend/src/engine/` | WASM client, worker, WebGL2, React observation and recovery |
+| `frontend/src/persist/`, `frontend/src/ui/pacing.ts` | Local identity, retention policy and bounded pacing only |
 | `frontend/harness/`         | Comparative measurements and committed SQLite ledger                  |
 | `infrastructure/terraform/` | Static website deployment                                             |
 | `docs/`                     | Current design, evidence, decisions, and archived source material     |
@@ -211,11 +260,11 @@ expensive ecological panels merely for formatting or documentation changes.
 | `make deploy`                                    | Parameterless local deploy script                                        |
 | `cd frontend && pnpm harness bacteria` | Run live bacterial ecology and save evidence |
 | `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
-| `cd frontend && pnpm harness bacteria-capacity` | Measure a 2,000-cell initialization load probe |
-| `cd frontend && pnpm harness rps --case pairwise` | Constructed producer/resistant/sensitive toxin contests |
-| `cd frontend && pnpm harness zones --case three-way --shares 1,0` | Constructed diet contests in zoned or mixed food worlds |
-| `cd frontend && pnpm harness evolve --world zones --seed 101` | De novo evolution with trait samples and checkpoints |
-| `cd frontend && pnpm harness invasion --checkpoint path` | Mutual-invasibility assay of a checkpoint's strategy clusters |
+| `cd frontend && pnpm harness bacteria-capacity` | Fixed 48/2000/2000-growth loads with census, inspection and render preparation |
+| `cd frontend && pnpm harness rps --case pairwise` | Constructed chemical production/compatibility contests |
+| `cd frontend && pnpm harness zones --case three-way --shares 1,0` | Constructed machinery-allocation contests in source-mixture worlds |
+| `cd frontend && pnpm harness evolve --world zones --seed 101 --justification REGISTRATION` | De novo evolution with trait samples and checkpoints |
+| `cd frontend && pnpm harness invasion --checkpoint path` | Rare-start comparisons of descriptive current-checkpoint clusters |
 | `cd frontend && pnpm harness recent`             | Read recent ledger rows                                                  |
 | `cd frontend && pnpm harness sql "..."`          | Query the measurement ledger                                             |
 | `cd frontend && pnpm run dev`                    | Local server, only when explicitly requested                             |

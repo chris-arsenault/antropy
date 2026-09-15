@@ -1,26 +1,32 @@
+// @vitest-environment node
 import { expect, it } from "vitest";
-import { createWorld, stepWorld } from "../../src/sim/world";
-import { DEFAULT_CONFIG } from "../../src/sim/config";
-import { balance, materialBalance } from "../../src/sim/accounting";
-import { strategyFixture, installMotorVariants } from "./strategyFixture";
+import { loadEngine } from "../numerical/engine";
+import { type Summary } from "../../src/engine/types";
+import { strategyFixture } from "./strategyFixture";
 import { parseFlags } from "./flags";
-
-it("matches scheduled supply and conserves material through deposit replacement", () => {
-  const supplied = [5, 25].map((lifetime) => {
-    const world = createWorld(301, { ...DEFAULT_CONFIG, sourceCount: 0, founders: 4 });
-    const flags = parseFlags(["--ticks", "100", "--lifetime", String(lifetime)]);
-    const fixture = strategyFixture(world, flags);
-    installMotorVariants(world, flags);
-    expect(world.cells[0].body).toEqual(world.cells[1].body);
-    for (let i = 0; i < 100; i++) {
-      fixture.beforeStep();
-      stepWorld(world);
-      fixture.afterStep();
+it("matches total scheduled supply and conserves material through source replacement", async () => {
+  const engine = await loadEngine(),
+    supplied = [];
+  for (const lifetime of [5, 25]) {
+    const world = engine.create(301, { width: 16, height: 16, sourceCount: 0, founders: 0 });
+    try {
+      const fixture = strategyFixture(
+        world,
+        parseFlags(["--ticks", "100", "--lifetime", String(lifetime)])
+      );
+      for (let i = 0; i < 100; i++) {
+        fixture.beforeStep();
+        world.step();
+        fixture.afterStep();
+      }
+      const s = world.command<Summary>("summary");
+      expect(world.command<{ sources: unknown[] }>("environment").sources).toHaveLength(0);
+      expect(Math.abs(s.energyResidual)).toBeLessThan(1e-8);
+      expect(Math.abs(s.materialResidual)).toBeLessThan(1e-8);
+      supplied.push(s.ledger.supplied);
+    } finally {
+      world.dispose();
     }
-    expect(world.sources).toHaveLength(0);
-    expect(Math.abs(balance(world))).toBeLessThan(1e-8);
-    expect(Math.abs(materialBalance(world))).toBeLessThan(1e-8);
-    return world.ledger.supplied;
-  });
+  }
   expect(supplied[0]).toBeCloseTo(supplied[1], 10);
 });

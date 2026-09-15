@@ -87,12 +87,14 @@ def report(root):
         if data["status"] == "complete" and data["run"] not in loaded:
             load(manifest.parent, str(database))
     with duckdb.connect(str(database), read_only=True) as db:
+        from chemistry_queries import queries_for
+        queries, version = queries_for(db, QUERIES)
         results = {}
-        for name, sql in QUERIES.items():
+        for name, sql in queries.items():
             cursor = db.execute(sql)
             names = [column[0] for column in cursor.description]
             results[name] = [dict(zip(names, row)) for row in cursor.fetchall()]
-    payload = {"queries": QUERIES, "results": results,
+    payload = {"schemaVersion": version, "queries": queries, "results": results,
                "analysis_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     (root / "report.json").write_text(json.dumps(payload, indent=2))
     print(json.dumps(results["endpoints"], indent=2))

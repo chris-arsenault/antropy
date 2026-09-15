@@ -1,0 +1,451 @@
+# Appendix A — Porting Existing Antropy Ecology to General-Purpose Chemistry
+
+This appendix extends the General-Purpose Digital Chemistry design and defines how Antropy's existing ecological systems and experiments map into the new chemistry.
+
+The migration preserves the **questions and demonstrated physical opportunities** of the current simulation while expressing them through the common chemical substrate.
+
+The September 13 audit corrected several earlier coexistence interpretations: only three of 24 evolved rare-start pairs increased in both directions at the recorded endpoints. Signal, sharing, disturbance, typed toxin, and gene transfer did not establish the previously reported coexistence results. Their underlying physical mechanisms remain demonstrated. These studies therefore become sources of useful questions and mechanism requirements rather than regression targets for particular evolutionary outcomes.
+
+---
+
+# A.1 Traversability Amendment
+
+The initial chemistry design's `viscosity` property is generalized to **environmental impedance**.
+
+Each chemical has:
+
+```text
+I(x, y) = environmental impedance
+```
+
+For the extracellular mixture at position `p`:
+
+```text
+impedance(p) =
+    Σ concentration(species, p) × I(species)
+```
+
+Impedance influences both organism movement and chemical transport.
+
+Use bounded nonlinear mappings conceptually equivalent to:
+
+```text
+movementMultiplier =
+    1 / (1 + kMove × impedance²)
+
+diffusionMultiplier =
+    1 / (1 + kDiffusion × impedance)
+```
+
+The exact functions and coefficients are calibration parameters.
+
+The nonlinearity is important. Low concentrations have modest physical effects, while concentrated high-impedance chemistry can create strongly resistant regions.
+
+This allows the same chemical system to generate:
+
+* sticky regions;
+* trails;
+* chemically defended territory;
+* diffusion barriers;
+* persistent extracellular structures;
+* effectively wall-like concentrations.
+
+Chemical species capable of producing these effects arise from the existing continuous 16 × 16 chemical property space. High impedance and low intrinsic diffusion should coexist somewhere in that space so barrier-forming chemistry is physically possible.
+
+## Environmental turnover
+
+Extracellular chemistry participates in a small, generic world-level turnover process so indefinitely persistent emissions do not accumulate without bound.
+
+Turnover is an environmental boundary flow applied uniformly to extracellular chemical matter. It is accounted explicitly as a material and chemical-energy sink.
+
+This is part of world ecology rather than a species-specific decay rule.
+
+An organism maintaining a long-lived chemical structure therefore normally continues investing in it.
+
+---
+
+# A.2 Membrane Compatibility
+
+Porting Antropy's toxin and family-chemistry questions exposes one additional general primitive: chemical effects need to depend partly on the organism as well as on the chemical.
+
+The original bacterial simulation demonstrated why this matters. A toxin that harmed its producer identically was selected away; later explicit immunity was required to make chemical offense a consequential strategy. Typed toxin subsequently explored differential compatibility between producer families.
+
+Each cell therefore has an inherited **membrane compatibility coordinate** in the same 16 × 16 chemical space:
+
+```text
+membraneCenter: (x, y)
+```
+
+A chemical retains its intrinsic membrane-stress property:
+
+```text
+S(species)
+```
+
+but effective stress depends on the relationship between the chemical and the cell's membrane:
+
+```text
+effectiveStress(cell, species) =
+    concentration
+    × S(species)
+    × susceptibility(cell.membraneCenter, species)
+```
+
+` susceptibility` varies smoothly with distance through chemical space using a fixed-width function.
+
+A membrane is therefore relatively tolerant of one region of chemistry and increasingly susceptible to sufficiently different regions.
+
+The membrane coordinate is heritable and locally mutable.
+
+This gives the common chemistry several important capabilities without introducing chemical categories:
+
+* producers may evolve tolerance to compounds they manufacture;
+* lineages may become differentially vulnerable to one another's chemistry;
+* a mutation in emitted chemistry can create new offensive or defensive relationships;
+* chemical compatibility can correlate with ancestry without using lineage identity;
+* no compound is intrinsically a "family toxin."
+
+Membrane compatibility is a specificity tradeoff: adaptation toward one region of chemical space does not grant universal chemical resistance.
+
+General physiological repair remains available for damage after exposure.
+
+---
+
+# A.3 Existing System Mapping
+
+| Existing Antropy system            | General-chemistry form                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Food A / Food B**                | Ordinary externally supplied chemical species. Cells obtain material by importing them and energy by transforming them downhill in chemical potential. Separate processing pathways become separate transporters and enzymes.                                                                                                          |
+| **Finite food deposits**           | Generic chemical sources with species, position, inventory/rate and spatial extent.                                                                                                                                                                                                                                                    |
+| **A/B food zones**                 | Regions supplied with different source species or source mixtures. The spatial-specialization experiment remains directly expressible without privileged food identities.                                                                                                                                                              |
+| **Food epochs**                    | Time-varying source composition. A source can shift between chemical coordinates or mixtures while total supplied matter/energy remains controlled.                                                                                                                                                                                    |
+| **Food sensors**                   | General chemical receptors targeted at the relevant source region of chemical space.                                                                                                                                                                                                                                                   |
+| **A/B processing genes**           | Investment in the relevant transporters and enzymes. Generalists maintain machinery for multiple chemical regions; specialists concentrate machinery.                                                                                                                                                                                  |
+| **Toxin field**                    | Exported chemistry with substantial membrane stress. Diffusion and persistence follow the chemical's ordinary physical properties.                                                                                                                                                                                                     |
+| **Toxin secretion**                | Synthesis plus export of a stressful chemical species.                                                                                                                                                                                                                                                                                 |
+| **Toxin immunity / defense**       | Membrane compatibility, chemical avoidance, transformation/detoxification, export, and general repair.                                                                                                                                                                                                                                 |
+| **Contact toxin injury**           | Highly local chemical warfare can arise from stressful compounds with low diffusion and short spatial reach. Direct contact damage becomes unnecessary as a separate chemical category.                                                                                                                                                |
+| **Typed toxin / family chemistry** | Different lineages may produce chemicals in different regions of chemical space while evolving corresponding membrane compatibility. Chemical identity and susceptibility replace explicit toxin type A/B and tint.                                                                                                                    |
+| **Neutral signal**                 | Any sufficiently low-stress, low-impedance chemical that organisms produce and sense. Its biological role exists only if evolved behavior makes the information useful.                                                                                                                                                                |
+| **Porous matrix**                  | Exported low-diffusion, high-impedance chemistry. Concentration determines its effect on movement and diffusion.                                                                                                                                                                                                                       |
+| **Solid-wall behavior**            | High local impedance can approach effectively impassable conditions continuously rather than switching into a separate wall state.                                                                                                                                                                                                     |
+| **Matrix toxin binding**           | Deferred until chemical-chemical interaction exists. Initial chemistry modifies transport through impedance but does not directly bind one chemical to another.                                                                                                                                                                        |
+| **Carbon / oxygen fields**         | Ordinary chemical species when an experiment needs analogous metabolic products. They receive no intrinsic carbon/oxygen semantics.                                                                                                                                                                                                    |
+| **Light harvesting**               | Deferred as a generic nonchemical external-energy input. Initial chemistry uses externally supplied chemical potential as its energy boundary.                                                                                                                                                                                         |
+| **Predation / prey yield**         | Chemical interference can kill competitors; death releases chemical inventory and decomposed cellular material locally. Nearby organisms may exploit those products through ordinary transport and metabolism. The benefit of killing therefore arises from access to released chemistry rather than a special transfer to the killer. |
+| **Reserve sharing**                | Cells export useful internal chemicals and neighboring cells import them. Cross-feeding, cooperation and cheating arise from ordinary chemical exchange.                                                                                                                                                                               |
+| **Horizontal gene transfer**       | Remains an orthogonal genetic mechanism. Once chemistry machinery encoding is defined, transfer operates on the same heritable receptor/transporter/enzyme/membrane machinery used by ordinary descent.                                                                                                                                |
+| **Abiotic disturbance**            | Remains a world process. Disturbance kills cells and mixes or redistributes the generic extracellular chemical mixture in the affected region.                                                                                                                                                                                         |
+| **Decomposition / detritus**       | Dead built material enters the world as one or more configured decomposition species. Those products have ordinary chemical properties and may become resources for other organisms.                                                                                                                                                   |
+| **Repair**                         | Remains general physiology responding to accumulated damage, including chemically induced membrane stress.                                                                                                                                                                                                                             |
+| **Movement / motor investment**    | Remains physical organism machinery. Environmental impedance modifies the resulting movement.                                                                                                                                                                                                                                          |
+
+---
+
+# A.4 Existing Experiment Migration
+
+## Food access and inherited adaptation
+
+The food-access, capability, food-epoch and spatial-zone studies remain useful almost unchanged conceptually.
+
+Their new form uses two or more externally supplied chemical species instead of food A/B.
+
+Constructed organisms may differ in transporter/enzyme allocation for those species. Evolved populations begin with common machinery and may discover different allocations.
+
+The existing zone experiments established that simultaneous spatial resource differences can create consequential local opportunities, while the food-epoch study established inherited performance changes when resource composition changes over time.
+
+These become foundational validation experiments for the chemistry.
+
+A useful initial chemistry world should demonstrate that:
+
+```text
+source chemistry differs
+        ↓
+different metabolic machinery has different costs/returns
+        ↓
+local inherited specialization can matter
+```
+
+The exact historical A/B results are not required.
+
+---
+
+## Toxin / producer-resistance-sensitive experiments
+
+The research question remains:
+
+> Can costly chemical offense create context-dependent relationships among producers, resistant organisms and susceptible organisms?
+
+The new experiment constructs these strategies using ordinary chemistry.
+
+A producer synthesizes and exports a high-stress species.
+
+A chemically compatible organism has a membrane coordinate near that species and pays whatever evolutionary opportunity cost that specialization creates.
+
+A susceptible organism lacks that compatibility.
+
+The experiment then measures local competitive consequences, dispersal effects and spatial persistence.
+
+The existing study showed that chemical range, matrix protection and spatial mixing fundamentally changed these interactions. It also showed that offense must have a route around producer self-harm.
+
+Those findings become design constraints on the generic chemistry, not special toxin rules.
+
+---
+
+## Matrix and traversability experiments
+
+The current matrix experiments become **chemical impedance experiments**.
+
+Constructed cells produce a chosen high-impedance species and pay the ordinary metabolic/export cost.
+
+Tests should establish:
+
+1. accumulated chemistry measurably changes local movement;
+2. it measurably changes diffusion through the region;
+3. producing it carries material and energy cost;
+4. a chemically capable organism can potentially transform the high-impedance species into a lower-impedance species.
+
+The fourth case is new and particularly important.
+
+A lineage should be physically capable of evolving something equivalent to:
+
+```text
+barrier compound
+       ↓ enzyme
+lower-impedance compound
+```
+
+so barriers can themselves become part of ecological interaction rather than permanent authored terrain.
+
+---
+
+## Neutral chemical signaling
+
+The current signal experiment asks whether a costed, sensed chemical can become useful communication. It produced little signal and did not demonstrate evolved communication.
+
+The general chemistry absorbs this experiment directly.
+
+Choose a region of chemical space with:
+
+* low membrane stress;
+* low or moderate impedance;
+* suitable diffusion.
+
+Provide the population with possible production, transport and sensing machinery through the same evolutionary mechanisms used for every other chemical.
+
+The question becomes:
+
+> Does evolution ever invest in producing chemistry primarily because information carried by its concentration improves behavior?
+
+No species is marked as a signal.
+
+Signal use is established only by a causal sender/cue/receiver/benefit experiment.
+
+---
+
+## Element-cycle and metabolic-guild experiments
+
+The current element-cycle experiment demonstrated that cells can materially alter shared chemical fields and that constructed metabolic guilds can exploit different parts of a cycle. The corrected audit does not support the earlier broad coexistence interpretation.
+
+The general chemistry replaces the dedicated carbon/oxygen cycle with **metabolic chains and cross-feeding**.
+
+For example:
+
+```text
+external A
+   ↓ organism 1
+B + captured energy
+   ↓ exported
+
+external B
+   ↓ organism 2
+C + captured energy
+```
+
+The important experiment is no longer "does phototrophy work?"
+
+It is:
+
+> Can the waste/product chemistry created by one evolved metabolism create a consequential resource opportunity for another?
+
+Constructed chains should first demonstrate that such niches physically exist. Evolution can then determine whether organisms discover them.
+
+A generic external-energy mechanism such as light can be added later if chemical-energy sources prove insufficient for a specific research question.
+
+---
+
+## Family chemistry
+
+The existing family study asked whether inherited chemical compatibility could create territorial relationships among related cells. Explicit toxin types created a physical interaction but did not produce evolved separated tint families.
+
+This question becomes a natural consequence of:
+
+```text
+emitted chemical coordinate
++
+membrane compatibility coordinate
+```
+
+A lineage may gradually co-evolve chemistry it tolerates while becoming chemically incompatible with other lineages.
+
+The relevant future observation is whether chemical phenotype and membrane compatibility become correlated within local ancestry groups and whether that alters spatial mixing or territorial persistence.
+
+No explicit family identifier participates.
+
+---
+
+## Predation
+
+The existing predation mechanism paid toxin-bearing neighbors directly from killed-cell material. Its corrected experiments retain a physical finding that damage-related feeding occurred, while only two of three tested evolved pairs increased in both rare-start directions.
+
+General chemistry changes the causal chain:
+
+```text
+chemical attack
+    ↓
+competitor death
+    ↓
+local release of chemical inventory + decomposed body matter
+    ↓
+ordinary uptake/metabolism
+```
+
+This permits predation, scavenging and opportunism to emerge from the same resource system.
+
+An organism benefits from killing only when it can actually capture useful released chemistry before competitors do.
+
+This is a stronger compositional model than direct prey yield because the kill and the meal are separate physical opportunities.
+
+---
+
+## Sharing / cooperation
+
+The current direct reserve-sharing experiment moved stored nutrient between touching cells. It produced substantial material movement but did not demonstrate gatherer/receiver specialization or coexistence.
+
+General chemistry reframes the question as cross-feeding:
+
+```text
+cell A synthesizes/exports chemical X
+cell B imports chemical X
+```
+
+Cell A may benefit because X is waste, because B later produces something useful, or because related neighbors benefit.
+
+Cell B may instead exploit A without reciprocating.
+
+This provides a more general foundation for cooperation, mutualism and cheating than automatic reserve equalization.
+
+---
+
+## Horizontal gene transfer
+
+Horizontal transfer remains valuable because it asks a different question from chemistry:
+
+> Can useful metabolic or physical capabilities spread independently of organism ancestry?
+
+The existing experiments confirm that transfer events occurred, while their ecological consequences remain unresolved.
+
+Once chemistry machinery has a defined genetic encoding, transfer should operate on complete meaningful genetic units such as a receptor, transporter, enzyme, or other defined machinery gene.
+
+Transferred chemical capabilities should immediately enter the same cost, development and expression system used by inherited machinery.
+
+---
+
+## Abiotic disturbance
+
+Disturbance remains directly useful in the sparse patch-population world.
+
+The existing study demonstrated physical killing and chemical mixing but did not establish the proposed colonizer/holder differentiation.
+
+In the new world, disturbance should operate on:
+
+* cells;
+* extracellular chemical concentrations;
+* local resource/source state where appropriate.
+
+Its primary value is maintaining opportunities for recolonization and changing local chemistry.
+
+The experiment becomes especially legible once occupancy is sparse: disturbed patches can visibly empty and later be recolonized.
+
+---
+
+# A.5 Controller and Sensor Migration
+
+Named chemical sensor groups are replaced by general receptor channels.
+
+Inputs such as:
+
+```text
+food A level
+food A phasic
+food B gradient
+toxin level
+signal gradient
+```
+
+become observations from evolvable chemical receptors.
+
+Each receptor reports the affinity-weighted chemistry around its target coordinate through the agreed local measurements:
+
+```text
+level
+temporal change
+body-relative gradient X
+body-relative gradient Y
+```
+
+The controller therefore sees chemical information without receiving the semantic identity assigned by the developer.
+
+Current dedicated chemical actions similarly converge on generic chemistry machinery:
+
+```text
+transport
+reaction
+production/export
+```
+
+The precise representation of multiple evolvable receptors, transporters and enzymes in the genome/controller is the next design problem and is intentionally separate from this chemistry specification.
+
+---
+
+# A.6 What Historical Experiments Become
+
+Existing study documents remain part of Antropy's evidence history.
+
+They establish useful facts such as:
+
+* spatial resource heterogeneity can matter;
+* inherited adaptation to changing resources occurred;
+* diffusive chemicals can produce area denial;
+* chemical barriers can strongly change exposure;
+* chemical production can have meaningful costs;
+* cells can alter common chemical fields;
+* direct sharing, disturbance and gene transfer physically operate;
+* useful communication has not yet been established.
+
+Their exact historical strategy counts, cluster shapes and coexistence classifications are not acceptance requirements for the general chemistry.
+
+The new chemistry should instead be validated in layers:
+
+### Physical chemistry
+
+Demonstrate conservation, diffusion, impedance, stress, transport and reaction-energy accounting.
+
+### Constructed ecological opportunities
+
+Show that the common chemistry is physically capable of supporting:
+
+* distinct metabolic substrates;
+* chemical stress and differential compatibility;
+* cross-feeding;
+* chemical barriers and barrier degradation;
+* neutral detectable emissions;
+* corpse-resource capture.
+
+### Evolutionary observation
+
+Allow the ordinary long-running observation world to determine which of those opportunities evolution actually discovers.
+
+The design goal is not to recreate the previous named mechanisms through different syntax.
+
+The design goal is to provide a sufficiently expressive physical chemistry that the ecological behaviors those mechanisms represented can arise from a common set of rules.

@@ -13,6 +13,49 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Enforce the WASM/worker data-sharing contract: scalar ticks, borrowed reply decoding, bounded
+  browser queries, incremental chart history, cached genealogy/genomes and acknowledged observation
+  updates. Preserve the diagnostic displays while removing repeated bulk observation transfers.
+- Restore worker-backed family and founder history charts, origin/share-change tables and
+  navigable selected-cell genealogy. Keep dead/divided parents, siblings and living descendants
+  inspectable; distinguish missing history coverage from zero membership. Document the other
+  diagnostic displays still missing after the runtime migration.
+- Replace the entire TypeScript simulation with one Rust/WASM kernel, shared by browser and
+  experiments. Use compact machinery operators, contiguous chemical fields, vector math and
+  separate movement/physiology clocks. Preserve 48 identical founders in two colonies.
+- Move physics and OffscreenCanvas/WebGL2 rendering into one worker. Render from borrowed packed
+  WASM buffers; send bounded summaries to React. Keep full chemistry out of the per-frame bridge.
+- Add exact checkpoint v10, strict body/history validation and durable manual interventions.
+  Migrate experiments and reports to schema 3; remove the old physics, renderer and persistence.
+- Measure 217 ticks/s at 48 cells, 59.9 at 2,000 varied cells and 33.4 under reproductive load,
+  including rendering preparation and observation. The slowest window is 31.0 ticks/s. GPU
+  execution, human visual acceptance and days/weeks operation remain unverified.
+- Verify short nutrition, chemical interaction and accumulated-history mechanisms without an
+  evolution campaign. Two million synthetic ancestor records restore with exact continuation
+  at 406 MiB sequential WASM high-water memory. See the
+  [current evidence](docs/design/chemistry/numerical-results.md).
+
+Earlier implementation stages in this unreleased sequence:
+
+- Replace named A/B, toxin, matrix, sharing, prey-yield and carbon/oxygen pathways with a
+  persisted 256-species digital chemistry: finite mixtures, funded transport, unary reactions,
+  generic biomass, membrane stress, impedance and uniform washout. Cells carry fixed heritable
+  machinery slots and a 39-input/nine-output RNN. Existing chemical checkpoints are rejected by v9.
+- Add chemical atlas/inspection and generic population traits, typed experimental flows and
+  versioned reports. Port optional typed gene transfer and disturbance; remove retired runtime
+  controls and historical campaign defaults. Preserve old evidence under its original schema.
+- Record bounded causal opportunities and negative findings without an evolution campaign.
+- Repair founder material retention and membrane compatibility using single-cell and small-patch
+  life-cycle probes. Restore 48 identical founders across two colonies; the ordinary default
+  peaks at 74 cells and ends at 57 with generation four after 2,000 ticks. Withdraw the unsupported
+  claim that reducing the initial population to eight was necessary for reproduction.
+- Account numerical chemical losses separately and reuse receptor samples, affinities and sparse
+  computation buffers. Indexed mixtures, shared transport supply and reusable reaction work
+  improve the unchanged 48-founder workload from 27.4 to 52.6 ticks/s including display calculations
+  and periodic stats; its slowest 250-tick window is 44.5 ticks/s. Complete final checkpoints match.
+  A synthetic 128-cell start reaches 30.7 ticks/s. Default encode/restore takes 82/297 ms.
+  Human motion, successful dispersal and days/weeks operation remain unverified.
+
 - Seed new sparse worlds with two separated starting colonies of the same founder genotype.
   Existing saved populations retain their placement.
 - Fix recovery in browsers without `crypto.randomUUID`; run and checkpoint IDs now use

@@ -1,7 +1,9 @@
 # Sparse spatial ecology and long observation
 
-Status: implemented candidate accepted after user review on September 13, 2026; all seven phases
-are complete. Long-term ecological outcomes and browser endurance remain open.
+Status: the pre-chemistry spatial candidate was accepted on September 13, 2026; its seven phases
+are complete. The subsequent [numerical chemistry contract](chemistry/numerical-engine.md) preserves
+this intent and observation structure but changes its physical economy. Its calibration and human
+motion review are separate; numerical proof points below describe the preceding A/B world. Long-term ecological outcomes and browser endurance remain open.
 Sulion plan: `5874e2d8-68cc-47f5-8e74-dd7ac873fa5c` — Build sparse spatial ecology and long observation.
 This is the work design, September 13, 2026. The [runtime contract](bacteria.md) and
 [calibration](../calibration.md) describe the new default. The
@@ -109,8 +111,8 @@ fluctuations avoid flickering labels. Preserve connections across founding event
 cell ancestry and movement. An arriving cell, reproduction at a new site and an established local
 population are different observations; document the convention used to call a founding event.
 
-Trait colors need stable meanings over time. The current requested three-way k-means partition
-cannot serve as durable population identity. Use explicit trait scales and separate ancestry views,
+Trait colors need stable meanings over time. The earlier three-way k-means partition
+could not serve as durable population identity and has been removed. Use explicit trait scales and separate ancestry views,
 show within-region variation, and distinguish inherited targets from grown bodies and recent actions.
 Observed divergence does not by itself prove an adaptive advantage. Preserve independent field
 controls, camera navigation and cell inspection while adding population selection.
@@ -131,22 +133,25 @@ document any reviewed loss of query capability. Benchmark accumulated births and
 living population size. Background execution, interruption, save latency and responsiveness need
 their own checks before promising days or weeks of unattended operation.
 
-Follow [ADR 0019](../adr/0019-single-language-kernel.md): one implementation per physical rule.
-Measure the larger world's bottlenecks before selecting worker placement or acceleration. The old
-shared-Wasm inference pool and COOP/COEP work are not prerequisites. An execution worker, if justified,
-must have coherent ownership of the simulation. No backend or hosted storage is authorized here.
+Follow [ADR 0020](../adr/0020-complete-rust-kernel.md): one implementation per physical rule.
+The complete Rust/WASM simulation and renderer now live in one worker. The old shared inference
+pool and COOP/COEP work remain unnecessary. No backend or hosted storage is authorized here.
 
 <a id="spatial-work-sequence"></a>
 
 ## Work sequence and acceptance
 
-Initial implementation candidate: 320 × 240 world units at the existing one-unit field resolution,
+Initial spatial implementation candidate: 320 × 240 world units at one-unit field resolution
+(the current numerical chemistry engine uses a two-unit mesh over the same world),
 48 finite renewal sites around seven irregular abiotic centers with an 18-unit spread, 3-unit
 source-radius scale, 600-second lifetime scale and 120-second mean renewal wait. Richness and
 composition vary by site. Ten percent of each initial finite inventory begins dissolved locally;
-uniform initial food is zero. Following user review, the 48 identical founders start in at least
+uniform initial food is zero. The current chemistry startup uses 48 identical founders in
 two separated colonies, using the first resource site and the site farthest from it by periodic
-distance. This is a starting condition; subsequent persistence, contact and colony counts remain open.
+distance, 24 per colony. The temporary reduction to four per colony was not established by the
+[funded life-cycle diagnosis](chemistry/viability.md) and has been withdrawn. Computational
+performance is measured at the retained population scale. This is a starting condition; subsequent
+persistence, contact and colony counts remain open.
 Viscosity 0.004 is a provisional movement value, 100 times lower than the previous 0.4. None of
 these values is a durable target. The raster is sixteen times the previous area with unchanged
 body size, concentration, uptake and diffusion units; no field rescaling is proposed initially.

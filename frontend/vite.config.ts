@@ -5,6 +5,7 @@ import { sourceIdentity } from "./harness/sourceIdentity";
 export default defineConfig({
   base: "./",
   plugins: [sourceIdentity(), react()],
+  worker: { plugins: () => [sourceIdentity()] },
   test: {
     environment: "happy-dom",
   },

@@ -1,0 +1,80 @@
+{
+  "id": 3662,
+  "before": {
+    "ancestryRecords": 1,
+    "biomass": 3.040000000000001,
+    "cellEnergy": 1.5801511377682878,
+    "energyResidual": -8.881784197001252e-14,
+    "generation": 0,
+    "genomes": 1,
+    "heldEnergy": 334.8910492850158,
+    "heldMaterial": 48.93309612668006,
+    "ledger": {
+      "births": 0,
+      "blockedDivisions": 0,
+      "damageDeaths": 0,
+      "deathHeat": 0,
+      "deaths": 0,
+      "disturbanceDeaths": 0,
+      "disturbances": 0,
+      "divisionHeat": 0,
+      "divisions": 0,
+      "flows": {
+        "captured": 24.79154313977451,
+        "constructed": 1.52,
+        "construction": 4.008365992396463,
+        "damage": 0.03055587952042046,
+        "distance": 0,
+        "exported": 5.119607612916342,
+        "exposure": 0.9807961242850117,
+        "imported": 6.091827975996508,
+        "learning": 0,
+        "maintenance": 1.3708738959221123,
+        "motors": 0,
+        "reacted": 5.803205874430372,
+        "reactionHeat": 6.285592799637228,
+        "repair": 0.08766361716328375,
+        "repaired": 0.03055587952042046,
+        "transport": 0.5605717794456428
+      },
+      "initialEnergy": 376.3393414910976,
+      "initialMaterial": 50.3200001135256,
+      "learnedBirths": 0,
+      "mutations": 0,
+      "numericalEnergy": 0.0007001026919689913,
+      "numericalMaterial": 0.00009397229767775257,
+      "organismTime": 60.00000000000031,
+      "overflowHeat": 18.853949942413205,
+      "recombinations": 0,
+      "supplied": 0,
+      "suppliedEnergy": 0,
+      "taskWrites": 0,
+      "transfers": 0,
+      "washedOut": 1.3868100145478648,
+      "washoutEnergy": 10.280574076412
+    },
+    "lineages": 1,
+    "materialResidual": -3.702767259472495e-15,
+    "modelSeconds": 60,
+    "population": 1,
+    "stopReason": null,
+    "tick": 300
+  },
+  "result": {
+    "modelSeconds": 2,
+    "results": [
+      {
+        "removed15": false,
+        "secondMoment": 4.863491773279814,
+        "tracerRemaining": 0.9990005474537611
+      },
+      {
+        "removed15": true,
+        "secondMoment": 5.733098164183055,
+        "tracerRemaining": 0.9990008920431137
+      }
+    ],
+    "steps": 10,
+    "tick": 300
+  }
+}

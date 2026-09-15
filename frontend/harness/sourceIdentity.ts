@@ -12,6 +12,10 @@ export function browserSourceDigest(root: string): string {
   const hash = createHash("sha256");
   for (const path of [
     ...files(join(root, "src")),
+    ...files(join(root, "../engine/src")),
+    join(root, "../engine/Cargo.toml"),
+    join(root, "../engine/Cargo.lock"),
+    join(root, "scripts/build-engine.mjs"),
     join(root, "pnpm-lock.yaml"),
     join(root, "vite.config.ts"),
     join(root, "harness/sourceIdentity.ts"),
@@ -29,7 +33,7 @@ export function sourceIdentity(): Plugin {
       root = config.root;
     },
     transform(code, id) {
-      if (!id.endsWith("/src/ui/runtimeIdentity.ts")) return;
+      if (!id.endsWith("/src/engine/runtimeIdentity.ts")) return;
       return { code: code.replace("ANTROPY_SOURCE_ID", browserSourceDigest(root)), map: null };
     },
     handleHotUpdate(ctx) {

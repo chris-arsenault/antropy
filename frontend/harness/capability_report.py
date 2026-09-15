@@ -140,6 +140,12 @@ def table(rows):
 
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else "harness/artifacts/capabilities-2026-09-11")
+    from chemistry_report import dispatch
+    if dispatch(root, "capability"):
+        if len(sys.argv) > 2:
+            if not dispatch(Path(sys.argv[2]), "capability-pilots"):
+                raise ValueError("Current capability reports require current pilot evidence")
+        return
     pilot_root = Path(sys.argv[2] if len(sys.argv) > 2 else "harness/artifacts/capability-pilots-2026-09-11")
     cases, pilots = summarize_root(root), summarize_root(pilot_root)
     rows = cases + pilots

@@ -39,29 +39,32 @@ The next design decision is a coherent world to observe. For each candidate mech
 ecological purpose, existing proof point, competing explanation and smallest missing test. Select
 settings on those grounds, not by the number of clusters produced in a long run.
 
-- Local resource differences and residency can make food-processing choices matter. The A/B halves
-  and thick medium were earlier defaults; local renewal sites and viscosity 0.004 now replace them.
-  Symmetric recycling has already replaced the old B-only return.
-  The question is how much environmental structure suits the observation world, not how to complete
-  another A/B certification campaign.
-- Bodies repeatedly evolved smaller and less costly in recorded studies. Determine whether this
-  reflects a plausible economical strategy or a structural lack of situations that repay size and
-  machinery. Do not impose a size cost solely to stop the observed outcome.
-- Toxin, immunity, defense, repair and matrix interact. Binding may shield competitors as well as
-  builders. Damage-related feeding may change that balance. A short benefit/cost comparison is
-  more useful for choosing settings than requiring hunter/prey or producer/resistant/sensitive roles.
-- Light fixation and gas exchange offer an additional material route. Current simplified settings
-  differ from the evolution study; use a small physiological check if considering activation.
-- Sharing, typed toxin, transfer and disturbance have implemented physical effects. Their named
-  ecological roles remain uncertain. The [corrected analysis](analysis-correction.md) withdraws
-  the claimed coexistence passes; it does not make those mechanisms useless.
-- The neutral signal remains quiet in the recorded arms. Cost, weak founder output and missing
-  receiver behavior are competing explanations; no causal diagnosis has selected among them.
-- Paid acquired-weight transmission exists, but its adaptive usefulness remains uncertain.
-  It need not be proved broadly before user observation; investigate only if it changes a design
-  choice or explains an observed limitation.
-- Food epochs are selectable and have recorded environment-dependent inherited benefits. They
-  are another way to vary opportunities, not a requirement to evolve permanent specialist factions.
+- Source identity, local depletion and machinery allocation can alter returns. The first chemistry
+  implementation's allocation probes showed a constructed reversal; evolved specialization remains open.
+  Current short nutrition probes establish acquisition-funded reproduction, but do not establish
+  founding at another patch. Diagnose cue/action/displacement and
+  resource lifetime before interpreting this as impossible dispersal or extending a horizon.
+- Economical bodies and broad metabolic machinery may outperform costly specialization. Preserve
+  genuine size/maintenance tradeoffs; do not impose a cost solely to prevent an observed winner.
+- The [resource-economy model and checks](design/chemistry/resource-economy.md) establish positive
+  local budgets, source-dependent machinery returns and repeated reproduction at one finite site.
+  A weak isolated site starves its resident. The revised 600-tick default has 26 divisions and
+  no deaths; both starting colonies reproduce. Continued turnover, migration and adaptation remain
+  open. Use local budgets and observed cues/actions to diagnose them before extending a run.
+- Generic stress, compatibility, repair and impedance now replace named toxin/defense/matrix
+  pathways. Paid barriers affect motion and diffusion. The tested degrader reduced material
+  returned at death but did not improve alive-cell external clearance; uptake limits are a
+  specific unresolved ecological opportunity.
+- Export/import can support cross-feeding and detectable cues. The current donor paid a substantial
+  cost; receiver benefit is not cooperation and a sensed emission is not communication.
+- Optional typed gene transfer and disturbance are implemented. Local recolonization, persistence
+  of unchanged traits under transfer and effects on diversity remain open.
+- Light and nonchemical energy, binding, extracellular reactions and variable genome structure
+  remain deferred by the chemistry design; old named mechanisms are removed, not disabled.
+- Paid acquired-weight transmission exists; adaptive usefulness is a conditional research question.
+  Preserve the earlier negative findings under their old physics.
+- Generic source epochs/zones are available. Earlier A/B cohort benefits remain historical and
+  do not prescribe permanent specialists or a new campaign.
 
 Existing negative results limit their exact hypotheses. Do not turn every unresolved mechanism
 into a required experiment or keep tuning until a desired role appears.
@@ -79,15 +82,21 @@ These are unimplemented choices requiring a reviewed purpose and design:
 | Evolvable mutation machinery or neural topology | A demonstrated representation or variation limitation |
 | Physical adhesion | Attachment, detachment, forces and costs; reserve sharing alone adds none |
 | Dormancy or additional life stages | An opportunity current physiology cannot express |
-| Additional resource species or microclimates | A useful pressure beyond the current material, gas and food mechanisms |
+| Nonchemical energy, binding, multiple-substrate reactions and variable genome structure | A measured limitation of the present 256-species unary chemistry; no parallel named pathway |
 
-Contact injury, predation, typed toxin, gene transfer, reserve sharing and local disturbance are
-already implemented optional mechanisms. Their existence is distinct from demonstrated kin
-recognition, cooperation or strategic roles. No new feature is justified solely by an inactive label.
+Chemical attack, recipient feeding and resource capture must use the generic shared substrate.
+Optional disturbance and gene transfer remain available. Their implementation does not establish
+recognition, cooperation or strategic roles.
 
 <a id="backlog-runtime-and-observation-limits"></a>
 
 ## Runtime and observation limits
+
+The [diagnostic continuity audit](design/chemistry/diagnostic-continuity.md) records restored genealogy,
+recent behavior windows, founder-relative/sequence comparisons, population body/learning summaries,
+source-epoch/task summaries and membrane phenotype history. These are now implemented through
+bounded observations. Current operating limits and remaining acceptance belong to the
+[reliability plan](design/chemistry/reliability-plan.md).
 
 Days or weeks of user observation is an intended use, not currently verified unattended operation.
 A durable design must preserve the ongoing world and enough of its history to understand change.
@@ -96,11 +105,11 @@ The implementation and remaining operational checks are separate from ecological
 | Requirement | Current implementation and gap |
 | --- | --- |
 | Continue after interruption | Six automatic and two manual compressed recovery points, plus file export; transactional retention tested with emulated IndexedDB. Actual browser termination, quota and suspension behavior still need review. A new session starts at tick zero; restore is explicit. |
-| Bounded storage and memory | Complete ancestry compacts into numeric pages; default limit two million records, with safe pause. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. Synthetic accumulated-state costs are measured; browser peak memory and an archive beyond the limit remain open. |
-| Preserve observation | Browser checkpoints retain 240 thinned spatial frames, 2,048 recent events, 240 chart samples and a short recent window. Dropped events are counted. Complete replay and unobserved history remain unavailable. |
-| Sustained execution | Bounded timers replace animation-only stepping on the main thread. Background throttling and sleep can still stop execution. Days/weeks responsiveness is unverified. |
-| Useful throughput | The 500-tick default and 100,000/two-million-record synthetic fixtures are measured in the continuation record. Actual browser render/save responsiveness under accumulated load remains a human operational check. |
-| Honest visual interpretation | Fixed inherited A/B colors and spatial regions replace requested trait clusters as the default map. Independent controls and zoom transitions are tested. The user accepted the current world after the startup and recovery fixes; future motion and legibility changes require human review. |
+| Bounded storage and memory | Complete ancestry uses compact numeric records; default limit two million records, with safe pause. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. A 30-minute browser fixture with 70 cells/100k ancestors retains stable GPU and WASM memory; peak costs under large ecological growth and an archive beyond the limit remain open. |
+| Preserve observation | Browser checkpoints retain 240 thinned spatial frames, 2,048 recent spatial events and the current population census. Dropped events are counted. The kernel retains 512 ordinary events and up to 4,096 explicit interventions; reaching the intervention limit rejects further manual changes. Complete replay and unobserved history remain unavailable. |
+| Sustained execution | A worker owns physics and rendering. One queued task yields simulation work; the main animation loop permits one unanswered presentation request. GPU completion fences bound outstanding frames. Background throttling and sleep can still stop execution. Days/weeks responsiveness is unverified. |
+| Useful throughput | Current headless capacity reaches 224.0/61.3/35.9 ticks/s for 48/2,000/2,000-growth. Actual software-rendered browser observations reach 214/54/32.6 ticks/s with drawing and diagnostics. Growth has little headroom; cold save pauses and frame rates are separate measurements. See [current evidence](design/chemistry/reliability-results.md). |
+| Honest visual interpretation | Fixed membrane-X colors and spatial regions describe current cells. Independent controls and zoom transitions are tested. The prior spatial world was accepted; digital chemistry still needs human motion and legibility review. |
 | Exact continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
 
 Design recovery, history retention and ancestry storage together, then validate their operational
@@ -109,6 +118,5 @@ add a backend, second simulation, or hosted storage without review. A small synt
 test can assess durability without spending an ecological campaign on it.
 
 Acceleration must retain one implementation per physical rule
-([ADR 0019](adr/0019-single-language-kernel.md)). Worker placement and other runtime changes need a
-measured bottleneck and coherent ownership boundary. The current implementation keeps main-thread
-ownership; [continuation measurements](continuing-observation.md) state its limits.
+([ADR 0020](adr/0020-complete-rust-kernel.md)). A worker owns the complete Rust/WASM kernel and
+OffscreenCanvas renderer; [continuation measurements](continuing-observation.md) state its limits.

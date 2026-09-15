@@ -1,6 +1,6 @@
 # 0019 — One TypeScript simulation kernel; reasoning outranks speed
 
-- Status: Accepted
+- Status: Superseded by [0020](0020-complete-rust-kernel.md); one implementation per physical rule retained
 - Date: 2026-09-12
 
 ## Context

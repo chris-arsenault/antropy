@@ -1,5 +1,13 @@
 # Design history
 
+The [pre-chemistry September 13 snapshot](2026-09-13-pre-chemistry/README.md) preserves the
+replaced runtime/controller/body/ecology/display contracts, architecture, calibration, commands,
+documentation index and repository/agent entry points. These are exact file copies, not revised
+measurements. Links outside the copied subset describe their original repository context.
+The [digital chemistry contract](../../design/chemistry/README.md) supersedes their executable
+A/B, toxin, matrix, carbon/oxygen and checkpoint instructions. Historical study records remain
+at their original paths with their original data and corrected conclusions.
+
 The [September 10, 2026 snapshot](2026-09-10/README.md) preserves the complete preceding docs tree,
 including its source archive, ADRs, indexes, principles, backlog, calibration and certification
 records. Its [design directory](2026-09-10/design/) contains all 38 prior design documents.

@@ -1,168 +1,130 @@
 # Architecture
 
-Antropy is a static browser application. The deterministic, DOM-free bacterial kernel runs in
-both the browser and Node harness. React controls pacing and inspection; Canvas reads world state.
-The [bacteria contract](design/bacteria.md) defines the current substrate. Ant architecture is
-preserved at tag `ant-colony-checkpoint-2026-09-09`.
+[Computable chemistry](design/chemistry/computational-foundation.md) and [ADR 0022](adr/0022-computable-chemistry.md)
+govern the new mathematical architecture: composed manifold reductions, shared geographic vector
+operators and bounded cellular mappings designed with their execution cost. The module map and
+clock descriptions below describe the existing runtime. M1 added definition v4/physical v12;
+M2's unfinished spatial operators have not replaced ordinary stepping. This revision preserves
+the worker ownership boundary and does not claim the replacement implementation is active.
+
+Antropy is a static browser application with one Rust physical kernel compiled to WebAssembly.
+The browser and headless experiments execute the same WASM binary. React owns controls and
+reduced observations. The world-owning worker also renders through OffscreenCanvas/WebGL2.
+[Runtime](design/bacteria.md), [numerical design](design/chemistry/numerical-engine.md) and
+[migration dispositions](design/chemistry/numerical-migration.md) define the boundaries.
 
 ## Ownership
 
 | Module | Responsibility |
 | --- | --- |
-| `sim/config.ts`, `types.ts`, `world.ts` | Resolved parameters, durable world shape, initialization and step order |
-| `sim/cycle.ts`, `chemotype.ts`, `predation.ts`, `disturbance.ts`, `transfer.ts`, `sharing.ts` | Optional element cycle, toxin types, damage-related feeding, disturbance, gene transfer and reserve exchange |
-| `sim/deposits.ts`, `ecologyFields.ts` | Finite A/B inventories, seeded arrivals, conservative transport and reactions |
-| `sim/landscape.ts`, `ancestryStore.ts` | Abiotic renewal sites and compact complete organism parentage |
-| `observe/spatialGroups.ts`, `spatialHistory.ts` | Camera-independent population grouping, identity, ancestry links and bounded spatial records |
-| `sim/secretion.ts`, `interference.ts`, `matrix.ts` | Shared action affordability, toxin damage/repair, porous binding material and footprint barriers |
-| `sim/fields.ts`, `geometry.ts`, `spatial.ts` | Periodic transport and sampling, body geometry and local contact lookup |
-| `sim/sensors.ts`, `controller/rnn.ts` | Local observation and receptor adaptation; RNN inference and genome variation |
-| `sim/genetics/`, `phenotype.ts` | Chromosomes, transmission/mutation policies and independent construction targets |
-| `sim/body.ts`, `development.ts`, `accounting.ts` | Actual material stocks, viscous rates, catabolism/construction and separate resource books |
-| `sim/controller/plasticity.ts`, `inference.ts` | Private synaptic traces, inherited learning rules and paid updates |
-| `sim/reproductivePolicies.ts` | Local fission/budding placement and parent-survival policy |
-| `sim/movement.ts`, `resources.ts`, `reproduction.ts` | Paid efforts, kinetic/diffusion-limited uptake, conservative local division and death |
-| `sim/events.ts`, `stats.ts` | Logged diagnostic overrides, events and accounting summaries |
-| `sim/observation.ts`, `budgetStats.ts` | Optional typed physical facts and explicit budget denominators |
-| `persist/` | Validated bacterial checkpoints, IndexedDB and local file transfer |
-| `ui/` | Canvas, camera, pacing, stats and individual inspection |
-| `harness/` | Comparative runs, saved checkpoints, SQLite run registry and local DuckDB investigation |
+| `engine/src/world.rs`, `config.rs` | Durable world, defaults, initialization and integration clock |
+| `chemistry.rs`, `genetics.rs` | Constrained U/D/I/S manifold, compact affinities, immutable genomes and compiled operators |
+| `field.rs`, `sources.rs` | Node-major float32 chemical amounts, conservative SIMD face exchange, washout and finite localized supplies |
+| `transport.rs`, `metabolism.rs`, `organism.rs`, `accounting.rs` | Shared supply, paid transport/reactions, float64 inventories, actual stocks and energy/material books |
+| `movement.rs`, `sensing.rs`, `controller.rs` | Periodic contact and funded motion, local chemical sensing, float32 RNN and paid private learning |
+| `lifecycle.rs` | Funded local birth, inheritance, retooling, optional transfer, disturbance and death |
+| `ancestry.rs`, `world_validation.rs` | Compact complete parentage, strict restore consistency and numeric checks |
+| `observation.rs`, `census.rs`, `relationships.rs` | Read-only reduced facts, spatial groups, traits and ancestry/genetic comparisons |
+| `render.rs`, `presentation.rs`, `abi.rs` | Borrowed render buffers and versioned WASM entry points |
+| `fixtures.rs`, `study_commands.rs`, `study_trace.rs` | Explicit constructed interventions and optional applied-flow tracing; never production selection |
+| `frontend/src/engine/` | Worker/session, WebGL2, React controls, retained observations, binary packaging and IndexedDB |
+| `frontend/src/ui/pacing.ts` | Bounded wall-clock pacing; no physical rules |
+| `frontend/src/persist/` | Local identity and recovery retention policy only |
+| `frontend/harness/` | WASM experiment orchestration, SQLite ledger, versioned artifacts and local reports |
 
-Simulation modules import no UI, DOM, persistence or harness code. Physics calls the controller
-interface without interpreting weights. The RNN receives an observation and private state, never
-the world. Behavioral genome encoding and variation stay inside the controller; organism genetics
-owns chromosome and physical-gene encoding. Checkpoint validation preserves
-the exact encoding and scalar precision through controller-owned codecs. The physical interface
-owns sensor/action types; a static controller adapter owns brain implementation and inspection.
-There is no runtime plugin registry or alternate substrate. See [ADR 0018](adr/0018-bacterial-runtime.md).
+The Rust crate imports no browser or harness implementation. The controller owns weight layout,
+diagnostics, inference, assimilation, mutation, expression and distance. There is no TypeScript
+physical fallback, second renderer or old-checkpoint adapter. Named food/toxin/matrix pathways
+and the superseded sparse-block kernel have been removed.
 
-## Kernel order
+## Numerical execution
 
-A world step executes supply and field transport, optional disturbance, then every cell's observation and RNN inference
-against the same chemical snapshot. Paid motion and contact resolution precede local secretion.
-Toxin exposure changes functional damage. Simultaneous uptake shares both foods and intracellular
-storage. Optional light fixation, catabolism, maintenance, paid repair and construction precede contact
-correction, optional gene transfer/reserve sharing, death with optional feeding, and local division. Daughters first act next tick.
+Movement ticks advance 0.2 model seconds. Sources, movement/contact, disturbance and optional
+contact transfer run each tick. Every 0.8 seconds, the accumulated interval advances field
+transport/washout, sensing/inference, injury, chemical transport, reactions, maintenance,
+repair, development and reproduction. Actions are held between inferences. Stability can
+subdivide diffusion further. These clocks are persisted, including between physiology steps.
 
-Inference first funds optional learning. Movement reserves basal maintenance before allocating
-quadratic motor and linear secretion expenditure. Nutrient material, built core/machinery, usable
-energy, chemical-energy content, external inputs and sinks have separate material and energy
-balances. Secretion consumes precursor material and processing energy. Emitted chemical retains
-chemical energy until decay, but cannot be eaten. See [the accounting equations](design/funded-bodies.md).
+Internal amounts, physical quantities and accounting use float64. Field amounts and RNN
+arithmetic use float32. Genotype compilation supplies sparse local affinities and reaction
+operators; mutations rebuild these once. Owned material/impedance reductions avoid repeated
+full scans. Shared substrate requests commit simultaneously, with no within-phase reaction
+cascade or prospective import headroom from export. Field roundoff has explicit matter/energy
+accounts. No concentration cutoff controls the working set.
 
-The world uses float64 resource fields and physical quantities; observations, weights and hidden state
-use float32. Integer ticks, stable iteration, deterministic body perturbations and persisted random
-streams keep continuation deterministic on one machine. Exact cross-machine replay is not an
-invariant: the save state is the record. Weights, traces and hidden state are float32 storage
-with double arithmetic. The kernel is TypeScript only, one implementation per physical rule;
-[ADR 0019](adr/0019-single-language-kernel.md) records why a WebAssembly split was built,
-measured and removed. Source schedules, body initialization/division
-and genetic variation each have a separate persisted stream, so genetic draws cannot change
-physical headings, placement or food schedules independently of inherited behavior.
+Separate environment, motion and genetic random streams support exact continuation on the
+tested WASM runtime. Cross-machine bitwise identity is not promised. The chemistry seed and
+resolved coefficients/table are stored together and validated. This supersedes
+[ADR 0019's TypeScript implementation choice](adr/0019-single-language-kernel.md), retaining
+its single-owner principle.
 
-## Controllers and inheritance
+## Rendering and worker boundary
 
-A dense 35-input, 24-unit recurrent network produces propulsion, steering, signal/toxin/matrix
-secretion, repair effort, candidate task byte and byte-write gate. All 1,640 weights and biases
-plus nine plasticity loci are heritable. Founder weights encode a small
-nutrient response; there is no controller fallback, pathfinder or task dispatcher.
+All cell/RNN/field state remains in WASM. The same worker borrows typed-array views over packed
+cell/source/death records and a five-layer field projection. Views are renewed after memory
+growth. Stepping and rendering execute sequentially, without shared-state races.
 
-Genotypes contain one or two chromosomes, each with behavioral and physical blocks. Diploid
-expression is additive. Ten physical loci encode nine construction targets (core, motor, A/B processing, storage, defense,
-toxin, matrix and light harvesting) plus a toxin tint. Only actual material stocks affect capabilities. Growth consumes material and usable
-energy; inherited target mutations do not grant machinery. Actual volume includes stored food and
-sets translational/rotational drag and thermal angular diffusion.
-Static policy tables select clonal/selfing transmission, uniform/one-point crossover,
-uniform/Gaussian mutation and fission/budding. The controller owns behavioral variation and
-expression; no other module interprets its weight layout. Genotypes are immutable after registration;
-expression caches use object identity and are reconstructed after restore.
+React receives status, bounded history, reduced region summaries and an explicitly selected
+cell. Neither the full 256-species field nor per-frame cell arrays cross the worker bridge.
+WebGL uploads still transfer bytes to GPU memory. This removes JS array serialization and
+worker structured clones from the render path; it does not claim literal CPU/GPU zero-copy.
 
-Resource-funded fission replaces the parent with two daughters; budding keeps the experienced
-parent and produces one daughter. Offspring receive empty recurrent state, task and synaptic traces,
-plus locally initialized receptor baselines. The controller's `assimilate` operation adds a retained
-fraction of acquired recurrent changes to birth-local chromosome copies before transmission and
-mutation. It leaves shared parental genotypes unchanged. New traces start at zero because learned
-changes already reside in the inherited baseline. Genotype ancestry records transfer magnitude;
-learning-transfer and mutation counters remain distinct.
-The world preserves organism ancestry and genotype ancestry. Diagnostic competition runs sample
-genomes for measurement; they never select reproduction in a living population.
+The [immutable sharing contract](design/chemistry/data-ownership.md) also governs diagnostics.
+Ticks use scalar exports. The browser rejects bulk state queries. Observations use one acknowledged
+envelope, incremental history and selected-organism revisions; unchanged genes and genealogy are
+not resent on each poll. Bounded replies are decoded from borrowed WASM bytes. Only explicit
+checkpoint paths copy reply bytes for asynchronous ownership.
 
-## Browser and persistence
+Layer toggles use GPU uniforms. Camera, source markers, population regions and color selection
+are independent. Soft groups resolve into real cells as zoom increases. The chemical atlas
+uses chemical coordinates, separate from geographic XY. Context loss pauses with world state
+retained. Unsupported OffscreenCanvas/WebGL2 reports an error rather than silently changing engines.
 
-The browser creates the same default configuration as the harness: seed 101, 48 founders near
-two separated sites in a 320 × 240 world, viscosity 0.004 and 48 finite local renewal sites, haploid clonal fission, physical/behavioral mutation, paid plasticity and full
-acquired-weight retention on.
-It starts paused at tick zero and does not silently restore a saved
-run. Run and always-visible stats expose the experiment. Green/blue food, red toxin and ochre
-porous matrix layers are enabled, with drag pan, wheel zoom, fit and cell selection. Neutral
-signaling and solid walls are disabled by default for the reasons in the current ecology contract.
+## Durability and observation
 
-Checkpoint version 8 declares substrate `bacteria-xy`. It preserves fields, habitats, source state, resolved
-configuration, PRNG streams, all live body/receptor/brain states, genome and organism ancestry,
-resource ledgers, recent diagnostic events, durable manual intervention history and stop reason.
-Import validates physical parameter relationships, matching body/ancestry records and lifetimes,
-controller-owned encodings, actual stock capacities, chromosome counts and both resource balances.
-It rejects older bacterial versions and ant files rather than
-inventing missing history or random state. IndexedDB uses a separate bacterial database.
-No backend or hosted data transfer is involved. Compressed recovery keeps six automatic and two
-manual points within 256 MiB, with transactional replacement. The UI saves every 30 seconds,
-on pause and best-effort on visibility/page exit. An automatic-save failure pauses execution.
-Restore is explicit and starts paused. Browser checkpoint metadata includes bounded observation
-history and a run identity; headless physical checkpoints can omit that independent projection.
+Physical checkpoints use v11 postcard bytes with `ANTROPY11\0` magic. They retain the manifold,
+all fields/inventories/stocks, genotypes, private memory, RNGs, source state, accounting,
+integration clock, complete parentage, interventions and stop reason. No old schema is inferred.
+Living/founder genomes remain; some dead non-founder sequences can be pruned while their
+ancestry records remain. Unavailable genetic comparisons are labeled.
+Installed machinery identity is distinct from inherited instructions and remains reachable during
+pruning. Paid refitting changes function without creating material; its cost becomes heat.
 
-Closed lifetimes older than the most recent 2,048 organism IDs compact into float64 pages. Each
-record keeps parent, founder lineage, genotype ID, birth/end tick and cause; its ID is implicit.
-Living/recent records stay mutable, decoded closed records are immutable. Unchanged page encodings
-are cached and a parsed checkpoint shares one decoded ancestry store across validation and restore.
-The default two-million-record limit pauses before losing a birth. The genotype pruning contract
-is unchanged. Browser timing and memory limits remain in [continuing observation](continuing-observation.md).
+Browser gzip packages add independent run identity, execution provenance, 240 thinned history
+samples, current regions and 2,048 recent spatial events with a dropped count. Missing observations
+are not reconstructed as routes or extinctions. Census/trait sampling occurs every 25 ticks.
+Group definitions are observer conventions, never species or controller inputs.
+An independent 81-sample window retains recent effort distributions. Population body, inherited
+sequence, founder-relative and learning comparisons are bounded Rust reductions.
 
-## Measurements and limits
+IndexedDB retains six automatic and two manual packages within 256 MiB. A raw physical checkpoint
+is limited to 192 MiB. Saving runs in the worker; failed writes pause without replacing the last
+good save. Restores are explicit and paused. The older database stores are untouched.
+Cold operations serialize before allocating snapshots. A GPU fence bounds unfinished frames;
+presentation requests and simulation tasks have separate bounded scheduling. An eight-run local
+health record can be exported even when the worker is unavailable.
+Identity uses `crypto.getRandomValues` without consuming model randomness.
+Manual interventions survive ordinary-event rollover; their explicit 4,096-record budget
+rejects further interventions before mutation.
 
-The harness records configuration, seed, source digests before/after execution, elapsed time, outcomes and sampled trajectories
-in local artifacts and the retained SQLite ledger. Old rows keep their ant identities. Bounded tests
-cover mechanics and integration; ecological outcomes are in [the results record](design/bacteria-results.md).
-Competition artifacts embed both compared genome encodings and hashes, source-checkpoint hash and
-source interventions. A filename alone is not the identity of an experiment. The visible stats
-mark runs with manual interventions as diagnostic even after recent events have rolled over.
+## Evidence and limits
 
-The adaptation harness attaches an optional world-scoped scalar observer to physical resolvers.
-It aggregates exact flows in bounded organism windows, records lifecycle identities and sampled
-state, and writes explicit schema-driven JSONL. A local Python importer loads completed runs into
-DuckDB transactionally. No event bus, hosted service or analytical feedback enters the kernel.
-The [study contract](overnight-study.md) records the Canonry reporting review, schemas, denominators,
-source identities, candidate selection and causal budget. This is harness evidence, not a second
-application persistence system.
+Schema-v3 harness artifacts archive the exact loaded WASM binary and configuration, bounded
+horizon, provenance, initial/final binary state and observations. Long runs stream samples and
+genotypes; study tracing records applied species/product flows. Historical Python readers only
+read historical artifacts and reject mixed physical schemas.
 
-Each mounted view owns one resize observer and reusable Canvas/raster buffers. Camera changes
-reuse the field image; only field ticks, layer changes or a replaced world invalidate it.
-The [display contract](design/bacterial-display.md) renders one clipped world. Pure camera helpers
-own clamping, anchored zoom and visible-body picking. Field rasterization and cell/lifecycle painting
-have separate modules. Recent lifecycle snapshots are transient. Population and spatial histories
-are bounded observer state, saved separately from physical events in browser checkpoints.
-Inherited statistics compare genetic construction targets with each lineage's actual founder
-genotype. Sequence hashes only select equality buckets; exact chromosome comparison resolves
-collisions and homolog permutations. Genome record IDs remain separate ancestry identities.
-Founder-share histories retain their observation origin with bounded sample thinning. Neither
-these measurements nor representative selection in the harness enters the controller or lifecycle.
-
-`src/observe` projects existing ancestry and immutable genomes into recent families, common-ancestor
-distances, separate physical/controller genetic distances and inherited trait/effort distributions.
-It reads the kernel without writing physical state or consuming randomness. Identity-keyed caches
-live outside the world and rebuild after import. UI history samples each 100 ticks, retaining bounded
-long-term trends and an unthinned recent window. No family label is a sensor or cooperation rule.
-
-The contact model uses bounded displacement and four local separation passes, not a rigid-body
-constraint solver; a pass that displaces no body ends resolution early, which is exact. The spatial
-index caches each body's radius at insertion and returns a reused neighbour snapshot in stable
-bin order. Parentage remains complete within the explicit memory limit. Current headless throughput is in
-[calibration](calibration.md#calibration-throughput). In the browser, the map redraws every frame
-while population statistics and the inspector refresh at a bounded cadence. No browser throughput
-or visual certification is claimed. A bounded timer advances physics independently of animation
-callbacks, preventing accumulated catch-up bursts; browser throttling and device sleep can still stop it.
+The [integrated load](design/chemistry/numerical-results.md) measured 217 ticks/s at 48 cells,
+59.9 at 2,000 varied cells, and 33.4 in the growing 2,000-cell fixture. It includes census,
+inspection and packed render preparation. The growing load's lowest 20-tick window was 31.0.
+These are constructed capacity probes, not carrying capacities or viable communities.
+The [reliability revision](design/chemistry/reliability-results.md) adds actual software-browser
+measurements and failure regressions. Hardware-browser motion/performance acceptance and
+days/weeks endurance remain unverified.
 
 ## Deployment
 
-The frontend builds to static assets and deploys through the Ahara `website` module: S3,
-CloudFront, ACM, and WAF. Terraform uses the shared Ahara state bucket at
-`projects/antropy.tfstate`. The project has no application backend, database, or authentication.
+The static frontend and WASM asset deploy through the Ahara website module using shared
+Terraform state at `projects/antropy.tfstate`. Rust's WASM target and SIMD are build requirements.
+No backend, new response-header policy, SharedArrayBuffer, authentication or hosted experiment
+storage is introduced.

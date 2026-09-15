@@ -1,6 +1,14 @@
-.PHONY: ci lint lint-fix fmt format typecheck test docs-check terraform-fmt-check build deploy
+.PHONY: ci engine-check engine-build lint lint-fix fmt format typecheck test docs-check terraform-fmt-check build deploy
 
-ci: lint fmt typecheck test docs-check terraform-fmt-check
+ci: engine-check lint fmt typecheck test docs-check terraform-fmt-check
+
+engine-check:
+	cargo fmt --manifest-path engine/Cargo.toml -- --check
+	cargo clippy --manifest-path engine/Cargo.toml --release -- -D warnings -W clippy::cognitive_complexity
+	cargo test --manifest-path engine/Cargo.toml
+
+engine-build:
+	node frontend/scripts/build-engine.mjs
 
 lint:
 	cd frontend && pnpm exec eslint .
@@ -17,7 +25,7 @@ format:
 typecheck:
 	cd frontend && pnpm exec tsc -b
 
-test:
+test: engine-build
 	cd frontend && pnpm exec vitest run
 
 docs-check:

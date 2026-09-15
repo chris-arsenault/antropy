@@ -1,129 +1,76 @@
-/**
- * Producer / resistant / sensitive toxin contests: the colicin rock-paper-scissors system.
- * Constructed physical genotypes share the founder brain; only toxin effort and two physical
- * targets differ. No assay score selects parents and no winner enters the browser default.
- */
+/** Constructed stress-production and compatibility contests; no prescribed coexistence. */
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { createWorld } from "../../src/sim/world";
-import { DEFAULT_CONFIG } from "../../src/sim/config";
-import { controller } from "../../src/sim/controller";
-import { diagnosticChanges } from "../../src/sim/controller/diagnostics";
-import { type Genotype } from "../../src/sim/genetics/genotype";
-import { type World } from "../../src/sim/types";
-import { constructed } from "./capabilityFixture";
-import { TINT_LOCUS } from "../../src/sim/body";
+import { type Engine } from "../../src/engine/client";
+import { loadEngine } from "../numerical/engine";
+import { assignPopulation, rareAssignment, frozen } from "./engineFixtures";
+import { type EngineConfig as Config, type Genotype } from "../../src/engine/types";
+import { chemicalContext, coordinate } from "./chemicalGenotypes";
+import { emissionGenome } from "./emissionGenome";
+import { chemicalConfig } from "./sourceSettings";
 import { type QuickScenario } from "./quickScenario";
 import { runQuick, runSelectionPilot } from "./quickRun";
 import { type Flags, flag, integerFlag } from "./flags";
 
 export interface RpsSettings {
-  toxinEffort: number;
-  producerWeapon: number;
-  resistantDefense: number;
-  defenseStrength: number;
-  immunityStrength: number;
-  toxinK: number;
-  damageRate: number;
-  contactDamageRate: number;
-  toxinDecay: number;
-  toxinDiffusion: number;
-  matrix: "founder" | "off";
+  emission: number[];
+  effort: number;
+  investment: number;
   size: number;
   founders: number;
   sources: number;
-  sourceRate: number;
-  /** Fraction of a contact-killed cell's material that feeds the touching producers. */
-  preyYield: number;
+  config: Config;
 }
 export type Strategy = "producer" | "resistant" | "sensitive" | "family-a" | "family-b";
 export const STRATEGIES: Strategy[] = ["producer", "resistant", "sensitive"];
-/** Family chemistry: two producer families of opposite tint and a sensitive non-producer. */
 export const FAMILIES: Strategy[] = ["family-a", "family-b", "sensitive"];
-const isFamilyCase = (strategies: Strategy[]) =>
-  strategies.some((s) => s === "family-a" || s === "family-b");
-
-export function rpsSettings(flags: Flags): RpsSettings {
-  const number = (key: string, fallback: number) => {
-    const value = Number(flag(flags, key, String(fallback)));
-    if (!Number.isFinite(value) || value < 0) throw new Error(`--${key} must be a number`);
-    return value;
-  };
+export function rpsSettings(flags: Flags, engine: Engine): RpsSettings {
+  const config = chemicalConfig(flags, engine),
+    space = chemicalContext(engine, config).chemistry;
+  const ranked = space.properties
+    .map((p, s) => ({ s, stress: p.stress }))
+    .sort((a, b) => b.stress - a.stress);
+  const first = ranked[0].s,
+    point = coordinate(first);
+  const second = ranked.find(({ s }) => {
+    const p = coordinate(s);
+    return Math.hypot(p.x - point.x, p.y - point.y) >= 5;
+  })!.s;
+  const emission = flag(flags, "emission-species", `${first},${second}`).split(",").map(Number);
+  if (emission.length !== 2 || emission.some((s) => !Number.isInteger(s) || s < 0 || s > 255))
+    throw new Error("--emission-species requires two chemical IDs");
+  const effort = Number(flag(flags, "emission-effort", "0.5"));
+  const investment = Number(flag(flags, "emission-investment", "1"));
+  if (!(effort >= 0 && effort <= 1 && investment >= 0 && investment <= 3))
+    throw new Error("Invalid emission effort or machinery investment");
   return {
-    toxinEffort: number("toxin-effort", 0.02),
-    producerWeapon: number("producer-weapon", 3),
-    resistantDefense: number("resistant-defense", 4),
-    defenseStrength: number("defense-strength", DEFAULT_CONFIG.defenseStrength),
-    immunityStrength: number("immunity-strength", DEFAULT_CONFIG.immunityStrength),
-    toxinK: number("toxin-k", DEFAULT_CONFIG.toxinK),
-    damageRate: number("damage-rate", DEFAULT_CONFIG.damageRate),
-    contactDamageRate: number("contact-damage", DEFAULT_CONFIG.contactDamageRate),
-    toxinDecay: number("toxin-decay", DEFAULT_CONFIG.toxinDecay),
-    toxinDiffusion: number("toxin-diffusion", DEFAULT_CONFIG.toxinDiffusion),
-    matrix: flag(flags, "matrix", "founder") === "off" ? "off" : "founder",
+    emission,
+    effort,
+    investment,
+    config,
     size: integerFlag(flags, "size", 32),
     founders: integerFlag(flags, "founders", 24),
     sources: integerFlag(flags, "sources", 3),
-    sourceRate: number("source-rate", DEFAULT_CONFIG.sourceRate),
-    preyYield: number("prey-yield", DEFAULT_CONFIG.preyYield),
   };
 }
-
-const ABSENT = -3;
-const TINTS: Partial<Record<Strategy, number>> = { "family-a": -3, "family-b": 3 };
-/** Same founder brain and core; toxin effort and two physical targets define each strategy. */
-export function strategyGenotype(strategy: Strategy, s: RpsSettings): Genotype {
-  const matrix = s.matrix === "off" ? ("off" as const) : undefined;
-  const brain = diagnosticChanges(controller.seed(), { matrix });
-  switch (strategy) {
-    case "producer":
-    case "family-a":
-    case "family-b":
-      return constructed(diagnosticChanges(brain, { toxinEffort: s.toxinEffort }), {
-        5: ABSENT,
-        6: Math.log(s.producerWeapon),
-        [TINT_LOCUS]: TINTS[strategy] ?? 0,
-      });
-    case "resistant":
-      return constructed(diagnosticChanges(brain, { toxin: "off" }), {
-        5: Math.log(s.resistantDefense),
-        6: ABSENT,
-      });
-    default:
-      return constructed(diagnosticChanges(brain, { toxin: "off" }), { 5: ABSENT, 6: ABSENT });
-  }
+export function strategyGenotype(strategy: Strategy, s: RpsSettings, engine: Engine): Genotype {
+  if (strategy === "producer" || strategy.startsWith("family"))
+    return emissionGenome(
+      engine,
+      chemicalContext(engine, s.config),
+      s.emission[Number(strategy === "family-b")],
+      s.effort,
+      s.investment
+    );
+  const base = chemicalContext(engine, s.config).genotype,
+    point = coordinate(s.emission[0]);
+  const membrane =
+    strategy === "resistant" ? point : { x: point.x < 8 ? 15 : 0, y: point.y < 8 ? 15 : 0 };
+  return {
+    ...base,
+    chromosomes: base.chromosomes.map((c) => ({ ...c, chemistry: { ...c.chemistry, membrane } })),
+  };
 }
-
-function install(
-  w: World,
-  strategies: Strategy[],
-  s: RpsSettings,
-  rare: number | null,
-  swap: boolean
-) {
-  for (const [i, strategy] of strategies.entries()) {
-    const id = i + 1;
-    w.genomes.set(id, {
-      id,
-      parent: null,
-      born: 0,
-      learned: 0,
-      genome: strategyGenotype(strategy, s),
-    });
-  }
-  w.nextGenome = strategies.length + 1;
-  for (const [i, c] of w.cells.entries()) {
-    c.genome = assignment(i, strategies.length, rare, swap) + 1;
-    w.ancestry.get(c.id)!.genome = c.genome;
-  }
-}
-/** Even round-robin placement; a rare invader takes one slot in ten and none of the others. */
-function assignment(i: number, n: number, rare: number | null, swap: boolean): number {
-  if (rare !== null && i % 10 === 0) return rare;
-  const slot = (i + Number(swap)) % n;
-  return rare !== null && slot === rare ? (slot + 1) % n : slot;
-}
-
 export function rpsScenario(
   name: string,
   strategies: Strategy[],
@@ -133,43 +80,39 @@ export function rpsScenario(
   return {
     name,
     hypothesis:
-      "Producer beats sensitive through toxin, resistant beats producer through cheaper protection, sensitive beats resistant by paying nothing; local dispersal lets all three persist.",
+      "Paid stress production and membrane compatibility change local injury and resource returns; cyclic dominance and coexistence are unproved.",
     specification: {
       strategies,
       rare,
       settings: s,
-      variants: Object.fromEntries(strategies.map((v, i) => [i + 1, v])),
+      variants: Object.fromEntries(strategies.map((v, i) => [i + 2, v])),
       nutrientDenominator:
         "Continuing supply: uptake/initial inventory percentages are intentionally null; inspect input ledger.",
     },
     target: { x: s.size / 2, y: s.size / 2, radius: 0 },
-    offeredFoodA: 0,
-    offeredFoodB: 0,
-    create(seed, swap) {
-      const w = createWorld(seed, {
-        ...DEFAULT_CONFIG,
+    create(engine, seed, swap) {
+      const w = engine.create(seed, {
+        ...s.config,
         width: s.size,
         height: s.size,
         founders: s.founders,
         sourceCount: s.sources,
-        sourceRate: s.sourceRate,
-        foodEpochs: undefined,
-        foodZones: undefined,
-        defenseStrength: s.defenseStrength,
-        immunityStrength: s.immunityStrength,
-        toxinK: s.toxinK,
-        damageRate: s.damageRate,
-        contactDamageRate: s.contactDamageRate,
-        toxinDecay: s.toxinDecay,
-        toxinDiffusion: s.toxinDiffusion,
-        toxinTypes: isFamilyCase(strategies) ? 2 : 1,
-        preyYield: s.preyYield,
-        mutationRate: 0,
-        physicalMutationRate: 0,
-        learning: "static",
-        learningRetention: 0,
+        sourceEpochs: null,
+        sourceZones: null,
+        ...frozen,
       });
-      install(w, strategies, s, rare === null ? null : strategies.indexOf(rare), swap);
+      const variants = strategies.map((label) => ({
+        label,
+        genotype: strategyGenotype(label, s, engine),
+      }));
+      try {
+        assignPopulation(w, variants, (i) =>
+          rareAssignment(i, variants.length, rare === null ? null : strategies.indexOf(rare), swap)
+        );
+      } catch (error) {
+        w.dispose();
+        throw error;
+      }
       return w;
     },
   };
@@ -181,7 +124,7 @@ const PAIRS: [Strategy, Strategy][] = [
   ["sensitive", "resistant"],
 ];
 const JUSTIFICATION =
-  "Rock-paper-scissors coexistence needs several generations of local replacement; pairwise 3,000-tick contests only establish each dominance. Fixed horizon, no extension, no mutation.";
+  "Rare-variant growth requires multiple funded generations. Pairwise causal effects must be established separately; no cyclic dominance is assumed. Fixed horizon, no extension, no mutation.";
 
 function runCase(
   scenario: QuickScenario,
@@ -222,9 +165,10 @@ function selectCases(which: string, s: RpsSettings, flags: Flags) {
   return [{ scenario: rpsScenario(which, STRATEGIES, s, rare), ticks, swap: false }];
 }
 
-export function runRps(flags: Flags): void {
+export async function runRps(flags: Flags): Promise<void> {
+  const engine = await loadEngine();
   const which = flag(flags, "case", "list"),
-    s = rpsSettings(flags);
+    s = rpsSettings(flags, engine);
   const root = flag(flags, "output", "harness/artifacts/rps");
   if (which === "list") {
     console.log(
@@ -232,7 +176,7 @@ export function runRps(flags: Flags): void {
         "pairwise: producer-sensitive, resistant-producer, sensitive-resistant; both placements, 3,000 ticks",
         "three-way: all three strategies together, 10,000 ticks (pilot)",
         "invade-<strategy>: that strategy starts at 10% among the other two, 10,000 ticks (pilot)",
-        "families / family-invade-<family-a|family-b|sensitive>: two producer families of opposite tint and a sensitive, toxinTypes 2",
+        "families / family-invade-<family-a|family-b|sensitive>: two emission coordinates with matching membranes and a distant membrane; no identity-based recognition",
         `settings: ${JSON.stringify(s)}`,
       ].join("\n")
     );
@@ -240,5 +184,5 @@ export function runRps(flags: Flags): void {
   }
   mkdirSync(root, { recursive: true });
   for (const test of selectCases(which, s, flags))
-    runCase(test.scenario, flags, root, test.ticks, test.swap);
+    await runCase(test.scenario, flags, root, test.ticks, test.swap);
 }

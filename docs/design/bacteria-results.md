@@ -3,7 +3,9 @@
 Updated September 13, 2026. These findings help prepare a world where diverse strategies and
 adaptation are likely during the user's days/weeks observation. They do not certify a completed
 ecosystem or prescribe which organisms that run should produce. Older measurements retain their
-recorded conditions; they are not automatically current-default measurements.
+recorded conditions; they are not current-default measurements. This page preserves pre-chemistry
+findings. Current [numerical chemistry evidence](chemistry/numerical-results.md) records new formula checks,
+constructed opportunities and operating limits; none of the old pathways executes in the new runtime.
 
 <a id="evidence-world-design-proof-points"></a>
 
@@ -23,8 +25,7 @@ two-species product specification or an established prediction of the user's lon
 
 Light fixation, transfer, sharing and disturbance have measurable physical effects, while useful
 communication, division of labor, chemical family roles and active hunting remain unestablished.
-Separate a mechanism's opportunity from its evolved exploitation. The current default leaves
-these newer mechanisms off; see the [resolved scope](README.md#design-current-default-and-disabled-scope).
+Separate a mechanism's opportunity from its evolved exploitation. The pre-chemistry default left these newer mechanisms off. For current replacements, see the [resolved scope](README.md#design-current-default-and-disabled-scope).
 
 The former 20/200-generation coexistence gate was not demonstrated and is retired as a work order.
 The next preparation concerns coherent ecological opportunities and durable long observation,
@@ -32,7 +33,7 @@ not running until an arbitrary number of groups passes that gate.
 
 <a id="evidence-capability-investigation"></a>
 
-## Current capability investigation
+## Pre-chemistry capability investigation
 
 The [registered six-area investigation](../capability-investigation.md) completed 48 short cases
 and four 10k selection pilots (108,915 ticks; about 197 seconds timed execution). Actual genotype
@@ -45,7 +46,7 @@ per founder. These are actual evolved variants, not hand-built diagnostic winner
 The B allele grows from 12.5% of founders to 17.31–26.00% of living cells in four fixed-inheritance
 pilots. B-rich supply favors it more than A-rich supply in only one of two seeds. This limits the
 food-specific selection claim, not the controlled processing result. Constructed specialist/generalist
-payoffs reverse between A and B under current physics. The tested high-motor coordination still loses;
+payoffs reverse between A and B under that study's physics. The tested high-motor coordination still loses;
 conditional matrix protects more cheaply than constant secretion but adds no divisions. Actual
 recurrence, private-learning and acquired-transfer tests give no consistent benefit in their contexts.
 Full denominators, trajectory artifacts, source identities and unresolved mechanisms are in the report.

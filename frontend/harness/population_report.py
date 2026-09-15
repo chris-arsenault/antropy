@@ -147,6 +147,9 @@ def plot(root):
 
 
 def main(root):
+    from chemistry_report import dispatch
+    if dispatch(root, "population"):
+        return
     runs = [report_run(root / f"{arm}-{seed}") for seed in (101, 202, 303) for arm in ("live", "frozen")]
     result = {"analysis_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "sample_cadence_ticks": 500, "late_window": [40000, 50000],

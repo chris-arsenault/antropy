@@ -27,6 +27,24 @@ Separate implemented mechanics, measured causal effects, constructed strategy co
 adaptation of an observed inherited variant. Preserve negative results and version-specific limits.
 Measurements outrank historical plans; human trajectory rejection cannot be overruled by counters.
 
+<a id="principles-computable-rules"></a>
+
+## Design computable artificial rules
+
+Physics supplies concepts for Antropy's own material, interaction and work rules. Design those
+rules for the execution environment: compact chemical-space bases, shared mixture reductions,
+bounded geographic operators and short vector updates. The 16×16 chemical manifold organizes
+sensing, transport, processing and cellular response, not just initial property generation.
+Preserve discrete chemical identities, local genome/RNN cells and meaningful conditional costs.
+
+Select equations, accounting and operating bounds together; measure the full composed workload
+before accepting the mathematics. Real-world fidelity and reproduction of a conventional
+continuum model are not default correctness requirements. Conserved material, explicit sources
+and sinks, funded capabilities, bounded work and coherent closed cycles remain requirements.
+Numerical formulas and their safeguards are implementer-owned choices, not immutable contracts
+merely because a previous plan selected them. See the
+[computational foundation](design/chemistry/computational-foundation.md).
+
 <a id="principles-author-pressures-and-local-carriers"></a>
 
 ## Author pressures and local carriers
@@ -74,8 +92,9 @@ address them before describing unattended long observation as supported.
 
 Use bounded mechanics tests and proportionate headless causal assays. Inspect browser startup
 configuration rather than running a browser simulation. Start servers only on explicit request.
-Substantial new designs require user review; authorized routine fixes do not require repeated
-approval. The user's intended long live run is distinct from an agent research campaign; neither
+Implementation owns formulas, numerical fidelity, optimization and tuning within the stated
+chemistry and ecology goals; validate these choices rather than deferring them as approval gates.
+The user's intended long live run is distinct from an agent research campaign; neither
 a documentation task nor that intended use authorizes launching a campaign now.
 
 <a id="principles-durable-architecture"></a>

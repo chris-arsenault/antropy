@@ -1,0 +1,93 @@
+[
+  {
+    "reference": "frontend/harness/artifacts/viability/cycle-refined/compatible-second",
+    "candidate": "frontend/harness/artifacts/viability/cycle-finer/compatible-second",
+    "tick": 3000,
+    "referenceResolution": 1e-13,
+    "resolution": 1e-15,
+    "exact": {
+      "genomes": true,
+      "ancestry": true,
+      "sources": true,
+      "rng": true,
+      "geneticRng": true,
+      "environmentRng": true,
+      "stopReason": true
+    },
+    "cellMaximumAbsoluteError": {
+      "x": 5.9685589803848416e-12,
+      "y": 3.149125404888764e-11,
+      "id": 0,
+      "parent": 0,
+      "lineage": 0,
+      "generation": 0,
+      "genome": 0,
+      "damage": 6.83259004929937e-13,
+      "heading": 3.093081346605686e-11,
+      "body": 4.382050278195493e-12,
+      "inventory": 3.816946758661288e-12,
+      "energy": 6.856626377782504e-12,
+      "born": 0,
+      "brain": 0,
+      "receptors": 7.81147369011137e-12,
+      "contacts": 0,
+      "inputs": 0,
+      "action": 0
+    },
+    "perSpeciesFieldError": {
+      "0": {
+        "l1": 5.181019831906886e-10,
+        "maximum": 5.939936043031224e-13
+      },
+      "184": {
+        "l1": 1.3534277299446811e-08,
+        "maximum": 8.969170324294482e-12
+      },
+      "15": {
+        "l1": 1.157255203402515e-08,
+        "maximum": 1.568067314562839e-11
+      },
+      "129": {
+        "l1": 2.9450932380892084e-11,
+        "maximum": 1.1616873860505192e-12
+      },
+      "142": {
+        "l1": 4.664613341537789e-13,
+        "maximum": 9.370392936264711e-14
+      },
+      "185": {
+        "l1": 3.551488311553728e-14,
+        "maximum": 6.384050198607884e-15
+      }
+    },
+    "sampledTraceMaximumAbsoluteError": {
+      "id": 0,
+      "genome": 0,
+      "group": 0,
+      "parent": 0,
+      "x": 5.9685589803848416e-12,
+      "y": 3.623767952376511e-11,
+      "heading": 3.1667113375988265e-11,
+      "energy": 1.0862866162142382e-11,
+      "inventory": 5.9870441937448504e-12,
+      "body": 5.396572078097961e-12,
+      "damage": 6.87672141452822e-13,
+      "stressLoad": 5.324560237163212e-13,
+      "impedance": 1.163176222007678e-10,
+      "localMixture": 1.060507237582442e-11,
+      "speedCeiling": 1.0903500324843662e-12,
+      "mobility": 1.5813739207004573e-12,
+      "action": 0,
+      "inputs": 9.313225746154785e-10,
+      "localInputsNow": 4.656612873077393e-10,
+      "targetDistance": 3.619016197831115e-11
+    },
+    "fieldL1Error": 2.5654884225260812e-08,
+    "physicalLedgerMaximumAbsoluteError": 1.657718939895858e-08,
+    "numericalMaterial": 2.724967147018505e-10,
+    "numericalEnergy": 1.3736593412570742e-09,
+    "absoluteTolerance": 1e-07,
+    "fieldL1Tolerance": 1e-06,
+    "withinAbsoluteTolerance": true
+  }
+]

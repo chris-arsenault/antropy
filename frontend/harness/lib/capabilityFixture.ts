@@ -1,95 +1,57 @@
-import { createWorld } from "../../src/sim/world";
-import { DEFAULT_CONFIG, type Config } from "../../src/sim/config";
-import { type World } from "../../src/sim/types";
-import { type Genotype } from "../../src/sim/genetics/genotype";
-import { type Genome } from "../../src/sim/controller";
-import { PHYSICAL_LOCI, structuralMass } from "../../src/sim/body";
-import { blueprint } from "../../src/sim/phenotype";
-import { initializeReceptors } from "../../src/sim/sensors";
-import { heldEnergy, heldMaterial } from "../../src/sim/accounting";
+import {
+  type EngineConfig,
+  type Genotype,
+  type CellState,
+  type Definition,
+} from "../../src/engine/types";
+import { type Engine, type EngineWorld } from "../../src/engine/client";
 import { foodAccess } from "./foodAccess";
+import { frozen, install, pulse, type Variant } from "./engineFixtures";
 import { type QuickScenario } from "./quickScenario";
 
 export interface CapabilityCase {
   key: string;
   hypothesis: string;
-  context: "brief" | "persistent" | "uniformA" | "uniformB";
-  variants: { label: string; genome: Genotype }[];
+  context: "brief" | "persistent" | "uniform0" | "uniform1";
+  variants: Variant[];
   mature?: boolean;
-  config?: Partial<Config>;
-  toxin?: number;
+  config?: Partial<EngineConfig>;
+  exposure?: { species: number; concentration: number };
   provenance?: Record<string, unknown>;
 }
-
-export function constructed(behavior: Genome, physical: Record<number, number> = {}): Genotype {
-  const genes = new Float32Array(PHYSICAL_LOCI);
-  for (const [i, value] of Object.entries(physical)) genes[Number(i)] = value;
-  return { chromosomes: [{ behavior, physical: genes }] };
+export function ancestralProcessing(genotype: Genotype, ancestor: Genotype): Genotype {
+  const g = structuredClone(genotype);
+  for (const [i, c] of g.chromosomes.entries()) {
+    const source = ancestor.chromosomes[i % ancestor.chromosomes.length];
+    c.physical.splice(7, 8, ...source.physical.slice(7, 15));
+    c.chemistry.transporters = structuredClone(source.chemistry.transporters);
+    c.chemistry.enzymes = structuredClone(source.chemistry.enzymes);
+  }
+  return g;
 }
-
-export function ancestralProcessing(g: Genotype): Genotype {
-  return {
-    chromosomes: g.chromosomes.map((c) => {
-      const physical = c.physical.slice();
-      physical[2] = 0;
-      physical[4] = 0;
-      return { physical, behavior: c.behavior };
-    }),
-  };
-}
-
-function uniform(seed: number, foodB: boolean): World {
-  const w = createWorld(seed, {
-    ...DEFAULT_CONFIG,
+function uniform(
+  engine: Engine,
+  seed: number,
+  slot: number,
+  overrides: Partial<EngineConfig>
+): EngineWorld {
+  const world = engine.create(seed, {
+    ...overrides,
+    ...frozen,
+    learning: overrides.learning ?? "static",
     width: 24,
     height: 24,
     founders: 16,
     sourceCount: 0,
-    initialNutrient: 0,
-    foodEpochs: undefined,
-    foodZones: undefined,
-    mutationRate: 0,
-    physicalMutationRate: 0,
-    learningRetention: 0,
-    learning: "static",
+    sourceEpochs: null,
+    sourceZones: null,
   });
-  (foodB ? w.nutrientB : w.nutrient).fill(96 / (24 * 24));
-  for (const [i, c] of w.cells.entries()) {
-    c.x = 4 + 4 * (i % 4);
-    c.y = 4 + 4 * Math.floor(i / 4);
-    c.heading = 0;
-  }
-  return w;
+  const definition = world.command<Definition>("definition");
+  pulse(world, [[definition.config.sourceSpecies[slot], 96]]);
+  return world;
 }
-
-function install(w: World, test: CapabilityCase, swap: boolean): void {
-  for (const [i, variant] of test.variants.entries()) {
-    const id = i + 1;
-    w.genomes.set(id, { id, parent: null, born: 0, learned: 0, genome: variant.genome });
-  }
-  w.nextGenome = test.variants.length + 1;
-  for (const [i, c] of w.cells.entries()) {
-    c.genome = ((i + Number(swap)) % test.variants.length) + 1;
-    w.ancestry.get(c.id)!.genome = c.genome;
-    if (test.mature) {
-      const body = { ...blueprint(w.genomes.get(c.genome)!.genome, w.config) };
-      const extra = structuralMass(body) - structuralMass(c.body);
-      const expense = Math.max(0, extra) * w.config.constructionEnergy;
-      c.reserve -= extra;
-      c.energy -= expense;
-      c.body = body;
-      w.ledger.construction += expense;
-      if (c.reserve < 0 || c.energy <= 0) throw new Error("Cannot fund diagnostic mature body");
-    }
-    initializeReceptors(w, c);
-  }
-  w.ledger.initialMaterial = heldMaterial(w);
-  w.ledger.initial = heldEnergy(w) + w.ledger.construction;
-}
-
 export function capabilityScenario(test: CapabilityCase): QuickScenario {
-  const foodB = test.context === "uniformB",
-    uniformFood = test.context.startsWith("uniform");
+  const uniformFood = test.context.startsWith("uniform");
   return {
     name: test.key,
     hypothesis: test.hypothesis,
@@ -97,20 +59,41 @@ export function capabilityScenario(test: CapabilityCase): QuickScenario {
       ...test,
       variants: test.variants.map((v) => v.label),
       provisioning: test.mature
-        ? "Mature blueprint paid from common material/energy packet"
-        : "Common founder stocks; targets develop through paid growth",
+        ? "Target stocks assembled from common packet, with surplus recycled"
+        : "Common founder stocks; inherited targets develop through paid growth",
     },
     target: { x: uniformFood ? 12 : 16, y: uniformFood ? 12 : 16, radius: uniformFood ? 0 : 2 },
-    offeredFoodA: foodB ? 0 : 96,
-    offeredFoodB: foodB ? 96 : 0,
-    create(seed, swap) {
-      const w = uniformFood
-        ? uniform(seed, foodB)
-        : foodAccess(test.context as "brief" | "persistent").create(seed, false);
-      Object.assign(w.config, test.config);
-      w.toxin.fill(test.toxin ?? 0);
-      install(w, test, swap);
-      return w;
+    create(engine, seed, swap) {
+      const world = uniformFood
+        ? uniform(engine, seed, Number(test.context === "uniform1"), test.config ?? {})
+        : foodAccess(test.context as "brief" | "persistent", test.config).create(
+            engine,
+            seed,
+            false
+          );
+      try {
+        const definition = world.command<Definition>("definition");
+        if (test.exposure)
+          pulse(world, [
+            [
+              test.exposure.species,
+              test.exposure.concentration * definition.config.width * definition.config.height,
+            ],
+          ]);
+        const frame = world.command<{ cells: CellState[] }>("frame");
+        const assignments = frame.cells.map((c, i) => ({
+          cell: c.id,
+          variant: (i + Number(swap)) % test.variants.length,
+          x: uniformFood ? 4 + 4 * (i % 4) : c.x,
+          y: uniformFood ? 4 + 4 * Math.floor(i / 4) : c.y,
+          heading: uniformFood ? 0 : c.heading,
+        }));
+        install(world, test.variants, assignments, test.mature);
+        return world;
+      } catch (error) {
+        world.dispose();
+        throw error;
+      }
     },
   };
 }

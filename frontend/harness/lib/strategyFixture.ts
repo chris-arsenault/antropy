@@ -1,75 +1,65 @@
-import { createRandomState, nextRandom } from "../../src/sim/random";
-import { wrap } from "../../src/sim/geometry";
-import { type World, type Source } from "../../src/sim/types";
+import { type EngineWorld } from "../../src/engine/client";
+import { type Definition, type Genotype } from "../../src/engine/types";
+import { samplingRandom } from "./samplingRandom";
+import { assignPopulation } from "./engineFixtures";
 import { type Flags, flag, integerFlag } from "./flags";
 
-/** A diagnostic supply calendar; never observes an organism or chooses its actions. */
-export function strategyFixture(world: World, flags: Flags) {
+/** Supply calendar generated independently of organisms, actions and all world RNGs. */
+export function strategyFixture(world: EngineWorld, flags: Flags) {
   const lifetime = integerFlag(flags, "lifetime", 100),
     spacing = integerFlag(flags, "spacing", 2),
     ticks = integerFlag(flags, "ticks", 20000);
-  if (lifetime < 1 || spacing < 0) throw new Error("Invalid deposit schedule");
-  const rng = createRandomState(world.seed ^ 0x9123),
-    random = () => nextRandom(rng);
-  const sites = Array.from({ length: 8 }, () => ({
-    x: random() * world.config.width,
-    y: random() * world.config.height,
-  }));
-  const calendar: { tick: number; source: Source }[] = [];
-  for (let tick = 0; tick < ticks; tick += lifetime) {
+  if (lifetime < 1 || spacing < 0 || ticks < 1 || ticks > 50000)
+    throw new Error("Invalid bounded deposit schedule");
+  const { seed, config } = world.command<Definition>("definition"),
+    start = world.command<{ tick: number }>("summary").tick;
+  const random = samplingRandom(seed ^ 0x9123),
+    sites = Array.from({ length: 8 }, () => ({
+      x: random() * config.width,
+      y: random() * config.height,
+    }));
+  const wrap = (v: number, size: number) => ((v % size) + size) % size;
+  const calendar: {
+    tick: number;
+    source: { x: number; y: number; radius: number; rate: number; duration: number };
+  }[] = [];
+  for (let tick = 0; tick < ticks; tick += lifetime)
     for (const site of sites) {
       const angle = random() * 2 * Math.PI;
       if (tick > 0) {
-        site.x = wrap(site.x + spacing * Math.cos(angle), world.config.width);
-        site.y = wrap(site.y + spacing * Math.sin(angle), world.config.height);
+        site.x = wrap(site.x + spacing * Math.cos(angle), config.width);
+        site.y = wrap(site.y + spacing * Math.sin(angle), config.height);
       }
-      const remaining = Math.min(lifetime, ticks - tick) * world.config.dt;
       calendar.push({
-        tick,
+        tick: start + tick,
         source: {
           ...site,
-          remaining,
-          rate: 0.3,
           radius: 2,
-          foodA: remaining * 0.15,
-          foodB: remaining * 0.15,
-          wait: 0,
+          rate: 0.3,
+          duration: Math.min(lifetime, ticks - tick) * config.dt,
         },
       });
     }
-  }
   let cursor = 0;
   return {
-    description: { lifetimeTicks: lifetime, relocationCells: spacing, calendar },
+    description: { lifetimeTicks: lifetime, relocationWorldUnits: spacing, calendar },
     beforeStep: () => {
-      while (cursor < calendar.length && calendar[cursor].tick === world.tick) {
-        const source = { ...calendar[cursor++].source };
-        world.sources.push(source);
-        world.ledger.supplied += source.foodA + source.foodB;
-      }
+      const { tick } = world.command<{ tick: number }>("summary");
+      while (cursor < calendar.length && calendar[cursor].tick === tick)
+        world.command("scheduledSource", { source: calendar[cursor++].source });
     },
     afterStep: () => {
-      world.sources = world.sources.filter((s) => s.remaining > 0);
+      world.command("retireSources");
     },
   };
 }
-
-export function installMotorVariants(world: World, flags: Flags): void {
-  const ancestor = world.genomes.get(1)!;
-  for (const [i, factor] of [0.5, 2].entries()) {
-    const genome = {
-      chromosomes: ancestor.genome.chromosomes.map((c) => {
-        const physical = c.physical.slice();
-        physical[1] = Math.log(factor);
-        return { behavior: c.behavior, physical };
-      }),
-    };
-    world.genomes.set(i + 1, { ...ancestor, id: i + 1, genome });
-  }
-  world.nextGenome = 3;
-  const swap = flag(flags, "swap", "false") === "true";
-  for (const [i, cell] of world.cells.entries()) {
-    cell.genome = ((i + Number(swap)) % 2) + 1;
-    world.ancestry.get(cell.id)!.genome = cell.genome;
-  }
+export function installMotorVariants(world: EngineWorld, flags: Flags) {
+  const ancestor = world.command<Genotype>("genotype", { id: 1 }),
+    swap = flag(flags, "swap", "false") === "true";
+  const variants = [0.5, 2].map((factor) => {
+    const genotype = structuredClone(ancestor);
+    for (const c of genotype.chromosomes) c.physical[1] = factor - 1;
+    return { label: `motor target times ${factor}`, genotype };
+  });
+  assignPopulation(world, variants, (i) => (i + Number(swap)) % 2);
 }
