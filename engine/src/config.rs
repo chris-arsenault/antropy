@@ -81,7 +81,6 @@ pub struct Config {
     pub daughter_inventory: f64,
     pub daughter_energy: f64,
     pub viscosity: f64,
-    pub thermal_energy: f64,
     pub motor_power_density: f64,
     pub motor_efficiency: f64,
     pub transfer_rate: f64,
@@ -164,7 +163,6 @@ impl Default for Config {
             daughter_inventory: 0.3,
             daughter_energy: 0.1,
             viscosity: 0.004,
-            thermal_energy: 0.00008,
             motor_power_density: 0.2,
             motor_efficiency: 0.5,
             transfer_rate: 0.,
@@ -231,6 +229,13 @@ impl Config {
             || (self.width / self.mesh) * (self.height / self.mesh) > 80000.
         {
             return Err("Invalid chemical mesh; dimensions must be integral multiples and at most 80000 nodes".into());
+        }
+        if self.dt > 1.
+            || self.physiology_interval < self.dt
+            || self.physiology_interval > 2.
+            || self.mesh < 0.5
+        {
+            return Err("Unsupported numerical resolution or update interval".into());
         }
         for x in [
             self.source_priming,

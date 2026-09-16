@@ -52,17 +52,17 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
       {p.cell ? (
         <>
           <CellDetails inspection={p} definition={definition} />
-          {p.cell.machineryGenome !== p.cell.genome && (
-            <details>
-              <summary>Installed machinery awaiting paid refit</summary>
-              <p>
-                Genome {p.cell.genome} supplies inherited instructions. Receptors, transporters and
-                enzymes still use installed genome {p.cell.machineryGenome} until the cell can pay
-                the construction work to refit its existing material.
-              </p>
-              <pre>{JSON.stringify(p.installedChemistry, null, 2)}</pre>
-            </details>
-          )}
+          {p.installedChemistry &&
+            JSON.stringify(p.installedChemistry) !== JSON.stringify(p.expressed?.chemistry) && (
+              <details>
+                <summary>Installed machinery and inherited target</summary>
+                <p>
+                  Genome {p.cell.genome} supplies inherited instructions. The installed coordinates
+                  below change gradually as the cell pays to refit its funded machinery.
+                </p>
+                <pre>{JSON.stringify(p.installedChemistry, null, 2)}</pre>
+              </details>
+            )}
           <Task bridge={bridge} id={p.cell.id} error={error} />
         </>
       ) : (
@@ -158,6 +158,10 @@ function CellDetails({
     </>
   );
 }
+function transportDirection(effort: number) {
+  if (effort < 0.5) return "export";
+  return effort > 0.5 ? "import" : "hold";
+}
 function Chemistry({
   inspection: p,
   definition,
@@ -166,15 +170,15 @@ function Chemistry({
   definition: Definition;
 }) {
   const c = p.cell!,
-    genes = p.expressed!.chemistry;
+    genes = c.installed;
   const slots = [...genes.receptors, ...genes.transporters, ...genes.enzymes];
   const operation = (i: number) => {
     if (i < 4) return "sense";
     if (i < 8)
       return (
-        (genes.transporters[i - 4].export ? "export" : "import") +
+        transportDirection(c.action.transport[i - 4]) +
         " · effort " +
-        n(c.action.transport[i - 4])
+        n(Math.abs(2 * c.action.transport[i - 4] - 1))
       );
     const e = genes.enzymes[i - 8];
     return "offset " + e.dx + ", " + e.dy;
@@ -189,7 +193,7 @@ function Chemistry({
         Membrane ({n(genes.membrane.x)}, {n(genes.membrane.y)})
       </p>
       <Table
-        columns={["Slot", "Target", "Operation", "Stock"]}
+        columns={["Slot", "Installed coordinate", "Operation", "Stock"]}
         rows={slots.map((g, i) => [
           MACHINERY[i],
           n(g.x) + ", " + n(g.y),

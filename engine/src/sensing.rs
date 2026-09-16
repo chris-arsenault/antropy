@@ -1,155 +1,111 @@
+//! Local embodied recognition. No property, coordinate, route or lineage input reaches the RNN.
 use crate::{
-    chemistry::Chemistry, config::Config, controller, field::Field, genetics::Compiled,
-    organism::Cell,
+    chemistry::Chemistry, config::Config, field::Field, genetics::Compiled, organism::Cell,
 };
-
-fn chemical_readings(cell: &Cell, g: &Compiled, c: &Config, field: &Field) -> [[f64; 4]; 4] {
+fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 4] {
+    let row = crate::footprint::sites(cell, c, field);
     let radius = cell.radius(c);
-    let mut sites = [field.stencil(cell.x, cell.y); 5];
-    for (i, angle) in [
-        0.,
-        std::f64::consts::PI,
-        -std::f64::consts::FRAC_PI_2,
-        std::f64::consts::FRAC_PI_2,
-    ]
-    .iter()
-    .enumerate()
+    let forward = [radius * cell.heading.cos(), radius * cell.heading.sin()];
+    let left = [-forward[1], forward[0]];
+    let perimeter = [forward, left, forward.map(|x| -x), left.map(|x| -x)]
+        .map(|p| field.stencil(cell.x + p[0], cell.y + p[1]));
+    // Compose the five observation rows first, then evaluate each geographic chemical row once.
+    let mut nodes: Vec<(usize, [f64; 5])> = Vec::with_capacity(16);
+    for (k, sites) in std::iter::once(row.as_slice())
+        .chain(perimeter.iter().map(|r| r.as_slice()))
+        .enumerate()
     {
-        let heading = cell.heading + angle;
-        sites[i + 1] = field.stencil(
-            cell.x + radius * heading.cos(),
-            cell.y + radius * heading.sin(),
-        );
-    }
-    // Receptor projection and bilinear interpolation commute. Most body samples share nodes.
-    let mut nodes = [usize::MAX; 20];
-    let mut count = 0;
-    let mut indices = [[0; 4]; 5];
-    for i in 0..5 {
-        for j in 0..4 {
-            let node = sites[i][j].0;
-            let index = nodes[..count]
-                .iter()
-                .position(|n| *n == node)
-                .unwrap_or_else(|| {
-                    nodes[count] = node;
-                    count += 1;
-                    count - 1
-                });
-            indices[i][j] = index;
+        for &(node, w) in sites {
+            if let Some(n) = nodes.iter_mut().find(|n| n.0 == node) {
+                n.1[k] += w;
+            } else {
+                let mut weights = [0.; 5];
+                weights[k] = w;
+                nodes.push((node, weights));
+            }
         }
     }
     std::array::from_fn(|slot| {
-        let stock = cell.body[3 + slot];
-        let gain = stock / (stock + c.birth_mass * c.receptor_ratio).max(1e-30);
-        let mut projected = [0.; 20];
-        let area = field.spacing * field.spacing;
-        for n in 0..count {
-            for a in &g.receptors[slot] {
-                projected[n] += a.value * field.amounts[nodes[n] * 256 + a.species] as f64 / area;
+        let mut readings = [0.; 5];
+        let kernel = &cell.operators.as_ref().unwrap().receptors[slot];
+        for &(node, weights) in &nodes {
+            let local = kernel
+                .iter()
+                .map(|a| a.value * field.amounts[node * 256 + a.species] as f64)
+                .sum::<f64>()
+                / field.spacing.powi(2);
+            for k in 0..5 {
+                readings[k] += weights[k] * local;
             }
         }
-        let mut values = [0.; 5];
-        for i in 0..5 {
-            for j in 0..4 {
-                values[i] += sites[i][j].1 * projected[indices[i][j]];
-            }
-        }
-        for v in &mut values {
-            *v *= gain;
-        }
-        let [center, front, rear, left, right] = values;
-        let tonic = center / (center + c.receptor_k);
-        [
-            tonic,
-            tonic - cell.receptors[slot],
-            (front - rear) / (front + rear + 2. * c.receptor_k),
-            (left - right) / (left + right + 2. * c.receptor_k),
-        ]
+        let gain = cell.body[3 + slot]
+            / (cell.body[3 + slot] + c.receptor_ratio * cell.body[0]).max(1e-30);
+        let r = readings.map(|v| gain * v / (c.receptor_k + v));
+        [r[0], r[1] - r[3], r[2] - r[4]]
     })
 }
+
 pub fn initialize(cell: &mut Cell, g: &Compiled, c: &Config, field: &Field) {
-    cell.receptors = chemical_readings(cell, g, c, field).map(|v| v[0]);
+    let values = readings(cell, c, field);
+    cell.receptors = values.map(|r| r[0]);
+    observe(cell, g, g, c, field);
 }
-pub fn observe(cell: &mut Cell, g: &Compiled, installed: &Compiled, c: &Config, field: &Field) {
-    let readings = chemical_readings(cell, installed, c, field);
-    for (slot, values) in readings.iter().enumerate() {
-        for (i, value) in values.iter().enumerate() {
-            cell.inputs[slot * 4 + i] = *value as f32;
-        }
-        cell.receptors[slot] += (-(-c.dt / c.receptor_tau).exp_m1()) * values[1];
+pub fn observe(cell: &mut Cell, g: &Compiled, _installed: &Compiled, c: &Config, field: &Field) {
+    let values = readings(cell, c, field);
+    for (i, r) in values.iter().enumerate() {
+        cell.inputs[4 * i] = r[0] as f32;
+        cell.inputs[4 * i + 1] = (r[0] - cell.receptors[i]) as f32;
+        cell.inputs[4 * i + 2] = r[1] as f32;
+        cell.inputs[4 * i + 3] = r[2] as f32;
     }
+    let stock = |q: f64, reference: f64| (q / (q + reference).max(1e-30)) as f32;
     for i in 0..12 {
-        cell.inputs[16 + i] =
-            (cell.body[3 + i] / (cell.body[3 + i] + g.body[3 + i]).max(1e-30)) as f32;
+        cell.inputs[16 + i] = stock(cell.body[3 + i], g.body[3 + i]);
     }
-    cell.inputs[28] = (cell.energy / cell.energy_capacity(c).max(1e-30)).min(1.) as f32;
-    cell.inputs[29] = (cell.body[0] / g.body[0] - 1.).clamp(0., 1.) as f32;
+    cell.inputs[28] = (cell.energy / cell.energy_capacity(c).max(1e-30)).clamp(0., 1.) as f32;
+    cell.inputs[29] = ((cell.body[0] / g.body[0] - 1.).clamp(0., 1.)) as f32;
     for i in 0..4 {
         cell.inputs[30 + i] = cell.contacts[i] as f32;
     }
     cell.inputs[34] = cell.brain.task as f32 / 255.;
-    cell.inputs[35] =
-        (cell.body[1] / (cell.body[1] + c.birth_mass * c.motor_ratio).max(1e-30)) as f32;
-    cell.inputs[36] =
-        (cell.body[2] / (cell.body[2] + c.birth_mass * c.storage_ratio).max(1e-30)) as f32;
-    cell.inputs[37] = (cell.material() / cell.capacity(c).max(1e-30)).min(1.) as f32;
+    cell.inputs[35] = stock(cell.body[1], g.body[1]);
+    cell.inputs[36] = stock(cell.body[2], g.body[2]);
+    cell.inputs[37] = (cell.material() / cell.capacity(c).max(1e-30)).clamp(0., 1.) as f32;
     cell.inputs[38] = cell.damage as f32;
 }
-pub fn infer(
-    cell: &mut Cell,
-    g: &Compiled,
-    installed: &Compiled,
-    c: &Config,
-    field: &Field,
-) -> bool {
-    observe(cell, g, installed, c, field);
-    let previous = cell.brain.task;
-    let strength = g.chromosome.behavior.plasticity[0].abs() as f64;
-    let cost = c.plasticity_cost * strength * c.dt;
-    let learn = c.learning == "plastic" && strength > 0. && cell.energy >= cell.basal(c) + cost;
-    if learn {
-        cell.flows.learning += cell.pay(cost);
+pub fn adapt(cell: &mut Cell, c: &Config, dt: f64) {
+    let alpha = 1. - (-dt / c.receptor_tau).exp();
+    for i in 0..4 {
+        cell.receptors[i] += alpha * (cell.inputs[i * 4] as f64 - cell.receptors[i]);
     }
-    cell.action = controller::act(
-        &g.chromosome.behavior,
-        &cell.inputs,
-        &mut cell.brain,
-        c,
-        learn,
-    );
-    previous != cell.brain.task
 }
 pub fn stress_load(
     cell: &Cell,
-    g: &Compiled,
+    _g: &Compiled,
     c: &Config,
     field: &Field,
     chemistry: &Chemistry,
 ) -> f64 {
-    let sites = field.stencil(cell.x, cell.y);
-    let volume = cell.volume(c).max(1e-12);
-    let mut load = field.scalar(&field.stress, &sites)
-        + c.internal_exposure / volume
-            * cell
-                .inventory
-                .iter()
-                .zip(&chemistry.properties)
-                .map(|(q, p)| q * p.stress)
-                .sum::<f64>();
-    for a in &g.membrane {
+    let row = crate::footprint::sites(cell, c, field);
+    let mut load = field.scalar(&field.stress, &row);
+    let membrane = &cell.operators.as_ref().unwrap().membrane;
+    for a in membrane.iter() {
         load -= (1. - c.susceptibility_floor)
             * a.value
             * chemistry.properties[a.species].stress
-            * (field.sample(a.species, &sites)
-                + c.internal_exposure * cell.inventory[a.species] / volume);
+            * field.sample(a.species, &row);
     }
-    load.max(0.)
-}
-pub fn injure(cell: &mut Cell, g: &Compiled, c: &Config, field: &Field, chemistry: &Chemistry) {
-    let load = stress_load(cell, g, c, field, chemistry);
-    let injury = (1. - cell.damage).min(c.damage_rate * load / (load + c.stress_k) * c.dt);
-    cell.damage += injury;
-    cell.flows.exposure = load * c.dt;
-    cell.flows.damage += injury;
+    let mut internal = cell
+        .inventory
+        .iter()
+        .zip(&chemistry.properties)
+        .map(|(q, p)| q * p.stress)
+        .sum::<f64>();
+    for a in membrane.iter() {
+        internal -= (1. - c.susceptibility_floor)
+            * a.value
+            * chemistry.properties[a.species].stress
+            * cell.inventory[a.species];
+    }
+    (load + c.internal_exposure * internal / cell.volume(c).max(1e-30)).max(0.)
 }

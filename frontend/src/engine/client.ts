@@ -71,7 +71,7 @@ export class Engine {
     });
   }
 
-  create(seed = 101, config: Record<string, unknown> = {}) {
+  create(seed = 27, config: Record<string, unknown> = {}) {
     const { handle } = this.command<{ handle: number }>("create", { seed, config });
     return new EngineWorld(this, handle);
   }

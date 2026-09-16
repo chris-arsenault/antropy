@@ -1,6 +1,11 @@
 //! Fixture authoring stays behind the controller boundary; inference remains ordinary act().
 use super::*;
 
+/// Fixed capacity-fixture variation; callers do not inspect the controller representation.
+pub fn perturb_weights(genome: &mut Genome, rng: &mut Random) {
+    mutate_vector(&mut genome.weights, rng, 0.1, 0.03, 16., "gaussian");
+}
+
 #[derive(Clone, Default, Deserialize)]
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct Changes {
@@ -64,7 +69,7 @@ pub fn change(base: &Genome, c: &Changes) -> Result<Genome, String> {
     if let Some(transport) = c.transport {
         for (slot, effort) in transport.into_iter().enumerate() {
             w[OUTPUT + (5 + slot) * HIDDEN..OUTPUT + (6 + slot) * HIDDEN].fill(0.);
-            w[OUTPUT_BIAS + 5 + slot] = logit(effort);
+            w[OUTPUT_BIAS + 5 + slot] = logit(2. * effort - 1.);
         }
     }
     if let Some(selected) = c.chemotaxis {

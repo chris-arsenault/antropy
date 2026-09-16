@@ -1,7 +1,13 @@
 # Digital chemistry reliability and validation plan
 
 September 14, 2026. Sulion plan `a3da6ddc-b43a-46bb-a42c-e63d140ed830`.
-Status: implementation and measured operational checks are complete. Batched rendering repairs the
+Status: superseded by the September 15 [numerical restart](../../../DIGITAL-CHEMISTRY-PLAN.md).
+Human motion/legibility and user-device acceptance remain unperformed and carry into
+replacement acceptance. The original crash remains unattributed. The following body
+records the prior implementation and its evidence, not work to resume or certification
+of a replacement engine.
+
+Prior implementation and measured operational checks were complete. Batched rendering repairs the
 2,000-cell browser failure; periodic-index optimization restores the growth workload's margin.
 The performance sub-plan is closed. Human motion and user-device acceptance remain unperformed.
 See [execution evidence](reliability-results.md).

@@ -66,10 +66,10 @@ fn physical(g: &Chromosome) -> Vec<f64> {
         out.extend([r.x / 15., r.y / 15.]);
     }
     for t in &m.transporters {
-        out.extend([t.x / 15., t.y / 15., u8::from(t.export) as f64]);
+        out.extend([t.x / 15., t.y / 15.]);
     }
     for e in &m.enzymes {
-        out.extend([e.x / 15., e.y / 15., e.dx as f64 / 30., e.dy as f64 / 30.]);
+        out.extend([e.x / 15., e.y / 15., e.dx / 30., e.dy / 30.]);
     }
     out.extend([m.membrane.x / 15., m.membrane.y / 15.]);
     out
@@ -96,7 +96,6 @@ fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32
             m.transporters
                 .iter()
                 .enumerate()
-                .filter(|(_, t)| !t.export)
                 .map(|(i, _)| b[7 + i])
                 .sum::<f64>()
                 / b[0]

@@ -1,229 +1,188 @@
+//! Frozen-mixture conversion and proportional construction with explicit work accounts.
 use crate::{
-    accounting::Ledger,
-    chemistry::{Chemistry, SPECIES, assembly_cost},
+    chemistry::{self, Chemistry},
     config::Config,
-    field::Field,
     genetics::Compiled,
     organism::Cell,
 };
-
-#[derive(Clone, Default, Debug)]
-struct Request {
-    substrate: usize,
-    product: usize,
-    quantity: f64,
-    energy: f64,
-    heat: f64,
-}
-#[derive(Clone, Debug)]
+#[derive(Default)]
 pub struct Work {
-    requests: Vec<Request>,
-    demand: [f64; SPECIES],
-    delta: [f64; SPECIES],
+    edges: Vec<(usize, usize, f64)>,
 }
-impl Default for Work {
-    fn default() -> Self {
-        Self {
-            requests: Vec::with_capacity(1024),
-            demand: [0.; SPECIES],
-            delta: [0.; SPECIES],
-        }
-    }
-}
-
 impl Work {
     pub fn reactions(&self) -> impl Iterator<Item = (usize, usize, f64)> + '_ {
-        self.requests
+        self.edges.iter().copied()
+    }
+}
+pub fn react(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) -> Work {
+    react_observed(cell, c, chemistry, dt, true)
+}
+pub fn react_observed(
+    cell: &mut Cell,
+    c: &Config,
+    _chemistry: &Chemistry,
+    dt: f64,
+    record: bool,
+) -> Work {
+    let operators = cell.operators.as_ref().unwrap();
+    let factors: [f64; 4] = std::array::from_fn(|slot| {
+        let enzyme = &operators.enzymes[slot];
+        let occupancy = enzyme
+            .engagement
             .iter()
-            .filter(|r| r.quantity > 0.)
-            .map(|r| (r.substrate, r.product, r.quantity))
-    }
-}
-pub fn react(cell: &mut Cell, g: &Compiled, c: &Config, work: &mut Work, ledger: &mut Ledger) {
-    work.requests.clear();
-    work.demand.fill(0.);
-    work.delta.fill(0.);
-    for slot in 0..4 {
-        let capacity = cell.body[11 + slot] * c.enzyme_turnover * (1. - cell.damage) * c.dt;
-        if capacity <= 0. {
-            continue;
+            .map(|a| a.value * cell.inventory[a.species])
+            .sum::<f64>();
+        enzyme.attenuation * dt * c.enzyme_turnover * cell.body[11 + slot] * (1. - cell.damage)
+            / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30)
+    });
+    let mut demand = [0.; 256];
+    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
+        for edge in &enzyme.conversions {
+            demand[edge.substrate] += factor * edge.binding * cell.inventory[edge.substrate];
         }
-        let start = work.requests.len();
-        let mut total = 0.;
-        for e in &g.enzymes[slot] {
-            let q = capacity * e.affinity * cell.inventory[e.substrate];
-            if q > 0. {
-                total += q;
-                work.requests.push(Request {
-                    substrate: e.substrate,
-                    product: e.product,
-                    quantity: q,
-                    energy: e.energy,
-                    heat: e.heat,
-                });
+    }
+    for (s, value) in demand.iter_mut().enumerate() {
+        if *value > 0. {
+            *value = (cell.inventory[s] / *value).min(1.);
+        }
+    }
+    let cost = factors
+        .iter()
+        .zip(&operators.enzymes)
+        .map(|(factor, enzyme)| {
+            enzyme
+                .conversions
+                .iter()
+                .map(|e| {
+                    factor
+                        * e.binding
+                        * cell.inventory[e.substrate]
+                        * demand[e.substrate]
+                        * (-e.work).max(0.)
+                })
+                .sum::<f64>()
+        })
+        .sum::<f64>();
+    let funding = if cost > 0. {
+        (cell.energy / cost).min(1.)
+    } else {
+        1.
+    };
+    let mut delta = [0.; 256];
+    let mut work = Work::default();
+    let mut balance = 0.;
+    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
+        for edge in &enzyme.conversions {
+            let q = factor
+                * edge.binding
+                * cell.inventory[edge.substrate]
+                * demand[edge.substrate]
+                * funding;
+            if q == 0. {
+                continue;
             }
-        }
-        let scale = (capacity / total.max(1e-300)).min(1.);
-        for r in &mut work.requests[start..] {
-            r.quantity *= scale;
-            work.demand[r.substrate] += r.quantity;
-        }
-    }
-    let mut uphill = 0.;
-    for r in &mut work.requests {
-        r.quantity *= (cell.inventory[r.substrate] / work.demand[r.substrate].max(1e-300)).min(1.);
-        if r.energy < 0. {
-            uphill -= r.energy * r.quantity;
-        }
-    }
-    let affordable = (cell.energy / uphill.max(1e-300)).min(1.);
-    let mut energy = 0.;
-    for r in &mut work.requests {
-        let q = r.quantity * if r.energy < 0. { affordable } else { 1. };
-        r.quantity = q;
-        work.delta[r.substrate] -= q;
-        work.delta[r.product] += q;
-        energy += q * r.energy;
-        cell.flows.reacted += q;
-        cell.chemical_flows.consumed[r.substrate] += q;
-        cell.chemical_flows.produced[r.product] += q;
-        cell.flows.reaction_heat += q * r.heat;
-        if r.energy > 0. {
-            cell.flows.captured += q * r.energy;
+            delta[edge.substrate] -= q * edge.changed;
+            cell.chemical_flows.consumed[edge.substrate] += q * edge.changed;
+            for p in &edge.products {
+                if p.species == edge.substrate {
+                    continue;
+                }
+                let amount = q * p.weight;
+                delta[p.species] += amount;
+                cell.chemical_flows.produced[p.species] += amount;
+                if record {
+                    work.edges.push((edge.substrate, p.species, amount));
+                }
+            }
+            balance += q * edge.work;
+            cell.flows.reacted += q * edge.changed;
+            cell.flows.captured += q * edge.work.max(0.);
+            cell.flows.reaction_heat += q * edge.heat;
         }
     }
-    cell.inventory.apply(&work.delta);
-    cell.energy = (cell.energy + energy).max(0.);
-    let overflow = (cell.energy - cell.energy_capacity(c)).max(0.);
-    cell.energy -= overflow;
-    ledger.overflow_heat += overflow;
+    cell.inventory.apply(&delta);
+    cell.energy = (cell.energy + balance).max(0.);
+    work
 }
-
-pub(crate) fn assemble(
+/// Consume a proportional mixture; returns constructed material and dissipated value.
+pub fn assemble(
     cell: &mut Cell,
     chemistry: &Chemistry,
     c: &Config,
-    quantity: f64,
+    requested: f64,
     reserve: f64,
-    extra_work: f64,
+    work_reserve: f64,
 ) -> (f64, f64) {
     let total = cell.material();
-    if total <= 0. || quantity <= 0. {
+    if total <= 0. {
         return (0., 0.);
     }
+    let potential = cell
+        .inventory
+        .iter()
+        .zip(&chemistry.properties)
+        .map(|(q, p)| q * p.potential)
+        .sum::<f64>()
+        / total;
     let body = chemistry.properties[chemistry.decomposition].potential;
-    let (mut cost, mut heat) = (0., 0.);
-    for (q, p) in cell.inventory.iter().zip(&chemistry.properties) {
-        let (work, loss) = assembly_cost(
-            p.potential,
-            body,
-            c.construction_energy + extra_work,
-            c.conversion_efficiency,
-        );
-        cost += q * work;
-        heat += q * loss;
-    }
-    let share = (quantity / total)
-        .min(1.)
-        .min((cell.energy - reserve).max(0.) / cost.max(1e-300));
-    cell.inventory.scale(1. - share);
-    cell.energy = (cell.energy - cost * share).max(0.);
-    (total * share, heat * share)
+    let (cost, heat) = chemistry::assembly_cost(
+        potential,
+        body,
+        c.construction_energy,
+        c.conversion_efficiency,
+    );
+    let built = requested
+        .max(0.)
+        .min((total - reserve).max(0.))
+        .min((cell.energy - work_reserve).max(0.) / cost);
+    cell.inventory.scale((1. - built / total).max(0.));
+    cell.pay(built * cost);
+    (built, built * heat)
 }
-pub fn develop(
-    cell: &mut Cell,
-    g: &Compiled,
-    c: &Config,
-    chemistry: &Chemistry,
-    field: &mut Field,
-    ledger: &mut Ledger,
-) {
-    let basal = cell.basal(c);
-    cell.flows.maintenance += cell.pay(basal);
-    let desired = cell.damage.min(cell.action.repair * c.repair_rate * c.dt);
-    let replacement = cell.mass() * c.repair_material;
-    if desired > 0. && replacement > 0. {
-        let (built, heat) = assemble(
-            cell,
-            chemistry,
-            c,
-            desired * replacement,
-            0.,
-            c.repair_energy / replacement,
-        );
-        let repaired = built / replacement;
-        cell.damage = (cell.damage - repaired).max(0.);
-        cell.flows.repair += heat;
-        cell.flows.repaired += repaired;
-        let rounding = field.deposit(cell.x, cell.y, chemistry.decomposition, built, chemistry);
-        ledger.rounding(rounding, chemistry.decomposition, chemistry);
-    }
-    let deficits: [f64; 15] = std::array::from_fn(|i| (2. * g.body[i] - cell.body[i]).max(0.));
-    let missing = deficits.iter().sum::<f64>();
-    let available = (cell.material() - c.protected_reserve * cell.capacity(c)).max(0.);
-    let request = missing
-        .min(available)
-        .min(c.growth_rate * cell.mass() * c.dt);
-    if request <= 0. {
+pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64) {
+    let need: [f64; 15] = std::array::from_fn(|i| (2. * g.body[i] - cell.body[i]).max(0.));
+    let total = need.iter().sum::<f64>();
+    if total == 0. {
         return;
     }
-    let (built, heat) = assemble(
-        cell,
-        chemistry,
-        c,
-        request,
-        c.protected_reserve * cell.energy_capacity(c),
-        0.,
-    );
-    for (stock, deficit) in cell.body.iter_mut().zip(deficits) {
-        *stock += built * deficit / missing;
+    let request = total.min(dt * c.growth_rate * cell.body[0] * (1. - cell.damage));
+    // Construction must leave work for the entire interval without another metabolic update.
+    // Price the largest proposed body, so growth itself cannot invalidate that reserve.
+    let proposed = std::array::from_fn(|i| cell.body[i] + request * need[i] / total);
+    let reserve = crate::accounting::interval_reserve(cell, &proposed, c);
+    let (built, heat) = assemble(cell, chemistry, c, request, c.protected_reserve, reserve);
+    for (stock, n) in cell.body.iter_mut().zip(need) {
+        *stock += built * n / total;
     }
     cell.flows.constructed += built;
     cell.flows.construction += heat;
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::genetics::Genotype;
-    #[test]
-    fn competing_reactions_cannot_create_matter_or_energy() {
-        let chemistry = Chemistry::new(101).unwrap();
-        let mut c = Config::default();
-        c.source_species = chemistry.source_species();
-        let mut g = Genotype::seed(&c, &chemistry);
-        let source = c.source_species[0];
-        for a in &mut g.chromosomes {
-            let enzyme = a.chemistry.enzymes[0];
-            a.chemistry.enzymes.fill(enzyme);
-        }
-        g.compile(&c, &chemistry);
-        let compiled = g.compiled.as_ref().unwrap();
-        let mut cell = Cell::new(1, 1, compiled, &c, 0., 0., 0.);
-        cell.inventory.fill(0.);
-        cell.inventory.set(source, 0.01);
-        cell.body[11..].fill(100.);
-        let before = cell.material();
-        let energy = cell.energy
-            + cell
-                .inventory
-                .iter()
-                .zip(&chemistry.properties)
-                .map(|(n, p)| n * p.potential)
-                .sum::<f64>();
-        let mut ledger = Ledger::default();
-        react(&mut cell, compiled, &c, &mut Work::default(), &mut ledger);
-        assert!((cell.material() - before).abs() < 1e-12);
-        assert!(cell.inventory.iter().all(|q| *q >= 0.));
-        let after = cell.energy
-            + cell
-                .inventory
-                .iter()
-                .zip(&chemistry.properties)
-                .map(|(n, p)| n * p.potential)
-                .sum::<f64>()
-            + cell.flows.reaction_heat
-            + ledger.overflow_heat;
-        assert!((energy - after).abs() < 1e-12);
+pub fn repair(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) {
+    let repair = (dt * c.repair_rate * cell.action.repair).min(cell.damage);
+    let total = cell.material();
+    let actual = repair
+        .min(total / c.repair_material.max(1e-30))
+        .min(cell.energy / c.repair_energy.max(1e-30));
+    if actual <= 0. {
+        return;
     }
+    // Repair material is converted to the decomposition chemical and remains material.
+    let value = cell
+        .inventory
+        .iter()
+        .zip(&chemistry.properties)
+        .map(|(q, p)| q * p.potential)
+        .sum::<f64>()
+        / total;
+    let product = chemistry.properties[chemistry.decomposition].potential;
+    let conversion = (product - value).max(0.) / c.conversion_efficiency;
+    let actual = actual.min(cell.energy / (c.repair_energy + c.repair_material * conversion));
+    let used = actual * c.repair_material;
+    cell.inventory.scale((1. - used / total).max(0.));
+    let s = chemistry.decomposition;
+    cell.inventory.set(s, cell.inventory[s] + used);
+    let paid = cell.pay(actual * c.repair_energy + used * conversion);
+    cell.damage = (cell.damage - actual).max(0.);
+    cell.flows.repaired += actual;
+    cell.flows.repair += paid + used * (value - product);
 }

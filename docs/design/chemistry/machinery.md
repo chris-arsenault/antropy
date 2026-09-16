@@ -1,11 +1,9 @@
 # Fixed machinery and controller contract
 
-Prior runtime/controller description. [Computable chemistry](computational-foundation.md) governs
-new machinery mathematics: heritable manifold kernels, weighted mixture reductions and bounded
-product mappings with actual funded capacity. The categorical direction, integer products and
-birth-time recycling below record earlier implementation choices; installed-state changes and
-M1's newer representation are documented separately. Reconcile them coherently in M3/M4 rather
-than treating any old encoding or conventional rate equation as immutable.
+The [composed runtime](composed-runtime.md) implements [computable chemistry](computational-foundation.md):
+heritable manifold kernels, weighted mixture reductions and bounded product mappings with
+actual funded capacity. Checkpoint v13 persists continuous targets and separate actual installed
+coordinates. Earlier categorical direction, integer products and birth-time recycling are retired.
 
 Status: implemented, with resolved choices in [numerical design](numerical-engine.md). The user specified a small
 fixed-slot genome; four slots per class were selected during implementation. See the [overview](README.md) and
@@ -21,7 +19,7 @@ not a runtime setting that can reinterpret existing genomes or checkpoints.
 | Gene group | Heritable values per slot | Actual funded material |
 | --- | --- | --- |
 | Receptor | Target x/y, investment | Receptor stock |
-| Transporter | Target x/y, import/export direction, investment | Transporter stock |
+| Transporter | Target x/y, investment | Transporter stock |
 | Enzyme | Substrate-center x/y, product-offset dx/dy, investment | Enzyme stock |
 | Membrane | One compatibility x/y coordinate for the cell | Included in ordinary core/membrane construction |
 | General body | Core, motor and storage construction targets | Core, motor and storage stocks |
@@ -31,12 +29,11 @@ inventory and usable energy are separate. Dedicated A/B processors, weapon, matr
 stocks are removed. General repair
 remains a core-supported action, with energy and replacement-material costs.
 
-Targets and membrane centers are bounded float32 coordinates in [0,15], reflected on mutation.
-Product offsets express signed integer steps in [-15,15] on each axis; mutate an offset locally
-by one step, with reflection at its bounds. A full-span offset range permits chemical-space
-access without requiring genome insertion. No-op reflected products consume no substrate.
-Transport direction is a categorical allele; an occasional direction flip is a discrete change,
-not a claim of smooth function. Local affinity and investment mutations should dominate.
+Targets and membrane centers are bounded f64 coordinates in [0,15], reflected on mutation.
+Continuous product offsets lie in [-15,15] on each axis. Reflected bilinear products preserve
+discrete chemical identities and conserve material; local mutations cross grid boundaries smoothly.
+Idle maps retain occupancy but change no material or work. Transport direction comes from signed
+neural effort, with no categorical exporter allele.
 
 Keep the core target strictly positive. Machinery investment uses bounded nonnegative construction
 targets, scaled by the core blueprint and fixed
@@ -47,8 +44,8 @@ mutation can raise investment or move its specificity without creating a new slo
 ## Costs, development and competition
 
 Slot capacity follows built stock, never investment directly. Each stock requires chemical matter,
-assembly energy, physical volume and maintenance. The substrate specifies paid transport and reaction inefficiency; no additional catalytic work
-fee is charged. Inactive machinery still occupies the body and pays maintenance; turning
+assembly energy, occupied area and maintenance. Transport and conversion cost work; a catalytic
+price applies only to material that changes identity. Inactive machinery still occupies the body and pays maintenance; turning
 off transporter effort does not recover its construction cost.
 
 Keep the current proportional-deficit growth rule toward twice the newborn blueprint, using the
@@ -63,9 +60,9 @@ comparison must measure conditional payoffs before claiming that investment alon
 
 An inherited change alters a daughter's machinery specification and future construction targets.
 Birth partitions actual parental stock by slot identity; it does not fill the daughter's changed
-target for free. Changed machinery slots recycle inherited stock to the extracellular decomposition species before
-ordinary paid growth rebuilds them. Optional lifetime transfer uses the same retargeting rule.
-Unchanged stocks remain funded and partition normally.
+target for free. Changed machinery retains its actual coordinates and response until work above
+the interval reserve funds gradual refitting. Optional lifetime transfer uses the same rule.
+Unchanged stocks and compiled coefficients remain shared and partition normally.
 
 ## Receptors
 
@@ -118,16 +115,17 @@ Nine output logits:
 | --- | --- | --- |
 | 0 | Forward swimming | `max(0, saturation(logit))` |
 | 1 | Turning | `saturation(logit)` |
-| 2 | General repair | `max(0, tanh(logit))` |
+| 2 | General repair | `max(0, saturation(logit))` |
 | 3 | Candidate private byte | `round(127.5 * (1 + saturation(logit/2)))` |
 | 4 | Commit byte | Commit if logit is nonnegative |
-| 5–8 | Transporter slot effort | One nonnegative effort per slot |
+| 5–8 | Transporter slot effort | Signed `saturation(logit)`, stored as `(1 + effort)/2` |
 
-Direction belongs to the transporter gene; effort cannot reverse it. Enzymes operate constitutively from installed stock, internal substrate and inherited offsets. Receptor expression and biomass growth
+Negative effort exports, zero holds, positive effort imports. Enzymes operate constitutively from
+installed stock, internal substrate and actual installed offsets. Receptor expression and biomass growth
 remain physiology, not additional action selectors. Synthesis followed by export is ordinary
 enzyme and transporter use; no output means toxin, signal, wall or sharing.
 
-Transport uses neural effort; constitutive first-order reactions are limited by installed stock
+Transport uses neural effort; constitutive reactions with substrate/product occupancy are limited by installed stock
 and physical resources.
 Requests are simultaneous within the substrate's declared phases. No automatic optimizer chooses
 profitable reactions, and no special metabolic fallback runs when the RNN is quiet. Founder import biases are explicit ordinary mutable weights; enzyme operation needs no action channel.
@@ -154,11 +152,9 @@ immutable genotype records. Acquired traces are assimilated into recurrent weigh
 state, byte, traces and contacts reset, receptor baselines initialize locally, damage persists.
 
 For optional diploid/selfing policies, define expression explicitly in the new genetic schema:
-average homologous continuous targets/investments; round averaged integer offsets to the nearest
-integer with half ties away from zero; use the first homolog's direction for categorical dominance.
-Homolog ordering is then
-meaningful and must persist. Recombine whole machinery-slot alleles; do not splice a direction
-from one slot onto an unrelated target accidentally. These expression rules retain existing optional policies, not an instruction to add outcrossing or new genome modes.
+average homologous continuous targets, offsets and investments. Recombine whole machinery-slot
+alleles; do not splice coordinates from unrelated targets. These expression rules retain existing
+optional policies, not an instruction to add outcrossing or new genome modes.
 
 Gene transfer is implemented but disabled in the default. It transfers a complete typed slot allele and record donor, recipient, old/new genotype and slot.
 Do not exchange a raw old physical-vector index. The transferred allele must use the same funding

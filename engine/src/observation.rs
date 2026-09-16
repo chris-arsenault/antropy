@@ -92,7 +92,7 @@ pub fn environment(w: &World) -> Value {
         .field
         .impedance
         .iter()
-        .filter(|i| w.config.movement_impedance * **i * **i >= 1.)
+        .filter(|i| w.config.movement_impedance * **i >= 1.)
         .count();
     json!({"tick":w.tick,"extracellular":{"amount":amount,"potential":potential,"species":species.to_vec()},"halfSpeedArea":half_speed as f64*w.field.spacing.powi(2),"sources":w.sources,"environmentRng":w.environment_rng})
 }
@@ -167,18 +167,10 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         .take(16)
         .collect();
     let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":cell.map(|c| crate::sensing::stress_load(c,w.genomes[&c.genome].compiled.as_ref().unwrap(),&w.config,&w.field,&w.chemistry)),"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
-    if request.get("machinery").and_then(Value::as_u64) != cell.map(|c| c.machinery_genome)
+    if request.get("machinery").and_then(Value::as_u64) != cell.map(|c| c.machinery_revision)
         || cell.is_none()
     {
-        result["installedChemistry"] = json!(cell.map(|c| {
-            let m = &w.genomes[&c.machinery_genome]
-                .compiled
-                .as_ref()
-                .unwrap()
-                .chromosome
-                .chemistry;
-            json!({"receptors":m.receptors,"transporters":m.transporters,"enzymes":m.enzymes})
-        }));
+        result["installedChemistry"] = json!(cell.map(|c| &c.installed));
     }
     if request.get("genealogy").and_then(Value::as_bool) == Some(true) {
         result["genealogy"] = crate::genealogy::inspect(w, id);

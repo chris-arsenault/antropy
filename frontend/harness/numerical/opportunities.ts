@@ -18,26 +18,10 @@ interface Case {
   moving: boolean;
   horizon: number;
 }
-const cases: Case[] = [
-  ...[0.8, 0.4, 0.2].flatMap((interval) =>
-    [false, true].map((supply) => ({ interval, mesh: 2, supply, moving: false, horizon: 300 }))
-  ),
-  ...[false, true].map((supply) => ({
-    interval: 0.8,
-    mesh: 1,
-    supply,
-    moving: false,
-    horizon: 300,
-  })),
-  ...[false, true].map((supply) => ({
-    interval: 0.8,
-    mesh: 2,
-    supply,
-    moving: true,
-    horizon: 300,
-  })),
-  { interval: 0.8, mesh: 2, supply: false, moving: false, horizon: 600 },
-];
+// Rebuild registration: one supplied/empty pair at each mesh, fixed 600-tick ceiling.
+const cases: Case[] = [4, 2].flatMap((mesh) =>
+  [false, true].map((supply) => ({ interval: 0.8, mesh, supply, moving: false, horizon: 600 }))
+);
 const output = process.argv[2];
 if (!output) throw new Error("Provide a new output directory");
 mkdirSync(output);
@@ -70,6 +54,10 @@ try {
       });
       if (status.stopReason) {
         stopping = status.stopReason;
+        break;
+      }
+      if (!frame.cells.length) {
+        stopping = "extinction";
         break;
       }
     }

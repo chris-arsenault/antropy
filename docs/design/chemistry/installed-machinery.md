@@ -1,8 +1,26 @@
 # Paid refitting and installed machinery
 
-Implemented September 14, 2026 under the [reliability plan](reliability-plan.md).
-Physical checkpoint version 11 separates inherited instructions from installed chemical
-machinery. This replaces immediate destruction of every retargeted slot.
+The [fresh composed runtime](composed-runtime.md) implements paid continuous refitting in
+physical checkpoint v13. The September14 measurements below preserve the reason to retain
+installed function; their whole-slot v11 replacement law is historical.
+
+## Current installed owner
+
+Each cell persists actual `installed` coordinates and `machineryRevision` separately from
+immutable inherited `genome` targets. `machineryGenome` retains provenance; live response comes
+from actual coordinates and their immutable compiled operators, including membrane response.
+No target change, birth or contact transfer grants replacement function.
+
+Paid refitting charges constructionEnergy × affected actual stock × coordinate distance moved.
+The largest slot's Manhattan distance advances at most .25 units/model-second, subject to work
+above the full interval reserve. Partial changes persist and change function continuously.
+Only changed slots recompile; completed slots borrow matching target coefficients. Unaffected
+allocations remain shared. Body material is conserved and paid work dissipates. Daughters inherit
+the actual intermediate installation, stock and damage; private contact/controller state resets.
+
+Rust checks cover unpaid/partial/completed changes, retained allocations, changed targets across
+birth and exact checkpoint continuation. [Current evidence](rebuild-results.md) separates these
+mechanics from the historical reproductive comparisons below.
 
 ## Problem and evidence
 
@@ -14,7 +32,7 @@ after 600 ticks and had not divided. This was a discontinuity in access to resou
 acquisition, despite smooth chemical affinity. It was not evidence that the nearby
 target was intrinsically unsuitable.
 
-## State and work
+## Historical v11 state and work
 
 Each cell has its inherited `genome` and an installed `machineryGenome`. Both reference
 immutable Rust-owned genotype records. The latter determines receptor affinity,
@@ -52,7 +70,7 @@ Refitting work is a separate cumulative energy flow, including in study output.
 Checkpoint v11 persists installed identity; earlier physical saves are rejected rather
 than adapted. Browser observation packages are independently versioned at 11.
 
-## Constructed result and limits
+## Historical constructed result and limits
 
 Ledger 3690–3701 records the retirement baseline; 3702–3713 repeats the same six paired
 comparisons after refitting. Both use daughters from the same resource-funded first

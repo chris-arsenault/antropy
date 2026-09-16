@@ -1,0 +1,153 @@
+# Composed artificial chemistry runtime
+
+September 15, 2026. This contract governs the fresh implementation under
+[the rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md). It supersedes the removed
+runtime's numerical formulas and the candidate-only integration sequence. The
+[computational foundation](computational-foundation.md), [principles](../../principles.md),
+[funded bodies](../funded-bodies.md) and [data ownership](data-ownership.md) remain binding.
+Implementation and acceptance are tracked separately in the plan; this document does
+not claim that performance, opportunity or human motion gates have passed.
+
+## Meaning and owners
+
+This is an artificial material and work system. It has no temperature, entropy,
+electrochemical capacitor, detailed balance or global thermodynamic acceptance solver.
+The 256 discrete chemical IDs inhabit a smooth reflected 16×16 chemical manifold.
+Geography is a separate periodic XY plane. U prices material conversions; D controls
+spread; I impedes motion; S creates compatible or incompatible exposure. Two shared
+signed profiles supply geographic transport signals. They store no usable work.
+
+Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, fifteen funded
+body stocks, usable work, damage, private controllers and complete compact ancestry.
+The same worker renders borrowed WASM views. Checkpoint v13 persists actual installed
+coordinates independently of inherited instructions and rejects earlier physical bytes.
+There is no exporter allele or thermal-energy setting in this version.
+
+## Geographic composition
+
+The default grid is h=2 on 320×240 geography: 19,200 nodes and 4,915,200 material
+values. The initial h4 selection was rejected after visual and performance review.
+dt=.2 model seconds and physiology=.8 remain explicit. Sources advance every
+tick. Diffusion/drift integrate the full accumulated interval at physiology boundaries;
+movement and maintenance run every tick. The schedule remainder is checkpointed.
+Resolution comparisons use matched physical fixtures and time.
+
+Four quadrature points at radius / sqrt(2), composed with bilinear grid interpolation,
+form normalized finite body footprints W. Sampling and local deposition use the same W.
+Material profiles are C times the two species-property rows. W-transposed body mass times
+installed membrane response adds embodied contributions. Membrane response averages the
+profile through its compact recognition kernel. No body contribution enters a work bank.
+
+Each neighboring node pair computes one shared impedance factor and two bounded signal
+differences. For a species, the directional coefficient is its D times the shared
+diffusion coefficient plus its two profile values times shared drift coefficients.
+The first profile attracts and the second repels. Drift magnitude is divided by one plus
+the sum of absolute shared differences; default drift is .25. Impedance mobility is
+1/(1 + scale × load). A derived index tracks occupied four-species SIMD groups at each
+node. Each substep visits those groups and their periodic neighbor halo; empty groups
+do not execute the stencil or property reductions. After a substep, concentrations below
+`1e-24` are rounded to zero. This local numerical floor applies equally to every species;
+it does not delete a species by its global abundance. Material and reference-value losses
+enter the signed numerical error accounts. The user authorized this threshold correction
+on September15. Intracellular stocks retain their material. There is no equilibrium shortcut.
+
+The destination-row stencil gathers incoming material and retains donor remainder.
+Substeps bound total outgoing fractions by .5. f32 rounding has explicit signed material
+and reference-value accounts. Exponential washout removes material and its reference
+value as a boundary loss. No passive spatial change can increase usable work.
+
+Bodies sample centered differences through W. The shared antisymmetric difference and
+identical deposition/sampling cancel an isolated body's own response. Paid propulsion
+uses actual motor stock, damage, drag from body extent, viscosity and impedance. Passive
+response is bounded separately. Local overlap correction supplies body-relative contacts;
+neither movement nor contact resolution credits usable work.
+
+## Local recognition and paid operators
+
+Recognition uses max(0, 1 − distance²/R²)², initially R=3. Each cell retains four receptor,
+four transporter and four enzyme targets plus a membrane coordinate. Enzyme offsets are
+continuous, reflected at manifold boundaries, with at most four weighted product IDs.
+Targets and installed coordinates have separate owners. Immutable compiled arrays are
+shared; refitting refreshes only affected slots. Birth inherits actual installation.
+
+Five receptor sample rows are composed before projecting local chemical rows. Each funded
+receptor supplies tonic, temporal, body-forward and body-left readings. Stock-dependent
+gain vanishes with absent stock. The 39-input, 24-recurrent-unit, nine-output private RNN
+has no coordinates, property table, route, ancestry or reproductive score. Four-lane
+controller arithmetic is deterministic within each supported runtime.
+
+Transport action storage is [0,1]: zero exports, .5 holds and one imports. Effort is the
+absolute signed distance from .5. Installed stock × turnover × effort gives finite
+capacity, divided between recognized species by their weighted local concentration and
+the shared occupancy denominator. Internal concentration uses actual body/inventory
+volume. Pre-transfer inventory determines export donors and import headroom; available
+work bounds all requests before any transfer. Exports cannot supply same-stage imports.
+
+W-transposed demand allocates each geographic donor once. Accepted imports use W and the
+same donor fraction. A complete chemical row is then committed once per affected node,
+including exports. This avoids repeated material/reduction updates for overlapping cells.
+Contiguous per-cell request rows and shared geographic donor rows use paired f64 arithmetic
+for deposition and gathering. Field commits and refreshes project material through the same
+five property rows, retaining six f64 reductions including total material. Exactly zero
+donor demand is handled explicitly. Exchange does not prune material; the extracellular
+numerical floor is applied at field substeps as described above.
+
+Enzymes act constitutively. Recognition, reflected product maps and the pullback of
+product occupancy are compiled once. For offset v, throughput is attenuated by
+1/(1 + |v|²/9). Occupancy includes recognized substrates and their mapped products.
+Common substrates and work are reserved against the frozen mixture before products are
+committed; no product cascades through slot iteration and no profitable slot is selected.
+
+For reference-value change d, usable work is .8d when d is positive and d/.8 when negative,
+less .05 per unit that actually changes chemical identity. The remainder dissipates.
+The catalytic charge and reported transformed flow vanish continuously at the identity
+map. Idle binding can occupy finite substrate capacity but neither changes material nor
+charges catalytic work. Conversion efficiency remains configurable below one.
+
+## Bodies, inheritance and accounts
+
+All internal species can fund biomass, selected proportionally. Assembly pays .5 work per
+unit plus any reference-value increase divided by efficiency. Body material has the
+decomposition species' reference value. Growth approaches twice the inherited newborn
+blueprint, bounded by actual material, work and core-dependent construction rate.
+Growth protects work for the proposed larger body's upkeep, current motor effort and learning
+through a complete physiology interval plus one movement tick. Refitting uses the same reserve
+for the current body. This prevents optional construction from consuming the next interval's upkeep.
+
+Maintenance charges actual stock and damage. Repair converts a proportional internal
+mixture into decomposition material with explicit material and work costs. Paid refitting
+moves installed coordinates toward inherited coordinates on affected actual stock.
+The greatest slot-coordinate distance advances by at most .25 manifold units per model
+second; sufficient work and time finish the refit exactly, preserving unchanged arrays.
+Unpaid target changes leave installed response intact. Excess usable work dissipates.
+
+Local division requires funded double body, inventory, work and division cost. Fission
+ends the parent and creates two daughters; budding retains a reduced parent and one
+daughter. Stocks and inventories split, damage fraction persists, private memory resets,
+and inherited targets can mutate or receive paid birth-local assimilation. Supported
+haploid/diploid and clonal/selfing policies remain. Optional contact transfer copies a
+whole typed genetic unit and grants no installed replacement stock. It defaults off.
+Newborn contact readings reset with private memory; receptor baselines initialize locally.
+Extinction stops visibly without reseeding. Unused genetic payloads can be pruned while retaining
+living target/installed origins, diagnostic catalogs, founder roots and every compact ancestor record.
+
+Death returns inventory and generic body locally and dissipates remaining work. Finite
+source reservoirs and demand-independent renewal are explicit boundary inputs. Material
+closure includes sources, field, inventories, body, washout and rounding. Work closure
+includes reference material value, usable work, all dissipative expenses and boundary
+losses. Restoring the same material/body state cannot fund a profitable conversion cycle.
+
+## Verification boundaries
+
+Rust tests cover dense product expectations, donor contention, conservation, exact
+continuation, zero self response, mutation continuity and funded installed inheritance.
+The zero-tick economy report distinguishes import-only upper bounds from finite enzyme
+processing under an explicitly chosen internal mixture. Neither predicts controller
+expression or evolutionary exploitation by itself.
+
+Production capacity uses 48/2,000/2,000-growth, all 256 channels, distinct genomes and
+learning: ten warmup plus 100 measured ticks, with census, inspection and rendering
+preparation. The target is 200 ticks/s headlessly and at least 30 ticks/s through the
+complete browser. GPU work, accumulated-state recovery and human motion judgment have
+separate acceptance. No population campaign or prescribed evolved ecosystem is a gate.
+Current bounded registrations and outcomes are in the [rebuild evidence](rebuild-results.md).

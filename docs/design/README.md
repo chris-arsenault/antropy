@@ -1,5 +1,21 @@
 # Current design and work order
 
+**September 15, 2026: a fresh production core is implemented.** The
+[composed runtime](chemistry/composed-runtime.md) and
+[rebuild work order](../../DIGITAL-CHEMISTRY-PLAN.md) govern its formulas, owners and
+accepted handoff. Native/WASM builds,69 Rust and56 Vitest checks pass. Bounded
+opportunities, cold recovery and isolated browser rendering/save/fault checks pass their declared
+checks. Default mesh2 and active chemical-group processing are restored; the user accepts this
+performance correction. Saturated-field limits remain recorded. The user's initial visual
+review passes at this resolution; M3 and the rebuild plan are complete. The user has started
+a long run for continuing observation. It subsequently crashed during an unattended hour;
+the [follow-up repair](../../LONG-RUN-RELIABILITY-PLAN.md) addresses reproduced development
+timing retention. Initial visual acceptance does not establish endurance.
+Seed27 supplies a centered review layout.
+See [current measurements](chemistry/rebuild-results.md). Earlier
+implementation statuses and integration sequences below are historical; their ecological
+and ownership requirements remain. Do not restore the discarded kernels.
+
 Updated September 15, 2026. [Computable chemistry](chemistry/computational-foundation.md),
 [ADR 0022](../adr/0022-computable-chemistry.md) and the [root plan](../../DIGITAL-CHEMISTRY-PLAN.md)
 govern the redesign: artificial rules composed over the chemical manifold, designed for their
@@ -63,7 +79,7 @@ the accepted direction and prior calibration. Chemistry changes require a new mo
 
 ## Current default and disabled scope
 
-Run starts seed 101, paused at tick zero, with 48 cells of the same founder genotype in two
+Run starts seed 27, paused at tick zero, with 48 cells of the same founder genotype in two
 separated resource neighborhoods of a 320 × 240 periodic world. Forty-eight finite renewal sites
 have unequal richness, local mixtures and variable release. Chemistry seed 101 resolves initial
 source IDs 0 and 80; decomposition uses ID 186. These are ordinary locations in the generated space,
@@ -71,7 +87,7 @@ not biological roles. Haploid clonal fission, mutation and paid inheritable plas
 
 The controller has 39 inputs, 24 recurrent units and nine outputs. Fifteen funded stocks support
 four receptors, four transporters and four enzymes plus core, motor and storage. Physical
-checkpoints use v12 after M1's definition change; the outer observation package remains v11.
+checkpoints use v13; the outer observation package remains v11.
 Generic stress, compatibility, repair and impedance replace named toxin/defense/
 matrix pathways. Source zones and epochs remain selectable. Disturbance and typed machinery
 transfer are experimental options, disabled by default. Light input and binding remain deferred.
@@ -89,28 +105,22 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
-M0's selected laws and M1's canonical compiler are implemented. M1's subsequent correction
-carries composition through row redistribution and CSR local delivery, compiles enzyme engagement,
-and separates material/installed dependencies from geographic movement. The same core workload
-measures 7.17/15.73 ms at 48/2,000 cells; the heaviest 2,000-cell tick is still 39.55 ms.
-See [the correction](../specs/digital-chemistry/validation.md#manifold-composition-correction).
-Ordinary stepping still uses the earlier spatial/biological pipeline. M2 must integrate the
-composed spatial owners; M3/M4 must replace live machinery and paid expression together.
-The measurements below describe the
-previous runtime and do not establish replacement performance or ecological readiness.
+The rebuild's M0 design, M1 complete production World and M2 consumer/opportunity work are
+complete. The sole Rust/WASM step integrates fields, machinery, local controllers, paid bodies
+and inheritance. M3's automated operating checks now pass, including the existing browser,
+worker WebGL2, isolated save/recovery and injected graphics/worker failures. The user passes
+the initial visual review at mesh2, completing M3 and the rebuild handoff.
 
-The sole Rust/WASM engine integrates physical chemistry, evolution, worker WebGL2 rendering,
-recovery and current experiments. Short probes establish supplied growth, finite-reserve
-exhaustion and several conditional chemical effects. Batched rendering and periodic-index optimization
-bring the actual software-rendered browser to 54 ticks/s at 2,000 varied cells and 32.6 during the
-constructed growth workload. Headless means are 61.3 and 35.9 respectively. Growth still has little
-headroom, and cold saves are measured separately. Human motion acceptance, the user's device limits,
-colonization and days/weeks persistence remain open observations.
+The user accepts the restored-resolution threshold correction. Headless default startup
+measures372ticks/s; the short software-rendered browser check observes about292ticks/s.
+Fully saturated2,000-cell growth remains slower and is a documented worst case, not a
+reason to delay continuing observation. See the [current evidence](chemistry/rebuild-results.md).
+Emission benefit, net movement payoff, colonization, sustained diversity and days/weeks
+operation remain unresolved observations. Do not invent a required long campaign to close them.
 
 Review [continuation limits](../continuing-observation.md) before depending on unattended execution.
-The previous spatial implementation was accepted after two-colony and recovery-identity fixes;
-that acceptance does not cover this new chemistry's motion or browser endurance. No days/weeks
-ecological campaign is required to finish development.
+The user's initial visual acceptance does not establish browser endurance. The user's long run
+is ongoing; no days/weeks ecological campaign is required to finish this rebuild.
 
 <a id="design-roadmap"></a>
 

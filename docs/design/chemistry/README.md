@@ -1,17 +1,17 @@
 # General-purpose digital chemistry
 
-Status: computational design revised September 15, 2026; M0 arithmetic and M1 representation
-implemented, ordinary-world replacement pending.
+Status: fresh production World implemented September 15, 2026. The
+[composed runtime](composed-runtime.md) owns the current artificial laws and checkpoint v13;
+[rebuild evidence](rebuild-results.md) records bounded opportunities and outstanding operating gates.
 [Computable chemistry](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
 govern formula selection and the [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) tracks integration.
 Design rules around shared manifold reductions, vector fields, diffusion plus drift and bounded
 transformations. Physics supplies concepts; reproducing a known physical process is not the target.
 
 [Numerical runtime record](numerical-engine.md), [reliability evidence](reliability-results.md) and
-[migration dispositions](numerical-migration.md) describe the prior implementation. M1 now supplies
-v4 profiles and physical checkpoint v12. The canonical v2 compiler serves the composed kernels
-and atlas; its unchanged 2,000-cell core measures 18.48 ms/tick. Live integration remains pending. M2's experimental
-operators failed their performance gate and have not replaced World stepping. Older findings below
+[migration dispositions](numerical-migration.md) describe the prior implementation. The removed
+M0/M1 compiler and M2 experiments are history. The fresh compiler serves actual installed machinery
+and the atlas through one complete World lifecycle. Older findings below
 remain version-specific evidence, not required formulas or certified replacement behavior.
 
 The runtime replaces named chemical systems with one material-conserving substrate:
@@ -29,10 +29,10 @@ substrate. They are not species categories or separate action systems.
 | [Machinery and controllers](machinery.md) | Fixed slots, funded capacities, local observations/actions, mutation and inheritance |
 | [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
 | [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
-| [Current measurements](numerical-results.md) | Bounded mechanism, capacity, default startup and storage results |
+| [Current measurements](rebuild-results.md) | Fresh-core registrations, bounded mechanisms, capacity, default startup and storage results |
 | [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
 | [Reliability evidence](reliability-results.md) | Current browser failures/limits, chemical-space revision and ordinary habitat checks |
-| [Installed machinery](installed-machinery.md) | Inherited targets, retained function and paid refitting in physical schema 11 |
+| [Installed machinery](installed-machinery.md) | Inherited targets, retained function, paid refitting and historical findings |
 | [Diagnostic continuity](diagnostic-continuity.md) | Genealogy, inherited/body comparisons and bounded recent/longitudinal observations |
 | [Migration and retirement](numerical-migration.md) | Current commands, reports, retained semantics and removed implementations |
 | [Historical performance and fidelity](performance.md) | Previous TypeScript quantization choices and evidence |
@@ -112,11 +112,11 @@ will emerge. Measure a missing link before adding a new reaction class.
 
 ## Decision and implementation boundary
 
-The user authorized all phases of the implementation plan. The complete replacement and short
-constructed opportunities are implemented; final integration status belongs to that plan.
-The runtime retains one chemical economy and rejects older checkpoints. Historical studies retain
-their original evidence. Headless 2,000-cell growing loads exceed 30 ticks/s; that result excludes
-GPU presentation. Actual software-rendered browser loads exposed a separate throughput limit.
-Small probes show supplied growth and reproduction; ordinary habitats show accessible uptake and
-growth. Transit, human motion acceptance and days/weeks persistence remain unresolved. The
-reliability plan remains the authority for completion rather than these individual positive checks.
+The user authorized the complete replacement. It is implemented through one production kernel,
+with short constructed opportunity checks and explicit rejection of old physical checkpoints.
+The [rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md) owns remaining acceptance. Headless
+capacity exceeds30ticks/s on the measured fixed workloads but misses the200ticks/s target.
+The user accepts these numbers for now and reports that visual inspection mostly looks good;
+automated browser checks remain unperformed. Seed27 is the centered review setup. Earlier browser failures keep their original
+scope. Supplied reproduction and conditional chemical opportunities do not establish sustained
+ecology, evolutionary diversity or days/weeks persistence.

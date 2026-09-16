@@ -83,13 +83,8 @@ impl Buffers {
             self.field.clear();
             for (i, node) in w.field.amounts.chunks_exact(256).enumerate() {
                 if kind == 5 {
-                    let matter = node.iter().map(|q| *q as f64).sum::<f64>() / area;
-                    let energy = node
-                        .iter()
-                        .zip(&w.chemistry.properties)
-                        .map(|(q, p)| *q as f64 * p.potential)
-                        .sum::<f64>()
-                        / area;
+                    let [matter, energy] =
+                        w.field.material_values(i, &w.chemistry).map(|q| q / area);
                     self.field.extend([
                         matter as f32,
                         energy as f32,
@@ -106,14 +101,7 @@ impl Buffers {
                     continue;
                 }
                 let value = match kind {
-                    0 => node.iter().map(|q| *q as f64).sum::<f64>() / area,
-                    1 => {
-                        node.iter()
-                            .zip(&w.chemistry.properties)
-                            .map(|(q, p)| *q as f64 * p.potential)
-                            .sum::<f64>()
-                            / area
-                    }
+                    0 | 1 => w.field.material_values(i, &w.chemistry)[kind as usize] / area,
                     2 => w.field.impedance[i],
                     3 => w.field.stress[i],
                     _ => node[species] as f64 / area,
@@ -175,6 +163,7 @@ mod tests {
         .unwrap();
         w.field.amounts.fill(0.);
         w.field.amounts[0] = 4.;
+        w.field.refresh(&w.chemistry);
         w.field.impedance[0] = 2.;
         w.field.stress[0] = w.config.stress_k;
         let mut buffers = Buffers::default();

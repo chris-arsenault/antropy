@@ -1,5 +1,8 @@
 # Bounded numerical chemistry engine
 
+The [fresh composed runtime](composed-runtime.md) supersedes this record's numerical
+formulas and implementation sequence. The body below preserves previous evidence.
+
 The [computational foundation](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
 govern the next mathematical design. The body below records the September 14 runtime, clocks,
 laws and measurements; it is not a requirement to preserve those formulas or an active work

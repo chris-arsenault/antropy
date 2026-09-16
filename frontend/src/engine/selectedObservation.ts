@@ -31,7 +31,7 @@ export class SelectedObservation {
   }
 
   private installedIdentity() {
-    return this.value?.cell?.machineryGenome ?? null;
+    return this.value?.cell?.machineryRevision ?? null;
   }
 
   private select(world: EngineWorld, id: number | null) {

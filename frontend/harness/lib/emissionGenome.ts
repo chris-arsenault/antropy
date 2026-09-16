@@ -11,14 +11,14 @@ export function emissionGenome(
   effort: number,
   investment = 1
 ): Genotype {
-  const g = behaviorChange(engine, context.genotype, { transport: [1, 1, effort, 1] });
+  const g = behaviorChange(engine, context.genotype, { transport: [1, 1, (1 - effort) / 2, 0] });
   const from = coordinate(context.config.sourceSpecies[0]),
     to = coordinate(species);
   for (const c of g.chromosomes) {
     c.physical[9] = investment - 1;
     c.physical[11] = investment - 1;
     c.chemistry.membrane = to;
-    c.chemistry.transporters[2] = { ...to, export: true };
+    c.chemistry.transporters[2] = { ...to };
     c.chemistry.enzymes[0] = { ...from, dx: to.x - from.x, dy: to.y - from.y };
   }
   return g;

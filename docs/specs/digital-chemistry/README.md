@@ -1,5 +1,13 @@
 # Integrated digital chemistry: computational contract
 
+**Numerical restart, September 15, 2026.** The previous live engine and separate candidate
+were deleted. The [fresh production contract](../../design/chemistry/composed-runtime.md)
+owns the new implementation. The [restart work order](../../../DIGITAL-CHEMISTRY-PLAN.md)
+supersedes this index's implementation status and the chapters' selected numerical
+prescriptions. Preserve the semantic obligations and negative evidence. Revision-4
+formulas, compiler layouts and isolated cost gates are historical choices, not a
+specification to reconstruct. The chapters have not yet been rewritten for the new core.
+
 The [computational foundation](../../design/chemistry/computational-foundation.md) and
 [ADR 0022](../../adr/0022-computable-chemistry.md) govern the
 [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md). Antropy designs computable artificial rules
@@ -30,18 +38,18 @@ useful reference material; their old imperatives are not the current implementat
 | [Representation](representation.md) | Implemented M1 definition/compiler ownership; formula-specific choices remain revisable |
 | [Evidence](validation.md) | Versioned M0/M1 results and superseded registrations, with current acceptance boundaries |
 
-## Implementation boundary
+## Historical candidate implementation boundary
 
-Chemistry v4 and physical checkpoint v12 are present in ordinary worlds. M1's canonical compiler
+Before removal, chemistry v4 and physical checkpoint v12 were present in ordinary worlds. M1's canonical compiler
 uses parameter v2/operator v3 with exact installed identity and 256-ID coverage. Its composition
 correction implements row transport, CSR local delivery, compiled engagement and dependency-based
 material/operator reuse. The unchanged 48/2,000-cell core measures 7.165/15.728 ms mean;
 this establishes neither desired throughput nor live integration. See [evidence](validation.md).
 
-Ordinary World still uses the previous diffusion/motion/biology. The old M2 candidate failed its
-cost gate and its expansion is canceled. Next, re-expand M2 to integrate the selected spatial
-rules using [M1's handoff](representation.md#m0-replacement-handoff). Live machinery and paid
-continuous expression remain M3/M4; complete browser acceptance remains unverified.
+That World used the previous diffusion/motion/biology. The old M2 candidate failed its
+cost gate and its expansion was canceled. This sequence is retired; do not re-expand its M2
+or reconstruct its executors. The fresh World implements the complete lifecycle and paid
+continuous expression under the [current contract](../../design/chemistry/composed-runtime.md).
 
 Keep individual genome/RNN cells, 256 material identities, small fixed heritable slots, finite
 uneven resources, generic paid biomass, common washout and 48 founders in at least two colonies.

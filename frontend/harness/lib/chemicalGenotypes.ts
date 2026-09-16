@@ -49,7 +49,7 @@ export function detoxGenome(enabled: boolean, context: ChemicalContext): Genotyp
     from = coordinate(stressSpecies(context)),
     to = coordinate(lowStressProduct(context));
   for (const c of g.chromosomes) {
-    c.chemistry.transporters[1] = { ...from, export: false };
+    c.chemistry.transporters[1] = { ...from };
     c.chemistry.enzymes[1] = {
       ...from,
       dx: enabled ? to.x - from.x : 0,

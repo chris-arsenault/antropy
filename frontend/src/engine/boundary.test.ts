@@ -22,7 +22,7 @@ it("keeps v4 chemical metadata bounded and rejects old physical bytes inside the
   const session = new Session(await Engine.load(bytes, true));
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(12);
+  expect(definition.version).toBe(13);
   expect(definition.chemistry.version).toBe(4);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -32,13 +32,13 @@ it("keeps v4 chemical metadata bounded and rejects old physical bytes inside the
   const exported = await session.export();
   expect((await decodePackage(exported)).metadata.version).toBe(11);
   const old = before.slice();
-  old.set(new TextEncoder().encode("ANTROPY11\0"));
+  old.set(new TextEncoder().encode("ANTROPY12\0"));
   const incompatible = await encodePackage(old, {
     seed: 101,
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v12 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v13 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });

@@ -109,12 +109,11 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
     let limits: Vec<_> = w.config.source_species.iter().map(|s| {
         let p = &w.chemistry.properties[*s];
         let full = economy::budget(&w.config, &w.chemistry, g, 2., &[0.; SPECIES], 1., 0.);
-        let cap = 4. * std::f64::consts::PI * full.radius * p.diffusion
-            / (w.config.diffusion_impedance * p.impedance).max(1e-300);
+        let cap = g.operators.transporters.iter().enumerate().map(|(i,r)| 2.*g.body[7+i]*w.config.transporter_turnover*r.iter().find(|a|a.species==*s).map_or(0.,|a|a.value)).sum::<f64>();
         let yield_per_unit = crate::chemistry::reaction_energy(p.potential,
             w.chemistry.properties[w.chemistry.decomposition].potential, w.config.conversion_efficiency).0;
         json!({"species":s,"properties":p,"fullParentRadius":full.radius,
-            "diffusiveImportCeiling":cap,"directEnergyCeiling":cap*yield_per_unit,
+            "installedTransportCeiling":cap,"terminalConversionWorkCeiling":cap*yield_per_unit,
             "parentMaintenance":full.maintenance,
             "unimpededWashoutLength":(w.config.washout>0.).then(||(p.diffusion/w.config.washout).sqrt())})
     }).collect();
@@ -122,7 +121,7 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         .cells
         .iter()
         .map(|cell| {
-            let sites = w.field.stencil(cell.x, cell.y);
+            let sites = crate::footprint::sites(cell, &w.config, &w.field);
             let local = std::array::from_fn(|s| w.field.sample(s, &sites));
             json!({"cell":cell.id,"position":[cell.x,cell.y],
             "concentrations":w.config.source_species.iter().map(|s|local[*s]).collect::<Vec<_>>(),
@@ -135,9 +134,9 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         "cases":cases(&w),"investments":investments(&w),"startup":startup,
         "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
             "No shared depletion, export, repair, refitting or movement through gradients",
-            "Perfect processing is an upper bound for the founder terminal reaction network",
+            "grossWork is an import-only upper bound; processingWork applies installed enzyme throughput to the assumed internal mixture",
             "Closure holds internal inventory fixed and removes a proportional mixture as construction",
             "Renewal average excludes initial priming transient and timestep overshoot",
-            "Positive surplus is a physical opportunity, not a reproductive or evolutionary result"]}),
+            "Positive calculated surplus is conditional; actual delivery, controller expression and product occupancy must be measured"]}),
     )
 }

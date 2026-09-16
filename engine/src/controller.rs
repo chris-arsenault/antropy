@@ -32,12 +32,22 @@ pub struct State {
     pub task: u8,
     pub last_energy: Option<f32>,
 }
-#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Action {
     pub swim: f64,
     pub turn: f64,
     pub repair: f64,
     pub transport: [f64; 4],
+}
+impl Default for Action {
+    fn default() -> Self {
+        Self {
+            swim: 0.,
+            turn: 0.,
+            repair: 0.,
+            transport: [0.5; 4],
+        }
+    }
 }
 
 impl Default for State {
@@ -64,8 +74,8 @@ pub fn seed() -> Genome {
     w[OUTPUT_BIAS] = 0.7;
     w[OUTPUT] = -0.6;
     w[OUTPUT + 4] = -0.6;
-    w[OUTPUT + HIDDEN + 3] = -3.;
-    w[OUTPUT + HIDDEN + 7] = -3.;
+    w[OUTPUT + HIDDEN + 3] = 3.;
+    w[OUTPUT + HIDDEN + 7] = 3.;
     w[OUTPUT + HIDDEN + 17] = 1.;
     w[OUTPUT + HIDDEN + 18] = 1.;
     w[OUTPUT + HIDDEN + 19] = -1.;
@@ -75,8 +85,8 @@ pub fn seed() -> Genome {
         w[OUTPUT_BIAS + 5 + s] = 1.5;
     }
     for s in [2, 3] {
-        w[OUTPUT + (5 + s) * HIDDEN + 20] = 3.;
-        w[OUTPUT_BIAS + 5 + s] = -3. * squash(1.5_f32 * 0.75);
+        w[OUTPUT + (5 + s) * HIDDEN + 20] = -3.;
+        w[OUTPUT_BIAS + 5 + s] = 3. * squash(1.5_f32 * 0.75);
     }
     Genome {
         weights: w,
@@ -130,7 +140,7 @@ pub fn act(g: &Genome, inputs: &[f32], state: &mut State, config: &Config, learn
         swim: squash(logits[0]).max(0.) as f64,
         turn: squash(logits[1]) as f64,
         repair: squash(logits[2]).max(0.) as f64,
-        transport: std::array::from_fn(|s| squash(logits[5 + s]).max(0.) as f64),
+        transport: std::array::from_fn(|s| (1. + squash(logits[5 + s]) as f64) * 0.5),
     }
 }
 fn update_traces(
@@ -349,6 +359,21 @@ mod tests {
         let mut s = State::default();
         act(&seed(), &[0.5; INPUTS], &mut s, &Config::default(), false);
         assert!(s.traces.iter().all(|x| *x == 0.));
+    }
+    #[test]
+    fn founder_turns_toward_the_body_left_chemical_reading() {
+        for cue in [-0.1, 0.1] {
+            let mut inputs = [0.; INPUTS];
+            inputs[3] = cue;
+            let action = act(
+                &seed(),
+                &inputs,
+                &mut State::default(),
+                &Config::default(),
+                false,
+            );
+            assert!(action.turn * cue as f64 > 0.);
+        }
     }
     #[test]
     fn activation_preserves_a_smooth_bounded_neural_response() {

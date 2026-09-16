@@ -1,21 +1,12 @@
+//! Sole production state and schedule. Browser stepping and every assay execute this owner.
+pub use crate::ancestry::Ancestor;
 use crate::{
-    accounting::Ledger,
-    chemistry::Chemistry,
-    config::Config,
-    field::Field,
-    genetics::Genotype,
-    metabolism, movement,
-    organism::{Cell, Flows},
-    random::Random,
-    sensing,
-    sources::{self, Source},
-    transport,
+    accounting::Ledger, chemistry::Chemistry, config::Config, field::Field, genetics::Genotype,
+    organism::Cell, random::Random, sources::Source,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-
-pub const VERSION: u32 = 12;
-pub use crate::ancestry::Ancestor;
+pub const VERSION: u32 = 13;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -25,7 +16,6 @@ pub struct Event {
     pub location: Option<[f64; 3]>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct World {
     pub version: u32,
     pub seed: u64,
@@ -48,11 +38,9 @@ pub struct World {
     pub stop_reason: Option<String>,
     pub field_elapsed: f64,
     #[serde(skip)]
-    reaction_work: metabolism::Work,
-    #[serde(skip)]
-    transport_work: transport::Work,
-    #[serde(skip)]
     pub trace: Option<crate::trace::Trace>,
+    #[serde(skip)]
+    exchange: crate::transport::Exchange,
 }
 impl World {
     pub fn new(seed: u64, mut config: Config) -> Result<Self, String> {
@@ -61,112 +49,54 @@ impl World {
         if config.source_species.is_empty() {
             config.source_species = chemistry.source_species();
         }
-        let field = Field::new(config.width, config.height, config.mesh);
-        let mut environment_rng = Random::new(seed ^ 0x7321);
-        let (patch_centers, habitats) = sources::landscape(&config, &mut environment_rng);
-        let sources = habitats
+        let mut rng = Random::new(seed);
+        let mut environment_rng = Random::new(seed ^ 0x656e765f726e67);
+        let mut field = Field::new(config.width, config.height, config.mesh);
+        let (patch_centers, habitats) = crate::sources::landscape(&config, &mut environment_rng);
+        let mut sources: Vec<_> = habitats
             .into_iter()
             .map(|h| Source::new(h, 0, &config, &mut environment_rng, &field))
             .collect();
-        let genotype = Genotype::seed(&config, &chemistry);
-        let mut genomes = BTreeMap::new();
-        genomes.insert(1, genotype);
-        let mut w = Self {
-            version: VERSION,
-            seed,
-            tick: 0,
-            rng: Random::new(seed),
-            genetic_rng: Random::new(seed ^ 0x6713),
-            environment_rng,
-            chemistry,
-            field,
-            cells: vec![],
-            sources,
-            patch_centers,
-            genomes,
-            ancestry: vec![],
-            next_cell: 1,
-            next_genome: 2,
-            ledger: Ledger::default(),
-            events: vec![],
-            stop_reason: None,
-            field_elapsed: 0.,
-            reaction_work: metabolism::Work::default(),
-            transport_work: transport::Work::default(),
-            trace: None,
-            config,
-        };
-        for source in &mut w.sources {
-            source.release(
-                w.config.source_priming,
-                &mut w.field,
-                &w.chemistry,
-                &mut w.ledger,
-            );
+        let mut ledger = Ledger::default();
+        for s in &mut sources {
+            s.release(config.source_priming, &mut field, &chemistry, &mut ledger);
         }
-        w.place_founders()?;
-        let (matter, energy) = w.held();
-        w.ledger.initial_material = matter;
-        w.ledger.initial_energy = energy;
-        // Initialization is measured after priming; its rounding is part of the initial state.
-        w.ledger.numerical_material = 0.;
-        w.ledger.numerical_energy = 0.;
-        Ok(w)
-    }
-    fn place_founders(&mut self) -> Result<(), String> {
-        let c = &self.config;
-        let compiled = self.genomes[&1].compiled.as_ref().unwrap();
-        let first = self
-            .sources
+        let g = Genotype::seed(&config, &chemistry);
+        let compiled = g.compiled.as_ref().unwrap();
+        let first = sources
             .first()
             .map(|s| [s.habitat.x, s.habitat.y])
-            .unwrap_or([c.width * 0.25, c.height * 0.5]);
-        let far = self
-            .sources
+            .unwrap_or([config.width * 0.25, config.height * 0.5]);
+        let second = sources
             .iter()
-            .map(|s| [s.habitat.x, s.habitat.y])
             .max_by(|a, b| {
-                movement::distance(*a, first, c).total_cmp(&movement::distance(*b, first, c))
+                crate::movement::distance(first, [a.habitat.x, a.habitat.y], &config).total_cmp(
+                    &crate::movement::distance(first, [b.habitat.x, b.habitat.y], &config),
+                )
             })
-            .unwrap_or([c.width * 0.75, c.height * 0.5]);
-        let far = if movement::distance(first, far, c) < c.width.min(c.height) * 0.1 {
-            [(first[0] + c.width / 2.).rem_euclid(c.width), first[1]]
-        } else {
-            far
-        };
-        let centers = [first, far];
-        let mut index = movement::Spatial::new(c, &[]);
-        for i in 0..c.founders {
-            let center = centers[i % 2];
+            .map(|s| [s.habitat.x, s.habitat.y])
+            .unwrap_or([config.width * 0.75, config.height * 0.5]);
+        let mut cells = Vec::new();
+        let mut ancestry = Vec::new();
+        for i in 0..config.founders {
+            let center = if i < config.founders.div_ceil(2) {
+                first
+            } else {
+                second
+            };
+            let angle = rng.unit() * std::f64::consts::TAU;
+            let reach = 3. * rng.unit().sqrt();
             let mut cell = Cell::new(
-                self.next_cell,
+                i as u64 + 1,
                 1,
                 compiled,
-                c,
-                center[0],
-                center[1],
-                self.rng.unit() * std::f64::consts::TAU,
+                &config,
+                (center[0] + angle.cos() * reach).rem_euclid(config.width),
+                (center[1] + angle.sin() * reach).rem_euclid(config.height),
+                rng.unit() * std::f64::consts::TAU,
             );
-            let radius = cell.radius(c);
-            let mut placed = false;
-            for attempt in 0..10000 {
-                let extent = (c.founders as f64 / 2.).sqrt().max(2.5) * radius * 1.5
-                    + (attempt / 200) as f64 * radius;
-                let angle = self.rng.unit() * std::f64::consts::TAU;
-                let reach = extent * self.rng.unit().sqrt();
-                cell.x = (center[0] + angle.cos() * reach).rem_euclid(c.width);
-                cell.y = (center[1] + angle.sin() * reach).rem_euclid(c.height);
-                if index.free([cell.x, cell.y], radius, usize::MAX, &self.cells, c) {
-                    placed = true;
-                    break;
-                }
-            }
-            if !placed {
-                return Err("Founder placement exceeds physical capacity".into());
-            }
-            sensing::initialize(&mut cell, compiled, c, &self.field);
-            index.add(self.cells.len(), &cell, radius);
-            self.ancestry.push(Ancestor {
+            crate::sensing::initialize(&mut cell, compiled, &config, &field);
+            ancestry.push(Ancestor {
                 id: cell.id,
                 parent: 0,
                 lineage: cell.id,
@@ -175,30 +105,80 @@ impl World {
                 ended: crate::ancestry::ALIVE,
                 cause: crate::ancestry::Cause::Alive,
             });
-            self.cells.push(cell);
-            self.next_cell += 1;
+            cells.push(cell);
         }
-        Ok(())
+        let next_cell = cells.len() as u64 + 1;
+        let mut world = Self {
+            version: VERSION,
+            seed,
+            tick: 0,
+            config,
+            rng,
+            environment_rng,
+            genetic_rng: Random::new(seed ^ 0x67656e655f726e67),
+            chemistry,
+            field,
+            cells,
+            sources,
+            patch_centers,
+            genomes: BTreeMap::from([(1, g)]),
+            ancestry,
+            next_cell,
+            next_genome: 2,
+            ledger: Ledger::default(),
+            events: vec![],
+            stop_reason: None,
+            field_elapsed: 0.,
+            trace: None,
+            exchange: Default::default(),
+        };
+        let (m, e) = world.held();
+        world.ledger.initial_material = m;
+        world.ledger.initial_energy = e;
+        Ok(world)
+    }
+    pub fn held(&self) -> (f64, f64) {
+        let (mut matter, mut energy) = self.field.totals(&self.chemistry);
+        let body_value = self.chemistry.properties[self.chemistry.decomposition].potential;
+        for c in &self.cells {
+            matter += c.mass() + c.material();
+            energy += c.mass() * body_value + c.energy;
+            energy += c
+                .inventory
+                .iter()
+                .zip(&self.chemistry.properties)
+                .map(|(q, p)| q * p.potential)
+                .sum::<f64>();
+        }
+        for s in &self.sources {
+            for (q, p) in s.inventory.iter().zip(&self.chemistry.properties) {
+                matter += q;
+                energy += q * p.potential;
+            }
+        }
+        (matter, energy)
     }
     pub fn step(&mut self) {
-        self.step_measured(|| 0.);
+        self.advance(None);
     }
-    /// The clock observes stage durations only; no physical decision reads it.
-    pub fn step_measured(&mut self, mut clock: impl FnMut() -> f64) -> [f64; 9] {
-        let mut times = [0.; 9];
-        let mut mark = clock();
+    pub fn step_measured(&mut self, clock: impl Fn() -> f64) -> [f64; 9] {
+        self.advance(Some(&clock))
+    }
+    fn advance(&mut self, clock: Option<&dyn Fn() -> f64>) -> [f64; 9] {
+        let mut stages = [0.; 9];
         if self.stop_reason.is_some() {
-            return times;
+            return stages;
         }
-        for cell in &mut self.cells {
-            cell.flows = Flows::default();
+        let now = || clock.map_or(0., |f| f());
+        let mut started = now();
+        for c in &mut self.cells {
+            c.flows = Default::default();
         }
-        self.ledger.organism_time += self.cells.len() as f64 * self.config.dt;
-        if let Some(trace) = &mut self.trace {
-            trace.before(&self.cells, &self.config, &self.field);
+        if let Some(t) = &mut self.trace {
+            t.before(&self.cells, &self.config, &self.field);
         }
-        for source in &mut self.sources {
-            source.advance(
+        for s in &mut self.sources {
+            s.advance(
                 self.tick,
                 &self.config,
                 &mut self.environment_rng,
@@ -207,298 +187,286 @@ impl World {
                 &mut self.ledger,
             );
         }
+        stages[0] = now() - started;
+        started = now();
         self.field_elapsed += self.config.dt;
         let physiology = self.field_elapsed + 1e-12 >= self.config.physiology_interval;
-        let mut slow = self.config.clone();
-        slow.dt = self.field_elapsed;
+        let mut sites: Vec<_> = self
+            .cells
+            .iter()
+            .map(|c| crate::footprint::sites(c, &self.config, &self.field))
+            .collect();
+        crate::footprint::deposit_profiles(&self.cells, &self.config, &mut self.field, &sites);
         if physiology {
-            let b = self.field.advance(
+            let balance = self.field.advance(
                 &self.chemistry,
                 self.field_elapsed,
                 self.config.washout,
                 self.config.diffusion_impedance,
             );
-            self.ledger.washed_out += b.matter;
-            self.ledger.washout_energy += b.energy;
-            self.ledger.numerical_material += b.roundoff_matter;
-            self.ledger.numerical_energy += b.roundoff_energy;
-            self.field_elapsed = 0.;
+            self.ledger.washed_out += balance.matter;
+            self.ledger.washout_energy += balance.energy;
+            self.ledger.numerical_material += balance.roundoff_matter;
+            self.ledger.numerical_energy += balance.roundoff_energy;
         }
-        let now = clock();
-        times[0] = now - mark;
-        mark = now;
-        self.disturb();
-        let now = clock();
-        times[1] = now - mark;
-        mark = now;
+        stages[1] = now() - started;
+        started = now();
+        if physiology || self.tick == 0 {
+            self.control(if physiology { self.field_elapsed } else { 0. });
+        }
+        stages[2] = now() - started;
+        started = now();
+        crate::movement::advance(&mut self.cells, &self.config, &self.field, &sites);
+        stages[3] = now() - started;
+        started = now();
         if physiology {
-            for cell in &mut self.cells {
-                crate::refitting::attempt(cell, &self.genomes, &slow);
-                let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
-                let installed = self.genomes[&cell.machinery_genome]
-                    .compiled
-                    .as_ref()
-                    .unwrap();
-                if sensing::infer(cell, g, installed, &slow, &self.field) {
-                    self.ledger.task_writes += 1;
-                }
+            for (row, c) in sites.iter_mut().zip(&self.cells) {
+                *row = crate::footprint::sites(c, &self.config, &self.field);
             }
-        }
-        let now = clock();
-        times[2] = now - mark;
-        mark = now;
-        movement::move_cells(&mut self.cells, &self.config, &self.field, &mut self.rng);
-        let now = clock();
-        times[3] = now - mark;
-        mark = now;
-        if physiology {
-            for cell in &mut self.cells {
-                sensing::injure(
-                    cell,
-                    self.genomes[&cell.genome].compiled.as_ref().unwrap(),
-                    &slow,
-                    &self.field,
-                    &self.chemistry,
-                );
-            }
-        }
-        let now = clock();
-        times[4] = now - mark;
-        mark = now;
-        if physiology {
-            transport::exchange(
+            let mut interval_config = self.config.clone();
+            interval_config.dt = self.field_elapsed;
+            self.exchange.profile = clock.is_some();
+            self.exchange.advance(
                 &mut self.cells,
-                &self.genomes,
-                &slow,
+                &interval_config,
                 &mut self.field,
                 &self.chemistry,
+                &sites,
                 &mut self.ledger,
-                &mut self.transport_work,
             );
+            stages[4] = now() - started;
+            stages[8] = self.exchange.preparation_ms;
+            started = now();
+            self.physiology(self.field_elapsed);
+            self.field_elapsed = 0.;
         }
-        let now = clock();
-        times[5] = now - mark;
-        mark = now;
+        stages[5] = now() - started;
+        started = now();
+        for c in &mut self.cells {
+            let paid = c.pay(c.basal(&self.config));
+            c.flows.maintenance += paid;
+            self.ledger.accumulate(&c.flows);
+            if let Some(t) = &mut self.trace {
+                t.capture(c, self.tick);
+            }
+        }
+        self.tick += 1;
+        crate::lifecycle::advance(self);
+        if self.tick.is_multiple_of(128) {
+            self.prune_genotypes();
+        }
+        stages[6] = now() - started;
+        started = now();
+        if let Some(t) = &mut self.trace {
+            t.finish(&self.cells, &self.config, self.tick);
+            if let Some(s) = &mut t.study {
+                s.genomes(&self.genomes);
+            }
+        }
+        stages[7] = now() - started;
+        stages
+    }
+    fn control(&mut self, dt: f64) {
+        let mut config = self.config.clone();
+        config.dt = dt;
         for cell in &mut self.cells {
             let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
-            if physiology {
-                let installed = self.genomes[&cell.machinery_genome]
-                    .compiled
-                    .as_ref()
-                    .unwrap();
-                metabolism::react(
-                    cell,
-                    installed,
-                    &slow,
-                    &mut self.reaction_work,
-                    &mut self.ledger,
-                );
-                if let Some(trace) = &mut self.trace {
-                    trace.reactions(cell, &self.reaction_work);
-                }
-                metabolism::develop(
-                    cell,
-                    g,
-                    &slow,
-                    &self.chemistry,
-                    &mut self.field,
-                    &mut self.ledger,
-                );
-            }
-            self.ledger.accumulate(&cell.flows);
-            if let Some(trace) = &mut self.trace {
-                trace.capture(cell, self.tick);
-            }
+            crate::sensing::observe(cell, g, g, &self.config, &self.field);
+            let cost = if self.config.learning == "plastic" {
+                self.config.plasticity_cost * dt * cell.body[0]
+            } else {
+                0.
+            };
+            let learn = cell.energy >= cost;
+            let paid = if learn { cell.pay(cost) } else { 0. };
+            cell.flows.learning += paid;
+            cell.action = crate::controller::act(
+                &g.chromosome.behavior,
+                &cell.inputs,
+                &mut cell.brain,
+                &config,
+                learn,
+            );
+            crate::sensing::adapt(cell, &self.config, dt);
         }
-        let now = clock();
-        times[6] = now - mark;
-        mark = now;
-        if physiology {
-            movement::resolve(&mut self.cells, &self.config);
-            self.reproduce();
-        }
-        self.transfer();
-        self.tick += 1;
-        if let Some(trace) = &mut self.trace {
-            trace.finish(&self.cells, &self.config, self.tick);
-            if let Some(study) = &mut trace.study {
-                study.genomes(&self.genomes);
-            }
-        }
-        let now = clock();
-        times[7] = now - mark;
-        mark = now;
-        self.trim_events();
-        if self.genomes.len() > 4 * self.cells.len() + 256 {
-            let living: BTreeSet<_> = self
-                .cells
-                .iter()
-                .flat_map(|c| [c.genome, c.machinery_genome])
-                .collect();
-            self.genomes
-                .retain(|id, g| g.parent.is_none() || living.contains(id));
-        }
-        times[8] = clock() - mark;
-        times
     }
-    pub fn held(&self) -> (f64, f64) {
-        let (mut matter, mut energy) = self.field.totals(&self.chemistry);
-        let body = self.chemistry.properties[self.chemistry.decomposition].potential;
-        for source in &self.sources {
-            for (q, p) in source.inventory.iter().zip(&self.chemistry.properties) {
-                matter += q;
-                energy += q * p.potential;
+    fn physiology(&mut self, dt: f64) {
+        for cell in &mut self.cells {
+            let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
+            let load =
+                crate::sensing::stress_load(cell, g, &self.config, &self.field, &self.chemistry);
+            let damage = dt * self.config.damage_rate * load / (self.config.stress_k + load);
+            cell.damage = (cell.damage + damage).min(1.);
+            cell.flows.exposure += load * dt;
+            cell.flows.damage += damage;
+            let work = crate::metabolism::react_observed(
+                cell,
+                &self.config,
+                &self.chemistry,
+                dt,
+                self.trace.is_some(),
+            );
+            if let Some(t) = &mut self.trace {
+                t.reactions(cell, &work);
             }
+            crate::metabolism::repair(cell, &self.config, &self.chemistry, dt);
+            crate::refitting::advance(cell, g, &self.config, &self.chemistry, dt);
+            crate::metabolism::grow(cell, g, &self.config, &self.chemistry, dt);
+            let excess = (cell.energy - cell.energy_capacity(&self.config)).max(0.);
+            cell.energy -= excess;
+            self.ledger.overflow_heat += excess;
         }
-        for cell in &self.cells {
-            matter += cell.mass() + cell.material();
-            energy += cell.mass() * body
-                + cell.energy
-                + cell
-                    .inventory
-                    .iter()
-                    .zip(&self.chemistry.properties)
-                    .map(|(q, p)| q * p.potential)
-                    .sum::<f64>();
+    }
+    pub fn intervention_budget(&self) -> Result<(), String> {
+        if self.events.iter().filter(|e| durable(&e.kind)).count() >= 4096 {
+            Err("Manual intervention history limit reached".into())
+        } else {
+            Ok(())
         }
-        (matter, energy)
+    }
+    fn prune_genotypes(&mut self) {
+        if self.genomes.len() <= self.cells.len() * 2 + 64 {
+            return;
+        }
+        let mut retained: BTreeSet<_> = self
+            .cells
+            .iter()
+            .flat_map(|c| [c.genome, c.machinery_genome])
+            .collect();
+        for e in self.events.iter().filter(|e| e.kind == "catalog") {
+            retained.extend(e.values.iter().copied());
+        }
+        self.genomes
+            .retain(|id, g| g.parent.is_none() || retained.contains(id));
     }
     pub fn event(&mut self, kind: &str, cell: u64, values: Vec<u64>) {
+        let location = self
+            .cells
+            .iter()
+            .find(|c| c.id == cell)
+            .map(|c| [c.x, c.y, c.radius(&self.config)]);
         self.events.push(Event {
             tick: self.tick,
             kind: kind.into(),
             cell,
             values,
-            location: None,
+            location,
         });
-    }
-    pub fn intervention_budget(&self) -> Result<(), String> {
-        if self
-            .events
-            .iter()
-            .filter(|e| durable_event(&e.kind))
-            .count()
-            >= 4096
-        {
-            return Err("Manual intervention history limit reached; export this experiment".into());
-        }
-        Ok(())
-    }
-    fn trim_events(&mut self) {
-        if self.events.len() <= 512 {
-            return;
-        }
-        let recent = self
-            .events
-            .iter()
-            .filter(|e| !durable_event(&e.kind))
-            .count();
-        let mut discard = recent.saturating_sub(512);
+        let mut recent = self.events.iter().filter(|e| !durable(&e.kind)).count();
         self.events.retain(|e| {
-            if discard > 0 && !durable_event(&e.kind) {
-                discard -= 1;
+            if !durable(&e.kind) && recent > 512 {
+                recent -= 1;
                 false
             } else {
                 true
             }
         });
     }
-    pub fn restore(bytes: &[u8]) -> Result<Self, String> {
-        let payload = bytes
-            .strip_prefix(b"ANTROPY12\0")
-            .ok_or("Incompatible checkpoint; digital chemistry engine v12 required")?;
-        let (mut w, remainder): (Self, _) =
-            postcard::take_from_bytes(payload).map_err(|e| e.to_string())?;
-        if !remainder.is_empty() {
-            return Err("Trailing checkpoint bytes".into());
-        }
-        w.validate()?;
-        w.field.rebuild();
-        for g in w.genomes.values_mut() {
-            g.compile(&w.config, &w.chemistry);
-        }
-        for s in &mut w.sources {
-            s.rebuild(&w.config, &w.field);
-        }
-        Ok(w)
+    pub fn release_cell(&mut self, cell: &Cell, cause: crate::ancestry::Cause) {
+        crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY12\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY13\0".to_vec()).map_err(|e| e.to_string())
+    }
+    pub fn restore(bytes: &[u8]) -> Result<Self, String> {
+        let bytes = bytes
+            .strip_prefix(b"ANTROPY13\0")
+            .ok_or("Unsupported physical checkpoint; v13 required")?;
+        let (mut world, tail): (Self, &[u8]) =
+            postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
+        if !tail.is_empty() || world.version != VERSION {
+            return Err("Unsupported or trailing physical checkpoint data".into());
+        }
+        world.validate()?;
+        world.field.rebuild();
+        for s in &mut world.sources {
+            s.rebuild(&world.config, &world.field);
+        }
+        for g in world.genomes.values_mut() {
+            g.compile(&world.config, &world.chemistry);
+        }
+        for cell in &mut world.cells {
+            let target = world.genomes[&cell.genome].compiled.as_ref().unwrap();
+            cell.operators = Some(if cell.installed == target.chromosome.chemistry {
+                target.operators.clone()
+            } else {
+                crate::chemical_operators::Operators::compile(
+                    &cell.installed,
+                    &world.config,
+                    &world.chemistry,
+                )
+            });
+        }
+        Ok(world)
     }
     pub fn validate(&self) -> Result<(), String> {
         if self.version != VERSION {
-            return Err("Incompatible world version".into());
+            return Err("Unsupported physical checkpoint version".into());
         }
         self.config.validate()?;
         self.chemistry.validate()?;
         self.field.validate()?;
         self.field.validate_reductions(&self.chemistry)?;
-        if self
-            .events
-            .iter()
-            .filter(|e| durable_event(&e.kind))
-            .count()
-            > 4096
-            || self.events.len() > 4608
-        {
-            return Err("Event history exceeds its operating limit".into());
-        }
-        if !self.field_elapsed.is_finite()
-            || self.field_elapsed < 0.
-            || self.field_elapsed >= self.config.physiology_interval + 1e-12
-        {
-            return Err("Invalid integration clock".into());
-        }
-        if self.field.nx as f64 * self.field.spacing != self.config.width
-            || self.field.ny as f64 * self.field.spacing != self.config.height
-            || self.field.spacing != self.config.mesh
-        {
-            return Err("Field/configuration mismatch".into());
-        }
         if self.cells.len() > self.config.max_population
             || self.ancestry.len() > self.config.max_ancestry_records
             || self.next_cell != self.ancestry.len() as u64 + 1
+            || !self.field_elapsed.is_finite()
+            || self.field_elapsed < 0.
+            || self.field_elapsed >= self.config.physiology_interval
         {
-            return Err("Invalid population history".into());
+            return Err("Invalid world capacity or schedule".into());
         }
+        if self.field.spacing != self.config.mesh
+            || self.field.nx as f64 * self.field.spacing != self.config.width
+            || self.field.ny as f64 * self.field.spacing != self.config.height
+        {
+            return Err("Field and world dimensions disagree".into());
+        }
+        let mut living = BTreeSet::new();
         for (id, g) in &self.genomes {
-            if *id == 0
-                || *id != g.id
+            if *id != g.id
+                || *id == 0
                 || *id >= self.next_genome
+                || g.parent.is_some_and(|p| p == 0 || p >= g.id)
                 || g.born > self.tick
-                || g.parent.is_some_and(|p| p == 0 || p >= *id)
+                || !g.learned.is_finite()
+                || g.learned < 0.
             {
-                return Err("Invalid genome identity".into());
+                return Err("Invalid genotype history".into());
             }
             g.validate(&self.config)?;
         }
-        let mut ids = BTreeSet::new();
         for cell in &self.cells {
             cell.validate(&self.config)?;
-            if !ids.insert(cell.id)
-                || !self.genomes.contains_key(&cell.genome)
-                || !self.genomes.contains_key(&cell.machinery_genome)
+            if !living.insert(cell.id)
                 || cell.id == 0
                 || cell.id >= self.next_cell
+                || !self.genomes.contains_key(&cell.genome)
+                || !self.genomes.contains_key(&cell.machinery_genome)
             {
-                return Err("Invalid cell identity".into());
+                return Err("Invalid living identity".into());
             }
             let a = &self.ancestry[cell.id as usize - 1];
-            if a.ended().is_some()
-                || a.genome != cell.genome
-                || a.parent() != cell.parent
-                || a.lineage != cell.lineage
-            {
-                return Err("Invalid living ancestry".into());
+            if a.parent() != cell.parent || a.lineage != cell.lineage || a.genome != cell.genome {
+                return Err("Body and ancestry disagree".into());
             }
         }
-        crate::world_validation::history(self, &ids)?;
+        crate::world_validation::history(self, &living)?;
         crate::world_validation::environment(self)
     }
 }
-fn durable_event(kind: &str) -> bool {
+fn durable(kind: &str) -> bool {
     matches!(
         kind,
-        "override" | "intervention" | "study-policy" | "counterfactual" | "catalog"
+        "override"
+            | "intervention"
+            | "authored-founders"
+            | "external-pulse"
+            | "study-policy"
+            | "replace-lineage"
+            | "catalog-append"
+            | "catalog"
+            | "counterfactual"
+            | "scheduled-source"
     )
 }

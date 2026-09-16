@@ -8,6 +8,7 @@ export function measureOperating(world: EngineWorld, ticks: number, wallSeconds:
     spatial = emptySpatial(),
     start = performance.now();
   const windows: number[] = [],
+    tickMs: number[] = [],
     stages = { stepMs: 0, censusMs: 0, renderMs: 0, inspectionMs: 0 };
   let last = start,
     steps = 0,
@@ -17,7 +18,9 @@ export function measureOperating(world: EngineWorld, ticks: number, wallSeconds:
   while (steps < ticks && performance.now() - start < wallSeconds * 1000) {
     const at = performance.now();
     const status = world.step();
-    stages.stepMs += performance.now() - at;
+    const duration = performance.now() - at;
+    stages.stepMs += duration;
+    tickMs.push(duration);
     steps++;
     observeOperating(world, steps, selected, spatial, stages);
     if (steps % 20 === 0) {
@@ -31,6 +34,7 @@ export function measureOperating(world: EngineWorld, ticks: number, wallSeconds:
     }
   }
   const wallMs = performance.now() - start;
+  tickMs.sort((a, b) => a - b);
   return {
     initial,
     summary: world.command<Summary>("summary"),
@@ -39,6 +43,10 @@ export function measureOperating(world: EngineWorld, ticks: number, wallSeconds:
     stages,
     wallMs,
     ticksPerSecond: (steps * 1000) / wallMs,
+    modelSecondsPerWallSecond:
+      (steps * world.command<{ config: { dt: number } }>("definition").config.dt * 1000) / wallMs,
+    maximumStepMs: tickMs.at(-1) ?? 0,
+    p95StepMs: tickMs[Math.max(0, Math.ceil(tickMs.length * 0.95) - 1)] ?? 0,
     stop: stop ?? (steps < ticks ? "wall cap" : "horizon"),
   };
 }

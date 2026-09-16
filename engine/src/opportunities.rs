@@ -7,17 +7,20 @@ use crate::{
 };
 
 fn base(count: usize) -> World {
+    base_mesh(count, 4.)
+}
+fn base_mesh(count: usize, mesh: f64) -> World {
     let mut w = World::new(
         101,
         Config {
             width: 24.,
             height: 24.,
+            mesh,
             founders: count,
             source_count: 0,
             mutation_rate: 0.,
             physical_mutation_rate: 0.,
             learning: "static".into(),
-            thermal_energy: 0.,
             daughter_inventory: 100.,
             ..Config::default()
         },
@@ -45,16 +48,12 @@ fn base(count: usize) -> World {
     w
 }
 fn stationary() -> controller::Genome {
-    controller::diagnostic([0., 0., 2., 0., -1., 2., 2., 2., 2.], None)
+    controller::diagnostic([0., 0., 2., 0., -1., 2., 2., -2., -2.], None)
 }
 fn export(g: &mut Genotype, slot: usize, s: usize) {
     let p = Target::species(s);
     for a in &mut g.chromosomes {
-        a.chemistry.transporters[slot] = Transporter {
-            x: p.x,
-            y: p.y,
-            export: true,
-        };
+        a.chemistry.transporters[slot] = Transporter { x: p.x, y: p.y };
     }
 }
 fn membrane(g: &mut Genotype, s: usize) {
@@ -94,6 +93,9 @@ fn finish(mut w: World) -> World {
 }
 
 pub fn create(name: &str) -> Result<World, String> {
+    if name.starts_with("sensing-") {
+        return sensing(name);
+    }
     match name {
         "crossfeeding"
         | "crossfeeding-export-off"
@@ -111,6 +113,29 @@ pub fn create(name: &str) -> Result<World, String> {
         _ => Err("Unknown chemical opportunity".into()),
     }
 }
+fn sensing(name: &str) -> Result<World, String> {
+    let mesh = if name.ends_with("-h4") {
+        4.
+    } else if name.ends_with("-h2") {
+        2.
+    } else {
+        return Err("Unregistered sensing mesh".into());
+    };
+    let mut w = base_mesh(1, mesh);
+    let g = w.genomes.get_mut(&1).unwrap();
+    pathway(g, 0, 240);
+    let connected = !name.contains("-off-");
+    for a in &mut g.chromosomes {
+        a.behavior = controller::diagnostic(
+            [0.5, 0., 2., 0., -1., 2., 2., -2., -2.],
+            connected.then_some((3, 1, 4.)),
+        );
+    }
+    w.cells[0].x = 9.;
+    w.cells[0].y = if name.contains("-right-") { 15. } else { 9. };
+    patch(&mut w, 0, 48., 2.);
+    Ok(finish(w))
+}
 fn chain(name: &str) -> Result<World, String> {
     let mut w = base(2);
     let donor = w.genomes.get_mut(&1).unwrap();
@@ -125,8 +150,8 @@ fn chain(name: &str) -> Result<World, String> {
     if name.ends_with("processing-off") {
         for a in &mut recipient.chromosomes {
             for e in &mut a.chemistry.enzymes {
-                e.dx = 0;
-                e.dy = 0;
+                e.dx = 0.;
+                e.dy = 0.;
             }
         }
     }

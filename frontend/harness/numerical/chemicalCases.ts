@@ -20,13 +20,20 @@ const names = [
   "barrier",
   "degradation",
   "degradation-off",
+  ...[4, 2].flatMap((mesh) => ["left", "right", "off"].map((side) => `sensing-${side}-h${mesh}`)),
 ];
+function horizonFor(name: string) {
+  if (name.startsWith("emission")) return 100;
+  if (name.startsWith("sensing")) return 120;
+  return 300;
+}
 interface Cell {
   id: number;
   x: number;
   y: number;
+  heading: number;
   inputs: number[];
-  action: { transport: number[] };
+  action: { transport: number[]; swim: number; turn: number };
   chemicalFlows: Record<string, number[]>;
   flows: Record<string, number>;
 }
@@ -42,18 +49,26 @@ interface Summary {
 }
 const output = process.argv[2];
 if (!output) throw new Error("Provide a new output directory");
+const selected = process.argv.slice(3);
+if (!selected.length || selected.some((name) => !names.includes(name)))
+  throw new Error("Name the registered cases explicitly");
 mkdirSync(output);
 const wasmDigest = captureEngine(output);
 const engine = await loadEngine(),
   db = openLedger();
 try {
-  for (const name of names) {
+  for (const name of selected) {
     const path = `${output}/${name}`;
     mkdirSync(path);
     const world = engine.diagnostic(name),
-      horizon = name.startsWith("emission") ? 100 : 300;
+      horizon = horizonFor(name);
     writeFileSync(`${path}/initial.antropy`, world.snapshot());
     const initial = world.command<{ cells: { id: number }[] }>("frame");
+    writeFileSync(`${path}/definition.json`, JSON.stringify(world.command("definition")));
+    writeFileSync(
+      `${path}/initial-cells.json`,
+      JSON.stringify(initial.cells.map((c) => world.command("inspect", { cell: c.id })))
+    );
     const last: Record<number, Inspection> = {},
       traces: unknown[] = [];
     const started = performance.now();
@@ -75,6 +90,10 @@ try {
         stop = status.stopReason;
         break;
       }
+      if (!world.command<Summary>("summary").population) {
+        stop = "extinction";
+        break;
+      }
     }
     const wallMs = performance.now() - started,
       summary = world.command<Summary>("summary");
@@ -88,7 +107,7 @@ try {
         wasmDigest,
         horizon,
         wallCapSeconds: 30,
-        registration: "docs/design/chemistry/numerical-engine.md",
+        registration: "docs/design/chemistry/rebuild-results.md",
       },
       summary: { ...summary, stop, lastLiving: last },
       wallMs,

@@ -10,29 +10,29 @@ mod chemical_observation;
 pub mod chemical_operators;
 pub mod chemical_products;
 pub mod chemical_profiles;
+mod chemical_projection;
 pub mod chemistry;
 pub mod chemistry_atlas;
 pub mod commands;
-pub mod composed;
 pub mod config;
 pub mod controller;
 pub mod diagnostics;
-pub mod disk;
 pub mod economy;
 mod economy_report;
-#[cfg(test)]
-mod economy_tests;
+mod exchange_vector;
 pub mod field;
-pub mod field_reductions;
+mod field_activity;
+#[cfg(test)]
+mod field_activity_tests;
+mod field_vector;
 pub mod fixtures;
+mod footprint;
 mod genealogy;
 #[cfg(test)]
 mod genealogy_tests;
 pub mod genetics;
-pub mod interaction;
 pub mod inventory;
 pub mod lifecycle;
-pub mod machinery_parameters;
 #[cfg(test)]
 mod mechanism_tests;
 pub mod metabolism;
@@ -47,14 +47,10 @@ pub mod random;
 mod refitting;
 mod relationships;
 mod render;
+#[cfg(test)]
+mod runtime_tests;
 pub mod sensing;
 pub mod sources;
-pub mod spatial_energy;
-mod spatial_flux;
-mod spatial_kernel;
-pub mod spatial_numeric;
-pub mod spatial_rounding;
-pub mod spatial_step;
 mod startup_probe;
 mod storage_diagnostics;
 mod study_commands;

@@ -94,7 +94,7 @@ fn values(w: &World, genome: u64) -> [f64; 9] {
     let mut x = 0.;
     let mut y = 0.;
     for (i, t) in m.transporters.iter().enumerate() {
-        if !t.export {
+        {
             import += b[7 + i];
             x += b[7 + i] * t.x;
             y += b[7 + i] * t.y;

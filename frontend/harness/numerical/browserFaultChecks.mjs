@@ -11,6 +11,10 @@ export async function faultChecks(connection, workerSession, scripts, records) {
       const draw=Renderer.prototype.draw;
       Renderer.prototype.draw=function(...args) {
         Renderer.prototype.draw=draw;
+        globalThis.faultGraphics={gl:this.gl,lostAt:performance.now(),restoredAt:null};
+        this.canvas.addEventListener('webglcontextrestored',()=>{
+          globalThis.faultGraphics.restoredAt=performance.now();
+        },{once:true});
         globalThis.graphicsLoss=this.gl.getExtension('WEBGL_lose_context');
         if(!globalThis.graphicsLoss)throw new Error('Context-loss extension unavailable');
         globalThis.graphicsLoss.loseContext();

@@ -11,7 +11,7 @@ const engine = await loadEngine(),
   world = engine.create(),
   db = openLedger();
 try {
-  const definition = world.command("definition"),
+  const definition = world.command<{ seed: number }>("definition"),
     initial = world.command("frame");
   writeFileSync(`${output}/initial.antropy`, world.snapshot());
   const traces: unknown[] = [];
@@ -37,13 +37,13 @@ try {
     experiment: "numerical-production-startup",
     label: "Ordinary 48-founder startup; bounded integration check",
     driver: "wasm",
-    seed: 101,
+    seed: definition.seed,
     ticks: steps,
     params: {
       wasmDigest,
       horizon: 600,
       wallCapSeconds: 30,
-      registration: "docs/design/chemistry/numerical-engine.md",
+      registration: "docs/design/chemistry/rebuild-results.md",
     },
     summary: { ...summary, stop },
     wallMs,

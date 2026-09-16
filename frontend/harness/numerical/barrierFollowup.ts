@@ -22,7 +22,7 @@ try {
       { cell: 1 }
     );
     const behavior = world.command("diagnosticController", {
-      logits: [0.7, 0, 2, 0, -1, 2, 2, 0, 2],
+      logits: [0.7, 0, 2, 0, -1, 2, 2, 0, -2],
     });
     inspection.genotype.chromosomes.forEach((ch) => {
       ch.behavior = behavior;

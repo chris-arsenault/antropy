@@ -11,7 +11,7 @@ worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara pla
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
 | Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
-| Current measurements | [docs/design/chemistry/reliability-results.md](docs/design/chemistry/reliability-results.md) |
+| Current measurements | [docs/design/chemistry/rebuild-results.md](docs/design/chemistry/rebuild-results.md) |
 | Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
 | Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
@@ -21,6 +21,28 @@ worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara pla
 
 ## Governing mathematical direction
 
+**Fresh core implementation, September 15, 2026.** The removed executors and separate
+candidate have been replaced with one new production World. The
+[composed runtime](docs/design/chemistry/composed-runtime.md) and
+[rebuild work order](DIGITAL-CHEMISTRY-PLAN.md) supersede the numerical formulas,
+schema and implementation-status claims below. The current physical checkpoint is v13;
+enzyme offsets and actual installed coordinates are continuous, and transport direction
+comes from signed neural effort. Native/WASM builds,69 Rust and56 Vitest checks pass. Bounded
+opportunity, cold recovery and isolated browser rendering/save/fault checks are recorded.
+The user accepts the performance correction and passes the initial visual review at mesh2;
+M0–M3 and the rebuild plan are complete. The user's subsequent unattended run crashed;
+the [follow-up repair](LONG-RUN-RELIABILITY-PLAN.md) addresses reproduced React development
+timing retention. Initial acceptance makes no endurance or adaptation claim.
+The200ticks/s high-population target remains deferred.
+The subsequent processing-threshold correction restores default mesh2 and skips empty
+chemical groups and numerical tails below1e-24 concentration. The h2 default600-tick run
+measures372ticks/s versus62 with the dense solver. Saturated2,000-growth remains below
+30ticks/s at23.4; see the current rebuild results for matched measurements and limits.
+New worlds default to seed27 for centered review; the independent chemistry seed remains101.
+Do not restore removed implementations or resume historical M0–M8 integration steps.
+The earlier runtime descriptions remain evidence; ecological and ownership requirements
+still govern the new implementation.
+
 [Computable chemistry](docs/design/chemistry/computational-foundation.md) and
 [ADR 0022](docs/adr/0022-computable-chemistry.md) govern the current redesign. Design artificial
 rules for composed operations over the 16×16 chemical manifold: shared reductions, geographic
@@ -29,14 +51,9 @@ supplies language, not required equations. Select rules, accounts, bounds and me
 together; optimizing a conventional physical solver after selecting it is insufficient.
 Preserve discrete chemicals, genome/RNN cells, funded capabilities, explicit material/work
 accounts and immutable sharing. The earlier M0 equations and canceled M2 expansion are reference
-records. Reopened M0 now has selected revision-4 laws, reusable Rust arithmetic and passing core
-cost/CI evidence in the root plan and current specifications. M1's composition correction now
-uses CSR local delivery, a single destination-row stencil, compiled engagement and separate
-material/geographic lifetimes. Installed changes retain unaffected operators. The same core
-workload measures 7.17/15.73 ms at 48/2,000 cells; this does not establish intended performance
-or live integration. M2 spatial integration follows. Historical M0/M1 step files
-must not be replayed. Ordinary World still executes the earlier spatial/biological pipeline;
-the M0 arithmetic proof does not establish browser integration, viability or evolution.
+records. The removed M0/M1 candidate's 7.17/15.73 ms core measurements remain historical
+evidence. They do not establish replacement performance. The new World step owns the complete
+production lifecycle; do not replay historical M0/M1 step files.
 
 ## Current goal and boundary
 
@@ -57,21 +74,20 @@ sequence records implementation and its human review gate; [plan closeout](docs/
 
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
 The active contract is 39 inputs, 24 recurrent units, nine outputs, fifteen funded stocks,
-four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v12.
+four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v13.
 [Digital chemistry](docs/design/chemistry/README.md) replaces A/B processing, named toxins,
 matrix binding, automatic catabolism, sharing, prey yield and the carbon/oxygen cycle.
 A persisted smooth 16 × 16 chemical manifold supplies potential, diffusion, impedance and stress.
 Finite sources, paid transport/reactions, generic biomass, washout and death close the resource books.
 Chemical definition version 4 adds validated shared profiles to the joint diffusion/impedance
-coverage. M1's canonical compiler serves the composed kernels and atlas, with live machinery
-integration still pending; World stepping
-still uses the earlier spatial and biological rules. Inherited target changes
+coverage. The new compiler serves live installed machinery and the atlas. World stepping uses the
+composed artificial rules linked above. Inherited target changes
 retain installed machinery identity until paid refitting; birth never grants replacement stock.
 
 Physical and behavioral mutation occur at local resource-funded reproduction; acquired recurrent
 changes can transmit into offspring chromosomes. The default is 320 × 240 units, viscosity 0.004,
-48 finite unequal renewal sites and two colonies. New [measurements](docs/design/chemistry/numerical-results.md)
-contains constructed opportunities and negative findings, not evolved-community certification.
+48 finite unequal renewal sites and two colonies. New [measurements](docs/design/chemistry/rebuild-results.md)
+contain constructed opportunities and negative findings, not evolved-community certification.
 Historical A/B studies and their [corrected analysis](docs/analysis-correction.md) retain their
 original meaning and do not establish current chemical behavior.
 
@@ -81,7 +97,7 @@ No fallback controller, task dispatcher, offline optimizer or central parent sel
 population. The task byte remains opaque. Genotypes are immutable; acquired experience belongs to
 individuals until explicit birth-local assimilation.
 
-Run starts seed 101, paused at tick zero, with 48 identical founder genotypes split between two
+Run starts seed 27, paused at tick zero, with 48 identical founder genotypes split between two
 separated resource neighborhoods; most opportunities start unoccupied. New default worlds must
 start with at least two spatial colonies. Generic source zones and epochs remain selectable.
 Haploid clonal fission, mutation and paid inheritable plasticity remain active. The user reviews through Run and

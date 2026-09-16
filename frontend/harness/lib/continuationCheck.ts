@@ -168,7 +168,7 @@ export async function runContinuationCheck(flags: Flags): Promise<void> {
     schemaVersion: 3,
     sourceDigest: engine.sourceDigest,
     binaryDigest,
-    registration: "docs/design/chemistry/numerical-engine.md",
+    registration: "docs/design/chemistry/rebuild-results.md",
     wallSecondsPerCase: 60,
     interpretation:
       "Synthetic storage and bounded continuation; no evolutionary or endurance claim",

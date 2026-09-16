@@ -9,16 +9,16 @@ physical opportunities and operating limits; no evolved community is supplied.
 
 ## Substrate and embodied state
 
-One periodic 320 × 240 XY plane contains continuous circular organisms and a mesh-2 chemical
+One periodic 320 × 240 XY plane contains continuous circular organisms and a mesh-4 chemical
 field. Neither axis is height. Sampling, motion, contact, offspring placement and rendering
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
 
 A cell owns position, heading, fifteen actual material stocks, a 256-element float64 intracellular chemical
 mixture, usable energy, injury, four adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
-drag. Circular footprints use a spherical reference radius; this is an approximation, not a
-resolved third dimension or fluid solver. Overdamped movement and Brownian rotation share local
-impedance-dependent drag. Four bounded contact-separation passes resolve overlaps approximately.
+drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile
+response share local impedance-dependent mobility. A bounded local pair correction resolves
+overlaps approximately. There is no temperature, Brownian rule or fluid solver.
 
 <a id="world-fields-and-finite-deposits"></a>
 
@@ -26,9 +26,9 @@ impedance-dependent drag. Four bounded contact-separation passes resolve overlap
 
 The world persists a constrained 16×16 chemical manifold. Every ID has potential, diffusivity,
 impedance and stress. IDs have no privileged food, toxin, signal or matrix role. Dense node-major float32 arrays store all 256 species per mesh node. Conservative SIMD
-face diffusion and one slow extracellular washout rate apply to all chemicals. Float32 rounding
+destination-row diffusion plus shared-profile drift and one slow extracellular washout rate apply to all chemicals. Float32 rounding
 has explicit matter/energy accounts; no concentration cutoff controls storage. See the
-[selected numerical laws](chemistry/numerical-engine.md).
+[selected numerical laws](chemistry/composed-runtime.md).
 
 Forty-eight finite renewal sites occupy seven unequal abiotic neighborhoods. Their positions,
 richness, radii and mixture proportions persist across localized renewal. Renewal is independent of organism demand or identity. Expired source
@@ -36,7 +36,7 @@ inventory is released with chemical identity intact. Sources supply matter and p
 release from an already accounted source is an internal transfer.
 
 The default chemistry seed is 101, independent of geography seed. Its physical source-selection
-rule chooses IDs 0 and 15. This bootstrap composition is provisional. Ten percent of initial
+rule chooses IDs 0 and 80. This bootstrap composition is provisional. Ten percent of initial
 source inventory is dissolved locally, with zero uniform background grant. Forty-eight identical
 mutable founders occupy two separated source neighborhoods, 24 per colony. Their membrane
 matches the primary retained metabolite; the mutable controller exports only near storage
@@ -58,20 +58,21 @@ compositions. No calendar, zone label or chemical ID enters the controller direc
 Movement ticks advance 0.2 model seconds. Field/sensing/physiology accumulate 0.8 seconds
 before their updates; actions remain held between inferences. The phase order is:
 
-1. Advance finite sources; on physiology boundaries advance conservative diffusion/washout.
-   Apply optional disturbance each movement tick.
-2. On physiology boundaries form local observations and run each RNN against the common field.
+1. Advance finite sources, compose chemical/body signals; on physiology boundaries advance
+   conservative diffusion/drift/washout through the full accumulated interval.
+2. At startup and physiology boundaries form local observations and run each RNN against the common field.
 3. Pay affordable swimming/turning and resolve movement/contact.
-4. On physiology boundaries apply membrane-dependent external and internal chemical injury.
-5. On those boundaries resolve funded import/export from shared supply, storage and usable energy.
-6. On those boundaries run unary enzymes, maintenance, repair and generic construction.
-7. Correct contact and attempt local funded reproduction on physiology boundaries; apply optional
-   contact transfer every tick. Daughters first infer on the next physiology boundary.
+4. On physiology boundaries resolve funded import/export from shared supply, storage and usable work.
+5. On those boundaries apply membrane-dependent external/internal injury, unary reactions,
+   repair, paid refitting, generic construction and work overflow.
+6. Pay maintenance every movement tick; resolve death, optional disturbance/contact transfer
+   and funded reproduction. Daughters first infer on the next physiology boundary.
 
 Transport cannot use prospective export to create import headroom; released material becomes
 available in the next transport phase. Enzymes see one starting intracellular inventory, so products
 cannot cascade by enzyme iteration order. Uphill reactions use energy already held. Downhill
-overflow becomes heat. Movement and transport reserve basal maintenance before allocating effort.
+overflow becomes heat. Growth/refitting protect upkeep and current motor/learning work through
+the next physiology interval. Motor and transport effort otherwise compete for available work.
 
 Matter and energy close separately across fields, sources, cells, generic bodies, washout and
 dissipation. There is no automatic scalar-reserve catabolism, direct prey yield, reserve sharing
@@ -87,7 +88,8 @@ only installed stocks provide capability. Repair replaces actual material and pa
 growth. Replaced material returns as the generic decomposition chemical.
 
 Fission requires all division stocks, daughter inventory/energy, the division charge and local
-physical space. Failed placement grants no resources. Fission splits stocks, each chemical and
+placement in the periodic plane. Daughters separate along the parent's heading and subsequently
+participate in ordinary local overlap resolution. Fission splits stocks, each chemical and
 post-cost energy equally; budding uses the same split while retaining the experienced parent.
 Changed inherited machinery retains its installed function until paid refitting is affordable.
 Birth splits installed stock and identity rather than granting new machinery. Damage fraction
@@ -107,7 +109,7 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v11 stores complete chemistry, mixtures, actual stocks and installed identity, chemical/behavioral genes,
+Checkpoint v13 stores complete chemistry, mixtures, actual stocks and installed coordinates/revision, chemical/behavioral genes,
 private state, parentage, source state, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs

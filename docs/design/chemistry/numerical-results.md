@@ -1,5 +1,9 @@
 # Numerical engine measurements
 
+**Historical measurements.** The September15 fresh core has a separate
+[registration and result record](rebuild-results.md). The binaries, checkpoints and claims below
+retain their original scope and do not certify the new production laws.
+
 September 14, 2026. These are bounded mechanism and computation checks for the replacement
 Rust/WASM engine. They do not demonstrate evolved adaptation, persistent coexistence or
 days/weeks endurance. The browser and harness now use this sole Rust/WASM runtime.

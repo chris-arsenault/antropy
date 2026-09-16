@@ -35,7 +35,7 @@ fn sparse_compatibility_correction_equals_full_chemical_exposure() {
     w.cells[0].y = 6.;
     let cell = &w.cells[0];
     let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
-    let sites = w.field.stencil(cell.x, cell.y);
+    let sites = crate::footprint::sites(cell, &w.config, &w.field);
     let expected = (0..256)
         .map(|s| {
             let chi = 1.
@@ -76,14 +76,18 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
     b.cells.reverse();
     let before = a.held();
     for w in [&mut a, &mut b] {
-        transport::exchange(
+        let sites = w
+            .cells
+            .iter()
+            .map(|c| crate::footprint::sites(c, &w.config, &w.field))
+            .collect::<Vec<_>>();
+        transport::Exchange::default().advance(
             &mut w.cells,
-            &w.genomes,
             &w.config,
             &mut w.field,
             &w.chemistry,
+            &sites,
             &mut w.ledger,
-            &mut transport::Work::default(),
         );
     }
     for cell in &a.cells {
@@ -101,30 +105,41 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
 }
 
 #[test]
-fn paid_refitting_preserves_stock_and_keeps_old_identity_until_affordable() {
+fn paid_refitting_moves_actual_coordinates_without_replacing_other_slots() {
     let mut w = fixture(Config::default());
     let mut g = w.genomes[&1].clone();
     g.id = 2;
     g.parent = Some(1);
     g.chromosomes[0].chemistry.transporters[0].x += 0.12;
     g.compile(&w.config, &w.chemistry);
-    w.genomes.insert(2, g);
+    let target = g.compiled.as_ref().unwrap();
     let mut cell = w.cells.remove(0);
     cell.genome = 2;
-    let stock = cell.body;
+    let before = cell.installed.clone();
+    let retained = cell.operators.as_ref().unwrap().enzymes[0].clone();
     cell.energy = 0.;
-    crate::refitting::attempt(&mut cell, &w.genomes, &w.config);
-    assert_eq!(cell.machinery_genome, 1);
-    assert_eq!(cell.body, stock);
+    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 0.2);
+    assert_eq!(cell.installed, before);
     cell.energy = 1.;
-    crate::refitting::attempt(&mut cell, &w.genomes, &w.config);
-    assert_eq!(cell.machinery_genome, 2);
-    assert_eq!(cell.body, stock);
-    assert!((cell.flows.refitting - stock[7] * w.config.construction_energy).abs() < 1e-12);
+    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 0.2);
+    assert!(cell.installed.transporters[0].x > before.transporters[0].x);
+    assert!(cell.installed.transporters[0].x < target.chromosome.chemistry.transporters[0].x);
+    assert!(std::sync::Arc::ptr_eq(
+        &retained,
+        &cell.operators.as_ref().unwrap().enzymes[0]
+    ));
     assert!((cell.energy + cell.flows.refitting - 1.).abs() < 1e-12);
-    let paid = cell.flows.refitting;
-    crate::refitting::attempt(&mut cell, &w.genomes, &w.config);
-    assert_eq!(cell.flows.refitting, paid);
+    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 0.8);
+    assert_eq!(cell.installed, target.chromosome.chemistry);
+    assert!(std::sync::Arc::ptr_eq(
+        &target.operators.transporters[0],
+        &cell.operators.as_ref().unwrap().transporters[0]
+    ));
+    assert!(std::sync::Arc::ptr_eq(
+        &retained,
+        &cell.operators.as_ref().unwrap().enzymes[0]
+    ));
+    assert!((cell.energy + cell.flows.refitting - 1.).abs() < 1e-12);
 }
 
 #[test]
@@ -142,7 +157,7 @@ fn disturbance_conserves_chemistry_and_death_releases_resources() {
     let before = w.held();
     let numerical = w.ledger.numerical_material;
     let numerical_energy = w.ledger.numerical_energy;
-    w.disturb();
+    crate::lifecycle::disturb(&mut w);
     let after = w.held();
     assert_eq!(w.cells.len(), 0);
     assert_eq!(w.ledger.disturbance_deaths, 2);
@@ -179,7 +194,7 @@ fn optional_selfing_and_budding_keep_funding_and_parentage() {
         cell.inventory.set(w.config.source_species[0], 1.);
     }
     let before = w.held();
-    w.reproduce();
+    crate::lifecycle::reproduce(&mut w);
     let after = w.held();
     assert!(w.ledger.divisions > 0);
     assert!(
@@ -227,6 +242,8 @@ fn membrane_mutation_is_local_and_not_universal_immunity() {
         a.chemistry.membrane = p;
     }
     g.compile(&w.config, &w.chemistry);
+    cell.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
+    cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
     let tolerant = sensing::stress_load(
         &cell,
         g.compiled.as_ref().unwrap(),
@@ -241,6 +258,8 @@ fn membrane_mutation_is_local_and_not_universal_immunity() {
         };
     }
     g.compile(&w.config, &w.chemistry);
+    cell.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
+    cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
     let sensitive = sensing::stress_load(
         &cell,
         g.compiled.as_ref().unwrap(),
@@ -342,7 +361,7 @@ fn optional_contact_transfer_retains_installed_identity_without_material_grants(
     }
     let before = w.held();
     let original = w.genomes[&1].chromosomes.clone();
-    w.transfer();
+    crate::lifecycle::transfer(&mut w);
     assert!(w.ledger.transfers > 0);
     assert_eq!(w.genomes[&1].chromosomes, original);
     assert!(w.cells.iter().any(|c| c.machinery_genome != c.genome));

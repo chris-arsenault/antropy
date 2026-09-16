@@ -60,6 +60,7 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
   expect(g.uploads.length).toBe(3);
   expect(g.uploads.every((v) => v.buffer === buffer)).toBe(true);
   expect(g.uploads[0].byteOffset).toBe(view.cells.byteOffset);
+  expect([view.nx, view.ny]).toEqual([12, 12]);
   expect(g.uploads[1].byteLength).toBe(12 * 12 * 8 * 4);
   const fieldUploads = () => g.uploads.filter((v) => v.byteOffset === view.field.byteOffset).length;
   const textures = fieldUploads();

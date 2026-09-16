@@ -1,11 +1,12 @@
 # Chemical substrate and accounting
 
-Runtime/reference description from the previous chemistry implementation. For new rules use the
-[computational foundation](computational-foundation.md) and [current specification](../../specs/digital-chemistry/README.md).
-The formulas and tick order below are version-specific, not the governing mathematical target.
-M1 added v4 interaction profiles and physical checkpoint v12; field-coupled transport and live
-continuous machinery remain unfinished. Preserve material identity, finite resources and explicit
-accounts while designing inexpensive composed operators across chemical space.
+Historical substrate/reference description from the previous chemistry implementation. Current
+execution is defined by the [composed runtime](composed-runtime.md), under the
+[computational foundation](computational-foundation.md). The formulas, mesh, checkpoint and
+tick order below preserve earlier choices; they do not govern the fresh production World.
+That World implements v4 shared profiles, continuous installed machinery and physical checkpoint
+v13. Preserve material identity, finite resources and explicit accounts without reconstructing
+the old conductance, temperature or categorical machinery rules below.
 
 Status: implemented; [numerical design](numerical-engine.md) and [current results](numerical-results.md) record selected
 laws, numerical checks and limitations. The [design overview](README.md) records provenance, scope and
@@ -87,9 +88,12 @@ amounts use float64 vectors with an owned material reduction. Geography is conti
 independent of mesh spacing. Default mesh 2 gives 160 × 120 nodes in the 320 × 240 world,
 about 18.75 MiB for external amount storage before work buffers, organisms or history.
 
-No abundance cutoff removes diffusion tails. Float32 rounding is recorded separately from
-physical washout in matter and potential accounts. Shared reductions and compiled compact
-operators keep computation bounded as every chemical spreads. Mesh allocation is limited to
+The user-authorized September15 correction rounds extracellular concentrations below
+`1e-24` to zero at field substeps and indexes occupied chemical groups plus their neighbor
+halo. Numerical losses, including this floor, are recorded separately from physical washout
+in matter and potential accounts. This local resolution does not select species by global
+abundance or prune intracellular stocks. See the [current runtime](composed-runtime.md).
+Shared reductions and compiled compact operators bound remaining work. Mesh allocation is limited to
 80,000 nodes; organism and ancestry limits are separate. These are operating limits, not
 carrying capacities. See [numerical methods and checks](numerical-engine.md).
 

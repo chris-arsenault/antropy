@@ -15,6 +15,10 @@ pub struct Cell {
     pub generation: u64,
     pub genome: u64,
     pub machinery_genome: u64,
+    pub installed: crate::genetics::Machinery,
+    pub machinery_revision: u64,
+    #[serde(skip)]
+    pub operators: Option<crate::chemical_operators::Operators>,
     pub born: u64,
     pub x: f64,
     pub y: f64,
@@ -90,6 +94,9 @@ impl Cell {
             generation: 0,
             genome,
             machinery_genome: genome,
+            installed: compiled.chromosome.chemistry.clone(),
+            machinery_revision: 0,
+            operators: Some(compiled.operators.clone()),
             born: 0,
             x,
             y,
@@ -134,6 +141,7 @@ impl Cell {
         amount
     }
     pub fn validate(&self, c: &Config) -> Result<(), String> {
+        self.installed.validate()?;
         self.inventory.validate()?;
         if self.inventory.len() != SPECIES
             || self.inputs.len() != INPUTS

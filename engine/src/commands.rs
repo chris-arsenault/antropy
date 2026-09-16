@@ -24,7 +24,7 @@ pub fn configuration(v: &Value) -> Result<Value, String> {
     }
     let genotype = Genotype::seed(&config, &chemistry);
     Ok(
-        json!({"config":config,"chemistry":chemistry,"genotype":genotype,"stationary":crate::controller::diagnostic([0.,0.,3.,0.,-1.,3.,3.,3.,3.],None)}),
+        json!({"config":config,"chemistry":chemistry,"genotype":genotype,"stationary":crate::controller::diagnostic([0.,0.,3.,0.,-1.,3.,3.,-3.,-3.],None)}),
     )
 }
 pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
@@ -94,10 +94,10 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             Ok(json!({}))
         }
         "profile" => Ok(json!(w.step_measured(crate::abi::clock))),
-        "composedCapacity" => crate::composed::capacity::run(
-            w,
-            v.get("baseline").and_then(Value::as_bool).unwrap_or(false),
-        ),
+        "fieldActivity" => Ok(json!(w.field.work_counts())),
+        "composedCapacity" => {
+            Err("Retired standalone core benchmark; use production capacity".into())
+        }
         "diffusionProbe" => Ok(crate::opportunities::diffusion_probe(w)),
         "field" => observation::field_view(
             w,
@@ -123,10 +123,9 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
                 .iter()
                 .map(|s| {
                     (0..4)
-                        .filter(|i| !compiled.chromosome.chemistry.transporters[*i].export)
                         .map(|i| {
                             compiled.body[7 + i]
-                                * compiled.transporters[i]
+                                * compiled.operators.transporters[i]
                                     .iter()
                                     .filter(|a| a.species == *s)
                                     .map(|a| a.value)
@@ -311,6 +310,9 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             g.compile(&w.config, &w.chemistry);
             cell.genome = g.id;
             cell.machinery_genome = g.id;
+            cell.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
+            cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+            cell.machinery_revision += 1;
             genotype = Some(g);
         }
         if let Some(value) = v.get("inventory") {
@@ -407,8 +409,8 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
             for e in &mut a.chemistry.enzymes {
                 e.x = rng.unit() * 15.;
                 e.y = rng.unit() * 15.;
-                e.dx = rng.index(31) as i8 - 15;
-                e.dy = rng.index(31) as i8 - 15;
+                e.dx = rng.unit() * 30. - 15.;
+                e.dy = rng.unit() * 30. - 15.;
             }
             for t in &mut a.chemistry.transporters {
                 t.x = rng.unit() * 15.;
@@ -420,14 +422,7 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
             }
             a.chemistry.membrane.x = rng.unit() * 15.;
             a.chemistry.membrane.y = rng.unit() * 15.;
-            crate::controller::mutate_vector(
-                &mut a.behavior.weights,
-                &mut rng,
-                0.1,
-                0.03,
-                16.,
-                "gaussian",
-            );
+            crate::controller::diagnostics::perturb_weights(&mut a.behavior, &mut rng);
         }
         g.compile(&w.config, &w.chemistry);
         let x =
@@ -496,7 +491,7 @@ pub fn create(v: &Value) -> Result<World, String> {
         }
         let interval = d.get("interval").and_then(Value::as_f64).unwrap_or(0.8);
         let mesh = d.get("mesh").and_then(Value::as_f64).unwrap_or(2.);
-        if ![0.2, 0.4, 0.8].contains(&interval) || ![1., 2.].contains(&mesh) {
+        if ![0.2, 0.4, 0.8].contains(&interval) || ![1., 2., 4.].contains(&mesh) {
             return Err("Unregistered diagnostic resolution".into());
         }
         return Ok(crate::diagnostics::nutrition(
@@ -506,7 +501,7 @@ pub fn create(v: &Value) -> Result<World, String> {
             d.get("moving").and_then(Value::as_bool).unwrap_or(false),
         ));
     }
-    let seed = v.get("seed").and_then(Value::as_u64).unwrap_or(101);
+    let seed = v.get("seed").and_then(Value::as_u64).unwrap_or(27);
     let config: Config = serde_json::from_value(v.get("config").cloned().unwrap_or(json!({})))
         .map_err(|e| e.to_string())?;
     World::new(seed, config)

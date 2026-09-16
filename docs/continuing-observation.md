@@ -5,6 +5,13 @@ and bounded observation history. Days/weeks ecological persistence and browser e
 unverified. Development establishes physical opportunities; it does not precompute the user's
 future community.
 
+The September 15 unattended tab crash prompted a separate
+[memory investigation and repair](../LONG-RUN-RELIABILITY-PLAN.md). Active development-page
+checks reproduced retained React performance records and rapid renderer-process growth.
+Development startup now releases completed React timing records after observer delivery;
+the simulation and shared WASM renderer are unchanged. The lost tab's exact cause remains
+unverified without its runtime trace. Current repair measurements belong to that record.
+
 The September 14 [reliability evidence](design/chemistry/reliability-results.md) adds browser
 retention, save-concurrency and presentation measurements. The older headless figures below
 retain their original scope. The repaired actual browser sustains 54 ticks/s at 2,000 varied cells

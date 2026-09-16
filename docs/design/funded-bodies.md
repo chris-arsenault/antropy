@@ -14,8 +14,8 @@ Each chromosome has fifteen bounded float32 investment loci plus fixed chemical 
 | 1 | Motor | 0.08 |
 | 2 | Storage | 0.08 |
 | 3–6 | Four receptors, each with a chemical target coordinate | 0.01 each |
-| 7–10 | Four transporters, each with target and import/export direction | 0.04 each |
-| 11–14 | Four unary enzymes, each with target and integer product offset | 0.04 each |
+| 7–10 | Four transporters, each with a target; neural effort chooses direction | 0.04 each |
+| 11–14 | Four unary enzymes, each with target and continuous product offset | 0.04 each |
 
 A membrane coordinate controls chemical compatibility. Slot count is fixed; no variable-length
 genome structure is implemented. Core target is reference core × exp(g0). Other stocks use
@@ -32,19 +32,19 @@ See [installed machinery](chemistry/installed-machinery.md).
 
 ## Geometry, motion and uptake
 
-Volume = structure/bodyDensity + internal matter/inventoryDensity; radius = cbrt(3V/(4π)).
-This reference sphere defines circular XY footprints, not a spatial depth axis.
+Area = structure/bodyDensity + internal matter/inventoryDensity; radius = sqrt(area/π).
+The API's `volume` name denotes this occupied area in the periodic XY plane.
 Energy capacity follows actual core; chemical storage capacity follows actual storage.
 
-Translational/rotational resistances are 6πηr and 8πηr³, divided by the square of local mobility.
-Motor-limited speed therefore scales by mobility; Brownian rotation uses the same effective drag.
-Damage reduces speed and turn capacity. There is no inertial coasting.
+Artificial drag is 8ηr. Funded motor power, damage, efficiency and local impedance mobility
+bound swimming and turning. Shared chemical/body profiles also produce bounded passive drift,
+without crediting usable work. There is no Brownian temperature or inertial coasting.
 
-Each transporter requests affinity-weighted first-order transfer, limited by funded throughput.
-Imports additionally face 4πDr conductance, local impedance, shared extracellular supply and
-pre-transfer internal headroom. Import/export work requires usable energy. More machinery cannot
-evade poor conductance or create material. The spherical conductance approximation over a 2D
-field is an explicit modeling simplification.
+Each transporter divides finite funded throughput among its recognized local mixture.
+Diffusion/drift and the finite body footprint determine delivery. Imports face shared
+extracellular donors and pre-transfer internal headroom; both directions require usable work.
+There is no separate spherical conductance ceiling. The [composed runtime](chemistry/composed-runtime.md)
+specifies occupancy, shared demand and the simultaneous commitment.
 
 <a id="bodies-accounting"></a>
 
@@ -56,7 +56,8 @@ generic body potential and usable energy, with all external supply, washout and 
 recorded separately.
 
 Unary reactions preserve scalar material and change identity. Downhill conversion captures
-0.8×potential drop; uphill conversion charges potential rise/0.8. Both lose heat. Enzymes share
+0.8×potential drop; uphill conversion charges potential rise/0.8. A .05 catalytic price applies
+per unit that changes identity and vanishes continuously for an idle offset. Enzymes share
 starting substrate and cannot consume each other's new products in the same phase. Overflow is heat.
 
 Every internal species can become generic biomass. Assembly consumes matter proportionally,
@@ -101,13 +102,12 @@ Haploid/diploid, clonal/selfing transmission, uniform/one-point crossover, Gauss
 fission/budding and static/plastic learning remain independent configured policies. Selfing requires
 diploidy and uses two gametes from one parent; outcrossing and multi-parent ancestry remain deferred.
 
-Diploid continuous alleles average; expressed offsets round and reflect in bounded chemical space.
-Transport direction follows the first homolog, so homolog order is meaningful and sequence identity
-must preserve it. Chemical coordinates mutate locally with reflection, enzyme offsets take bounded
-integer steps, and transporter direction can flip. No slot count evolves.
+Diploid continuous alleles average, including enzyme offsets. Chemical coordinates and offsets
+mutate locally with reflection; reflected product positions distribute material bilinearly
+among at most four discrete species. Neural effort can reverse any transporter. No slot count evolves.
 
 Default behavioral mutation probability/scale is 0.0015/0.08; physical and chemical alleles use
-0.1/0.12, with their declared discrete operators. Weights clamp to [-16,16], plasticity to [-1,1],
+0.1/0.12. Weights clamp to [-16,16], plasticity to [-1,1],
 investments to [-3,3], coordinates to reflected [0,15] and offsets to [-15,15].
-No score selects parents or filters mutants. Checkpoint v11 preserves complete allele and actual-state
+No score selects parents or filters mutants. Checkpoint v13 preserves complete allele and actual-state
 distinctions; unavailable pruned genotype payloads remain labeled provenance.

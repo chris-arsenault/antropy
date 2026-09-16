@@ -169,6 +169,12 @@ representation error. Competing requests cannot overdraw donors or reuse prospec
 through incidental iteration order. Zero and tiny amounts need defined behavior without a
 global abundance deletion threshold.
 
+The September15 processing-threshold correction defines a local extracellular concentration
+floor of `1e-24`, with explicit numerical-loss accounting and active-region execution in the
+[current runtime](composed-runtime.md). It does not remove a chemical identity based on its
+total abundance or grant replacement material. This user-authorized numerical resolution
+supersedes earlier implementation text that required processing every positive diffusion tail.
+
 Usable energy is funded and bounded. Motors, processing, construction, repair, learning and
 remodeling have consistent consequences under the selected accounting rules. A closed sequence
 that restores material, body and relevant field state must not manufacture spendable work.

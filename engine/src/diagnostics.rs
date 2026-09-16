@@ -12,7 +12,6 @@ pub fn nutrition(interval: f64, mesh: f64, supply: bool, moving: bool) -> World 
         learning: "static".into(),
         mutation_rate: 0.,
         physical_mutation_rate: 0.,
-        thermal_energy: 0.,
         ..Config::default()
     };
     let mut w = World::new(101, c).unwrap();
@@ -51,6 +50,11 @@ pub fn nutrition(interval: f64, mesh: f64, supply: bool, moving: bool) -> World 
 
 pub fn initialize(w: &mut World) {
     for cell in &mut w.cells {
+        if w.tick == 0 {
+            let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
+            cell.installed = g.chromosome.chemistry.clone();
+            cell.operators = Some(g.operators.clone());
+        }
         sensing::initialize(
             cell,
             w.genomes[&cell.genome].compiled.as_ref().unwrap(),
@@ -69,16 +73,12 @@ pub fn retarget(g: &mut crate::genetics::Genotype, slot: usize, from: usize, to:
     let b = Target::species(to);
     for ch in &mut g.chromosomes {
         ch.chemistry.receptors[slot] = a;
-        ch.chemistry.transporters[slot] = crate::genetics::Transporter {
-            x: a.x,
-            y: a.y,
-            export: false,
-        };
+        ch.chemistry.transporters[slot] = crate::genetics::Transporter { x: a.x, y: a.y };
         ch.chemistry.enzymes[slot] = crate::genetics::Enzyme {
             x: a.x,
             y: a.y,
-            dx: (b.x - a.x) as i8,
-            dy: (b.y - a.y) as i8,
+            dx: b.x - a.x,
+            dy: b.y - a.y,
         };
     }
 }

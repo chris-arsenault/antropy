@@ -1,0 +1,757 @@
+[
+  {
+    "wallMs": 261,
+    "processes": [
+      {
+        "id": 1204376,
+        "type": "browser",
+        "rssKiB": 230536
+      },
+      {
+        "id": 1204516,
+        "type": "renderer",
+        "rssKiB": 93096
+      },
+      {
+        "id": 1204514,
+        "type": "renderer",
+        "rssKiB": 93216
+      },
+      {
+        "id": 1204502,
+        "type": "renderer",
+        "rssKiB": 74460
+      },
+      {
+        "id": 1204479,
+        "type": "renderer",
+        "rssKiB": 380756
+      },
+      {
+        "id": 1204480,
+        "type": "renderer",
+        "rssKiB": 98384
+      },
+      {
+        "id": 1204465,
+        "type": "renderer",
+        "rssKiB": 121136
+      },
+      {
+        "id": 1204409,
+        "type": "GPU",
+        "rssKiB": 136204
+      },
+      {
+        "id": 1204412,
+        "type": "network.mojom.NetworkService",
+        "rssKiB": 130716
+      },
+      {
+        "id": 1204428,
+        "type": "storage.mojom.StorageService",
+        "rssKiB": 50052
+      }
+    ],
+    "main": {
+      "usedSize": 23590540,
+      "totalSize": 36847616,
+      "embedderHeapUsedSize": 7253168,
+      "backingStorageSize": 1871893
+    },
+    "worker": {
+      "usedSize": 1092048,
+      "totalSize": 4980736,
+      "embedderHeapUsedSize": 613952,
+      "backingStorageSize": 262934
+    },
+    "status": {
+      "at": 631,
+      "summary": {
+        "ancestryRecords": 48,
+        "biomass": 72.96000000000004,
+        "cellEnergy": 24,
+        "energyResidual": 0,
+        "generation": 0,
+        "genomes": 1,
+        "heldEnergy": 45310.764853262226,
+        "heldMaterial": 6650.35693310879,
+        "ledger": {
+          "births": 0,
+          "deathHeat": 0,
+          "deaths": 0,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 0,
+          "divisions": 0,
+          "flows": {
+            "captured": 0,
+            "constructed": 0,
+            "construction": 0,
+            "damage": 0,
+            "distance": 0,
+            "exported": 0,
+            "exposure": 0,
+            "imported": 0,
+            "learning": 0,
+            "maintenance": 0,
+            "motors": 0,
+            "reacted": 0,
+            "reactionHeat": 0,
+            "refitting": 0,
+            "repair": 0,
+            "repaired": 0,
+            "transport": 0
+          },
+          "initialEnergy": 45310.764853262226,
+          "initialMaterial": 6650.35693310879,
+          "numericalEnergy": 0,
+          "numericalMaterial": 0,
+          "overflowHeat": 0,
+          "supplied": 0,
+          "suppliedEnergy": 0,
+          "transfers": 0,
+          "washedOut": 0,
+          "washoutEnergy": 0
+        },
+        "lineages": 48,
+        "materialResidual": 0,
+        "modelSeconds": 0,
+        "population": 48,
+        "stopReason": null,
+        "tick": 0
+      },
+      "workerWork": {
+        "simulationMs": 0,
+        "renderMs": 5.199999809265137,
+        "observationMs": 20.40000009536743,
+        "frames": 2,
+        "skippedFrames": 0
+      }
+    }
+  },
+  {
+    "wallMs": 10266,
+    "processes": [
+      {
+        "id": 1204376,
+        "type": "browser",
+        "rssKiB": 232664
+      },
+      {
+        "id": 1204516,
+        "type": "renderer",
+        "rssKiB": 92312
+      },
+      {
+        "id": 1204514,
+        "type": "renderer",
+        "rssKiB": 92528
+      },
+      {
+        "id": 1204502,
+        "type": "renderer",
+        "rssKiB": 73908
+      },
+      {
+        "id": 1204479,
+        "type": "renderer",
+        "rssKiB": 542324
+      },
+      {
+        "id": 1204480,
+        "type": "renderer",
+        "rssKiB": 97536
+      },
+      {
+        "id": 1204465,
+        "type": "renderer",
+        "rssKiB": 121200
+      },
+      {
+        "id": 1204409,
+        "type": "GPU",
+        "rssKiB": 145928
+      },
+      {
+        "id": 1204412,
+        "type": "network.mojom.NetworkService",
+        "rssKiB": 130844
+      },
+      {
+        "id": 1204428,
+        "type": "storage.mojom.StorageService",
+        "rssKiB": 50116
+      }
+    ],
+    "main": {
+      "usedSize": 77895368,
+      "totalSize": 122830848,
+      "embedderHeapUsedSize": 35396016,
+      "backingStorageSize": 1909272
+    },
+    "worker": {
+      "usedSize": 2045788,
+      "totalSize": 4718592,
+      "embedderHeapUsedSize": 740240,
+      "backingStorageSize": 623808
+    },
+    "status": {
+      "at": 10699.5,
+      "summary": {
+        "ancestryRecords": 572,
+        "biomass": 185.27203090987555,
+        "cellEnergy": 3.3488371051669397,
+        "energyResidual": -6.137815944384784e-8,
+        "generation": 7,
+        "genomes": 86,
+        "heldEnergy": 36363.80029439558,
+        "heldMaterial": 5948.020137097044,
+        "ledger": {
+          "births": 524,
+          "deathHeat": 0,
+          "deaths": 224,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 20.959999999999905,
+          "divisions": 262,
+          "flows": {
+            "captured": 1933.9165582197124,
+            "constructed": 577.7011589274774,
+            "construction": 2569.006383974737,
+            "damage": 204.16832684098645,
+            "distance": 11203.966540596079,
+            "exported": 337.9079989183312,
+            "exposure": 13619.29262660513,
+            "imported": 1340.6674903456346,
+            "learning": 113.49783455339227,
+            "maintenance": 891.2820706571433,
+            "motors": 397.708502229442,
+            "reacted": 517.854422016221,
+            "reactionHeat": 515.8450409309486,
+            "refitting": 6.566388793150507,
+            "repair": 366.26470683496973,
+            "repaired": 189.7169636931126,
+            "transport": 83.92877446319712
+          },
+          "initialEnergy": 45310.764853262226,
+          "initialMaterial": 6650.35693310879,
+          "numericalEnergy": -0.15461797040525124,
+          "numericalMaterial": -0.02571098946090657,
+          "overflowHeat": 0,
+          "supplied": 188.26619304117827,
+          "suppliedEnergy": 1357.4020233086203,
+          "transfers": 0,
+          "washedOut": 890.6287000423765,
+          "washoutEnergy": 5339.4614977700685
+        },
+        "lineages": 13,
+        "materialResidual": 8.770224130261184e-12,
+        "modelSeconds": 486.40000000000003,
+        "population": 86,
+        "stopReason": null,
+        "tick": 2432
+      },
+      "throughput": 222.79689684204322,
+      "workerWork": {
+        "simulationMs": 8759.800001621246,
+        "renderMs": 105.89999485015869,
+        "observationMs": 178.19999980926514,
+        "frames": 190,
+        "skippedFrames": 0
+      }
+    }
+  },
+  {
+    "wallMs": 20512,
+    "processes": [
+      {
+        "id": 1204376,
+        "type": "browser",
+        "rssKiB": 232672
+      },
+      {
+        "id": 1204516,
+        "type": "renderer",
+        "rssKiB": 92376
+      },
+      {
+        "id": 1204514,
+        "type": "renderer",
+        "rssKiB": 92520
+      },
+      {
+        "id": 1204502,
+        "type": "renderer",
+        "rssKiB": 73908
+      },
+      {
+        "id": 1204479,
+        "type": "renderer",
+        "rssKiB": 739816
+      },
+      {
+        "id": 1204480,
+        "type": "renderer",
+        "rssKiB": 97536
+      },
+      {
+        "id": 1204465,
+        "type": "renderer",
+        "rssKiB": 121200
+      },
+      {
+        "id": 1204409,
+        "type": "GPU",
+        "rssKiB": 147472
+      },
+      {
+        "id": 1204412,
+        "type": "network.mojom.NetworkService",
+        "rssKiB": 130844
+      },
+      {
+        "id": 1204428,
+        "type": "storage.mojom.StorageService",
+        "rssKiB": 50116
+      }
+    ],
+    "main": {
+      "usedSize": 87165496,
+      "totalSize": 156909568,
+      "embedderHeapUsedSize": 60969848,
+      "backingStorageSize": 1943513
+    },
+    "worker": {
+      "usedSize": 2226076,
+      "totalSize": 7864320,
+      "embedderHeapUsedSize": 795104,
+      "backingStorageSize": 1315059
+    },
+    "status": {
+      "at": 20963.400000095367,
+      "summary": {
+        "ancestryRecords": 1520,
+        "biomass": 449.05650083352117,
+        "cellEnergy": 8.878408463949441,
+        "energyResidual": -1.320549927186221e-7,
+        "generation": 15,
+        "genomes": 192,
+        "heldEnergy": 27527.620779232504,
+        "heldMaterial": 5632.555055894433,
+        "ledger": {
+          "births": 1472,
+          "deathHeat": 0,
+          "deaths": 592,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 58.8799999999991,
+          "divisions": 736,
+          "flows": {
+            "captured": 5297.071174253255,
+            "constructed": 1607.6871062636396,
+            "construction": 7422.853027013044,
+            "damage": 516.6632748359035,
+            "distance": 28675.55333478924,
+            "exported": 883.5668226998941,
+            "exposure": 33448.788886256,
+            "imported": 3721.031532156051,
+            "learning": 305.29746048838405,
+            "maintenance": 2426.258314438144,
+            "motors": 1058.7636517666242,
+            "reacted": 1392.6002650072085,
+            "reactionHeat": 1411.305310126273,
+            "refitting": 20.16295479441666,
+            "repair": 999.629483704444,
+            "repaired": 510.94614178359467,
+            "transport": 230.2299177427988
+          },
+          "initialEnergy": 45310.764853262226,
+          "initialMaterial": 6650.35693310879,
+          "numericalEnergy": -0.30186929693337394,
+          "numericalMaterial": -0.05701152753210005,
+          "overflowHeat": 0,
+          "supplied": 903.4477310717501,
+          "suppliedEnergy": 6327.261405032612,
+          "transfers": 0,
+          "washedOut": 1921.3066198135693,
+          "washoutEnergy": 10177.327228417189
+        },
+        "lineages": 8,
+        "materialResidual": 6.986335121528242e-11,
+        "modelSeconds": 887.2,
+        "population": 192,
+        "stopReason": null,
+        "tick": 4436
+      },
+      "throughput": 196.00452321653307,
+      "workerWork": {
+        "simulationMs": 18112.799998283386,
+        "renderMs": 181.29999685287476,
+        "observationMs": 344.300000667572,
+        "frames": 329,
+        "skippedFrames": 0
+      }
+    }
+  },
+  {
+    "wallMs": 30701,
+    "processes": [
+      {
+        "id": 1204376,
+        "type": "browser",
+        "rssKiB": 236576
+      },
+      {
+        "id": 1204502,
+        "type": "renderer",
+        "rssKiB": 73908
+      },
+      {
+        "id": 1204479,
+        "type": "renderer",
+        "rssKiB": 1025056
+      },
+      {
+        "id": 1204480,
+        "type": "renderer",
+        "rssKiB": 97536
+      },
+      {
+        "id": 1204465,
+        "type": "renderer",
+        "rssKiB": 123812
+      },
+      {
+        "id": 1204409,
+        "type": "GPU",
+        "rssKiB": 147140
+      },
+      {
+        "id": 1204412,
+        "type": "network.mojom.NetworkService",
+        "rssKiB": 131032
+      },
+      {
+        "id": 1204428,
+        "type": "storage.mojom.StorageService",
+        "rssKiB": 50116
+      }
+    ],
+    "main": {
+      "usedSize": 112245828,
+      "totalSize": 181956608,
+      "embedderHeapUsedSize": 80025912,
+      "backingStorageSize": 1986338
+    },
+    "worker": {
+      "usedSize": 2457776,
+      "totalSize": 6291456,
+      "embedderHeapUsedSize": 730040,
+      "backingStorageSize": 40505788
+    },
+    "status": {
+      "at": 31218.5,
+      "summary": {
+        "ancestryRecords": 2094,
+        "biomass": 316.6263853831399,
+        "cellEnergy": 6.35509932995174,
+        "energyResidual": -1.3685348676517606e-7,
+        "generation": 16,
+        "genomes": 133,
+        "heldEnergy": 22266.12467600271,
+        "heldMaterial": 5170.198733440058,
+        "ledger": {
+          "births": 2046,
+          "deathHeat": 0,
+          "deaths": 938,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 81.83999999999861,
+          "divisions": 1023,
+          "flows": {
+            "captured": 8168.190180843439,
+            "constructed": 2169.381173333595,
+            "construction": 9897.767859098905,
+            "damage": 777.9204312845952,
+            "distance": 44625.79389312595,
+            "exported": 1404.2357830532846,
+            "exposure": 48888.3119963687,
+            "imported": 5246.1040506956515,
+            "learning": 484.40523167001,
+            "maintenance": 3807.2385803307493,
+            "motors": 1752.1048732863874,
+            "reacted": 2123.9331024996964,
+            "reactionHeat": 2174.7933641170885,
+            "refitting": 28.516601386579808,
+            "repair": 1490.4118610800756,
+            "repaired": 768.1527706064765,
+            "transport": 332.516991687441
+          },
+          "initialEnergy": 45310.764853262226,
+          "initialMaterial": 6650.35693310879,
+          "numericalEnergy": -0.41432416695773483,
+          "numericalMaterial": -0.09073711879601977,
+          "overflowHeat": 0,
+          "supplied": 1546.353329263781,
+          "suppliedEnergy": 10831.095867584983,
+          "transfers": 0,
+          "washedOut": 3026.6022660512476,
+          "washoutEnergy": 13826.55500649107
+        },
+        "lineages": 6,
+        "materialResidual": 6.149637743479985e-11,
+        "modelSeconds": 1274.4,
+        "population": 133,
+        "stopReason": null,
+        "tick": 6372
+      },
+      "throughput": 155.3398058252427,
+      "workerWork": {
+        "simulationMs": 27358.69999885559,
+        "renderMs": 254.39999532699585,
+        "observationMs": 510.10000133514404,
+        "frames": 450,
+        "skippedFrames": 1
+      }
+    }
+  },
+  {
+    "wallMs": 40789,
+    "processes": [
+      {
+        "id": 1204376,
+        "type": "browser",
+        "rssKiB": 233788
+      },
+      {
+        "id": 1204502,
+        "type": "renderer",
+        "rssKiB": 73908
+      },
+      {
+        "id": 1204479,
+        "type": "renderer",
+        "rssKiB": 1108156
+      },
+      {
+        "id": 1204480,
+        "type": "renderer",
+        "rssKiB": 97536
+      },
+      {
+        "id": 1204465,
+        "type": "renderer",
+        "rssKiB": 123812
+      },
+      {
+        "id": 1204409,
+        "type": "GPU",
+        "rssKiB": 146880
+      },
+      {
+        "id": 1204412,
+        "type": "network.mojom.NetworkService",
+        "rssKiB": 131032
+      },
+      {
+        "id": 1204428,
+        "type": "storage.mojom.StorageService",
+        "rssKiB": 50116
+      }
+    ],
+    "main": {
+      "usedSize": 142767132,
+      "totalSize": 184172544,
+      "embedderHeapUsedSize": 83625880,
+      "backingStorageSize": 2048345
+    },
+    "worker": {
+      "usedSize": 2530092,
+      "totalSize": 6553600,
+      "embedderHeapUsedSize": 820336,
+      "backingStorageSize": 1431807
+    },
+    "status": {
+      "at": 41093.40000009537,
+      "summary": {
+        "ancestryRecords": 2552,
+        "biomass": 252.02279151521998,
+        "cellEnergy": 5.019577049890266,
+        "energyResidual": -1.288899511564523e-7,
+        "generation": 20,
+        "genomes": 110,
+        "heldEnergy": 25444.119688208997,
+        "heldMaterial": 5553.563656848993,
+        "ledger": {
+          "births": 2504,
+          "deathHeat": 0,
+          "deaths": 1190,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 100.15999999999822,
+          "divisions": 1252,
+          "flows": {
+            "captured": 10272.859769462035,
+            "constructed": 2614.7167914129905,
+            "construction": 11820.791696642187,
+            "damage": 975.9236103289091,
+            "distance": 54681.681104351344,
+            "exported": 1775.2887990728907,
+            "exposure": 60717.83822373274,
+            "imported": 6403.112543289388,
+            "learning": 615.008919570556,
+            "maintenance": 4819.703084554008,
+            "motors": 2234.041474342132,
+            "reacted": 2661.2298415484356,
+            "reactionHeat": 2734.5418074623294,
+            "refitting": 35.03233035264232,
+            "repair": 1860.6915594492582,
+            "repaired": 964.5199009597297,
+            "transport": 408.9200671181092
+          },
+          "initialEnergy": 45310.764853262226,
+          "initialMaterial": 6650.35693310879,
+          "numericalEnergy": -0.53081976062915,
+          "numericalMaterial": -0.12840789693861196,
+          "overflowHeat": 0,
+          "supplied": 3178.017142899266,
+          "suppliedEnergy": 22435.721509989577,
+          "transfers": 0,
+          "washedOut": 4274.938827055944,
+          "washoutEnergy": 17674.00655544111
+        },
+        "lineages": 6,
+        "materialResidual": 5.844966177726008e-11,
+        "modelSeconds": 1679.2,
+        "population": 110,
+        "stopReason": null,
+        "tick": 8396
+      },
+      "throughput": 207.83373297397966,
+      "workerWork": {
+        "simulationMs": 36276.099999427795,
+        "renderMs": 337.59999561309814,
+        "observationMs": 676.2000031471252,
+        "frames": 587,
+        "skippedFrames": 1
+      }
+    }
+  },
+  {
+    "wallMs": 50990,
+    "processes": [
+      {
+        "id": 1204376,
+        "type": "browser",
+        "rssKiB": 234748
+      },
+      {
+        "id": 1204502,
+        "type": "renderer",
+        "rssKiB": 73908
+      },
+      {
+        "id": 1204479,
+        "type": "renderer",
+        "rssKiB": 1216276
+      },
+      {
+        "id": 1204480,
+        "type": "renderer",
+        "rssKiB": 97536
+      },
+      {
+        "id": 1204465,
+        "type": "renderer",
+        "rssKiB": 123812
+      },
+      {
+        "id": 1204409,
+        "type": "GPU",
+        "rssKiB": 147596
+      },
+      {
+        "id": 1204412,
+        "type": "network.mojom.NetworkService",
+        "rssKiB": 131032
+      },
+      {
+        "id": 1204428,
+        "type": "storage.mojom.StorageService",
+        "rssKiB": 50116
+      }
+    ],
+    "main": {
+      "usedSize": 59261760,
+      "totalSize": 183386112,
+      "embedderHeapUsedSize": 30565184,
+      "backingStorageSize": 1906728
+    },
+    "worker": {
+      "usedSize": 2938012,
+      "totalSize": 4194304,
+      "embedderHeapUsedSize": 646392,
+      "backingStorageSize": 405613
+    },
+    "status": {
+      "at": 51334.60000038147,
+      "summary": {
+        "ancestryRecords": 3098,
+        "biomass": 326.56955090331013,
+        "cellEnergy": 6.307343825205406,
+        "energyResidual": -1.151020114775747e-7,
+        "generation": 25,
+        "genomes": 133,
+        "heldEnergy": 26975.453671380285,
+        "heldMaterial": 5885.798611417911,
+        "ledger": {
+          "births": 3050,
+          "deathHeat": 0,
+          "deaths": 1440,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 121.99999999999775,
+          "divisions": 1525,
+          "flows": {
+            "captured": 12759.533324927179,
+            "constructed": 3194.167026371122,
+            "construction": 14317.043688197828,
+            "damage": 1207.1008090119508,
+            "distance": 65985.17653341792,
+            "exported": 2231.262431413884,
+            "exposure": 75748.36024715223,
+            "imported": 7856.047053383149,
+            "learning": 767.118600196176,
+            "maintenance": 5995.295307988223,
+            "motors": 2797.06513922909,
+            "reacted": 3298.7348344212796,
+            "reactionHeat": 3396.054258383221,
+            "refitting": 42.58603479566399,
+            "repair": 2283.936211371705,
+            "repaired": 1189.6398893337864,
+            "transport": 504.36547423985564
+          },
+          "initialEnergy": 45310.764853262226,
+          "initialMaterial": 6650.35693310879,
+          "numericalEnergy": -0.6343391462573885,
+          "numericalMaterial": -0.16425731477072522,
+          "overflowHeat": 0,
+          "supplied": 4703.831027312043,
+          "suppliedEnergy": 33048.60508900925,
+          "transfers": 0,
+          "washedOut": 5468.553606317604,
+          "washoutEnergy": 21159.085895750788
+        },
+        "lineages": 6,
+        "materialResidual": 8.883480062671367e-11,
+        "modelSeconds": 2087.2000000000003,
+        "population": 133,
+        "stopReason": null,
+        "tick": 10436
+      },
+      "throughput": 192.2721389936467,
+      "workerWork": {
+        "simulationMs": 45606.59999990463,
+        "renderMs": 418.0999970436096,
+        "observationMs": 843.6000037193298,
+        "frames": 724,
+        "skippedFrames": 1
+      }
+    }
+  }
+]

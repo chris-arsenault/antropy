@@ -1,0 +1,73 @@
+{
+  "id": 3852,
+  "before": {
+    "ancestryRecords": 1,
+    "biomass": 3.040000000000001,
+    "cellEnergy": 1.5951600000000001,
+    "energyResidual": -6.217248937900877e-13,
+    "generation": 0,
+    "genomes": 1,
+    "heldEnergy": 341.6590819151956,
+    "heldMaterial": 47.7038097380652,
+    "ledger": {
+      "births": 0,
+      "deathHeat": 0,
+      "deaths": 0,
+      "disturbanceDeaths": 0,
+      "divisionHeat": 0,
+      "divisions": 0,
+      "flows": {
+        "captured": 6.600415832892661,
+        "constructed": 1.52,
+        "construction": 8.303668975911897,
+        "damage": 0.09878766900975536,
+        "distance": 7.863103133740072e-9,
+        "exported": 2.152811024975306,
+        "exposure": 3.5593993508819723,
+        "imported": 6.049401609449063,
+        "learning": 0,
+        "maintenance": 1.3343418233359647,
+        "motors": 0,
+        "reacted": 1.5674451694888876,
+        "reactionHeat": 1.7671749040723486,
+        "refitting": 0,
+        "repair": 0.2436875090267303,
+        "repaired": 0.09878766900975536,
+        "transport": 0.4101106317212183
+      },
+      "initialEnergy": 376.3393287503527,
+      "initialMaterial": 50.319998471292514,
+      "numericalEnergy": -0.0007160970259969818,
+      "numericalMaterial": -0.00009398253997414292,
+      "overflowHeat": 2.7711777234542856,
+      "supplied": 0,
+      "suppliedEnergy": 0,
+      "transfers": 0,
+      "washedOut": 2.6162827157672894,
+      "washoutEnergy": 19.850801364661283
+    },
+    "lineages": 1,
+    "materialResidual": -4.244868345715247e-15,
+    "modelSeconds": 60,
+    "population": 1,
+    "stopReason": null,
+    "tick": 300
+  },
+  "result": {
+    "modelSeconds": 2,
+    "results": [
+      {
+        "removed15": false,
+        "secondMoment": 8.053906663421687,
+        "tracerRemaining": 0.9980018066125922
+      },
+      {
+        "removed15": true,
+        "secondMoment": 8.051308775260367,
+        "tracerRemaining": 0.9980020841467194
+      }
+    ],
+    "steps": 10,
+    "tick": 300
+  }
+}

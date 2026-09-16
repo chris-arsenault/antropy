@@ -1,5 +1,9 @@
 # Reliability execution evidence
 
+The September15 [fresh-core results](rebuild-results.md) govern the replacement simulation.
+The measurements below retain their original binary/schema scope. Renderer/recovery obligations
+and the unattributed original crash carry forward; these timings do not certify the fresh core.
+
 September 14, 2026. Work is in progress under the [reliability plan](reliability-plan.md).
 This record supersedes broad readiness claims inferred from earlier headless checks.
 The user's lost browser run remains an observation without a recovered causal trace.

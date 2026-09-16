@@ -4,6 +4,10 @@ import { createHash } from "node:crypto";
 import { launch } from "./browserConnection.mjs";
 import { faultChecks } from "./browserFaultChecks.mjs";
 import { useBuild } from "./browserBuild.mjs";
+import { recordMemory } from "./browserMemory.mjs";
+const durationMs = Number(process.env.ANTROPY_DURATION_SECONDS ?? 0) * 1000;
+if (!Number.isFinite(durationMs) || durationMs < 0 || durationMs > 1800000)
+  throw new Error("Operational duration must be between 0 and 1800 seconds");
 const [executable, site, output, packagePath] = process.argv.slice(2);
 if (!executable || !site || !output)
   throw new Error("Provide Chromium, existing site and new output directory");
@@ -53,11 +57,11 @@ try {
     window.Worker=class extends NativeWorker {
       constructor(...args) {super(...args); window.runtimeWorker=this;
         this.addEventListener('message',({data:m})=>{
-          if(m.kind==='reply') window.check.replies[m.id]=m;
+          if(m.kind==='reply' && m.id<0) window.check.replies[m.id]=m;
           if(m.kind==='fault') window.check.errors.push(m.value);
           if(m.kind==='definition') window.check.definition=m.value;
           if(m.kind==='observation') {
-            const s=m.value.status;
+            const s=window.check.status=Object.assign(window.check.status??{},m.value.status);
             if(s.kernelDigest) window.check.kernelDigest=s.kernelDigest;
             if(s.summary) window.check.samples.push({at:performance.now(),summary:s.summary,
               throughput:s.throughput,memoryBytes:s.memoryBytes,error:s.error,workerWork:s.workerWork});
@@ -94,6 +98,8 @@ try {
     "document.querySelectorAll('details').forEach(e=>e.open=true); window.callWorker('inspect',{cell:1})"
   );
   await connection.page.evaluate("window.callWorker('speed',{value:'max'})");
+  if (process.env.ANTROPY_CLEAR_TIMINGS === "1")
+    await connection.page.evaluate("setInterval(()=>performance.clearMeasures(), 1000)");
   if (workerSession) {
     if (process.env.ANTROPY_RENDER_OFF === "1") {
       await connection.page.send("Debugger.enable", {}, workerSession);
@@ -108,8 +114,10 @@ try {
         workerSession
       );
     }
-    await connection.page.send("Profiler.enable", {}, workerSession);
-    await connection.page.send("Profiler.start", {}, workerSession);
+    if (!durationMs) {
+      await connection.page.send("Profiler.enable", {}, workerSession);
+      await connection.page.send("Profiler.start", {}, workerSession);
+    }
   }
   await connection.page.evaluate("window.callWorker('running',{value:true})");
   if (process.env.ANTROPY_TRACE === "1")
@@ -117,16 +125,26 @@ try {
       categories: "gpu,cc,renderer.scheduler,disabled-by-default-gpu.service",
       transferMode: "ReportEvents",
     });
-  await connection.page.send("Profiler.enable");
-  await connection.page.send("Profiler.start");
+  if (!durationMs) {
+    await connection.page.send("Profiler.enable");
+    await connection.page.send("Profiler.start");
+  }
   const started = Date.now();
+  const memory = [];
+  let lastMemory = -10000;
   for (;;) {
     await new Promise((r) => setTimeout(r, 250));
     const state = await connection.page.evaluate("window.check.samples.at(-1)");
+    const elapsed = Date.now() - started;
+    if (durationMs && elapsed - lastMemory >= 10000) {
+      await recordMemory(connection, workerSession, memory, output, elapsed, state);
+      lastMemory = elapsed;
+    }
     if (
-      state.summary.tick >= (packagePath ? 100 : 300) ||
+      (!durationMs && state.summary.tick >= (packagePath ? 100 : 300)) ||
+      state.summary.stopReason ||
       state.error ||
-      Date.now() - started > 30000
+      elapsed > (durationMs || 30000)
     )
       break;
   }
@@ -141,10 +159,11 @@ try {
     await completed;
     await writeFile(`${output}/browser-trace.json`, JSON.stringify(trace));
   }
-  await connection.page
-    .send("Profiler.stop")
-    .then((r) => writeFile(`${output}/main.cpuprofile`, JSON.stringify(r.profile)));
-  if (workerSession)
+  if (!durationMs)
+    await connection.page
+      .send("Profiler.stop")
+      .then((r) => writeFile(`${output}/main.cpuprofile`, JSON.stringify(r.profile)));
+  if (workerSession && !durationMs)
     await connection.page
       .send("Profiler.stop", {}, workerSession)
       .then((r) => writeFile(`${output}/worker.cpuprofile`, JSON.stringify(r.profile)));
@@ -163,6 +182,7 @@ try {
         binaryDigest,
         renderSources,
         production: process.env.ANTROPY_PRODUCTION === "1",
+        timingControl: process.env.ANTROPY_CLEAR_TIMINGS === "1",
         initial,
         renderDisabled: process.env.ANTROPY_RENDER_OFF === "1",
         saveMs,
@@ -179,8 +199,28 @@ try {
   if (result.errors.length || result.alerts.length)
     throw new Error(JSON.stringify(result.errors.concat(result.alerts)));
   if (process.env.ANTROPY_FAULTS === "1") {
-    const faults = await faultChecks(connection, workerSession, scripts, records);
-    await writeFile(`${output}/faults.json`, JSON.stringify(faults, null, 2));
+    try {
+      const faults = await faultChecks(connection, workerSession, scripts, records);
+      await writeFile(`${output}/faults.json`, JSON.stringify(faults, null, 2));
+    } catch (error) {
+      const state = await connection.page.evaluate(
+        "({last:window.check.samples.at(-1),errors:window.check.errors,alerts:[...document.querySelectorAll('[role=alert]')].map(e=>e.textContent)})"
+      );
+      const graphics = await connection.page.send(
+        "Runtime.evaluate",
+        {
+          expression:
+            "({lost:globalThis.faultGraphics?.gl.isContextLost(),lostAt:globalThis.faultGraphics?.lostAt,restoredAt:globalThis.faultGraphics?.restoredAt})",
+          returnByValue: true,
+        },
+        workerSession
+      );
+      await writeFile(
+        `${output}/faults.json`,
+        JSON.stringify({ error: String(error), graphics: graphics.result.value, ...state }, null, 2)
+      );
+      throw error;
+    }
   }
   console.log(
     JSON.stringify({

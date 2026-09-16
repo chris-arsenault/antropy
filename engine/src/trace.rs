@@ -24,7 +24,7 @@ pub fn frame(w: &crate::world::World) -> serde_json::Value {
         let sites=w.field.stencil(c.x,c.y);
         let local:Vec<_>=(0..256).map(|s| w.field.sample(s,&sites)).collect();
         let impedance=w.field.scalar(&w.field.impedance,&sites);
-        serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":1./(1.+w.config.movement_impedance*impedance*impedance),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)})
+        serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":crate::movement::mobility(impedance,w.config.movement_impedance),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)})
     }).collect();
     serde_json::json!({"tick":w.tick,"cells":cells})
 }
@@ -155,7 +155,7 @@ impl Trace {
             g.organism_seconds += config.dt;
             g.damage_seconds += c.damage * config.dt;
             let load = field.scalar(&field.impedance, &field.stencil(c.x, c.y));
-            if 1. / (1. + config.movement_impedance * load * load) <= 0.8 {
+            if crate::movement::mobility(load, config.movement_impedance) <= 0.8 {
                 g.slowed_seconds += config.dt;
             }
         }

@@ -5,4 +5,5 @@ stack:
   - typescript
   - terraform
 rust_dir: engine
+rust_artifacts: {}
 typescript_dir: frontend

@@ -1,35 +1,31 @@
+//! Geographic material owner. Shared manifold signals drive a bounded linear redistribution.
 use crate::chemistry::{Chemistry, SPECIES};
 use serde::{Deserialize, Serialize};
-#[path = "field_batch.rs"]
-mod batch;
-
-pub fn mobility(load: f64, k: f64) -> f64 {
-    1. / (1. + k * load)
-}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Field {
     pub nx: usize,
     pub ny: usize,
     pub spacing: f64,
-    /// Node-major chemical vectors; each vector is one contiguous SIMD workload.
     pub amounts: Vec<f32>,
-    #[serde(skip)]
-    next: Vec<f32>,
-    // Incremental reductions influence movement between field updates. Persist their exact
-    // arithmetic state; rebuilding from amounts in another order changes continuation.
     pub impedance: Vec<f64>,
     pub stress: Vec<f64>,
+    pub signal: Vec<[f64; 2]>,
+    totals: [f64; 2],
+    pub drift: f64,
     #[serde(skip)]
-    faces: Vec<(usize, usize)>,
+    next: Vec<f32>,
     #[serde(skip)]
-    mobility: Vec<f64>,
-    matter: f64,
-    energy: f64,
+    neighbors: Vec<[usize; 4]>,
     #[serde(skip)]
-    reductions: std::cell::RefCell<crate::field_reductions::Cache>,
+    pub body_signal: Vec<[f64; 2]>,
+    #[serde(skip)]
+    activity: crate::field_activity::Activity,
+    #[serde(skip)]
+    last_groups: usize,
 }
-#[derive(Default, Clone, Copy, Debug)]
+
+#[derive(Clone, Copy, Debug, Default)]
 pub struct FieldBalance {
     pub matter: f64,
     pub energy: f64,
@@ -37,184 +33,214 @@ pub struct FieldBalance {
     pub roundoff_energy: f64,
 }
 
+pub fn mobility(load: f64, scale: f64) -> f64 {
+    1. / (1. + scale * load)
+}
+
 impl Field {
     pub fn new(width: f64, height: f64, spacing: f64) -> Self {
-        let (nx, ny) = ((width / spacing) as usize, (height / spacing) as usize);
-        let mut f = Self {
+        let nx = (width / spacing) as usize;
+        let ny = (height / spacing) as usize;
+        let mut field = Self {
             nx,
             ny,
             spacing,
             amounts: vec![0.; nx * ny * SPECIES],
+            impedance: vec![0.; nx * ny],
+            stress: vec![0.; nx * ny],
+            signal: vec![[0.; 2]; nx * ny],
+            totals: [0.; 2],
+            drift: 0.25,
             next: vec![],
-            impedance: vec![],
-            stress: vec![],
-            faces: vec![],
-            mobility: vec![],
-            matter: 0.,
-            energy: 0.,
-            reductions: Default::default(),
+            neighbors: vec![],
+            body_signal: vec![],
+            activity: Default::default(),
+            last_groups: 0,
         };
-        f.rebuild();
-        f
+        field.rebuild();
+        field
     }
     pub fn rebuild(&mut self) {
-        self.reductions = Default::default();
         let n = self.nx * self.ny;
-        self.next = vec![0.; n * SPECIES];
-        self.impedance.resize(n, 0.);
-        self.stress.resize(n, 0.);
-        self.mobility = vec![0.; n];
-        self.faces = (0..n)
-            .flat_map(|i| {
+        self.next.resize(n * SPECIES, 0.);
+        self.next.fill(0.);
+        self.activity.rebuild(&self.amounts);
+        // A fully withdrawn row can retain rounding in its persisted reductions until
+        // the next field step. Preserve that cleanup across a checkpoint restore.
+        for node in 0..n {
+            if self.impedance[node] != 0. || self.stress[node] != 0. || self.signal[node] != [0.; 2]
+            {
+                self.activity.retain(node);
+            }
+        }
+        self.body_signal = vec![[0.; 2]; n];
+        self.neighbors = (0..n)
+            .map(|i| {
+                let x = i % self.nx;
                 [
-                    (i, (i / self.nx) * self.nx + (i + 1) % self.nx),
-                    (i, (i + self.nx) % n),
+                    i - x + (x + 1) % self.nx,
+                    i - x + (x + self.nx - 1) % self.nx,
+                    (i + self.nx) % n,
+                    (i + n - self.nx) % n,
                 ]
             })
             .collect();
     }
-    pub fn validate(&self) -> Result<(), String> {
-        if self.nx < 4
-            || self.ny < 4
-            || self.nx.checked_mul(self.ny).is_none_or(|n| n > 80000)
-            || !self.spacing.is_finite()
-            || self.spacing <= 0.
-            || self.amounts.len() != self.nx * self.ny * SPECIES
-            || self.amounts.iter().any(|q| !q.is_finite() || *q < 0.)
-            || self.impedance.len() != self.nx * self.ny
-            || self.stress.len() != self.nx * self.ny
-        {
-            return Err("Invalid chemical field".into());
-        }
-        Ok(())
-    }
-    pub fn validate_reductions(&self, chemistry: &Chemistry) -> Result<(), String> {
-        let area = self.spacing * self.spacing;
-        let close = |a: f64, b: f64| a.is_finite() && (a - b).abs() <= 1e-9 * (1. + b.abs());
-        let (mut matter, mut energy) = (0., 0.);
-        for (i, node) in self.amounts.chunks_exact(SPECIES).enumerate() {
-            let (mut impedance, mut stress) = (0., 0.);
-            for (q, p) in node.iter().zip(&chemistry.properties) {
-                let q = *q as f64;
-                matter += q;
-                energy += q * p.potential;
-                impedance += q * p.impedance / area;
-                stress += q * p.stress / area;
-            }
-            if !close(self.impedance[i], impedance) || !close(self.stress[i], stress) {
-                return Err("Field reductions disagree with chemistry".into());
-            }
-        }
-        if !close(self.matter, matter) || !close(self.energy, energy) {
-            return Err("Field accounting disagrees with chemistry".into());
-        }
-        Ok(())
-    }
-    pub fn refresh(&mut self, chemistry: &Chemistry) {
-        self.reductions.borrow_mut().invalidate();
-        let area = self.spacing * self.spacing;
-        self.matter = 0.;
-        self.energy = 0.;
-        let properties = std::array::from_fn(|j| {
-            std::array::from_fn(|s| {
-                let p = &chemistry.properties[s];
-                match j {
-                    0 => p.potential,
-                    1 => p.impedance,
-                    _ => p.stress,
-                }
-            })
-        });
-        for (i, node) in self.amounts.chunks_exact(SPECIES).enumerate() {
-            let [matter, energy, impedance, stress] =
-                crate::numeric::reductions(node.try_into().unwrap(), &properties);
-            self.matter += matter;
-            self.energy += energy;
-            self.impedance[i] = impedance / area;
-            self.stress[i] = stress / area;
-        }
-    }
-    /// Bilinear finite-volume sampling uses node centers and periodic geographic boundaries.
     pub fn stencil(&self, x: f64, y: f64) -> [(usize, f64); 4] {
-        let (gx, gy) = (x / self.spacing - 0.5, y / self.spacing - 0.5);
+        let gx = x / self.spacing - 0.5;
+        let gy = y / self.spacing - 0.5;
         let (ix, iy) = (gx.floor() as isize, gy.floor() as isize);
-        let (fx, fy) = (gx - gx.floor(), gy - gy.floor());
-        let at = |x: isize, y: isize| {
+        let (a, b) = (gx - gx.floor(), gy - gy.floor());
+        let node = |x: isize, y: isize| {
             y.rem_euclid(self.ny as isize) as usize * self.nx
                 + x.rem_euclid(self.nx as isize) as usize
         };
         [
-            (at(ix, iy), (1. - fx) * (1. - fy)),
-            (at(ix + 1, iy), fx * (1. - fy)),
-            (at(ix, iy + 1), (1. - fx) * fy),
-            (at(ix + 1, iy + 1), fx * fy),
+            (node(ix, iy), (1. - a) * (1. - b)),
+            (node(ix + 1, iy), a * (1. - b)),
+            (node(ix, iy + 1), (1. - a) * b),
+            (node(ix + 1, iy + 1), a * b),
         ]
     }
-    pub fn sample(&self, s: usize, stencil: &[(usize, f64); 4]) -> f64 {
-        stencil
+    pub fn sample(&self, species: usize, sites: &[(usize, f64)]) -> f64 {
+        sites
             .iter()
-            .map(|(i, w)| self.amounts[i * SPECIES + s] as f64 * w)
+            .map(|&(n, w)| w * self.amounts[n * SPECIES + species] as f64)
             .sum::<f64>()
-            / (self.spacing * self.spacing)
+            / self.spacing.powi(2)
     }
-    pub fn scalar(&self, values: &[f64], stencil: &[(usize, f64); 4]) -> f64 {
-        stencil.iter().map(|(i, w)| values[*i] * w).sum()
+    pub fn scalar(&self, values: &[f64], sites: &[(usize, f64)]) -> f64 {
+        sites.iter().map(|&(n, w)| w * values[n]).sum()
     }
-    /// Returns signed numerical loss. Callers account the requested physical transfer separately.
-    pub fn add(&mut self, node: usize, s: usize, q: f64, chemistry: &Chemistry) -> f64 {
-        let i = node * SPECIES + s;
-        let before = self.amounts[i] as f64;
-        self.amounts[i] = (before + q).max(0.) as f32;
-        let delta = self.amounts[i] as f64 - before;
-        if delta != 0. {
-            self.reductions.borrow_mut().changed(node);
+    pub fn add(&mut self, node: usize, species: usize, amount: f64, chemistry: &Chemistry) -> f64 {
+        let index = node * SPECIES + species;
+        let before = self.amounts[index] as f64;
+        let after = (before + amount).max(0.) as f32;
+        self.amounts[index] = after;
+        if after > 0. {
+            self.activity
+                .set(node, self.activity.masks[node] | (1 << (species / 4)));
         }
-        let area = self.spacing * self.spacing;
-        self.impedance[node] += delta * chemistry.properties[s].impedance / area;
-        self.stress[node] += delta * chemistry.properties[s].stress / area;
-        self.matter += delta;
-        self.energy += delta * chemistry.properties[s].potential;
-        q - delta
+        let change = after as f64 - before;
+        self.record(node, species, change, chemistry);
+        amount - change
     }
-    pub fn deposit(&mut self, x: f64, y: f64, s: usize, q: f64, chemistry: &Chemistry) -> f64 {
-        let stencil = self.stencil(x, y);
-        stencil
+    fn record(&mut self, node: usize, species: usize, change: f64, chemistry: &Chemistry) {
+        let p = &chemistry.properties[species];
+        let concentration = change / self.spacing.powi(2);
+        self.totals[0] += change;
+        self.totals[1] += change * p.potential;
+        self.impedance[node] += concentration * p.impedance;
+        self.stress[node] += concentration * p.stress;
+        for k in 0..2 {
+            self.signal[node][k] += concentration * p.interaction[k];
+        }
+    }
+    pub fn deposit(&mut self, x: f64, y: f64, species: usize, amount: f64, c: &Chemistry) -> f64 {
+        self.stencil(x, y)
             .iter()
-            .map(|(i, w)| self.add(*i, s, q * w, chemistry))
+            .map(|&(n, w)| self.add(n, species, amount * w, c))
             .sum()
     }
-    pub fn totals(&self, _chemistry: &Chemistry) -> (f64, f64) {
-        (self.matter, self.energy)
-    }
-    pub fn thermodynamics(
-        &self,
-        chemistry: &Chemistry,
-    ) -> std::cell::Ref<'_, [crate::field_reductions::Node]> {
-        self.reductions
-            .borrow_mut()
-            .update(&self.amounts, self.spacing * self.spacing, chemistry);
-        std::cell::Ref::map(self.reductions.borrow(), |cache| cache.nodes.as_slice())
-    }
-    /// Install canonical reductions computed alongside a validated f32 spatial proposal.
-    pub(crate) fn commit_spatial(
+    /// Commit a complete chemical row and reduce its actual rounded change once per node.
+    pub fn apply_rows(
         &mut self,
-        amounts: &[f64],
-        nodes: &mut Vec<crate::field_reductions::Node>,
-    ) {
-        for (to, from) in self.amounts.iter_mut().zip(amounts) {
-            *to = *from as f32;
-        }
+        changes: &mut [f64],
+        active: &mut [bool],
+        chemistry: &Chemistry,
+    ) -> [f64; 2] {
+        let mut rounding = [0.; 2];
         let area = self.spacing * self.spacing;
-        let mut totals = [crate::spatial_energy::Sum::default(); 2];
-        for (i, n) in nodes.iter().enumerate() {
-            totals[0].add(n[0]);
-            totals[1].add(n[1]);
-            self.impedance[i] = n[3] * 12. / area;
-            self.stress[i] = n[6] / area;
+        let rows = crate::chemical_projection::Rows::new(chemistry);
+        for (node, used) in active.iter_mut().enumerate() {
+            if !*used {
+                continue;
+            }
+            let range = node * SPECIES..(node + 1) * SPECIES;
+            let (reduction, loss) = crate::chemical_projection::commit(
+                &mut self.amounts[range.clone()],
+                &mut changes[range],
+                &rows,
+            );
+            self.activity.set(
+                node,
+                crate::field_activity::mask(&self.amounts[node * SPECIES..(node + 1) * SPECIES]),
+            );
+            rounding[0] += loss[0];
+            rounding[1] += loss[1];
+            self.totals[0] += reduction[0];
+            self.totals[1] += reduction[1];
+            self.impedance[node] += reduction[2] / area;
+            self.stress[node] += reduction[3] / area;
+            self.signal[node][0] += reduction[4] / area;
+            self.signal[node][1] += reduction[5] / area;
+            *used = false;
         }
-        self.matter = totals[0].get();
-        self.energy = totals[1].get();
-        self.reductions.get_mut().install(nodes);
+        rounding
+    }
+    pub fn totals(&self, _: &Chemistry) -> (f64, f64) {
+        (self.totals[0], self.totals[1])
+    }
+    pub(crate) fn active_groups(&self, node: usize) -> u64 {
+        self.activity.masks[node]
+    }
+    pub(crate) fn material_values(&self, node: usize, chemistry: &Chemistry) -> [f64; 2] {
+        let mut values = [0.; 2];
+        let mut mask = self.active_groups(node);
+        while mask != 0 {
+            let start = mask.trailing_zeros() as usize * 4;
+            mask &= mask - 1;
+            for s in start..start + 4 {
+                let q = self.amounts[node * SPECIES + s] as f64;
+                values[0] += q;
+                values[1] += q * chemistry.properties[s].potential;
+            }
+        }
+        values
+    }
+    /// Scalar diagnostics only; no physical field frame crosses the worker boundary.
+    pub fn work_counts(&self) -> [usize; 3] {
+        let groups = self
+            .activity
+            .nodes
+            .iter()
+            .map(|&n| self.activity.masks[n].count_ones() as usize)
+            .sum();
+        [self.activity.nodes.len(), groups, self.last_groups]
+    }
+    pub fn refresh(&mut self, chemistry: &Chemistry) {
+        self.activity.rebuild(&self.amounts);
+        self.totals = [0.; 2];
+        let rows = crate::chemical_projection::Rows::new(chemistry);
+        for n in 0..self.nx * self.ny {
+            let values = crate::chemical_projection::project(
+                &self.amounts[n * SPECIES..(n + 1) * SPECIES],
+                &rows,
+            );
+            self.totals[0] += values[0];
+            self.totals[1] += values[1];
+            let a = self.spacing.powi(2);
+            self.impedance[n] = values[2] / a;
+            self.stress[n] = values[3] / a;
+            self.signal[n] = [values[4] / a, values[5] / a];
+        }
+    }
+    fn coefficients(&self, node: usize, dt: f64, impedance: f64) -> [[f32; 3]; 4] {
+        self.neighbors[node].map(|other| {
+            let difference: [f64; 2] = std::array::from_fn(|k| {
+                self.signal[other][k] + self.body_signal[other][k]
+                    - self.signal[node][k]
+                    - self.body_signal[node][k]
+            });
+            let rate = dt / (1. + impedance * (self.impedance[node] + self.impedance[other]) / 2.);
+            let drift =
+                self.drift / (self.spacing * (1. + difference[0].abs() + difference[1].abs()));
+            [
+                (rate / self.spacing.powi(2)) as f32,
+                (rate * drift * difference[0]) as f32,
+                (-rate * drift * difference[1]) as f32,
+            ]
+        })
     }
     pub fn advance(
         &mut self,
@@ -223,107 +249,145 @@ impl Field {
         washout: f64,
         impedance: f64,
     ) -> FieldBalance {
-        self.refresh(chemistry);
-        let before = self.totals(chemistry);
-        let max_d = chemistry
+        let maximum = chemistry
             .properties
             .iter()
             .map(|p| p.diffusion)
             .fold(0., f64::max);
-        let steps = (4. * max_d * dt / (self.spacing * self.spacing) / 0.95)
-            .ceil()
-            .max(1.) as usize;
-        let h = dt / steps as f64;
-        let factor = (-washout * dt).exp();
-        let matter = before.0 * (1. - factor);
-        let energy = before.1 * (1. - factor);
-        // Uniform decay commutes with each frozen conservative linear transport operator.
-        // Apply it to the last operator output; book its analytical sink and measure roundoff.
+        let rate = 4. * (maximum / self.spacing.powi(2) + self.drift / self.spacing);
+        let steps = (dt * rate / 0.5).ceil().max(1.) as usize;
+        let rows: [[f32; SPECIES]; 3] = std::array::from_fn(|k| {
+            std::array::from_fn(|s| {
+                let p = &chemistry.properties[s];
+                if k == 0 {
+                    p.diffusion as f32
+                } else {
+                    p.interaction[k - 1] as f32
+                }
+            })
+        });
+        let before = self.totals;
+        let decay = (-washout * dt).exp();
+        let projection = crate::chemical_projection::Rows::new(chemistry);
+        let floor = crate::field_activity::CONCENTRATION_FLOOR * self.spacing.powi(2) as f32;
+        self.last_groups = 0;
         for step in 0..steps {
-            if step > 0 {
-                self.refresh(chemistry);
+            self.activity.prepare(&self.neighbors);
+            for i in 0..self.activity.work.len() {
+                let n = self.activity.work[i];
+                self.last_groups += self.activity.candidates[n].count_ones() as usize;
+                let coefficients = self.coefficients(n, dt / steps as f64, impedance);
+                let inputs =
+                    self.neighbors[n].map(|j| &self.amounts[j * SPECIES..(j + 1) * SPECIES]);
+                let mask = crate::field_vector::redistribute(
+                    &self.amounts[n * SPECIES..(n + 1) * SPECIES],
+                    inputs,
+                    &mut self.next[n * SPECIES..(n + 1) * SPECIES],
+                    &rows,
+                    coefficients,
+                    if step + 1 == steps { decay as f32 } else { 1. },
+                    crate::field_vector::Work {
+                        mask: self.activity.candidates[n],
+                        floor,
+                    },
+                );
+                self.activity.set(n, mask);
             }
-            self.diffuse(
-                chemistry,
-                h,
-                impedance,
-                if step + 1 == steps { factor } else { 1. },
-            );
+            std::mem::swap(&mut self.amounts, &mut self.next);
+            self.totals = [0.; 2];
+            for &n in &self.activity.work {
+                let range = n * SPECIES..(n + 1) * SPECIES;
+                crate::field_activity::clear(
+                    &mut self.next[range.clone()],
+                    self.activity.candidates[n],
+                );
+                let v = crate::chemical_projection::project_active(
+                    &self.amounts[range],
+                    &projection,
+                    self.activity.masks[n],
+                );
+                self.totals[0] += v[0];
+                self.totals[1] += v[1];
+                let area = self.spacing.powi(2);
+                self.impedance[n] = v[2] / area;
+                self.stress[n] = v[3] / area;
+                self.signal[n] = [v[4] / area, v[5] / area];
+            }
+            self.activity.finish();
         }
-        self.refresh(chemistry);
-        let after = self.totals(chemistry);
         FieldBalance {
-            matter,
-            energy,
-            roundoff_matter: before.0 - after.0 - matter,
-            roundoff_energy: before.1 - after.1 - energy,
+            matter: before[0] * (1. - decay),
+            energy: before[1] * (1. - decay),
+            roundoff_matter: before[0] * decay - self.totals[0],
+            roundoff_energy: before[1] * decay - self.totals[1],
         }
     }
-    fn diffuse(&mut self, chemistry: &Chemistry, dt: f64, k: f64, decay: f64) {
-        for (m, l) in self.mobility.iter_mut().zip(&self.impedance) {
-            *m = mobility(*l, k);
+    pub fn gradient(&self, sites: &[(usize, f64)]) -> [[f64; 2]; 2] {
+        let mut result = [[0.; 2]; 2];
+        for &(n, w) in sites {
+            let [r, l, d, u] = self.neighbors[n];
+            for (axis, (a, b)) in [(r, l), (d, u)].into_iter().enumerate() {
+                for (k, value) in result[axis].iter_mut().enumerate() {
+                    *value += w
+                        * (self.signal[a][k] + self.body_signal[a][k]
+                            - self.signal[b][k]
+                            - self.body_signal[b][k])
+                        / (2. * self.spacing);
+                }
+            }
         }
-        crate::numeric::scale(&self.amounts, &mut self.next, decay as f32);
-        let scale = dt * decay / (self.spacing * self.spacing);
-        let diffusion = std::array::from_fn(|s| chemistry.properties[s].diffusion as f32);
-        for &(a, b) in &self.faces {
-            let conductance = 2. * self.mobility[a] * self.mobility[b]
-                / (self.mobility[a] + self.mobility[b])
-                * scale;
-            let (ia, ib) = (a * SPECIES, b * SPECIES);
-            let (lo, hi) = (ia.min(ib), ia.max(ib));
-            let (left, right) = self.next.split_at_mut(hi);
-            crate::numeric::exchange(
-                self.amounts[lo..lo + SPECIES].try_into().unwrap(),
-                self.amounts[hi..hi + SPECIES].try_into().unwrap(),
-                (&mut left[lo..lo + SPECIES]).try_into().unwrap(),
-                (&mut right[..SPECIES]).try_into().unwrap(),
-                &diffusion,
-                conductance as f32,
-            );
-        }
-        std::mem::swap(&mut self.next, &mut self.amounts);
+        result
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn field_conserves_and_washout_is_uniform() {
-        let c = Chemistry::new(101).unwrap();
-        let mut f = Field::new(16., 16., 2.);
-        for s in 0..SPECIES {
-            f.deposit(0., 0., s, 1., &c);
+    pub fn validate(&self) -> Result<(), String> {
+        let n = self
+            .nx
+            .checked_mul(self.ny)
+            .ok_or("Invalid field dimensions")?;
+        if self.nx < 4
+            || self.ny < 4
+            || n > 80000
+            || self.spacing <= 0.
+            || !self.spacing.is_finite()
+            || self.amounts.len() != n * SPECIES
+            || self.impedance.len() != n
+            || self.stress.len() != n
+            || self.signal.len() != n
+            || self.amounts.iter().any(|q| !q.is_finite() || *q < 0.)
+            || !self.drift.is_finite()
+            || !(0. ..=1.).contains(&self.drift)
+        {
+            return Err("Invalid field state".into());
         }
-        let start = f.totals(&c);
-        let mut removed = (0., 0.);
-        let mut roundoff = (0., 0.);
-        for _ in 0..20 {
-            let b = f.advance(&c, 0.2, 0.01, 1.);
-            removed.0 += b.matter;
-            removed.1 += b.energy;
-            roundoff.0 += b.roundoff_matter;
-            roundoff.1 += b.roundoff_energy;
-        }
-        assert!(f.amounts.iter().all(|x| *x >= 0.));
-        let end = f.totals(&c);
-        assert!((start.0 - end.0 - removed.0 - roundoff.0).abs() < 1e-9);
-        assert!((start.1 - end.1 - removed.1 - roundoff.1).abs() < 1e-8);
-        assert!((end.0 / start.0 - (-0.04_f64).exp()).abs() < 1e-6);
+        Ok(())
     }
-    #[test]
-    fn periodic_sampling_and_rare_matter() {
-        let c = Chemistry::new(1).unwrap();
-        let mut f = Field::new(16., 16., 2.);
-        f.deposit(0., 0., 7, 1e-25, &c);
-        assert_eq!(
-            f.sample(7, &f.stencil(0., 0.)),
-            f.sample(7, &f.stencil(16., 16.))
-        );
-        assert!(f.sample(7, &f.stencil(0., 0.)) > 0.);
-        let before = f.totals(&c).0;
-        f.advance(&c, 0.2, 0., 0.);
-        assert!((f.totals(&c).0 / before - 1.).abs() < 1e-6);
+    pub fn validate_reductions(&self, c: &Chemistry) -> Result<(), String> {
+        let mut reference = self.clone();
+        reference.refresh(c);
+        let close = |a: f64, b: f64| a.is_finite() && (a - b).abs() <= 1e-9 * (1. + b.abs());
+        if !self
+            .totals
+            .iter()
+            .zip(reference.totals)
+            .all(|(&a, b)| close(a, b))
+            || !self
+                .impedance
+                .iter()
+                .zip(&reference.impedance)
+                .all(|(&a, &b)| close(a, b))
+            || !self
+                .stress
+                .iter()
+                .zip(&reference.stress)
+                .all(|(&a, &b)| close(a, b))
+            || !self
+                .signal
+                .iter()
+                .flatten()
+                .zip(reference.signal.iter().flatten())
+                .all(|(&a, &b)| close(a, b))
+        {
+            return Err("Field reductions disagree with material".into());
+        }
+        Ok(())
     }
 }

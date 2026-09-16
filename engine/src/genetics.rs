@@ -1,5 +1,5 @@
 use crate::{
-    chemistry::{self, Affinity, Chemistry},
+    chemistry::{self, Chemistry},
     config::Config,
     controller,
     random::Random,
@@ -7,6 +7,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Target {
     pub x: f64,
     pub y: f64,
@@ -21,19 +22,21 @@ impl Target {
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Transporter {
     pub x: f64,
     pub y: f64,
-    pub export: bool,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Enzyme {
     pub x: f64,
     pub y: f64,
-    pub dx: i8,
-    pub dy: i8,
+    pub dx: f64,
+    pub dy: f64,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Machinery {
     pub receptors: [Target; 4],
     pub transporters: [Transporter; 4],
@@ -58,25 +61,33 @@ pub struct Genotype {
     pub compiled: Option<Compiled>,
 }
 #[derive(Clone, Debug)]
-pub struct Edge {
-    pub substrate: usize,
-    pub product: usize,
-    pub affinity: f64,
-    pub energy: f64,
-    pub heat: f64,
-}
-#[derive(Clone, Debug)]
 pub struct Compiled {
     pub sequence_fingerprint: u64,
     pub chromosome: Chromosome,
     pub body: [f64; 15],
-    pub receptors: [Vec<Affinity>; 4],
-    pub transporters: [Vec<Affinity>; 4],
-    pub enzymes: [Vec<Edge>; 4],
-    pub membrane: Vec<Affinity>,
+    pub operators: crate::chemical_operators::Operators,
 }
 
 impl Machinery {
+    pub fn validate(&self) -> Result<(), String> {
+        let points = self
+            .receptors
+            .iter()
+            .map(|p| p.point())
+            .chain(self.transporters.iter().map(|p| [p.x, p.y]))
+            .chain(self.enzymes.iter().map(|p| [p.x, p.y]))
+            .chain([self.membrane.point()]);
+        if points
+            .flatten()
+            .any(|v| !v.is_finite() || !(0. ..=15.).contains(&v))
+            || self.enzymes.iter().any(|e| {
+                !e.dx.is_finite() || !e.dy.is_finite() || e.dx.abs() > 15. || e.dy.abs() > 15.
+            })
+        {
+            return Err("Invalid installed machinery".into());
+        }
+        Ok(())
+    }
     pub fn seed(chemistry: &Chemistry, sources: &[usize]) -> Self {
         let from = [
             Target::species(sources[0]),
@@ -94,19 +105,15 @@ impl Machinery {
             receptors: [from[0], from[1], to, stress],
             transporters: std::array::from_fn(|i| {
                 let p = if i < 2 { from[i] } else { to };
-                Transporter {
-                    x: p.x,
-                    y: p.y,
-                    export: i >= 2,
-                }
+                Transporter { x: p.x, y: p.y }
             }),
             enzymes: std::array::from_fn(|i| {
                 let p = from[i % 2];
                 Enzyme {
                     x: p.x,
                     y: p.y,
-                    dx: (to.x - p.x) as i8,
-                    dy: (to.y - p.y) as i8,
+                    dx: to.x - p.x,
+                    dy: to.y - p.y,
                 }
             }),
             membrane: to,
@@ -135,16 +142,11 @@ impl Machinery {
             point(&mut p.x, &mut p.y);
         }
         point(&mut self.membrane.x, &mut self.membrane.y);
-        for t in &mut self.transporters {
-            if rng.unit() < c.physical_mutation_rate * 0.1 {
-                t.export = !t.export;
-            }
-        }
         for e in &mut self.enzymes {
             for d in [&mut e.dx, &mut e.dy] {
                 if rng.unit() < c.physical_mutation_rate {
-                    let step = if rng.unit() < 0.5 { -1. } else { 1. };
-                    *d = (2. * chemistry::reflect((*d as f64 + 15. + step) / 2.) - 15.) as i8;
+                    let step = rng.normal() * c.physical_mutation_scale;
+                    *d = 2. * chemistry::reflect((*d + 15. + step) / 2.) - 15.;
                 }
             }
         }
@@ -159,13 +161,12 @@ impl Machinery {
             transporters: std::array::from_fn(|i| Transporter {
                 x: mean(a.transporters[i].x, b.transporters[i].x),
                 y: mean(a.transporters[i].y, b.transporters[i].y),
-                export: a.transporters[i].export,
             }),
             enzymes: std::array::from_fn(|i| Enzyme {
                 x: mean(a.enzymes[i].x, b.enzymes[i].x),
                 y: mean(a.enzymes[i].y, b.enzymes[i].y),
-                dx: ((a.enzymes[i].dx as f64 + b.enzymes[i].dx as f64) / 2.).round() as i8,
-                dy: ((a.enzymes[i].dy as f64 + b.enzymes[i].dy as f64) / 2.).round() as i8,
+                dx: mean(a.enzymes[i].dx, b.enzymes[i].dx),
+                dy: mean(a.enzymes[i].dy, b.enzymes[i].dy),
             }),
             membrane: Target {
                 x: mean(a.membrane.x, b.membrane.x),
@@ -259,40 +260,13 @@ impl Genotype {
                 core * ratios[i] * (1. + chromosome.physical[i] as f64).max(0.)
             }
         });
-        let receptors = std::array::from_fn(|i| {
-            chemistry::compile_affinity(m.receptors[i].point(), c.affinity_radius)
-        });
-        let transporters = std::array::from_fn(|i| {
-            chemistry::compile_affinity(
-                [m.transporters[i].x, m.transporters[i].y],
-                c.affinity_radius,
-            )
-        });
-        let enzymes = std::array::from_fn(|i| {
-            let e = m.enzymes[i];
-            chemistry::compile_affinity([e.x, e.y], c.affinity_radius)
-                .into_iter()
-                .filter_map(|a| {
-                    let p = chemistry::product(a.species, e.dx, e.dy);
-                    if p == a.species {
-                        return None;
-                    }
-                    let (energy, heat) = chemistry::reaction_energy(
-                        chemistry.properties[a.species].potential,
-                        chemistry.properties[p].potential,
-                        c.conversion_efficiency,
-                    );
-                    Some(Edge {
-                        substrate: a.species,
-                        product: p,
-                        affinity: a.value,
-                        energy,
-                        heat,
-                    })
-                })
-                .collect()
-        });
-        let membrane = chemistry::compile_affinity(m.membrane.point(), c.affinity_radius);
+        let operators = if let Some(previous) = &self.compiled {
+            let mut op = previous.operators.clone();
+            op.update(&previous.chromosome.chemistry, m, c, chemistry);
+            op
+        } else {
+            crate::chemical_operators::Operators::compile(m, c, chemistry)
+        };
         self.compiled = Some(Compiled {
             sequence_fingerprint: {
                 use std::hash::{Hash, Hasher};
@@ -304,10 +278,7 @@ impl Genotype {
             },
             chromosome,
             body,
-            receptors,
-            transporters,
-            enzymes,
-            membrane,
+            operators,
         });
     }
     pub fn inherit(
@@ -377,7 +348,7 @@ impl Genotype {
             learned,
             mutated,
             chromosomes: acquired,
-            compiled: None,
+            compiled: self.compiled.clone(),
         };
         child.compile(c, chemistry);
         child
@@ -402,7 +373,9 @@ impl Genotype {
             if points
                 .flatten()
                 .any(|x| !x.is_finite() || !(0. ..=15.).contains(&x))
-                || m.enzymes.iter().any(|e| e.dx.abs() > 15 || e.dy.abs() > 15)
+                || m.enzymes.iter().any(|e| {
+                    !e.dx.is_finite() || !e.dy.is_finite() || e.dx.abs() > 15. || e.dy.abs() > 15.
+                })
             {
                 return Err("Invalid machinery".into());
             }

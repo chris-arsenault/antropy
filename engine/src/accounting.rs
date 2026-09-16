@@ -1,6 +1,22 @@
+//! Linear material value and usable-work accounts. Spatial signals store no spendable work.
 use crate::{chemistry::Chemistry, organism::Flows};
 use serde::{Deserialize, Serialize};
-
+/// Automatic construction/refitting protects already funded work until the next physiology event.
+pub fn interval_reserve(
+    cell: &crate::organism::Cell,
+    body: &[f64; 15],
+    c: &crate::config::Config,
+) -> f64 {
+    let maintenance = crate::organism::maintenance_rate(body, cell.damage, c);
+    let motors =
+        body[1] * c.motor_power_density * (cell.action.swim + 0.25 * cell.action.turn.abs());
+    let learning = if c.learning == "plastic" {
+        body[0] * c.plasticity_cost
+    } else {
+        0.
+    };
+    (c.physiology_interval + c.dt) * (maintenance + motors + learning)
+}
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Ledger {
@@ -12,47 +28,20 @@ pub struct Ledger {
     pub washout_energy: f64,
     pub numerical_material: f64,
     pub numerical_energy: f64,
-    pub flows: Flows,
-    pub division_heat: f64,
     pub death_heat: f64,
+    pub division_heat: f64,
     pub overflow_heat: f64,
     pub births: u64,
     pub divisions: u64,
     pub deaths: u64,
-    pub damage_deaths: u64,
-    pub mutations: u64,
-    pub learned_births: u64,
-    pub recombinations: u64,
-    pub transfers: u64,
-    pub disturbances: u64,
     pub disturbance_deaths: u64,
-    pub blocked_divisions: u64,
-    pub task_writes: u64,
-    pub organism_time: f64,
+    pub transfers: u64,
+    pub flows: Flows,
 }
 impl Ledger {
-    pub fn rounding(&mut self, q: f64, s: usize, chemistry: &Chemistry) {
-        self.numerical_material += q;
-        self.numerical_energy += q * chemistry.properties[s].potential;
-    }
-    pub fn accumulate(&mut self, f: &Flows) {
-        self.flows.imported += f.imported;
-        self.flows.exported += f.exported;
-        self.flows.reacted += f.reacted;
-        self.flows.captured += f.captured;
-        self.flows.constructed += f.constructed;
-        self.flows.maintenance += f.maintenance;
-        self.flows.motors += f.motors;
-        self.flows.learning += f.learning;
-        self.flows.transport += f.transport;
-        self.flows.reaction_heat += f.reaction_heat;
-        self.flows.construction += f.construction;
-        self.flows.refitting += f.refitting;
-        self.flows.repair += f.repair;
-        self.flows.repaired += f.repaired;
-        self.flows.exposure += f.exposure;
-        self.flows.damage += f.damage;
-        self.flows.distance += f.distance;
+    pub fn rounding(&mut self, loss: f64, species: usize, chemistry: &Chemistry) {
+        self.numerical_material += loss;
+        self.numerical_energy += loss * chemistry.properties[species].potential;
     }
     pub fn heat(&self) -> f64 {
         let f = &self.flows;
@@ -64,8 +53,30 @@ impl Ledger {
             + f.construction
             + f.refitting
             + f.repair
-            + self.division_heat
             + self.death_heat
+            + self.division_heat
             + self.overflow_heat
+    }
+    pub fn accumulate(&mut self, f: &Flows) {
+        macro_rules! add { ($($name:ident),*) => { $(self.flows.$name += f.$name;)* }; }
+        add!(
+            imported,
+            exported,
+            reacted,
+            captured,
+            constructed,
+            maintenance,
+            motors,
+            learning,
+            transport,
+            reaction_heat,
+            construction,
+            refitting,
+            repair,
+            repaired,
+            exposure,
+            damage,
+            distance
+        );
     }
 }

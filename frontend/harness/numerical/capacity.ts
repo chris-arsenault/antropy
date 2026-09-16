@@ -2,64 +2,6 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { loadEngine, captureEngine } from "./engine";
 import { measureOperating, measureStorage } from "./performance";
 import { openLedger, recordRun } from "../lib/ledger";
-import { browserSourceDigest } from "../sourceIdentity";
-import { resolve } from "node:path";
-
-/** M1 canonical compiler/core gate; ordinary World/browser integration remains separate. */
-export async function runCoreCapacity(output: string, baseline = false, mesh = 2) {
-  mkdirSync(output);
-  const engine = await loadEngine(),
-    wasmDigest = captureEngine(output, engine),
-    sourceDigest = browserSourceDigest(resolve(".")),
-    database = openLedger();
-  try {
-    for (const population of [48, 2000]) {
-      const world = engine.create(101, { founders: 0, sourceCount: 0, mesh });
-      try {
-        world.command("loadFixture", { population, growth: false });
-        writeFileSync(`${output}/${population}-initial.antropy`, world.snapshot());
-        const at = performance.now();
-        const result = world.command<Record<string, unknown>>("composedCapacity", { baseline });
-        const wallMs = performance.now() - at;
-        writeFileSync(`${output}/${population}-final.antropy`, world.snapshot());
-        const summary = {
-          ...result,
-          wasmDigest,
-          sourceDigest,
-          memoryBytes: engine.memoryBytes,
-          nodeVersion: process.version,
-          runtimeFlags: process.execArgv,
-        };
-        const id = recordRun(database, {
-          experiment: baseline ? "m0-diffusion-baseline" : "m1-canonical-capacity",
-          label: "256 channels; bounded arithmetic proof; scope and exclusions in summary",
-          driver: "wasm",
-          seed: 101,
-          ticks: Number(result.measuredTicks),
-          params: { population, warmup: 10, horizon: 100, wallCapSeconds: 60 },
-          summary,
-          wallMs,
-        });
-        writeFileSync(`${output}/${population}.json`, JSON.stringify({ id, ...summary }, null, 2));
-        console.log(
-          JSON.stringify({
-            id,
-            population,
-            meanMs: result.meanMs,
-            worstWindowMs: result.worstWindowMs,
-            measuredTicks: result.measuredTicks,
-            stoppingReason: result.stoppingReason,
-            fitsAllocation: result.fitsAllocation,
-          })
-        );
-      } finally {
-        world.dispose();
-      }
-    }
-  } finally {
-    database.close();
-  }
-}
 
 /** Fixed registered 48/2000/2000-growth workloads; no horizon expansion. */
 export async function runCapacity(output: string) {
@@ -138,7 +80,7 @@ export async function runCapacity(output: string) {
 if (process.argv[1]?.endsWith("capacity.ts")) {
   const output = process.argv[2];
   if (!output) throw new Error("Provide a new output directory");
-  if (process.argv[3] === "core" || process.argv[3] === "diffusion")
-    await runCoreCapacity(output, process.argv[3] === "diffusion", Number(process.argv[4] ?? 2));
-  else await runCapacity(output);
+  if (process.argv[3])
+    throw new Error("Only the complete production capacity workload is supported");
+  await runCapacity(output);
 }

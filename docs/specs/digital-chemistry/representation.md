@@ -1,17 +1,22 @@
 # Chemical definition and compiled machinery representation
 
-[ADR 0022](../../adr/0022-computable-chemistry.md), the
-[computational foundation](../../design/chemistry/computational-foundation.md) and the
-[M1 composition correction](../../../DIGITAL-CHEMISTRY-PLAN.md#active-implementation-correction-compose-operators-through-commitment)
-govern this representation. Chemistry v4 and physical checkpoint v12 are unchanged.
-The canonical compiler now supplies both the composed numerical kernels and the stateless atlas.
-Ordinary World integration remains M2–M4; this establishes neither viability nor evolved behavior.
+This page preserves the pre-removal representation decisions and measurements.
+The current [composed runtime](../../design/chemistry/composed-runtime.md) implements
+chemistry v4 with physical checkpoint v13, continuous inherited and installed machinery,
+and one production compiler. The historical v12 and capacitor descriptions below do not
+govern execution. [ADR 0022](../../adr/0022-computable-chemistry.md) and the
+[computational foundation](../../design/chemistry/computational-foundation.md) remain governing.
 
 ## M0 replacement handoff
 
-M1 consolidates M0's selected arithmetic into
-[`MachineryParameters`](../../../engine/src/machinery_parameters.rs) v2 and
-[`CompiledOperators`](../../../engine/src/chemical_operators.rs) v3. The numerical-only
+The numerical compiler described below was deleted on September 15, 2026. This is a
+historical representation record; the [restart work order](../../../DIGITAL-CHEMISTRY-PLAN.md)
+governs. Deleted source is available at pre-removal Git commit
+`41fd5d2edb06be5d6ab0c342ffa4fe1456baa87c`, under `engine/src/chemical_operators.rs`.
+
+M1 consolidated M0's selected arithmetic into
+`MachineryParameters` v2 (the deleted `engine/src/machinery_parameters.rs`) and
+`CompiledOperators` v3. The numerical-only
 `Instructions`, `Operators` and compiler are removed. There is one replacement compiler.
 
 The parameter value contains four receptor centers, four transporter centers, four enzyme
@@ -144,7 +149,7 @@ observes organisms or retries a seed to obtain an ecological winner.
 
 ## Parameters and operators
 
-[`MachineryParameters`](../../../engine/src/machinery_parameters.rs) version 1 contains four
+Historical `MachineryParameters` version 1 contains four
 receptor centers, four transporter center/coupling triples, four enzyme center/offset/coupling
 quintuples and a membrane coordinate: 42 f64 coordinates and a version. Centers use the existing
 `Target` value type and lie in [0,15]², offsets in [−15,15]², coupling in [−1,1]. Validation rejects
@@ -163,7 +168,7 @@ distance divided by 9, also shared with the continuous-distance M0 capacity calc
 M0's duplicate product/barrier formulas have been removed; its rate/occupancy algebra remains
 test-local until its production owner is implemented.
 
-[`OperatorCompiler`](../../../engine/src/chemical_operators.rs) borrows one validated chemistry
+The historical `OperatorCompiler` borrows one validated chemistry
 definition. Recognition has fixed radius 3 and uses the existing compact affinity compiler.
 Enzyme channels retain originating substrate, product, weight, binding coefficient, symmetric
 barrier and coupling. Binding is `affinity * weight` at both endpoints. Distinct originating

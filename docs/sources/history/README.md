@@ -1,5 +1,12 @@
 # Design history
 
+The September 15 numerical-core removal preserves the previous
+[root plan](digital-chemistry-plan-before-core-removal.md),
+[M0 expansion](digital-chemistry-m0-before-core-removal.md) and
+[M1 expansion](digital-chemistry-m1-before-core-removal.md) unchanged. Their relative
+links describe their original repository-root locations. These are superseded work
+orders; the [numerical restart](../../../DIGITAL-CHEMISTRY-PLAN.md) governs new work.
+
 The [pre-chemistry September 13 snapshot](2026-09-13-pre-chemistry/README.md) preserves the
 replaced runtime/controller/body/ecology/display contracts, architecture, calibration, commands,
 documentation index and repository/agent entry points. These are exact file copies, not revised

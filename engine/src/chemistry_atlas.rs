@@ -1,13 +1,6 @@
 //! Stateless chemistry/compiler inspection; pre-integration runtime curves are labeled separately.
+use crate::chemical_profiles::ProfileCoverage;
 use crate::chemistry::{Chemistry, affinity, coordinate, product, reaction_energy};
-use crate::{
-    chemical_operators::{CompiledOperators, OPERATOR_VERSION, OperatorCompiler},
-    chemical_profiles::ProfileCoverage,
-    genetics::Target,
-    machinery_parameters::{
-        EnzymeParameters, MachineryParameters, PARAMETER_VERSION, TransportParameters,
-    },
-};
 use serde_json::{Value, json};
 const NAMES: [&str; 4] = ["potential", "diffusion", "impedance", "stress"];
 fn values(c: &Chemistry, s: usize) -> [f64; 4] {
@@ -82,7 +75,7 @@ fn analysis(c: &Chemistry, radius: f64) -> Value {
             json!({"from":pair[0],"to":pair[1],"usable":usable,"heat":heat})
         })
         .collect();
-    json!({"width":radius,"neighbors":neighbors,"neighborhoods":neighborhoods,"affinityWeightedBarrierCount":barrier,"impedancePath":{"species":path,"transitions":transitions,"lawStatus":"pre-integration reference-energy reaction law"}})
+    json!({"width":radius,"neighbors":neighbors,"neighborhoods":neighborhoods,"affinityWeightedBarrierCount":barrier,"impedancePath":{"species":path,"transitions":transitions,"lawStatus":"Linear reference-value accounting; conversion also pays catalytic overhead"}})
 }
 fn curves() -> Value {
     let distance: Vec<_> = (0..151).map(|i| i as f64 / 10.).collect();
@@ -96,57 +89,24 @@ fn curves() -> Value {
         let products = [-1, 0, 1].map(|dx| json!({"dx":dx,"dy":1,"product":product(species,dx,1)}));
         json!({"species":species,"products":products})
     });
-    json!({"lawStatus":"pre-integration runtime laws; M2/M3 replacement pending","affinity":affinities,
+    json!({"lawStatus":"Production artificial transport response","affinity":affinities,
         "load":load,"movement":load.iter().map(|v|crate::movement::mobility(*v,0.5)).collect::<Vec<_>>(),
         "diffusion":load.iter().map(|v|crate::field::mobility(*v,1.)).collect::<Vec<_>>(),
         "targetMutations":targets,"offsetMutations":offsets})
 }
 
 fn operator_examples(c: &Chemistry) -> Result<Value, String> {
-    let compiler = OperatorCompiler::new(c)?;
-    let mut examples = Vec::new();
-    for (name, [x, y], offset) in [
-        ("corner", [0., 0.], [1., 1.]),
-        ("center", [7., 7.], [1., 0.]),
-        ("fractional", [7.5, 7.5], [0.25, -0.75]),
-        ("reflected", [14.5, 14.5], [1., 1.]),
-        ("idle", [7., 7.], [0., 0.]),
-    ] {
-        let center = Target { x, y };
-        let parameters = MachineryParameters {
-            version: PARAMETER_VERSION,
-            receptors: [center; 4],
-            membrane: center,
-            transporters: [TransportParameters { center }; 4],
-            enzymes: [EnzymeParameters { center, offset }; 4],
-        };
-        let op = compiler.compile_target(&parameters)?;
-        let conversions: Vec<_> = op.enzymes[0]
-            .iter()
-            .map(|c| {
-                json!({
-                    "substrate":c.substrate,
-                    "products":c.products.iter().map(|p|json!({"species":p.species,"weight":p.weight})).collect::<Vec<_>>(),
-                    "binding":c.binding,"attenuation":c.attenuation,"work":c.work,"heat":c.heat,
-                })
-            })
-            .collect();
-        examples.push(
-            json!({"name":name,"parameters":parameters,"ownedBytes":op.owned_bytes(),
-            "sharedDefinitionBytes":op.key.definition.len(),"membraneProfile":op.profile,
-            "enzymeConversionCounts":op.enzymes.each_ref().map(|e|e.len()),
-            "representativeEngagement":op.engagement[0].iter().map(|a|json!({"species":a.species,"weight":a.value})).collect::<Vec<_>>(),
-            "representativeEnzyme":conversions}),
-        );
-    }
+    let config = crate::config::Config::default();
+    let examples:Vec<_> = [([7.,7.],[0.,0.]),([7.5,7.5],[0.25,-0.75]),([14.5,14.5],[1.,1.])].into_iter().map(|(point,offset)| {
+        let mut machinery=crate::genetics::Machinery::seed(c,&c.source_species());
+        machinery.enzymes[0]=crate::genetics::Enzyme{x:point[0],y:point[1],dx:offset[0],dy:offset[1]};
+        let op=crate::chemical_operators::Operators::compile(&machinery,&config,c);
+        json!({"parameters":machinery,"membraneProfile":op.profile,
+            "representativeEngagement":op.enzymes[0].engagement.iter().map(|a|json!({"species":a.species,"weight":a.value})).collect::<Vec<_>>(),
+            "representativeEnzyme":op.enzymes[0].conversions.iter().map(|e|json!({"substrate":e.substrate,"binding":e.binding,"work":e.work,"heat":e.heat,"products":e.products.iter().map(|p|json!({"species":p.species,"weight":p.weight})).collect::<Vec<_>>() })).collect::<Vec<_>>()})
+    }).collect();
     Ok(
-        json!({"version":OPERATOR_VERSION,"maximumOwnedBytes":CompiledOperators::maximum_owned_bytes(),
-        "parameterVersion":PARAMETER_VERSION,
-        "maximumConversions":crate::chemical_operators::MAX_CONVERSIONS,
-        "maximumProducts":crate::chemical_operators::MAX_PRODUCTS,
-        "scope":"canonical executable coefficients used by composed kernels; ordinary World integration pending M2-M4; slots repeat within each fixture",
-        "byteScope":"target-sized structs and boxed payloads; excludes allocator overhead and shared definition",
-        "examples":examples}),
+        json!({"version":1,"scope":"Production World compiler; installed coefficients determine live recognition, conversion and body profiles","examples":examples}),
     )
 }
 

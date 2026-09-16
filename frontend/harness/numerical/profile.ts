@@ -14,15 +14,15 @@ console.log(
   JSON.stringify(
     Object.fromEntries(
       [
-        "fields",
-        "disturbance",
+        "sources",
+        "fieldAndFootprints",
         "sensingController",
         "movement",
-        "injury",
-        "transport",
-        "metabolism",
-        "contactsBirths",
-        "housekeeping",
+        "exchange",
+        "physiology",
+        "maintenanceAndLifecycle",
+        "trace",
+        "exchangePreparationSubset",
       ].map((name, i) => [name, totals[i]])
     ),
     null,

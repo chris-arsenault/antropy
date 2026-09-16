@@ -9,7 +9,7 @@ export interface GenotypeFacts {
 export function traitValues(world: EngineWorld, id: number) {
   const { blueprint: b, expressed: g } = world.command<GenotypeFacts>("genotypeFacts", { id }),
     m = g.chemistry;
-  const importers = m.transporters.reduce((sum, t, i) => sum + (t.export ? 0 : b[7 + i]), 0);
+  const importers = m.transporters.reduce((sum, _t, i) => sum + b[7 + i], 0);
   return {
     membraneX: m.membrane.x,
     membraneY: m.membrane.y,

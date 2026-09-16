@@ -94,6 +94,9 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
         let g = variants.get(a.variant).ok_or("Unknown fixture variant")?;
         c.genome = g.id;
         c.machinery_genome = g.id;
+        c.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
+        c.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+        c.machinery_revision += 1;
         c.x = a.x;
         c.y = a.y;
         c.heading = a.heading;

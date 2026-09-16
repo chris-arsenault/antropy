@@ -125,7 +125,7 @@ export interface Target {
 }
 export interface Machinery {
   receptors: Target[];
-  transporters: (Target & { export: boolean })[];
+  transporters: Target[];
   enzymes: (Target & { dx: number; dy: number })[];
   membrane: Target;
 }
@@ -143,6 +143,8 @@ export interface Genotype {
 }
 export interface CellState {
   machineryGenome: number;
+  machineryRevision: number;
+  installed: Machinery;
   id: number;
   parent: number | null;
   lineage: number;
@@ -165,7 +167,7 @@ export interface CellState {
   chemicalFlows: { imported: number[]; exported: number[]; consumed: number[]; produced: number[] };
 }
 export interface Inspection {
-  installedChemistry: Omit<Genotype["chromosomes"][number]["chemistry"], "membrane"> | null;
+  installedChemistry: Machinery | null;
   genealogy: {
     generation: number;
     family: number;

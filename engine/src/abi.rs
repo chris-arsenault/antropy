@@ -28,7 +28,13 @@ impl Store {
             .get("op")
             .and_then(Value::as_str)
             .ok_or("Missing operation")?;
-        let value = if op == "chemistryAtlas" {
+        let value = if op == "resourceEconomy" {
+            crate::economy_report::report(
+                v.get("seed").and_then(Value::as_u64).unwrap_or(101),
+                serde_json::from_value(v.get("config").cloned().unwrap_or(json!({})))
+                    .map_err(|e| e.to_string())?,
+            )?
+        } else if op == "chemistryAtlas" {
             crate::chemistry_atlas::atlas(v.get("seed").and_then(Value::as_u64).unwrap_or(101))?
         } else if op == "controllerChange" {
             let base = serde_json::from_value(

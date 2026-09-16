@@ -11,7 +11,9 @@ const cases = [
   { mode: "save", founders: 48, history: 0, repetitions: 100 },
   { mode: "save", founders: 70, history: 100000, repetitions: 100 },
   { mode: "render", founders: 70, history: 100000, repetitions: 200 },
-];
+].filter(
+  (settings) => !process.env.ANTROPY_PROBE_MODE || settings.mode === process.env.ANTROPY_PROBE_MODE
+);
 try {
   const version = await connection.browser.send("Browser.getVersion");
   for (const settings of cases) {

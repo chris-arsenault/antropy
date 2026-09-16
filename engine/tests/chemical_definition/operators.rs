@@ -1,292 +1,174 @@
-use super::parameters::fixture;
 use antropy_engine::{
-    chemical_operators::*,
-    chemistry::{Chemistry, affinity, compile_affinity, coordinate},
-    genetics::Target,
-    machinery_parameters::{InstalledParameters, MachineryParameters},
+    chemical_operators::Operators,
+    chemistry::{Chemistry, affinity, coordinate},
+    config::Config,
+    genetics::{Enzyme, Machinery, Target},
 };
-
-pub fn cases() -> Vec<(&'static str, MachineryParameters)> {
-    [
-        ("corner", [0., 0.], [1., 1.]),
-        ("center", [7., 7.], [1., 0.]),
-        ("fractional", [7.5, 7.5], [0.25, -0.75]),
-        ("reflected", [14.5, 14.5], [1., 1.]),
-        ("idle", [7., 7.], [0., 0.]),
-    ]
-    .into_iter()
-    .map(|(name, [x, y], offset)| {
-        let mut p = fixture();
-        let center = Target { x, y };
-        p.receptors = [center; 4];
-        p.membrane = center;
-        for t in &mut p.transporters {
-            t.center = center;
-        }
-        for e in &mut p.enzymes {
-            e.center = center;
-            e.offset = offset;
-        }
-        (name, p)
-    })
-    .collect()
-}
-
-// Independent hat-function enumeration, not the compiler's four-corner construction.
-fn dense_weight(s: usize, p: usize, offset: [f64; 2]) -> f64 {
+use std::sync::Arc;
+// Independent dense hat enumeration checks the sparse product map including reflection.
+fn weight(s: usize, p: usize, offset: [f64; 2]) -> f64 {
     let a = coordinate(s);
     let b = coordinate(p);
-    let mut weight = 1.;
-    for k in 0..2 {
-        let x = a[k] + offset[k];
-        let reflected = 15. - ((x % 30. + 30.) % 30. - 15.).abs();
-        weight *= (1. - (reflected - b[k]).abs()).max(0.);
-    }
-    weight
+    (0..2)
+        .map(|k| {
+            let reflected = 15. - ((a[k] + offset[k]).rem_euclid(30.) - 15.).abs();
+            (1. - (reflected - b[k]).abs()).max(0.)
+        })
+        .product()
 }
-
-fn verify_enzyme(parameters: &MachineryParameters, enzyme: &[Conversion], chemistry: &Chemistry) {
-    let e = parameters.enzymes[0];
-    let mut count = 0;
-    for s in 0..256 {
-        let a = affinity(e.center.point(), s, 3.);
-        if a == 0. {
-            continue;
-        }
-        let map = &enzyme[count];
-        assert_eq!(map.substrate, s);
-        assert_eq!(map.binding, a);
-        let mut output = 0.;
-        let mut product_sum = 0.;
-        for p in 0..256 {
-            let weight = dense_weight(s, p, e.offset);
-            let actual = map
-                .products
-                .iter()
-                .find(|v| v.species == p)
-                .map_or(0., |v| v.weight);
-            assert!((actual - weight).abs() < 1e-13);
-            output += weight * chemistry.properties[p].potential;
-            product_sum += actual;
-        }
-        assert!((product_sum - 1.).abs() < 1e-13);
-        let delta = chemistry.properties[s].potential - output;
-        let work = if delta >= 0. {
-            0.8 * delta
-        } else {
-            delta / 0.8
-        } - 0.05;
-        assert!((map.work - work).abs() < 1e-12);
-        assert!((map.heat - (delta - work)).abs() < 1e-12);
-        assert!(map.heat >= 0.);
-        assert_eq!(
-            map.attenuation,
-            1. / (1. + (e.offset[0].powi(2) + e.offset[1].powi(2)) / 9.)
-        );
-        count += 1;
-    }
-    assert_eq!(count, enzyme.len());
-}
-
 #[test]
-fn compact_operators_match_dense_forward_maps() {
-    let c = Chemistry::new(101).unwrap();
-    let compiler = OperatorCompiler::new(&c).unwrap();
-    for (_, p) in cases() {
-        let op = compiler.compile_target(&p).unwrap();
-        verify_enzyme(&p, &op.enzymes[0], &c);
-        for s in 0..256 {
-            let expected = affinity(p.enzymes[0].center.point(), s, 3.)
-                + (0..256)
-                    .map(|origin| {
-                        affinity(p.enzymes[0].center.point(), origin, 3.)
-                            * dense_weight(origin, s, p.enzymes[0].offset)
-                    })
-                    .sum::<f64>();
-            let actual = op.engagement[0]
+fn production_coefficients_match_dense_products_and_work_accounts() {
+    let chemistry = Chemistry::new(101).unwrap();
+    let config = Config::default();
+    for (center, offset) in [
+        ([0., 0.], [1., 1.]),
+        ([7.5, 7.5], [0.25, -0.75]),
+        ([14.5, 14.5], [1., 1.]),
+        ([7., 7.], [0., 0.]),
+    ] {
+        let mut m = Machinery::seed(&chemistry, &chemistry.source_species());
+        m.enzymes = [Enzyme {
+            x: center[0],
+            y: center[1],
+            dx: offset[0],
+            dy: offset[1],
+        }; 4];
+        let op = Operators::compile(&m, &config, &chemistry);
+        let enzyme = &op.enzymes[0];
+        assert!(enzyme.conversions.len() <= 36);
+        let mut occupancy = [0.; 256];
+        for e in &enzyme.conversions {
+            assert_eq!(e.binding, affinity(center, e.substrate, 3.));
+            let mut value = 0.;
+            let mut sum = 0.;
+            occupancy[e.substrate] += e.binding;
+            for p in 0..256 {
+                let expected = weight(e.substrate, p, offset);
+                let actual = e
+                    .products
+                    .iter()
+                    .find(|v| v.species == p)
+                    .map_or(0., |v| v.weight);
+                assert!((actual - expected).abs() < 1e-12);
+                value += expected * chemistry.properties[p].potential;
+                sum += actual;
+                occupancy[p] += e.binding * expected;
+            }
+            assert!((sum - 1.).abs() < 1e-12);
+            let difference = chemistry.properties[e.substrate].potential - value;
+            assert!((difference - e.work - e.heat).abs() < 1e-12);
+            assert!(e.heat >= 0.05 * e.changed - 1e-12);
+            assert!(e.products.len() <= 4);
+        }
+        for (s, expected) in occupancy.into_iter().enumerate() {
+            let actual = enzyme
+                .engagement
                 .iter()
                 .find(|a| a.species == s)
                 .map_or(0., |a| a.value);
-            assert!((actual - expected).abs() < 1e-12);
+            assert!((expected - actual).abs() < 1e-12);
         }
-        assert_eq!(op.membrane, p.membrane.point());
-        assert_eq!(op.profile, c.profiles.evaluate(p.membrane.point()));
-        for s in 0..256 {
-            assert_eq!(
-                op.stress[s],
-                c.properties[s].stress * (1. - 0.95 * affinity(p.membrane.point(), s, 3.))
-            );
-            for slot in 0..4 {
-                let expected = affinity(p.receptors[slot].point(), s, 3.);
-                let actual = op.receptors[slot]
+        if offset == [0., 0.] {
+            assert!(
+                enzyme
+                    .conversions
                     .iter()
-                    .find(|a| a.species == s)
-                    .map_or(0., |a| a.value);
-                assert_eq!(actual, expected);
-                assert_eq!(op.transporters[slot], op.receptors[slot]);
-            }
+                    .all(|e| e.changed == 0. && e.work == 0.)
+            );
         }
     }
 }
-
 #[test]
-fn actual_processing_and_sensing_are_continuous_at_topology_changes() {
-    use antropy_engine::{
-        composed::{
-            Accounts,
-            machinery::{ReactionWork, receptors},
-        },
-        config::Config,
-        world::World,
-    };
-    let world = World::new(
+fn partial_refresh_preserves_unaffected_allocations() {
+    let chemistry = Chemistry::new(101).unwrap();
+    let config = Config::default();
+    let mut m = Machinery::seed(&chemistry, &chemistry.source_species());
+    let mut op = Operators::compile(&m, &config, &chemistry);
+    let original = op.clone();
+    let before = m.clone();
+    m.receptors[0] = Target { x: 7.5, y: 7.5 };
+    op.update(&before, &m, &config, &chemistry);
+    assert!(!Arc::ptr_eq(&original.receptors[0], &op.receptors[0]));
+    for i in 0..4 {
+        assert!(Arc::ptr_eq(&original.enzymes[i], &op.enzymes[i]));
+        assert!(Arc::ptr_eq(&original.transporters[i], &op.transporters[i]));
+    }
+}
+#[test]
+fn processing_is_continuous_across_product_and_recognition_boundaries() {
+    let world = antropy_engine::world::World::new(
         101,
         Config {
+            width: 24.,
+            height: 24.,
             founders: 1,
-            ..Config::default()
+            source_count: 0,
+            ..Default::default()
         },
     )
     .unwrap();
-    let compiler = OperatorCompiler::new(&world.chemistry).unwrap();
-    let local = std::array::from_fn(|s| 0.1 + s as f64 / 255.);
     for x in [3., 7., 14.] {
         for offset in [0., 1., -1.] {
-            for eps in [1e-4, 1e-6] {
-                let mut p = fixture();
-                for e in &mut p.enzymes {
-                    e.center.x = x - eps;
-                    e.offset[0] = offset - eps;
+            let eps = 1e-6;
+            let cells: [antropy_engine::organism::Cell; 2] = [-eps, eps].map(|delta| {
+                let mut cell = world.cells[0].clone();
+                cell.inventory.fill(0.1);
+                cell.energy = 10.;
+                for e in &mut cell.installed.enzymes {
+                    e.x = x + delta;
+                    e.dx = offset + delta;
                 }
-                p.receptors[0].x = x - eps;
-                let a = compiler.compile_target(&p).unwrap();
-                for e in &mut p.enzymes {
-                    e.center.x = x + eps;
-                    e.offset[0] = offset + eps;
-                }
-                p.receptors[0].x = x + eps;
-                let b = compiler.compile_target(&p).unwrap();
-                let mut left = world.cells[0].clone();
-                left.inventory.fill(0.1);
-                left.energy = 10.;
-                let mut right = left.clone();
-                let mut work = ReactionWork::default();
-                work.react(&mut left, &a, &world.config, 0.2, &mut Accounts::default());
-                work.react(&mut right, &b, &world.config, 0.2, &mut Accounts::default());
-                let l1: f64 = left
-                    .inventory
-                    .iter()
-                    .zip(right.inventory.iter())
-                    .map(|(a, b)| (a - b).abs())
-                    .sum();
-                // Conservative Lipschitz envelope: four bounded slots, support <=36,
-                // compact affinity, bilinear products and piecewise-linear reference yields.
-                assert!(l1 + (left.energy - right.energy).abs() <= 4096. * eps + 1e-12);
-                let sa = receptors(&left, &a, &local);
-                let sb = receptors(&right, &b, &local);
-                assert!(
-                    sa.iter().zip(sb).map(|(a, b)| (a - b).abs()).sum::<f64>()
-                        <= 4096. * eps + 1e-12
-                );
-            }
-        }
-    }
-}
-
-#[test]
-fn supports_costs_and_cache_identity_are_bounded() {
-    let c = Chemistry::new(101).unwrap();
-    let compiler = OperatorCompiler::new(&c).unwrap();
-    let mut maximum = 0;
-    for x in 0..151 {
-        for y in 0..151 {
-            maximum = maximum.max(compile_affinity([x as f64 / 10., y as f64 / 10.], 3.).len());
-        }
-    }
-    assert!(maximum <= MAX_SUPPORT);
-    for (_, p) in cases() {
-        let target = compiler.compile_target(&p).unwrap();
-        assert_eq!(target, compiler.compile_target(&p).unwrap());
-        assert!(target.enzymes.iter().all(|e| e.len() <= MAX_SUPPORT));
-        assert!(target.enzymes.iter().map(|e| e.len()).sum::<usize>() <= MAX_CONVERSIONS);
-        assert!(
-            target
-                .enzymes
+                cell.operators = Some(Operators::compile(
+                    &cell.installed,
+                    &world.config,
+                    &world.chemistry,
+                ));
+                antropy_engine::metabolism::react(&mut cell, &world.config, &world.chemistry, 0.2);
+                cell
+            });
+            let change = cells[0]
+                .inventory
                 .iter()
-                .flatten()
-                .all(|e| e.products.len() <= 4)
-        );
-        assert!(target.owned_bytes() <= CompiledOperators::maximum_owned_bytes());
-        let mut installed = InstalledParameters {
-            revision: 7,
-            parameters: p,
-        };
-        let a = compiler.compile_installed(&installed).unwrap();
-        assert_ne!(target.key, a.key);
-        assert!(std::sync::Arc::ptr_eq(
-            &target.key.definition,
-            &a.key.definition
-        ));
-        installed.revision += 1;
-        let b = compiler.compile_installed(&installed).unwrap();
-        assert_ne!(a.key, b.key);
-        assert_eq!(a.enzymes, b.enzymes);
-        installed.parameters.membrane.x += 0.001;
-        assert_ne!(b.key, compiler.compile_installed(&installed).unwrap().key);
-        let other = Chemistry::new(202).unwrap();
-        assert_ne!(
-            a.key.definition,
-            OperatorCompiler::new(&other)
-                .unwrap()
-                .compile_installed(&installed)
-                .unwrap()
-                .key
-                .definition
-        );
+                .zip(cells[1].inventory.iter())
+                .map(|(a, b)| (a - b).abs())
+                .sum::<f64>()
+                + (cells[0].energy - cells[1].energy).abs();
+            assert!(change < 4096. * eps);
+        }
     }
-    let mut invalid = c.clone();
-    invalid.properties[0].potential += 1.;
-    assert!(OperatorCompiler::new(&invalid).is_err());
-    println!(
-        "maximum_sampled_support={maximum}; maximum_owned_bytes={}",
-        CompiledOperators::maximum_owned_bytes()
-    );
 }
 
 #[test]
-fn installed_refresh_matches_recompile_and_retains_unaffected_maps() {
-    let chemistry = Chemistry::new(101).unwrap();
-    let compiler = OperatorCompiler::new(&chemistry).unwrap();
-    let mut installed = InstalledParameters {
-        revision: 0,
-        parameters: fixture(),
-    };
-    let mut actual = compiler.compile_installed(&installed).unwrap();
-    for change in 0..5 {
-        let retained = actual.enzymes[3].as_ptr();
-        match change {
-            0 => installed.parameters.membrane.x += 0.1,
-            1 => installed.parameters.receptors[0].x += 0.1,
-            2 => installed.parameters.transporters[1].center.y += 0.1,
-            3 => installed.parameters.enzymes[2].offset[0] += 0.1,
-            _ => {}
+fn an_idle_offset_and_a_tiny_offset_have_continuous_work_cost() {
+    let world = antropy_engine::world::World::new(
+        101,
+        Config {
+            width: 24.,
+            height: 24.,
+            founders: 1,
+            source_count: 0,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let outcomes = [0., 1e-8].map(|offset| {
+        let mut cell = world.cells[0].clone();
+        cell.inventory.fill(0.1);
+        cell.energy = 10.;
+        for e in &mut cell.installed.enzymes {
+            e.dx = offset;
+            e.dy = 0.;
         }
-        installed.revision += 1;
-        compiler.refresh_installed(&mut actual, &installed).unwrap();
-        assert_eq!(actual, compiler.compile_installed(&installed).unwrap());
-        assert_eq!(actual.enzymes[3].as_ptr(), retained);
-    }
-    let previous = actual.clone();
-    installed.parameters.membrane.x = f64::NAN;
-    assert!(compiler.refresh_installed(&mut actual, &installed).is_err());
-    assert_eq!(actual, previous);
-    installed.parameters.membrane = fixture().membrane;
-    let other = Chemistry::new(202).unwrap();
-    let other_compiler = OperatorCompiler::new(&other).unwrap();
-    other_compiler
-        .refresh_installed(&mut actual, &installed)
-        .unwrap();
-    assert_eq!(
-        actual,
-        other_compiler.compile_installed(&installed).unwrap()
-    );
+        cell.operators = Some(Operators::compile(
+            &cell.installed,
+            &world.config,
+            &world.chemistry,
+        ));
+        antropy_engine::metabolism::react(&mut cell, &world.config, &world.chemistry, 0.8);
+        cell
+    });
+    assert_eq!(outcomes[0].energy, 10.);
+    assert_eq!(outcomes[0].flows.reacted, 0.);
+    assert!((outcomes[1].energy - 10.).abs() < 1e-8);
+    assert!(outcomes[1].flows.reacted < 1e-8);
 }

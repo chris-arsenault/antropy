@@ -62,7 +62,7 @@ impl Study {
             let load = field.scalar(&field.impedance, &field.stencil(c.x, c.y));
             r.seconds += dt;
             r.slowed_seconds +=
-                f64::from(1. / (1. + config.movement_impedance * load * load) <= 0.8) * dt;
+                f64::from(crate::movement::mobility(load, config.movement_impedance) <= 0.8) * dt;
             r.impaired_seconds += f64::from(c.damage >= 0.2) * dt;
             r.damage_seconds += c.damage * dt;
             r.swim_seconds += c.action.swim * dt;
