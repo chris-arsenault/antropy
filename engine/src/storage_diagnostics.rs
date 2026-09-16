@@ -66,7 +66,7 @@ pub fn field(w: &mut World, kind: &str) -> Result<Value, String> {
         }
     }
     if kind == "widespread" {
-        for node in w.field.amounts.chunks_exact_mut(256) {
+        for node in w.field.amounts.as_chunks_mut::<256>().0 {
             for s in (0..256).step_by(16) {
                 node[s] = 0.001;
             }

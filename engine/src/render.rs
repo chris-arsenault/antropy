@@ -81,7 +81,7 @@ impl Buffers {
         {
             let area = w.field.spacing * w.field.spacing;
             self.field.clear();
-            for (i, node) in w.field.amounts.chunks_exact(256).enumerate() {
+            for (i, node) in w.field.amounts.as_chunks::<256>().0.iter().enumerate() {
                 if kind == 5 {
                     let [matter, energy] =
                         w.field.material_values(i, &w.chemistry).map(|q| q / area);

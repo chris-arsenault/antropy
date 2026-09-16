@@ -77,7 +77,7 @@ pub fn summary(w: &World) -> Value {
 }
 pub fn environment(w: &World) -> Value {
     let mut species = [0.; 256];
-    for node in w.field.amounts.chunks_exact(256) {
+    for node in w.field.amounts.as_chunks::<256>().0 {
         for (total, q) in species.iter_mut().zip(node) {
             *total += *q as f64;
         }
@@ -111,19 +111,25 @@ pub fn field_view(w: &World, kind: &str, species: usize) -> Result<Value, String
         "chemical" => w
             .field
             .amounts
-            .chunks_exact(SPECIES)
+            .as_chunks::<SPECIES>()
+            .0
+            .iter()
             .map(|n| n[species] / area as f32)
             .collect(),
         "material" => w
             .field
             .amounts
-            .chunks_exact(SPECIES)
+            .as_chunks::<SPECIES>()
+            .0
+            .iter()
             .map(|n| n.iter().sum::<f32>() / area as f32)
             .collect(),
         "potential" => w
             .field
             .amounts
-            .chunks_exact(SPECIES)
+            .as_chunks::<SPECIES>()
+            .0
+            .iter()
             .map(|n| {
                 (n.iter()
                     .zip(&w.chemistry.properties)

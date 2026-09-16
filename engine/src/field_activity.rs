@@ -13,7 +13,7 @@ pub struct Activity {
 
 pub fn mask(row: &[f32]) -> u64 {
     let mut bits = 0;
-    for (i, group) in row.chunks_exact(4).enumerate() {
+    for (i, group) in row.as_chunks::<4>().0.iter().enumerate() {
         if group.iter().any(|q| *q > 0.) {
             bits |= 1 << i;
         }
@@ -42,7 +42,7 @@ impl Activity {
         self.queued = vec![false; count];
         self.nodes.clear();
         self.work.clear();
-        for (node, row) in amounts.chunks_exact(256).enumerate() {
+        for (node, row) in amounts.as_chunks::<256>().0.iter().enumerate() {
             self.set(node, mask(row));
         }
     }
