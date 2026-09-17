@@ -169,8 +169,8 @@ representation error. Competing requests cannot overdraw donors or reuse prospec
 through incidental iteration order. Zero and tiny amounts need defined behavior without a
 global abundance deletion threshold.
 
-The September15 processing-threshold correction defines a local extracellular concentration
-floor of `1e-24`, with explicit numerical-loss accounting and active-region execution in the
+The September15 processing-threshold correction introduced a local extracellular concentration
+floor, revised to `1e-9` by the September17 weathering work, with numerical-loss accounting and active-region execution in the
 [current runtime](composed-runtime.md). It does not remove a chemical identity based on its
 total abundance or grant replacement material. This user-authorized numerical resolution
 supersedes earlier implementation text that required processing every positive diffusion tail.

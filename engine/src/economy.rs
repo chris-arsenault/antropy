@@ -59,7 +59,7 @@ pub fn budget(
         .sum::<f64>();
     let maintenance = maintenance_rate(&cell.body, 0., c);
     let transport = imports.iter().sum::<f64>() * c.transport_energy;
-    let motor = cell.body[1] * c.motor_power_density * swim;
+    let motor = crate::movement::motor_work_rate(&cell.body, 0., swim, 0., c);
     let surplus = gross_work - maintenance - transport - motor;
     // Conditional internal mixture: the imported proportions, with no accumulated products.
     // Product feedback in a live cell can lower this bound further.
@@ -112,7 +112,7 @@ pub fn budget(
         processing_capacity,
         processing_work,
         processing_surplus,
-        construction_ceiling: (surplus / c.construction_energy)
+        construction_ceiling: (processing_surplus / c.construction_energy)
             .max(0.)
             .min(imports.iter().sum()),
         imports,

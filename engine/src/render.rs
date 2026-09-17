@@ -6,6 +6,7 @@ pub const STRIDE: usize = 12;
 pub struct Buffers {
     pub cells: Vec<f32>,
     pub field: Vec<f32>,
+    body_signal: Vec<[f64; 2]>,
     pub markers: Vec<f32>,
     pub descriptor: [u32; 13],
     selection: Option<(u32, usize)>,
@@ -80,6 +81,15 @@ impl Buffers {
             || self.field.len() != w.field.nx * w.field.ny * channels
         {
             let area = w.field.spacing * w.field.spacing;
+            if kind == 5 {
+                self.body_signal.resize(w.field.nx * w.field.ny, [0.; 2]);
+                self.body_signal.fill([0.; 2]);
+                crate::footprint::visit_current(w, |node, p| {
+                    for (k, value) in p.into_iter().enumerate() {
+                        self.body_signal[node][k] += value;
+                    }
+                });
+            }
             self.field.clear();
             for (i, node) in w.field.amounts.as_chunks::<256>().0.iter().enumerate() {
                 if kind == 5 {
@@ -88,21 +98,32 @@ impl Buffers {
                     self.field.extend([
                         matter as f32,
                         energy as f32,
-                        w.field.impedance[i] as f32,
+                        (w.field.impedance[i] + w.field.source_load[i]) as f32,
                         w.field.stress[i] as f32,
                         node[species] / area as f32,
                         (1. - crate::movement::mobility(
-                            w.field.impedance[i],
+                            w.field.impedance[i] + w.field.source_load[i],
                             w.config.movement_impedance,
                         )) as f32,
                         (w.field.stress[i] / (w.config.stress_k + w.field.stress[i])) as f32,
-                        0.,
+                        crate::weathering::exposure(
+                            crate::weathering::strength(crate::weathering::signal(
+                                std::array::from_fn(|k| {
+                                    w.field.signal[i][k]
+                                        + self.body_signal[i][k]
+                                        + w.field.source_signal[i][k]
+                                }),
+                            )),
+                            w.field.impedance[i] + w.field.source_load[i],
+                            w.config.habitat_feedback,
+                            w.config.diffusion_impedance,
+                        ) as f32,
                     ]);
                     continue;
                 }
                 let value = match kind {
                     0 | 1 => w.field.material_values(i, &w.chemistry)[kind as usize] / area,
-                    2 => w.field.impedance[i],
+                    2 => w.field.impedance[i] + w.field.source_load[i],
                     3 => w.field.stress[i],
                     _ => node[species] as f64 / area,
                 };
@@ -143,6 +164,14 @@ mod tests {
             w.step();
             control.step();
         }
+        buffers.prepare(&w, 5, 0, 0, true, 1).unwrap();
+        let mut restored_buffers = Buffers::default();
+        let restored = World::restore(&w.snapshot().unwrap()).unwrap();
+        restored_buffers
+            .prepare(&restored, 5, 0, 0, true, 1)
+            .unwrap();
+        assert_eq!(buffers.field, restored_buffers.field);
+        buffers.prepare(&w, 4, 0, 0, true, 1).unwrap();
         assert_eq!(w.snapshot().unwrap(), control.snapshot().unwrap());
         assert_eq!(buffers.cells.len(), w.cells.len() * STRIDE);
         assert_eq!(buffers.field.len(), 144);
@@ -172,11 +201,26 @@ mod tests {
         assert!(buffers.markers.chunks_exact(STRIDE).all(|m| m[7] == 1.));
         assert!(
             (buffers.field[5] as f64
-                - (1. - crate::movement::mobility(2., w.config.movement_impedance)))
+                - (1.
+                    - crate::movement::mobility(
+                        2. + w.field.source_load[0],
+                        w.config.movement_impedance
+                    )))
             .abs()
                 < 1e-6
         );
         assert_eq!(buffers.field[6], 0.5);
+        let ambient =
+            crate::weathering::strength(crate::weathering::signal(std::array::from_fn(|k| {
+                w.field.signal[0][k] + buffers.body_signal[0][k] + w.field.source_signal[0][k]
+            })));
+        let expected = crate::weathering::exposure(
+            ambient,
+            2. + w.field.source_load[0],
+            true,
+            w.config.diffusion_impedance,
+        );
+        assert!((buffers.field[7] as f64 - expected).abs() < 1e-7);
         assert_eq!(buffers.field[4], 4. / w.field.spacing.powi(2) as f32);
         assert!(
             (buffers.field[1] / buffers.field[0] - w.chemistry.properties[0].potential as f32)

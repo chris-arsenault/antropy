@@ -150,7 +150,8 @@ pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt
     // Price the largest proposed body, so growth itself cannot invalidate that reserve.
     let proposed = std::array::from_fn(|i| cell.body[i] + request * need[i] / total);
     let reserve = crate::accounting::interval_reserve(cell, &proposed, c);
-    let (built, heat) = assemble(cell, chemistry, c, request, c.protected_reserve, reserve);
+    let material_reserve = cell.capacity(c) * c.protected_inventory_fraction;
+    let (built, heat) = assemble(cell, chemistry, c, request, material_reserve, reserve);
     for (stock, n) in cell.body.iter_mut().zip(need) {
         *stock += built * n / total;
     }
@@ -158,11 +159,14 @@ pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt
     cell.flows.construction += heat;
 }
 pub fn repair(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) {
+    let mass = cell.mass();
+    let material_per_fraction = mass * c.repair_material;
+    let work_per_fraction = mass * c.repair_energy;
     let repair = (dt * c.repair_rate * cell.action.repair).min(cell.damage);
     let total = cell.material();
     let actual = repair
-        .min(total / c.repair_material.max(1e-30))
-        .min(cell.energy / c.repair_energy.max(1e-30));
+        .min(total / material_per_fraction.max(1e-30))
+        .min(cell.energy / work_per_fraction.max(1e-30));
     if actual <= 0. {
         return;
     }
@@ -176,12 +180,13 @@ pub fn repair(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) {
         / total;
     let product = chemistry.properties[chemistry.decomposition].potential;
     let conversion = (product - value).max(0.) / c.conversion_efficiency;
-    let actual = actual.min(cell.energy / (c.repair_energy + c.repair_material * conversion));
-    let used = actual * c.repair_material;
+    let actual = actual
+        .min(cell.energy / (work_per_fraction + material_per_fraction * conversion).max(1e-30));
+    let used = actual * material_per_fraction;
     cell.inventory.scale((1. - used / total).max(0.));
     let s = chemistry.decomposition;
     cell.inventory.set(s, cell.inventory[s] + used);
-    let paid = cell.pay(actual * c.repair_energy + used * conversion);
+    let paid = cell.pay(actual * work_per_fraction + used * conversion);
     cell.damage = (cell.damage - actual).max(0.);
     cell.flows.repaired += actual;
     cell.flows.repair += paid + used * (value - product);

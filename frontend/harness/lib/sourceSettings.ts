@@ -3,25 +3,32 @@ import { type EngineConfig } from "../../src/engine/types";
 import { chemicalContext } from "./chemicalGenotypes";
 import { type Flags, flag } from "./flags";
 
+export const CHEMICAL_OPTIONS = {
+  chemistrySeed: "chemistry-seed",
+  sourceRate: "source-rate",
+  washout: "washout",
+  weatheringRate: "weathering-rate",
+  mesh: "mesh",
+  physiologyInterval: "physiology-interval",
+  viscosity: "viscosity",
+  damageRate: "damage-rate",
+  transferRate: "transfer-rate",
+  sourceLifetime: "source-lifetime",
+  sourceGap: "source-gap",
+  sourceRadius: "source-radius",
+  sourceDrift: "source-drift",
+  sourceProcessing: "source-processing",
+};
+
 export function chemicalConfig(flags: Flags, engine: Engine): EngineConfig {
   const overrides: Partial<EngineConfig> = {};
-  const options = {
-    chemistrySeed: "chemistry-seed",
-    sourceRate: "source-rate",
-    washout: "washout",
-    mesh: "mesh",
-    physiologyInterval: "physiology-interval",
-    viscosity: "viscosity",
-    damageRate: "damage-rate",
-    transferRate: "transfer-rate",
-    sourceLifetime: "source-lifetime",
-    sourceGap: "source-gap",
-    sourceRadius: "source-radius",
-  };
-  for (const [key, name] of Object.entries(options))
+  for (const [key, name] of Object.entries(CHEMICAL_OPTIONS))
     if (flags.values.has(name)) overrides[key] = Number(flag(flags, name, ""));
   if (flags.values.has("source-species"))
     overrides.sourceSpecies = flag(flags, "source-species", "").split(",").map(Number);
+  const feedback = flag(flags, "habitat-feedback", "on");
+  if (!["on", "off"].includes(feedback)) throw new Error("--habitat-feedback must be on or off");
+  overrides.habitatFeedback = feedback === "on";
   const disturbance = flag(flags, "disturbance", "off");
   if (!["on", "off"].includes(disturbance)) throw new Error("--disturbance must be on or off");
   if (disturbance === "on")

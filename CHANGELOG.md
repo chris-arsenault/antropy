@@ -13,6 +13,48 @@ All notable user-visible changes are recorded here.
 
 ## Unreleased
 
+- Correct physical coupling: repair work/material scale with funded body mass; growth and birth
+  reserves use actual capacities and daughter upkeep. Empty machinery slots cannot slow paid
+  refitting. Price swimming/turning by squared effort, retaining stock construction and upkeep
+  costs. Use finite enzyme throughput in the analytical construction ceiling. Checkpoint v19
+  rejects previous physics and retired absolute-reserve configuration keys.
+
+- Make weathering respond to the local chemical mixture, sharing one operator between reservoirs
+  and dissolved material. Remove the independent weather clock; neutral mixtures do not convert.
+  Update field and inspection displays to show local interaction activity. Use a shared 1e-9
+  extracellular concentration floor and physical checkpoint v18; earlier saves and the retired
+  weathering-period option fail explicitly. Retain core transport, biology and mutation.
+
+- Correct ecology composition: reservoirs contribute to the shared medium and process retained
+  inventory with the same local conversion operator as field material. Remove the diffusion-based
+  reactivity rule and potential-drop rate ranking. Apply existing numerical activity limits,
+  cache source material reductions, and translate compiled source footprints. Use checkpoint v17;
+  earlier physical saves are rejected. Keep mutation, funded biology, mesh2 and borrowed rendering.
+  Defaults are sourceDrift4/sourceProcessing0.25/sourceGap2400 with explicit external renewal.
+
+Earlier ecology stages (superseded by the correction above):
+
+- Move resource reservoirs through the local chemical medium and process their released mixtures
+  into lower-potential chemicals with explicit material and heat accounts. External renewal remains
+  active. Local delivery footprints avoid per-reservoir full-grid scans.
+- Set source drift and processing to4/4 after short comparisons; expose both settings and scalar
+  motion/conversion counters. Physical checkpoint v15 rejects earlier saves. Preserve borrowed
+  WASM rendering and memory/storage retention. Record short source evidence separately from
+  adaptation and sustained ecology.
+
+- Add smooth geographic weathering, conservative extracellular transformations and chemical
+  shelter to ordinary worlds. Paid exports can alter local exposure; no climate input or free
+  energy enters a controller. Preserve full mesh2 and active chemical-group processing.
+- Show chemical weathering through the existing worker WebGL2 texture, with local exposure
+  in inspection and separate material/heat counters. That stage introduced physical checkpoint v14.
+- Record paid shelter's costs and small conditional construction benefit, retaining negative
+  barrier findings. Add bounded recording and checkpoint salvage for the registered overnight
+  comparison; browser history and recovery retention are unchanged.
+- Fix current evolution-report traits and wall-budget options, and retry GPU-backpressured
+  redraws while paused. These were the concrete defects from the fresh-context review.
+
+Earlier implementation stages in this unreleased sequence:
+
 - Enforce the WASM/worker data-sharing contract: scalar ticks, borrowed reply decoding, bounded
   browser queries, incremental chart history, cached genealogy/genomes and acknowledged observation
   updates. Preserve the diagnostic displays while removing repeated bulk observation transfers.

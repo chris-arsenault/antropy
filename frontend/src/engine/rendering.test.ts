@@ -49,7 +49,7 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
     species: 0,
     color: 6,
     selected: -1,
-    layers: [true, false, false, false, false],
+    layers: [true, false, false, false, false, false],
     regions: true,
     sources: true,
     exposure: 4,

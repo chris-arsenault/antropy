@@ -18,6 +18,7 @@ export function ChemicalControls({
           <option value="matter">Dissolved amount</option>
           <option value="potential">Energy per material</option>
           <option value="chemical">Chemical #{value.species}</option>
+          <option value="weathering">Chemical weathering</option>
           <option value="none">No background field</option>
         </select>
       </label>
@@ -56,10 +57,13 @@ export function ChemicalControls({
 export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
   const half = quantity(Math.log(2) / value.exposure);
   const name = value.base === "chemical" ? `Chemical #${value.species}` : "Dissolved amount";
-  const legend =
+  let legend =
     value.base === "potential"
       ? "Blue → amber: 0.5 → 8 energy / material. Brightness indicates presence, not usable food."
       : `${name}: dark → bright, 0 → dense. Half brightness at ${half} material / area.`;
+  if (value.base === "weathering")
+    legend =
+      "Blue → amber: low → high local chemical interaction, attenuated by medium resistance. Actual conversion depends on the chemicals present.";
   return (
     <div className="chemical-legend">
       {value.base !== "none" && (
@@ -77,7 +81,7 @@ export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
       {value.stress && (
         <p>
           Rose dots: 0–100% abiotic stress saturation. This is an exposure reference; cell injury
-          depends on membrane compatibility and defense.
+          depends on membrane compatibility and repair.
         </p>
       )}
     </div>

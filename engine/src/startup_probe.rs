@@ -62,6 +62,7 @@ pub fn isolated(seed: u64, second: bool, founders: usize) -> Result<World, Strin
         &mut w.ledger,
     );
     w.sources = vec![source];
+    crate::source_medium::project(&mut w);
     w.environment_rng = original.environment_rng;
     for (i, c) in w.cells.iter_mut().enumerate() {
         c.x = 31. + 2. * (i % 2) as f64;

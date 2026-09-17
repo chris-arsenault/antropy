@@ -17,26 +17,39 @@ pub fn motor_limits(cell: &Cell, c: &Config, mobility: f64) -> (f64, f64) {
     let drag = c.viscosity * cell.radius(c).max(0.01) * 8.;
     ((power * c.motor_efficiency * mobility / drag).sqrt(), power)
 }
+/// Efforts specify velocity fractions; their squared norm prices the requested motion.
+pub fn motor_work_rate(body: &[f64; 15], damage: f64, swim: f64, turn: f64, c: &Config) -> f64 {
+    body[1] * c.motor_power_density * (1. - damage) * (swim * swim + 0.25 * turn * turn)
+}
+pub fn passive(profile: [f64; 2], gradient: [[f64; 2]; 2], mobility: f64, drift: f64) -> [f64; 2] {
+    let force: [f64; 2] =
+        std::array::from_fn(|k| profile[0] * gradient[k][0] - profile[1] * gradient[k][1]);
+    let bound = drift * mobility / (1. + force[0].abs() + force[1].abs());
+    force.map(|f| bound * f)
+}
 pub fn advance(cells: &mut [Cell], c: &Config, field: &Field, sites: &[Vec<(usize, f64)>]) {
     for (cell, row) in cells.iter_mut().zip(sites) {
-        let mobility = mobility(field.scalar(&field.impedance, row), c.movement_impedance);
-        let (speed, power) = motor_limits(cell, c, mobility);
-        let effort = cell.action.swim + cell.action.turn.abs() * 0.25;
-        let cost = power * effort * c.dt;
+        let mobility = mobility(field.medium_load(row), c.movement_impedance);
+        let (speed, _) = motor_limits(cell, c, mobility);
+        let cost = motor_work_rate(
+            &cell.body,
+            cell.damage,
+            cell.action.swim,
+            cell.action.turn,
+            c,
+        ) * c.dt;
         let paid = cell.pay(cost);
         cell.flows.motors += paid;
-        let fraction = if cost > 0. { paid / cost } else { 0. };
+        let fraction = if cost > 0. { (paid / cost).sqrt() } else { 0. };
         cell.heading = (cell.heading
             + cell.action.turn * speed / (2. * cell.radius(c).max(0.01)) * c.dt * fraction)
             .rem_euclid(std::f64::consts::TAU);
-        let gradient = field.gradient(row);
+        let gradient = field.gradient(row, true);
         let profile = cell.operators.as_ref().unwrap().profile;
-        let passive: [f64; 2] =
-            std::array::from_fn(|k| profile[0] * gradient[k][0] - profile[1] * gradient[k][1]);
-        let bound = field.drift * mobility / (1. + passive[0].abs() + passive[1].abs());
+        let passive = passive(profile, gradient, mobility, field.drift);
         let swimming = speed * cell.action.swim * fraction;
-        let dx = (swimming * cell.heading.cos() + bound * passive[0]) * c.dt;
-        let dy = (swimming * cell.heading.sin() + bound * passive[1]) * c.dt;
+        let dx = (swimming * cell.heading.cos() + passive[0]) * c.dt;
+        let dy = (swimming * cell.heading.sin() + passive[1]) * c.dt;
         cell.x = (cell.x + dx).rem_euclid(c.width);
         cell.y = (cell.y + dy).rem_euclid(c.height);
         cell.flows.distance += dx.hypot(dy);

@@ -184,6 +184,7 @@ export class Renderer {
       Number(o.layers[3])
     );
     gl.uniform1f(gl.getUniformLocation(p, "selectedLayer"), Number(o.layers[4]));
+    gl.uniform1f(gl.getUniformLocation(p, "weatheringLayer"), Number(o.layers[5] ?? false));
     gl.uniform1f(gl.getUniformLocation(p, "exposure"), o.exposure);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }

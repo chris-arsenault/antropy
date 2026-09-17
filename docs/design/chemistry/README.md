@@ -1,8 +1,13 @@
 # General-purpose digital chemistry
 
-Status: fresh production World implemented September 15, 2026. The
-[composed runtime](composed-runtime.md) owns the current artificial laws and checkpoint v13;
-[rebuild evidence](rebuild-results.md) records bounded opportunities and outstanding operating gates.
+Status: fresh production World implemented September 15, with environmental chemistry added
+September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
+owns the current artificial laws and checkpoint v19. The [physical coupling correction](../../physical-coupling-correction.md)
+records the current biological costs. The [correction plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign)
+records current verification. Historical [source evidence](mobile-source-results.md) records medium-driven reservoir
+motion, transformed release and short calibration. [Environmental evidence](environmental-results.md) records weathering,
+shelter, short opportunities and the overnight investigation; [rebuild evidence](rebuild-results.md)
+preserves the preceding implementation's measurements.
 [Computable chemistry](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
 govern formula selection and the [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) tracks integration.
 Design rules around shared manifold reductions, vector fields, diffusion plus drift and bounded
@@ -30,6 +35,8 @@ substrate. They are not species categories or separate action systems.
 | [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
 | [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
 | [Current measurements](rebuild-results.md) | Fresh-core registrations, bounded mechanisms, capacity, default startup and storage results |
+| [Environmental chemistry](environmental-results.md) | Geographic weathering, extracellular conversion, paid shelter, short controls and overnight evidence |
+| [Mobile sources](mobile-source-results.md) | Medium-dependent motion and release, bounded cost and short calibration |
 | [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
 | [Reliability evidence](reliability-results.md) | Current browser failures/limits, chemical-space revision and ordinary habitat checks |
 | [Installed machinery](installed-machinery.md) | Inherited targets, retained function, paid refitting and historical findings |
@@ -104,8 +111,9 @@ higher-potential species. The proposed biomass energy rule closes that gap. Seco
 diffusion and exponential washout do not keep every small concentration exactly zero. Sparse
 storage is an implementation strategy, not a guarantee of bounded occupied field entries.
 
-Unary chemistry can express transformations and exchange, but cannot express chemical binding,
-multi-substrate dependence or extracellular neutralization. A cheap route to a low-potential
+Unary chemistry can express transformations and exchange. Local-medium weathering now supplies
+extracellular unary conversion; chemical binding, consumed multi-substrate reactions and pairwise
+neutralization remain absent. A cheap route to a low-potential
 product might also outperform longer metabolic chains. Machinery cost and heterogeneous supply
 make alternatives possible; they do not establish that cross-feeding or persistent diversity
 will emerge. Measure a missing link before adding a new reaction class.
@@ -114,9 +122,11 @@ will emerge. Measure a missing link before adding a new reaction class.
 
 The user authorized the complete replacement. It is implemented through one production kernel,
 with short constructed opportunity checks and explicit rejection of old physical checkpoints.
-The [rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md) owns remaining acceptance. Headless
-capacity exceeds30ticks/s on the measured fixed workloads but misses the200ticks/s target.
-The user accepts these numbers for now and reports that visual inspection mostly looks good;
-automated browser checks remain unperformed. Seed27 is the centered review setup. Earlier browser failures keep their original
-scope. Supplied reproduction and conditional chemical opportunities do not establish sustained
-ecology, evolutionary diversity or days/weeks persistence.
+The [rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md) is complete; the
+[environmental plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md) retains its pending human review.
+The [source plan](../../../MOBILE-SOURCES-PLAN.md) owns mobile reservoir implementation and
+short calibration. The restored-resolution saturated workloads remain below the200ticks/s target, and
+large saturated cases also miss30ticks/s. These accepted operating limits remain explicit.
+Isolated browser rendering/save/fault checks have run; human review of the new environmental
+behavior is still separate. Seed27 remains the centered review setup. Supplied reproduction and
+conditional chemical opportunities do not establish sustained ecology or days/weeks persistence.

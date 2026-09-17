@@ -1,6 +1,6 @@
 # Composed artificial chemistry runtime
 
-September 15, 2026. This contract governs the fresh implementation under
+Updated September 17, 2026. This contract governs the fresh implementation under
 [the rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
@@ -19,7 +19,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, fifteen funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v13 persists actual installed
+The same worker renders borrowed WASM views. Checkpoint v18 persists actual installed
 coordinates independently of inherited instructions and rejects earlier physical bytes.
 There is no exporter allele or thermal-energy setting in this version.
 
@@ -46,21 +46,94 @@ the sum of absolute shared differences; default drift is .25. Impedance mobility
 1/(1 + scale × load). A derived index tracks occupied four-species SIMD groups at each
 node. Each substep visits those groups and their periodic neighbor halo; empty groups
 do not execute the stencil or property reductions. After a substep, concentrations below
-`1e-24` are rounded to zero. This local numerical floor applies equally to every species;
+`1e-9` are rounded to zero. This local numerical floor applies equally to every species;
 it does not delete a species by its global abundance. Material and reference-value losses
-enter the signed numerical error accounts. The user authorized this threshold correction
-on September15. Intracellular stocks retain their material. There is no equilibrium shortcut.
+enter the signed numerical error accounts. The September17 weathering revision raises the
+September15 floor from 1e-24 after a matched numerical/cost comparison; see the
+[registration and results](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign).
+Intracellular stocks retain their material. There is no equilibrium shortcut.
 
 The destination-row stencil gathers incoming material and retains donor remainder.
 Substeps bound total outgoing fractions by .5. f32 rounding has explicit signed material
 and reference-value accounts. Exponential washout removes material and its reference
 value as a boundary loss. No passive spatial change can increase usable work.
 
+### Mobile resource reservoirs
+
+Forty-eight externally renewing reservoirs start in uneven neighborhoods. Independent renewals
+continue to import accounted material and reference value. Defaults are sourceDrift4,
+sourceProcessing0.25 and sourceGap2400; sourceProcessing multiplies the common weathering rate.
+The world remains open; sun-funded transformations are deferred.
+
+Reservoir inventory projects through the same chemical interaction and impedance properties as
+field material. Its interface area is mesh area divided by the sum of squared footprint weights.
+Exposed material is Q/(1+Q/interfaceArea), bounded by that area. This is a finite interface signal,
+not a transfer of ownership: cells cannot consume held reservoir inventory. The same footprint
+deposits the signal, samples the medium and releases material. Passive velocity uses the common
+body response, including embodied and reservoir signals; an isolated source cannot propel itself.
+Empty sources retain the incoming mixture's response and can continue drifting.
+
+Chemical conversion acts on retained inventory before proportional release. Release preserves
+the actual stored identities, without a second reaction. All source responses are frozen before
+any source moves or releases. Body profiles are refreshed first; source projections are refreshed
+after all sources advance. Renewal imports a fresh accounted batch at the current location.
+
+Source inventory reductions and occupied chemical groups are derived once during release/commit,
+then reused by response and projection. Restore and explicit interventions reconstruct them.
+Geographic projection clears only previously touched nodes, with at most one projection per update;
+unchanged source geometry and inventories retain the previous projection.
+A radius/grid-dependent Gaussian kernel is compiled once. Motion translates it using the ordinary
+bilinear geographic stencil; no Gaussian evaluation occurs for translation. This defines a
+discrete interpolated footprint, with continuous motion across grid cells and periodic seams.
+
+### Environmental conversion from the local medium
+
+Environmental conversion reuses the two local interaction profiles H, including dissolved
+material, embodied signals and reservoir interfaces. B=H/(1+|H0|+|H1|) bounds the shared response.
+For each reflected adjacent product t of s, compile a=(p0[t]-p0[s], -(p1[t]-p1[s]))/4.
+Engagement is max(0,a dot B): the medium favors a product whose attraction/repulsion response
+to it is stronger. There is no constant branch activity. Different mixtures can favor different
+products; neutral mixtures do not convert, and dilution continuously weakens conversion.
+Four local directions provide compact compiled support and continuity in chemical identity;
+they are a selected artificial rule, not a required physical reaction network.
+
+A branch to equal or higher reference value is inactive because no external work funds it.
+Reference-value differences account dissipation, not rate ranking. Diffusion controls spread only.
+Exposure uses the existing impedance mobility 1/(1+diffusionImpedance×load). For branch hazards
+r=weatheringRate×elapsed×exposure×engagement, allocate r/(1+sum(r)). All branches reserve against
+the original donor; products cannot cascade during that update. Field and reservoir material
+use the same compiled operator; sourceProcessing multiplies reservoir exposure. Lost reference
+value is heat, never usable cell work. No geographic oscillator or weatheringPeriod setting remains.
+
+Conversion runs in the final active field pass. Zero rate, neutral medium and inert species/pairs
+skip reaction arithmetic. Sum engagement is bounded by 2|B|_1; skip a source donor or a complete
+pair of field lanes when each q×min(1,2×|B|_1×weatheringRate×elapsed×exposure)≤f. A small field
+lane can accompany an active partner. Here f is the concentration floor times mesh area for
+field material, or interface area for reservoir material. Skipped donors retain their material.
+Final extracellular products face the same floor and numerical accounts. Only surviving groups
+wake future work. Repeated conversion can still broaden chemical support; compact mapping is
+not a guarantee of sparse long-term chemistry. No global chemical pruning is used.
+
+Deposits affect both chemical direction and exposure regardless of who produced them. Diffusion,
+drift, washout, conversion and funded uptake change this context over time. habitatFeedback removes
+impedance attenuation for diagnostic comparisons; it does not remove the mixture's direction.
+The render/inspection activity is |B|_1 with and without attenuation, not a universal reaction rate.
+Observers derive current body contributions through shared projection arithmetic instead of
+reading the physical solver's previous-stage body cache. Rendering reuses its own two-component
+derived buffer; inspection reduces contributions at its sample sites without mutating World.
+Chemical operators, source projections and footprint kernels are derived caches; physical owners
+and configuration determine conversion and exact continuation.
+The [correction plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#ecology-correction) records current
+checks; the earlier [environmental](environmental-results.md) and [source](mobile-source-results.md)
+studies describe their original v14/v15 rules and cannot certify this revision.
+
 Bodies sample centered differences through W. The shared antisymmetric difference and
 identical deposition/sampling cancel an isolated body's own response. Paid propulsion
 uses actual motor stock, damage, drag from body extent, viscosity and impedance. Passive
 response is bounded separately. Local overlap correction supplies body-relative contacts;
 neither movement nor contact resolution credits usable work.
+In v19, requested motor work is `power × (swim² + .25 × turn²) × dt`; paid velocity scales
+by `sqrt(paid/requested)`. The same work-rate function prices growth/refit reserves and budgets.
 
 ## Local recognition and paid operators
 
@@ -115,11 +188,13 @@ through a complete physiology interval plus one movement tick. Refitting uses th
 for the current body. This prevents optional construction from consuming the next interval's upkeep.
 
 Maintenance charges actual stock and damage. Repair converts a proportional internal
-mixture into decomposition material with explicit material and work costs. Paid refitting
+mixture into decomposition material with explicit material and work costs proportional to
+total installed mass times the repaired damage fraction. Paid refitting
 moves installed coordinates toward inherited coordinates on affected actual stock.
-The greatest slot-coordinate distance advances by at most .25 manifold units per model
+The greatest positive-stock slot-coordinate distance advances by at most .25 manifold units per model
 second; sufficient work and time finish the refit exactly, preserving unchanged arrays.
-Unpaid target changes leave installed response intact. Excess usable work dissipates.
+Empty slots neither add cost nor slow the shared schedule; they can finish freely when no funded
+changes remain. Unpaid funded target changes leave installed response intact. Excess usable work dissipates.
 
 Local division requires funded double body, inventory, work and division cost. Fission
 ends the parent and creates two daughters; budding retains a reduced parent and one
@@ -130,6 +205,13 @@ whole typed genetic unit and grants no installed replacement stock. It defaults 
 Newborn contact readings reset with private memory; receptor baselines initialize locally.
 Extinction stops visibly without reseeding. Unused genetic payloads can be pruned while retaining
 living target/installed origins, diagnostic catalogs, founder roots and every compact ancestor record.
+
+V19 requires inventory at daughterInventoryFraction (.1875) times actual parent storage capacity.
+Retained work is the larger of daughterEnergyFraction (.125) times actual energy capacity and
+both actual daughters' initial upkeep/learning reserve. Division additionally costs
+divisionWorkPerCore (.04) times parent core. Growth protects protectedInventoryFraction (.125)
+of current storage capacity. These replace absolute newborn allowances, with no new controls.
+The [coupling correction](../../physical-coupling-correction.md) records units and verification.
 
 Death returns inventory and generic body locally and dissipates remaining work. Finite
 source reservoirs and demand-independent renewal are explicit boundary inputs. Material

@@ -88,8 +88,8 @@ amounts use float64 vectors with an owned material reduction. Geography is conti
 independent of mesh spacing. Default mesh 2 gives 160 × 120 nodes in the 320 × 240 world,
 about 18.75 MiB for external amount storage before work buffers, organisms or history.
 
-The user-authorized September15 correction rounds extracellular concentrations below
-`1e-24` to zero at field substeps and indexes occupied chemical groups plus their neighbor
+The September17 weathering revision rounds extracellular concentrations below
+`1e-9` to zero at field substeps and retains the September15 index of occupied groups plus their neighbor
 halo. Numerical losses, including this floor, are recorded separately from physical washout
 in matter and potential accounts. This local resolution does not select species by global
 abundance or prune intracellular stocks. See the [current runtime](composed-runtime.md).

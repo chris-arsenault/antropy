@@ -92,9 +92,10 @@ pub fn environment(w: &World) -> Value {
         .field
         .impedance
         .iter()
-        .filter(|i| w.config.movement_impedance * **i >= 1.)
+        .zip(&w.field.source_load)
+        .filter(|(i, s)| w.config.movement_impedance * (**i + **s) >= 1.)
         .count();
-    json!({"tick":w.tick,"extracellular":{"amount":amount,"potential":potential,"species":species.to_vec()},"halfSpeedArea":half_speed as f64*w.field.spacing.powi(2),"sources":w.sources,"environmentRng":w.environment_rng})
+    json!({"tick":w.tick,"extracellular":{"amount":amount,"potential":potential,"species":species.to_vec()},"halfSpeedArea":half_speed as f64*w.field.spacing.powi(2),"sources":w.sources,"sourceResponse":crate::source_medium::observe(w),"environmentRng":w.environment_rng})
 }
 pub fn frame(w: &World) -> Value {
     let cells: Vec<_> = w.cells.iter().map(|c| cell_view(c, w)).collect();
@@ -106,7 +107,13 @@ pub fn field_view(w: &World, kind: &str, species: usize) -> Result<Value, String
     }
     let area = w.field.spacing * w.field.spacing;
     let values: Vec<f32> = match kind {
-        "impedance" => w.field.impedance.iter().map(|x| *x as f32).collect(),
+        "impedance" => w
+            .field
+            .impedance
+            .iter()
+            .zip(&w.field.source_load)
+            .map(|(x, s)| (x + s) as f32)
+            .collect(),
         "stress" => w.field.stress.iter().map(|x| *x as f32).collect(),
         "chemical" => w
             .field
@@ -156,10 +163,7 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         .get(id.checked_sub(1).ok_or("Invalid organism id")? as usize)
         .ok_or("Unknown organism")?;
     let genome = w.genomes.get(&ancestor.genome);
-    let impedance = cell.map(|c| {
-        w.field
-            .scalar(&w.field.impedance, &w.field.stencil(c.x, c.y))
-    });
+    let impedance = cell.map(|c| w.field.medium_load(&w.field.stencil(c.x, c.y)));
     let local: Option<Vec<f64>> = cell.map(|c| {
         let sites = w.field.stencil(c.x, c.y);
         (0..256).map(|s| w.field.sample(s, &sites)).collect()
@@ -173,6 +177,7 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         .take(16)
         .collect();
     let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":cell.map(|c| crate::sensing::stress_load(c,w.genomes[&c.genome].compiled.as_ref().unwrap(),&w.config,&w.field,&w.chemistry)),"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
+    result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     if request.get("machinery").and_then(Value::as_u64) != cell.map(|c| c.machinery_revision)
         || cell.is_none()
     {

@@ -39,6 +39,9 @@ Energy capacity follows actual core; chemical storage capacity follows actual st
 Artificial drag is 8ηr. Funded motor power, damage, efficiency and local impedance mobility
 bound swimming and turning. Shared chemical/body profiles also produce bounded passive drift,
 without crediting usable work. There is no Brownian temperature or inertial coasting.
+Motor work uses `power × (swim² + 0.25 × turn²)` and velocity scales with the square root
+of available-work funding. Extra motor capacity costs construction, upkeep and occupied area;
+it does not add an operating penalty at the same actual speed and radius.
 
 Each transporter divides finite funded throughput among its recognized local mixture.
 Diffusion/drift and the finite body footprint determine delivery. Imports face shared
@@ -63,10 +66,16 @@ starting substrate and cannot consume each other's new products in the same phas
 Every internal species can become generic biomass. Assembly consumes matter proportionally,
 pays 0.5 work per unit plus any uphill potential gap/0.8, and dissipates excess input potential.
 There is no privileged biomass ingredient or free catabolic reserve. Generic body potential equals
-the selected decomposition species' potential. Repair replaces material and pays additional work.
+the selected decomposition species' potential. Repair replaces material and pays additional work
+proportional to the damage fraction repaired times total installed body mass.
 Death returns internal species unchanged, converts structure to the decomposition species and
 dissipates remaining usable energy. Death-material totals are throughput, not another sink.
 See [selected equations](chemistry/numerical-engine.md) and [closed-cycle tests](chemistry/numerical-results.md).
+
+The [v19 correction](../physical-coupling-correction.md) specifies capacity-based growth and
+daughter reserves. Division retains enough work for both actual half-bodies' initial upkeep
+and learning, and charges work per parent core. This removes absolute starter-size reserve
+requirements while retaining ordinary material, construction and maintenance costs.
 
 <a id="bodies-lifetimestatic-and-lifetimedynamic-information"></a>
 
@@ -109,5 +118,5 @@ among at most four discrete species. Neural effort can reverse any transporter. 
 Default behavioral mutation probability/scale is 0.0015/0.08; physical and chemical alleles use
 0.1/0.12. Weights clamp to [-16,16], plasticity to [-1,1],
 investments to [-3,3], coordinates to reflected [0,15] and offsets to [-15,15].
-No score selects parents or filters mutants. Checkpoint v13 preserves complete allele and actual-state
+No score selects parents or filters mutants. Checkpoint v19 preserves complete allele and actual-state
 distinctions; unavailable pruned genotype payloads remain labeled provenance.

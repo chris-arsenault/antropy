@@ -3,7 +3,7 @@ use super::*;
 
 /// Fixed capacity-fixture variation; callers do not inspect the controller representation.
 pub fn perturb_weights(genome: &mut Genome, rng: &mut Random) {
-    mutate_vector(&mut genome.weights, rng, 0.1, 0.03, 16., "gaussian");
+    mutate_vector(&mut genome.weights, rng, 0.1, 0.03, 16.);
 }
 
 #[derive(Clone, Default, Deserialize)]

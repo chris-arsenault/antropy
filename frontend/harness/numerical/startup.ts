@@ -5,27 +5,44 @@ import { openLedger, recordRun } from "../lib/ledger";
 
 const output = process.argv[2];
 if (!output) throw new Error("Provide a new output directory");
+const horizon = Number(process.argv[3] ?? 600);
+const weathering = process.argv[4] ?? "on";
+const registration = process.argv[5] ?? "ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign";
+if (![600, 3000].includes(horizon) || !["on", "off"].includes(weathering))
+  throw new Error("Expected horizon 600|3000 and weathering on|off");
 mkdirSync(output);
 const wasmDigest = captureEngine(output);
 const engine = await loadEngine(),
-  world = engine.create(),
+  world = engine.create(27, weathering === "off" ? { weatheringRate: 0 } : {}),
   db = openLedger();
 try {
   const definition = world.command<{ seed: number }>("definition"),
     initial = world.command("frame");
   writeFileSync(`${output}/initial.antropy`, world.snapshot());
   const traces: unknown[] = [];
+  const intervals: unknown[] = [];
   const start = performance.now();
+  let previous = start;
   let steps = 0,
     stop = "horizon";
-  while (steps < 600) {
-    if (performance.now() - start >= 30000) {
+  while (steps < horizon) {
+    if (performance.now() - start >= 120000) {
       stop = "wall-cap";
       break;
     }
     const status = world.step();
     steps++;
     if (steps % 20 === 0) traces.push(world.command("frame"));
+    if (steps % 100 === 0) {
+      const now = performance.now();
+      intervals.push({
+        tick: steps,
+        wallMs: now - previous,
+        activity: world.command("fieldActivity"),
+        summary: world.command("summary"),
+      });
+      previous = performance.now();
+    }
     if (status.stopReason) {
       stop = status.stopReason;
       break;
@@ -35,15 +52,16 @@ try {
     summary = world.command<Record<string, unknown>>("summary");
   const id = recordRun(db, {
     experiment: "numerical-production-startup",
-    label: "Ordinary 48-founder startup; bounded integration check",
+    label: `Ordinary seed27; local weathering ${weathering}; ${horizon} ticks`,
     driver: "wasm",
     seed: definition.seed,
     ticks: steps,
     params: {
       wasmDigest,
-      horizon: 600,
-      wallCapSeconds: 30,
-      registration: "docs/design/chemistry/rebuild-results.md",
+      horizon,
+      weathering,
+      wallCapSeconds: 120,
+      registration,
     },
     summary: { ...summary, stop },
     wallMs,
@@ -51,7 +69,11 @@ try {
   writeFileSync(`${output}/final.antropy`, world.snapshot());
   writeFileSync(
     `${output}/result.json`,
-    JSON.stringify({ id, wasmDigest, definition, initial, summary, stop, wallMs }, null, 2)
+    JSON.stringify(
+      { id, wasmDigest, definition, initial, summary, stop, wallMs, intervals },
+      null,
+      2
+    )
   );
   writeFileSync(`${output}/traces.json`, JSON.stringify(traces));
   console.log(JSON.stringify({ id, steps, stop, wallMs, summary }));

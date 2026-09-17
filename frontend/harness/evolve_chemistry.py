@@ -2,9 +2,16 @@
 import hashlib
 import json
 from pathlib import Path
-import numpy as np
 
-TRAITS = ["membraneX", "membraneY", "importX", "importY", "motor", "core", "receptors", "importers", "enzymes"]
+TRAITS = ["membraneX", "membraneY", "transportX", "transportY", "motor", "core", "receptors", "transporters", "enzymes"]
+LEGACY_TRAITS = ["membraneX", "membraneY", "importX", "importY", "motor", "core", "receptors", "importers", "enzymes"]
+
+
+def read_manifest(directory):
+    manifest = json.loads((directory / "manifest.json").read_text())
+    if manifest.get("checkpointVersion") not in (10, 11, 13, 14, 15, 16, 17, 18, 19):
+        raise ValueError(f"Unsupported physical checkpoint schema: {directory}")
+    return manifest
 
 
 def records(path, interruptions=None):
@@ -20,24 +27,26 @@ def records(path, interruptions=None):
                     interruptions.add(f"{Path(path).name}:{number}: incomplete final record omitted")
 
 
-def inherited_vectors(directory):
+def inherited_vectors(directory, version):
     values = {}
     for row in records(directory / "genomes.jsonl"):
         facts = row["facts"]
         body, chemistry = facts["blueprint"], facts["expressed"]["chemistry"]
-        imports = [(body[7 + i], t) for i, t in enumerate(chemistry["transporters"]) if not t["export"]]
-        total = sum(q for q, _ in imports)
-        center = [sum(q * t[axis] for q, t in imports) / total if total else 0 for axis in ("x", "y")]
+        # v13 transport direction is a neural action, not an inherited slot category.
+        transporters = [(body[7 + i], t) for i, t in enumerate(chemistry["transporters"])
+                        if version >= 13 or not t["export"]]
+        total = sum(q for q, _ in transporters)
+        center = [sum(q * t[axis] for q, t in transporters) / total if total else 0 for axis in ("x", "y")]
         values[row["genotype"]["id"]] = [chemistry["membrane"]["x"], chemistry["membrane"]["y"],
             *center, body[1] / body[0], body[0], sum(body[3:7]) / body[0], total / body[0], sum(body[11:15]) / body[0]]
     return values
 
 
 def describe(directory, k, cluster):
-    manifest = json.loads((directory / "manifest.json").read_text())
-    if manifest.get("checkpointVersion") not in (10, 11):
-        raise ValueError(f"Unsupported physical checkpoint schema: {directory}")
-    values = inherited_vectors(directory)
+    import numpy as np
+    manifest = read_manifest(directory)
+    traits = TRAITS if manifest["checkpointVersion"] >= 13 else LEGACY_TRAITS
+    values = inherited_vectors(directory, manifest["checkpointVersion"])
     interruptions = set()
     final = None
     for final in records(directory / "samples.jsonl", interruptions):
@@ -68,7 +77,8 @@ def describe(directory, k, cluster):
         "checkpointVersion": manifest["checkpointVersion"],
         "coverage": "captured observations" if captured else "no captured observations",
         "interruptions": sorted(interruptions),
-        "centers": [dict(zip(TRAITS, row)) for row in centers * scale + mean],
+        "traits": traits,
+        "centers": [dict(zip(traits, row)) for row in centers * scale + mean],
         "populationDenominator": "Living cells in each captured sample",
         "sourceDigest": manifest["sourceDigest"], "binaryDigest": manifest["binaryDigest"],
         "manifestSha256": hashlib.sha256((directory / "manifest.json").read_bytes()).hexdigest(),
@@ -77,6 +87,7 @@ def describe(directory, k, cluster):
 
 
 def report(root, k, cluster):
+    import numpy as np
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -105,8 +116,8 @@ def report(root, k, cluster):
     figure.tight_layout()
     figure.savefig(root / "evolve-clusters.png", dpi=130)
     plt.close(figure)
-    result = {"schemaVersion": 3, "requestedGroups": k, "traits": TRAITS,
-        "interpretation": "Endpoint clusters describe inherited traits; they neither identify stable species nor prove adaptation. Zero import capacity has no effective import target; its coordinates are represented as zero.",
+    result = {"schemaVersion": 3, "requestedGroups": k, "traits": rows[0]["traits"],
+        "interpretation": "Endpoint clusters describe inherited construction targets, not installed bodies, current actions, stable species or adaptation. In v13 all transporter slots are bidirectional; their stock-weighted coordinates do not identify an import strategy. Legacy schemas describe import slots only. Zero target stock has coordinates represented as zero.",
         "runs": rows}
     (root / "evolve-summary.json").write_text(json.dumps(result, indent=2, allow_nan=False))
     print(json.dumps({"runs": len(rows), "output": str(root / "evolve-summary.json")}))

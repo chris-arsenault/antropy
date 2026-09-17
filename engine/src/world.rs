@@ -6,7 +6,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 13;
+pub const VERSION: u32 = 19;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -41,6 +41,8 @@ pub struct World {
     pub trace: Option<crate::trace::Trace>,
     #[serde(skip)]
     exchange: crate::transport::Exchange,
+    #[serde(skip)]
+    pub(crate) climate: crate::climate::Climate,
 }
 impl World {
     pub fn new(seed: u64, mut config: Config) -> Result<Self, String> {
@@ -108,6 +110,7 @@ impl World {
             cells.push(cell);
         }
         let next_cell = cells.len() as u64 + 1;
+        let climate = crate::climate::Climate::new(&config, &chemistry);
         let mut world = Self {
             version: VERSION,
             seed,
@@ -131,10 +134,12 @@ impl World {
             field_elapsed: 0.,
             trace: None,
             exchange: Default::default(),
+            climate,
         };
         let (m, e) = world.held();
         world.ledger.initial_material = m;
         world.ledger.initial_energy = e;
+        crate::source_medium::project(&mut world);
         Ok(world)
     }
     pub fn held(&self) -> (f64, f64) {
@@ -177,16 +182,6 @@ impl World {
         if let Some(t) = &mut self.trace {
             t.before(&self.cells, &self.config, &self.field);
         }
-        for s in &mut self.sources {
-            s.advance(
-                self.tick,
-                &self.config,
-                &mut self.environment_rng,
-                &mut self.field,
-                &self.chemistry,
-                &mut self.ledger,
-            );
-        }
         stages[0] = now() - started;
         started = now();
         self.field_elapsed += self.config.dt;
@@ -197,17 +192,23 @@ impl World {
             .map(|c| crate::footprint::sites(c, &self.config, &self.field))
             .collect();
         crate::footprint::deposit_profiles(&self.cells, &self.config, &mut self.field, &sites);
+        crate::source_medium::advance(self);
         if physiology {
-            let balance = self.field.advance(
+            self.climate.prepare(&self.config);
+            let balance = self.field.advance_weathered(
                 &self.chemistry,
                 self.field_elapsed,
                 self.config.washout,
                 self.config.diffusion_impedance,
+                Some(&mut self.climate),
             );
             self.ledger.washed_out += balance.matter;
             self.ledger.washout_energy += balance.energy;
             self.ledger.numerical_material += balance.roundoff_matter;
             self.ledger.numerical_energy += balance.roundoff_energy;
+            self.ledger.weathering_heat += balance.weathering_heat;
+            self.ledger.weathered_material += balance.weathered_material;
+            self.ledger.sheltered_conversion += balance.sheltered_conversion;
         }
         stages[1] = now() - started;
         started = now();
@@ -366,12 +367,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY13\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY19\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY13\0")
-            .ok_or("Unsupported physical checkpoint; v13 required")?;
+            .strip_prefix(b"ANTROPY19\0")
+            .ok_or("Unsupported physical checkpoint; v19 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
@@ -379,6 +380,7 @@ impl World {
         }
         world.validate()?;
         world.field.rebuild();
+        world.climate = crate::climate::Climate::new(&world.config, &world.chemistry);
         for s in &mut world.sources {
             s.rebuild(&world.config, &world.field);
         }
@@ -397,6 +399,7 @@ impl World {
                 )
             });
         }
+        crate::source_medium::project(&mut world);
         Ok(world)
     }
     pub fn validate(&self) -> Result<(), String> {

@@ -3,7 +3,6 @@ use crate::{
     chemistry::{Chemistry, SPECIES},
     config::Config,
     field::Field,
-    movement::distance,
     random::Random,
 };
 use serde::{Deserialize, Serialize};
@@ -25,6 +24,12 @@ pub struct Source {
     pub inventory: Vec<f64>,
     #[serde(skip)]
     pub footprint: Vec<(usize, f64)>,
+    #[serde(skip)]
+    pub kernel: crate::source_footprint::Kernel,
+    #[serde(skip)]
+    pub material: crate::source_medium::Material,
+    #[serde(skip)]
+    pub interface: f64,
 }
 impl Source {
     pub fn new(habitat: Habitat, tick: u64, c: &Config, rng: &mut Random, field: &Field) -> Self {
@@ -43,38 +48,19 @@ impl Source {
             rate,
             inventory,
             footprint: vec![],
+            kernel: Default::default(),
+            material: Default::default(),
+            interface: 0.,
         };
         source.rebuild(c, field);
         source
     }
-    pub fn rebuild(&mut self, c: &Config, field: &Field) {
-        self.footprint.clear();
-        let radius = self.habitat.radius.max(field.spacing * 0.25);
-        let mut total = 0.;
-        for y in 0..field.ny {
-            for x in 0..field.nx {
-                let d = distance(
-                    [
-                        (x as f64 + 0.5) * field.spacing,
-                        (y as f64 + 0.5) * field.spacing,
-                    ],
-                    [self.habitat.x, self.habitat.y],
-                    c,
-                );
-                if d <= 3. * radius {
-                    let w = (-d * d / (2. * radius * radius)).exp();
-                    self.footprint.push((y * field.nx + x, w));
-                    total += w;
-                }
-            }
-        }
-        if total == 0. {
-            self.footprint = field.stencil(self.habitat.x, self.habitat.y).to_vec();
-        } else {
-            for (_, w) in &mut self.footprint {
-                *w /= total;
-            }
-        }
+    pub fn rebuild(&mut self, _c: &Config, field: &Field) {
+        self.kernel.prepare(self.habitat.radius, field);
+        self.kernel
+            .translate(self.habitat.x, self.habitat.y, field, &mut self.footprint);
+        self.interface =
+            field.spacing.powi(2) / self.footprint.iter().map(|(_, a)| a * a).sum::<f64>();
     }
     pub fn release(
         &mut self,
@@ -83,54 +69,97 @@ impl Source {
         chemistry: &Chemistry,
         ledger: &mut Ledger,
     ) {
-        for (s, q) in self.inventory.iter_mut().enumerate() {
-            let released = *q * fraction;
-            if released <= 0. {
-                continue;
-            }
-            *q -= released;
-            for &(node, w) in &self.footprint {
-                let loss = field.add(node, s, released * w, chemistry);
-                ledger.rounding(loss, s, chemistry);
+        let mut mask = if self.material.valid {
+            self.material.mask
+        } else {
+            u64::MAX
+        };
+        let mut material = crate::source_medium::Material {
+            valid: true,
+            ..Default::default()
+        };
+        while mask != 0 {
+            let start = mask.trailing_zeros() as usize * 4;
+            mask &= mask - 1;
+            for s in start..start + 4 {
+                let released = self.inventory[s] * fraction;
+                self.inventory[s] -= released;
+                material.add(s, self.inventory[s], chemistry);
+                if released <= 0. {
+                    continue;
+                }
+                ledger.source_released += released;
+                for &(node, w) in &self.footprint {
+                    let loss = field.add(node, s, released * w, chemistry);
+                    ledger.rounding(loss, s, chemistry);
+                }
             }
         }
+        self.material = material;
     }
     pub fn advance(
         &mut self,
-        tick: u64,
-        c: &Config,
+        step: &crate::source_medium::Step<'_>,
         rng: &mut Random,
         field: &mut Field,
-        chemistry: &Chemistry,
         ledger: &mut Ledger,
-    ) {
+    ) -> bool {
+        let c = step.config;
+        let chemistry = step.chemistry;
+        let [dx, dy] = step.response.velocity.map(|v| v * c.dt);
+        let mut changed = dx != 0. || dy != 0.;
+        if dx != 0. || dy != 0. {
+            self.habitat.x = (self.habitat.x + dx).rem_euclid(c.width);
+            self.habitat.y = (self.habitat.y + dy).rem_euclid(c.height);
+            ledger.source_distance += dx.hypot(dy);
+            self.rebuild(c, field);
+        }
         if self.remaining <= 0. {
             self.wait -= c.dt;
             if self.wait > 0. {
-                return;
+                return changed;
             }
-            *self = Self::new(self.habitat.clone(), tick, c, rng, field);
+            *self = Self::new(self.habitat.clone(), step.tick, c, rng, field);
+            changed = true;
             for (s, q) in self.inventory.iter().enumerate() {
                 ledger.supplied += q;
                 ledger.supplied_energy += q * chemistry.properties[s].potential;
             }
         }
-        let total = self.inventory.iter().sum::<f64>();
-        self.release(
-            (self.rate * c.dt / total.max(1e-300)).min(1.),
-            field,
-            chemistry,
-            ledger,
+        if !self.material.valid {
+            self.material = crate::source_medium::Material::read(&self.inventory, chemistry);
+        }
+        let total = self.material.total;
+        let (conversion, mask) = step.operators.inventory_active(
+            &mut self.inventory,
+            step.response.signal,
+            c.dt * c.weathering_rate * c.source_processing * step.exposure,
+            crate::field_activity::CONCENTRATION_FLOOR as f64 * self.interface,
+            self.material.mask,
         );
+        self.material.mask = mask;
+        ledger.source_converted += conversion[0];
+        ledger.source_heat += conversion[1];
+        if conversion[0] > 0. || (self.rate > 0. && total > 0.) {
+            changed = true;
+            self.release(
+                (self.rate * c.dt / total.max(1e-300)).min(1.),
+                field,
+                chemistry,
+                ledger,
+            );
+        }
         self.remaining -= c.dt;
-        if self.remaining <= 0. || total <= self.rate * c.dt {
+        if self.remaining <= 1e-12 || total <= self.rate * c.dt {
+            changed |= self.material.total > 0.;
             self.release(1., field, chemistry, ledger);
             self.remaining = 0.;
             self.wait = -(1. - rng.unit()).ln() * c.source_gap;
         }
+        changed
     }
 }
-fn composition(h: &Habitat, tick: u64, c: &Config) -> Vec<f64> {
+pub(crate) fn composition(h: &Habitat, tick: u64, c: &Config) -> Vec<f64> {
     if let Some(zones) = &c.source_zones {
         return zones[((h.x / c.width) * zones.len() as f64) as usize].clone();
     }

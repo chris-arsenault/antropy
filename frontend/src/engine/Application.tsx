@@ -26,7 +26,7 @@ export function Application() {
     <main>
       <header>
         <div>
-          <h1>Antropy</h1>
+          <h1>Biotropy</h1>
           <p>Spatial digital chemistry · individually evolving cells</p>
         </div>
         <RunControls bridge={bridge} status={s} error={error} />

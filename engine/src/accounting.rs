@@ -9,13 +9,32 @@ pub fn interval_reserve(
 ) -> f64 {
     let maintenance = crate::organism::maintenance_rate(body, cell.damage, c);
     let motors =
-        body[1] * c.motor_power_density * (cell.action.swim + 0.25 * cell.action.turn.abs());
+        crate::movement::motor_work_rate(body, cell.damage, cell.action.swim, cell.action.turn, c);
     let learning = if c.learning == "plastic" {
         body[0] * c.plasticity_cost
     } else {
         0.
     };
     (c.physiology_interval + c.dt) * (maintenance + motors + learning)
+}
+/// Combined reserves for two conservative halves, priced from their actual capacities.
+pub fn division_requirements(
+    cell: &crate::organism::Cell,
+    c: &crate::config::Config,
+) -> (f64, f64, f64) {
+    let daughter = cell.body.map(|q| q * 0.5);
+    let maintenance = crate::organism::maintenance_rate(&daughter, cell.damage, c);
+    let learning = if c.learning == "plastic" {
+        daughter[0] * c.plasticity_cost
+    } else {
+        0.
+    };
+    let interval = (c.physiology_interval + c.dt) * (maintenance + learning);
+    let material = cell.capacity(c) * c.daughter_inventory_fraction;
+    let division = cell.body[0] * c.division_work_per_core;
+    let energy =
+        (cell.energy_capacity(c) * c.daughter_energy_fraction).max(2. * interval) + division;
+    (material, energy, division)
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -31,6 +50,13 @@ pub struct Ledger {
     pub death_heat: f64,
     pub division_heat: f64,
     pub overflow_heat: f64,
+    pub weathering_heat: f64,
+    pub weathered_material: f64,
+    pub sheltered_conversion: f64,
+    pub source_heat: f64,
+    pub source_converted: f64,
+    pub source_released: f64,
+    pub source_distance: f64,
     pub births: u64,
     pub divisions: u64,
     pub deaths: u64,
@@ -56,6 +82,8 @@ impl Ledger {
             + self.death_heat
             + self.division_heat
             + self.overflow_heat
+            + self.weathering_heat
+            + self.source_heat
     }
     pub fn accumulate(&mut self, f: &Flows) {
         macro_rules! add { ($($name:ident),*) => { $(self.flows.$name += f.$name;)* }; }

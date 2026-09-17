@@ -15,6 +15,7 @@ uniform vec2 worldSize;
 uniform vec3 camera;
 uniform vec4 layers;
 uniform float selectedLayer;
+uniform float weatheringLayer;
 uniform float exposure;
 in vec2 pixel;
 out vec4 color;
@@ -44,6 +45,7 @@ void main() {
   float quality=clamp((amount.y/max(amount.x,1e-20)-0.5)/7.5,0.0,1.0);
   vec3 energy=mix(vec3(0.22,0.4,0.8),vec3(0.93,0.69,0.3),quality);
   light=mix(light,energy,presence*layers.y);
+  light=mix(light,mix(vec3(0.035,0.12,0.23),vec3(0.72,0.4,0.12),clamp(detail.w,0.0,1.0)),weatheringLayer);
   light=mix(light,vec3(0.83,0.64,0.93),selectedLayer*(1.0-exp(-exposure*max(0.0,detail.x))));
   // Screen-space patterns keep hazards distinguishable at every zoom.
   float band=1.0-smoothstep(0.16,0.25,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/10.0)-0.5));

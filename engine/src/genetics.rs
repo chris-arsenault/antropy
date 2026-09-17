@@ -6,6 +6,8 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
+pub(crate) mod mutation;
+
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Target {
@@ -119,37 +121,36 @@ impl Machinery {
             membrane: to,
         }
     }
-    fn mutate(&mut self, rng: &mut Random, c: &Config) {
-        let mut point = |x: &mut f64, y: &mut f64| {
-            for v in [x, y] {
-                if rng.unit() < c.physical_mutation_rate {
-                    let n = if c.mutation_kind == "gaussian" {
-                        rng.normal()
-                    } else {
-                        rng.signed()
-                    };
-                    *v = chemistry::reflect(*v + n * c.physical_mutation_scale) as f32 as f64;
-                }
-            }
-        };
-        for p in &mut self.receptors {
-            point(&mut p.x, &mut p.y);
-        }
-        for p in &mut self.transporters {
-            point(&mut p.x, &mut p.y);
-        }
-        for p in &mut self.enzymes {
-            point(&mut p.x, &mut p.y);
-        }
-        point(&mut self.membrane.x, &mut self.membrane.y);
-        for e in &mut self.enzymes {
-            for d in [&mut e.dx, &mut e.dy] {
-                if rng.unit() < c.physical_mutation_rate {
-                    let step = rng.normal() * c.physical_mutation_scale;
-                    *d = 2. * chemistry::reflect((*d + 15. + step) / 2.) - 15.;
-                }
-            }
-        }
+    fn mutate(&mut self, rng: &mut Random, c: &Config) -> bool {
+        let points = self
+            .receptors
+            .iter_mut()
+            .flat_map(|p| [&mut p.x, &mut p.y])
+            .chain(
+                self.transporters
+                    .iter_mut()
+                    .flat_map(|p| [&mut p.x, &mut p.y]),
+            )
+            .chain(self.enzymes.iter_mut().flat_map(|p| [&mut p.x, &mut p.y]))
+            .chain([&mut self.membrane.x, &mut self.membrane.y]);
+        let points_changed = mutation::mutate(
+            points,
+            rng,
+            c.physical_mutation_rate,
+            c.physical_mutation_scale,
+            0.,
+            15.,
+        );
+        let offsets = self.enzymes.iter_mut().flat_map(|e| [&mut e.dx, &mut e.dy]);
+        let offsets_changed = mutation::mutate(
+            offsets,
+            rng,
+            c.physical_mutation_rate,
+            c.physical_mutation_scale,
+            -15.,
+            15.,
+        );
+        points_changed || offsets_changed
     }
     fn express(a: &Self, b: &Self) -> Self {
         let mean = |x: f64, y: f64| ((x + y) * 0.5) as f32 as f64;
@@ -335,11 +336,8 @@ impl Genotype {
                 c.physical_mutation_rate,
                 c.physical_mutation_scale,
                 3.,
-                &c.mutation_kind,
             );
-            let before = a.chemistry.clone();
-            a.chemistry.mutate(rng, c);
-            mutated |= before != a.chemistry;
+            mutated |= a.chemistry.mutate(rng, c);
         }
         let mut child = Self {
             id,

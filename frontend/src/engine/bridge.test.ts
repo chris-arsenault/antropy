@@ -35,7 +35,7 @@ const options: ViewOptions = {
   species: 0,
   color: 6,
   selected: -1,
-  layers: [true, false, false, false, false],
+  layers: [true, false, false, false, false, false],
   sources: true,
   regions: true,
   exposure: 4,

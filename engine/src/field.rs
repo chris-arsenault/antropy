@@ -20,6 +20,14 @@ pub struct Field {
     #[serde(skip)]
     pub body_signal: Vec<[f64; 2]>,
     #[serde(skip)]
+    pub source_signal: Vec<[f64; 2]>,
+    #[serde(skip)]
+    pub source_load: Vec<f64>,
+    #[serde(skip)]
+    pub source_nodes: Vec<usize>,
+    #[serde(skip)]
+    pub source_listed: Vec<bool>,
+    #[serde(skip)]
     activity: crate::field_activity::Activity,
     #[serde(skip)]
     last_groups: usize,
@@ -31,6 +39,9 @@ pub struct FieldBalance {
     pub energy: f64,
     pub roundoff_matter: f64,
     pub roundoff_energy: f64,
+    pub weathering_heat: f64,
+    pub weathered_material: f64,
+    pub sheltered_conversion: f64,
 }
 
 pub fn mobility(load: f64, scale: f64) -> f64 {
@@ -54,6 +65,10 @@ impl Field {
             next: vec![],
             neighbors: vec![],
             body_signal: vec![],
+            source_signal: vec![],
+            source_load: vec![],
+            source_nodes: vec![],
+            source_listed: vec![],
             activity: Default::default(),
             last_groups: 0,
         };
@@ -74,6 +89,10 @@ impl Field {
             }
         }
         self.body_signal = vec![[0.; 2]; n];
+        self.source_signal = vec![[0.; 2]; n];
+        self.source_load = vec![0.; n];
+        self.source_nodes.clear();
+        self.source_listed = vec![false; n];
         self.neighbors = (0..n)
             .map(|i| {
                 let x = i % self.nx;
@@ -101,6 +120,17 @@ impl Field {
             (node(ix, iy + 1), (1. - a) * b),
             (node(ix + 1, iy + 1), a * b),
         ]
+    }
+    pub fn medium_load(&self, sites: &[(usize, f64)]) -> f64 {
+        sites
+            .iter()
+            .map(|&(n, w)| w * (self.impedance[n] + self.source_load[n]))
+            .sum()
+    }
+    pub fn medium_signal(&self, n: usize) -> [f64; 2] {
+        std::array::from_fn(|k| {
+            self.signal[n][k] + self.body_signal[n][k] + self.source_signal[n][k]
+        })
     }
     pub fn sample(&self, species: usize, sites: &[(usize, f64)]) -> f64 {
         sites
@@ -227,12 +257,16 @@ impl Field {
     }
     fn coefficients(&self, node: usize, dt: f64, impedance: f64) -> [[f32; 3]; 4] {
         self.neighbors[node].map(|other| {
-            let difference: [f64; 2] = std::array::from_fn(|k| {
-                self.signal[other][k] + self.body_signal[other][k]
-                    - self.signal[node][k]
-                    - self.body_signal[node][k]
-            });
-            let rate = dt / (1. + impedance * (self.impedance[node] + self.impedance[other]) / 2.);
+            let difference: [f64; 2] =
+                std::array::from_fn(|k| self.medium_signal(other)[k] - self.medium_signal(node)[k]);
+            let rate = dt
+                / (1.
+                    + impedance
+                        * (self.impedance[node]
+                            + self.source_load[node]
+                            + self.impedance[other]
+                            + self.source_load[other])
+                        / 2.);
             let drift =
                 self.drift / (self.spacing * (1. + difference[0].abs() + difference[1].abs()));
             [
@@ -248,6 +282,16 @@ impl Field {
         dt: f64,
         washout: f64,
         impedance: f64,
+    ) -> FieldBalance {
+        self.advance_weathered(chemistry, dt, washout, impedance, None)
+    }
+    pub fn advance_weathered(
+        &mut self,
+        chemistry: &Chemistry,
+        dt: f64,
+        washout: f64,
+        impedance: f64,
+        mut climate: Option<&mut crate::climate::Climate>,
     ) -> FieldBalance {
         let maximum = chemistry
             .properties
@@ -279,7 +323,7 @@ impl Field {
                 let coefficients = self.coefficients(n, dt / steps as f64, impedance);
                 let inputs =
                     self.neighbors[n].map(|j| &self.amounts[j * SPECIES..(j + 1) * SPECIES]);
-                let mask = crate::field_vector::redistribute(
+                let mut mask = crate::field_vector::redistribute(
                     &self.amounts[n * SPECIES..(n + 1) * SPECIES],
                     inputs,
                     &mut self.next[n * SPECIES..(n + 1) * SPECIES],
@@ -291,6 +335,20 @@ impl Field {
                         floor,
                     },
                 );
+                if step + 1 == steps
+                    && let Some(weather) = climate.as_deref_mut()
+                {
+                    let medium = (
+                        self.medium_signal(n),
+                        self.impedance[n] + self.source_load[n],
+                    );
+                    mask = weather.convert(
+                        &mut self.next[n * SPECIES..(n + 1) * SPECIES],
+                        mask,
+                        medium,
+                        dt,
+                    );
+                }
                 self.activity.set(n, mask);
             }
             std::mem::swap(&mut self.amounts, &mut self.next);
@@ -315,23 +373,32 @@ impl Field {
             }
             self.activity.finish();
         }
+        let weathering_heat = climate.as_ref().map_or(0., |c| c.heat);
         FieldBalance {
             matter: before[0] * (1. - decay),
             energy: before[1] * (1. - decay),
             roundoff_matter: before[0] * decay - self.totals[0],
-            roundoff_energy: before[1] * decay - self.totals[1],
+            roundoff_energy: before[1] * decay - self.totals[1] - weathering_heat,
+            weathering_heat,
+            weathered_material: climate.as_ref().map_or(0., |c| c.converted),
+            sheltered_conversion: climate.as_ref().map_or(0., |c| c.prevented),
         }
     }
-    pub fn gradient(&self, sites: &[(usize, f64)]) -> [[f64; 2]; 2] {
+    pub fn gradient(&self, sites: &[(usize, f64)], bodies: bool) -> [[f64; 2]; 2] {
         let mut result = [[0.; 2]; 2];
         for &(n, w) in sites {
             let [r, l, d, u] = self.neighbors[n];
             for (axis, (a, b)) in [(r, l), (d, u)].into_iter().enumerate() {
                 for (k, value) in result[axis].iter_mut().enumerate() {
-                    *value += w
-                        * (self.signal[a][k] + self.body_signal[a][k]
+                    let difference = if bodies {
+                        self.signal[a][k] + self.body_signal[a][k]
                             - self.signal[b][k]
-                            - self.body_signal[b][k])
+                            - self.body_signal[b][k]
+                    } else {
+                        self.signal[a][k] - self.signal[b][k]
+                    };
+                    *value += w
+                        * (difference + self.source_signal[a][k] - self.source_signal[b][k])
                         / (2. * self.spacing);
                 }
             }

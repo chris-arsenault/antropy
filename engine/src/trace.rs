@@ -23,10 +23,31 @@ pub fn frame(w: &crate::world::World) -> serde_json::Value {
         let mut probe=c.clone();crate::sensing::observe(&mut probe,g,w.genomes[&c.machinery_genome].compiled.as_ref().unwrap(),&w.config,&w.field);
         let sites=w.field.stencil(c.x,c.y);
         let local:Vec<_>=(0..256).map(|s| w.field.sample(s,&sites)).collect();
-        let impedance=w.field.scalar(&w.field.impedance,&sites);
-        serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":crate::movement::mobility(impedance,w.config.movement_impedance),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)})
+        let impedance=w.field.medium_load(&sites);
+        serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":crate::movement::mobility(impedance,w.config.movement_impedance),"weathering":crate::climate::local(w,c.x,c.y),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)})
     }).collect();
     serde_json::json!({"tick":w.tick,"cells":cells})
+}
+
+/// Headless study samples omit private controller state and full local chemical rows.
+pub fn habitat(w: &crate::world::World) -> serde_json::Value {
+    let cells: Vec<_> = w
+        .cells
+        .iter()
+        .map(|c| {
+            let exports: Vec<_> = c
+                .chemical_flows
+                .exported
+                .iter()
+                .enumerate()
+                .filter(|(_, q)| **q > 0.)
+                .collect();
+            serde_json::json!({"id":c.id,"lineage":c.lineage,"genome":c.genome,"born":c.born,
+            "body":c.body,"installed":c.installed,"machineryGenome":c.machinery_genome,
+            "weathering":crate::climate::local(w,c.x,c.y),"exports":exports})
+        })
+        .collect();
+    serde_json::json!(cells)
 }
 
 #[cfg(test)]
@@ -44,6 +65,7 @@ mod tests {
             observed.step();
             control.step();
             frame(&observed);
+            habitat(&observed);
         }
         assert_eq!(observed.snapshot().unwrap(), control.snapshot().unwrap());
         let trace = observed.trace.as_ref().unwrap();
@@ -154,7 +176,7 @@ impl Trace {
             let g = self.group(c);
             g.organism_seconds += config.dt;
             g.damage_seconds += c.damage * config.dt;
-            let load = field.scalar(&field.impedance, &field.stencil(c.x, c.y));
+            let load = field.medium_load(&field.stencil(c.x, c.y));
             if crate::movement::mobility(load, config.movement_impedance) <= 0.8 {
                 g.slowed_seconds += config.dt;
             }

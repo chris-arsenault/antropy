@@ -24,13 +24,36 @@ pub fn deposit_profiles(
     field.body_signal.fill([0.; 2]);
     let area = field.spacing * field.spacing;
     for (cell, row) in cells.iter().zip(sites) {
-        let profile = cell.operators.as_ref().unwrap().profile;
-        let amount = cell.mass() / area;
-        for &(node, w) in row {
-            for (k, p) in profile.iter().enumerate() {
-                field.body_signal[node][k] += w * amount * p;
+        visit_row(cell, area, row, &mut |node, values| {
+            for (k, value) in values.into_iter().enumerate() {
+                field.body_signal[node][k] += value;
             }
-        }
+        });
     }
     let _ = config;
+}
+
+fn visit_row(
+    cell: &Cell,
+    area: f64,
+    row: &[(usize, f64)],
+    visit: &mut impl FnMut(usize, [f64; 2]),
+) {
+    let amount = cell.mass() / area;
+    let profile = cell.operators.as_ref().unwrap().profile;
+    for &(node, weight) in row {
+        visit(node, profile.map(|p| weight * amount * p));
+    }
+}
+
+/// Observers derive current body signals; the solver cache belongs to its frozen stage.
+pub fn visit_current(w: &crate::world::World, mut visit: impl FnMut(usize, [f64; 2])) {
+    for cell in &w.cells {
+        visit_row(
+            cell,
+            w.field.spacing.powi(2),
+            &sites(cell, &w.config, &w.field),
+            &mut visit,
+        );
+    }
 }

@@ -57,6 +57,7 @@ it("preserves source dimensions, chemistry and population settings in invasion",
 });
 it("rejects retired switches instead of silently ignoring them", () => {
   for (const name of [
+    "weathering-period",
     "cycle",
     "toxin-types",
     "prey-yield",

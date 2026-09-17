@@ -126,6 +126,9 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         rate: s.rate,
         inventory: vec![0.; 256],
         footprint: vec![],
+        kernel: Default::default(),
+        material: Default::default(),
+        interface: 0.,
     };
     for &id in &w.config.source_species {
         let q = s.duration * s.rate / w.config.source_species.len() as f64;
@@ -135,13 +138,14 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
     }
     source.rebuild(&w.config, &w.field);
     w.sources.push(source);
+    crate::source_medium::project(w);
     w.event("scheduled-source", 0, vec![]);
     Ok(json!({}))
 }
 pub fn sample(w: &World) -> Value {
     let bodies:Vec<_>=w.cells.iter().map(|c| {
-        let load=w.field.scalar(&w.field.impedance,&w.field.stencil(c.x,c.y));
-        let mobility=1./(1.+w.config.movement_impedance*load*load);
+        let load=w.field.medium_load(&w.field.stencil(c.x,c.y));
+        let mobility=crate::movement::mobility(load,w.config.movement_impedance);
         json!({"tick":w.tick,"cell":c.id,"genome":c.genome,"core":c.body[0],"motor":c.body[1],"speed_ceiling":crate::movement::motor_limits(c,&w.config,mobility).0})
     }).collect();
     let census:Vec<_>=w.cells.iter().map(|c|json!({"tick":w.tick,"cell":c.id,"lineage":c.lineage,"genome":c.genome,"born":c.born,"generation":c.generation,"x":c.x,"y":c.y,"energy":c.energy,"inventory_material":c.material(),"damage":c.damage})).collect();

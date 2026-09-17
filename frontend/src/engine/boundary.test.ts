@@ -20,9 +20,12 @@ const compact = { width: 24, height: 24, founders: 2, sourceCount: 2 };
 
 it("keeps v4 chemical metadata bounded and rejects old physical bytes inside the unchanged package", async () => {
   const session = new Session(await Engine.load(bytes, true));
+  expect(() => session.restart(101, { ...compact, weatheringPeriod: 1200 })).toThrow(
+    /unknown field.*weatheringPeriod/
+  );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(13);
+  expect(definition.version).toBe(19);
   expect(definition.chemistry.version).toBe(4);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -32,13 +35,13 @@ it("keeps v4 chemical metadata bounded and rejects old physical bytes inside the
   const exported = await session.export();
   expect((await decodePackage(exported)).metadata.version).toBe(11);
   const old = before.slice();
-  old.set(new TextEncoder().encode("ANTROPY12\0"));
+  old.set(new TextEncoder().encode("ANTROPY18\0"));
   const incompatible = await encodePackage(old, {
     seed: 101,
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v13 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v19 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });

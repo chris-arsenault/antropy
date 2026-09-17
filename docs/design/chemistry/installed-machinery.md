@@ -1,7 +1,7 @@
 # Paid refitting and installed machinery
 
 The [fresh composed runtime](composed-runtime.md) implements paid continuous refitting in
-physical checkpoint v13. The September14 measurements below preserve the reason to retain
+physical checkpoint v19. The September14 measurements below preserve the reason to retain
 installed function; their whole-slot v11 replacement law is historical.
 
 ## Current installed owner
@@ -12,8 +12,10 @@ from actual coordinates and their immutable compiled operators, including membra
 No target change, birth or contact transfer grants replacement function.
 
 Paid refitting charges constructionEnergy × affected actual stock × coordinate distance moved.
-The largest slot's Manhattan distance advances at most .25 units/model-second, subject to work
+The largest funded slot's Manhattan distance advances at most .25 units/model-second, subject to work
 above the full interval reserve. Partial changes persist and change function continuously.
+Zero-stock slots contribute neither cost nor scheduling distance. When only empty slots differ,
+their instructions can finish without work; constructing functioning stock still costs material/work.
 Only changed slots recompile; completed slots borrow matching target coefficients. Unaffected
 allocations remain shared. Body material is conserved and paid work dissipates. Daughters inherit
 the actual intermediate installation, stock and damage; private contact/controller state resets.

@@ -180,21 +180,13 @@ pub fn assimilate(allele: &Genome, expressed: &Genome, state: &State, retention:
     child
 }
 pub fn mutate(g: &mut Genome, rng: &mut Random, c: &Config) -> bool {
-    let weights = mutate_vector(
-        &mut g.weights,
-        rng,
-        c.mutation_rate,
-        c.mutation_scale,
-        16.,
-        &c.mutation_kind,
-    );
+    let weights = mutate_vector(&mut g.weights, rng, c.mutation_rate, c.mutation_scale, 16.);
     let plasticity = mutate_vector(
         &mut g.plasticity,
         rng,
         c.mutation_rate,
         c.mutation_scale,
         1.,
-        &c.mutation_kind,
     );
     weights || plasticity
 }
@@ -204,45 +196,8 @@ pub fn mutate_vector(
     rate: f64,
     scale: f64,
     bound: f32,
-    kind: &str,
 ) -> bool {
-    if rate <= 0. || scale <= 0. {
-        return false;
-    }
-    let change = |value: &mut f32, rng: &mut Random| {
-        let noise = if kind == "gaussian" {
-            rng.normal()
-        } else {
-            rng.signed()
-        };
-        let next = (*value + (noise * scale) as f32).clamp(-bound, bound);
-        let changed = next != *value;
-        *value = next;
-        changed
-    };
-    let mut changed = false;
-    if rate >= 0.25 {
-        for value in values {
-            if rng.unit() < rate {
-                changed |= change(value, rng);
-            }
-        }
-    } else {
-        // The number of failures before a Bernoulli success is geometric:
-        // P(gap >= k) = (1-rate)^k. Skip loci without changing their probabilities.
-        let log_failure = (-rate).ln_1p();
-        let mut index = 0usize;
-        loop {
-            let gap = ((-rng.unit()).ln_1p() / log_failure).floor() as usize;
-            index = index.saturating_add(gap);
-            if index >= values.len() {
-                break;
-            }
-            changed |= change(&mut values[index], rng);
-            index += 1;
-        }
-    }
-    changed
+    crate::genetics::mutation::mutate(values, rng, rate, scale, -(bound as f64), bound as f64)
 }
 pub fn express(a: &Genome, b: &Genome) -> Genome {
     let mean = |x: &[f32], y: &[f32]| x.iter().zip(y).map(|(a, b)| (a + b) * 0.5).collect();
@@ -312,29 +267,16 @@ mod tests {
     fn sparse_mutation_keeps_rate_support_and_zero_rate_identity() {
         let mut rng = Random::new(101);
         let mut values = vec![0.; 100000];
-        assert!(!mutate_vector(
-            &mut values,
-            &mut rng,
-            0.,
-            0.1,
-            16.,
-            "uniform"
-        ));
-        assert!(mutate_vector(
-            &mut values,
-            &mut rng,
-            0.01,
-            0.1,
-            16.,
-            "uniform"
-        ));
+        assert!(!mutate_vector(&mut values, &mut rng, 0., 0.1, 16.));
+        assert!(mutate_vector(&mut values, &mut rng, 0.01, 0.1, 16.));
         let counts: Vec<_> = values
             .chunks(10000)
             .map(|bin| bin.iter().filter(|v| **v != 0.).count())
             .collect();
         assert!((850..1150).contains(&counts.iter().sum::<usize>()));
         assert!(counts.iter().all(|n| (60..140).contains(n)));
-        assert!(values.iter().all(|x| x.abs() <= 0.1));
+        assert!(values.iter().all(|x| x.is_finite() && x.abs() <= 16.));
+        assert!(values.iter().any(|x| x.abs() > 8.));
     }
     #[test]
     fn private_learning_and_assimilation() {

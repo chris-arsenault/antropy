@@ -2,7 +2,7 @@
 
 The [composed runtime](composed-runtime.md) implements [computable chemistry](computational-foundation.md):
 heritable manifold kernels, weighted mixture reductions and bounded product mappings with
-actual funded capacity. Checkpoint v13 persists continuous targets and separate actual installed
+actual funded capacity. Checkpoint v15 persists continuous targets and separate actual installed
 coordinates. Earlier categorical direction, integer products and birth-time recycling are retired.
 
 Status: implemented, with resolved choices in [numerical design](numerical-engine.md). The user specified a small

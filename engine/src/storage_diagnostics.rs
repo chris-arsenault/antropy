@@ -58,6 +58,7 @@ pub fn field(w: &mut World, kind: &str) -> Result<Value, String> {
         return Err("Unknown chemical storage load".into());
     }
     w.sources.clear();
+    crate::source_medium::project(w);
     w.field.amounts.fill(0.);
     if kind == "patchy" {
         let node = (w.field.ny / 2 * w.field.nx + w.field.nx / 2) * 256;

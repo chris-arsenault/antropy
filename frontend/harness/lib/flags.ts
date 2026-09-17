@@ -2,6 +2,7 @@ export interface Flags {
   readonly values: Map<string, string[]>;
 }
 const RETIRED = new Set([
+  "weathering-period",
   "chemical-resolution",
   "resolution",
   "regime",
@@ -55,6 +56,20 @@ export function integerFlag(flags: Flags, key: string, fallback: number): number
   const value = Number(flag(flags, key, String(fallback)));
   if (!Number.isSafeInteger(value)) throw new Error(`--${key} must be an integer`);
   return value;
+}
+
+export function assertKnownFlags(flags: Flags, allowed: readonly string[]) {
+  for (const key of flags.values.keys())
+    if (!allowed.includes(key)) throw new Error(`Unknown option --${key}`);
+}
+
+export function wallSecondsFlag(flags: Flags, fallback: number): number {
+  const legacy = integerFlag(flags, "wall", fallback);
+  const seconds = integerFlag(flags, "wall-seconds", legacy);
+  if (flags.values.has("wall") && legacy !== seconds)
+    throw new Error("Conflicting --wall and --wall-seconds budgets");
+  if (seconds <= 0) throw new Error("--wall-seconds must be positive");
+  return seconds;
 }
 
 export function seedsFlag(flags: Flags, fallback: string): number[] {

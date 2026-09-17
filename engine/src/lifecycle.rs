@@ -86,23 +86,28 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
     }
     cell
 }
+fn division_cost(cell: &Cell, target: &[f64; 15], config: &crate::config::Config) -> Option<f64> {
+    if !cell
+        .body
+        .iter()
+        .zip(target)
+        .all(|(q, t)| *q + 1e-12 >= 2. * t)
+    {
+        return None;
+    }
+    let (material, energy, cost) = crate::accounting::division_requirements(cell, config);
+    (cell.material() >= material && cell.energy >= energy).then_some(cost)
+}
 pub fn reproduce(w: &mut World) {
     let parents = std::mem::take(&mut w.cells);
     let original = parents.len();
     let mut divisions = 0;
     for mut cell in parents {
         let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
-        let ready = cell
-            .body
-            .iter()
-            .zip(g.body)
-            .all(|(q, t)| *q + 1e-12 >= 2. * t)
-            && cell.material() >= 2. * w.config.daughter_inventory
-            && cell.energy >= 2. * w.config.daughter_energy + w.config.division_cost;
-        if !ready {
+        let Some(division) = division_cost(&cell, &g.body, &w.config) else {
             w.cells.push(cell);
             continue;
-        }
+        };
         let fission = w.config.reproduction == "fission";
         let records = if fission { 2 } else { 1 };
         if original + divisions >= w.config.max_population
@@ -119,7 +124,7 @@ pub fn reproduce(w: &mut World) {
             w.cells.push(cell);
             continue;
         }
-        let paid = cell.pay(w.config.division_cost);
+        let paid = cell.pay(division);
         if let Some(study) = w.trace.as_mut().and_then(|t| t.study.as_mut()) {
             study.flow(&cell, "division", None, None, paid);
         }

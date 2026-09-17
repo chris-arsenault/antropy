@@ -34,6 +34,7 @@ interface MeasurementOptions {
   spatial?: boolean;
   progress?: boolean;
   onSample?: (world: EngineWorld) => void;
+  stop?: () => string | null;
 }
 export function measure(
   world: EngineWorld,
@@ -48,7 +49,8 @@ export function measure(
     wallMs = (options.wallSeconds ?? 120) * 1000;
   validateBudget(ticks, cadence, wallMs, initial.tick);
   let current = { tick: initial.tick, stopReason: initial.stopReason },
-    failure: string | null = null;
+    failure: string | null = null,
+    externalStop: string | null = null;
   const sample = () => {
     const point = world.command<Summary>("summary");
     series.push(point);
@@ -57,8 +59,12 @@ export function measure(
     if (options.progress && point.tick % 5000 === 0)
       console.log(JSON.stringify({ progress: point.tick, population: point.population }));
   };
+  const withinBudget = () =>
+    current.tick < ticks && !current.stopReason && performance.now() - started < wallMs;
   try {
-    while (current.tick < ticks && !current.stopReason && performance.now() - started < wallMs) {
+    while (withinBudget()) {
+      externalStop = options.stop?.() ?? null;
+      if (externalStop) break;
       current = world.step();
       if (current.tick % cadence === 0) sample();
     }
@@ -67,7 +73,7 @@ export function measure(
     failure = String(error);
   }
   return {
-    stop: measurementStop(failure, current, ticks),
+    stop: measurementStop(failure, current, ticks, externalStop),
     failure,
     completed: current.tick >= ticks,
     wallMs: performance.now() - started,
@@ -96,7 +102,7 @@ export function recordMeasurement(
   const provenance = {
     justification,
     schemaVersion: 3,
-    checkpointVersion: 10,
+    checkpointVersion: definition.version,
     config: definition.config,
     stop: result.stop,
     completed: result.completed,
@@ -193,8 +199,9 @@ function validateBudget(ticks: number, cadence: number, wallMs: number, startTic
 function measurementStop(
   failure: string | null,
   current: { tick: number; stopReason: string | null },
-  ticks: number
+  ticks: number,
+  externalStop: string | null
 ) {
   if (failure) return "failure";
-  return current.stopReason ?? (current.tick < ticks ? "wall cap" : "horizon");
+  return externalStop ?? current.stopReason ?? (current.tick < ticks ? "wall cap" : "horizon");
 }

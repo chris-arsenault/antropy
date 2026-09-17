@@ -12,7 +12,12 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | --- | --- |
 | Governing computable chemistry and active work | [Computational foundation](design/chemistry/computational-foundation.md), [ADR 0022](adr/0022-computable-chemistry.md), [root plan](../DIGITAL-CHEMISTRY-PLAN.md), [current specification](specs/digital-chemistry/README.md) |
 | Chemical system, implementation and current evidence | [Digital chemistry](design/chemistry/README.md), [numerical contract](design/chemistry/numerical-engine.md), [measurements](design/chemistry/numerical-results.md), [migration and retirement](design/chemistry/numerical-migration.md) |
+| Current environmental extension and investigation | [Environmental plan](../ENVIRONMENTAL-ECOLOGY-PLAN.md), [weathering and shelter evidence](design/chemistry/environmental-results.md) |
+| Current 50,000-tick evolution and chemical-flow analysis | [Local-weathering trajectory](local-weathering-50k-study.md) |
+| Physical investment, body scaling and evolutionary tradeoffs | [Physical coupling audit](physical-coupling-audit.md), [v19 corrections](physical-coupling-correction.md) |
+| Mobile reservoirs and short calibration | [Source plan](../MOBILE-SOURCES-PLAN.md), [source laws and evidence](design/chemistry/mobile-source-results.md) |
 | World hypothesis and prior implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
+| Open hypotheses from observed evolution | [Evolution and ecology hypothesis log](hypothesis-log.md) |
 | Analytical resource budgets, source calibration and current viability checks | [Resource economy](design/chemistry/resource-economy.md) |
 | Historical A/B movement and local reproduction controls | [Spatial probes](spatial-probes.md) |
 | Recovery, accumulated-state measurements and limits | [Continuing observation](continuing-observation.md) |

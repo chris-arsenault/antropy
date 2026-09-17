@@ -2,14 +2,14 @@
 
 The current runtime uses [digital chemistry](chemistry/README.md). The
 [pre-chemistry contract](../sources/history/2026-09-13-pre-chemistry/design/bacteria.md)
-preserves the replaced A/B economy. [Numerical evidence](chemistry/numerical-results.md) records constructed
+preserves the replaced A/B economy. [Environmental evidence](chemistry/environmental-results.md) records constructed
 physical opportunities and operating limits; no evolved community is supplied.
 
 <a id="world-substrate-and-embodied-state"></a>
 
 ## Substrate and embodied state
 
-One periodic 320 × 240 XY plane contains continuous circular organisms and a mesh-4 chemical
+One periodic 320 × 240 XY plane contains continuous circular organisms and a mesh-2 chemical
 field. Neither axis is height. Sampling, motion, contact, offspring placement and rendering
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
 
@@ -27,13 +27,23 @@ overlaps approximately. There is no temperature, Brownian rule or fluid solver.
 The world persists a constrained 16×16 chemical manifold. Every ID has potential, diffusivity,
 impedance and stress. IDs have no privileged food, toxin, signal or matrix role. Dense node-major float32 arrays store all 256 species per mesh node. Conservative SIMD
 destination-row diffusion plus shared-profile drift and one slow extracellular washout rate apply to all chemicals. Float32 rounding
-has explicit matter/energy accounts; no concentration cutoff controls storage. See the
+has explicit matter/energy accounts. Active chemical groups skip empty stencil work; concentrations
+below 1e-9 are rounded to zero with signed numerical accounts. Storage remains dense. See the
 [selected numerical laws](chemistry/composed-runtime.md).
 
-Forty-eight finite renewal sites occupy seven unequal abiotic neighborhoods. Their positions,
-richness, radii and mixture proportions persist across localized renewal. Renewal is independent of organism demand or identity. Expired source
-inventory is released with chemical identity intact. Sources supply matter and potential energy;
-release from an already accounted source is an internal transfer.
+Local mixture profiles favor compatible chemical transformations through a compact compiled
+operator. There is no independent weather clock or baseline conversion in neutral medium.
+Unfunded transformations cannot increase reference value. The existing impedance response
+attenuates conversion. Paid exports can change both product selection and exposure; deposits
+remain available to neighbors and subject to transport, washout, weathering and uptake.
+Controllers receive the resulting chemistry through their ordinary local sensors.
+
+Forty-eight reservoirs start in seven unequal abiotic neighborhoods. Local chemical gradients
+move them with impedance-dependent drag, including during renewal waits. Richness and radii
+persist; renewal uses the current location and configured incoming mixture. Independent renewals
+continue indefinitely, importing accounted matter and potential. Release is an internal transfer
+whose chemical identities can change with the local medium, conserving material and dissipating
+potential. Expiration uses the same processing rule. See [source laws and short evidence](chemistry/mobile-source-results.md).
 
 The default chemistry seed is 101, independent of geography seed. Its physical source-selection
 rule chooses IDs 0 and 80. This bootstrap composition is provisional. Ten percent of initial
@@ -58,8 +68,10 @@ compositions. No calendar, zone label or chemical ID enters the controller direc
 Movement ticks advance 0.2 model seconds. Field/sensing/physiology accumulate 0.8 seconds
 before their updates; actions remain held between inferences. The phase order is:
 
-1. Advance finite sources, compose chemical/body signals; on physiology boundaries advance
-   conservative diffusion/drift/washout through the full accumulated interval.
+1. Freeze local source responses, drift and release processed material; compose chemical/body
+   signals. On physiology boundaries advance
+   conservative diffusion/drift/washout through the full accumulated interval, followed by
+   conservative extracellular weathering and accounted potential loss.
 2. At startup and physiology boundaries form local observations and run each RNN against the common field.
 3. Pay affordable swimming/turning and resolve movement/contact.
 4. On physiology boundaries resolve funded import/export from shared supply, storage and usable work.
@@ -76,7 +88,8 @@ the next physiology interval. Motor and transport effort otherwise compete for a
 
 Matter and energy close separately across fields, sources, cells, generic bodies, washout and
 dissipation. There is no automatic scalar-reserve catabolism, direct prey yield, reserve sharing
-or chemical-specific decay/binding pathway.
+or named chemical decay/binding pathway. Weathering uses the same generic property-derived map
+for every chemical, with fixed points and susceptibility determined by the chemical definition.
 
 <a id="world-growth-death-and-reproduction"></a>
 
@@ -109,8 +122,8 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v13 stores complete chemistry, mixtures, actual stocks and installed coordinates/revision, chemical/behavioral genes,
-private state, parentage, source state, ledgers, interventions and stop reason. Earlier schemas
+Checkpoint v19 stores complete chemistry, mixtures, actual stocks and installed coordinates/revision, chemical/behavioral genes,
+private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs
 as provenance, and unavailable genetic comparisons must be labeled.

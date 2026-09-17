@@ -8,12 +8,16 @@ export interface EngineConfig extends Record<string, unknown> {
   mesh: number;
   dt: number;
   physiologyInterval: number;
+  weatheringRate: number;
+  habitatFeedback: boolean;
   founders: number;
   chemistrySeed: number;
   sourceCount: number;
   sourceRate: number;
   sourceLifetime: number;
   sourceGap: number;
+  sourceDrift: number;
+  sourceProcessing: number;
   sourceRadius: number;
   viscosity: number;
   sourceSpecies: number[];
@@ -101,6 +105,13 @@ export interface Summary {
     divisionHeat: number;
     deathHeat: number;
     overflowHeat: number;
+    weatheringHeat: number;
+    weatheredMaterial: number;
+    shelteredConversion: number;
+    sourceHeat: number;
+    sourceConverted: number;
+    sourceReleased: number;
+    sourceDistance: number;
     mutations: number;
     learnedBirths: number;
     recombinations: number;
@@ -191,6 +202,7 @@ export interface Inspection {
   exposure: number | null;
   impedance: number | null;
   mobility: number | null;
+  weathering: [number, number, number] | null;
   expressed: Genotype["chromosomes"][number] | null;
   local: number[] | null;
   relationships: {

@@ -1,7 +1,8 @@
 # Current calibration
 
 [Configuration](../engine/src/config.rs) and the persisted chemical definition specify authored
-model scales. [Numerical design](design/chemistry/numerical-engine.md) and [measurements](design/chemistry/numerical-results.md)
+model scales. [Composed runtime](design/chemistry/composed-runtime.md) and
+[environmental measurements](design/chemistry/environmental-results.md)
 record formula selection, rejected candidates and measured limits.
 The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibration.md) is historical.
 
@@ -17,13 +18,15 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
 | Compact affinity support / minimum susceptibility | R=3 coordinate units / 0.05 |
-| Finite sources | 48 around seven unequal regions, spread 18; rate scale 0.2, radius 3, lifetime scale 600 s, mean renewal wait 1,200 s |
+| Renewing reservoirs | 48 initially around seven unequal regions, spread 18; rate scale 0.2, radius 3, lifetime scale 600 s, mean renewal wait 1,200 s; indefinite external replenishment |
+| Reservoir drift / medium processing | 4 / 4; local gradients and impedance bound motion, local signals select downhill release branches |
 | Source bootstrap | IDs 0 and 80 for chemistry seed 101, ranked by deliverable potential; 10% finite stock dissolved locally |
 | Extracellular washout | 0.001 per second for every species; half-life 693 model seconds |
-| Field mesh / physiology interval | 2 world units / 0.8 model seconds; no abundance cutoff |
+| Field mesh / physiology interval | 2 world units / 0.8 model seconds; active four-species groups, accounted concentration floor 1e-9 |
+| Weathering rate / local response | 0.025 × positive interaction difference with the bounded medium profile; existing diffusion impedance attenuates exposure; no weather clock |
 | Founder homeostasis | Membrane matches retained product; export begins near 75% storage fill |
 | Movement / diffusion impedance coefficients | 0.5 / 1 |
-| Viscosity / thermal energy | 0.004 / 0.00008 |
+| Viscosity | 0.004; no thermal-energy state or temperature solver |
 | Transport turnover / work | 2.5 per installed stock per second / 0.05 per material |
 | Enzyme turnover / downhill capture efficiency | 2.5 per installed stock per second / 0.8 |
 | Construction work / growth rate | 0.5 per material plus potential deficit / 0.06 |
@@ -50,17 +53,28 @@ converts an untyped reserve. Ploidy, birth-local assimilation and expression are
 The [analytical resource economy](design/chemistry/resource-economy.md) derives the current
 source and turnover settings. Positive local growth budgets coexist with an unaffordable
 uniform-background reference. Both daughters at one finite site reproduce; an isolated weak
-site remains unable to support its resident. The actual default starts with 48 cells and reaches
-74 after 600 ticks, with 26 divisions and no deaths. These are bounded viability findings.
+site remained unable to support its resident in those earlier probes. The earlier fixed-source weathering
+startup starts with 48 cells and reaches 54 after 600 ticks, with 54 divisions and maximum
+generation 3. This is a bounded integration finding, not sustained ecology.
+
+[Mobile reservoir calibration](design/chemistry/mobile-source-results.md) selects drift4 and
+processing4 from six 1,500-tick comparisons. By500ticks, 16/48 sources in seed27 and15/48 in
+seed101 move beyond their initial radius; approximately30% of releases change chemical identity.
+Two3,000-tick confirmations end with39/113 cells. These establish changing local supply and
+continued access, not evolved pursuit or long-term survival.
 
 <a id="calibration-throughput"></a>
 
 ## Measured throughput
 
-The [integrated numerical record](design/chemistry/numerical-results.md) measures 217 ticks/s at
-48 cells, 59.9 at 2,000 varied cells and 33.4 during the growing 2,000-cell load. These include
-packed rendering preparation, census and inspection. GPU execution, browser suspension and
-days/weeks endurance remain unmeasured. Earlier TypeScript quantization results are historical.
+The [mobile-source measurements](design/chemistry/mobile-source-results.md) give
+39.31/24.55/20.18 ticks/s on fully occupied 48/2,000/2,000-growth fixtures, including packed
+render preparation, census and inspection. Large saturated workloads miss the30ticks/s floor.
+These source-free capacity fixtures retain the prior environmental limits; brief report
+generation overlapped this check, so small differences do not establish a speedup. Ordinary
+mobile-source confirmations measure131–136ticks/s with recording, without GPU execution.
+Isolated browser operation was checked before this extension; days/weeks endurance remains
+unmeasured. Earlier numerical and TypeScript figures are historical.
 
 See [continuation](continuing-observation.md) and the validation record for final operating checks.
 Historical A/B throughput figures do not apply to this larger chemical state.

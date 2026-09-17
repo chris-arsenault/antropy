@@ -140,7 +140,7 @@ function studyManifest({
   return {
     run,
     schemaVersion: 3,
-    checkpointVersion: 10,
+    checkpointVersion: definition.version,
     wallSeconds,
     source,
     sourceSelection,

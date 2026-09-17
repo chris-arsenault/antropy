@@ -11,15 +11,20 @@ potential energy, diffusion, impedance and stress. Each cell has four receptors,
 four unary enzymes and inherited membrane compatibility. Actual installed material, internal
 chemical inventory and usable energy fund movement, reactions, repair, learning, growth and division.
 No external fitness scorer or named food/toxin/matrix pathway selects ecological roles.
+Smooth geographic weathering transforms extracellular chemicals. Accumulated material can
+shelter a neighborhood, giving paid production and export a possible local return.
+Resource reservoirs drift with local chemical gradients and release mixtures altered by the
+surrounding medium. External replenishment remains active; the world is still an open system.
 
-[Short constructed probes](docs/design/chemistry/numerical-results.md) test physical opportunities and costs.
+[Short constructed probes](docs/design/chemistry/environmental-results.md) test physical opportunities and costs.
 They do not prove evolved cooperation, persistent diversity or successful colonization.
 One Rust/WASM kernel serves the browser and experiments. Rendering borrows WASM buffers in the
 same worker through OffscreenCanvas/WebGL2; full chemistry does not cross to React. Integrated
-headless capacity exceeds 30 ticks/s through the 2,000-cell growth fixture. Actual software-browser
-testing passes that minimum at 48 cells but exposes a presentation limit at 2,000. See the
-[reliability record](docs/design/chemistry/reliability-results.md). Default transit, human motion
-review and [days/weeks operation](docs/continuing-observation.md) remain unverified.
+headless operation exceeds 30 ticks/s in ordinary startup, while fully occupied fields with
+2,000 cells remain below that floor. See the current
+[environmental measurements](docs/design/chemistry/environmental-results.md). The earlier rebuild
+passed initial human review; the changed environment needs its own review.
+[Days/weeks browser operation](docs/continuing-observation.md) remains unverified.
 See the [current work order](docs/design/README.md); historical coexistence claims retain their
 [corrections](docs/analysis-correction.md).
 The prior ant implementation is preserved at commit `780fa4e`, annotated tag
@@ -41,9 +46,9 @@ pnpm run build
 Run `make ci` from the repository root before committing.
 
 Press **Run** to begin at tick zero: 48 bacteria in two separated starting colonies in a 320 × 240 world,
-48 finite renewal sites with local chemical mixtures and mutation enabled. The UI requests
+48 mobile renewing reservoirs with local chemical mixtures and mutation enabled. The UI requests
 30 ticks/s; the bounded reproducing-world computation exceeds that rate. Layers show material, chemical potential,
-stress, impedance or one selected chemical. Drag to pan, wheel to zoom and select a cell to inspect
+stress, impedance, chemical weathering or one selected chemical. Drag to pan, wheel to zoom and select a cell to inspect
 its machinery, mixtures, sensors, recurrent state and private byte. Stats remain visible.
 The display shows one framed world, with bounded panning and zoom anchored under the pointer.
 Soft regions summarize nearby cells at world scale; isolated cells remain visible. Zoom reveals
@@ -58,7 +63,8 @@ Stats also show physical capacity ranges and acquired learning. Environment, inh
 persistence controls are available below the map. The default is haploid clonal fission with
 paid plasticity and full learned-weight retention. Diploidy, selfing, crossover, mutation operators,
 budding and learning retention are configurable. Material and usable energy have separate ledgers.
-See the [evolutionary contract](docs/design/funded-bodies.md). Checkpoint v11 rejects older versions.
+See the [evolutionary contract](docs/design/funded-bodies.md). Physical checkpoint v19 rejects
+older versions; the browser observation package remains v11.
 Recovery saves every 30 seconds while running and on pause; restores start paused. Export a file
 for a separate copy. Browser suspension can interrupt execution; storage failures pause it visibly.
 
@@ -82,7 +88,8 @@ pnpm harness recent --n 5
 | Governing principles     | [docs/principles.md](docs/principles.md)                   |
 | Current design and order | [docs/design/README.md](docs/design/README.md)             |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
-| Chemical proof points and limits | [Numerical results](docs/design/chemistry/numerical-results.md) |
+| Chemical proof points and limits | [Environmental results](docs/design/chemistry/environmental-results.md), [rebuild results](docs/design/chemistry/rebuild-results.md) |
+| Mobile reservoirs and short calibration | [Source results](docs/design/chemistry/mobile-source-results.md) |
 | Architecture             | [docs/architecture.md](docs/architecture.md)               |
 | Development              | [docs/development.md](docs/development.md)                 |
 | Calibration              | [docs/calibration.md](docs/calibration.md)                 |

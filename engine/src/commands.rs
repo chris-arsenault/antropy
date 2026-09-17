@@ -49,6 +49,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         "stepStatus" => Ok(json!({"tick":w.tick,"stopReason":w.stop_reason})),
         "frame" => Ok(observation::frame(w)),
         "assayFrame" => Ok(crate::trace::frame(w)),
+        "habitatSample" => Ok(crate::trace::habitat(w)),
         "summary" => Ok(observation::summary(w)),
         "chemicalOverview" => Ok(crate::chemical_observation::overview(w)),
         "historyFixture" => crate::storage_diagnostics::history(w, number(v, "count")? as usize),
@@ -59,6 +60,8 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
                 .ok_or("Missing field kind")?,
         ),
         "environment" => Ok(observation::environment(w)),
+        "weatheringProbe" => Ok(crate::weathering_probe::run(w)),
+        "sourceProbe" => Ok(crate::source_probe::run(w.chemistry.seed)),
         "census" => crate::census::observe(w, v),
         "traceStart" => {
             let target: Option<[f64; 3]> =
@@ -237,6 +240,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             // Ordinary advancement releases the final inventory before retirement.
             w.sources
                 .retain(|s| s.remaining > 0. || s.inventory.iter().any(|q| *q > 0.));
+            crate::source_medium::project(w);
             Ok(json!({}))
         }
         "loadFixture" => {
@@ -372,6 +376,7 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
     }
     if v.get("clearSources").and_then(Value::as_bool) == Some(true) {
         w.sources.clear();
+        crate::source_medium::project(w);
     }
     let after = w.held();
     w.ledger.supplied += after.0 - before.0 + w.ledger.numerical_material - rounding_before.0;
@@ -391,6 +396,7 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
     w.cells.clear();
     w.ancestry.clear();
     w.sources.clear();
+    crate::source_medium::project(w);
     w.genomes.retain(|id, _| *id == 1);
     w.next_cell = 1;
     w.next_genome = 2;

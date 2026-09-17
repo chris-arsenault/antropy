@@ -13,9 +13,14 @@ pub mod chemical_profiles;
 mod chemical_projection;
 pub mod chemistry;
 pub mod chemistry_atlas;
+pub mod climate;
+#[cfg(test)]
+mod climate_tests;
 pub mod commands;
 pub mod config;
 pub mod controller;
+#[cfg(test)]
+mod coupling_tests;
 pub mod diagnostics;
 pub mod economy;
 mod economy_report;
@@ -50,6 +55,11 @@ mod render;
 #[cfg(test)]
 mod runtime_tests;
 pub mod sensing;
+pub mod source_footprint;
+pub mod source_medium;
+mod source_probe;
+#[cfg(test)]
+mod source_tests;
 pub mod sources;
 mod startup_probe;
 mod storage_diagnostics;
@@ -57,5 +67,8 @@ mod study_commands;
 mod study_trace;
 mod trace;
 pub mod transport;
+pub mod weathering;
+mod weathering_budget;
+mod weathering_probe;
 pub mod world;
 mod world_validation;

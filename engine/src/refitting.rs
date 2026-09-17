@@ -2,11 +2,24 @@
 use crate::{
     chemistry::Chemistry,
     config::Config,
-    genetics::{Compiled, Target},
+    genetics::{Compiled, Machinery, Target},
     organism::Cell,
 };
 fn distance(a: Target, b: Target) -> f64 {
     (a.x - b.x).abs() + (a.y - b.y).abs()
+}
+fn distances(a: &Machinery, b: &Machinery) -> [f64; 13] {
+    let mut result = [0.; 13];
+    result[12] = distance(a.membrane, b.membrane);
+    for i in 0..4 {
+        result[i] = distance(a.receptors[i], b.receptors[i]);
+        let (x, y) = (a.transporters[i], b.transporters[i]);
+        result[4 + i] = (x.x - y.x).abs() + (x.y - y.y).abs();
+        let (x, y) = (a.enzymes[i], b.enzymes[i]);
+        result[8 + i] =
+            (x.x - y.x).abs() + (x.y - y.y).abs() + (x.dx - y.dx).abs() + (x.dy - y.dy).abs();
+    }
+    result
 }
 fn move_target(a: &mut Target, b: Target, f: f64) {
     a.x = move_coordinate(a.x, b.x, f);
@@ -21,22 +34,23 @@ pub fn advance(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry,
         return;
     }
     let old = cell.installed.clone();
-    let mut reach = distance(old.membrane, target.membrane);
-    let mut cost = cell.body[0] * distance(old.membrane, target.membrane);
-    for i in 0..4 {
-        reach = reach.max(distance(old.receptors[i], target.receptors[i]));
-        cost += cell.body[3 + i] * distance(old.receptors[i], target.receptors[i]);
-        let (a, b) = (old.transporters[i], target.transporters[i]);
-        reach = reach.max((a.x - b.x).abs() + (a.y - b.y).abs());
-        cost += cell.body[7 + i] * ((a.x - b.x).abs() + (a.y - b.y).abs());
-        let (a, b) = (old.enzymes[i], target.enzymes[i]);
-        reach = reach
-            .max((a.x - b.x).abs() + (a.y - b.y).abs() + (a.dx - b.dx).abs() + (a.dy - b.dy).abs());
-        cost += cell.body[11 + i]
-            * ((a.x - b.x).abs() + (a.y - b.y).abs() + (a.dx - b.dx).abs() + (a.dy - b.dy).abs());
-    }
-    cost *= c.construction_energy;
-    let fraction = (dt * 0.25 / reach).min(1.);
+    let distances = distances(&old, target);
+    let stocks = cell.body[3..].iter().chain([&cell.body[0]]);
+    let (reach, cost) = distances
+        .iter()
+        .zip(stocks)
+        .filter(|(_, stock)| **stock > 0.)
+        .fold((0_f64, 0.), |(reach, cost), (distance, stock)| {
+            (
+                reach.max(*distance),
+                cost + distance * stock * c.construction_energy,
+            )
+        });
+    let fraction = if reach > 0. {
+        (dt * 0.25 / reach).min(1.)
+    } else {
+        1.
+    };
     let surplus = (cell.energy - crate::accounting::interval_reserve(cell, &cell.body, c)).max(0.);
     let paid = cell.pay((cost * fraction).min(surplus));
     let fraction = if cost > 0. { paid / cost } else { fraction };

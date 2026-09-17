@@ -72,3 +72,6 @@
 .field-ramp.chemical {
   background: linear-gradient(90deg, #08121a, #d4a4ee);
 }
+.field-ramp.weathering {
+  background: linear-gradient(90deg, #091f3b, #b8661f);
+}

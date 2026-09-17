@@ -21,7 +21,7 @@ fn base_mesh(count: usize, mesh: f64) -> World {
             mutation_rate: 0.,
             physical_mutation_rate: 0.,
             learning: "static".into(),
-            daughter_inventory: 100.,
+            division_work_per_core: 100.,
             ..Config::default()
         },
     )

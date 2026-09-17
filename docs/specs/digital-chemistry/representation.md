@@ -2,7 +2,7 @@
 
 This page preserves the pre-removal representation decisions and measurements.
 The current [composed runtime](../../design/chemistry/composed-runtime.md) implements
-chemistry v4 with physical checkpoint v13, continuous inherited and installed machinery,
+chemistry v4 with physical checkpoint v18, continuous inherited and installed machinery,
 and one production compiler. The historical v12 and capacitor descriptions below do not
 govern execution. [ADR 0022](../../adr/0022-computable-chemistry.md) and the
 [computational foundation](../../design/chemistry/computational-foundation.md) remain governing.

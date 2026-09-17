@@ -3,6 +3,34 @@
 Antropy is a browser-based 2D artificial-life simulation built as a Vite, React, TypeScript, and
 worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara platform.
 
+## Primary design constraint: shared mathematics and few controls
+
+This applies to proposals as well as implementation. Build behavior from a small set of
+fundamental parameters and shared, tractable vector operations. Extend the established
+mathematical architecture before inventing a mechanism for an individual feature. A collection
+of special-case rules does not become a shared model merely by putting it in one helper or
+writing it in vector notation.
+
+- Start with the common state, governing operation and existing parameters. Explain how the
+  requested behavior follows from their composition, including bounds, ownership and cost.
+- Do not default to feature-specific probabilities, scales, branches, thresholds or tunable
+  mixtures for sources, climate, individual chemicals, machinery slots or gene categories.
+  A new independent control needs a reason the shared rule cannot express the required behavior.
+- Where quantities have different domains, use explicit representation transforms derived from
+  those domains. Do not hide separately tuned behavior in per-category normalization constants.
+- Prefer one algebraic update across the relevant vectors. Preserve sparse work elimination,
+  immutable sharing and funded physical consequences; measure cost instead of assuming that
+  vector notation guarantees speed.
+- For mutation, propose a common distribution and operator over gene values before separate
+  mutation laws for controllers, bodies, enzymes or transporters. Rare large changes should
+  follow from that shared law rather than a special waste-consumer mutation path.
+
+Current scope: correct the microclimate/ecology additions after the completed mutation correction.
+Preserve the established mathematical foundation. The seed27 run is a positive evolutionary
+result whose observations remain useful after the microclimate correction; explaining every
+phenotype's advantage is not a prerequisite for proceeding. Retain open questions in the
+[hypothesis log](docs/hypothesis-log.md); future phenotype legibility belongs in the UI work.
+
 ## Read first
 
 | Topic                  | Link                                                                             |
@@ -11,7 +39,7 @@ worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara pla
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
 | Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
-| Current measurements | [docs/design/chemistry/rebuild-results.md](docs/design/chemistry/rebuild-results.md) |
+| Current measurements | [Environmental evidence](docs/design/chemistry/environmental-results.md), [rebuild evidence](docs/design/chemistry/rebuild-results.md) |
 | Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
 | Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
@@ -21,11 +49,57 @@ worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara pla
 
 ## Governing mathematical direction
 
+**Physical coupling correction, September 17, 2026.** Checkpoint v19 is current. Repair expense
+scales with funded mass, reproductive reserves with actual capacities, and motor work with squared
+velocity effort. Empty slots do not delay paid refitting. The [correction record](docs/physical-coupling-correction.md)
+owns formulas, renamed reserve settings and bounded verification; the v18 audit remains historical.
+No new chemical efficiency gene, environmental retuning or mutation change accompanies these fixes.
+
+**Local weathering revision, September 17, 2026.** That stage introduced checkpoint v18. Weathering
+depends on positive local chemical interaction differences through the existing shared profiles;
+neutral medium does not convert. The independent geographic weather clock is removed. The
+common extracellular concentration floor is 1e-9; tiny owned reservoir/cell stocks are retained.
+The [weathering expansion](ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign) records causal
+and numerical/cost comparisons. Do not equate weathering's role with a particular formula or
+require evolved shelter specialists to justify environmental chemistry. Human review remains open.
+
+**Ecology composition repair, September 17, 2026 (v17 evidence).** Reservoirs
+contribute to and sample the shared medium; retained inventory and extracellular material use
+one compiled neighbor-conversion operator. Diffusion does not determine reactivity. Existing
+reference values prevent unfunded uphill conversion; their magnitudes do not rank reaction rates.
+Source material projections and geographic kernels have separate lifetimes. The existing local
+concentration floor bounds conversion work and final extracellular products; owned tiny source
+stocks are retained. Defaults are sourceDrift4/sourceProcessing0.25/sourceGap2400, full mesh2.
+The [current runtime](docs/design/chemistry/composed-runtime.md) specifies these rules;
+the [correction plan](ENVIRONMENTAL-ECOLOGY-PLAN.md#ecology-correction) records verification.
+Earlier v14–v16 measurements below retain their original meaning. Human review remains pending.
+
+**Mobile reservoirs, September 16, 2026.** The [source plan](MOBILE-SOURCES-PLAN.md) adds
+medium-driven drift and downhill processing of released material. That stage introduced v15.
+Its defaults were sourceDrift4/sourceProcessing4, selected through six
+1,500-tick comparisons and bounded confirmations. [Source evidence](docs/design/chemistry/mobile-source-results.md)
+records the short horizon and limits. External renewal continues indefinitely; finite deposits
+do not constitute a closed system. No sun or usable-work grant has been added. Preserve local
+footprint processing, full mesh2 and the borrowed worker rendering boundary. Human motion
+review remains pending independently of these physical and operating checks.
+
+**Environmental extension, September 16, 2026.** The
+[environmental plan](ENVIRONMENTAL-ECOLOGY-PLAN.md) adds smooth geographic weathering,
+conservative extracellular conversion and impedance-mediated shelter to ordinary World.
+That extension introduced checkpoint v14. Full mesh2, active chemical groups and borrowed worker rendering
+remain. The [environmental record](docs/design/chemistry/environmental-results.md) contains
+selected artificial laws, paid short comparisons, negative barrier findings and operating
+limits. M0–M3 are complete: both seed27 arms went extinct; both seed101 arms stopped safely
+at the registered archive limit and retain incomplete horizons. The selected genotype had
+no shelter-specific construction advantage. M4's human visual review remains pending.
+Do not tune rates or expand seeds/horizons to obtain a preferred ecological result. Human
+review of this changed environment is separate from the earlier rebuild acceptance.
+
 **Fresh core implementation, September 15, 2026.** The removed executors and separate
 candidate have been replaced with one new production World. The
 [composed runtime](docs/design/chemistry/composed-runtime.md) and
 [rebuild work order](DIGITAL-CHEMISTRY-PLAN.md) supersede the numerical formulas,
-schema and implementation-status claims below. The current physical checkpoint is v13;
+schema and implementation-status claims below. That rebuild introduced checkpoint v13;
 enzyme offsets and actual installed coordinates are continuous, and transport direction
 comes from signed neural effort. Native/WASM builds,69 Rust and56 Vitest checks pass. Bounded
 opportunity, cold recovery and isolated browser rendering/save/fault checks are recorded.
@@ -74,11 +148,13 @@ sequence records implementation and its human review gate; [plan closeout](docs/
 
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
 The active contract is 39 inputs, 24 recurrent units, nine outputs, fifteen funded stocks,
-four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v13.
+four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v18.
 [Digital chemistry](docs/design/chemistry/README.md) replaces A/B processing, named toxins,
 matrix binding, automatic catabolism, sharing, prey yield and the carbon/oxygen cycle.
 A persisted smooth 16 × 16 chemical manifold supplies potential, diffusion, impedance and stress.
 Finite sources, paid transport/reactions, generic biomass, washout and death close the resource books.
+Extracellular weathering conserves material and accounts lost potential as heat. Geographic
+activity and chemical impedance set exposure; controllers see resulting local chemistry only.
 Chemical definition version 4 adds validated shared profiles to the joint diffusion/impedance
 coverage. The new compiler serves live installed machinery and the atlas. World stepping uses the
 composed artificial rules linked above. Inherited target changes
@@ -86,7 +162,7 @@ retain installed machinery identity until paid refitting; birth never grants rep
 
 Physical and behavioral mutation occur at local resource-funded reproduction; acquired recurrent
 changes can transmit into offspring chromosomes. The default is 320 × 240 units, viscosity 0.004,
-48 finite unequal renewal sites and two colonies. New [measurements](docs/design/chemistry/rebuild-results.md)
+48 unequal mobile renewing reservoirs and two colonies. New [measurements](docs/design/chemistry/rebuild-results.md)
 contain constructed opportunities and negative findings, not evolved-community certification.
 Historical A/B studies and their [corrected analysis](docs/analysis-correction.md) retain their
 original meaning and do not establish current chemical behavior.

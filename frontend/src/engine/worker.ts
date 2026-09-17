@@ -20,7 +20,8 @@ let lastDraw = 0,
   lastSummary = 0,
   lastSave = performance.now(),
   lastField = 0,
-  fieldDirty = true;
+  fieldDirty = true,
+  drawPending = false;
 const send = (message: Message) => port.postMessage(message);
 const inspection = new SelectedObservation();
 const health = new HealthRecorder();
@@ -48,6 +49,7 @@ function publish() {
 }
 function draw(now: number) {
   if (!renderer || !view || !session) return;
+  drawPending = true;
   const refresh = fieldDirty || now - lastField >= 200;
   const started = performance.now();
   const frame = renderer.draw(
@@ -57,8 +59,12 @@ function draw(now: number) {
     refresh
   );
   work.renderMs += performance.now() - started;
-  if (frame) work.frames++;
-  else work.skippedFrames++;
+  if (!frame) {
+    work.skippedFrames++;
+    return;
+  }
+  drawPending = false;
+  work.frames++;
   lastDraw = now;
   if (refresh) {
     lastField = now;
@@ -94,7 +100,10 @@ function publishSafely() {
   }
 }
 function advance() {
-  if (!session?.running) return;
+  if (!session?.running) {
+    if (drawPending) draw(performance.now());
+    return;
+  }
   const now = performance.now();
   const started = performance.now();
   session.advance(now);
@@ -241,7 +250,7 @@ function validateLayers(next: ViewOptions) {
   validateColor(next);
   if (
     !Array.isArray(next.layers) ||
-    next.layers.length !== 5 ||
+    next.layers.length !== 6 ||
     next.layers.some((v) => typeof v !== "boolean")
   )
     throw new Error("Invalid field layers");

@@ -59,7 +59,7 @@ impl Study {
                     ..Default::default()
                 });
             let dt = config.dt;
-            let load = field.scalar(&field.impedance, &field.stencil(c.x, c.y));
+            let load = field.medium_load(&field.stencil(c.x, c.y));
             r.seconds += dt;
             r.slowed_seconds +=
                 f64::from(crate::movement::mobility(load, config.movement_impedance) <= 0.8) * dt;

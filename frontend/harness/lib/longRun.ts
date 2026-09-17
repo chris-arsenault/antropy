@@ -52,6 +52,7 @@ interface Settings {
   wallSeconds: number;
   provenance: Record<string, unknown>;
   observation?: (world: EngineWorld) => Record<string, unknown>;
+  stop?: () => string | null;
 }
 function sample(
   world: EngineWorld,
@@ -107,6 +108,7 @@ export function runRecorded(engine: Engine, world: EngineWorld, s: Settings) {
       wallSeconds: s.wallSeconds,
       spatial: false,
       progress: true,
+      stop: s.stop,
       onSample: (w) => {
         const tick = sample(w, known, genomes, samples, s.observation);
         if (tick % s.checkpointEvery === 0)
@@ -182,5 +184,5 @@ function createManifest(
   };
 }
 export function completedStatus(stop: string) {
-  return stop === "wall cap" ? "incomplete" : "complete";
+  return stop === "horizon" || stop === "extinction" ? "complete" : "incomplete";
 }

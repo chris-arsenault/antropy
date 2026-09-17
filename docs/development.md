@@ -16,9 +16,10 @@ The browser starts a paused new world; current operation is described in
 
 ## Chemistry and experiment boundaries
 
-The [digital chemistry contract](design/chemistry/README.md) governs current v11 checkpoints and
+The [digital chemistry contract](design/chemistry/composed-runtime.md) governs current v19 checkpoints and
 schema-v3 evidence. Historical studies preserve their original results, not executable current
-registrations. Read [numerical evidence](design/chemistry/numerical-results.md) before selecting a new comparison.
+registrations. Read [environmental evidence](design/chemistry/environmental-results.md) and
+[rebuild evidence](design/chemistry/rebuild-results.md) before selecting a new comparison.
 Register the question, competing explanation, conditions, horizons, wall budget and stopping decision.
 Do not rerun every migrated campaign or search for a chosen community.
 
@@ -59,9 +60,15 @@ evidence schema and reject mixed old/new roots. No hosted artifact service is in
 
 Prefix entries with `pnpm harness`; use new output directories for append-only evidence.
 Generic configuration flags include `--chemistry-seed`, `--source-species` (comma-separated IDs),
-`--source-rate`, `--washout`, `--viscosity`, `--damage-rate`, `--transfer-rate` and
+`--source-rate`, `--source-drift`, `--source-processing`, `--washout`, `--weathering-rate`, `--habitat-feedback on|off`,
+`--viscosity`, `--damage-rate`, `--transfer-rate` and
 `--disturbance on` on commands that use generic configuration. Named old-chemistry flags fail.
 Read each command's settings before using flags from another family.
+
+`evolve` accepts `--wall-seconds` and the older `--wall` alias; conflicting budgets and
+unknown flags fail before execution. Current evolution reports describe stock-weighted
+transporter targets and investment. Transport direction is a neural action, so those inherited
+traits do not identify importers or exporters. Historical v10/v11 reports retain their old labels.
 
 Source zones/epochs use share vectors over resolved IDs. Equal total matter can supply different
 potential energy; preserve both quantities. The old `--regime` switch is rejected. Brief versus persistent food-access fixtures use an
@@ -74,7 +81,8 @@ No diagnostic or observed winner automatically replaces the browser founder.
 
 ## Studies, cohorts and batches
 
-All saved-genotype paths require explicit v11 binary checkpoints or browser packages. There is no default historical export,
+The retired `--weathering-period` flag fails explicitly; local mixtures now drive conversion.
+All saved-genotype paths require explicit v19 binary checkpoints or browser packages. There is no default historical export,
 hardcoded successful genotype or old-schema adapter. A short study invocation is:
 
 ```bash
@@ -114,10 +122,30 @@ chemical injury or motor/scheduled-resource questions. Historical batch defaults
 
 ## Persistence, reporting and verification
 
-Checkpoint v11 preserves chemical definitions, inventories, installed stocks and identity, immutable genes,
+Physical checkpoint v19 preserves chemical definitions, source response settings, environmental configuration, inventories,
+installed stocks and identity, immutable genes,
 private state, random streams, ledgers, complete parentage and bounded browser history. Older
 versions are rejected. Recovery retains six automatic/two manual points within 256 MiB and
 pauses on failure; raw snapshots are limited to 192 MiB. Field amounts use float32 with explicit rounding accounts; mesh geometry bounds allocation. Browser suspension, quota behavior and long-run responsiveness remain open.
+The separately versioned browser observation package remains v11.
+
+The registered environmental investigation reuses `runRecorded`, optional lineage traces and
+the existing ledger. Its `harness/numerical/habitatBatch.ts` entry point has separate `pilot`
+and `main` stages; inspect all pilots before invoking main. The fixed registration and resource
+bounds live in `ENVIRONMENTAL-ECOLOGY-PLAN.md`. New case directories are required. Run the
+read-only report with `python3 harness/habitat_report.py STUDY NEW_REPORT`; it advances no ticks.
+Headless recording limits do not change browser history or IndexedDB retention.
+
+The [mobile-source registration](../MOBILE-SOURCES-PLAN.md) uses six 300-tick cell-free probes
+and ordinary comparisons capped at 3,000 ticks. From `frontend`, create a new study directory
+with `pnpm exec tsx harness/numerical/mobileSources.ts probe harness/artifacts/NEW-STUDY`.
+Inspect `probes.json` before invoking `case ROOT SEED DRIFT PROCESSING TICKS` on that entry point.
+Cases share a 30-minute wall budget from probe creation and a 120-second per-case limit.
+Read completed evidence without advancing ticks:
+`python3 harness/mobile_source_report.py STUDY NEW_REPORT`.
+These are registered investigation tools; their available parameter values do not authorize
+additional sweeps. Headless source output observations are prospective normal release rates,
+excluding expiration flushes; actual converted/released material is counted separately.
 
 The cell inspector exposes 39 local inputs, stocks/targets, chemical mixtures, U/D/I/S properties,
 membrane compatibility, actual transfers, private recurrence and task state. Manual interventions

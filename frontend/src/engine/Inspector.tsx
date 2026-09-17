@@ -135,6 +135,13 @@ function CellDetails({
         {n(p.exposure)} · impedance {n(p.impedance)} · mobility {n(p.mobility)}.
       </p>
       <Chemistry inspection={p} definition={definition} />
+      {p.weathering && (
+        <p>
+          Chemical weathering: medium activity {n(p.weathering[0])} · exposed activity{" "}
+          {n(p.weathering[1])} · attenuation {(100 * p.weathering[2]).toFixed(1)}%. Conversion also
+          depends on the chemical present.
+        </p>
+      )}
       <details>
         <summary>Local inputs and private recurrent state</summary>
         <Table

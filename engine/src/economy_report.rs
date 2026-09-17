@@ -129,14 +129,18 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         })
         .collect();
     Ok(
-        json!({"schemaVersion":1,"ticksAdvanced":0,"seed":seed,"config":w.config,
+        json!({"schemaVersion":2,"physicalVersion":w.version,"ticksAdvanced":0,"seed":seed,"config":w.config,
         "chemistry":w.chemistry,"sourceLimits":limits,"renewal":source_budget(&w),
+        "environmentalOpportunity":crate::weathering_budget::report(&w.config,&w.chemistry),
+        "reservoirResponse":crate::source_medium::observe(&w),
         "cases":cases(&w),"investments":investments(&w),"startup":startup,
         "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
             "No shared depletion, export, repair, refitting or movement through gradients",
             "grossWork is an import-only upper bound; processingWork applies installed enzyme throughput to the assumed internal mixture",
+            "constructionCeiling uses processingSurplus; extra uphill assembly cost and omitted expenses can reduce it further",
             "Closure holds internal inventory fixed and removes a proportional mixture as construction",
             "Renewal average excludes initial priming transient and timestep overshoot",
+            "Uniform composition budgets assume raw incoming feedstock; medium-dependent source processing and weathering change actual chemical delivery",
             "Positive calculated surplus is conditional; actual delivery, controller expression and product occupancy must be measured"]}),
     )
 }

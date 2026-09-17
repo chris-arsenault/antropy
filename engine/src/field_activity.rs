@@ -1,5 +1,5 @@
 //! Derived work lists; material ownership and checkpoint layout remain in Field.
-pub const CONCENTRATION_FLOOR: f32 = 1e-24;
+pub const CONCENTRATION_FLOOR: f32 = 1e-9;
 
 #[derive(Clone, Debug, Default)]
 pub struct Activity {

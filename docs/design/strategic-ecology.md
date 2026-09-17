@@ -2,17 +2,21 @@
 
 Digital chemistry supplies physical opportunities for an unresolved ecological history. A mechanism,
 a constructed benefit and an evolved role remain different claims. Current evidence is in
-[numerical measurements](chemistry/numerical-results.md); earlier named-mechanism studies retain their
+[environmental measurements](chemistry/environmental-results.md) and
+[rebuild measurements](chemistry/rebuild-results.md); earlier named-mechanism studies retain their
 [original contract](../sources/history/2026-09-13-pre-chemistry/design/strategic-ecology.md).
 
 <a id="ecology-resource-opportunities"></a>
 
 ## Resource opportunities
 
-Finite sources release mixtures of ordinary chemical IDs into localized neighborhoods. Sites vary
-in richness, radius, composition and lifetime. Renewal waits are exponential; fixed sites preserve
-geographic opportunities while the optional scattered layout redraws positions. Sources do not
-respond to organism ancestry or select successful genotypes.
+Reservoirs release mixtures of ordinary chemical IDs into localized neighborhoods. They vary
+in richness, radius, composition and lifetime, and drift in response to local chemical gradients
+and impedance. Renewal waits are exponential; renewals replenish finite inventory at its current
+location indefinitely. There is no relocation lottery. Local chemical signals can transform the
+released mixture downhill with accounted potential loss. Sources do not respond to organism
+ancestry or select successful genotypes. [Short calibration](chemistry/mobile-source-results.md)
+establishes motion and altered output, not evolved pursuit or a closed resource cycle.
 
 Chemical potential determines possible energy returns. Transporters, enzymes and maintenance determine
 whether obtaining those returns repays their costs. Source schedules and zones specify shares over
@@ -99,13 +103,18 @@ conversion reduced injury but also reduced construction. Relatedness does not en
 
 Concentration-weighted impedance slows movement and symmetric extracellular diffusion. Paid export
 can build persistent, low-diffusion accumulations. Uniform slow washout removes all extracellular
-species at the same first-order rate. There is no separate matrix material, binding reservoir,
+species at the same first-order rate. Generic extracellular weathering also changes chemical
+identity and accounts the lost potential. Geographic activity changes its rate; concentration-
+weighted impedance shelters local material. There is no separate matrix material, binding reservoir,
 solid-wall mode or builder action.
 
-The paid-barrier probe reduced displacement and tracer spread. Uptake plus transformation reduced
-the amount of high-impedance material returned at death. It did not accelerate extracellular
-clearance while the tested cell was alive; uptake was the limiting link. This limitation remains
-visible in the validation record.
+The rebuilt-core paid-barrier probe barely reduced displacement and **failed** its predicted
+reduction in tracer spread. Uptake plus transformation reduced high-impedance material returned
+at death; it did not establish a competitive benefit. The newer environmental comparison found
+that expensive ID15 shelter lowered exposure but lost construction and survival against its
+control. A cheaper ID245 byproduct had a small additional construction return attributable to
+shielding in both placements, without a survival advantage. Neither result establishes an
+evolved builder strategy. The full costs and negative findings remain in the evidence.
 
 <a id="ecology-disabled-systems"></a>
 
@@ -115,7 +124,7 @@ visible in the validation record.
 | --- | --- |
 | Disturbance and horizontal transfer | Shared-kernel experimental paths; disabled in the default |
 | Source zones and epochs | Selectable mixture schedules, with matter and potential tracked separately |
-| Binding, solid walls, extracellular catalysis | Absent; no compatibility implementation |
+| Binding, solid walls, general extracellular catalysis | Absent; medium-dependent source processing is a bounded release operator |
 | Light input, multiple-substrate reactions, variable genome length | Deferred by the chemistry design |
 | Named toxins, signaling fields, automatic sharing and prey yield | Replaced by generic chemistry; retired controls rejected |
 

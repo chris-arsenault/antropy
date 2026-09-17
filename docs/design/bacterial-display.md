@@ -24,9 +24,10 @@ select wrapped bodies. Camera actions never alter simulation state or randomness
 | --- | --- |
 | Dissolved amount | Total extracellular material concentration; fixed exponential brightness with explicit sensitivity |
 | Energy per material | Concentration-weighted mean chemical potential, blue to amber on the fixed 0.5–8 energy/material scale; brightness masks empty or trace-only regions |
-| Movement resistance | Amber diagonal bands for mobility lost to chemical impedance, `1 - 1/(1 + movementImpedance × load²)`; viscosity remains separate |
-| Stress exposure | Rose dots for abiotic reference saturation, `stress/(stressK + stress)`; actual injury also depends on membrane compatibility and funded defense |
+| Movement resistance | Amber diagonal bands for mobility lost to chemical impedance, `1 - 1/(1 + movementImpedance × load)`; viscosity remains separate |
+| Stress exposure | Rose dots for abiotic reference saturation, `stress/(stressK + stress)`; actual injury also depends on membrane compatibility and paid repair |
 | Selected chemical layer | Concentration of one explicit chemical ID |
+| Chemical weathering | Blue-to-amber local interaction activity, attenuated by impedance; actual conversion also depends on the chemical present |
 | Source marks | Persistent source-size marks: bright ring and center cross while releasing, dim dashed ring while dormant; one Gaussian width, not a resource boundary |
 | Soft population region | Nearby actual cells, each contributing its own color; a viewing aggregate with no biological authority |
 | Small isolated mark | An actual ungrouped cell, kept visible at world scale |
@@ -47,10 +48,11 @@ not represent a solid wall.
 Source release is a normalized Gaussian truncated at three source radii; its ring marks one
 radius. Diffusion then carries dissolved chemicals beyond that release stencil.
 
-Choose one background field: dissolved amount, energy per material, selected chemical, or none.
+Choose one background field: dissolved amount, energy per material, selected chemical,
+chemical weathering, or none.
 Movement resistance and stress remain independently selectable. Different pattern shapes
 keep simultaneous hazards identifiable without adding every field into one color wash.
-Sensitivity changes concentration brightness, not potential hue or hazard scales.
+Sensitivity changes concentration brightness, not potential hue, weathering or hazard scales.
 At sensitivity `e`, brightness is `1 - exp(-e × concentration)`; the legend gives the
 half-brightness concentration `ln(2)/e`. The default is 4, with 1/16/64 alternatives for
 dense/faint/trace chemistry. Scales do not normalize to each frame's maximum, so depletion stays visible.
@@ -94,7 +96,7 @@ the display must not invent ecological differences to make layers look different
 Living population, divisions, deaths and affected-cell percentages lead observation. Coverage uses
 world area; injury and slowing use living population. Typed material and energy transfers retain
 explicit denominators and conservation residuals. Imports, exports, transformations, construction,
-repair, motor expense and washout are separate flows.
+repair, motor expense, washout and extracellular weathering are separate flows.
 
 The source controls offer local mixtures, alternating compositions or spatial zones for a new
 population. Source shares index the world's resolved chemical IDs. Changing composition changes
@@ -128,6 +130,8 @@ The [numerical evidence](chemistry/numerical-results.md) records measured throug
 The cell inspector shows installed machinery, chemical targets, transporter effort, internal and
 external mixtures, membrane/stress/impedance loads and actual recent transfers. The U/D/I/S atlas
 uses chemical coordinates, independent of world geography; target overlays show the selected cell.
+The inspector also shows mixture activity, attenuated activity and fractional attenuation.
+These observational values do not enter the RNN directly.
 
 <a id="display-implementation-boundary"></a>
 
@@ -143,7 +147,8 @@ other amount, present count and tick. The worker caches this by observed tick an
 on world replacement. It runs on the half-second status publication path, not at simulation
 or render frequency. Unchanged paused observations omit it from the revisioned packet.
 The ordinary 16 KiB reply limit and observation budget apply; no raw field is admitted to
-browser diagnostic commands. Two hazard scalars reuse previously spare texture channels.
+browser diagnostic commands. Two hazard scalars and weathering exposure use the existing
+texture channels. The worker still renders borrowed WASM views; no full field crosses to React.
 
 The bounded display check is `node harness/numerical/browserChemicals.mjs CHROMIUM EXISTING_SITE NEW_OUTPUT`
 from `frontend`. It uses a fresh browser profile, twenty manual ticks, the actual application,

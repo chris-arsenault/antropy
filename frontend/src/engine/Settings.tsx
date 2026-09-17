@@ -14,11 +14,13 @@ const fields = [
   ["width", "World width", 8],
   ["height", "World height", 8],
   ["founders", "Starting cells", 2],
-  ["sourceCount", "Finite sources", 0],
+  ["sourceCount", "Renewing reservoirs", 0],
   ["sourceRate", "Source release rate", 0],
   ["sourceLifetime", "Source lifetime", 0.01],
   ["sourceGap", "Source renewal gap", 0],
   ["sourceRadius", "Source radius", 0.01],
+  ["sourceDrift", "Source response to chemical gradients", 0],
+  ["sourceProcessing", "Stored-resource weathering multiplier", 0],
   ["viscosity", "Viscosity", 0.00001],
   ["mutationRate", "Controller mutation probability", 0],
   ["physicalMutationRate", "Physical mutation probability", 0],
@@ -99,6 +101,10 @@ export function Settings({
       </details>
       <Policies config={config} select={select} />
       <p>
+        Reservoirs contain finite deposits and receive external replenishment after a wait. They
+        drift with the local medium, which can change the chemicals they release.
+      </p>
+      <p>
         Changes take effect on restart. Selfing uses two gametes from one diploid parent. Zero
         mutation probabilities freeze inherited mutation; private learning is controlled separately.
       </p>
@@ -146,7 +152,7 @@ function SourceComposition({
     <>
       {" "}
       <label>
-        Source composition{" "}
+        Incoming feedstock composition{" "}
         <select
           value={layout(config)}
           onChange={(e) => setConfig(composition(config, e.target.value))}

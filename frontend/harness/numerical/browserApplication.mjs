@@ -94,6 +94,10 @@ try {
     "({kernelDigest:window.check.kernelDigest,visibility:document.visibilityState,canvas:[...document.querySelectorAll('canvas')].map(c=>[c.clientWidth,c.clientHeight]),definition:window.check.definition,last:window.check.samples.at(-1),alerts:[...document.querySelectorAll('[role=alert]')].map(e=>e.textContent)})"
   );
   if (!initial.last) throw new Error("Application did not initialize");
+  if (process.env.ANTROPY_WEATHERING === "1")
+    await connection.page.evaluate(
+      "const select=[...document.querySelectorAll('select')].find(s=>[...s.options].some(o=>o.value==='weathering')); if(!select) throw new Error('Weathering view unavailable'); select.value='weathering'; select.dispatchEvent(new Event('change',{bubbles:true}));"
+    );
   await connection.page.evaluate(
     "document.querySelectorAll('details').forEach(e=>e.open=true); window.callWorker('inspect',{cell:1})"
   );
