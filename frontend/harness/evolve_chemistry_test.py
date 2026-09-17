@@ -12,17 +12,9 @@ class ReportContract(unittest.TestCase):
         source = next(Path(sys.argv[1]).glob("*/manifest.json")).parent
         manifest = read_manifest(source)
         self.assertEqual(manifest["checkpointVersion"], 19)
-        import numpy as np
-        from seed_cycle_findings import capacity_blocks
         values = inherited_vectors(source, manifest["checkpointVersion"])
         genome = json.loads((source / "genomes.jsonl").read_text().splitlines()[0])
         body = genome["facts"]["blueprint"]
-        small_parent = np.asarray([body]) * 0.2
-        blocked = capacity_blocks(small_parent, manifest["config"])
-        self.assertFalse(any(bool(result[0]) for result in blocked))
-        legacy = {**manifest["config"], "daughterInventory": 0.3, "daughterEnergy": 0.1, "divisionCost": 0.08}
-        del legacy["daughterInventoryFraction"]
-        self.assertTrue(capacity_blocks(small_parent, legacy)[0][0])
         slots = genome["facts"]["expressed"]["chemistry"]["transporters"]
         self.assertTrue(all("export" not in slot for slot in slots))
         vector = dict(zip(TRAITS, values[genome["genotype"]["id"]]))
@@ -31,6 +23,19 @@ class ReportContract(unittest.TestCase):
         for axis in ("x", "y"):
             expected = sum(body[7 + i] * slot[axis] for i, slot in enumerate(slots)) / sum(body[7:11])
             self.assertAlmostEqual(vector["transport" + axis.upper()], expected)
+
+    def test_report_capacity_bounds(self):
+        import numpy as np
+        from seed_cycle_findings import capacity_blocks
+        source = next(Path(sys.argv[1]).glob("*/manifest.json")).parent
+        manifest = read_manifest(source)
+        genome = json.loads((source / "genomes.jsonl").read_text().splitlines()[0])
+        small_parent = np.asarray([genome["facts"]["blueprint"]]) * 0.2
+        blocked = capacity_blocks(small_parent, manifest["config"])
+        self.assertFalse(any(bool(result[0]) for result in blocked))
+        legacy = {**manifest["config"], "daughterInventory": 0.3, "daughterEnergy": 0.1, "divisionCost": 0.08}
+        del legacy["daughterInventoryFraction"]
+        self.assertTrue(capacity_blocks(small_parent, legacy)[0][0])
 
     def test_interruption_extinction_and_schema(self):
         from evolve_report import kmeans

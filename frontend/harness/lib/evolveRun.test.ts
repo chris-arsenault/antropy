@@ -45,10 +45,11 @@ it("feeds current producer artifacts to the Python reader without an ecological 
       wallSeconds: 1,
       provenance: {},
     });
-    execFileSync("/usr/bin/python3", ["harness/evolve_chemistry_test.py", root, "--contract"], {
-      encoding: "utf8",
-      timeout: 10000,
-    });
+    execFileSync(
+      "/usr/bin/python3",
+      ["-S", "harness/evolve_chemistry_test.py", root, "--contract"],
+      { encoding: "utf8", timeout: 10000 }
+    );
     recordMeasurement(engine, world, 0, join(root, "bacteria"), "contract-test");
     const result = JSON.parse(readFileSync(join(root, "bacteria/run-1/result.json"), "utf8"));
     expect(result.checkpointVersion).toBe(world.command<{ version: number }>("definition").version);
