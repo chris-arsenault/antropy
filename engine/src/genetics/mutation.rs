@@ -186,7 +186,7 @@ mod tests {
         w.config.mutation_scale = 0.08;
         w.config.physical_mutation_rate = 1.;
         let cell = &mut w.cells[0];
-        cell.body = cell.body.map(|q| q * 2.);
+        cell.set_fixture_body(cell.body.map(|q| q * 2.));
         cell.energy = 1.;
         let installed = cell.installed.clone();
         let stock = cell.body;

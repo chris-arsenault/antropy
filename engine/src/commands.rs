@@ -248,7 +248,9 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             load_fixture(w, count)?;
             if v.get("growth").and_then(Value::as_bool) == Some(true) {
                 for (i, cell) in w.cells.iter_mut().enumerate() {
-                    cell.body = cell.body.map(|q| q * if i % 10 == 0 { 2. } else { 1.8 });
+                    cell.set_fixture_body(
+                        cell.body.map(|q| q * if i % 10 == 0 { 2. } else { 1.8 }),
+                    );
                     cell.energy = cell.energy_capacity(&w.config);
                     cell.inventory.fill(0.004);
                 }
@@ -325,7 +327,9 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             cell.inventory = amounts.into();
         }
         if let Some(value) = v.get("body") {
-            cell.body = serde_json::from_value(value.clone()).map_err(|e| e.to_string())?;
+            cell.set_fixture_body(
+                serde_json::from_value(value.clone()).map_err(|e| e.to_string())?,
+            );
         }
         for (name, slot) in [
             ("x", &mut cell.x),
@@ -342,7 +346,12 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             let g = genotype
                 .as_ref()
                 .unwrap_or_else(|| &w.genomes[&cell.genome]);
-            cell.body = g.compiled.as_ref().unwrap().body;
+            cell.set_fixture_body(g.compiled.as_ref().unwrap().body);
+        }
+        if let Some(value) = v.get("boundMaterial") {
+            let amounts: Vec<f64> =
+                serde_json::from_value(value.clone()).map_err(|e| e.to_string())?;
+            cell.bound_material = amounts.into();
         }
         cell.validate(&w.config)?;
         if let Some(g) = genotype {
@@ -440,8 +449,8 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
             g.id,
             g.compiled.as_ref().unwrap(),
             &w.config,
-            x,
-            y,
+            &w.chemistry,
+            [x, y],
             rng.unit() * std::f64::consts::TAU,
         );
         cell.energy = cell.energy_capacity(&w.config);

@@ -16,9 +16,9 @@ pub fn report(c: &Config, chemicals: &chemistry::Chemistry) -> Value {
         .0;
     let food = &chemicals.properties[source];
     let shelter = &chemicals.properties[deposit];
-    let body = chemicals.properties[chemicals.decomposition].potential;
+    let terminal = chemicals.properties[chemicals.decomposition].potential;
     let yield_per_food =
-        chemistry::reaction_energy(food.potential, body, c.conversion_efficiency).0;
+        chemistry::reaction_energy(food.potential, terminal, c.conversion_efficiency).0;
     let (production_work, _) =
         chemistry::reaction_energy(food.potential, shelter.potential, c.conversion_efficiency);
     let mut rows = vec![];

@@ -1,10 +1,5 @@
 //! Frozen-mixture conversion and proportional construction with explicit work accounts.
-use crate::{
-    chemistry::{self, Chemistry},
-    config::Config,
-    genetics::Compiled,
-    organism::Cell,
-};
+use crate::{chemistry::Chemistry, config::Config, genetics::Compiled, organism::Cell};
 #[derive(Default)]
 pub struct Work {
     edges: Vec<(usize, usize, f64)>,
@@ -107,7 +102,7 @@ pub fn react_observed(
 /// Consume a proportional mixture; returns constructed material and dissipated value.
 pub fn assemble(
     cell: &mut Cell,
-    chemistry: &Chemistry,
+    _chemistry: &Chemistry,
     c: &Config,
     requested: f64,
     reserve: f64,
@@ -117,27 +112,14 @@ pub fn assemble(
     if total <= 0. {
         return (0., 0.);
     }
-    let potential = cell
-        .inventory
-        .iter()
-        .zip(&chemistry.properties)
-        .map(|(q, p)| q * p.potential)
-        .sum::<f64>()
-        / total;
-    let body = chemistry.properties[chemistry.decomposition].potential;
-    let (cost, heat) = chemistry::assembly_cost(
-        potential,
-        body,
-        c.construction_energy,
-        c.conversion_efficiency,
-    );
+    let cost = c.construction_energy;
     let built = requested
         .max(0.)
         .min((total - reserve).max(0.))
         .min((cell.energy - work_reserve).max(0.) / cost);
-    cell.inventory.scale((1. - built / total).max(0.));
+    cell.inventory.transfer_to(&mut cell.bound_material, built);
     cell.pay(built * cost);
-    (built, built * heat)
+    (built, built * cost)
 }
 pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64) {
     let need: [f64; 15] = std::array::from_fn(|i| (2. * g.body[i] - cell.body[i]).max(0.));
@@ -158,7 +140,7 @@ pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt
     cell.flows.constructed += built;
     cell.flows.construction += heat;
 }
-pub fn repair(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) {
+pub fn repair(cell: &mut Cell, c: &Config, _chemistry: &Chemistry, dt: f64) {
     let mass = cell.mass();
     let material_per_fraction = mass * c.repair_material;
     let work_per_fraction = mass * c.repair_energy;
@@ -166,28 +148,15 @@ pub fn repair(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) {
     let total = cell.material();
     let actual = repair
         .min(total / material_per_fraction.max(1e-30))
+        .min(mass / material_per_fraction.max(1e-30))
         .min(cell.energy / work_per_fraction.max(1e-30));
     if actual <= 0. {
         return;
     }
-    // Repair material is converted to the decomposition chemical and remains material.
-    let value = cell
-        .inventory
-        .iter()
-        .zip(&chemistry.properties)
-        .map(|(q, p)| q * p.potential)
-        .sum::<f64>()
-        / total;
-    let product = chemistry.properties[chemistry.decomposition].potential;
-    let conversion = (product - value).max(0.) / c.conversion_efficiency;
-    let actual = actual
-        .min(cell.energy / (work_per_fraction + material_per_fraction * conversion).max(1e-30));
     let used = actual * material_per_fraction;
-    cell.inventory.scale((1. - used / total).max(0.));
-    let s = chemistry.decomposition;
-    cell.inventory.set(s, cell.inventory[s] + used);
-    let paid = cell.pay(actual * work_per_fraction + used * conversion);
+    cell.inventory.exchange_with(&mut cell.bound_material, used);
+    let paid = cell.pay(actual * work_per_fraction);
     cell.damage = (cell.damage - actual).max(0.);
     cell.flows.repaired += actual;
-    cell.flows.repair += paid + used * (value - product);
+    cell.flows.repair += paid;
 }

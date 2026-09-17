@@ -6,7 +6,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 19;
+pub const VERSION: u32 = 20;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -93,8 +93,11 @@ impl World {
                 1,
                 compiled,
                 &config,
-                (center[0] + angle.cos() * reach).rem_euclid(config.width),
-                (center[1] + angle.sin() * reach).rem_euclid(config.height),
+                &chemistry,
+                [
+                    (center[0] + angle.cos() * reach).rem_euclid(config.width),
+                    (center[1] + angle.sin() * reach).rem_euclid(config.height),
+                ],
                 rng.unit() * std::f64::consts::TAU,
             );
             crate::sensing::initialize(&mut cell, compiled, &config, &field);
@@ -144,15 +147,15 @@ impl World {
     }
     pub fn held(&self) -> (f64, f64) {
         let (mut matter, mut energy) = self.field.totals(&self.chemistry);
-        let body_value = self.chemistry.properties[self.chemistry.decomposition].potential;
         for c in &self.cells {
             matter += c.mass() + c.material();
-            energy += c.mass() * body_value + c.energy;
+            energy += c.energy;
             energy += c
                 .inventory
                 .iter()
+                .zip(c.bound_material.iter())
                 .zip(&self.chemistry.properties)
-                .map(|(q, p)| q * p.potential)
+                .map(|((q, bound), p)| (q + bound) * p.potential)
                 .sum::<f64>();
         }
         for s in &self.sources {
@@ -367,12 +370,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY19\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY20\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY19\0")
-            .ok_or("Unsupported physical checkpoint; v19 required")?;
+            .strip_prefix(b"ANTROPY20\0")
+            .ok_or("Unsupported physical checkpoint; v20 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {

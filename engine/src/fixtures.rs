@@ -39,8 +39,8 @@ fn fund(cell: &mut Cell, g: &Genotype, w: &World) -> Result<(f64, f64), String> 
         *stock -= returned;
         surplus += returned;
     }
-    let s = w.chemistry.decomposition;
-    cell.inventory.set(s, cell.inventory[s] + surplus);
+    cell.bound_material
+        .transfer_to(&mut cell.inventory, surplus);
     let requested = target
         .iter()
         .zip(cell.body)

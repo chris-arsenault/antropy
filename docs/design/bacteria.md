@@ -95,10 +95,10 @@ for every chemical, with fixed points and susceptibility determined by the chemi
 
 ## Growth, death and reproduction
 
-Any internal chemical can become generic biomass, paying assembly work and any uphill potential
-gap. Growth fills deficits toward twice the inherited newborn target. Genes prescribe targets;
-only installed stocks provide capability. Repair replaces actual material and pays energy before
-growth. Replaced material returns as the generic decomposition chemical.
+Any internal chemical can fund generic biomass, paying assembly work and retaining its identity
+in the bound mixture. Growth fills deficits toward twice the inherited newborn target. Genes
+prescribe targets; only installed stocks provide capability. Repair pays work and exchanges equal
+amounts of the frozen inventory and bound mixtures before growth. Replaced material retains its identity.
 
 Fission requires all division stocks, daughter inventory/energy, the division charge and local
 placement in the periodic plane. Daughters separate along the parent's heading and subsequently
@@ -106,8 +106,9 @@ participate in ordinary local overlap resolution. Fission splits stocks, each ch
 post-cost energy equally; budding uses the same split while retaining the experienced parent.
 Changed inherited machinery retains its installed function until paid refitting is affordable.
 Birth splits installed stock and identity rather than granting new machinery. Damage fraction
-persists. Starvation or unit injury releases inventories unchanged, converts body material to the
-decomposition species and dissipates remaining usable energy. No killer receives a direct grant.
+persists. Starvation or unit injury releases inventory and bound material unchanged and dissipates
+remaining usable energy. No killer receives a direct grant. [Bound material](../bound-material.md)
+records the shared transfer rules and their work accounts.
 
 There is no age timer, remote parent selection, fitness culling or automatic reseeding. Extinction
 stops the run. Population and ancestry safety limits pause with retained state.
@@ -122,7 +123,7 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v19 stores complete chemistry, mixtures, actual stocks and installed coordinates/revision, chemical/behavioral genes,
+Checkpoint v20 stores complete chemistry, free and bound mixtures, actual stocks and installed coordinates/revision, chemical/behavioral genes,
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs

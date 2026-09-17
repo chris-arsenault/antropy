@@ -37,7 +37,10 @@ For a pure species, increasing concentration cannot exceed 4 pi r D_s / (k I_s)
 when I_s is positive. Potential energy alone therefore cannot identify usable supply.
 The energy budget subtracts maintenance, transport, movement, learning, construction,
 repair and refitting from captured reaction energy. Conversion preserves chemical matter;
-construction consumes it, and construction itself does not harvest its excess potential.
+construction transfers it into the bound mixture and pays assembly work without harvesting
+reference value. [Checkpoint v20](../../bound-material.md) retains that value and each chemical
+identity through growth, repair, division and death. The seeded terminal pathway used by the
+perfect-processing calculation remains a metabolic reference, not a universal body composition.
 
 At fixed body stocks and internal material X, a terminal unary substrate with import U
 and unsaturated first-order enzyme rate e has inventory U / (e + U_total / X), if

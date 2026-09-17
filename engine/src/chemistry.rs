@@ -310,10 +310,6 @@ pub fn reaction_energy(from: f64, to: f64, eta: f64) -> (f64, f64) {
         (delta / eta, -delta * (1. / eta - 1.))
     }
 }
-pub fn assembly_cost(potential: f64, body: f64, work: f64, eta: f64) -> (f64, f64) {
-    let cost = work + (body - potential).max(0.) / eta;
-    (cost, potential + cost - body)
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Affinity {
@@ -369,9 +365,6 @@ mod tests {
                 let (down, h2) = reaction_energy(b, a, 0.8);
                 assert!(up + down <= 1e-12);
                 assert!((up + down + h1 + h2).abs() < 1e-12);
-                let (cost, heat) = assembly_cost(a, b, 0.5, 0.8);
-                assert!(cost > 0. && heat >= 0.);
-                assert!((a + cost - b - heat).abs() < 1e-12);
             }
         }
     }

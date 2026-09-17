@@ -180,16 +180,20 @@ charges catalytic work. Conversion efficiency remains configurable below one.
 ## Bodies, inheritance and accounts
 
 All internal species can fund biomass, selected proportionally. Assembly pays .5 work per
-unit plus any reference-value increase divided by efficiency. Body material has the
-decomposition species' reference value. Growth approaches twice the inherited newborn
+unit and transfers the consumed mixture into bound material without changing chemical identity.
+Bound reference value is its mixture dotted with chemical reference values; no usable work is
+captured by construction. Bound mass equals total funded stock. Growth approaches twice the inherited newborn
 blueprint, bounded by actual material, work and core-dependent construction rate.
 Growth protects work for the proposed larger body's upkeep, current motor effort and learning
 through a complete physiology interval plus one movement tick. Refitting uses the same reserve
 for the current body. This prevents optional construction from consuming the next interval's upkeep.
 
-Maintenance charges actual stock and damage. Repair converts a proportional internal
-mixture into decomposition material with explicit material and work costs proportional to
-total installed mass times the repaired damage fraction. Paid refitting
+Maintenance charges actual stock and damage. Repair exchanges equal proportional amounts of
+free and bound material, frozen before the exchange. Material demand and work costs scale with
+total installed mass times the repaired damage fraction. Available free material, bound mass and
+work limit repair; returned material cannot fund the same exchange. Death releases both mixtures
+unchanged. Checkpoint v20 persists and validates bound material; see [the correction](../../bound-material.md).
+Paid refitting
 moves installed coordinates toward inherited coordinates on affected actual stock.
 The greatest positive-stock slot-coordinate distance advances by at most .25 manifold units per model
 second; sufficient work and time finish the refit exactly, preserving unchanged arrays.

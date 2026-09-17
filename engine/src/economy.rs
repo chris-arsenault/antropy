@@ -31,8 +31,8 @@ pub fn budget(
     inventory: f64,
     swim: f64,
 ) -> Budget {
-    let mut cell = Cell::new(0, 0, g, c, 0., 0., 0.);
-    cell.body = cell.body.map(|v| v * scale);
+    let mut cell = Cell::new(0, 0, g, c, chemistry, [0., 0.], 0.);
+    cell.set_fixture_body(cell.body.map(|v| v * scale));
     cell.inventory.fill(inventory / 256.);
     let mut imports = vec![0.; 256];
     for slot in 0..4 {

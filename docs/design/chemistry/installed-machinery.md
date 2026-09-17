@@ -1,7 +1,7 @@
 # Paid refitting and installed machinery
 
 The [fresh composed runtime](composed-runtime.md) implements paid continuous refitting in
-physical checkpoint v19. The September14 measurements below preserve the reason to retain
+physical checkpoint v20. The September14 measurements below preserve the reason to retain
 installed function; their whole-slot v11 replacement law is historical.
 
 ## Current installed owner

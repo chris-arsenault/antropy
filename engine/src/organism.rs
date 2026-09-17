@@ -24,6 +24,7 @@ pub struct Cell {
     pub y: f64,
     pub heading: f64,
     pub body: [f64; 15],
+    pub bound_material: crate::inventory::Inventory,
     pub inventory: crate::inventory::Inventory,
     pub energy: f64,
     pub damage: f64,
@@ -79,14 +80,18 @@ impl Cell {
         genome: u64,
         compiled: &Compiled,
         c: &Config,
-        x: f64,
-        y: f64,
+        chemistry: &crate::chemistry::Chemistry,
+        position: [f64; 2],
         heading: f64,
     ) -> Self {
         let mut inventory = vec![0.; SPECIES];
         for &s in &c.source_species {
             inventory[s] += c.founder_inventory / c.source_species.len() as f64;
         }
+        // Explicit initial matter, retained from the earlier founder condition.
+        // Descendants inherit actual bound mixtures instead of calling this constructor.
+        let mut bound_material = vec![0.; SPECIES];
+        bound_material[chemistry.decomposition] = compiled.body.iter().sum();
         Self {
             id,
             parent: None,
@@ -98,10 +103,11 @@ impl Cell {
             machinery_revision: 0,
             operators: Some(compiled.operators.clone()),
             born: 0,
-            x,
-            y,
+            x: position[0],
+            y: position[1],
             heading,
             body: compiled.body,
+            bound_material: bound_material.into(),
             inventory: inventory.into(),
             energy: c.founder_energy,
             damage: 0.,
@@ -119,6 +125,13 @@ impl Cell {
     }
     pub fn mass(&self) -> f64 {
         self.body.iter().sum()
+    }
+    /// Explicit diagnostic grant/removal, preserving the existing material proportions.
+    /// Ordinary growth and inheritance must transfer actual funded mixtures instead.
+    pub fn set_fixture_body(&mut self, body: [f64; 15]) {
+        self.bound_material
+            .scale(body.iter().sum::<f64>() / self.bound_material.material().max(1e-30));
+        self.body = body;
     }
     pub fn volume(&self, c: &Config) -> f64 {
         self.mass() / c.body_density + self.material() / c.inventory_density
@@ -143,6 +156,10 @@ impl Cell {
     pub fn validate(&self, c: &Config) -> Result<(), String> {
         self.installed.validate()?;
         self.inventory.validate()?;
+        self.bound_material.validate()?;
+        if (self.bound_material.material() - self.mass()).abs() > 1e-10 * (1. + self.mass()) {
+            return Err("Bound material does not fund body stocks".into());
+        }
         if self.inventory.len() != SPECIES
             || self.inputs.len() != INPUTS
             || self.brain.hidden.len() != 24

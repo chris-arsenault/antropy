@@ -49,7 +49,15 @@ phenotype's advantage is not a prerequisite for proceeding. Retain open question
 
 ## Governing mathematical direction
 
-**Physical coupling correction, September 17, 2026.** Checkpoint v19 is current. Repair expense
+**Bound material, September 17, 2026.** Checkpoint v20 is current. Each cell owns a chemical
+mixture whose mass funds its fifteen body stocks. Growth transfers inventory identity into this
+mixture; repair exchanges frozen mixtures; division splits it and death returns it unchanged.
+Assembly/repair pay work without chemical conversion. The [bound-material record](docs/bound-material.md)
+owns accounting and bounded measurements. Initial founders retain their declared material;
+descendants never reset to the founder's decomposition species. Preserve this through all fixtures,
+diagnostics, checkpoints and live consumers. No new genes or environmental controls accompany it.
+
+**Physical coupling correction, September 17, 2026.** That stage introduced checkpoint v19. Repair expense
 scales with funded mass, reproductive reserves with actual capacities, and motor work with squared
 velocity effort. Empty slots do not delay paid refitting. The [correction record](docs/physical-coupling-correction.md)
 owns formulas, renamed reserve settings and bounded verification; the v18 audit remains historical.

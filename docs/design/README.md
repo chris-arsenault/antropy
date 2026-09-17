@@ -1,5 +1,10 @@
 # Current design and work order
 
+**September 17, 2026: bound body material.** The [v20 correction](../bound-material.md)
+preserves chemical identity through construction, repair, division and death, removing the
+compulsory #186 return. It retains paid assembly/repair and the funded-capability model.
+Its bounded checks do not establish a changed long-run abundance distribution or food web.
+
 **September 17, 2026: physical coupling correction.** The
 [v19 correction](../physical-coupling-correction.md) addresses the audited body/repair scaling,
 absolute birth reserves, empty-slot refit delay and motor effort cost. It also corrects the

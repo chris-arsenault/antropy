@@ -19,7 +19,12 @@ fn world() -> World {
 
 fn value(cell: &Cell, w: &World) -> f64 {
     cell.energy
-        + cell.mass() * w.chemistry.properties[w.chemistry.decomposition].potential
+        + cell
+            .bound_material
+            .iter()
+            .zip(&w.chemistry.properties)
+            .map(|(q, p)| q * p.potential)
+            .sum::<f64>()
         + cell
             .inventory
             .iter()
@@ -29,13 +34,13 @@ fn value(cell: &Cell, w: &World) -> f64 {
 }
 
 #[test]
-fn repair_tracks_funded_mass_and_closes_uphill_and_downhill_accounts() {
+fn repair_tracks_funded_mass_and_preserves_mixed_material_value() {
     let w = world();
     for species in [0, 240, w.chemistry.decomposition] {
         let mut expense: Option<f64> = None;
         for scale in [0.25, 1., 4.] {
             let mut cell = w.cells[0].clone();
-            cell.body = cell.body.map(|q| q * scale);
+            cell.set_fixture_body(cell.body.map(|q| q * scale));
             cell.inventory.fill(0.);
             cell.inventory.set(species, 0.4 * scale);
             cell.energy = cell.energy_capacity(&w.config);
@@ -68,7 +73,7 @@ fn smaller_bodies_and_storage_can_divide_with_capacity_scaled_reserves() {
         g.chromosomes[0].physical[0] = scale.ln() as f32;
         g.chromosomes[0].physical[2] = storage - 1.;
         g.compile(&w.config, &w.chemistry);
-        w.cells[0].body = g.compiled.as_ref().unwrap().body.map(|q| 2. * q);
+        w.cells[0].set_fixture_body(g.compiled.as_ref().unwrap().body.map(|q| 2. * q));
         let (material, energy, cost) = accounting::division_requirements(&w.cells[0], &w.config);
         assert!(material < w.cells[0].capacity(&w.config));
         assert!(energy < w.cells[0].energy_capacity(&w.config));
@@ -112,7 +117,7 @@ fn small_body_growth_protects_a_fraction_of_its_own_storage() {
     g.compile(&w.config, &w.chemistry);
     let g = g.compiled.as_ref().unwrap();
     let cell = &mut w.cells[0];
-    cell.body = g.body;
+    cell.set_fixture_body(g.body);
     cell.inventory.fill(0.);
     cell.inventory
         .set(w.chemistry.decomposition, cell.capacity(&w.config) * 0.5);
@@ -169,6 +174,7 @@ fn unfunded_slot_cannot_delay_paid_refit_or_grant_material() {
     let w = world();
     let mut a = w.cells[0].clone();
     a.body[4] = 0.;
+    a.set_fixture_body(a.body);
     a.energy = 1.;
     let mut g = w.genomes[&1].clone();
     g.chromosomes[0].chemistry.transporters[0].x += 1.;

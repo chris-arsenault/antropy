@@ -7,12 +7,7 @@ use crate::{
 pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
     let row = crate::footprint::sites(cell, &w.config, &w.field);
     for s in 0..256 {
-        let q = cell.inventory[s]
-            + if s == w.chemistry.decomposition {
-                cell.mass()
-            } else {
-                0.
-            };
+        let q = cell.inventory[s] + cell.bound_material[s];
         for &(node, weight) in &row {
             let loss = w.field.add(node, s, q * weight, &w.chemistry);
             w.ledger.rounding(loss, s, &w.chemistry);
@@ -55,6 +50,7 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
     cell.born = w.tick;
     cell.generation += 1;
     cell.body = cell.body.map(|q| q * 0.5);
+    cell.bound_material.scale(0.5);
     cell.inventory = cell.inventory.half();
     cell.energy *= 0.5;
     cell.brain = controller::State::default();
@@ -143,6 +139,7 @@ pub fn reproduce(w: &mut World) {
             w.cells.push(b);
         } else {
             cell.body = cell.body.map(|q| q * 0.5);
+            cell.bound_material.scale(0.5);
             cell.inventory.scale(0.5);
             cell.energy *= 0.5;
             w.cells.push(cell);

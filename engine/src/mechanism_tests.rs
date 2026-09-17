@@ -70,6 +70,7 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
         cell.inventory.fill(0.);
         cell.action.transport = [1.; 4];
         cell.body[7..11].fill(10.);
+        cell.set_fixture_body(cell.body);
         cell.energy = 1.;
     }
     let mut b = a.clone();
@@ -189,7 +190,7 @@ fn optional_selfing_and_budding_keep_funding_and_parentage() {
     let mut w = World::new(101, c).unwrap();
     let original: Vec<_> = w.cells.iter().map(|c| c.id).collect();
     for cell in &mut w.cells {
-        cell.body = cell.body.map(|q| q * 2.);
+        cell.set_fixture_body(cell.body.map(|q| q * 2.));
         cell.energy = 1.;
         cell.inventory.set(w.config.source_species[0], 1.);
     }
@@ -216,7 +217,7 @@ fn newborn_receptors_do_not_get_a_false_temporal_spike() {
     let compiled = g.compiled.as_ref().unwrap();
     let mut field = crate::field::Field::new(24., 24., 2.);
     field.deposit(6., 6., c.source_species[0], 10., &chemistry);
-    let mut cell = Cell::new(1, 1, compiled, &c, 6., 6., 0.);
+    let mut cell = Cell::new(1, 1, compiled, &c, &chemistry, [6., 6.], 0.);
     sensing::initialize(&mut cell, compiled, &c, &field);
     sensing::observe(&mut cell, compiled, compiled, &c, &field);
     for i in [1, 5, 9, 13] {

@@ -65,6 +65,37 @@ impl Inventory {
             material: self.material * 0.5,
         }
     }
+    /// Move a proportional mixture without changing chemical identity.
+    pub fn transfer_to(&mut self, other: &mut Self, amount: f64) {
+        if amount <= 0. || self.material <= 0. {
+            return;
+        }
+        let amount = amount.min(self.material);
+        let fraction = amount / self.material;
+        for (donor, recipient) in self.amounts.iter_mut().zip(&mut other.amounts) {
+            let moved = *donor * fraction;
+            *donor -= moved;
+            *recipient += moved;
+        }
+        self.material -= amount;
+        other.material += amount;
+    }
+    /// Exchange equal amounts from the two frozen mixtures; returned material cannot
+    /// supply replacement in the same operation.
+    pub fn exchange_with(&mut self, other: &mut Self, amount: f64) {
+        let amount = amount.min(self.material).min(other.material);
+        if amount <= 0. {
+            return;
+        }
+        let a = amount / self.material;
+        let b = amount / other.material;
+        for (left, right) in self.amounts.iter_mut().zip(&mut other.amounts) {
+            let out = *left * a;
+            let back = *right * b;
+            *left = (*left - out) + back;
+            *right = (*right - back) + out;
+        }
+    }
     pub fn validate(&self) -> Result<(), String> {
         if self.amounts.len() != 256
             || self.amounts.iter().any(|q| !q.is_finite() || *q < 0.)

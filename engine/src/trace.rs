@@ -56,7 +56,8 @@ mod tests {
     #[test]
     fn observers_preserve_physics_and_capture_descendants_and_reaction_edges() {
         let mut observed = crate::diagnostics::nutrition(0.8, 2., true, false);
-        observed.cells[0].body = observed.cells[0].body.map(|q| q * 2.);
+        let body = observed.cells[0].body.map(|q| q * 2.);
+        observed.cells[0].set_fixture_body(body);
         observed.cells[0].energy = 1.;
         crate::diagnostics::initialize(&mut observed);
         let mut control = observed.clone();

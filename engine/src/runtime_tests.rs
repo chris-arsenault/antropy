@@ -73,7 +73,7 @@ fn birth_splits_installed_material_without_expressing_the_new_target() {
     w.next_genome = 3;
     let cell = &mut w.cells[0];
     cell.genome = 2;
-    cell.body = cell.body.map(|q| q * 2.);
+    cell.set_fixture_body(cell.body.map(|q| q * 2.));
     cell.energy = 1.;
     cell.contacts = [1.; 4];
     w.ancestry[0].genome = 2;

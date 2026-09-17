@@ -167,6 +167,7 @@ export interface CellState {
   heading: number;
   body: number[];
   inventory: { amounts: number[]; material: number };
+  boundMaterial: { amounts: number[]; material: number };
   energy: number;
   damage: number;
   inputs: number[];

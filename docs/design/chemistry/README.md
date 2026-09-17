@@ -2,8 +2,9 @@
 
 Status: fresh production World implemented September 15, with environmental chemistry added
 September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
-owns the current artificial laws and checkpoint v19. The [physical coupling correction](../../physical-coupling-correction.md)
-records the current biological costs. The [correction plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign)
+owns the current artificial laws and checkpoint v20. [Bound material](../../bound-material.md)
+preserves chemical identity through the body cycle; the [physical coupling correction](../../physical-coupling-correction.md)
+records the retained mass/capacity/motor costs. The [correction plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign)
 records current verification. Historical [source evidence](mobile-source-results.md) records medium-driven reservoir
 motion, transformed release and short calibration. [Environmental evidence](environmental-results.md) records weathering,
 shelter, short opportunities and the overnight investigation; [rebuild evidence](rebuild-results.md)

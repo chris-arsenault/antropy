@@ -3,6 +3,8 @@ mod abi;
 pub mod accounting;
 pub mod ancestry;
 #[cfg(test)]
+mod bound_material_tests;
+#[cfg(test)]
 mod boundary_tests;
 mod catalog;
 pub mod census;

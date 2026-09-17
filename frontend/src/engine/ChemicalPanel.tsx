@@ -127,7 +127,7 @@ function ChemicalProperties({
       {!listed && <p>This ID is outside the top 12 dissolved chemicals; it may be absent.</p>}
       <p>
         {definition.config.sourceSpecies.includes(selected) ? "Included in source mixtures. " : ""}
-        {definition.chemistry.decomposition === selected ? "Decomposition product. " : ""}
+        {definition.chemistry.decomposition === selected ? "Initial founder body material. " : ""}
         Potential is stored chemical energy, not energy a cell can necessarily harvest.
       </p>
     </details>

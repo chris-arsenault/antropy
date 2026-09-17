@@ -2,11 +2,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { loadEngine, captureEngine } from "./engine";
 import { measureOperating, measureStorage } from "./performance";
 import { openLedger, recordRun } from "../lib/ledger";
+import { type Engine } from "../../src/engine/client";
 
 /** Fixed registered 48/2000/2000-growth workloads; no horizon expansion. */
-export async function runCapacity(output: string) {
+export async function runCapacity(output: string, supplied?: Engine) {
   mkdirSync(output);
-  const engine = await loadEngine(),
+  const engine = supplied ?? (await loadEngine()),
     wasmDigest = captureEngine(output, engine),
     results: unknown[] = [],
     database = openLedger();

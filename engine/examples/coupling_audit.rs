@@ -12,8 +12,8 @@ use serde_json::{Value, json};
 
 fn cell(w: &World, scale: f64) -> Cell {
     let g = w.genomes[&1].compiled.as_ref().unwrap();
-    let mut c = Cell::new(1, 1, g, &w.config, 12., 12., 0.);
-    c.body = c.body.map(|q| q * scale);
+    let mut c = Cell::new(1, 1, g, &w.config, &w.chemistry, [12., 12.], 0.);
+    c.set_fixture_body(c.body.map(|q| q * scale));
     c.inventory.fill(0.);
     c.inventory.set(w.chemistry.decomposition, 0.4 * scale);
     c.energy = c.energy_capacity(&w.config);
@@ -49,6 +49,7 @@ fn motors(w: &World) -> Vec<Value> {
         .map(|scale| {
             let mut c = reference.clone();
             c.body[1] *= scale;
+            c.set_fixture_body(c.body);
             let (maximum, power) = movement::motor_limits(&c, &w.config, 1.);
             let effort = target_speed / maximum;
             c.action.swim = effort;
@@ -76,8 +77,9 @@ fn reactions(w: &World) -> Vec<Value> {
         g.compile(&w.config, &w.chemistry);
         for accumulated in [false, true] {
             let compiled = g.compiled.as_ref().unwrap();
-            let mut c = Cell::new(1, 1, compiled, &w.config, 12., 12., 0.);
+            let mut c = Cell::new(1, 1, compiled, &w.config, &w.chemistry, [12., 12.], 0.);
             c.body[12..].fill(0.);
+            c.set_fixture_body(c.body);
             c.inventory.fill(0.);
             c.inventory.set(0, 0.4);
             c.inventory
@@ -146,8 +148,8 @@ fn stress(w: &World) -> Vec<Value> {
         g.compile(&w.config, &w.chemistry);
         for scale in [0.25, 1., 4.] {
             let compiled = g.compiled.as_ref().unwrap();
-            let mut c = Cell::new(1, 1, compiled, &w.config, 12., 12., 0.);
-            c.body = c.body.map(|q| q * scale);
+            let mut c = Cell::new(1, 1, compiled, &w.config, &w.chemistry, [12., 12.], 0.);
+            c.set_fixture_body(c.body.map(|q| q * scale));
             c.inventory.fill(0.);
             c.inventory.set(120, 0.4 * scale);
             let load = sensing::stress_load(&c, compiled, &w.config, &w.field, &w.chemistry);

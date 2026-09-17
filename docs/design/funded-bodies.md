@@ -63,14 +63,13 @@ Unary reactions preserve scalar material and change identity. Downhill conversio
 per unit that changes identity and vanishes continuously for an idle offset. Enzymes share
 starting substrate and cannot consume each other's new products in the same phase. Overflow is heat.
 
-Every internal species can become generic biomass. Assembly consumes matter proportionally,
-pays 0.5 work per unit plus any uphill potential gap/0.8, and dissipates excess input potential.
-There is no privileged biomass ingredient or free catabolic reserve. Generic body potential equals
-the selected decomposition species' potential. Repair replaces material and pays additional work
-proportional to the damage fraction repaired times total installed body mass.
-Death returns internal species unchanged, converts structure to the decomposition species and
-dissipates remaining usable energy. Death-material totals are throughput, not another sink.
-See [selected equations](chemistry/numerical-engine.md) and [closed-cycle tests](chemistry/numerical-results.md).
+Every internal species can fund generic biomass. Assembly transfers matter proportionally into
+the bound mixture and pays 0.5 work per unit. There is no privileged biomass ingredient or free
+catabolic reserve. Bound material retains chemical identity and reference value. Repair exchanges
+equal amounts of the frozen free and bound mixtures and pays work proportional to the repaired
+damage fraction times total installed body mass. Bound mass always equals total funded stock.
+Death returns both mixtures unchanged and dissipates remaining usable energy. Death-material
+totals are throughput, not another sink. See [bound-material rules and checks](../bound-material.md).
 
 The [v19 correction](../physical-coupling-correction.md) specifies capacity-based growth and
 daughter reserves. Division retains enough work for both actual half-bodies' initial upkeep
@@ -118,5 +117,5 @@ among at most four discrete species. Neural effort can reverse any transporter. 
 Default behavioral mutation probability/scale is 0.0015/0.08; physical and chemical alleles use
 0.1/0.12. Weights clamp to [-16,16], plasticity to [-1,1],
 investments to [-3,3], coordinates to reflected [0,15] and offsets to [-15,15].
-No score selects parents or filters mutants. Checkpoint v19 preserves complete allele and actual-state
+No score selects parents or filters mutants. Checkpoint v20 preserves complete allele and actual-state
 distinctions; unavailable pruned genotype payloads remain labeled provenance.

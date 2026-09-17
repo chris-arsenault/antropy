@@ -3,8 +3,10 @@ import { createHash } from "node:crypto";
 import { Engine } from "../../src/engine/client";
 const loaded = new WeakMap<Engine, Uint8Array<ArrayBuffer>>();
 
-export async function loadEngine() {
-  const bytes = readFileSync(new URL("../../public/antropy-engine.wasm", import.meta.url));
+export async function loadEngine(
+  path = new URL("../../public/antropy-engine.wasm", import.meta.url)
+) {
+  const bytes = readFileSync(path);
   const source = new Uint8Array(bytes);
   const engine = await Engine.load(source);
   loaded.set(engine, source);
