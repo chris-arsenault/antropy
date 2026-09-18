@@ -1,5 +1,37 @@
 # Current design and work order
 
+**Canonical mathematical plan:** [transformation algebra and runtime integration](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
+Sulion root `14120639-64cd-4840-b2d4-734e0aa4e123`. A0–A5 adopt the white paper's unresolved
+work and the former M6 human-review obligation. The redundant M6 branch is retired; prior
+v21/v22 evidence remains historical. Environmental plans and their review gates remain separate.
+
+**September 18, 2026: exact discrete chemical actions are implemented in v23.** The
+[canonical plan](../../MATHEMATICAL-SYMMETRY-PLAN.md#a0-execution--bounded-permutation-algebra)
+selects `(S16 × S16) semidirect C2`: bounded coordinate permutations and axis exchange.
+Enzymes retain five parameters and compile mixtures of at most eight exact actions. Mixtures
+are irreversible kinetic operators, not group elements. Ordinary enzymes and environmental
+conversion share the action algebra; recognition, funded installation, material/work accounts
+and the compiler retain their common boundaries. The [white paper](chemistry/transformation-algebra.md)
+remains the design/evidence contract. A0–A4 pass bounded verification; A5 human motion review
+remains pending. Startup measures376ticks/s versus385 before; saturated capacity remains
+within1% of baseline and retains its below30ticks/s limit at2,000cells. These measurements
+do not establish long-run abundance, recycling or endurance.
+
+**September 18, 2026: complete the omitted enzyme transformation.** The
+[correction and omission audit](../symmetry-completion-audit.md) adds inherited rotation,
+paid angular refitting and a shared founder translation that preserves separate food outputs.
+Physical checkpoint v22 rejects earlier saves. The earlier symmetry plan's unchanged-founder
+exclusion did not fulfill the user's intended enzyme change; its results remain v21 evidence.
+
+**September 18, 2026: mathematical symmetry correction.** The
+[executed plan](../../MATHEMATICAL-SYMMETRY-PLAN.md) corrects geographic direction bias,
+chemical distance/product costs, duplicate weathering edges, work/refit allocation and mutation
+direction. That stage ran the shared operators under physical checkpoint v21.
+Default startup measures399ticks/s versus410 before; saturated capacity remains within2% of
+baseline, with its existing below30ticks/s limits at2,000cells. Scalar mutation, funded bodies,
+full mesh2 and borrowed worker rendering remain. Human motion review is pending. These bounded
+checks do not establish waste recycling, sustained diversity or long-run browser endurance.
+
 **September 17, 2026: bound body material.** The [v20 correction](../bound-material.md)
 preserves chemical identity through construction, repair, division and death, removing the
 compulsory #186 return. It retains paid assembly/repair and the funded-capability model.
@@ -127,6 +159,7 @@ shares. See the [corrected analysis](../analysis-correction.md) and [evidence](b
 | Document | Owns |
 | --- | --- |
 | [Computational foundation](chemistry/computational-foundation.md) | Governing mathematical design, composed manifold operations and cost-first selection |
+| [Transformation algebra white paper](chemistry/transformation-algebra.md) | Group-theoretic direction, finite-state constraints and evidence contract; selected v23 implementation tracked in the canonical plan |
 | [Digital chemistry](chemistry/README.md) | Chemical identity, fixed machinery, implementation records and replacement decisions |
 | [Sparse spatial ecology](spatial-ecology.md) | Implemented world hypothesis, movement retuning, spatial populations, multiscale observation and handoff |
 | [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
@@ -158,7 +191,7 @@ not biological roles. Haploid clonal fission, mutation and paid inheritable plas
 
 The controller has 39 inputs, 24 recurrent units and nine outputs. Fifteen funded stocks support
 four receptors, four transporters and four enzymes plus core, motor and storage. Physical
-checkpoints use v18; the outer observation package remains v11.
+checkpoints use v23; the outer observation package remains v11.
 Generic stress, compatibility, repair and impedance replace named toxin/defense/
 matrix pathways. Source zones and epochs remain selectable. Disturbance and typed machinery
 transfer are experimental options, disabled by default. Light input and binding remain deferred.
@@ -178,10 +211,11 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
-Correct the mathematical composition of the source operators and audit the environmental
-extension against the same foundation. The user requested the
-[default-seed observation](../default-seed-cycles-study.md) before that correction; it is complete.
-The
+The source/environmental repair, v21/v22 geometric corrections and selected v23 finite action
+are implemented. The [canonical math plan](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order)
+records A0–A4 evidence and owns the pending A5 human motion gate and current operating limits.
+The [default-seed observation](../default-seed-cycles-study.md)
+remains positive historical evidence under its original rules. The
 [source plan](../../MOBILE-SOURCES-PLAN.md) supplies short calibration; the
 [environmental plan](../../ENVIRONMENTAL-ECOLOGY-PLAN.md) retains its pending human gate.
 Interpret resource flows and paid returns before inferring adaptation. Reservoir movement does

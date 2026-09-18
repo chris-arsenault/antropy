@@ -1,7 +1,9 @@
 # Paid refitting and installed machinery
 
 The [fresh composed runtime](composed-runtime.md) implements paid continuous refitting in
-physical checkpoint v20. The September14 measurements below preserve the reason to retain
+physical checkpoint v23. Enzyme parameters now describe mixtures of exact finite chemical
+actions; refitting follows a funded path through those coefficients, not an interpolated
+group element. The September14 measurements below preserve the reason to retain
 installed function; their whole-slot v11 replacement law is historical.
 
 ## Current installed owner
@@ -12,10 +14,13 @@ from actual coordinates and their immutable compiled operators, including membra
 No target change, birth or contact transfer grants replacement function.
 
 Paid refitting charges constructionEnergy × affected actual stock × coordinate distance moved.
-The largest funded slot's Manhattan distance advances at most .25 units/model-second, subject to work
-above the full interval reserve. Partial changes persist and change function continuously.
-Zero-stock slots contribute neither cost nor scheduling distance. When only empty slots differ,
-their instructions can finish without work; constructing functioning stock still costs material/work.
+Each funded slot requests at most .25 units/model-second. Distance is Euclidean for a coordinate
+pair; an enzyme sums its center and offset-vector edit lengths plus recognition radius times
+the shortest angular edit in radians. Angular interpolation wraps through the circle's seam.
+Shared work above the full
+interval reserve funds all requests proportionally. Partial changes persist and change function
+continuously. Zero-stock slots can finish without work while funded slots remain partial;
+constructing functioning stock still costs material/work.
 Only changed slots recompile; completed slots borrow matching target coefficients. Unaffected
 allocations remain shared. Body material is conserved and paid work dissipates. Daughters inherit
 the actual intermediate installation, stock and damage; private contact/controller state resets.

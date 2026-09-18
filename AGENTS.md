@@ -25,7 +25,20 @@ writing it in vector notation.
   mutation laws for controllers, bodies, enzymes or transporters. Rare large changes should
   follow from that shared law rather than a special waste-consumer mutation path.
 
-Current scope: correct the microclimate/ecology additions after the completed mutation correction.
+Current mathematical direction: the [transformation algebra white paper](docs/design/chemistry/transformation-algebra.md)
+records the group-theoretic requirement and its completion evidence. Physical v23 implements
+the selected finite action `(S16 × S16) semidirect C2` on actual discrete identities. Enzymes
+compile smooth mixtures of at most eight exact actions; these irreversible mixtures are not
+group elements. D4 is the geometry-preserving subgroup, not the whole catalytic repertoire.
+The canonical plan's A0 derivation and A1–A4 evidence own the selected law and measured limits.
+Pre-projection composition, rotated fixtures or cost corrections alone cannot justify completion.
+The [enzyme correction and omission audit](docs/symmetry-completion-audit.md) retains prior evidence.
+Use the single [canonical mathematical plan](MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
+root `14120639-64cd-4840-b2d4-734e0aa4e123`, phases A0–A5. Old M0–M6 instructions are
+historical; M6 human review transfers to A5 without a pass. Keep environmental plans separate.
+Do not replace a requested transformation change with a cost-only correction, or treat a
+founder-preservation clause authored in a plan as permission to omit the user's requirement.
+Trace completion claims back to the request, including defaults and ordinary live consumers.
 Preserve the established mathematical foundation. The seed27 run is a positive evolutionary
 result whose observations remain useful after the microclimate correction; explaining every
 phenotype's advantage is not a prerequisite for proceeding. Retain open questions in the
@@ -49,7 +62,35 @@ phenotype's advantage is not a prerequisite for proceeding. Retain open question
 
 ## Governing mathematical direction
 
-**Bound material, September 17, 2026.** Checkpoint v20 is current. Each cell owns a chemical
+**Exact chemical actions, September 18, 2026.** Physical checkpoint v23 replaces reflected
+product projection with exact bounded interval permutations and quarter turns. Existing five
+enzyme parameters select their continuous kinetic mixture; orientation no longer means a
+projected arbitrary-angle rigid rotation. Weathering uses adjacent coordinate exchanges from
+the same group with its existing local-medium rates. Ordinary reactions, atlas and economy
+use one compiler; inheritance preserves installed identity and paid refitting. Mutation
+constants, mesh2, material accounts and borrowed rendering remain unchanged. The
+[canonical results](MATHEMATICAL-SYMMETRY-PLAN.md#a4-results) measure startup376ticks/s and
+saturated capacity43.54/21.38/16.03ticks/s. The latter two remain below30ticks/s; matching
+baseline does not meet that target. A5 owns pending human motion review. Old saves fail
+explicitly; no compatibility adapter or alternative economy is added.
+
+**Enzyme transformations, September 18, 2026.** Checkpoint v22 adds inherited rotation to
+the compiled reflected translation map, periodic heavy-tail angle mutation and paid angular
+refitting. Founder enzymes share one midpoint-derived displacement; export transporters follow
+their separate product centers. They no longer individually target the same chemical.
+The [omission audit](docs/symmetry-completion-audit.md) owns validation and remaining limitations.
+
+**Shared transformations, September 18, 2026.** That stage introduced checkpoint v21 and rejected older
+physical saves. Geographic drift uses Euclidean magnitude. Chemical recognition/refit use one
+Euclidean metric; catalytic attenuation prices compiled reflected products. Weathering gives each
+distinct adjacent destination one rate. Consuming reactions share frozen work before donor allocation;
+productive reactions cannot be vetoed by an unfunded consuming request. Refit slots advance independently
+subject to shared work. Chemical mutation uses isotropic vector events with preserved heavy-tail
+magnitudes and event opportunities; scalar neural/body mutation is unchanged. No controls, field
+resolution or observation ownership changed. The [plan](MATHEMATICAL-SYMMETRY-PLAN.md) owns
+matched costs and retained asymmetries; human motion acceptance remains pending.
+
+**Bound material, September 17, 2026.** That stage introduced checkpoint v20. Each cell owns a chemical
 mixture whose mass funds its fifteen body stocks. Growth transfers inventory identity into this
 mixture; repair exchanges frozen mixtures; division splits it and death returns it unchanged.
 Assembly/repair pay work without chemical conversion. The [bound-material record](docs/bound-material.md)
@@ -156,7 +197,7 @@ sequence records implementation and its human review gate; [plan closeout](docs/
 
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
 The active contract is 39 inputs, 24 recurrent units, nine outputs, fifteen funded stocks,
-four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v18.
+four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v23.
 [Digital chemistry](docs/design/chemistry/README.md) replaces A/B processing, named toxins,
 matrix binding, automatic catabolism, sharing, prey yield and the carbon/oxygen cycle.
 A persisted smooth 16 × 16 chemical manifold supplies potential, diffusion, impedance and stress.
@@ -219,7 +260,7 @@ ledger preserves named measurements, and a report a study document links to is c
 `docs/evidence/`.
 
 The founder retains construction feedstock until storage is nearly full and has a membrane
-compatible with its main retained metabolic product. These are mutable starting alleles, not
+centered between its two initial metabolic product centers. These are mutable starting alleles, not
 physical exemptions. [Numerical probes](docs/design/chemistry/numerical-results.md) establish supplied
 funded reproduction and empty-source exhaustion; they do not establish sustained diversity or adaptation.
 

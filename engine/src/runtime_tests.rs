@@ -68,11 +68,19 @@ fn birth_splits_installed_material_without_expressing_the_new_target() {
     g.id = 2;
     g.parent = Some(1);
     g.chromosomes[0].chemistry.enzymes[0].dx += 0.3;
+    g.chromosomes[0].chemistry.enzymes[0].angle = 1.4;
     g.compile(&w.config, &w.chemistry);
     w.genomes.insert(2, g);
     w.next_genome = 3;
     let cell = &mut w.cells[0];
     cell.genome = 2;
+    cell.installed.enzymes[0].angle = 0.37;
+    cell.operators = Some(crate::chemical_operators::Operators::compile(
+        &cell.installed,
+        &w.config,
+        &w.chemistry,
+    ));
+    let inherited_operator = cell.operators.as_ref().unwrap().enzymes[0].clone();
     cell.set_fixture_body(cell.body.map(|q| q * 2.));
     cell.energy = 1.;
     cell.contacts = [1.; 4];
@@ -84,6 +92,10 @@ fn birth_splits_installed_material_without_expressing_the_new_target() {
     assert_eq!(w.cells.len(), 2);
     for cell in &w.cells {
         assert_eq!(cell.installed, installed);
+        assert!(std::sync::Arc::ptr_eq(
+            &inherited_operator,
+            &cell.operators.as_ref().unwrap().enzymes[0],
+        ));
         assert_eq!(cell.body, stock.map(|q| q * 0.5));
         assert_eq!(cell.genome, 2);
         assert_eq!(cell.contacts, [0.; 4]);

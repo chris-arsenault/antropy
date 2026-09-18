@@ -1,6 +1,6 @@
 //! Sparse chemical-space redistribution shared by exposed field and reservoir inventory.
 use crate::{
-    chemical_products::product_neighborhood,
+    chemical_group::neighbor,
     chemical_projection::lanes,
     chemistry::{Chemistry, SPECIES},
 };
@@ -19,8 +19,7 @@ pub struct Operators {
 impl Operators {
     pub fn new(chemistry: &Chemistry) -> Self {
         let destination = std::array::from_fn(|s| {
-            [[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]
-                .map(|offset| product_neighborhood(s, offset)[0].species)
+            [(0, 1), (0, -1), (1, 1), (1, -1)].map(|(axis, direction)| neighbor(s, axis, direction))
         });
         let heat: [[f64; 4]; SPECIES] = std::array::from_fn(|s| {
             destination[s].map(|t| {
@@ -32,7 +31,8 @@ impl Operators {
             std::array::from_fn(|j| {
                 let target = &chemistry.properties[destination[s][j]];
                 // The medium favors stronger interaction; reference value gates unfunded work.
-                let weight = if heat[s][j] > 0. { 0.25 } else { 0. };
+                let unique = !destination[s][..j].contains(&destination[s][j]);
+                let weight = if heat[s][j] > 0. && unique { 0.25 } else { 0. };
                 [
                     weight * (target.interaction[0] - p.interaction[0]),
                     -weight * (target.interaction[1] - p.interaction[1]),

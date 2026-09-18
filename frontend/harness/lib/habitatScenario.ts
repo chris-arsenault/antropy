@@ -26,7 +26,7 @@ function genome(
     ch.chemistry.receptors = Array.from({ length: 4 }, () => coordinate(0));
     ch.chemistry.enzymes = [240, depositProduct, 240, 240].map((species) => {
       const target = coordinate(species);
-      return { ...coordinate(0), dx: target.x, dy: target.y };
+      return { ...coordinate(0), dx: target.x, dy: target.y, angle: 0 };
     });
     ch.chemistry.transporters = [0, 0, exported, 240].map(coordinate);
   }

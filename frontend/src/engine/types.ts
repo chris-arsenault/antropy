@@ -137,7 +137,7 @@ export interface Target {
 export interface Machinery {
   receptors: Target[];
   transporters: Target[];
-  enzymes: (Target & { dx: number; dy: number })[];
+  enzymes: (Target & { dx: number; dy: number; angle: number })[];
   membrane: Target;
 }
 export interface Genotype {

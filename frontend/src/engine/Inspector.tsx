@@ -188,7 +188,9 @@ function Chemistry({
         n(Math.abs(2 * c.action.transport[i - 4] - 1))
       );
     const e = genes.enzymes[i - 8];
-    return "offset " + e.dx + ", " + e.dy;
+    return (
+      "offset " + n(e.dx) + ", " + n(e.dy) + " · orientation " + n((e.angle * 180) / Math.PI) + "°"
+    );
   };
   const species = c.inventory.amounts
     .map((inside, s) => ({ inside, s, outside: p.local![s] }))

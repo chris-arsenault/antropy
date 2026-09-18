@@ -54,6 +54,7 @@ export function detoxGenome(enabled: boolean, context: ChemicalContext): Genotyp
       ...from,
       dx: enabled ? to.x - from.x : 0,
       dy: enabled ? to.y - from.y : 0,
+      angle: 0,
     };
   }
   return g;

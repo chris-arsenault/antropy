@@ -79,6 +79,7 @@ pub fn retarget(g: &mut crate::genetics::Genotype, slot: usize, from: usize, to:
             y: a.y,
             dx: b.x - a.x,
             dy: b.y - a.y,
+            angle: 0.,
         };
     }
 }

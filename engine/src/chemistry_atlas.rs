@@ -99,11 +99,11 @@ fn operator_examples(c: &Chemistry) -> Result<Value, String> {
     let config = crate::config::Config::default();
     let examples:Vec<_> = [([7.,7.],[0.,0.]),([7.5,7.5],[0.25,-0.75]),([14.5,14.5],[1.,1.])].into_iter().map(|(point,offset)| {
         let mut machinery=crate::genetics::Machinery::seed(c,&c.source_species());
-        machinery.enzymes[0]=crate::genetics::Enzyme{x:point[0],y:point[1],dx:offset[0],dy:offset[1]};
+        machinery.enzymes[0]=crate::genetics::Enzyme{x:point[0],y:point[1],dx:offset[0],dy:offset[1],angle:std::f64::consts::FRAC_PI_4};
         let op=crate::chemical_operators::Operators::compile(&machinery,&config,c);
         json!({"parameters":machinery,"membraneProfile":op.profile,
             "representativeEngagement":op.enzymes[0].engagement.iter().map(|a|json!({"species":a.species,"weight":a.value})).collect::<Vec<_>>(),
-            "representativeEnzyme":op.enzymes[0].conversions.iter().map(|e|json!({"substrate":e.substrate,"binding":e.binding,"work":e.work,"heat":e.heat,"products":e.products.iter().map(|p|json!({"species":p.species,"weight":p.weight})).collect::<Vec<_>>() })).collect::<Vec<_>>()})
+            "representativeEnzyme":op.enzymes[0].conversions.iter().map(|e|json!({"substrate":e.substrate,"binding":e.binding,"catalytic":e.catalytic,"work":e.work,"heat":e.heat,"products":e.products.iter().map(|p|json!({"species":p.species,"weight":p.weight})).collect::<Vec<_>>() })).collect::<Vec<_>>()})
     }).collect();
     Ok(
         json!({"version":1,"scope":"Production World compiler; installed coefficients determine live recognition, conversion and body profiles","examples":examples}),

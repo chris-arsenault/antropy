@@ -8,6 +8,11 @@ mod bound_material_tests;
 mod boundary_tests;
 mod catalog;
 pub mod census;
+#[cfg(test)]
+mod chemical_equivariance_tests;
+pub mod chemical_group;
+#[cfg(test)]
+mod chemical_group_tests;
 mod chemical_observation;
 pub mod chemical_operators;
 pub mod chemical_products;
@@ -26,6 +31,8 @@ mod coupling_tests;
 pub mod diagnostics;
 pub mod economy;
 mod economy_report;
+#[cfg(test)]
+mod enzyme_transform_tests;
 mod exchange_vector;
 pub mod field;
 mod field_activity;
@@ -67,6 +74,8 @@ mod startup_probe;
 mod storage_diagnostics;
 mod study_commands;
 mod study_trace;
+#[cfg(test)]
+mod symmetry_tests;
 mod trace;
 pub mod transport;
 pub mod weathering;

@@ -75,3 +75,26 @@ processes without changing the energy it extracts from each unit of the same tra
 across phenotypes? Could inherited differences in extraction, with explicit costs or tradeoffs,
 support different uses of the same food and leave usable resources for other organisms?
 No efficiency mechanism, energy-account change or mathematical redesign is selected here.
+
+## H3 — Escape from the founder's waste product depends on early evolutionary history
+
+**Raised by:** investigation requested by the user, September 18, 2026.
+**Status:** supported for the measured 20k histories; general reliability remains unresolved.
+
+The symmetry version's larger #186 stock may primarily reflect which metabolic variants
+establish, rather than a new chemical preference for #186. Chemical mutation now consumes a
+different number of shared genetic random draws, changing subsequent neural/body mutations
+despite their unchanged formulas. The same world seed therefore does not pair the same
+genetic opportunities across versions.
+
+The [causal investigation](186-symmetry-causality.md) finds a specific old-run enzyme mutation
+at tick 2960 whose descendants redirect production toward #218. Removing just that inherited
+scalar under the original mathematics increases 20k #186 share from 17.13% to 25.18%; the
+symmetry control is 26.30%. Keeping all new rules unchanged but skipping one initial genetic
+draw gives 37.27%. Alternative pathways remain accessible, and #218 has a measured conditional
+advantage when intracellular #186 inhibits the original enzyme.
+
+These interventions support sensitivity to successful early metabolic branches. They do not
+prove that symmetry has no systematic effect across repeated histories, or that the same
+explanation accounts for every later snapshot. Preserve the distinction between removing the
+forced death-product sink and reliably evolving away from the founder's inherited metabolism.

@@ -1,25 +1,31 @@
 # Composed artificial chemistry runtime
 
-Updated September 17, 2026. This contract governs the fresh implementation under
-[the rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md). It supersedes the removed
+Updated September 18, 2026. This contract governs the fresh implementation under
+[the canonical math plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
 [funded bodies](../funded-bodies.md) and [data ownership](data-ownership.md) remain binding.
 Implementation and acceptance are tracked separately in the plan; this document does
-not claim that performance, opportunity or human motion gates have passed.
+not claim that performance, opportunity or human motion gates have passed. The
+[symmetry correction](../../../MATHEMATICAL-SYMMETRY-PLAN.md) records the v21 laws
+and matched measurements. The [enzyme completion](../../symmetry-completion-audit.md)
+records the v22 correction and its omitted founder scope. V23 replaces projected rigid maps
+with exact finite actions and bounded kinetic mixtures, selected in the
+[A0 derivation](../../../MATHEMATICAL-SYMMETRY-PLAN.md#a0-execution--bounded-permutation-algebra).
+Runtime measurements and human motion review remain separate from implementation.
 
 ## Meaning and owners
 
 This is an artificial material and work system. It has no temperature, entropy,
 electrochemical capacitor, detailed balance or global thermodynamic acceptance solver.
-The 256 discrete chemical IDs inhabit a smooth reflected 16×16 chemical manifold.
+The 256 discrete chemical IDs inhabit a smooth bounded 16×16 chemical manifold.
 Geography is a separate periodic XY plane. U prices material conversions; D controls
 spread; I impedes motion; S creates compatible or incompatible exposure. Two shared
 signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, fifteen funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v18 persists actual installed
+The same worker renders borrowed WASM views. Checkpoint v23 persists actual installed
 coordinates independently of inherited instructions and rejects earlier physical bytes.
 There is no exporter allele or thermal-energy setting in this version.
 
@@ -90,7 +96,10 @@ discrete interpolated footprint, with continuous motion across grid cells and pe
 
 Environmental conversion reuses the two local interaction profiles H, including dissolved
 material, embodied signals and reservoir interfaces. B=H/(1+|H0|+|H1|) bounds the shared response.
-For each reflected adjacent product t of s, compile a=(p0[t]-p0[s], -(p1[t]-p1[s]))/4.
+For each in-bounds adjacent product t of s, compile a=(p0[t]-p0[s], -(p1[t]-p1[s]))/4.
+The edge uses an exact coordinate transposition from the common finite group; outward
+directions select identity and have zero coefficient. Edge rows retain fewer distinct
+neighbors; rates are not renormalized to match interior totals.
 Engagement is max(0,a dot B): the medium favors a product whose attraction/repulsion response
 to it is stronger. There is no constant branch activity. Different mixtures can favor different
 products; neutral mixtures do not convert, and dilution continuously weakens conversion.
@@ -130,16 +139,39 @@ studies describe their original v14/v15 rules and cannot certify this revision.
 Bodies sample centered differences through W. The shared antisymmetric difference and
 identical deposition/sampling cancel an isolated body's own response. Paid propulsion
 uses actual motor stock, damage, drag from body extent, viscosity and impedance. Passive
-response is bounded separately. Local overlap correction supplies body-relative contacts;
+response uses `drift × mobility × f / (1 + hypot(fx,fy))`, shared with reservoirs.
+Local overlap correction supplies body-relative contacts;
 neither movement nor contact resolution credits usable work.
+At exact coincidence, the normalized difference of heading vectors supplies the separation
+direction. Swapping bodies reverses it and rotating both headings rotates it. Identical headings
+give zero correction: no distinguished axis exists. This degenerate tie cannot be continuous
+with every possible approach direction. Ordinary noncoincident contact geometry is unchanged.
 In v19, requested motor work is `power × (swim² + .25 × turn²) × dt`; paid velocity scales
 by `sqrt(paid/requested)`. The same work-rate function prices growth/refit reserves and budgets.
 
 ## Local recognition and paid operators
 
-Recognition uses max(0, 1 − distance²/R²)², initially R=3. Each cell retains four receptor,
-four transporter and four enzyme targets plus a membrane coordinate. Enzyme offsets are
-continuous, reflected at manifold boundaries, with at most four weighted product IDs.
+Recognition uses max(0, 1 − distance²/R²)² with Euclidean distance, initially R=3.
+The kernel samples each existing discrete species once, without edge normalization; corners
+therefore have less total recognition support. Product mixtures instead preserve unit-sum
+material weights. These operators have different roles and need not share normalization.
+Each cell retains four receptor,
+four transporter and four enzyme targets plus a membrane coordinate. Enzymes carry continuous
+recognition center a, displacement d and periodic orientation theta. Exact chemical actions
+belong to `(S16 × S16) semidirect C2`, represented by two 16-entry permutations and an axis
+exchange bit. Bounded interval reflections and axis exchange generate this closed group;
+composition and inverse act exactly on the stored IDs, including boundaries.
+
+The continuous parameters compile a mixture of at most eight such actions. Target b is the
+bounded parameter reflect(a+d). Theta interpolates adjacent quarter-turn orientations; for
+each orientation, interpolate the interval-reflection pivots Q(a)+b, where Q is that
+quarter turn plus a half turn. See the A0 derivation for the full formula. Products undergo
+no clipping, reflection or projection after the exact action. Component maps are bijective;
+the kinetic mixture and funded reaction are irreversible and are not called group elements.
+All product coefficients compile once per changed enzyme; live reactions use sparse rows.
+Founders share d = startupCenter - midpoint(sourceCenters), with theta=0. Their two foods
+therefore have separate product centers; export transporters recognize those centers.
+Startup membrane and initial body composition retain the selected startup center.
 Targets and installed coordinates have separate owners. Immutable compiled arrays are
 shared; refitting refreshes only affected slots. Birth inherits actual installation.
 
@@ -165,11 +197,18 @@ five property rows, retaining six f64 reductions including total material. Exact
 donor demand is handled explicitly. Exchange does not prune material; the extracellular
 numerical floor is applied at field substeps as described above.
 
-Enzymes act constitutively. Recognition, reflected product maps and the pullback of
-product occupancy are compiled once. For offset v, throughput is attenuated by
-1/(1 + |v|²/9). Occupancy includes recognized substrates and their mapped products.
-Common substrates and work are reserved against the frozen mixture before products are
-committed; no product cascades through slot iteration and no profitable slot is selected.
+Enzymes act constitutively. Recognition, finite-action mixtures and the pullback of
+product occupancy are compiled once. Each substrate s has attenuation
+`1/(1 + sum_t(productWeight(t) × distance²(s,t))/R²)`, using actual compiled products
+and the shared affinity radius R. Binding times attenuation is compiled into its catalytic
+coefficient; live conversion performs no new distance calculation. Equivalent conversions have
+equal kinetic cost even when their raw offsets differ. Occupancy still uses binding affinity
+for recognized substrates and mapped products, independently of kinetic attenuation.
+
+Reserve frozen work proportionally across work-consuming requests; productive requests retain
+their full request. Then share each frozen material donor among those funded requests. Newly
+captured work and new products cannot fund the same event. This one-pass allocation can leave
+some reserved work unused when material is scarce; it does not iterate or select a profitable slot.
 
 For reference-value change d, usable work is .8d when d is positive and d/.8 when negative,
 less .05 per unit that actually changes chemical identity. The remainder dissipates.
@@ -195,10 +234,15 @@ work limit repair; returned material cannot fund the same exchange. Death releas
 unchanged. Checkpoint v20 persists and validates bound material; see [the correction](../../bound-material.md).
 Paid refitting
 moves installed coordinates toward inherited coordinates on affected actual stock.
-The greatest positive-stock slot-coordinate distance advances by at most .25 manifold units per model
-second; sufficient work and time finish the refit exactly, preserving unchanged arrays.
-Empty slots neither add cost nor slow the shared schedule; they can finish freely when no funded
-changes remain. Unpaid funded target changes leave installed response intact. Excess usable work dissipates.
+Each funded slot requests at most .25 distance units per model second. Distance is Euclidean
+for recognition/transport/membrane coordinates; enzymes sum recognition-center and offset-vector
+edit lengths plus R times the shortest angular edit in radians. Work is constructionEnergy × stock × requested distance, allocated proportionally
+from available surplus. One distant target cannot delay another slot except through shared work.
+This prices continuous changes to installed parameters, so distinct edit paths with equivalent
+end-product maps may cost differently. It is separate from per-conversion kinetics.
+Empty slots can finish freely without creating stock. Completed slots borrow target compiled
+arrays immediately, even while others remain partial. Unpaid funded target changes leave installed
+response intact. Excess usable work dissipates.
 
 Local division requires funded double body, inventory, work and division cost. Fission
 ends the parent and creates two daughters; budding retains a reduced parent and one

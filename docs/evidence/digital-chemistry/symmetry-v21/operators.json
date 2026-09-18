@@ -1,0 +1,78 @@
+{
+  "accounts": {
+    "compartmentSpeciesConservationMaxError": 0.0,
+    "reactionReferenceAccountMaxError": 2.220446049250313e-16,
+    "reactionReferenceShiftMaxError": 8.881784197001252e-16
+  },
+  "chemistrySeed": 101,
+  "geometry": {
+    "chemicalQuarterTurnMaxErrors": {
+      "products": 0.0,
+      "recognition": 0.0,
+      "weathering": 0.0
+    },
+    "cornerWeatheringDestinations": [
+      16,
+      16,
+      1,
+      1
+    ],
+    "productNormalizationMaxError": 0.0,
+    "uniformMixtureRecognition": {
+      "corner": 4.209876543209877,
+      "interior": 9.444444444444446
+    }
+  },
+  "motion": {
+    "axisSpeed": 0.5,
+    "diagonalRelativeLoss": 0.0,
+    "diagonalSpeed": 0.5,
+    "refitDistanceForUnitEuclideanChange": {
+      "axis": 1.0,
+      "diagonal": 1.0
+    },
+    "refitNote": "Euclidean distances; funded refits are covered by runtime unit tests"
+  },
+  "reflectedCosts": {
+    "rows": [
+      {
+        "attenuation": 0.8999999999999999,
+        "offset": [
+          3.0,
+          0.0
+        ],
+        "products": [
+          [
+            215,
+            1.0
+          ]
+        ],
+        "workPerUnit": -0.33642074369342656
+      },
+      {
+        "attenuation": 0.8999999999999999,
+        "offset": [
+          -1.0,
+          0.0
+        ],
+        "products": [
+          [
+            215,
+            1.0
+          ]
+        ],
+        "workPerUnit": -0.33642074369342656
+      }
+    ],
+    "singleCombinedOffset": 10.0,
+    "substrate": 231,
+    "successiveReflectedOffsets": 14.0
+  },
+  "schemaVersion": 1,
+  "spatial": {
+    "geographicQuarterTurnMaxAmountError": 1.4901161193847656e-8,
+    "nodes": 64,
+    "operatorIntervals": 1
+  },
+  "worldTicksAdvanced": 0
+}

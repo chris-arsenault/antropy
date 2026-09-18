@@ -7,6 +7,9 @@ pub const RANGES: [(f64, f64); 4] = [(0.5, 8.), (0.005, 0.5), (0., 12.), (0., 1.
 pub fn coordinate(s: usize) -> [f64; 2] {
     [(s / 16) as f64, (s % 16) as f64]
 }
+pub fn distance_squared(a: [f64; 2], b: [f64; 2]) -> f64 {
+    (a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)
+}
 pub fn reflect(x: f64) -> f64 {
     let t = x.rem_euclid(30.);
     if t > 15. { 30. - t } else { t }
@@ -17,8 +20,7 @@ pub fn product(s: usize, dx: i8, dy: i8) -> usize {
 }
 pub fn affinity(target: [f64; 2], s: usize, radius: f64) -> f64 {
     let p = coordinate(s);
-    let z =
-        (1. - ((p[0] - target[0]).powi(2) + (p[1] - target[1]).powi(2)) / radius.powi(2)).max(0.);
+    let z = (1. - distance_squared(p, target) / radius.powi(2)).max(0.);
     z * z
 }
 

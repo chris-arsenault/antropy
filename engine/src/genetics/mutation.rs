@@ -26,7 +26,7 @@ impl Gene for f64 {
     }
 }
 
-fn reflected(value: f64, low: f64, high: f64, scale: f64, uniform: f64) -> f64 {
+fn phase(value: f64, low: f64, high: f64, scale: f64, uniform: f64) -> f64 {
     let width = high - low;
     let normalized_scale = NORMAL_ABS_MEDIAN * scale / width;
     let u = uniform.clamp(-1. + f64::EPSILON, 1. - f64::EPSILON);
@@ -34,8 +34,37 @@ fn reflected(value: f64, low: f64, high: f64, scale: f64, uniform: f64) -> f64 {
     // Reduce modulo the reflection period before dividing: even a finite extreme
     // scale or an endpoint draw cannot overflow the heavy-tailed displacement.
     let step = (normalized_scale * u).rem_euclid(2. * denominator) / denominator;
-    let phase = ((value - low) / width + step).rem_euclid(2.);
+    ((value - low) / width + step).rem_euclid(2.)
+}
+
+fn reflected(value: f64, low: f64, high: f64, scale: f64, uniform: f64) -> f64 {
+    let width = high - low;
+    let phase = phase(value, low, high, scale, uniform);
     low + width * (1. - (phase - 1.).abs())
+}
+
+/// The same heavy-tail displacement on a circle instead of a reflected interval.
+pub(crate) fn mutate_angles<'a>(
+    values: impl IntoIterator<Item = &'a mut f64>,
+    rng: &mut Random,
+    rate: f64,
+    scale: f64,
+) -> bool {
+    if rate <= 0. || scale <= 0. {
+        return false;
+    }
+    let mut changed = false;
+    for value in values {
+        if rng.unit() >= rate {
+            continue;
+        }
+        let next = std::f64::consts::TAU
+            * phase(*value, 0., std::f64::consts::TAU, scale, rng.signed()).rem_euclid(1.);
+        let next = crate::genetics::angles::wrap(next);
+        changed |= *value != next;
+        *value = next;
+    }
+    changed
 }
 
 /// `scale` has the same units as the gene. Rate and scale are supplied by the
@@ -69,6 +98,49 @@ pub(crate) fn mutate<'a, T: Gene + 'a>(
     }
     changed
 }
+
+fn event_count(rng: &mut Random, rate: f64) -> usize {
+    let p = rate.clamp(0., 1.);
+    let u = rng.unit();
+    usize::from(u < 2. * p - p * p) + usize::from(u < p * p)
+}
+
+fn vector_step(point: [f64; 2], bounds: [f64; 2], scale: f64, u: f64, angle: f64) -> [f64; 2] {
+    let direction = [angle.cos(), angle.sin()];
+    std::array::from_fn(|i| reflected(point[i], bounds[0], bounds[1], scale * direction[i], u))
+}
+
+/// Two scalar opportunities become a Binomial(2, rate) number of isotropic
+/// vector events. Each event retains the scalar law's absolute-step distribution.
+pub(crate) fn mutate_pairs<'a>(
+    values: impl IntoIterator<Item = [&'a mut f64; 2]>,
+    rng: &mut Random,
+    rate: f64,
+    scale: f64,
+    low: f64,
+    high: f64,
+) -> bool {
+    if rate <= 0. || scale <= 0. {
+        return false;
+    }
+    let mut changed = false;
+    for [x, y] in values {
+        let original = [*x, *y];
+        let mut point = original;
+        for _ in 0..event_count(rng, rate) {
+            let u = rng.signed();
+            let angle = rng.unit() * std::f64::consts::TAU;
+            point = vector_step(point, [low, high], scale, u, angle);
+        }
+        changed |= original != point;
+        [*x, *y] = point;
+    }
+    changed
+}
+
+#[cfg(test)]
+#[path = "mutation_geometry_tests.rs"]
+mod geometry_tests;
 
 #[cfg(test)]
 mod tests {
@@ -203,6 +275,13 @@ mod tests {
                 installed
             );
             assert_eq!(cell.installed, installed);
+            assert!(
+                child.chromosomes[0]
+                    .chemistry
+                    .enzymes
+                    .iter()
+                    .any(|e| e.angle != 0.)
+            );
             assert_eq!(cell.body, stock.map(|q| q * 0.5));
         }
         let after = w.held();
@@ -215,7 +294,7 @@ mod tests {
     }
 
     #[test]
-    fn default_rates_preserve_per_birth_mutation_opportunities() {
+    fn scalar_rates_preserve_per_coordinate_mutation_opportunities() {
         let c = crate::config::Config::default();
         let g = crate::controller::seed();
         let neural = g.weights.len() + g.plasticity.len();

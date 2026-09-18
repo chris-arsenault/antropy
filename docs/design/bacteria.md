@@ -49,7 +49,7 @@ The default chemistry seed is 101, independent of geography seed. Its physical s
 rule chooses IDs 0 and 80. This bootstrap composition is provisional. Ten percent of initial
 source inventory is dissolved locally, with zero uniform background grant. Forty-eight identical
 mutable founders occupy two separated source neighborhoods, 24 per colony. Their membrane
-matches the primary retained metabolite; the mutable controller exports only near storage
+is centered between the two initial product centers; the mutable controller exports only near storage
 capacity. [Small numerical probes](chemistry/numerical-results.md) support supplied growth and resource exhaustion;
 the integrated capacity check retains 48 founders and tests two 2,000-cell loads.
 Single-site/no-source diagnostic
@@ -123,7 +123,7 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v20 stores complete chemistry, free and bound mixtures, actual stocks and installed coordinates/revision, chemical/behavioral genes,
+Checkpoint v23 stores complete chemistry, free and bound mixtures, actual stocks and installed coordinates/orientation/revision, chemical/behavioral genes,
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs

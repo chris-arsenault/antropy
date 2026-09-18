@@ -6,6 +6,9 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+mod angle_tests;
+pub mod angles;
 pub(crate) mod mutation;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -36,6 +39,8 @@ pub struct Enzyme {
     pub y: f64,
     pub dx: f64,
     pub dy: f64,
+    /// Periodic orientation coordinate mixing adjacent exact square actions.
+    pub angle: f64,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -83,7 +88,12 @@ impl Machinery {
             .flatten()
             .any(|v| !v.is_finite() || !(0. ..=15.).contains(&v))
             || self.enzymes.iter().any(|e| {
-                !e.dx.is_finite() || !e.dy.is_finite() || e.dx.abs() > 15. || e.dy.abs() > 15.
+                !e.dx.is_finite()
+                    || !e.dy.is_finite()
+                    || e.dx.abs() > 15.
+                    || e.dy.abs() > 15.
+                    || !e.angle.is_finite()
+                    || !(-std::f64::consts::PI..std::f64::consts::PI).contains(&e.angle)
             })
         {
             return Err("Invalid installed machinery".into());
@@ -96,6 +106,10 @@ impl Machinery {
             Target::species(*sources.get(1).unwrap_or(&sources[0])),
         ];
         let to = Target::species(chemistry.decomposition);
+        let offset = [
+            to.x - (from[0].x + from[1].x) * 0.5,
+            to.y - (from[0].y + from[1].y) * 0.5,
+        ];
         let stress = Target::species(
             chemistry
                 .properties
@@ -106,7 +120,14 @@ impl Machinery {
         Self {
             receptors: [from[0], from[1], to, stress],
             transporters: std::array::from_fn(|i| {
-                let p = if i < 2 { from[i] } else { to };
+                let p = if i < 2 {
+                    from[i]
+                } else {
+                    Target {
+                        x: chemistry::reflect(from[i - 2].x + offset[0]),
+                        y: chemistry::reflect(from[i - 2].y + offset[1]),
+                    }
+                };
                 Transporter { x: p.x, y: p.y }
             }),
             enzymes: std::array::from_fn(|i| {
@@ -114,8 +135,9 @@ impl Machinery {
                 Enzyme {
                     x: p.x,
                     y: p.y,
-                    dx: to.x - p.x,
-                    dy: to.y - p.y,
+                    dx: offset[0],
+                    dy: offset[1],
+                    angle: 0.,
                 }
             }),
             membrane: to,
@@ -125,15 +147,11 @@ impl Machinery {
         let points = self
             .receptors
             .iter_mut()
-            .flat_map(|p| [&mut p.x, &mut p.y])
-            .chain(
-                self.transporters
-                    .iter_mut()
-                    .flat_map(|p| [&mut p.x, &mut p.y]),
-            )
-            .chain(self.enzymes.iter_mut().flat_map(|p| [&mut p.x, &mut p.y]))
-            .chain([&mut self.membrane.x, &mut self.membrane.y]);
-        let points_changed = mutation::mutate(
+            .map(|p| [&mut p.x, &mut p.y])
+            .chain(self.transporters.iter_mut().map(|p| [&mut p.x, &mut p.y]))
+            .chain(self.enzymes.iter_mut().map(|p| [&mut p.x, &mut p.y]))
+            .chain([[&mut self.membrane.x, &mut self.membrane.y]]);
+        let points_changed = mutation::mutate_pairs(
             points,
             rng,
             c.physical_mutation_rate,
@@ -141,8 +159,8 @@ impl Machinery {
             0.,
             15.,
         );
-        let offsets = self.enzymes.iter_mut().flat_map(|e| [&mut e.dx, &mut e.dy]);
-        let offsets_changed = mutation::mutate(
+        let offsets = self.enzymes.iter_mut().map(|e| [&mut e.dx, &mut e.dy]);
+        let offsets_changed = mutation::mutate_pairs(
             offsets,
             rng,
             c.physical_mutation_rate,
@@ -150,7 +168,13 @@ impl Machinery {
             -15.,
             15.,
         );
-        points_changed || offsets_changed
+        let angles_changed = mutation::mutate_angles(
+            self.enzymes.iter_mut().map(|e| &mut e.angle),
+            rng,
+            c.physical_mutation_rate,
+            c.physical_mutation_scale / c.affinity_radius,
+        );
+        points_changed || offsets_changed || angles_changed
     }
     fn express(a: &Self, b: &Self) -> Self {
         let mean = |x: f64, y: f64| ((x + y) * 0.5) as f32 as f64;
@@ -168,6 +192,7 @@ impl Machinery {
                 y: mean(a.enzymes[i].y, b.enzymes[i].y),
                 dx: mean(a.enzymes[i].dx, b.enzymes[i].dx),
                 dy: mean(a.enzymes[i].dy, b.enzymes[i].dy),
+                angle: angles::mean(a.enzymes[i].angle, b.enzymes[i].angle),
             }),
             membrane: Target {
                 x: mean(a.membrane.x, b.membrane.x),
@@ -360,23 +385,7 @@ impl Genotype {
             if a.physical.iter().any(|x| !x.is_finite() || x.abs() > 3.) {
                 return Err("Invalid physical loci".into());
             }
-            let m = &a.chemistry;
-            let points = m
-                .receptors
-                .iter()
-                .map(|p| p.point())
-                .chain(m.transporters.iter().map(|p| [p.x, p.y]))
-                .chain(m.enzymes.iter().map(|p| [p.x, p.y]))
-                .chain([m.membrane.point()]);
-            if points
-                .flatten()
-                .any(|x| !x.is_finite() || !(0. ..=15.).contains(&x))
-                || m.enzymes.iter().any(|e| {
-                    !e.dx.is_finite() || !e.dy.is_finite() || e.dx.abs() > 15. || e.dy.abs() > 15.
-                })
-            {
-                return Err("Invalid machinery".into());
-            }
+            a.chemistry.validate()?;
         }
         Ok(())
     }

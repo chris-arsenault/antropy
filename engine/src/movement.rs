@@ -24,7 +24,7 @@ pub fn motor_work_rate(body: &[f64; 15], damage: f64, swim: f64, turn: f64, c: &
 pub fn passive(profile: [f64; 2], gradient: [[f64; 2]; 2], mobility: f64, drift: f64) -> [f64; 2] {
     let force: [f64; 2] =
         std::array::from_fn(|k| profile[0] * gradient[k][0] - profile[1] * gradient[k][1]);
-    let bound = drift * mobility / (1. + force[0].abs() + force[1].abs());
+    let bound = drift * mobility / (1. + force[0].hypot(force[1]));
     force.map(|f| bound * f)
 }
 pub fn advance(cells: &mut [Cell], c: &Config, field: &Field, sites: &[Vec<(usize, f64)>]) {
@@ -134,7 +134,16 @@ fn contacts(cells: &mut [Cell], c: &Config) {
         let unit = if length > 0. {
             [d[0] / length, d[1] / length]
         } else {
-            [1., 0.]
+            let direction = [
+                b.heading.cos() - a.heading.cos(),
+                b.heading.sin() - a.heading.sin(),
+            ];
+            let norm = direction[0].hypot(direction[1]);
+            if norm > 1e-12 {
+                direction.map(|v| v / norm)
+            } else {
+                [0.; 2]
+            }
         };
         let correction = ((a.radius(c) + b.radius(c) - length) * 0.25).min(c.dt * 0.5);
         for k in 0..2 {

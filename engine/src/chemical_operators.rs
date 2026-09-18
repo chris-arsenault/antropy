@@ -1,6 +1,6 @@
 //! Immutable local operators. Coordinates select coefficients once, never a reaction search.
 use crate::{
-    chemical_products::{ProductWeight, product_neighborhood},
+    chemical_products::{ProductWeight, Transform},
     chemistry::{self, Affinity, Chemistry},
     config::Config,
     genetics::Machinery,
@@ -12,6 +12,7 @@ pub struct Conversion {
     pub substrate: usize,
     pub products: Vec<ProductWeight>,
     pub binding: f64,
+    pub catalytic: f64,
     pub changed: f64,
     pub work: f64,
     pub heat: f64,
@@ -20,7 +21,6 @@ pub struct Conversion {
 pub struct EnzymeOperator {
     pub conversions: Vec<Conversion>,
     pub engagement: Vec<Affinity>,
-    pub attenuation: f64,
 }
 #[derive(Clone, Debug)]
 pub struct Operators {
@@ -31,10 +31,21 @@ pub struct Operators {
     pub profile: [f64; 2],
 }
 fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> EnzymeOperator {
+    let transform = Transform::new(e);
     let mut occupancy = [0.; 256];
     let mut conversions = Vec::new();
     for a in chemistry::compile_affinity([e.x, e.y], c.affinity_radius) {
-        let products = product_neighborhood(a.species, [e.dx, e.dy]);
+        let products = transform.products(a.species);
+        let displacement: f64 = products
+            .iter()
+            .map(|p| {
+                p.weight
+                    * chemistry::distance_squared(
+                        chemistry::coordinate(a.species),
+                        chemistry::coordinate(p.species),
+                    )
+            })
+            .sum();
         let changed = 1.
             - products
                 .iter()
@@ -58,6 +69,7 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
             substrate: a.species,
             products,
             binding: a.value,
+            catalytic: a.value / (1. + displacement / c.affinity_radius.powi(2)),
             changed,
             work: work - 0.05 * changed,
             heat: heat + 0.05 * changed,
@@ -72,27 +84,44 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
     EnzymeOperator {
         conversions,
         engagement,
-        attenuation: 1. / (1. + (e.dx * e.dx + e.dy * e.dy) / 9.),
     }
 }
 impl Operators {
-    /// A completed paid refit can borrow already compiled target slots; untouched slots stay shared.
-    pub fn complete_refit(&mut self, before: &Machinery, target: &Machinery, compiled: &Self) {
+    /// Completed slots borrow target operators even while other slots remain partially installed.
+    pub fn refit(
+        &mut self,
+        before: &Machinery,
+        after: &Machinery,
+        target: (&Machinery, &Self),
+        c: &Config,
+        chemistry: &Chemistry,
+    ) {
+        let (target, compiled) = target;
+        let mut pending = before.clone();
         for i in 0..4 {
-            if before.receptors[i] != target.receptors[i] {
+            if after.receptors[i] == target.receptors[i]
+                && before.receptors[i] != after.receptors[i]
+            {
                 self.receptors[i] = compiled.receptors[i].clone();
+                pending.receptors[i] = after.receptors[i];
             }
-            if before.transporters[i] != target.transporters[i] {
+            if after.transporters[i] == target.transporters[i]
+                && before.transporters[i] != after.transporters[i]
+            {
                 self.transporters[i] = compiled.transporters[i].clone();
+                pending.transporters[i] = after.transporters[i];
             }
-            if before.enzymes[i] != target.enzymes[i] {
+            if after.enzymes[i] == target.enzymes[i] && before.enzymes[i] != after.enzymes[i] {
                 self.enzymes[i] = compiled.enzymes[i].clone();
+                pending.enzymes[i] = after.enzymes[i];
             }
         }
-        if before.membrane != target.membrane {
+        if after.membrane == target.membrane && before.membrane != after.membrane {
             self.membrane = compiled.membrane.clone();
             self.profile = compiled.profile;
+            pending.membrane = after.membrane;
         }
+        self.update(&pending, after, c, chemistry);
     }
     pub fn compile(m: &Machinery, c: &Config, chemistry: &Chemistry) -> Self {
         let membrane = Arc::new(chemistry::compile_affinity(

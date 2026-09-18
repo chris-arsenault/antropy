@@ -2,7 +2,9 @@
 
 Status: fresh production World implemented September 15, with environmental chemistry added
 September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
-owns the current artificial laws and checkpoint v20. [Bound material](../../bound-material.md)
+owns the current artificial laws and checkpoint v23. The
+[symmetry correction](../../../MATHEMATICAL-SYMMETRY-PLAN.md) records shared geometry,
+funding, mutation and matched runtime measurements. [Bound material](../../bound-material.md)
 preserves chemical identity through the body cycle; the [physical coupling correction](../../physical-coupling-correction.md)
 records the retained mass/capacity/motor costs. The [correction plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign)
 records current verification. Historical [source evidence](mobile-source-results.md) records medium-driven reservoir
@@ -10,7 +12,9 @@ motion, transformed release and short calibration. [Environmental evidence](envi
 shelter, short opportunities and the overnight investigation; [rebuild evidence](rebuild-results.md)
 preserves the preceding implementation's measurements.
 [Computable chemistry](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
-govern formula selection and the [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) tracks integration.
+govern formula selection. The [canonical math plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order)
+tracks current transformation-algebra work; the [rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md)
+retains completed integration evidence.
 Design rules around shared manifold reductions, vector fields, diffusion plus drift and bounded
 transformations. Physics supplies concepts; reproducing a known physical process is not the target.
 
@@ -30,6 +34,7 @@ substrate. They are not species categories or separate action systems.
 | Document | Responsibility |
 | --- | --- |
 | [Computational foundation](computational-foundation.md) | Governing design: composed chemical-space computation, accounts, costs and decision ownership |
+| [Transformation algebra white paper](transformation-algebra.md) | Group actions, discrete representation and irreversible dynamics; design contract for the canonical plan's selected v23 implementation |
 | [Current specification responsibilities](../../specs/digital-chemistry/README.md) | Current contracts and explicitly historical M0 equations/evidence |
 | [Substrate and accounting](substrate.md) | Chemical properties, generation constraints, fields, sources, turnover, reactions, construction and death |
 | [Machinery and controllers](machinery.md) | Fixed slots, funded capacities, local observations/actions, mutation and inheritance |

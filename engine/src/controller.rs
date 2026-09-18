@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 
 pub const INPUTS: usize = 39;
 pub mod diagnostics;
+#[cfg(test)]
+mod symmetry_tests;
 pub const HIDDEN: usize = 24;
 pub const OUTPUTS: usize = 9;
 pub const RECURRENT: usize = INPUTS * HIDDEN;

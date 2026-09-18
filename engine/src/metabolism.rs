@@ -27,20 +27,9 @@ pub fn react_observed(
             .iter()
             .map(|a| a.value * cell.inventory[a.species])
             .sum::<f64>();
-        enzyme.attenuation * dt * c.enzyme_turnover * cell.body[11 + slot] * (1. - cell.damage)
+        dt * c.enzyme_turnover * cell.body[11 + slot] * (1. - cell.damage)
             / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30)
     });
-    let mut demand = [0.; 256];
-    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
-        for edge in &enzyme.conversions {
-            demand[edge.substrate] += factor * edge.binding * cell.inventory[edge.substrate];
-        }
-    }
-    for (s, value) in demand.iter_mut().enumerate() {
-        if *value > 0. {
-            *value = (cell.inventory[s] / *value).min(1.);
-        }
-    }
     let cost = factors
         .iter()
         .zip(&operators.enzymes)
@@ -48,13 +37,7 @@ pub fn react_observed(
             enzyme
                 .conversions
                 .iter()
-                .map(|e| {
-                    factor
-                        * e.binding
-                        * cell.inventory[e.substrate]
-                        * demand[e.substrate]
-                        * (-e.work).max(0.)
-                })
+                .map(|e| factor * e.catalytic * cell.inventory[e.substrate] * (-e.work).max(0.))
                 .sum::<f64>()
         })
         .sum::<f64>();
@@ -63,16 +46,29 @@ pub fn react_observed(
     } else {
         1.
     };
+    let funded = |work: f64| if work < 0. { funding } else { 1. };
+    let mut demand = [0.; 256];
+    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
+        for edge in &enzyme.conversions {
+            demand[edge.substrate] +=
+                factor * edge.catalytic * cell.inventory[edge.substrate] * funded(edge.work);
+        }
+    }
+    for (s, value) in demand.iter_mut().enumerate() {
+        if *value > 0. {
+            *value = (cell.inventory[s] / *value).min(1.);
+        }
+    }
     let mut delta = [0.; 256];
     let mut work = Work::default();
     let mut balance = 0.;
     for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
         for edge in &enzyme.conversions {
             let q = factor
-                * edge.binding
+                * edge.catalytic
                 * cell.inventory[edge.substrate]
                 * demand[edge.substrate]
-                * funding;
+                * funded(edge.work);
             if q == 0. {
                 continue;
             }

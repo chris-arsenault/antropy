@@ -5,14 +5,30 @@ use antropy_engine::{
     genetics::{Enzyme, Machinery, Target},
 };
 use std::sync::Arc;
-// Independent dense hat enumeration checks the sparse product map including reflection.
-fn weight(s: usize, p: usize, offset: [f64; 2]) -> f64 {
+// Independently enumerate the interval involutions at zero orientation.
+fn weight(s: usize, p: usize, center: [f64; 2], offset: [f64; 2]) -> f64 {
     let a = coordinate(s);
     let b = coordinate(p);
     (0..2)
         .map(|k| {
-            let reflected = 15. - ((a[k] + offset[k]).rem_euclid(30.) - 15.).abs();
-            (1. - (reflected - b[k]).abs()).max(0.)
+            let target = 15. - ((center[k] + offset[k]).rem_euclid(30.) - 15.).abs();
+            let pivot = 15. - center[k] + target;
+            let source = 15. - a[k];
+            (0..=30)
+                .map(|j| {
+                    let candidate = j as f64 - source;
+                    let destination = if (0. ..=15.).contains(&candidate) {
+                        candidate
+                    } else {
+                        source
+                    };
+                    if destination == b[k] {
+                        (1. - (pivot - j as f64).abs()).max(0.)
+                    } else {
+                        0.
+                    }
+                })
+                .sum::<f64>()
         })
         .product()
 }
@@ -32,6 +48,7 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
             y: center[1],
             dx: offset[0],
             dy: offset[1],
+            angle: 0.,
         }; 4];
         let op = Operators::compile(&m, &config, &chemistry);
         let enzyme = &op.enzymes[0];
@@ -41,9 +58,10 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
             assert_eq!(e.binding, affinity(center, e.substrate, 3.));
             let mut value = 0.;
             let mut sum = 0.;
+            let mut displacement = 0.;
             occupancy[e.substrate] += e.binding;
             for p in 0..256 {
-                let expected = weight(e.substrate, p, offset);
+                let expected = weight(e.substrate, p, center, offset);
                 let actual = e
                     .products
                     .iter()
@@ -52,9 +70,13 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
                 assert!((actual - expected).abs() < 1e-12);
                 value += expected * chemistry.properties[p].potential;
                 sum += actual;
+                let a = coordinate(e.substrate);
+                let b = coordinate(p);
+                displacement += expected * ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2));
                 occupancy[p] += e.binding * expected;
             }
             assert!((sum - 1.).abs() < 1e-12);
+            assert!((e.catalytic - e.binding / (1. + displacement / 9.)).abs() < 1e-12);
             let difference = chemistry.properties[e.substrate].potential - value;
             assert!((difference - e.work - e.heat).abs() < 1e-12);
             assert!(e.heat >= 0.05 * e.changed - 1e-12);

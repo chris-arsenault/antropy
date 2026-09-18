@@ -98,7 +98,7 @@ fn reactions(w: &World) -> Vec<Value> {
                 json!({"substrate":0,"product":product,"accumulatedProduct":accumulated,
                 "potential":w.chemistry.properties[product].potential,
                 "stress":w.chemistry.properties[product].stress,"inputInternalLoad":load,
-                "attenuation":compiled.operators.enzymes[0].attenuation,
+                "attenuation":edge.catalytic / edge.binding,
                 "workPerUnit":edge.work,"consumed":c.chemical_flows.consumed[0],
                 "netWork":c.energy-energy_before,"captured":c.flows.captured}),
             );

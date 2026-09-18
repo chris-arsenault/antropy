@@ -1,7 +1,7 @@
 //! Zero-tick upper bounds from the same recognition coefficients and funded stocks as World.
 pub use crate::economy_report::report;
 use crate::{
-    chemistry::{self, Chemistry},
+    chemistry::Chemistry,
     config::Config,
     genetics::Compiled,
     organism::{Cell, maintenance_rate},
@@ -21,6 +21,16 @@ pub struct Budget {
     pub processing_work: f64,
     pub processing_surplus: f64,
     pub construction_ceiling: f64,
+}
+/// Import-only ceiling from installed conversions, before throughput/occupancy limits.
+pub fn conversion_work_ceiling(g: &Compiled, species: usize) -> f64 {
+    g.operators
+        .enzymes
+        .iter()
+        .flat_map(|e| &e.conversions)
+        .filter(|edge| edge.substrate == species)
+        .map(|edge| edge.work)
+        .fold(0., f64::max)
 }
 pub fn budget(
     c: &Config,
@@ -47,15 +57,7 @@ pub fn budget(
     let gross_work = imports
         .iter()
         .enumerate()
-        .map(|(s, q)| {
-            q * chemistry::reaction_energy(
-                chemistry.properties[s].potential,
-                chemistry.properties[chemistry.decomposition].potential,
-                c.conversion_efficiency,
-            )
-            .0
-            .max(0.)
-        })
+        .map(|(s, q)| q * conversion_work_ceiling(g, s))
         .sum::<f64>();
     let maintenance = maintenance_rate(&cell.body, 0., c);
     let transport = imports.iter().sum::<f64>() * c.transport_energy;
@@ -82,10 +84,10 @@ pub fn budget(
             .iter()
             .map(|a| a.value * inside[a.species])
             .sum::<f64>();
-        let rate = cell.body[11 + slot] * c.enzyme_turnover * e.attenuation
+        let rate = cell.body[11 + slot] * c.enzyme_turnover
             / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30);
         for edge in &e.conversions {
-            let q = rate * edge.binding * inside[edge.substrate];
+            let q = rate * edge.catalytic * inside[edge.substrate];
             processing_capacity[edge.substrate] += q;
             processing_value[edge.substrate] += q * edge.work;
         }

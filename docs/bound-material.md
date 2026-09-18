@@ -101,3 +101,10 @@ Raw generated artifacts remain local under
 `frontend/harness/artifacts/bound-material-v20-20260917/`. The former `decomposition` definition
 field remains the declared founder material and seeded metabolic reference; the UI now labels
 it as initial founder body material. It no longer dictates growth, repair or death products.
+
+The later [matched impact study](bound-material-impact-study.md) compares v19/v20 through
+20,000 completed ticks: #186 falls from 60.50% to 17.13% of nearly identical total field
+material, while average biomass rises 88%. Enzymatic consumption remains approximately 99.5%
+#0/#80 in both versions. The correction improves material circulation and chemical distribution;
+it does not establish evolved waste metabolism. Both longer runs hit their registered harness
+archive caps, so their planned 40k endpoints remain unverified.

@@ -77,12 +77,22 @@ fn physical(g: &Chromosome) -> Vec<f64> {
 pub fn physical_distance(a: &Chromosome, b: &Chromosome) -> f64 {
     let left = physical(a);
     let right = physical(b);
-    (left
+    let angles: f64 = a
+        .chemistry
+        .enzymes
         .iter()
-        .zip(&right)
-        .map(|(x, y)| (x - y).powi(2))
-        .sum::<f64>()
-        / left.len() as f64)
+        .zip(&b.chemistry.enzymes)
+        .map(|(a, b)| {
+            (crate::genetics::angles::difference(a.angle, b.angle) / std::f64::consts::TAU).powi(2)
+        })
+        .sum();
+    ((angles
+        + left
+            .iter()
+            .zip(&right)
+            .map(|(x, y)| (x - y).powi(2))
+            .sum::<f64>())
+        / (left.len() + 4) as f64)
         .sqrt()
 }
 fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32; 3] {

@@ -19,7 +19,7 @@ export function emissionGenome(
     c.physical[11] = investment - 1;
     c.chemistry.membrane = to;
     c.chemistry.transporters[2] = { ...to };
-    c.chemistry.enzymes[0] = { ...from, dx: to.x - from.x, dy: to.y - from.y };
+    c.chemistry.enzymes[0] = { ...from, dx: to.x - from.x, dy: to.y - from.y, angle: 0 };
   }
   return g;
 }

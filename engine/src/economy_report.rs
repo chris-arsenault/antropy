@@ -110,8 +110,7 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         let p = &w.chemistry.properties[*s];
         let full = economy::budget(&w.config, &w.chemistry, g, 2., &[0.; SPECIES], 1., 0.);
         let cap = g.operators.transporters.iter().enumerate().map(|(i,r)| 2.*g.body[7+i]*w.config.transporter_turnover*r.iter().find(|a|a.species==*s).map_or(0.,|a|a.value)).sum::<f64>();
-        let yield_per_unit = crate::chemistry::reaction_energy(p.potential,
-            w.chemistry.properties[w.chemistry.decomposition].potential, w.config.conversion_efficiency).0;
+        let yield_per_unit = economy::conversion_work_ceiling(g, *s);
         json!({"species":s,"properties":p,"fullParentRadius":full.radius,
             "installedTransportCeiling":cap,"terminalConversionWorkCeiling":cap*yield_per_unit,
             "parentMaintenance":full.maintenance,
@@ -136,7 +135,7 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         "cases":cases(&w),"investments":investments(&w),"startup":startup,
         "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
             "No shared depletion, export, repair, refitting or movement through gradients",
-            "grossWork is an import-only upper bound; processingWork applies installed enzyme throughput to the assumed internal mixture",
+            "grossWork uses the best installed conversion per imported species without throughput limits; processingWork applies installed enzyme throughput to the assumed internal mixture",
             "constructionCeiling uses processingSurplus; extra uphill assembly cost and omitted expenses can reduce it further",
             "Closure holds internal inventory fixed and removes a proportional mixture as construction",
             "Renewal average excludes initial priming transient and timestep overshoot",

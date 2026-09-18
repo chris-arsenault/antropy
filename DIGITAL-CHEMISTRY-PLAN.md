@@ -1,5 +1,10 @@
 # Rebuild Antropy as composed artificial chemistry
 
+Historical completed rebuild. Current mathematical work belongs to the single
+[canonical math plan](MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order).
+The closeout and implementation records below retain their original scope and evidence;
+they are not another active execution sequence.
+
 September 15, 2026. The user directed deleting the numerical implementations before
 rebuilding because repeated attempts to restart became patches to the existing system.
 This instruction supersedes the old M0–M8 integration work order. The user subsequently

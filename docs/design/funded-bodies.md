@@ -15,7 +15,7 @@ Each chromosome has fifteen bounded float32 investment loci plus fixed chemical 
 | 2 | Storage | 0.08 |
 | 3–6 | Four receptors, each with a chemical target coordinate | 0.01 each |
 | 7–10 | Four transporters, each with a target; neural effort chooses direction | 0.04 each |
-| 11–14 | Four unary enzymes, each with target and continuous product offset | 0.04 each |
+| 11–14 | Four unary enzymes, each with target, continuous product offset and orientation mixture | 0.04 each |
 
 A membrane coordinate controls chemical compatibility. Slot count is fixed; no variable-length
 genome structure is implemented. Core target is reference core × exp(g0). Other stocks use
@@ -106,16 +106,33 @@ Static learning and zero retained learning are distinct interventions.
 
 ## Policy composition and mutation
 
-Haploid/diploid, clonal/selfing transmission, uniform/one-point crossover, Gaussian/uniform mutation,
+Haploid/diploid, clonal/selfing transmission, uniform/one-point crossover,
 fission/budding and static/plastic learning remain independent configured policies. Selfing requires
 diploidy and uses two gametes from one parent; outcrossing and multi-parent ancestry remain deferred.
 
-Diploid continuous alleles average, including enzyme offsets. Chemical coordinates and offsets
-mutate locally with reflection; reflected product positions distribute material bilinearly
-among at most four discrete species. Neural effort can reverse any transporter. No slot count evolves.
+Diploid linear alleles average, including enzyme offsets. Angles use the circular mean;
+antipodal alleles use a declared zero-angle convention because no unique mean exists.
+Chemical coordinates and offsets mutate with reflection, while angles wrap periodically;
+parameters compile mixtures of exact bounded chemical permutations with at most eight
+product species per substrate. These mixtures are not group elements; component actions
+have exact composition and inverses. Neural effort can reverse any transporter. No slot count evolves.
 
-Default behavioral mutation probability/scale is 0.0015/0.08; physical and chemical alleles use
-0.1/0.12. Weights clamp to [-16,16], plasticity to [-1,1],
-investments to [-3,3], coordinates to reflected [0,15] and offsets to [-15,15].
-No score selects parents or filters mutants. Checkpoint v20 preserves complete allele and actual-state
+All mutations use the same heavy-tail law: for signed uniform u, the proposed scalar
+step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
+P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
+Default behavioral probability/scale is 0.0015/0.08; physical alleles use0.1/0.12 in their
+existing parameter units. Scalar neural and fifteen investment loci retain independent opportunities.
+Each of17 chemical coordinate pairs has Binomial(2,p) vector events: each event uses the same
+absolute-step law and a uniform direction. These pairs and body loci contribute4.9 expected
+events per birth at p=.1. Four enzyme-angle loci add0.4 events, for5.3 total. Their scale is
+physicalMutationScale/R radians, making the corresponding arc length use the same chemical
+step units. Expected changed coordinates are approximately8.36, including angles, because
+a vector event changes both axes.
+The [symmetry measurements](../../MATHEMATICAL-SYMMETRY-PLAN.md#m4-execution) check event
+rates and realized magnitudes separately. Reflection respects the finite square's boundary;
+arbitrary-angle covariance applies to interior proposals, not the square itself.
+
+Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
+chemical coordinates within [0,15] and offsets within [-15,15]; angles wrap into [-pi,pi).
+No score selects parents or filters mutants. Checkpoint v23 preserves complete allele and actual-state
 distinctions; unavailable pruned genotype payloads remain labeled provenance.

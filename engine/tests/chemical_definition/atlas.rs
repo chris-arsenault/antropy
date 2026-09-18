@@ -20,6 +20,7 @@ fn atlas_uses_live_compiler_and_validated_definition() {
         for (row, e) in rows.iter().zip(&op.enzymes[0].conversions) {
             assert_eq!(row["work"], e.work);
             assert_eq!(row["heat"], e.heat);
+            assert_eq!(row["catalytic"], e.catalytic);
         }
     }
 }
