@@ -98,3 +98,18 @@ These interventions support sensitivity to successful early metabolic branches. 
 prove that symmetry has no systematic effect across repeated histories, or that the same
 explanation accounts for every later snapshot. Preserve the distinction between removing the
 forced death-product sink and reliably evolving away from the founder's inherited metabolism.
+
+## H4 — Local cell interactions may support additional conditional strategies
+
+**Raised by:** user, September 19, 2026. **Status:** deferred research, not tested or scheduled.
+
+Close neighbors may impose consequential pressure and offer opportunities for chemically
+selective harm or feeding. Current pressure, contact, stress, repair and death-release rules
+provide parts of that pathway. It remains unestablished whether harming a neighbor repays
+its costs, whether the beneficiary is the producer or a bystander, and whether current contact
+inputs support useful behavior. Different phenotypes should interact through actual chemical
+susceptibility and machinery, rather than an explicit same/different-phenotype rule.
+
+The [research design](design/cell-interaction-research.md) owns proposed shared operations,
+conditional damaged-membrane access, accounting constraints and future bounded checks.
+This hypothesis does not advance that work ahead of ecology/climate or authorize a campaign.

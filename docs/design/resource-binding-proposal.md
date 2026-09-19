@@ -4,7 +4,82 @@ September 19, 2026. Selected proposal, supported by the
 [force investigation](resource-binding-investigation.md) and bounded diagnostics below.
 Investigation plan `e82be48c-7411-4228-8ac4-83f74560a7a7`.
 Implementation belongs to environmental root `5e88cd8a-1314-4622-9989-4bb02af68581`.
-Production mechanics have not changed.
+Implementation started September 19 after baseline commit `70ef791` was pushed.
+
+### Integrated execution registration
+
+B1 integrates all three mechanical consumers at length 6 and retains the length 0
+identity-kernel limit for comparison. Derived buffers are rebuilt, never persisted;
+the added configuration field advances the physical checkpoint to v28.
+
+B2 runs the same seven-source irregular neighborhood using ordinary `World::step`:
+one 100-tick pilot, followed by paired length 0/6 cases through 3,000 ticks, with a central
+batch near depletion and one empty source 120 model seconds from ordinary refill.
+Freeze mutation, transfer and learning; there are no cells in this source fixture.
+Then use the existing funded role 2 diagnostic cell for 300 ticks with active versus
+identity enzymes, static learning, zero mutation/transfer, and the same funded bodies.
+Measure actual uptake, reaction, export, material/work accounts and the resulting
+source force. This distinguishes cell-mediated chemistry from an externally supplied
+product patch. Stop on extinction or 120 seconds per case. No horizon extension.
+
+B3 uses the ordinary 48/2000/2000-growth WASM capacity panel, 100 ticks after 10 warmups,
+60 seconds per case, comparing the captured v27 kernel with v28. Retain the growing
+case's existing sub-30 ticks/s limitation separately from added cost. Register one
+isolated browser operational check against the existing server for rendering/errors
+and the new default configuration; this does not replace the user's motion review.
+No new server or long population campaign.
+
+The first capacity pair put the 2,000-cell added step cost at 1.014 ms, too close to
+the 1 ms budget for a single 100-tick sample. Register two additional alternating
+baseline/candidate capacity panels, with unchanged workloads and horizons, to
+resolve that decision. The cell identity control died at 48 ticks; register a paired
+40-tick follow-up before either cell dies, including force measured with body
+contributions removed from a diagnostic field clone. This isolates extracellular
+chemical feedback from the control's death and subsequent biomass release.
+
+## Implementation results
+
+B1 and B2 are implemented and checked. B3's automated operating checks are complete;
+the user reports initial visual acceptance: "it looks mostly healthy" while continuing
+observation on September 19. This closes the initial motion review, not long-run persistence.
+[Retained results](../evidence/digital-chemistry/binding-v28/README.md)
+record ledger 4124–4151, ordinary World probes, capacity comparisons and an isolated
+browser check. The initial accumulated work was committed and pushed as `70ef791`;
+the v28 binding implementation follows it locally.
+
+- All three consumers use one derived field at the selected six-unit reach. The cache
+  compares actual combined input, so mutations through intervention and diagnostic APIs
+  also invalidate it. Unchanged and exactly zero inputs avoid convolution. Equal opposite
+  kernel weights share output reads/writes; this is the same convolution up to roundoff.
+- The ordinary seven-source run completed 3,000 ticks through depletion and a 54.46-unit
+  refill. Widest separation changed from 33 to 31.61 versus 32.82 with local attraction.
+  Median separation ended at 17.37 versus its initial 17: persistence is unresolved.
+- At tick 40, the funded active cell imported 0.17165 units of chemical 136, converted
+  0.18582 units from 136 to 8, and exported 0.17843 units of 8. The identity control
+  converted zero and exported 0.16571 units from its initial inventory. Both were alive.
+  Removing body contributions from the diagnostic force calculation still left a
+  source-velocity difference of 2.89e-6 world units/model second. The effect is small
+  against the fixture's large reservoir background; it establishes a feedback path,
+  not useful colony-scale regulation. The active cell reached 300 ticks; the identity
+  control exhausted usable energy at tick 48.
+- After pairing the kernel weights, ordinary WASM step cost increased by 0.31 ms at
+  48 cells and 0.28 ms at 2,000 cells against the captured baseline. Operating rates
+  were 86.35/36.89 ticks/s versus 88.62/37.21. The growing case reached 23.54 ticks/s;
+  its preexisting failure to reach 30 remains open. These fixed short workloads do not
+  establish mature-world or 16-times-area performance.
+- The existing-server browser check reached tick 391 with 56 cells, no runtime errors
+  or alerts, a working borrowed renderer and a successful manual save. This checks
+  operation and startup, not visually acceptable motion over ecological timescales.
+
+The physical checkpoint is v28 and rejects earlier bytes. No compatibility adapter,
+new climate driver, fixed wells, extra transport steps or multicore work was added.
+Initial geography and other physical constants remain unchanged.
+
+Final `make ci` passed: 140 Rust unit tests, 17 integration tests, 62 frontend tests,
+formatting, clippy, ESLint, TypeScript, documentation and Terraform format checks.
+The 12 existing ESLint warnings remain. Current-schema report readers and assertions
+were updated after CI exposed their stale v27 expectations. B3's initial human motion
+review is recorded above; the growing-capacity and long-horizon limits remain open.
 
 ## Proposition
 

@@ -89,6 +89,8 @@ pub fn project(w: &mut World) {
         source.material = Material::read(&source.inventory, &w.chemistry);
     }
     project_current(w);
+    w.field.attraction_length = w.config.attraction_length;
+    w.field.prepare_attraction();
 }
 
 fn project_current(w: &mut World) {
@@ -132,7 +134,7 @@ pub fn response(s: &Source, tick: u64, c: &Config, field: &Field, chem: &Chemist
     Response {
         velocity: crate::movement::passive(
             p,
-            field.gradient(sites, true),
+            field.gradient(sites),
             c.pressure_strength * other_load,
             crate::field::mobility(load, c.movement_impedance),
             c.source_drift,
@@ -148,6 +150,9 @@ pub fn response(s: &Source, tick: u64, c: &Config, field: &Field, chem: &Chemist
 }
 
 pub fn advance(w: &mut World) {
+    if !w.sources.is_empty() {
+        w.field.prepare_attraction();
+    }
     w.climate.operators.as_mut().unwrap().work_strength = w.config.environmental_work;
     let responses: Vec<_> = w
         .sources

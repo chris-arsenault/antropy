@@ -6,7 +6,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 27;
+pub const VERSION: u32 = 28;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -190,6 +190,7 @@ impl World {
         let now = || clock.map_or(0., |f| f());
         let mut started = now();
         self.field.pressure_strength = self.config.pressure_strength;
+        self.field.attraction_length = self.config.attraction_length;
         for c in &mut self.cells {
             c.flows = Default::default();
         }
@@ -232,6 +233,9 @@ impl World {
         }
         stages[2] = now() - started;
         started = now();
+        if !self.cells.is_empty() {
+            self.field.prepare_attraction();
+        }
         crate::movement::advance(&mut self.cells, &self.config, &self.field, &sites);
         stages[3] = now() - started;
         started = now();
@@ -393,12 +397,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY27\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY28\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY27\0")
-            .ok_or("Unsupported physical checkpoint; v27 required")?;
+            .strip_prefix(b"ANTROPY28\0")
+            .ok_or("Unsupported physical checkpoint; v28 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {

@@ -2,6 +2,9 @@
 mod abi;
 pub mod accounting;
 pub mod ancestry;
+mod attraction;
+#[cfg(test)]
+mod attraction_tests;
 #[cfg(test)]
 mod bound_material_tests;
 #[cfg(test)]

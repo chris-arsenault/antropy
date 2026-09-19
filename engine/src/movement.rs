@@ -49,7 +49,7 @@ pub fn advance(cells: &mut [Cell], c: &Config, field: &Field, sites: &[Vec<(usiz
         cell.heading = (cell.heading
             + cell.action.turn * speed / (2. * cell.radius(c).max(0.01)) * c.dt * fraction)
             .rem_euclid(std::f64::consts::TAU);
-        let gradient = field.gradient(row, true);
+        let gradient = field.gradient(row);
         let profile = cell.operators.as_ref().unwrap().profile;
         let self_load =
             crate::medium_response::self_load(cell.mass() * profile[2], field.spacing.powi(2), row);

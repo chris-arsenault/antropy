@@ -14,7 +14,7 @@ impl Field {
             .max(0.)
     }
 
-    pub fn gradient(&self, sites: &[(usize, f64)], bodies: bool) -> [[f64; 3]; 2] {
+    pub fn gradient(&self, sites: &[(usize, f64)]) -> [[f64; 3]; 2] {
         let mut result = [[0.; 3]; 2];
         for &(n, w) in sites {
             let [r, l, d, u] = self.neighbors[n];
@@ -23,17 +23,16 @@ impl Field {
                     let mut difference = self.signal[a][k] - self.signal[b][k]
                         + self.source_signal[a][k]
                         - self.source_signal[b][k];
-                    if bodies {
-                        difference += self.body_signal[a][k] - self.body_signal[b][k];
+                    difference += self.body_signal[a][k] - self.body_signal[b][k];
+                    if k == 0 {
+                        difference = self.attractive(a) - self.attractive(b);
                     }
                     *value += w * difference / (2. * self.spacing);
                 }
                 let mut difference = self.impedance[a] + self.source_load[a]
                     - self.impedance[b]
                     - self.source_load[b];
-                if bodies {
-                    difference += self.body_load[a] - self.body_load[b];
-                }
+                difference += self.body_load[a] - self.body_load[b];
                 result[axis][2] += w * difference / (2. * self.spacing);
             }
         }
@@ -48,8 +47,10 @@ impl Field {
         max_impedance: f64,
     ) -> [[f32; 4]; 4] {
         self.neighbors[node].map(|other| {
-            let difference: [f64; 2] =
-                std::array::from_fn(|k| self.medium_signal(other)[k] - self.medium_signal(node)[k]);
+            let difference = [
+                self.attractive(other) - self.attractive(node),
+                self.medium_signal(other)[1] - self.medium_signal(node)[1],
+            ];
             let pressure = self.pressure_strength
                 * medium_response::pressure_difference(
                     self.mechanical_load(node),

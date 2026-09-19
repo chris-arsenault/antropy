@@ -18,6 +18,10 @@ pub struct Field {
     #[serde(skip)]
     pub pressure_strength: f64,
     #[serde(skip)]
+    pub attraction_length: f64,
+    #[serde(skip)]
+    pub(crate) attraction: crate::attraction::Attraction,
+    #[serde(skip)]
     next: Vec<f32>,
     #[serde(skip)]
     pub(crate) neighbors: Vec<[usize; 4]>,
@@ -70,6 +74,8 @@ impl Field {
             totals: [0.; 2],
             drift: 0.25,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
+            attraction_length: 0.,
+            attraction: Default::default(),
             next: vec![],
             neighbors: vec![],
             body_signal: vec![],
@@ -85,6 +91,7 @@ impl Field {
         field
     }
     pub fn rebuild(&mut self) {
+        self.attraction = Default::default();
         let n = self.nx * self.ny;
         self.next.resize(n * SPECIES, 0.);
         self.next.fill(0.);
@@ -274,6 +281,7 @@ impl Field {
         let floor = crate::field_activity::CONCENTRATION_FLOOR * self.spacing.powi(2) as f32;
         self.last_groups = 0;
         for step in 0..steps {
+            self.prepare_attraction();
             self.activity.prepare(&self.neighbors);
             for i in 0..self.activity.work.len() {
                 let n = self.activity.work[i];

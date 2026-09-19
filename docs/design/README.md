@@ -1,14 +1,20 @@
 # Current design and work order
 
-**Current ecology proposal:** [resource binding](resource-binding-proposal.md) selects a shared
+**Current ecology implementation:** [resource binding](resource-binding-proposal.md) adds a shared
 six-unit attraction length, existing local repulsion/nonlinear pressure, a bounded evaluator,
 all-consumer integration and short mechanism/cost checks. The
 [investigation](resource-binding-investigation.md) retains the force diagnosis and evidence.
 The user rejected prescribed geographic basins.
 Cellular changes to local material should alter binding; homeostatic clusters are valid.
 The [50k spatial review](spatial-isolation-review.md) retains its observation and rejected
-proposal. Production changes remain proposed; external directional forcing is a later topic.
+proposal. Physical v28 integrates the field into ordinary source, cell and dissolved motion;
+bounded checks and initial positive human review are recorded in the binding plan. External
+directional forcing is a later topic.
 Execution stays single-threaded; multicore implementation is in the backlog.
+
+**Deferred research:** [cell interactions](cell-interaction-research.md) considers contact
+pressure, phenotype-dependent chemical harm and recovery of neighbor material through shared
+paid operations. This is a backlog avenue, not the next implementation or a new experiment.
 
 **Performance and scaling:** the [completed serial pass](../../SCALING-PLAN.md) reduces active
 field support, transport passes and cell-exchange work. Its shared-memory 16–32-core design is

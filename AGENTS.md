@@ -67,6 +67,14 @@ phenotype's advantage is not a prerequisite for proceeding. Retain open question
 
 ## Governing mathematical direction
 
+**Shared attraction, September 19, 2026.** Physical v28 adds `attractionLength=6` to the
+existing geographic response. One periodic, normalized scalar convolution of current
+dissolved, source and body attraction drives all three mechanical consumers. Local
+repulsion, nonlinear pressure, raw chemical exposure and release footprints remain.
+No fixed wells or cluster identities are introduced. The
+[binding plan](docs/design/resource-binding-proposal.md) owns bounded results and remaining
+human motion review. Derived buffers are Rust-owned and omitted from checkpoints.
+
 The browser default world seed is27 (`Engine.create`), distinct from chemistry seed101.
 Validation of a default-run report must use the actual browser seed and reported failure window.
 The initial v25 chemical mutation scale used full domain width15; the extinction investigation

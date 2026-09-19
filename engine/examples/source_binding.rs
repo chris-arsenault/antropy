@@ -33,7 +33,7 @@ fn profile(s: &Source, w: &World) -> [f64; 3] {
 
 fn terms(w: &World, s: &Source) -> Value {
     let p = profile(s, w);
-    let gradient = w.field.gradient(&s.footprint, true);
+    let gradient = w.field.gradient(&s.footprint);
     let own = medium_response::self_load(
         s.material.total * p[2] / (1. + s.material.total / s.interface),
         w.field.spacing.powi(2),
@@ -63,6 +63,9 @@ fn terms(w: &World, s: &Source) -> Value {
 
 fn snapshot(path: &str) -> Result<Value, Box<dyn std::error::Error>> {
     let mut w = World::restore(&std::fs::read(path)?)?;
+    // This historical decomposition diagnoses the local-law identity limit.
+    w.config.attraction_length = 0.;
+    w.field.attraction_length = 0.;
     // This is the body projection made immediately before source response in World::advance.
     let sites: Vec<_> = w
         .cells
@@ -100,7 +103,7 @@ fn snapshot(path: &str) -> Result<Value, Box<dyn std::error::Error>> {
             let mut parts = serde_json::Map::new();
             let mut sum = [0.; 2];
             for (name, field) in &channels {
-                let g = field.gradient(&s.footprint, true);
+                let g = field.gradient(&s.footprint);
                 let force = medium_response::force(p, g, w.config.pressure_strength * other);
                 for k in 0..2 {
                     sum[k] += force[k];
@@ -147,6 +150,7 @@ fn fixture() -> World {
         source_count: 2,
         source_species: vec![0, 136],
         source_priming: 0.,
+        attraction_length: 0., // Historical local-law baseline; candidate filtering is explicit.
         ..Config::default()
     };
     let mut w = World::new(27, c).unwrap();

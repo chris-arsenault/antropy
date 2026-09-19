@@ -38,11 +38,15 @@ recipient benefit and a substantial donor cost; it does not show cooperation.
 
 ## Injury, death and resource capture
 
-Stressful chemistry can injure cells. Death returns their remaining internal species and converts
-built material into the common decomposition chemical with accounted energy. Nearby organisms must
+Stressful chemistry can injure cells. Death returns their free and bound mixtures with their
+actual chemical identities and dissipates remaining usable energy. Nearby organisms must
 capture this material through ordinary funded transport and metabolism. No killer identity or
 prey-yield transfer grants resources. The current corpse-capture probe acquired released material
 and delayed death; hunting and sustained predation remain unestablished.
+
+The [cell interaction research avenue](cell-interaction-research.md) adds a deferred design for
+crowding, selective chemical injury and conditional damaged-membrane access. It introduces no
+live attack rule and is not selected as the next work item.
 
 <a id="ecology-disturbance"></a>
 

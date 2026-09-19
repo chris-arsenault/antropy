@@ -39,7 +39,7 @@ fn embodied_pressure_has_no_self_propulsion_at_off_grid_or_periodic_positions() 
         footprint::deposit_profiles(&w.cells, &w.config, &mut w.field, &sites);
         let v = movement::passive(
             w.cells[0].operators.as_ref().unwrap().profile,
-            w.field.gradient(&sites[0], true),
+            w.field.gradient(&sites[0]),
             w.field.pressure_load(&sites[0]),
             1.,
             4.,
@@ -62,6 +62,7 @@ fn source_pairs_attract_when_dilute_and_separate_when_crowded() {
                 source_priming: 0.,
                 source_processing: 0.,
                 source_lifetime: 1e9,
+                attraction_length: 0., // Identity-kernel limit retains the earlier local law.
                 ..Config::default()
             };
             let mut w = World::new(27, c).unwrap();

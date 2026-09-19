@@ -5,8 +5,10 @@ supersedes the fixed-basin remedy in the [50k spatial review](docs/design/spatia
 Next work is shared, composition-dependent attraction and nonlinear repulsion that bind
 resource neighborhoods. The user rejected prescribed wells and does not require migration,
 chaos or perpetual turnover. The proposal selects a six-unit shared attraction length and
-its evaluator. Static and short source-only dynamic probes support implementation; integrated
-binding and performance remain unverified. B1–B3 in that proposal are the next work sequence.
+its evaluator. Physical v28 implements B1 and executes B2 with ordinary World depletion,
+renewal and funded-cell chemical feedback checks. B3 records ordinary WASM cost and browser
+operational evidence; human motion review remains separate. The proposal owns exact results
+and unresolved long-horizon persistence.
 The v18 evidence and remaining human review below retain their historical scope.
 
 Status: local-medium weathering verified; user reports positive visual review through at least 8,000 ticks.

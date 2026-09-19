@@ -80,6 +80,7 @@ pub struct Config {
     pub conversion_efficiency: f64,
     pub environmental_work: f64,
     pub pressure_strength: f64,
+    pub attraction_length: f64,
     pub growth_rate: f64,
     pub construction_energy: f64,
     pub protected_inventory_fraction: f64,
@@ -168,6 +169,7 @@ impl Default for Config {
             conversion_efficiency: 0.8,
             environmental_work: crate::transformation_work::DEFAULT_STRENGTH,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
+            attraction_length: 6.,
             growth_rate: 0.06,
             construction_energy: 0.5,
             protected_inventory_fraction: 0.125,
@@ -249,6 +251,7 @@ impl Config {
             || self.physiology_interval < self.dt
             || self.physiology_interval > 2.
             || self.mesh < 0.5
+            || self.attraction_length > self.width.min(self.height) / 2.
         {
             return Err("Unsupported numerical resolution or update interval".into());
         }

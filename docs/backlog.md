@@ -20,6 +20,21 @@ Current work remains single-threaded. Ecology, persistent geography and directio
 design proceed in [the spatial isolation review](design/spatial-isolation-review.md);
 they do not depend on first implementing multicore execution.
 
+<a id="backlog-cell-interactions"></a>
+
+## Deferred cell interaction research
+
+Added September 19 at the user's request; **not selected as the next work item**.
+[Cell interaction research](design/cell-interaction-research.md) owns the design: useful
+crowding/contact pressure, phenotype-dependent chemical harm, and paid recovery of a
+neighbor's actual material. Start from current pressure, contact sensing, membrane
+susceptibility and transport. Damaged-membrane access is a conditional extension if ordinary
+injury/release cannot provide a useful return. No phenotype enemy labels, kill rewards,
+dedicated combat economy or live changes accompany this entry.
+
+Selection requires a budgeted small opportunity check; no implementation or campaign is
+scheduled. This does not reprioritize environmental work or the multicore backlog.
+
 <a id="backlog-plan-carryover"></a>
 
 ## Requirements migrated from earlier plans

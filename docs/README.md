@@ -10,6 +10,7 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 
 | Need | Document |
 | --- | --- |
+| Deferred cell crowding, chemical antagonism and feeding research | [Cell interaction research](design/cell-interaction-research.md) — design only, not scheduled next |
 | Current spatial isolation, source migration and directional climate review | [50k study and staged ecology proposal](design/spatial-isolation-review.md) |
 | Full-screen world and observation navigation | [Viewport UI pass](../UI-OBSERVATION-PLAN.md) |
 | Enzyme role colors, counts and transformation web | [Chemical web](../CHEMICAL-WEB-PLAN.md) |
@@ -176,6 +177,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Open questions and deferred features
 
 - [Deferred multicore scaling](backlog.md#backlog-multicore-scaling)
+- [Deferred cell interaction research](backlog.md#backlog-cell-interactions)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

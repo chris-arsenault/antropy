@@ -20,6 +20,7 @@ const fields = [
   ["sourceGap", "Source renewal gap", 0],
   ["sourceRadius", "Source radius", 0.01],
   ["sourceDrift", "Source response to chemical gradients", 0],
+  ["attractionLength", "Material attraction reach", 0],
   ["sourceProcessing", "Stored-resource weathering multiplier", 0],
   ["viscosity", "Viscosity", 0.00001],
   ["mutationRate", "Controller mutation probability", 0],

@@ -12,6 +12,7 @@ fn fixture() -> World {
         source_count: 7,
         source_species: vec![0, 136],
         source_priming: 0.,
+        attraction_length: 0., // Historical source-only prototype installs its own field.
         ..Config::default()
     };
     let mut w = World::new(27, c).unwrap();

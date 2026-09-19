@@ -1,6 +1,6 @@
 # Composed artificial chemistry runtime
 
-Updated September 18, 2026. This contract governs the fresh implementation under
+Updated September 19, 2026. This contract governs the fresh implementation under
 [the canonical math plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
@@ -20,6 +20,8 @@ Runtime measurements and human motion review remain separate from implementation
 V27 implements the [regenerative initial ecosystem](regenerative-ecosystem.md): shared
 local external work for cellular and abiotic conversion, finite-owner self-load subtraction,
 and four mutable founder types. Its evidence is recorded in the canonical plan's R0–R4 section.
+V28 adds the [shared attraction field](../resource-binding-proposal.md), with six-unit
+mechanical reach and unchanged local repulsion, crowding pressure and chemical exposure.
 
 ## Meaning and owners
 
@@ -32,7 +34,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, fifteen funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v27 persists actual installed
+The same worker renders borrowed WASM views. Checkpoint v28 persists actual installed
 coordinates independently of inherited instructions and rejects earlier physical bytes.
 There is no exporter allele or thermal-energy setting in this version.
 
@@ -65,6 +67,18 @@ differences. The third is the pressure difference `deltaP=χ*(L_left+L_right)*de
 where `P(L)=χL²/2`, χ=.003, and L includes field, reservoir-interface and embodied impedance.
 For a species, directional drift contracts its two signed profiles and positive impedance
 with `deltaA, -deltaB, -deltaP`. The first profile attracts and the second repels;
+in v28, A is the combined dissolved/source/body attractive row convolved with a normalized
+periodic separable Gaussian of length6, truncated at three lengths on each axis.
+Repulsion B and load L remain local. One length applies to source motion, passive cell
+motion and dissolved transport; chemical sensing, release footprints and work remain raw.
+The full-resolution derived cache compares actual input before recomputing, skips exact
+zero support, and combines equal opposite weights to share output loads/stores. It refreshes
+before source response, each existing transport substep and cell motion when those consumers
+run. No additional transport steps, physical state copies or worker messages are introduced.
+The identity limit length0 evaluates the local row directly. Configuration limits reach to
+half the shorter world dimension; derived buffers are rebuilt after checkpoint restore.
+
+With either reach,
 crowding increasingly opposes concentration regardless of chemical identity. Drift magnitude
 is divided by `1+abs(deltaA)+abs(deltaB)+maxSpeciesImpedance*abs(deltaP)`, bounding every
 species with one face calculation; default drift is .25. Impedance mobility is
