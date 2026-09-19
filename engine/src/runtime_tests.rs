@@ -67,7 +67,7 @@ fn birth_splits_installed_material_without_expressing_the_new_target() {
     let mut g = w.genomes[&1].clone();
     g.id = 2;
     g.parent = Some(1);
-    g.chromosomes[0].chemistry.enzymes[0].dx += 0.3;
+    g.chromosomes[0].chemistry.enzymes[0].center_x += 0.3;
     g.chromosomes[0].chemistry.enzymes[0].angle = 1.4;
     g.compile(&w.config, &w.chemistry);
     w.genomes.insert(2, g);

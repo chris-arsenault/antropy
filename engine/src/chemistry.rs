@@ -109,16 +109,42 @@ impl Chemistry {
                     .total_cmp(&(properties[b].potential - 2.).abs())
             })
             .unwrap();
-        let result = Self {
-            version: 4,
+        let mut result = Self {
+            version: 5,
             seed,
             coefficients,
             properties,
             decomposition,
             profiles,
         };
-        result.validate()?;
-        Ok(result)
+        let mut landscape_rng = Random::new(seed ^ 0x706f74656e746961);
+        for _ in 0..256 {
+            result.coefficients[0] = (0..16)
+                .map(|i| {
+                    let square = (i / 4) * (i / 4) + (i % 4) * (i % 4);
+                    if (4..=8).contains(&square) {
+                        landscape_rng.normal() / square as f64
+                    } else {
+                        0.
+                    }
+                })
+                .collect();
+            let potential = Self::resolve(&result.coefficients)?;
+            for (p, q) in result.properties.iter_mut().zip(potential) {
+                p.potential = q.potential;
+            }
+            result.decomposition = (0..SPECIES)
+                .min_by(|&a, &b| {
+                    (result.properties[a].potential - 2.)
+                        .abs()
+                        .total_cmp(&(result.properties[b].potential - 2.).abs())
+                })
+                .unwrap();
+            if result.validate().is_ok() {
+                return Ok(result);
+            }
+        }
+        Err("Unable to construct a smooth multidirectional chemical definition".into())
     }
     fn resolve(coefficients: &[Vec<f64>]) -> Result<Vec<Properties>, String> {
         if coefficients.len() != 4
@@ -181,12 +207,13 @@ impl Chemistry {
         n
     }
     pub fn validate(&self) -> Result<(), String> {
-        if self.version != 4 || self.properties.len() != SPECIES || self.decomposition >= SPECIES {
+        if self.version != 5 || self.properties.len() != SPECIES || self.decomposition >= SPECIES {
             return Err("Invalid chemistry schema".into());
         }
         let expected = Self::resolve(&self.coefficients)?;
         self.profiles.validate(&self.properties)?;
         ProfileCoverage::measure(&self.properties).validate()?;
+        crate::chemical_landscape::validate(&self.properties)?;
         for (p, q) in self.properties.iter().zip(expected) {
             for (a, b) in [
                 (p.potential, q.potential),

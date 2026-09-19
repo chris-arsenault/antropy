@@ -1,0 +1,11 @@
+{
+  "traceStart": 0.0009448999999790432,
+  "fieldAndFootprintsAndSources": 10.092087924999989,
+  "sensingController": 0.061056950000011045,
+  "movement": 0.2506562499999745,
+  "exchange": 0.1363727499999925,
+  "physiology": 0.09500720000000341,
+  "maintenanceAndLifecycle": 0.012474824999992508,
+  "traceFinish": 0.00019377500001951378,
+  "exchangePreparationSubset": 0.05661125000000312
+}

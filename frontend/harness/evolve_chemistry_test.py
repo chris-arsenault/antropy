@@ -11,7 +11,7 @@ class ReportContract(unittest.TestCase):
     def test_current_producer_contract(self):
         source = next(Path(sys.argv[1]).glob("*/manifest.json")).parent
         manifest = read_manifest(source)
-        self.assertEqual(manifest["checkpointVersion"], 23)
+        self.assertEqual(manifest["checkpointVersion"], 27)
         values = inherited_vectors(source, manifest["checkpointVersion"])
         genome = json.loads((source / "genomes.jsonl").read_text().splitlines()[0])
         body = genome["facts"]["blueprint"]

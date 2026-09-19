@@ -40,7 +40,7 @@ not a permission to export every cell's genome or recurrent state. These observa
 the render path. JSON is allowed for bounded reduced queries and explicit controls; it is forbidden
 for stepping and rendering. The complete physical arrays remain behind Rust's boundary.
 
-The dissolved-chemistry sidebar receives `chemicalOverview`: Rust reduces the field into at most
+The dissolved-chemistry window receives `chemicalOverview`: Rust reduces the field into at most
 twelve `{id, amount, peak}` rows, total and other amount, present count and tick. Properties come
 from the existing initialization definition. This command uses the ordinary 16 KiB reply budget;
 publication explicitly rejects more than twelve rows. The worker caches by observed tick,
@@ -48,6 +48,15 @@ clears that cache on world replacement, and omits unchanged observations from su
 The reduction runs on status publication, never per render or simulation tick. Chemistry selection
 only changes a small view command. Hazard response scalars occupy spare channels in the existing
 worker-local texture; neither texture dimensions nor CPU staging ownership changes.
+
+The Web window opts into `chemicalWeb`: Rust reduces installed enzyme conversions into one
+64-row page of chemical pairs, full-population primary/supporting counts, totals and at most
+256 reservoir species IDs. Chemical and mode filters plus paging retain access to every pair.
+The worker caches by world identity, observed tick and query; closing the window disables and
+clears this observation. It uses the ordinary 16 KiB reply budget, existing delta/backpressure
+and explicit row/source limits. No genomes, per-cell route arrays or field grids cross this
+boundary. Enzyme map colors use immutable compiled route metadata and funded stocks directly
+inside the existing Rust packed-render preparation. This adds no physical state or history.
 
 The worker-local census includes region membership needed to associate successive observed groups.
 Those IDs describe an observer's grouping, not a second physical cell array. They never enter React

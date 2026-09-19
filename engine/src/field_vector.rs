@@ -8,8 +8,8 @@ pub fn redistribute(
     center: &[f32],
     adjacent: [&[f32]; 4],
     out: &mut [f32],
-    rows: &[[f32; 256]; 3],
-    coefficients: [[f32; 3]; 4],
+    rows: &[[f32; 256]; 4],
+    coefficients: [[f32; 4]; 4],
     decay: f32,
     Work { mut mask, floor }: Work,
 ) -> u64 {
@@ -29,16 +29,22 @@ pub fn redistribute(
             let mut outgoing = zero;
             for face in 0..4 {
                 let diffusion = f32x4_mul(prop[0], c[face][0]);
-                let drift = f32x4_add(
+                let chemical_drift = f32x4_add(
                     f32x4_mul(prop[1], c[face][1]),
                     f32x4_mul(prop[2], c[face][2]),
                 );
-                outgoing = f32x4_add(outgoing, f32x4_add(diffusion, f32x4_max(zero, drift)));
+                let drift = f32x4_add(chemical_drift, f32x4_mul(prop[3], c[face][3]));
+                // Face construction bounds drift to finite values. Masking gives max(0,d)
+                // with canonical positive zero, without general NaN-aware SIMD max work.
+                let forward = v128_and(drift, f32x4_gt(drift, zero));
+                let reverse = f32x4_neg(drift);
+                let backward = v128_and(reverse, f32x4_gt(reverse, zero));
+                outgoing = f32x4_add(outgoing, f32x4_add(diffusion, forward));
                 incoming = f32x4_add(
                     incoming,
                     f32x4_mul(
                         v128_load(adjacent[face].as_ptr().add(s).cast()),
-                        f32x4_add(diffusion, f32x4_max(zero, f32x4_neg(drift))),
+                        f32x4_add(diffusion, backward),
                     ),
                 );
             }
@@ -66,7 +72,7 @@ pub fn redistribute(
             for face in 0..4 {
                 let c = coefficients[face];
                 let diffusion = rows[0][s] * c[0];
-                let drift = rows[1][s] * c[1] + rows[2][s] * c[2];
+                let drift = rows[1][s] * c[1] + rows[2][s] * c[2] + rows[3][s] * c[3];
                 outgoing += diffusion + drift.max(0.);
                 incoming += adjacent[face][s] * (diffusion + (-drift).max(0.));
             }

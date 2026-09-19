@@ -1,0 +1,146 @@
+.observation-window.window-wide {
+  width: min(980px, calc(100% - 40px));
+}
+.web-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 12px 0;
+}
+.web-controls > span {
+  font-size: 12px;
+  color: #a9c2c9;
+}
+.web-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.web-controls select {
+  max-width: 100%;
+}
+.web-controls button[aria-pressed="true"] {
+  color: #c5f4d7;
+  background: #24483c;
+  border-color: #50735f;
+}
+.web-meaning {
+  padding: 10px 14px;
+  background: #1a2c32;
+  border-left: 2px solid #668f84;
+  border-radius: 4px;
+}
+.web-meaning p {
+  margin: 0;
+}
+.web-meaning details {
+  margin-top: 6px;
+}
+.web-meaning details p {
+  margin-top: 8px;
+}
+.web-census {
+  font-variant-numeric: tabular-nums;
+}
+.chemical-web-graph {
+  background: #0a141c;
+  border: 1px solid #30454d;
+  border-radius: 12px;
+  overflow: auto;
+}
+.chemical-web-graph svg {
+  display: block;
+  width: 100%;
+  min-width: 530px;
+  max-height: 580px;
+}
+.web-grid {
+  fill: #35515b;
+}
+.web-edge path {
+  fill: none;
+  opacity: 0.72;
+}
+.web-edge path:hover {
+  opacity: 1;
+  stroke-width: 5;
+}
+.web-edge.environmental path {
+  stroke-dasharray: 4 3;
+  opacity: 0.55;
+}
+.web-node {
+  cursor: pointer;
+  outline: none;
+}
+.web-node > circle:not(.web-source) {
+  stroke: #0a141c;
+  stroke-width: 2;
+}
+.web-node:focus > circle,
+.web-node:hover > circle,
+.web-node.selected > circle {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.web-node text {
+  fill: #e3ede9;
+  text-anchor: middle;
+  font:
+    11px ui-monospace,
+    monospace;
+  paint-order: stroke;
+  stroke: #0a141c;
+  stroke-width: 3;
+}
+.web-source {
+  fill: none;
+  stroke: #9ce2b9;
+  stroke-width: 1;
+}
+.web-edge-count {
+  fill: #dceee6;
+  text-anchor: middle;
+  font: 10px system-ui;
+  paint-order: stroke;
+  stroke: #0a141c;
+  stroke-width: 3;
+  pointer-events: none;
+}
+.web-axis {
+  fill: #829fa8;
+  font: 10px system-ui;
+}
+.web-caption {
+  color: #8da9b2;
+  font-size: 12px;
+}
+.web-route-table button {
+  padding: 4px 8px;
+}
+.web-route-table td:not(:first-child),
+.web-route-table th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.web-pages {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .observation-window.window-wide {
+    width: calc(100% - 16px);
+  }
+  .web-controls label {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .web-pages {
+    flex-wrap: wrap;
+  }
+}

@@ -10,11 +10,6 @@
 body {
   margin: 0;
 }
-main {
-  padding: 20px;
-  max-width: 1680px;
-  margin: auto;
-}
 h1 {
   margin: 0;
   font-size: 25px;
@@ -35,8 +30,7 @@ p {
 }
 header,
 .run-controls,
-.map-tools,
-.settings {
+.map-tools {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -91,33 +85,13 @@ label {
 label input:not([type="checkbox"]):not([type="file"]) {
   max-width: 110px;
 }
-.workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 16px;
-  align-items: start;
-}
-.viewport {
-  border: 1px solid #243847;
-  border-radius: 12px;
-  overflow: hidden;
-  position: sticky;
-  top: 10px;
-}
 .viewport canvas {
-  width: 100%;
-  height: calc(100dvh - 245px);
-  min-height: 360px;
-  max-height: 1000px;
   display: block;
   touch-action: none;
   cursor: grab;
 }
 .viewport canvas:active {
   cursor: grabbing;
-}
-.world-canvas {
-  position: relative;
 }
 .world-scale {
   position: absolute;
@@ -181,17 +155,6 @@ label input:not([type="checkbox"]):not([type="file"]) {
 }
 .death-key {
   color: #ffb090;
-}
-.run-status {
-  padding: 5px 10px;
-  border: 1px solid #405363;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #b4c8d1;
-}
-.run-status.is-running {
-  border-color: #547d66;
-  color: #aee7bb;
 }
 .panel {
   background: #101d27;
@@ -336,46 +299,8 @@ pre {
   max-height: 300px;
   overflow: auto;
 }
-.settings {
-  align-items: start;
-}
-.settings > details {
-  flex: 1;
-  min-width: 290px;
-}
-.settings label {
-  display: inline-block;
-  margin: 10px;
-}
-@media (max-width: 850px) {
-  .workspace {
-    grid-template-columns: 1fr;
-  }
-  .viewport {
-    position: relative;
-    top: 0;
-  }
-  .viewport canvas {
-    height: 62vh;
-  }
-  aside {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-}
 @media (max-width: 540px) {
-  main {
-    padding: 8px;
-  }
-  .viewport canvas {
-    min-height: 280px;
-    height: 55vh;
-  }
   .map-tools {
     gap: 8px;
-  }
-  aside {
-    display: block;
   }
 }

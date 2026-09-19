@@ -37,10 +37,25 @@ pub struct Transporter {
 pub struct Enzyme {
     pub x: f64,
     pub y: f64,
-    pub dx: f64,
-    pub dy: f64,
+    #[serde(rename = "centerX")]
+    pub center_x: f64,
+    #[serde(rename = "centerY")]
+    pub center_y: f64,
     /// Periodic orientation coordinate mixing adjacent exact square actions.
     pub angle: f64,
+}
+pub mod founder;
+impl Enzyme {
+    /// Recognition and action are independent; this involution exchanges the endpoints.
+    pub fn between(from: [f64; 2], to: [f64; 2]) -> Self {
+        Self {
+            x: from[0],
+            y: from[1],
+            center_x: (from[0] + to[0]) * 0.5,
+            center_y: (from[1] + to[1]) * 0.5,
+            angle: 0.,
+        }
+    }
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -88,10 +103,10 @@ impl Machinery {
             .flatten()
             .any(|v| !v.is_finite() || !(0. ..=15.).contains(&v))
             || self.enzymes.iter().any(|e| {
-                !e.dx.is_finite()
-                    || !e.dy.is_finite()
-                    || e.dx.abs() > 15.
-                    || e.dy.abs() > 15.
+                !e.center_x.is_finite()
+                    || !e.center_y.is_finite()
+                    || !(0. ..=15.).contains(&e.center_x)
+                    || !(0. ..=15.).contains(&e.center_y)
                     || !e.angle.is_finite()
                     || !(-std::f64::consts::PI..std::f64::consts::PI).contains(&e.angle)
             })
@@ -105,11 +120,20 @@ impl Machinery {
             Target::species(sources[0]),
             Target::species(*sources.get(1).unwrap_or(&sources[0])),
         ];
-        let to = Target::species(chemistry.decomposition);
-        let offset = [
-            to.x - (from[0].x + from[1].x) * 0.5,
-            to.y - (from[0].y + from[1].y) * 0.5,
-        ];
+        let center = founder::center(
+            chemistry,
+            [sources[0], *sources.get(1).unwrap_or(&sources[0])],
+        );
+        let action = crate::chemical_group::Action::intervals(center.map(|v| (v * 2.) as u8));
+        let products = [
+            action.apply(sources[0]),
+            action.apply(*sources.get(1).unwrap_or(&sources[0])),
+        ]
+        .map(Target::species);
+        let to = Target {
+            x: (products[0].x + products[1].x) * 0.5,
+            y: (products[0].y + products[1].y) * 0.5,
+        };
         let stress = Target::species(
             chemistry
                 .properties
@@ -120,14 +144,7 @@ impl Machinery {
         Self {
             receptors: [from[0], from[1], to, stress],
             transporters: std::array::from_fn(|i| {
-                let p = if i < 2 {
-                    from[i]
-                } else {
-                    Target {
-                        x: chemistry::reflect(from[i - 2].x + offset[0]),
-                        y: chemistry::reflect(from[i - 2].y + offset[1]),
-                    }
-                };
+                let p = if i < 2 { from[i] } else { products[i - 2] };
                 Transporter { x: p.x, y: p.y }
             }),
             enzymes: std::array::from_fn(|i| {
@@ -135,8 +152,8 @@ impl Machinery {
                 Enzyme {
                     x: p.x,
                     y: p.y,
-                    dx: offset[0],
-                    dy: offset[1],
+                    center_x: center[0],
+                    center_y: center[1],
                     angle: 0.,
                 }
             }),
@@ -144,6 +161,8 @@ impl Machinery {
         }
     }
     fn mutate(&mut self, rng: &mut Random, c: &Config) -> bool {
+        // Specificity changes over R, not over the entire chemical domain.
+        let chemical_scale = c.physical_mutation_scale * c.affinity_radius;
         let points = self
             .receptors
             .iter_mut()
@@ -155,26 +174,27 @@ impl Machinery {
             points,
             rng,
             c.physical_mutation_rate,
-            c.physical_mutation_scale,
+            chemical_scale,
             0.,
             15.,
         );
-        let offsets = self.enzymes.iter_mut().map(|e| [&mut e.dx, &mut e.dy]);
-        let offsets_changed = mutation::mutate_pairs(
-            offsets,
+        let centers_changed = mutation::mutate_pairs(
+            self.enzymes
+                .iter_mut()
+                .map(|e| [&mut e.center_x, &mut e.center_y]),
             rng,
             c.physical_mutation_rate,
-            c.physical_mutation_scale,
-            -15.,
+            chemical_scale,
+            0.,
             15.,
         );
         let angles_changed = mutation::mutate_angles(
             self.enzymes.iter_mut().map(|e| &mut e.angle),
             rng,
             c.physical_mutation_rate,
-            c.physical_mutation_scale / c.affinity_radius,
+            chemical_scale / c.affinity_radius,
         );
-        points_changed || offsets_changed || angles_changed
+        points_changed || centers_changed || angles_changed
     }
     fn express(a: &Self, b: &Self) -> Self {
         let mean = |x: f64, y: f64| ((x + y) * 0.5) as f32 as f64;
@@ -190,8 +210,8 @@ impl Machinery {
             enzymes: std::array::from_fn(|i| Enzyme {
                 x: mean(a.enzymes[i].x, b.enzymes[i].x),
                 y: mean(a.enzymes[i].y, b.enzymes[i].y),
-                dx: mean(a.enzymes[i].dx, b.enzymes[i].dx),
-                dy: mean(a.enzymes[i].dy, b.enzymes[i].dy),
+                center_x: mean(a.enzymes[i].center_x, b.enzymes[i].center_x),
+                center_y: mean(a.enzymes[i].center_y, b.enzymes[i].center_y),
                 angle: angles::mean(a.enzymes[i].angle, b.enzymes[i].angle),
             }),
             membrane: Target {

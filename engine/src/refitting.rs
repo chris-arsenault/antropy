@@ -17,7 +17,11 @@ fn distances(a: &Machinery, b: &Machinery, radius: f64) -> [f64; 13] {
         result[4 + i] = crate::chemistry::distance_squared([x.x, x.y], [y.x, y.y]).sqrt();
         let (x, y) = (a.enzymes[i], b.enzymes[i]);
         result[8 + i] = crate::chemistry::distance_squared([x.x, x.y], [y.x, y.y]).sqrt()
-            + crate::chemistry::distance_squared([x.dx, x.dy], [y.dx, y.dy]).sqrt()
+            + crate::chemistry::distance_squared(
+                [x.center_x, x.center_y],
+                [y.center_x, y.center_y],
+            )
+            .sqrt()
             + radius * angles::difference(x.angle, y.angle).abs();
     }
     result
@@ -75,8 +79,8 @@ pub fn advance(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry,
         let (a, b) = (&mut cell.installed.enzymes[i], target.enzymes[i]);
         a.x = move_coordinate(a.x, b.x, fractions[8 + i]);
         a.y = move_coordinate(a.y, b.y, fractions[8 + i]);
-        a.dx = move_coordinate(a.dx, b.dx, fractions[8 + i]);
-        a.dy = move_coordinate(a.dy, b.dy, fractions[8 + i]);
+        a.center_x = move_coordinate(a.center_x, b.center_x, fractions[8 + i]);
+        a.center_y = move_coordinate(a.center_y, b.center_y, fractions[8 + i]);
         a.angle = angles::interpolate(a.angle, b.angle, fractions[8 + i]);
     }
     if cell.installed == old {

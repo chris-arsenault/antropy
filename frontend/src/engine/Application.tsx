@@ -1,77 +1,90 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Bridge } from "./bridge";
 import { WorldView } from "./WorldView";
-import { StatsPanel } from "./StatsPanel";
-import { Inspector } from "./Inspector";
-import { Settings } from "./Settings";
-import { PersistenceControls } from "./PersistenceControls";
-import { type LiveStatus } from "./types";
-import { SPEEDS } from "../ui/pacing";
-import { ChemicalPanel } from "./ChemicalPanel";
 import { initialChemicalDisplay } from "./chemicalDisplay";
+import { ObservationDock } from "./ObservationDock";
+import { type PanelKey } from "./observationNavigation";
+import { ObservationPanels } from "./ObservationPanels";
+import { RunControls, WorldStatus } from "./RunControls";
+import "./observation.css";
 
 export function Application() {
   const [bridge] = useState(() => new Bridge()),
     [message, setMessage] = useState("");
   const [chemistry, setChemistry] = useState(initialChemicalDisplay);
+  const [color, setColor] = useState(3);
+  const [active, setActive] = useState<PanelKey | null>(null);
+  const close = useCallback(() => setActive(null), []);
+  const inspect = useCallback(() => setActive("cell"), []);
+  const selectPanel = useCallback((panel: PanelKey) => {
+    setActive((current) => (current === panel ? null : panel));
+  }, []);
   const selectChemical = useCallback((species: number) => {
     setChemistry((v) => ({ ...v, species, base: "chemical" }));
   }, []);
   const view = useSyncExternalStore(bridge.subscribe, bridge.getSnapshot);
   const error = useCallback((e: unknown) => setMessage(String(e)), []);
-  const s = view.status,
-    definition = view.definition;
+  const dismiss = useCallback(() => setMessage(""), []);
   useVisibilitySave(bridge, error);
   return (
-    <main>
-      <header>
-        <div>
+    <main className="application">
+      <WorldView
+        bridge={bridge}
+        view={view}
+        error={error}
+        chemistry={chemistry}
+        setChemistry={setChemistry}
+        mapOpen={active === "map"}
+        close={close}
+        onInspect={inspect}
+        color={color}
+        setColor={setColor}
+      />
+      <header className="game-hud">
+        <div className="brand">
           <h1>Biotropy</h1>
-          <p>Spatial digital chemistry · individually evolving cells</p>
+          <span>Living chemistry</span>
         </div>
-        <RunControls bridge={bridge} status={s} error={error} />
+        <WorldStatus status={view.status} />
+        <RunControls bridge={bridge} status={view.status} error={error} />
       </header>
-      {(view.error || message) && <p role="alert">{view.error || message}</p>}
-      <div className="workspace">
-        <WorldView
-          bridge={bridge}
-          view={view}
-          error={error}
-          chemistry={chemistry}
-          setChemistry={setChemistry}
-        />
-        <aside>
-          {s && definition && (
-            <>
-              <ChemicalPanel
-                chemicals={s.chemicals}
-                definition={definition}
-                selected={chemistry.species}
-                select={selectChemical}
-              />
-              <StatsPanel status={s} definition={definition} bridge={bridge} error={error} />
-              <Inspector
-                bridge={bridge}
-                inspection={view.inspection}
-                definition={definition}
-                error={error}
-              />
-            </>
-          )}
-        </aside>
-      </div>
-      <div className="settings">
-        {definition && (
-          <Settings
-            key={definition.seed + ":" + JSON.stringify(definition.config)}
-            bridge={bridge}
-            definition={definition}
-            error={error}
-          />
-        )}
-        <PersistenceControls bridge={bridge} ready={!!s} />
-      </div>
+      <WorldNotices
+        error={view.error || message}
+        stop={view.status?.summary.stopReason ?? null}
+        dismiss={view.error ? null : dismiss}
+      />
+      <ObservationPanels
+        bridge={bridge}
+        view={view}
+        active={active}
+        close={close}
+        error={error}
+        chemistry={chemistry}
+        selectChemical={selectChemical}
+        inspect={inspect}
+        color={color}
+        setColor={setColor}
+      />
+      <ObservationDock active={active} select={selectPanel} />
     </main>
+  );
+}
+
+function WorldNotices({
+  error,
+  stop,
+  dismiss,
+}: {
+  error: string | null;
+  stop: string | null;
+  dismiss: (() => void) | null;
+}) {
+  if (!error && !stop) return null;
+  return (
+    <div className="world-notice" role={error ? "alert" : "status"}>
+      <span>{error || stop}</span>
+      {error && dismiss && <button onClick={dismiss}>Dismiss</button>}
+    </div>
   );
 }
 
@@ -90,67 +103,4 @@ function useVisibilitySave(bridge: Bridge, error: (e: unknown) => void) {
       window.removeEventListener("pagehide", save);
     };
   }, [bridge, error]);
-}
-
-function RunControls({
-  bridge,
-  status: s,
-  error,
-}: {
-  bridge: Bridge;
-  status: LiveStatus | null;
-  error: (e: unknown) => void;
-}) {
-  return (
-    <div className="run-controls">
-      <button
-        className="primary"
-        disabled={!s || !!s.summary.stopReason}
-        onClick={() => {
-          bridge.call("running", { value: !s?.running }).catch(error);
-        }}
-      >
-        {s?.running ? "Pause" : "Run"}
-      </button>
-      <button disabled={!s || s.running} onClick={() => bridge.call("step").catch(error)}>
-        Step
-      </button>
-      <SpeedControl bridge={bridge} status={s} error={error} />
-      <span role="status">
-        {s?.running ? "Running" : "Paused"} · {s?.recovery ?? "Loading chemistry engine"}
-      </span>
-    </div>
-  );
-}
-function SpeedControl({
-  bridge,
-  status: s,
-  error,
-}: {
-  bridge: Bridge;
-  status: LiveStatus | null;
-  error: (e: unknown) => void;
-}) {
-  return (
-    <label>
-      Speed{" "}
-      <select
-        disabled={!s}
-        value={s?.speed ?? 30}
-        onChange={(e) =>
-          bridge
-            .call("speed", {
-              value: e.target.value === "max" ? "max" : Number(e.target.value),
-            })
-            .catch(error)
-        }
-      >
-        {SPEEDS.map((speed) => (
-          <option key={speed} value={speed}>
-            {speed === "max" ? "Maximum" : `${speed} ticks/s`}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
 }

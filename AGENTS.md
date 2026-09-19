@@ -26,16 +26,21 @@ writing it in vector notation.
   follow from that shared law rather than a special waste-consumer mutation path.
 
 Current mathematical direction: the [transformation algebra white paper](docs/design/chemistry/transformation-algebra.md)
-records the group-theoretic requirement and its completion evidence. Physical v23 implements
+records the group-theoretic requirement and its completion evidence. Physical v27 retains
 the selected finite action `(S16 × S16) semidirect C2` on actual discrete identities. Enzymes
 compile smooth mixtures of at most eight exact actions; these irreversible mixtures are not
 group elements. D4 is the geometry-preserving subgroup, not the whole catalytic repertoire.
 The canonical plan's A0 derivation and A1–A4 evidence own the selected law and measured limits.
 Pre-projection composition, rotated fixtures or cost corrections alone cannot justify completion.
 The [enzyme correction and omission audit](docs/symmetry-completion-audit.md) retains prior evidence.
-Use the single [canonical mathematical plan](MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
-root `14120639-64cd-4840-b2d4-734e0aa4e123`, phases A0–A5. Old M0–M6 instructions are
-historical; M6 human review transfers to A5 without a pass. Keep environmental plans separate.
+Use the single [canonical mathematical plan](MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation),
+root `555cf223-16f7-4e8b-a10a-7160dbdeead2`, phases R0–R4. Old M0–M6 instructions are
+historical. A0–A5 are complete; the user accepts deployed v23 through 100,000 ticks.
+The current correction adds nonuniform potential basins, recognition-independent reflection
+centers, specificity-radius-scaled common mutation and explicitly funded environmental returns. Group
+membership alone does not establish accessible mutations, paid cycles or evolved recycling.
+Keep environmental plans separate. The [viewport UI pass](UI-OBSERVATION-PLAN.md) reorganizes
+observation before future phenotype work; it does not change the simulation.
 Do not replace a requested transformation change with a cost-only correction, or treat a
 founder-preservation clause authored in a plan as permission to omit the user's requirement.
 Trace completion claims back to the request, including defaults and ordinary live consumers.
@@ -62,6 +67,23 @@ phenotype's advantage is not a prerequisite for proceeding. Retain open question
 
 ## Governing mathematical direction
 
+The browser default world seed is27 (`Engine.create`), distinct from chemistry seed101.
+Validation of a default-run report must use the actual browser seed and reported failure window.
+The initial v25 chemical mutation scale used full domain width15; the extinction investigation
+replaces that unit with existing specificity radiusR, retaining the heavy-tail law and event rate.
+Do not claim a600tick startup certifies later viability, or undo rare large mutations to hide a failure.
+
+**Chemical geometry correction, September 18, 2026.** Definition v5 removes the privileged
+potential slope while retaining smoothness/coverage and unchanged other physical surfaces.
+Physical v27 retains separate enzyme recognition/action and shared impedance pressure
+in field, reservoir and cell motion. It subtracts finite owners' actual self-load and applies
+one pressure strength χ=.003. Shared environmental work ε=119.31341917861687 funds accepted
+cellular and abiotic conversions through the same local profile contraction; abiotic branches
+must afford their potential increase. It rejects earlier checkpoints. Preserve sparse bounded
+operations and explicit accounts. The world remains open; there is no finite environmental
+battery. The [current runtime](docs/design/chemistry/composed-runtime.md) and canonical R0–R4
+plan govern these changes. Earlier acceptance and measurements remain version-specific.
+
 **Exact chemical actions, September 18, 2026.** Physical checkpoint v23 replaces reflected
 product projection with exact bounded interval permutations and quarter turns. Existing five
 enzyme parameters select their continuous kinetic mixture; orientation no longer means a
@@ -71,7 +93,8 @@ use one compiler; inheritance preserves installed identity and paid refitting. M
 constants, mesh2, material accounts and borrowed rendering remain unchanged. The
 [canonical results](MATHEMATICAL-SYMMETRY-PLAN.md#a4-results) measure startup376ticks/s and
 saturated capacity43.54/21.38/16.03ticks/s. The latter two remain below30ticks/s; matching
-baseline does not meet that target. A5 owns pending human motion review. Old saves fail
+baseline does not meet that target. A5 human review passed on the deployed v23 run; the user
+reports real differentiation and acceptable speed through 100,000 ticks. Old saves fail
 explicitly; no compatibility adapter or alternative economy is added.
 
 **Enzyme transformations, September 18, 2026.** Checkpoint v22 adds inherited rotation to
@@ -197,15 +220,16 @@ sequence records implementation and its human review gate; [plan closeout](docs/
 
 The [current design](docs/design/README.md) governs top-down bacteria with heritable local RNNs.
 The active contract is 39 inputs, 24 recurrent units, nine outputs, fifteen funded stocks,
-four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v23.
+four receptors/transporters/unary enzymes each, a membrane coordinate and physical checkpoint v27.
 [Digital chemistry](docs/design/chemistry/README.md) replaces A/B processing, named toxins,
 matrix binding, automatic catabolism, sharing, prey yield and the carbon/oxygen cycle.
 A persisted smooth 16 × 16 chemical manifold supplies potential, diffusion, impedance and stress.
 Finite sources, paid transport/reactions, generic biomass, washout and death close the resource books.
-Extracellular weathering conserves material and accounts lost potential as heat. Geographic
+Cellular, extracellular and reservoir conversion share accounted local external work;
+abiotic conversion dissipates the supplied work plus potential drop. Geographic
 activity and chemical impedance set exposure; controllers see resulting local chemistry only.
-Chemical definition version 4 adds validated shared profiles to the joint diffusion/impedance
-coverage. The new compiler serves live installed machinery and the atlas. World stepping uses the
+Chemical definition version 5 adds multidirectional potential basins to the shared-profile and
+joint diffusion/impedance coverage. The compiler serves live installed machinery and the atlas. World stepping uses the
 composed artificial rules linked above. Inherited target changes
 retain installed machinery identity until paid refitting; birth never grants replacement stock.
 
@@ -222,8 +246,10 @@ No fallback controller, task dispatcher, offline optimizer or central parent sel
 population. The task byte remains opaque. Genotypes are immutable; acquired experience belongs to
 individuals until explicit birth-local assimilation.
 
-Run starts seed 27, paused at tick zero, with 48 identical founder genotypes split between two
-separated resource neighborhoods; most opportunities start unoccupied. New default worlds must
+Run starts seed 27, paused at tick zero, with 48 cells across four mutable founder genotypes
+for0→128→136→8→0, six of each in each of two separated resource neighborhoods.
+Reservoirs renew0/136; finite initial8/128 priming enters initial accounts. Most opportunities
+start unoccupied. New default worlds must
 start with at least two spatial colonies. Generic source zones and epochs remain selectable.
 Haploid clonal fission, mutation and paid inheritable plasticity remain active. The user reviews through Run and
 stats. Active systems need an ecological purpose and a physical opportunity proof point; evolved
@@ -259,9 +285,10 @@ Current generated experiment dumps remain local (`frontend/harness/artifacts/` i
 ledger preserves named measurements, and a report a study document links to is copied into
 `docs/evidence/`.
 
-The founder retains construction feedstock until storage is nearly full and has a membrane
-centered between its two initial metabolic product centers. These are mutable starting alleles, not
-physical exemptions. [Numerical probes](docs/design/chemistry/numerical-results.md) establish supplied
+The four founders start with input-centered membranes, mild product export, repair and reduced
+swimming. Their free and bound material starts54.3698% input and45.6302% product. These are
+mutable starting alleles and finite initial material, not physical exemptions.
+[Numerical probes](docs/design/chemistry/numerical-results.md) establish supplied
 funded reproduction and empty-source exhaustion; they do not establish sustained diversity or adaptation.
 
 ## Experiment operating policy

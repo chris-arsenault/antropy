@@ -52,6 +52,10 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         "habitatSample" => Ok(crate::trace::habitat(w)),
         "summary" => Ok(observation::summary(w)),
         "chemicalOverview" => Ok(crate::chemical_observation::overview(w)),
+        "chemicalWeb" => Ok(crate::chemical_roles::overview(
+            w,
+            &crate::chemical_roles::Query::parse(v)?,
+        )),
         "historyFixture" => crate::storage_diagnostics::history(w, number(v, "count")? as usize),
         "fieldFixture" => crate::storage_diagnostics::field(
             w,
@@ -407,6 +411,9 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
     w.sources.clear();
     crate::source_medium::project(w);
     w.genomes.retain(|id, _| *id == 1);
+    // Keep the registered capacity load independent of ordinary startup founders.
+    w.genomes
+        .insert(1, crate::genetics::Genotype::seed(&w.config, &w.chemistry));
     w.next_cell = 1;
     w.next_genome = 2;
     let mut rng = Random::new(w.seed ^ 0x10ad_u64);
@@ -424,8 +431,8 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
             for e in &mut a.chemistry.enzymes {
                 e.x = rng.unit() * 15.;
                 e.y = rng.unit() * 15.;
-                e.dx = rng.unit() * 30. - 15.;
-                e.dy = rng.unit() * 30. - 15.;
+                e.center_x = rng.unit() * 15.;
+                e.center_y = rng.unit() * 15.;
             }
             for t in &mut a.chemistry.transporters {
                 t.x = rng.unit() * 15.;

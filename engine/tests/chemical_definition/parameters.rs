@@ -12,7 +12,7 @@ fn actual_continuous_parameters_survive_checkpoint_separately_from_targets() {
         },
     )
     .unwrap();
-    w.cells[0].installed.enzymes[0].dx = 0.12345;
+    w.cells[0].installed.enzymes[0].center_x = 0.12345;
     w.cells[0].machinery_revision = 7;
     let bytes = w.snapshot().unwrap();
     let restored = World::restore(&bytes).unwrap();
@@ -41,7 +41,7 @@ fn invalid_genetic_and_installed_parameters_are_rejected() {
         w.genomes.get_mut(&1).unwrap().chromosomes[0]
             .chemistry
             .enzymes[0]
-            .dx = value;
+            .center_x = value;
         assert!(w.genomes[&1].validate(&w.config).is_err());
         let mut w = World::new(
             101,
@@ -54,7 +54,7 @@ fn invalid_genetic_and_installed_parameters_are_rejected() {
             },
         )
         .unwrap();
-        w.cells[0].installed.enzymes[0].dx = value;
+        w.cells[0].installed.enzymes[0].center_x = value;
         assert!(World::restore(&w.snapshot().unwrap()).is_err());
     }
 }

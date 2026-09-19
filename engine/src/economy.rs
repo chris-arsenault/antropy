@@ -32,6 +32,15 @@ pub fn conversion_work_ceiling(g: &Compiled, species: usize) -> f64 {
         .map(|edge| edge.work)
         .fold(0., f64::max)
 }
+pub fn local_work_ceiling(g: &Compiled, species: usize, c: &Config, signal: [f64; 2]) -> f64 {
+    g.operators
+        .enzymes
+        .iter()
+        .flat_map(|e| &e.conversions)
+        .filter(|e| e.substrate == species)
+        .map(|e| e.energy(c, signal)[0])
+        .fold(0., f64::max)
+}
 pub fn budget(
     c: &Config,
     chemistry: &Chemistry,
@@ -41,6 +50,13 @@ pub fn budget(
     inventory: f64,
     swim: f64,
 ) -> Budget {
+    let signal = crate::weathering::signal(std::array::from_fn(|k| {
+        local
+            .iter()
+            .zip(&chemistry.properties)
+            .map(|(q, p)| q * p.interaction[k])
+            .sum()
+    }));
     let mut cell = Cell::new(0, 0, g, c, chemistry, [0., 0.], 0.);
     cell.set_fixture_body(cell.body.map(|v| v * scale));
     cell.inventory.fill(inventory / 256.);
@@ -57,7 +73,7 @@ pub fn budget(
     let gross_work = imports
         .iter()
         .enumerate()
-        .map(|(s, q)| q * conversion_work_ceiling(g, s))
+        .map(|(s, q)| q * local_work_ceiling(g, s, c, signal))
         .sum::<f64>();
     let maintenance = maintenance_rate(&cell.body, 0., c);
     let transport = imports.iter().sum::<f64>() * c.transport_energy;
@@ -89,7 +105,7 @@ pub fn budget(
         for edge in &e.conversions {
             let q = rate * edge.catalytic * inside[edge.substrate];
             processing_capacity[edge.substrate] += q;
-            processing_value[edge.substrate] += q * edge.work;
+            processing_value[edge.substrate] += q * edge.energy(c, signal)[0];
         }
     }
     let processing_work = processing_capacity

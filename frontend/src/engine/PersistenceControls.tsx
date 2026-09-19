@@ -19,6 +19,7 @@ export function PersistenceControls({ bridge, ready }: { bridge: Bridge; ready: 
   return (
     <details
       className="panel"
+      open
       onToggle={(e) => {
         if (e.currentTarget.open && ready) run(refresh);
       }}

@@ -9,18 +9,18 @@ use crate::{
 
 fn transform_enzyme(e: Enzyme, q: u8, mirror: bool) -> Enzyme {
     let mut p = [e.x, e.y];
-    let mut d = [e.dx, e.dy];
+    let mut d = [e.center_x, e.center_y];
     if mirror {
         p[0] = 15. - p[0];
-        d[0] = -d[0];
+        d[0] = 15. - d[0];
     }
     let [x, y] = quarter_point(p, q);
-    let v = quarter_point([7.5 + d[0], 7.5 + d[1]], q);
+    let v = quarter_point(d, q);
     Enzyme {
         x,
         y,
-        dx: v[0] - 7.5,
-        dy: v[1] - 7.5,
+        center_x: v[0],
+        center_y: v[1],
         angle: angles::wrap(if mirror { -e.angle } else { e.angle }),
     }
 }
@@ -59,8 +59,8 @@ fn ordinary_funded_reactions_commute_with_all_square_frames() {
         initial.installed.enzymes = std::array::from_fn(|i| Enzyme {
             x: [0.2, 7.5, 14.7, 8.][i],
             y: [0.3, 4.2, 15., 9.][i],
-            dx: [8.3, -4.1, 2.2, 1.][i],
-            dy: [10., 7., -2.3, -3.][i],
+            center_x: [8.3, 4.1, 2.2, 1.][i],
+            center_y: [10., 7., 2.3, 3.][i],
             angle: [0.4, -0.9, 2.1, 0.][i],
         });
         initial.operators = Some(Operators::compile(
@@ -109,15 +109,7 @@ fn installed_round_trip_restores_material_without_creating_usable_work() {
             } else {
                 (product, source)
             };
-            let [x, y] = chemistry::coordinate(from);
-            let target = chemistry::coordinate(to);
-            Enzyme {
-                x,
-                y,
-                dx: target[0] - x,
-                dy: target[1] - y,
-                angle: 0.,
-            }
+            Enzyme::between(chemistry::coordinate(from), chemistry::coordinate(to))
         });
         cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
         let heat = cell.flows.reaction_heat;
@@ -167,7 +159,7 @@ fn environmental_actions_match_unique_in_bounds_edges_and_square_frames() {
             for s in 0..256 {
                 assert!((actual[u.apply(s)] - expected[s]).abs() < 1e-12);
             }
-            for k in 0..2 {
+            for k in 0..3 {
                 assert!((other[k] - account[k]).abs() < 1e-12);
             }
         }

@@ -8,12 +8,14 @@ if (!output) throw new Error("Provide a new output directory");
 const horizon = Number(process.argv[3] ?? 600);
 const weathering = process.argv[4] ?? "on";
 const registration = process.argv[5] ?? "ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign";
+const seed = Number(process.argv[6] ?? 27);
+if (!Number.isSafeInteger(seed) || seed < 0) throw new Error("Expected a nonnegative integer seed");
 if (![600, 3000].includes(horizon) || !["on", "off"].includes(weathering))
   throw new Error("Expected horizon 600|3000 and weathering on|off");
 mkdirSync(output);
 const wasmDigest = captureEngine(output);
 const engine = await loadEngine(),
-  world = engine.create(27, weathering === "off" ? { weatheringRate: 0 } : {}),
+  world = engine.create(seed, weathering === "off" ? { weatheringRate: 0 } : {}),
   db = openLedger();
 try {
   const definition = world.command<{ seed: number }>("definition"),
@@ -52,7 +54,7 @@ try {
     summary = world.command<Record<string, unknown>>("summary");
   const id = recordRun(db, {
     experiment: "numerical-production-startup",
-    label: `Ordinary seed27; local weathering ${weathering}; ${horizon} ticks`,
+    label: `Ordinary seed${seed}; local weathering ${weathering}; ${horizon} ticks`,
     driver: "wasm",
     seed: definition.seed,
     ticks: steps,

@@ -2,7 +2,7 @@
 
 The [composed runtime](composed-runtime.md) implements [computable chemistry](computational-foundation.md):
 heritable manifold kernels, weighted mixture reductions and bounded product mappings with
-actual funded capacity. Checkpoint v15 persists continuous targets and separate actual installed
+actual funded capacity. Checkpoint v27 persists continuous targets and separate actual installed
 coordinates. Earlier categorical direction, integer products and birth-time recycling are retired.
 
 Status: implemented, with resolved choices in [numerical design](numerical-engine.md). The user specified a small
@@ -20,7 +20,7 @@ not a runtime setting that can reinterpret existing genomes or checkpoints.
 | --- | --- | --- |
 | Receptor | Target x/y, investment | Receptor stock |
 | Transporter | Target x/y, investment | Transporter stock |
-| Enzyme | Substrate-center x/y, product-offset dx/dy, investment | Enzyme stock |
+| Enzyme | Recognition x/y, reflection centerX/centerY, orientation, investment | Enzyme stock |
 | Membrane | One compatibility x/y coordinate for the cell | Included in ordinary core/membrane construction |
 | General body | Core, motor and storage construction targets | Core, motor and storage stocks |
 
@@ -30,8 +30,10 @@ stocks are removed. General repair
 remains a core-supported action, with energy and replacement-material costs.
 
 Targets and membrane centers are bounded f64 coordinates in [0,15], reflected on mutation.
-Continuous product offsets lie in [-15,15] on each axis. Reflected bilinear products preserve
-discrete chemical identities and conserve material; local mutations cross grid boundaries smoothly.
+Reflection centers lie in[0,15] independently of recognition. Mixtures of interval reflections
+and quarter turns preserve discrete identities and material; local parameter changes are continuous.
+Chemical mutation uses the shared distribution in specificity units (recognition radius times
+physical scale); rare large jumps remain uncapped. The full-width15 scaling was rejected.
 Idle maps retain occupancy but change no material or work. Transport direction comes from signed
 neural effort, with no categorical exporter allele.
 
@@ -47,6 +49,8 @@ Slot capacity follows built stock, never investment directly. Each stock require
 assembly energy, occupied area and maintenance. Transport and conversion cost work; a catalytic
 price applies only to material that changes identity. Inactive machinery still occupies the body and pays maintenance; turning
 off transporter effort does not recover its construction cost.
+Conversion yield includes the same accounted local environmental work as abiotic transformations;
+the [runtime contract](composed-runtime.md) defines funding, frozen sampling and dissipation.
 
 Keep the current proportional-deficit growth rule toward twice the newborn blueprint, using the
 new stock vector. Include every stock and internal amount in body volume, storage and drag.
@@ -121,7 +125,7 @@ Nine output logits:
 | 5–8 | Transporter slot effort | Signed `saturation(logit)`, stored as `(1 + effort)/2` |
 
 Negative effort exports, zero holds, positive effort imports. Enzymes operate constitutively from
-installed stock, internal substrate and actual installed offsets. Receptor expression and biomass growth
+installed stock, internal substrate and actual installed actions. Receptor expression and biomass growth
 remain physiology, not additional action selectors. Synthesis followed by export is ordinary
 enzyme and transporter use; no output means toxin, signal, wall or sharing.
 
@@ -152,7 +156,7 @@ immutable genotype records. Acquired traces are assimilated into recurrent weigh
 state, byte, traces and contacts reset, receptor baselines initialize locally, damage persists.
 
 For optional diploid/selfing policies, define expression explicitly in the new genetic schema:
-average homologous continuous targets, offsets and investments. Recombine whole machinery-slot
+average homologous continuous targets, reflection centers and investments, with circular orientation means. Recombine whole machinery-slot
 alleles; do not splice coordinates from unrelated targets. These expression rules retain existing
 optional policies, not an instruction to add outcrossing or new genome modes.
 

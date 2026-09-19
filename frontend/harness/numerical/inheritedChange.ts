@@ -22,7 +22,7 @@ const snapshot = parent.snapshot();
 writeFileSync(`${output}/funded-daughters.antropy`, snapshot);
 const initialTick = parent.command<Summary>("summary").tick;
 parent.dispose();
-const changes = ["receptor", "importer", "enzyme-target", "enzyme-offset", "investment", "empty"];
+const changes = ["receptor", "importer", "enzyme-target", "enzyme-center", "investment", "empty"];
 const requested = process.argv[3];
 if (requested && !changes.includes(requested)) throw new Error("Unknown registered comparison");
 function mutate(g: Genotype, name: string) {
@@ -32,7 +32,7 @@ function mutateChromosome(c: Genotype["chromosomes"][number], name: string) {
   if (name === "receptor") c.chemistry.receptors[0].x += 0.12;
   if (name === "importer") c.chemistry.transporters[0].x += 0.12;
   if (name === "enzyme-target") c.chemistry.enzymes[0].x += 0.12;
-  if (name === "enzyme-offset") c.chemistry.enzymes[0].dx += 1;
+  if (name === "enzyme-center") c.chemistry.enzymes[0].centerX += 1;
   if (name === "investment") c.physical[7] += 0.12;
 }
 function sample(w: EngineWorld) {

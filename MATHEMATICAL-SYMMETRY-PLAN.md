@@ -1,11 +1,799 @@
 # Canonical mathematics — transformation algebra and runtime integration
 
-Adopted September 18, 2026. Sole open mathematical plan:
+<a id="regenerative-ecosystem-implementation"></a>
+
+## Regenerative ecosystem implementation — September 18
+
+Root `555cf223-16f7-4e8b-a10a-7160dbdeead2`. **R0–R4 implementation and automated verification complete. Human review pending.**
+The user requested an implementation plan for the
+[initial-ecosystem white paper](docs/design/chemistry/regenerative-ecosystem.md).
+The user authorized all phases after planning. Expansions and evidence remain in this document.
+
+### R0 execution
+
+Branch `f2b6085c-9ce9-429f-bc5d-3534cdee3b41`.
+
+1. Map production and preserve baseline: read compiler, metabolism, both weathering paths,
+   source/body projections, accounts and initialization. Archive source and WASM under
+   `frontend/harness/artifacts/regenerative-20260918/`. Run the registered capacity baseline.
+2. Calculate and register: `engine/examples/regenerative_budget.rs` evaluates the full installed
+   enzyme support on the paper's inventory and actual initial source medium without ticks.
+   Select frozen-stage sampling, common work arithmetic and initial delivery corrections.
+   R1's eight single-cell cases compare each primary converter in supplied versus absent drive;
+   R2's four300tick cases cover dilute/crowded source pairs and background/unequal inventory.
+   R3 reserves four remaining300tick cases for delivery interventions, then at most two1500tick
+   community placements. R4 retains the single5000tick observation and capacity checks.
+
+R0 evidence: baseline ledger4059–4061 measures40.72/19.87/14.46ticks/s, all cold
+continuations exact. Full compiled recognition has9/15/25/15 substrate rows; on the paper's
+two-species inventories the work rates reproduce0.07505/0.04659/0.04052/0.04052.
+The existing random reservoir mixtures give the two uphill founders negative startup work
+at some locations. Therefore R3 must arrange actual supporting mixtures and priming; increasing
+ε cannot repair a reversed medium. Complete dynamic delivery, competing abiotic products and
+body feedback remain R1/R3 checks, not established by this zero-tick source-only calculation.
+
+Selected integration: sample the shared body/source/field medium at the frozen pre-exchange
+footprints once per physiology event; reactions use that signal after paid exchange. Compile
+Δu and two profile coefficients; cache local yields only for occupied enzyme rows in the
+reaction scratch. Abiotic affordability masks rates before normalizing competing branches.
+External work is recorded only on accepted amounts. Both scalar reservoir and SIMD field
+paths use these terms. No per-cell scan of all bodies. Pressure calibration retains the actual
+source interface amount and includes background; its numeric χ is selected in R2.
+
+### Outcome and scope
+
+Deliver a starting world where complementary cellular transformations can repay their own
+costs and exchange products in productive resource neighborhoods. Implement the white paper's
+shared environmental-work coupling, finite-owner pressure correction and initial ecology on
+the existing runtime. Four authored founder types establish a starting opportunity; permanent
+four-type coexistence, a target population and an evolved food web are not acceptance conditions.
+
+Retain the chemical manifold, exact action algebra, heterogeneous property surfaces, kinetic
+attenuation, funded machinery, transport, body accounts, mutation and RNN controller boundary.
+Keep finite mobile renewing reservoirs, full mesh2, 320×240 geography, seed27, chemistry seed101,
+48 founders and 48 reservoirs, with at least two separated colonies. Preserve ordinary mutation
+and learning in the eventual default. Diagnostic interventions belong only in registered probes.
+
+The only new shared control coefficients are environmental work strength ε and pressure strength χ.
+No loss-matched renewal, global power allocator, new chemical property surface, separate force
+kernels, source personalities, waste-specific rewards, new controller inputs or history redesign.
+All authored starting alleles remain mutable and all starting material/work is accounted.
+Rust retains physical ownership and the worker renders borrowed WASM views with existing bounded
+observations and backpressure. No new server, publication, commit or deployment is in this plan.
+
+### Evidence, reuse and plan boundaries
+
+The white paper §§2–8 and Appendix A are the design basis. Its four-edge budgets are conditional
+on local medium and delivery; they do not establish a geographic configuration. The existing
+v26 pressure result below prevented overlap but did not establish sustained greater population
+at5k, and increased active chemical coverage and runtime cost. Preserve that negative result.
+
+| Existing owner | Planned change or reuse |
+| --- | --- |
+| `chemical_operators.rs`, `metabolism.rs` | Compile chemical-only potential/profile differences; evaluate local work once per frozen reaction stage and use the same result for funding and commit. Retain installed operators and donor arbitration. |
+| `weathering.rs`, `climate.rs`, `source_medium.rs` | Use the same supplied-work coefficient and affordability rule for dissolved and reservoir conversion; preserve bounded product topology, sparse execution and exposure. |
+| `medium_response.rs`, `footprint.rs`, `source_footprint.rs`, movement and field consumers | Subtract each finite owner's actual projected self-load; apply one pressure coefficient to finite-owner response and dissolved pressure. Reuse footprints and reductions. |
+| `accounting.rs`, configuration, physical state codecs, reports | Carry accepted external work into existing balance conventions; persist new controls and cumulative accounts, reconstruct derived caches, reject incompatible physics explicitly. |
+| `genetics/founder.rs`, controller seeding, World initialization, `sources.rs` | Author four ordinary genotypes, funded bodies, initial mixtures and two productive neighborhoods. Keep replenishment and source transformation ordinary. |
+| Resource-economy calculation, quick scenarios, numerical capacity fixtures, ledger | Reuse these for zero-tick budgets, short causal probes and matched performance. Extend bounded observations only for evidence unavailable from existing accounts. |
+| Atlas, chemical-role/web views and inspectors | Audit consumers of compiled work/topology; represent local-medium-dependent yield accurately, without presenting capability counts as actual flow. |
+
+This section is the next work in the canonical mathematics document. The earlier pressure and
+geometry sections retain their versioned evidence. Only the formulas explicitly changed here
+are superseded during implementation. The environmental plan, its correction branch and human
+handoff obligations remain separate and untouched. Their correction contract and the v26
+pressure record were read for this planning pass; older environmental execution appendices were
+not re-audited. Existing unrelated working-tree changes must be preserved.
+
+### Decisions and remaining engineering choices
+
+**Settled:** for each compiled row use the paper's linear profile difference, then take the
+positive local contraction: `w=ε[a·B]+`. Cells use `y=fη(Δu+w)−κz`; accepted amount q records
+external work `qw` and dissipation `q(Δu+w−y)`. Abiotic conversion captures no cellular work
+and requires `Δu+w≥0`. Identity and absent substrate/machinery supply no work. Products and
+new work cannot fund another reaction in the same stage. No hard-coded chemical-ID privileges.
+
+**Settled:** finite-owner pressure uses `Lother=L−(S/a)ΣW²` with the actual projected amount
+and matched footprint. Dissolved material retains collective `P=χL²/2`. The correction must
+cover bodies and reservoirs, not just source motion. Background load remains physical.
+
+**Provisional:** the circuit0→128→136→8→0, ε≈119.3134, reference stocks and equal founder
+counts are the first construction from the paper. Validate complete compiled recognition
+support, actual local medium, injury, reserves and geographic delivery before adopting them
+as defaults. Do not treat the four isolated arrows or H* as the full runtime budget.
+
+**Implementer-owned, resolved in R0–R3:** frozen medium sampling/update order; treatment of
+unaffordable abiotic branches before donor allocation; schema fields; χ; source mixture,
+holdings, release/renewal, priming and placement; and ordinary founder RNN weights. Resolve
+these from equations and bounded evidence, changing one mechanism at a time. A failed
+prediction narrows the correction; it does not authorize another architecture or parameter sweep.
+If a change beyond the paper is necessary, identify that concrete blocker before expanding scope.
+
+### R0 — Qualify equations and starting budgets
+
+Sulion phase `8d201f42-643e-4f77-9a0e-9ee5e8ec88f5`. No dependency.
+
+Map the selected equations to ordinary World, compiler, accounts and all scalar/vector consumers.
+Archive the current source/build identity and configuration for matched cost evidence before edits.
+Use the existing resource-economy path to calculate all four funded founders with complete
+recognition/product support, transport competition, injury/repair, upkeep, assembly, movement,
+learning and division reserves. Include abiotic competing routes and actual reservoir/body/field
+contributions to the medium. Derive approach/crowding loads for the pressure interval.
+
+Acceptance: a concrete initial candidate, explicit units and account signs, frozen update order,
+compiler/cache plan and registered short checks. Reproduce the paper's reference arithmetic
+and distinguish it from the complete candidate budget. No requirement to re-derive the whole
+chemistry design. An infeasible common pressure interval or inaccessible funded return is a
+specific unresolved finding, not a reason to fabricate an extra mechanism.
+
+### R1 — Integrate shared transformation work
+
+Sulion phase `87695965-afb3-4098-8b10-504306c5500f`. [depends on R0]
+
+Execution branch `c8febb4a-d47d-4510-9e9f-9d6e1df4c3ec`:
+1. Integrate common work and accounts in compiler/metabolism/weathering/climate, frozen World
+   sampling, flow ledger, physical v27, economy and observation consumers.
+2. Verify shared work with mixed-row/cycle/funding invariants and scalar/SIMD owner agreement.
+   Run the registered eight300tick founder cases once R3's shared genotype builder is available;
+   keep that acceptance pending rather than duplicate founder construction in a test-only path.
+
+Implement the shared coefficient in ordinary cellular reactions and both abiotic owners.
+Replace automatic exact uphill top-up. Evaluate local terms against frozen stage inputs;
+avoid allocating fresh per-cell full-field data or recomputing all organisms to sample one cell.
+Keep scalar and vectorized abiotic paths consistent. Thread actual accepted external input and
+dissipation through World accounts, death/lifetime totals as applicable, reports and persistence.
+Audit atlas/economy/inspection consumers that currently assume work is chemical-only.
+
+Acceptance: material and work close for downhill, uphill, mixed-product and closed-cycle
+fixtures; nonnegative dissipation; identity/zero-medium limits; donor and energy contention;
+unchanged installed identity through refit; no same-stage cascade or source release double-count.
+Chemical relabeling and geometric covariance retain their declared meaning. Cold-restored
+continuation agrees. One-cell probes establish paid return and its loss in an unfavorable
+medium for each founder, with actual uptake, repair and reserves. Positive algebra alone is
+insufficient. Version the changed physical semantics across every reader; retain no old economy.
+
+### R2 — Correct finite-owner pressure
+
+Sulion phase `88938461-0e36-4132-b795-aef77e0e1937`. [depends on R0, R1]
+
+Execution branch `fe75c3d9-0848-4448-9cd9-c58bf9d3b9f2`:
+1. Integrate exact finite-owner self-load from actual projected amounts and one shared χ in
+   field/source/body pressure. Preserve matched gradients and frozen caches.
+2. Verify isolated and pair responses, background load and finite-material delivery bounds.
+   For a60:40 initial0:136 mixture, signed attraction C=0.0241845 and impedance2.84980
+   give the reversal load `C/(χ i²)`. Selecting χ=0.003 puts it at0.99263. Initial50:50
+   through70:30 mixtures reverse at0.536–1.955; the common coefficient allows low-load
+   attraction while retaining crowded opposition. Check these predictions on actual footprints.
+
+R2 evidence: four300tick finite-source cases at two periodic placements match: dilute
+pair separation4→3.98166, crowded4→4.14875. The prior all-repulsive response is avoided
+without a second force kernel. Five pressure tests pass, including exact sampled self-load
+for bodies and interface-limited sources, retained dissolved background, covariance and
+conservative nonnegative field flow. Local concentrations and delivery in the inhabited
+community remain R3's shared acceptance, not implied by pair separation.
+
+R1 evidence: ledger4062–4069 records the eight single-cell controls. Driven uphill types
+construct0.51835/0.51736 material and survive300ticks; zero-drive controls die at20/16ticks.
+Downhill types are unchanged by removing drive. The8→0 specialist consumes local food
+faster than diffusion replenishes it and dies at253ticks after0.51454 construction;
+this is a negative delivery finding retained for R3. All130 then-current Rust unit tests pass.
+
+Implement self-load subtraction from the already deposited impedance amount and footprint.
+Derive one χ from the shared feasible interval at useful approach/crowding concentrations.
+Apply χ consistently in finite-owner response and conservative field-face pressure. Preserve
+interface scaling, mobility, speed bounds, donor floors and active support. Do not turn a
+roundoff correction into an unaccounted physical cutoff.
+
+Acceptance: isolated off-grid/periodic owners have zero self-force; matched scalar/vector
+responses and spatial/chemical covariance pass; field material stays nonnegative and conserved.
+Short source/body cases show attraction where productive overlap is sparse and opposition
+where crowded, including unequal amounts, mixed compositions and dissolved background.
+Check each directed response rather than assuming reciprocal pair equilibrium. Concentrations
+must remain useful for budgeted uptake; separated centers alone do not pass. Record the cost
+of the added footprint sum and active coverage. No pair scan or second spatial solver.
+
+### R3 — Build the initial ecosystem
+
+Sulion phase `f35038b3-c059-4d56-9600-a8711bdb07ad`. [depends on R1, R2]
+
+Execution branch `d0063627-6147-4f27-bb05-3331da3a7ce1`:
+1. Wire the R1-tested shared founder builder into World initialization; retain48 cells and
+   two colonies. Initial source0 shares lie in0.55–0.65, with136 completing the mixture,
+   so source media support the uphill circuit instead of randomly reversing it. Each source
+   footprint receives finite8/128 priming at sampled concentration0.05 from the existing0.1
+   priming setting; it is included in initial accounts, not renewed as a new source function.
+2. Register and measure producer-on/off delivery for the8→0 starvation finding, then two
+   community placements. Use full ordinary dynamics, actual local medium and funded bodies.
+   Confirm growth and uptake without confusing seeded product with producer-created product.
+
+R3 evidence: delivery controls4070–4073 start with no8 in field, bodies or inventories.
+With136→8 enabled, its neighbor imports0.21107 and converts0.20719 of8; disabling that
+enzyme yields exactly zero8 uptake/conversion. Swapped placements agree. Delivery helps but
+does not keep that isolated recipient alive for300ticks; it is not a self-sustaining pair.
+The two full community cases4074/4075 complete1500ticks with45/52 cells from8, without
+mutation. Final whole-population founder-genotype counts are32/3/8/2 and28/12/9/3,
+respectively, versus2/2/2/2 initially. All four paths remain active; this is a constructed
+opportunity, not evolved coexistence. Work residuals are3.1e-9/3.6e-9. R4 must still test
+the large ordinary default and cost, with mutation and learning active.
+
+Construct X/Y reflection actions and independent recognition through existing genome/compiler
+interfaces. Start with12 cells per type, six of each per colony. Fund the reference machinery,
+inventory, bound-material mixtures and usable work explicitly. Author transport, repair and
+motion as ordinary mutable RNN weights. No role identity or controller fallback enters physics.
+
+Use ordinary renewing reservoirs initially supplying0 and136, with accounted8/128 priming.
+Select geometry and supply using the qualified delivery/turnover budget; retain unoccupied
+neighborhoods. Source types continue changing through ordinary chemistry. Share the resulting
+startup configuration between browser and harness, paused at tick zero with the current map defaults.
+
+Acceptance: all256 chemical identities satisfy the two-action composition, while actual
+founder routes, products and funded bodies match the construction. Small community probes
+demonstrate producer export, recipient uptake/conversion and paid repair/growth at the same
+locations. Separate initial priming, source input, cell output and abiotic flow; if existing
+traces cannot identify provenance, use a matched producer intervention before claiming transfer.
+Do not require stable role shares or interpret authored founders as evolved differentiation.
+Keep mutation and learning active in the production default after controlled probes.
+
+### R4 — Verify operation and hand off
+
+Sulion phase `efa1f4c6-e2d8-4b3f-816a-b9dd1e584e4b`. [depends on R3]
+
+Execution branch `28512e73-7b36-40dc-8b50-8df0efcdc409`:
+1. Measure the registered5,000tick default and matched capacity. Inspect complete founder
+   descendant counts, actual chemical accounts, source spacing and cold continuation.
+2. Reconcile current formulas, defaults, consumers and schema; run full CI and verify worker
+   integration on the existing server. Preserve negative findings and human review status.
+
+Browser registration: use `browserApplication.mjs` with cached Chromium1234 against the
+existing `http://localhost:26000/` in a fresh isolated profile. Purpose: v27 startup defaults,
+worker/WebGL2 rendering, bounded inspection and local save. Stop at the first observation
+at/after300ticks or30seconds, outer cap120seconds; do not enable long-duration mode or faults.
+This operational check cannot supply human motion acceptance. No other simulation runs concurrently.
+
+After mechanism checks, observe one ordinary seed27 startup through at most5,000ticks.
+Measure local access, all four route flows, repair/growth, divisions/deaths, source clustering,
+chemical coverage and external material/work. Diagnose failures from these accounts rather
+than extending the run. Compare whole-runtime cost against the archived pre-change engine
+using identical workloads and ordinary census/inspection/render preparation.
+
+Acceptance: representative full-resolution use meets at least30ticks/s; report baseline and
+candidate48/2,000/2,000-growth capacity separately, including pre-existing saturated failures.
+Investigate a matched-case slowdown above10% before handoff; ecological support growth and
+per-operation cost must be distinguished. Do not trade resolution or ownership for a pass.
+Verify exact save/restore continuation, bounded observations and memory, and run make ci.
+Update the runtime/work-order/founder/account descriptions with actual constants and evidence.
+Human review must judge visible clustering, motion and chemical legibility on the existing
+server; automated completion does not mark that review passed. Record it as pending until
+received. No claim of long-run coexistence, endurance or a completed ecosystem.
+
+### Bounded verification envelope
+
+R0 registers each causal question, alternative explanation, initial conditions, predicted
+response and decision before execution. Read existing negatives first. Use production World
+and existing fixtures/ledger. Controlled probes freeze mutation and declare private learning,
+inherited learning and transfer; later default observation retains ordinary settings.
+
+- Mechanism probes: at most16 cases of300ticks each,120seconds per case. Select only cases
+  needed for work coupling, pressure and their controls; this is a ceiling, not a test quota.
+- Local community: at most two1,500tick cases with swapped placement,120seconds each, after
+  single-cell delivery and cost checks pass.
+- Ordinary startup: one seed27 run, at most5,000ticks/180seconds, samples/checkpoints every
+  1,000ticks plus initial/final. Stop on extinction, accounting failure or resource limits.
+- Total ecological ceiling12,800ticks and20minutes wall time, one simulation process.
+  No seed sweep, automatic retry, horizon extension or overnight campaign.
+- Capacity: baseline/candidate48/2,000/2,000-growth fixtures,10warmup+100measured ticks per
+  case,60seconds each. Reuse matching baseline evidence when its exact build and fixture qualify.
+- Keep generated artifacts local. Before runs, bound expected output and record available
+  memory/disk; ceilings3GiB RSS,1.5GiB WASM and2GiB new artifacts. Stop and retain partial
+  evidence at a limit. Reuse bounded traces rather than adding persistent reaction history.
+- Browser operations, if needed: register a specific integration purpose, isolated session
+  on the existing server, at most300ticks/120seconds. Never touch the user's run or storage.
+
+Bounded invariants belong in Rust/Vitest; ecological evidence belongs in the existing ledger.
+Run make ci and diff checks before implementation handoff. Failed predictions remain negative;
+branch a multi-step prerequisite from its blocked phase instead of hiding it in later work.
+
+### Current state and resume
+
+All five implementation phases are complete. Physical v27 uses shared local external work,
+χ=.003 pressure with finite-owner self-load subtraction, and the four ordinary mutable
+founders. Runtime documentation, atlas/reference reports, chemical-web affordability,
+accounting, schema readers and default initialization are reconciled. Full mesh2, borrowed
+worker rendering, mutation and funded inheritance remain intact. Earlier physical saves
+are explicitly rejected; human review requires a fresh world.
+
+R4 evidence is preserved in the [v27 report](docs/evidence/digital-chemistry/regenerative-v27/README.md),
+ledger4059–4079 and the local artifact directory. The ordinary seed27 run reaches5,000ticks
+in40.642seconds, ending203cells with150/18/23/12 descendants of the four initial roles.
+All four inputs are consumed; no sustained-coexistence or evolved-dependence claim follows.
+The separate producer-on/off control establishes actual producer-dependent uptake. The
+isolated8→0 starvation and recipient eventual death remain negative delivery findings.
+
+Source nearest-neighbor median changes5.07→6.24units; pairs within8units change44→23,
+and within1unit0→2. This retains geographic neighborhoods but includes some spread and
+overlap. The dilute/crowded mechanism tests establish attraction/repulsion; they do not
+certify the visible pattern. Human motion and legibility review remains pending.
+
+Matched initial capacity states yield40.31/19.88/14.42ticks/s versus40.72/19.87/14.46.
+Step-time changes stay within1%; no optimization or formula change was needed after measurement.
+The2,000-growth case ends1,742cells versus480, with higher WASM allocator high-water978.5MB
+versus841.0MB. Saturated2,000-cell workloads remain below30ticks/s. Exact continuation passes
+all six capacity cases and the5k checkpoint; the latter is26.1MB and restores in77.2ms.
+Global chemical identities reach256 by3k; sparse geographic support must still be measured
+in later endurance work. This run does not resolve far-run field accumulation or OOM limits.
+
+The registered isolated browser check uses the existing server, initializes v27 paused at0,
+reaches392ticks with61cells, renders48frames without skips, and reports154–182ticks/s in
+active observation windows. Local manual save takes231ms; no runtime errors or alerts occur.
+The first-observation stop overshoots300ticks by92 because sampling is asynchronous. The
+static screenshot verifies visible fields/source outlines and inspector content, not motion.
+No extra server, user-profile access, publication or deployment occurred.
+
+`make ci` passes149Rust tests and62Vitest tests, Clippy, formatting, TypeScript, docs and
+Terraform format; ESLint reports12warnings and no errors. The two initial failing fixture
+tests assumed a single starting genome; they now verify actual assignments. A new startup
+invariant checks six copies of each funded role per colony and exact installed circuit edges.
+Generated local artifacts total950MiB, below2GiB. Measured WASM high-water remains below1.5GiB;
+the default inspection/replay process ends at439MB RSS, not a measured campaign peak.
+
+Resume with the user's visual assessment on this fresh version. Do not re-run R0–R4, extend
+the ecological horizon or tune toward four-type coexistence merely to close the human gate.
+Environmental plan obligations remain separate.
+
+<a id="source-concentration-correction"></a>
+
+## Source concentration correction — September 18
+
+Root `b482e871-94d8-41c9-86a3-7486f13c13f3`. User reports coincident reservoirs by
+tick 1,000 and asks whether restoring separated resource opportunities improves population.
+Same seed27 saved evidence: v23 has zero pairs of centers within one unit at tick1k;
+corrected-mutation v25 has83. All1,128 initial pair coefficients change from negative
+with feedstocks0/80 to positive with0/5. Feedstock selection changed with the potential
+surface; movement code did not. Keep this definition, feedstocks, founders and inheritance.
+
+### Selected mathematical extension
+
+The shared feature projection has two signed chemical channels A,B and a positive impedance
+load L. Its bilinear attraction is `a*A - b*B`; mobility cannot change its direction.
+Extend the constitutive response with the scalar `P(L)=L²/2`. At the spatial scale of an
+owner, the force is `a*grad(A) - b*grad(B) - i*L*grad(L)`, where i is that owner's
+ordinary impedance property (the inventory or membrane-weighted mean for finite owners).
+This is the lowest-degree pressure whose slope vanishes at zero load and increases with
+load. Unit load is already the reference of the existing `1/(1+scale*L)` mobility law;
+there is no fitted source-spacing constant. This is an artificial constitutive law, not
+a thermodynamic work store, global energy minimizer or momentum-conserving particle solver.
+
+Use matched deposition/sampling W and the skew-adjoint periodic centered difference D.
+Finite owners first gather `L_W=W^T L` and `grad(L)_W=W^T D L`, then form the local
+pressure response. For an isolated profile proportional to W, `W^T D W=0`: no self motion,
+including off-grid centers. Do not instead gather `D(L²/2)` through a wide footprint;
+that different closure can produce discrete self force. The finite-owner closure evaluates
+the same local law at its resolved footprint scale; it is not claimed to be the exact
+gradient of one global many-body potential.
+
+For a field face, use `deltaP=(L_left+L_right)*(L_right-L_left)/2`, the exact divided
+difference of P. The force contracts the same three property rows. Reversing a face negates
+all drift terms. Bound them together before the existing conservative nonnegative stencil;
+retain the existing substep bound, donor floors and active four-species groups. The finite
+body velocity retains its rotation-invariant norm bound. Embodied impedance is projected
+with the existing body footprint into a derived pressure-only load, just as its signed
+interaction channels are; existing viscous mobility and weathering exposure keep their
+current field/reservoir load definition. No new chemical, genome or full-frame observation.
+
+Chemical relabeling with all property rows preserves contractions. Geographic reflection,
+integer mesh translation and axis exchange on a square test lattice commute with the
+stencil. Arbitrary local rotations commute with the vector law, not exactly with the grid.
+These are symmetries of the update; irreversible motion itself is not a group action.
+
+### Registration and gates
+
+First test zero/constant medium, isolated finite source/body at off-grid and periodic
+positions, attraction at low load versus opposition at high load, reversed pairs,
+coordinate covariance, field nonnegativity/material accounts and cold continuation.
+A cell-free source pair probe uses the actual shared operators for at most300ticks per
+case; mutation/controller/learning are absent. Preserve source material and check separation
+before a population run. This gates the claim that the new response can oppose collapse.
+
+Then run one ordinary seed27 candidate to5,000ticks,1,000tick samples/checkpoints and a
+180second wall cap, using the existing recorded evolution runner. Baseline is ledger4051
+(48→134→82→116→111→153 cells), not a rerun. Measure source nearest distances, pairs within
+one unit, source availability, population, paid divisions/deaths, damage, imports and
+account residuals. The intervention also changes passive field/body response, so any
+population effect is attributed to the common pressure correction, not isolated source
+spacing. A return to700–800 cells is a hypothesis, never a tuning criterion. Stop at the
+horizon, extinction, resource limit or accounting failure; no seed/horizon expansion.
+
+Use the standard48/2,000/2,000-growth capacity panel on archived baseline and candidate
+(10 warmup+100 measured ticks,60second case caps). Check saved-state continuation. Total
+new population horizon5,000ticks; at most four300tick mechanism cases; total execution wall
+budget12minutes excluding build/CI. Run make ci. Record negative results rather than sweep.
+Physical revision26 rejects earlier checkpoints so old bytes cannot silently resume under
+new mechanical laws. Existing artifacts stay available with their own archived engines.
+
+### Results and disposition
+
+Implemented the selected rule without tuning its coefficient or changing chemistry,
+feedstocks, founder, mutation, renewal, grid resolution or sparse floors. The pressure-only
+body impedance cache is derived and does not enlarge persisted state. Rendering/observation
+retain their two signed chemical channels and borrowed buffers.
+
+The300tick production-source pair checks retain attraction at dilute inventory (distance
+4→3.8381) and oppose crowded inventory (4→11.9999 on the24unit periodic fixture). A12unit
+translation gives the same distances to roundoff. Isolated off-grid source/body response,
+local rotations/reflections, chemical relabeling, grid reflection/axis exchange/translation,
+nonnegative field material and accounting pass. These checks establish a mechanical
+opportunity, not a preferred spacing or a thermodynamic equilibrium.
+
+Matched ordinary seed27, baseline ledger4051 versus candidate4055:
+
+| Tick | Baseline cells | Pressure cells | Baseline median nearest source | Pressure median nearest source |
+| --- | ---: | ---: | ---: | ---: |
+| 1,000 | 134 | 102 | 0.083 | 12.420 |
+| 2,000 | 82 | 255 | 0.055 | 14.556 |
+| 3,000 | 116 | 181 | 0.045 | 13.533 |
+| 4,000 | 111 | 128 | 0.072 | 14.376 |
+| 5,000 | 153 | 150 | 0.080 | 14.870 |
+
+At5k, center pairs within one unit fall140→0; overlapping drawn-radius pairs fall145→2.
+Renewal schedules, active source counts and released material agree (4,934.362 released).
+Mean living-cell damage falls0.2716→0.2047, but divisions rise1,055→1,548 and deaths950→1,446.
+All deaths in both complete ancestry records are classified as starvation: usable energy
+was exhausted, rather than the direct damage threshold being reached. This does not prove
+which local food, processing, exposure or allocation shortage exhausted that energy.
+The source collapse is corrected; the hypothesis of sustained greater population is not
+supported at this horizon. No700–800cell recovery is established. The pressure acts on
+field and cells too, so this is not a source-only causal intervention.
+
+The recorded run takes40.60→76.31seconds (123.15→65.52ticks/s including recorded observation).
+Occupied four-species groups at5k increase350,689→644,712; both worlds have reached all19,200
+geographic nodes. Wider chemical activity accompanies the higher dynamic workload. Matched
+standard capacity workloads, baseline ledgers4052–4054 versus4056–4058, measure
+43.36→38.15,20.89→19.65,15.63→14.26ticks/s at48/2,000/2,000-growth respectively:
+6–12% lower throughput. The pre-existing saturated2,000cell workloads remain below30ticks/s;
+no claim of intended saturated performance or later-run speed. No further tuning or horizon
+extension was performed.
+
+All six unique candidate checkpoints restore byte-exactly and paired single-step continuations
+agree; final checkpoint equals the tick5k checkpoint. Capacity continuation also passes.
+Candidate final material/work residuals are7.32e-8/2.62e-7. CI passes144 Rust and62 Vitest tests
+with twelve existing lint warnings. Integration checks caught and corrected a three-channel
+profile leaking into the two-channel observer, and updated explicit schema/report expectations.
+[Comparison evidence](docs/evidence/digital-chemistry/pressure-v26/response-comparison.json)
+retains measurements and binary/source digests; full checkpoints remain in local artifacts.
+Human motion review remains pending. No commit, push or deployment. A freshv26 world is
+required; earlier checkpoints remain paired with their earlier engines.
+
+<a id="chemical-geometry-correction"></a>
+
+## Chemical geometry correction — September 18 follow-up
+
+### Reopened: user reports extinction by tick5,000
+
+The browser default is seed27 (`Engine.create`); B0/B3 mistakenly exercised seed101 for only
+600ticks. Those checks establish startup only. User observation rejects continuing viability.
+Read current seed27 through5,000ticks or extinction, with1,000tick samples/checkpoints and
+180second wall cap, using the existing recorded runner. Compare archivedv23 on identical
+seed/default configuration. Then one targeted control through the same horizon if traces can
+distinguish mutation load from food/environment effects. Maximum15,000ticks/540seconds before
+a decision; no seed sweep or horizon extension. Existing600tick checks are the short pilot.
+Inspect whole-population material, work, exposure/repair, imports, reactions and inherited versus
+installed machinery. Reproduction followed by extinction is a finding, not run failure.
+The decision is which changed mechanism needs correction; no survival quota or selected founder.
+Any repair comparison gets its own explicit bounded registration after the cause is established.
+
+Results: ledger4048 v25 has3cells at5,000ticks; archivedv23 ledger4049 has323. V25 mean
+damage rises0.300→0.473→0.561→0.711 over ticks1k–4k, despite appreciable local feedstock.
+The reduced-scale control (ledger4050, physicalScale0.008) retains60cells, recovering from53
+at3k. This also reduces body mutation, so it does not isolate chemical magnitude by itself.
+The prior normalization multiplied ordinary chemical steps by the entire domain width15.
+That is five recognition radii and changes typical local mutations as well as rare jumps.
+
+Selected correction: express chemical mutation scale in the existing recognition radius R,
+the distance over which physical specificity changes, instead of the full domain width.
+Keep the same heavy-tail law and event rates, body/neural scales, reflection-center/action
+representation and environment. Default point scale becomes0.36 versus1.8 in v25 and0.12
+before the geometry change. There remains no magnitude cutoff; this retains greater chemical
+variation without redefining a local mutation in units of the entire manifold. Angular scale
+uses that same arc displacement/R. No new parameter or special waste mutation.
+
+Validate this single candidate on the actual default seed27 to5,000ticks, cadence1,000,
+180second wall cap, stopping at extinction or horizon. This isolates the chemical-unit change
+with body/neural parameters unchanged. Success means the measured early-collapse mechanism
+is relieved with continued paid reproduction, not a prescribed population or certification
+of long-run survival. Do not extend or tune if it fails. Ordinary accounts and every saved
+checkpoint must validate. Before that, repair the separate negative-flow roundoff defect:
+identity mixtures generated consumed flow as low as−1.3e-18, rejecting the tick3k checkpoint.
+Compute changed mass from non-self products and potential from their deltas, keeping identity
+exact instead of relaxing validation. Original invalid evidence stays unchanged.
+
+#### Extinction correction result
+
+Root `e51e7cfc-fdc6-4166-836c-141e356ec795`; prerequisite flow repair branch
+`9ede45f6-400e-4e9c-9dba-28e8d362ff70`. Ledger4051, same browser seed27: population
+48→134→82→116→111→153 at0/1k/2k/3k/4k/5k. Paid divisions total1,055, including279 in
+the final1,000ticks; mean damage falls from0.462 at2k to0.272 at5k. The rejected width-scale
+run ends at3cells with mean damage0.708 and479 total divisions. Final survivors still had
+local feedstock0.25–0.77, but damage per physiology event0.00655–0.00695 exceeded actual
+repair0.00606–0.00612 despite94.7–95.6% repair effort. Loss of useful specificity and processing,
+combined with exposure, is supported; simple global food exhaustion is not.
+
+The radius correction preserves chemical event frequency and the heavy-tail law. Over100,000
+draws the tested recognition pair changes19,038 times at either scale. Median nonzero change
+is0.251 versus0.084 before the geometry work and1.25 in the rejected width-scaled version.
+Product-neighborhood hits for0→138,119→187,15→240 are78/194/7 versus20/68/4 at the older
+scale. These are access counts, not claims of coordinated adaptation or statistical certainty
+for the rarest route. Body and neural constants remain unchanged in the correction.
+
+All initial and1k–5k checkpoints restore and replay exactly. Final material/work residuals are
+6.0e-8/−1.31e-7. Full CI passes140 Rust and62 Vitest tests; twelve existing lint warnings remain.
+The added256-case identity-mixture test requires exactly zero transformed mass/work/heat.
+The read-only `checkpoint_flows` example identified the preserved invalid checkpoint records.
+Summary evidence: [matched comparison](docs/evidence/digital-chemistry/geometry-v25/extinction-correction.json).
+Detailed checkpoints/genomes/traces remain under `frontend/harness/artifacts/geometry-extinction-*`.
+
+This corrects the reproduced early-collapse regression through the user's reported5k horizon.
+It does not certify later survival or show that mutation was the only ecological influence.
+No horizon extension, seed search, landscape retuning, environment change or deployment.
+The earlier B0–B3 results below retain their original width-scaled meaning and are superseded
+for continuing viability and mutation units by this correction. A fresh run uses the corrected
+units; restarting a collapsed population is not an automatic runtime intervention.
+
+User authorized planning and execution after the chemical-web review. Current canonical root
+`dfb36e51-2cd4-4688-9978-bd82e9179238` supersedes the completed v23 queue below without
+reinterpreting its evidence. This remains the sole mathematical working document. Existing UI
+changes stay in place; no commit, push, deployment or long campaign is authorized here.
+
+### Findings and outcome
+
+The default definition has decreasing potential on all 240 positive-X edges. Founder enzymes
+share displacement (8.5,10), while physical mutation's median selected displacement is 0.081.
+Recognition participates in constructing the product transform, and weathering's strictly
+downhill neighboring conversions cannot close a cycle. Common permutation-group membership
+did not establish common accessible operations or funded ecological return paths.
+
+Correct these relationships in order: chemical definition, evolutionary representation, then
+environmental integration. Keep discrete IDs, bounded square geometry, local controllers,
+funded installations, material/work accounting, immutable sharing, sparse thresholds and
+the borrowed render path. Do not add a real-world thermodynamic solver or special waste-use rule.
+
+### Milestones
+
+- B0: remove the privileged chemical potential gradient, establish smooth multidirectional
+  variation and retained physical-property coverage. Start with the potential surface whose
+  directional bias is demonstrated; inspect the remaining surfaces before changing their laws.
+  Version definitions/checkpoints deliberately, preserve reproducibility, and verify an ordinary
+  founder resource opportunity. No evolutionary claim from a surface plot.
+- B1 [depends on B0]: select and implement a common transformation/recognition representation
+  with meaningful composition and short general mutation paths from a substrate to its product.
+  Preserve paid refits and stock inheritance. Selection requires worked interior/boundary,
+  mutation and inverse examples; an ambient group alone is insufficient.
+- B2 [depends on B1]: use that transformation language for environmental return paths with an
+  explicit bounded external work supply. Preserve the open-world direction, local-medium
+  dependence and common field/reservoir implementation. Select accounting and sparse cost before
+  integration; no implicit unbounded subsidy or fabricated sunlight model.
+- B3 [depends on B2]: verify opportunities, accounts, continuation, integrated cost and UI.
+  Reconcile specifications and state exactly what remains an ecological hypothesis.
+
+### Evidence and budgets
+
+Read-only definition calculations and deterministic operator tests precede any population run.
+Use seed101 plus the eight existing definition seeds for geometry validation, not an ecological
+seed search. Preserve the existing property-range, coverage and neighborhood bounds unless
+a documented geometric argument establishes a better bound. No parameters tuned to population
+counts. Surface generation and compilation are cold work; live work must remain bounded.
+
+At most two 600-tick ordinary startups (B0/final; reuse archived v23 cost evidence), four constructed probes of at most
+300 ticks, and the existing three-case capacity panel (10 warmup + 100 measured ticks each,
+60-second case cap). Total headless wall cap 15 minutes excluding build/CI, principal ticks
+at most 3,000, artifacts below 1 GiB. Register each probe's concrete question before execution;
+these are ceilings, not required runs. Browser operational check only on the existing server,
+isolated profile, at most 300 ticks/120 seconds. No new server. Run full CI and diff checks.
+
+<a id="b0-expansion"></a>
+
+### B0 expansion
+
+Branch `6ed4dfdb-e01b-44fe-a892-411a380aeb37`.
+
+1. Select and implement the landscape in `chemistry.rs` and shared definition helpers. Retain
+   compact persisted coefficients, deterministic seed ownership and static property compilation.
+   Measure rising/falling edges, extrema, smoothness and original coverage. Correct schema and
+   definition consumers together; existing v23 evidence stays historical.
+2. Verify all existing definition fixtures, property consumers and founder opportunity. Read
+   zero-tick resource budgets before bounded startup; record negative results and fix a missing
+   physical opportunity rather than extending the run. Shared CI closes both steps.
+
+Current state: B0–B3 implementation and automated checks complete. Human motion judgment
+and ecological outcomes remain subsequent observations, distinct from these mechanism checks.
+
+#### B0 selected potential law
+
+Retain the existing bounded cosine basis and normalized range. Replace the privileged (1,0)
+mode with a seeded isotropic spectral band: modes with squared wavenumber 4 through 8 have
+independent zero-mean normal coefficients scaled by inverse squared wavenumber. This includes
+(0,2), (2,0), (1,2), (2,1), (2,2), treating axis exchange/reflection identically in distribution.
+It puts structure at roughly half-domain scale, above the three-unit recognition radius, with
+multiple basins instead of a single axial fall. No selected chemical ID or biological outcome
+participates. Other physical surfaces and interaction profiles remain unchanged in this first
+mechanism correction so their existing conditional opportunities are retained and measured.
+
+Definition generation conditions this small random field on explicit geometry: each axis must
+have at least a quarter of its edges rising and a quarter falling, at least two strict local
+maxima and minima, existing low/high coverage, and the existing 0.15 normalized adjacent-step
+bound. At most 256 deterministic cold candidates; failure is explicit. This is validation of
+a generated definition, not simulation seed selection or population tuning. Persist the selected
+coefficients and actual tables. Chemical definition v5 and physical v24 reject prior schemas.
+
+B0 checks: all 134 Rust and 62 Vitest tests and CI pass. Three fixed-ID fixtures were revised
+to use current source definitions or analytically reactive material. The historical potential
+hash fixture is superseded by topology/determinism coverage; unchanged properties will be
+compared between archived/current WASM directly, avoiding native/WASM trig-bit differences.
+The zero-tick economy predicts processing surplus 0.03856/0.04117 at pure second/first default
+feedstock, concentration0.03 and body scale1. Proceed with one seed101, 600-tick startup,
+120-second cap, to check actual uptake, paid construction/divisions and account closure.
+Ordinary mutation/learning remain enabled; no custom controller. This is startup operability,
+not evidence of evolved recycling. Local artifacts: `chemical-geometry-b0-startup` and
+`chemical-geometry-b0-atlas`; use the existing atlas exporter/plotter without advancing ticks.
+
+B0 complete: ledger4043, seed101,600ticks in1.435s (418ticks/s),138 paid divisions,137 living
+cells, material/work residuals4.1e-11/1.4e-9. Both axes have120 rising/120 falling edges and
+two strict maxima/minima. Archived/current WASM confirms exact equality of diffusion,
+impedance, stress and profile coefficients for all eight definition seeds. This establishes
+startup opportunity, not evolved recycling. The atlas shows the retained resistance gradient;
+it does not impose the universal energy ordering corrected here.
+
+<a id="b1-expansion"></a>
+
+### B1 — recognition-independent actions and mutation geometry
+
+Keep the proven exact bounded interval reflections and square orientations, but remove the
+recognition point from action construction. An enzyme now stores recognition a, global
+reflection center c and orientation theta. Its components are `J_(2cx,2cy) Qq`, interpolating
+neighboring integer reflection parameters and quarter-turn orientations (at most eight).
+The center lies in the same 0–15 square as every other chemical coordinate. A zero-angle
+integer component is an involution. For a,b in the square, center `(a+b)/2` exchanges them
+exactly when both endpoints are discrete; the complement of each reflected interval stays
+fixed. No wrapping, clamping or accidental long boundary translation is introduced.
+
+Recognition changes only catalytic acceptance; it never changes the transformation. Thus
+moving recognition from a to b can reuse the same operation on b, including its reverse for
+an involution. General orientation retains exact component inverse/composition through Action;
+one enzyme's bounded mixture is still not the entire group. Costs use actual changed products,
+and recognition/center/angular installation changes remain funded. Rename displacement fields
+to centerX/centerY throughout persisted genes, inspection and all authored fixture consumers.
+The canonical between-points constructor owns deliberate diagnostic routes. Founder selection
+chooses one shared reflection from chemical properties with positive processing on both supplied
+substrates, then constructs matching mutable export interfaces; it never sees population success.
+
+Use the existing common heavy-tail formula and event rates. Chemical coordinate scale becomes
+`physicalMutationScale × 15`, making this control a fraction of the shared domain; angular scale
+is the corresponding arc displacement divided by recognition radius. Body and neural loci keep
+their existing units. No special waste mutation or separate chemical rate. One mutation can
+reach any product neighborhood; quantify how often using the actual inherited-code path rather
+than inferring accessibility from group membership. Compare100,000 independent target draws at
+old/new scale, zero World ticks; report event rate, realized displacement and radius3 target hits.
+
+Steps: implement compiler/representation and all consumers with independent recognition,
+endpoint exchange, D4 and actual funded-reaction checks; then measure mutation accessibility,
+birth/refit/restore and CI. Future environment integration retains local sparse execution and
+uses the same bounded-reflection generators, with explicit work before permitting return paths.
+
+B1 branch `6437a6f5-8a79-4857-b679-f4a2b4d11deb`: 136 Rust tests pass; TypeScript passes.
+All65,536 ordered pairs exchange exactly with unchanged action when recognition moves.
+In100,000 ordinary machinery-inheritance draws, the selected recognition group changed19,038
+times at both scales. For0→138,119→187,15→240, radius3 product-neighborhood hits rose
+20→354,68→824,4→78. Median realized change rose0.084→1.24–1.26. These count recognition
+access only, not coordinated transport, affordable refits or ecological success. Independent
+center/orientation mutations can also alter the action. Existing funded-refit, actual-stock
+inheritance, continuation and eight-frame reaction checks pass. Physicalv25 rejects intermediate
+v24 because centers and offsets occupy identical byte shapes with different meanings.
+Historical displacement comparison executables now fail explicitly; recover their original
+commit to repeat historical evidence. Full CI remains the integrated B3 gate.
+
+<a id="b2-expansion"></a>
+
+### B2 — bounded externally driven return paths
+
+Keep four local branches and the existing medium response/rate/exposure. Author each neighbor
+conversion with the same interval-reflection action as an enzyme centered halfway between its
+endpoints. Recognition/kinetic selection can differ; the action and endpoint accounting cannot.
+The complementary parts of a reflection are irrelevant to a selected donor, not a different
+global map. Outward edges are identity and do no work.
+
+Remove the potential-order gate from medium-selected routes. A conversion s→t dissipates
+`q max(E_s-E_t,0)` or receives external work `q max(E_t-E_s,0)`. This is an explicit open-world
+drive, not energy stored in geographic vectors or a claimed sunlight simulation. Book field
+and reservoir work separately and include both in conservation. No new control: existing rate,
+local profile strength and shielding bound conversion and work. For exposed owned material M,
+elapsed rate-time h, signal norm u≤1 and potential range R=7.5, each update supplies at most
+`M R min(2hu,1)`. No material or zero medium means no work. Supply can continue over time,
+as appropriate for the retained open-world direction; it is not a finite lifetime energy store.
+
+Select this minimal drive before introducing sun/terrain fields. It removes the categorical
+ban on chemical recharging while preserving local environmental direction and sparse floors.
+Opposite medium can reverse an environmental route; an enzyme can express its exact reverse.
+Neither graph connectivity nor this constructed possibility establishes a stable ecosystem.
+
+Steps: implement shared routes, bounded work and all runtime/account consumers; verify
+field/reservoir parity, changed-medium reversals, paid environment→cell cycles and accounts.
+Use zero-tick operator assays first: one uphill selected pair, reverse cell enzyme, normal
+donor/work limiting; compare zero medium and reversed medium. No population run for this test.
+Preserve numerical-floor accounting and measure integrated cost in B3.
+
+B2 branch `310d8067-29c5-42ec-ae5f-db08b8c6e4cc` complete. The960 directed neighbor routes
+use the same midpoint reflection as enzymes;480 uphill directions are now expressible.
+Reversing the medium reverses edge engagement (donor shares still depend on other branches).
+Field/reservoir parity, work bounds, no same-event cascade, sparse floors, full accounts and
+checkpoint continuation pass. A constructed112→96 environmental route supplied0.00707538
+work; ordinary cell reverse processing captured0.00472512, with residual4.8e-17. This is a
+funded opportunity with authored installed machinery, not an evolved recycler.
+
+### B3 expansion — integration and handoff
+
+Complete CI, then inspect the current zero-tick economy before the remaining600-tick ordinary
+seed101 startup. Run the existing48/2000/2000-growth capacity panel (10 warmup,100 measured,
+60-second cap each), compare archivedv23 measurements, inspect accounts and exact restore.
+Run `browserObservationUi.mjs` on the existing port26000 with a fresh Chromium profile:
+purpose is current-schema startup, enzyme-center inspection, Web routes, Stats accounts,
+borrowed rendering and local save/restore on desktop/mobile. At most300ticks/120seconds.
+No long ecological experiment; no parameter tuning to counts. Preserve generated evidence
+locally and concise measurements in this plan. Reconcile current docs and all schema consumers.
+Human judgment of motion and long-run recycling remains the user's subsequent observation,
+not an automated completion claim.
+
+### B3 results
+
+Branch `9c808ab5-7170-479c-83a7-7bb670501b31`. Full `make ci` passes:139 Rust tests,
+62 Vitest tests, formatting, lint, TypeScript, docs and Terraform format. Twelve existing lint
+warnings remain. The checks caught two stale schema expectations and a missed diagnostic
+offset consumer; all were corrected. No mechanism was tuned to the resulting population.
+
+The zero-tick budget predicts positive processing surplus at all48 founder positions,
+range0.07357–0.21694. At concentration0.03 and body scale1, pure feedstocks give0.04497/0.04923,
+and an equal mixture0.05541. Ledger4044: seed101 reached600ticks in1.570s (382ticks/s),
+139 paid divisions,127 living cells,60 deaths. Material/work residuals were1.14e-8/5.99e-8.
+The environment supplied2.129 field work and2.664 reservoir work; cellular captured flow628.077
+mostly still consumes initially supplied chemical potential. This does not show evolved recycling.
+The definition-only B0 startup measured418ticks/s; the full correction measured8.6% lower
+throughput while executing different biological and source-conversion activity.
+
+| Saturated constructed workload | Archived v23 ticks/s | v25 ticks/s | Change |
+| --- | ---: | ---: | ---: |
+| 48 cells | 43.54 | 43.46 | −0.18% |
+| 2,000 cells | 21.38 | 20.83 | −2.55% |
+| 2,000 with growth | 16.03 | 15.66 | −2.33% |
+
+Ledger4045–4047: all100 measured ticks completed; all three checkpoint restores and continued
+bytes match exactly. Peak measured WASM allocation826MB versus871MB in the earlier growth
+fixture; changed growth outcomes prevent attributing this as an allocator improvement. Saturated
+2,000-cell workloads still miss30ticks/s. No new dense field pass or resolution reduction.
+
+The registered browser check passed21 desktop/mobile layouts, enzyme colors and Web modes,
+current cell inspection, local save/restore and worker error checks. It advanced17ticks in a
+6.65-second operational session on the existing server, using a fresh isolated profile.
+This validates operation and view bounds, not motion quality or browser throughput.
+
+Final WASM SHA256:`e9ac78a5825ad2518567cda1062e68309518389208929d9a63075e54540cdfdd`.
+Preserved [startup](docs/evidence/digital-chemistry/geometry-v25/startup.json),
+[capacity](docs/evidence/digital-chemistry/geometry-v25/capacity.json),
+[browser](docs/evidence/digital-chemistry/geometry-v25/browser.json), and
+[property surfaces](docs/evidence/digital-chemistry/geometry-v25/physical-properties.png).
+Full artifacts use `frontend/harness/artifacts/chemical-geometry-*` (under400MiB), including
+the B0 comparison, current checkpoints, atlas and browser screenshots. No long run, commit,
+push or deployment occurred. Physicalv25 requires a new world; old bytes fail explicitly.
+Diffusion/impedance/stress and profile surfaces retain their measured prior laws. In particular,
+the impedance gradient remains; removing the universal potential ordering was this definition
+correction's selected scope. Long-run diversity, product use and sustained loops remain open.
+
+## Historical v23 execution record
+
+Adopted and completed September 18, 2026. Canonical mathematical plan:
 `14120639-64cd-4840-b2d4-734e0aa4e123`. The existing root is retained so its evidence and
 unfinished obligations stay connected. Current phases are A0–A5 below; old M0–M6 records
 are historical. Execution of A0–A5 is authorized by the subsequent user instruction;
-publication remains outside scope. A0–A4 and A5's automated contracts/operation are complete.
-A5 remains open only for human motion acceptance.
+publication was subsequently authorized and v23 deployed from `3efa2446`. A0–A5 are complete.
+The user reports real differentiation and acceptable speed through 100,000 ticks, accepting
+the deployed run. This closes the human gate, not the separately deferred long-run cleanup.
 
 <a id="canonical-work-order"></a>
 
@@ -45,7 +833,7 @@ separate bespoke controls and a thermodynamic reconstruction are not.
 | A2 / 10 — Funded machinery and inheritance | Integrate targets, installed operations, paid partial refit, shared mutation, actual-stock inheritance and enabled expression paths. Update versioned state and consumers together; no free capabilities or implicit checkpoint adapter. | Complete |
 | A3 / 11 — Common runtime consumers | Reconcile recognition, transport, weathering/reservoir conversion, body accounts, shared features, atlas, inspection and economy with the selected algebra. Give each retained distinct operator a precise reason and guarantee. Audit geographic/controller representation claims without inventing a second mechanism. | Complete |
 | A4 / 12 — Opportunities and complete cost | Establish resource budgets, bounded physical opportunities, compiled/live equivalence, accounts, complete startup/capacity cost, mature-field and changed-machinery limits, memory, ownership and exact restore. Run CI. No ecological endpoint substitutes for an algebraic claim. | Complete |
-| A5 / 13 — Contracts and human review | Reconcile current contracts and evidence, run a registered isolated operational check on the existing server, and obtain actual human judgment of final motion/activity placement. Carries unfinished M6 review; no earlier version is retroactively approved. | Automated work complete; blocked on human review |
+| A5 / 13 — Contracts and human review | Reconcile current contracts and evidence, run a registered isolated operational check on the existing server, and obtain actual human judgment of final motion/activity placement. Carries unfinished M6 review; no earlier version is retroactively approved. | Complete; user accepts deployed v23 through 100,000 ticks |
 
 Stable phase IDs, in A0–A5 order: `f5e020f1-a269-4dc1-bf77-4a1653a319cd`,
 `cb958f3e-636a-4a0b-83c3-f95a855d317c`, `866cbb02-a097-4a3f-8f6c-df37d07425ca`,
@@ -318,7 +1106,7 @@ change, seed expansion or long ecological campaign is justified by these measure
 ## A5 execution — contracts and motion handoff
 
 Expansion `ef43cac6-d736-4aa4-852a-dec3a6011218`: automated contracts/operation, then actual
-human motion review. The second step stays open until the user supplies that judgment.
+human motion review. Both steps are complete; the user's acceptance is recorded below.
 
 Reconcile the current agent guide, work order, physical/body/installation contracts and
 white-paper implementation status. Retain the white paper as a pure design record; this plan
@@ -370,7 +1158,7 @@ transfer remains off by default and no exchange-order symmetry is claimed for it
 extends deterministic RNN/task-byte equality across every floating-point decision threshold
 or identical random-seed trajectory across differently ordered populations.
 
-### A5 automated results and remaining gate
+### A5 automated results and human acceptance
 
 The existing-server browser check passes: physical v23 starts paused at tick0 with48 founders,
 advances to tick388 with80 cells and25 rendered frames, and reports no ordinary error or
@@ -401,18 +1189,19 @@ Final `make ci` passes130 Rust and60 Vitest tests, formatting, Clippy, TypeScrip
 documentation links and Terraform formatting. ESLint retains13 existing warnings. Final
 documentation checks and `git diff --check` pass. No publication was performed.
 
-The only unfulfilled A5 step is the user's judgment of actual motion and activity placement
-on a fresh v23 world. [AGENTS.md](AGENTS.md#critical-rules) requires: “Human review is a real
-gate for motion.” Automated operation and source inspection cannot supply that decision.
-The root stays open; environmental plan statuses remain untouched. Physical v23 explicitly
-rejects earlier physical checkpoints, so review must begin with a new world.
+After commit, push and successful deployment of `3efa2446`, the user reports real
+differentiation and acceptable speed through 100,000 ticks and moves on to UI cleanup.
+This supplies A5's human acceptance. The A5 branch and root are complete; environmental
+plan statuses remain untouched. The report does not remove the measured saturated-capacity
+limits or establish days/weeks endurance. The next scoped work is the
+[viewport UI reorganization](UI-OBSERVATION-PLAN.md), followed by later phenotype work.
 
 ## Historical v21 work order and evidence
 
 Everything below records the earlier correction, including its then-current instructions and
 claims. It is retained for provenance, not a second work order. The canonical section above
 supersedes its execution sequence and exclusions. References below saying M6 is pending record
-its historical state; the live obligation now belongs to A5.
+its historical state; A5 carried that obligation and is now complete.
 
 Created 2026-09-18. Status: the v21 corrections and automated checks below completed;
 the user identified an omitted enzyme requirement. The

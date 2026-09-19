@@ -39,6 +39,9 @@ pub(crate) mod lanes {
     pub fn min(a: Pair, b: Pair) -> Pair {
         f64x2_min(a, b)
     }
+    pub fn nonnegative(a: Pair) -> Pair {
+        v128_bitselect(splat(1.), zero(), f64x2_ge(a, zero()))
+    }
     pub fn store(a: &mut [f64], value: Pair) {
         assert!(a.len() >= 2);
         unsafe {
@@ -95,6 +98,9 @@ pub(crate) mod lanes {
     }
     pub fn min(a: Pair, b: Pair) -> Pair {
         [a[0].min(b[0]), a[1].min(b[1])]
+    }
+    pub fn nonnegative(a: Pair) -> Pair {
+        a.map(|v| if v >= 0. { 1. } else { 0. })
     }
     pub fn store(a: &mut [f64], value: Pair) {
         a[..2].copy_from_slice(&value);
@@ -158,12 +164,17 @@ pub fn project_active(material: &[f32], rows: &Rows, mut mask: u64) -> [f64; 6] 
     values.map(lanes::total)
 }
 
-pub fn commit(material: &mut [f32], changes: &mut [f64], rows: &Rows) -> ([f64; 6], [f64; 2]) {
+pub fn commit(
+    material: &mut [f32],
+    changes: &mut [f64],
+    rows: &Rows,
+    mask: u64,
+) -> ([f64; 6], [f64; 2]) {
     assert_eq!(material.len(), SPECIES);
     assert_eq!(changes.len(), SPECIES);
     let mut values = [lanes::zero(); 6];
     let mut rounding = [lanes::zero(); 2];
-    for s in (0..SPECIES).step_by(2) {
+    for s in crate::field_activity::pairs(mask) {
         let before = lanes::load_material(&material[s..]);
         let requested = lanes::load(&changes[s..]);
         let after = lanes::store_material(
@@ -219,7 +230,7 @@ mod tests {
         for (actual, expected) in project(&material, &rows).into_iter().zip(initial) {
             assert!((actual - expected).abs() < 1e-10);
         }
-        let (change, loss) = commit(&mut material, &mut changes, &rows);
+        let (change, loss) = commit(&mut material, &mut changes, &rows, u64::MAX);
         assert!(changes.iter().all(|q| *q == 0.));
         let mut expected_loss = [0.; 2];
         for s in 0..SPECIES {

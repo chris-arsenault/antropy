@@ -9,6 +9,17 @@ food density and geometry remain adjustable. The first irregular patch arrangeme
 revisable hypothesis; the enduring goal is a large, uneven world with capable movement and legible
 local populations. Implementation phases and acceptance live in that design document.
 
+<a id="backlog-multicore-scaling"></a>
+
+## Deferred multicore scaling
+
+The user deferred multicore implementation on September 18. Preserve
+[the shared-memory design and P0–P4 milestones](../SCALING-PLAN.md#multicore-design)
+in paused Sulion plan `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
+Current work remains single-threaded. Ecology, persistent geography and directional climate
+design proceed in [the spatial isolation review](design/spatial-isolation-review.md);
+they do not depend on first implementing multicore execution.
+
 <a id="backlog-plan-carryover"></a>
 
 ## Requirements migrated from earlier plans

@@ -16,8 +16,10 @@ fn distances(a: &Machinery, b: &Machinery) -> [f64; 13] {
         let (x, y) = (a.transporters[i], b.transporters[i]);
         result[4 + i] = (x.x - y.x).abs() + (x.y - y.y).abs();
         let (x, y) = (a.enzymes[i], b.enzymes[i]);
-        result[8 + i] =
-            (x.x - y.x).abs() + (x.y - y.y).abs() + (x.dx - y.dx).abs() + (x.dy - y.dy).abs();
+        result[8 + i] = (x.x - y.x).abs()
+            + (x.y - y.y).abs()
+            + (x.center_x - y.center_x).abs()
+            + (x.center_y - y.center_y).abs();
     }
     result
 }
@@ -72,8 +74,8 @@ pub fn advance(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry,
         let (a, b) = (&mut cell.installed.enzymes[i], target.enzymes[i]);
         a.x = move_coordinate(a.x, b.x, fraction);
         a.y = move_coordinate(a.y, b.y, fraction);
-        a.dx = move_coordinate(a.dx, b.dx, fraction);
-        a.dy = move_coordinate(a.dy, b.dy, fraction);
+        a.center_x = move_coordinate(a.center_x, b.center_x, fraction);
+        a.center_y = move_coordinate(a.center_y, b.center_y, fraction);
     }
     cell.machinery_revision += 1;
     cell.operators.as_mut().unwrap().refit(

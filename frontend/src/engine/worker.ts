@@ -260,7 +260,7 @@ function validateLayers(next: ViewOptions) {
     throw new Error("Invalid overlays");
 }
 function validateColor(next: ViewOptions) {
-  if (!Number.isInteger(next.color) || next.color < 0 || next.color > 13 || next.exposure <= 0)
+  if (!Number.isInteger(next.color) || next.color < 0 || next.color > 15 || next.exposure <= 0)
     throw new Error("Invalid color mapping");
 }
 const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => unknown>> = {
@@ -268,6 +268,10 @@ const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => un
     publisher.acknowledge(Number(p.sequence));
   },
   view: setView,
+  chemicalWeb(p) {
+    requireSession().chemicalWeb.select(p);
+    publish();
+  },
   frame: present,
   running(p) {
     if (p.value && !renderer)

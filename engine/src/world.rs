@@ -6,7 +6,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 23;
+pub const VERSION: u32 = 27;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -54,6 +54,7 @@ impl World {
         let mut rng = Random::new(seed);
         let mut environment_rng = Random::new(seed ^ 0x656e765f726e67);
         let mut field = Field::new(config.width, config.height, config.mesh);
+        field.pressure_strength = config.pressure_strength;
         let (patch_centers, habitats) = crate::sources::landscape(&config, &mut environment_rng);
         let mut sources: Vec<_> = habitats
             .into_iter()
@@ -63,8 +64,13 @@ impl World {
         for s in &mut sources {
             s.release(config.source_priming, &mut field, &chemistry, &mut ledger);
         }
-        let g = Genotype::seed(&config, &chemistry);
-        let compiled = g.compiled.as_ref().unwrap();
+        crate::initial_ecology::prime(&sources, &config, &chemistry, &mut field);
+        let genomes: BTreeMap<_, _> = (0..config.founders.clamp(1, 4))
+            .map(|i| {
+                let g = crate::genetics::founder::circuit(&config, &chemistry, i);
+                (g.id, g)
+            })
+            .collect();
         let first = sources
             .first()
             .map(|s| [s.habitat.x, s.habitat.y])
@@ -81,6 +87,8 @@ impl World {
         let mut cells = Vec::new();
         let mut ancestry = Vec::new();
         for i in 0..config.founders {
+            let genome = (i % genomes.len()) as u64 + 1;
+            let compiled = genomes[&genome].compiled.as_ref().unwrap();
             let center = if i < config.founders.div_ceil(2) {
                 first
             } else {
@@ -90,7 +98,7 @@ impl World {
             let reach = 3. * rng.unit().sqrt();
             let mut cell = Cell::new(
                 i as u64 + 1,
-                1,
+                genome,
                 compiled,
                 &config,
                 &chemistry,
@@ -100,12 +108,13 @@ impl World {
                 ],
                 rng.unit() * std::f64::consts::TAU,
             );
+            crate::initial_ecology::fund(&mut cell, &config, i % 4);
             crate::sensing::initialize(&mut cell, compiled, &config, &field);
             ancestry.push(Ancestor {
                 id: cell.id,
                 parent: 0,
                 lineage: cell.id,
-                genome: 1,
+                genome,
                 born: 0,
                 ended: crate::ancestry::ALIVE,
                 cause: crate::ancestry::Cause::Alive,
@@ -114,6 +123,7 @@ impl World {
         }
         let next_cell = cells.len() as u64 + 1;
         let climate = crate::climate::Climate::new(&config, &chemistry);
+        let next_genome = genomes.len() as u64 + 1;
         let mut world = Self {
             version: VERSION,
             seed,
@@ -127,10 +137,10 @@ impl World {
             cells,
             sources,
             patch_centers,
-            genomes: BTreeMap::from([(1, g)]),
+            genomes,
             ancestry,
             next_cell,
-            next_genome: 2,
+            next_genome,
             ledger: Ledger::default(),
             events: vec![],
             stop_reason: None,
@@ -179,6 +189,7 @@ impl World {
         }
         let now = || clock.map_or(0., |f| f());
         let mut started = now();
+        self.field.pressure_strength = self.config.pressure_strength;
         for c in &mut self.cells {
             c.flows = Default::default();
         }
@@ -210,6 +221,7 @@ impl World {
             self.ledger.numerical_material += balance.roundoff_matter;
             self.ledger.numerical_energy += balance.roundoff_energy;
             self.ledger.weathering_heat += balance.weathering_heat;
+            self.ledger.weathering_work += balance.weathering_work;
             self.ledger.weathered_material += balance.weathered_material;
             self.ledger.sheltered_conversion += balance.sheltered_conversion;
         }
@@ -224,6 +236,16 @@ impl World {
         stages[3] = now() - started;
         started = now();
         if physiology {
+            let signals: Vec<_> = sites
+                .iter()
+                .map(|row| {
+                    crate::weathering::signal(std::array::from_fn(|k| {
+                        row.iter()
+                            .map(|&(n, a)| a * self.field.medium_signal(n)[k])
+                            .sum()
+                    }))
+                })
+                .collect();
             for (row, c) in sites.iter_mut().zip(&self.cells) {
                 *row = crate::footprint::sites(c, &self.config, &self.field);
             }
@@ -241,7 +263,7 @@ impl World {
             stages[4] = now() - started;
             stages[8] = self.exchange.preparation_ms;
             started = now();
-            self.physiology(self.field_elapsed);
+            self.physiology(self.field_elapsed, &signals);
             self.field_elapsed = 0.;
         }
         stages[5] = now() - started;
@@ -294,8 +316,8 @@ impl World {
             crate::sensing::adapt(cell, &self.config, dt);
         }
     }
-    fn physiology(&mut self, dt: f64) {
-        for cell in &mut self.cells {
+    fn physiology(&mut self, dt: f64, signals: &[[f64; 2]]) {
+        for (cell, &signal) in self.cells.iter_mut().zip(signals) {
             let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
             let load =
                 crate::sensing::stress_load(cell, g, &self.config, &self.field, &self.chemistry);
@@ -309,6 +331,7 @@ impl World {
                 &self.chemistry,
                 dt,
                 self.trace.is_some(),
+                signal,
             );
             if let Some(t) = &mut self.trace {
                 t.reactions(cell, &work);
@@ -370,12 +393,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY23\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY27\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY23\0")
-            .ok_or("Unsupported physical checkpoint; v23 required")?;
+            .strip_prefix(b"ANTROPY27\0")
+            .ok_or("Unsupported physical checkpoint; v27 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
@@ -383,6 +406,7 @@ impl World {
         }
         world.validate()?;
         world.field.rebuild();
+        world.field.pressure_strength = world.config.pressure_strength;
         world.climate = crate::climate::Climate::new(&world.config, &world.chemistry);
         for s in &mut world.sources {
             s.rebuild(&world.config, &world.field);

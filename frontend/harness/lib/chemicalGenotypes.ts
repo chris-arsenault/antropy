@@ -1,5 +1,10 @@
 import { type Engine } from "../../src/engine/client";
-import { type Definition, type EngineConfig, type Genotype } from "../../src/engine/types";
+import {
+  type Definition,
+  type EngineConfig,
+  type Genotype,
+  type Target,
+} from "../../src/engine/types";
 
 export interface ChemicalContext {
   config: EngineConfig;
@@ -10,6 +15,12 @@ export interface ChemicalContext {
 export const chemicalContext = (engine: Engine, config: Partial<EngineConfig> = {}) =>
   engine.command<ChemicalContext>("configuration", { config });
 export const coordinate = (species: number) => ({ x: Math.floor(species / 16), y: species % 16 });
+export const enzymeBetween = (from: Target, to: Target) => ({
+  ...from,
+  centerX: (from.x + to.x) / 2,
+  centerY: (from.y + to.y) / 2,
+  angle: 0,
+});
 export function stressSpecies(context: ChemicalContext) {
   return context.chemistry.properties.reduce(
     (best, p, s, all) => (p.stress > all[best].stress ? s : best),
@@ -52,8 +63,8 @@ export function detoxGenome(enabled: boolean, context: ChemicalContext): Genotyp
     c.chemistry.transporters[1] = { ...from };
     c.chemistry.enzymes[1] = {
       ...from,
-      dx: enabled ? to.x - from.x : 0,
-      dy: enabled ? to.y - from.y : 0,
+      centerX: enabled ? enzymeBetween(from, to).centerX : 0,
+      centerY: enabled ? enzymeBetween(from, to).centerY : 0,
       angle: 0,
     };
   }

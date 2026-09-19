@@ -84,9 +84,9 @@ fn geometry(chemistry: &Chemistry) -> Value {
 }
 
 fn motion() -> Value {
-    let axis = movement::passive([1., 0.], [[1., 0.], [0., 0.]], 1., 1.);
+    let axis = movement::passive([1., 0., 0.], [[1., 0., 0.], [0., 0., 0.]], 0., 1., 1.);
     let d = std::f64::consts::FRAC_1_SQRT_2;
-    let diagonal = movement::passive([1., 0.], [[d, 0.], [d, 0.]], 1., 1.);
+    let diagonal = movement::passive([1., 0., 0.], [[d, 0., 0.], [d, 0., 0.]], 0., 1., 1.);
     let a = axis[0].hypot(axis[1]);
     let b = diagonal[0].hypot(diagonal[1]);
     json!({"axisSpeed":a,"diagonalSpeed":b,"diagonalRelativeLoss":1.-b/a,
@@ -103,8 +103,8 @@ fn reflected_costs() -> Value {
             machinery.enzymes[0] = antropy_engine::genetics::Enzyme {
                 x: 14.,
                 y: 7.,
-                dx,
-                dy: 0.,
+                center_x: dx,
+                center_y: 0.,
                 angle: 0.,
             };
             let operators =
@@ -180,6 +180,9 @@ fn accounts(chemistry: &Chemistry) -> Value {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    if antropy_engine::world::VERSION >= 25 {
+        return Err("Historical displacement experiment retired: use its original commit and schema; reflection centers are not offsets.".into());
+    }
     let path = std::env::args()
         .nth(1)
         .ok_or("Usage: symmetry_audit <new-report.json>")?;

@@ -129,6 +129,15 @@ fn stored_inventory_changes_without_release_and_source_responses_are_frozen() {
     let mut c = config();
     c.source_priming = 0.;
     c.founders = 0;
+    let chemistry = Chemistry::new(c.chemistry_seed).unwrap();
+    let op = crate::weathering::Operators::new(&chemistry);
+    let species = (0..256)
+        .find(|&s| {
+            let signal = crate::weathering::signal(chemistry.properties[s].interaction);
+            (0..4).any(|j| op.heat[j][s] > 0. && op.local(s, j, signal).0 > 0.)
+        })
+        .unwrap();
+    c.source_species = vec![species];
     let mut w = World::new(27, c).unwrap();
     for source in &mut w.sources {
         source.rate = 0.;
@@ -209,7 +218,7 @@ fn local_source_footprints_match_full_periodic_reference_without_duplicate_nodes
 }
 
 #[test]
-fn source_response_uses_medium_and_processing_conserves_material_without_uphill_products() {
+fn source_response_uses_medium_and_processing_accounts_for_uphill_products() {
     let c = config();
     let chem = Chemistry::new(101).unwrap();
     let mut field = Field::new(24., 24., 2.);
@@ -240,12 +249,20 @@ fn source_response_uses_medium_and_processing_conserves_material_without_uphill_
     for s in 0..256 {
         let mut row = [0.; 256];
         row[s] = 2.;
-        crate::weathering::Operators::new(&chem).inventory(&mut row, medium.signal, 0.5);
+        let accounts =
+            crate::weathering::Operators::new(&chem).inventory(&mut row, medium.signal, 0.5);
         assert!((row.iter().sum::<f64>() - 2.).abs() < 1e-14);
+        let energy: f64 = row
+            .iter()
+            .zip(&chem.properties)
+            .map(|(q, p)| q * p.potential)
+            .sum();
+        assert!(
+            (2. * chem.properties[s].potential + accounts[2] - accounts[1] - energy).abs() < 1e-12
+        );
         for (target, amount) in row.into_iter().enumerate() {
             assert!(amount >= 0.);
             if amount > 0. {
-                assert!(chem.properties[target].potential <= chem.properties[s].potential);
                 if target != s {
                     converted += amount;
                 }
@@ -276,7 +293,22 @@ fn moving_sources_rebuild_exactly_and_account_for_inventory_conversion_across_re
     let mut c = config();
     c.source_lifetime = 2.;
     c.source_gap = 1.;
+    let chemistry = Chemistry::new(c.chemistry_seed).unwrap();
+    let op = crate::weathering::Operators::new(&chemistry);
+    let species = (0..256)
+        .find(|&s| {
+            let signal = crate::weathering::signal(chemistry.properties[s].interaction);
+            (0..4).any(|j| op.heat[j][s] > 0. && op.local(s, j, signal).0 > 0.)
+        })
+        .unwrap();
+    c.source_species = vec![species];
     let mut w = World::new(27, c).unwrap();
+    // Short-lived batches are tiny: provide an explicit finite medium for this conversion check.
+    for n in 0..w.field.nx * w.field.ny {
+        w.field
+            .add(n, species, 4. * w.config.mesh.powi(2), &w.chemistry);
+    }
+    crate::diagnostics::initialize(&mut w);
     for _ in 0..40 {
         let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
         let before = w.snapshot().unwrap();

@@ -5,6 +5,7 @@ const STATUS_KEYS = new Set([
   "workerWork",
   "summary",
   "chemicals",
+  "chemicalWeb",
   "running",
   "speed",
   "throughput",
@@ -19,6 +20,11 @@ const STATUS_KEYS = new Set([
 
 /** Fail before structured clone. This is a display budget, never an ecology/population limit. */
 export function checkObservationBudget(delta: ObservationDelta) {
+  if (
+    delta.status.chemicalWeb &&
+    (delta.status.chemicalWeb.rows.length > 64 || delta.status.chemicalWeb.sources.length > 256)
+  )
+    throw new Error("Chemical web observation exceeds its 64-route or 256-source limit");
   if (delta.status.chemicals && delta.status.chemicals.rows.length > 12)
     throw new Error("Chemical observation exceeds 12 rows");
   if (Object.keys(delta.status).some((key) => !STATUS_KEYS.has(key)))

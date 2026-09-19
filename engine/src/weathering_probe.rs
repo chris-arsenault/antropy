@@ -25,6 +25,7 @@ pub fn run(w: &World) -> Value {
         }
         let initial = field.totals(&w.chemistry);
         let (mut matter_loss, mut energy_loss, mut heat, mut converted) = (0., 0., 0., 0.);
+        let mut work = 0.;
         let mut samples = vec![];
         for step in 0..75 {
             climate.prepare(&config);
@@ -38,6 +39,7 @@ pub fn run(w: &World) -> Value {
             matter_loss += b.matter + b.roundoff_matter;
             energy_loss += b.energy + b.roundoff_energy;
             heat += b.weathering_heat;
+            work += b.weathering_work;
             converted += b.weathered_material;
             if (step + 1) % 15 == 0 {
                 samples.push(json!({"seconds":(step+1) as f64*0.8,
@@ -48,9 +50,9 @@ pub fn run(w: &World) -> Value {
         let species = totals(&field);
         results.push(
             json!({"medium":medium,"enabled":enabled,"species":species,"samples":samples,
-            "heat":heat,"converted":converted,"initial":initial,"final":final_state,
+            "heat":heat,"externalWork":work,"converted":converted,"initial":initial,"final":final_state,
             "materialResidual":initial.0-final_state.0-matter_loss,
-            "energyResidual":initial.1-final_state.1-energy_loss-heat}),
+            "energyResidual":initial.1+work-final_state.1-energy_loss-heat}),
         );
     }
     json!({"modelSeconds":60,"steps":75,"seed":w.seed,"chemistrySeed":w.chemistry.seed,

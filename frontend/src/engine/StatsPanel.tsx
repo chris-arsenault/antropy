@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { type Bridge } from "./bridge";
 import { type Definition, type HistoryPoint, type LiveStatus } from "./types";
-import { GenealogyPanel } from "./GenealogyPanel";
 import { EvolutionPanel } from "./EvolutionPanel";
 
 const TRAITS = [
@@ -166,17 +164,7 @@ function Membranes({ status }: { status: LiveStatus }) {
     </details>
   );
 }
-export function StatsPanel({
-  status,
-  definition,
-  bridge,
-  error,
-}: {
-  status: LiveStatus;
-  definition: Definition;
-  bridge: Bridge;
-  error: (e: unknown) => void;
-}) {
+export function StatsPanel({ status, definition }: { status: LiveStatus; definition: Definition }) {
   const s = status.summary,
     l = s.ledger;
   return (
@@ -198,23 +186,40 @@ export function StatsPanel({
         ))}
       </dl>
       <Chart points={status.history} label="Living population" value={(p) => p.population} />
-      <p>
-        Older samples are thinned; {status.history.length} observations retained. Counts and trait
-        differences do not establish evolutionary benefit.
-      </p>
-      <GenealogyPanel status={status} bridge={bridge} error={error} />
+      <p>{status.history.length} retained observations. Older samples are thinned.</p>
+      <dl className="metrics">
+        <div>
+          <dt>Built material</dt>
+          <dd>{s.biomass.toFixed(2)}</dd>
+        </div>
+        <div>
+          <dt>Usable cell energy</dt>
+          <dd>{s.cellEnergy.toFixed(2)}</dd>
+        </div>
+        <div>
+          <dt>Living genotypes</dt>
+          <dd>{s.genomes.toLocaleString()}</dd>
+        </div>
+        <div>
+          <dt>Highest generation</dt>
+          <dd>{s.generation.toLocaleString()}</dd>
+        </div>
+      </dl>
       <EvolutionPanel status={status} />
       <Membranes status={status} />
       <Traits status={status} />
-      <dl className="metrics">
-        {metricRows(status).map(([label, value]) => (
-          <div key={label}>
-            <dt>{label}</dt>
-            <dd>{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <p>Accounting errors measure balance, not activity.</p>
+      <details>
+        <summary>Resource accounting and runtime</summary>
+        <dl className="metrics">
+          {metricRows(status).map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p>Accounting errors measure balance, not activity.</p>
+      </details>
       {s.stopReason && <p role="status">{s.stopReason}</p>}
       <details>
         <summary>Configuration and cumulative resource accounting</summary>
@@ -241,9 +246,12 @@ function metricRows(status: LiveStatus) {
     ["Imported · lifetime", f.imported.toFixed(3)],
     ["Weathered material · lifetime", l.weatheredMaterial.toFixed(3)],
     ["Weathering heat · lifetime", l.weatheringHeat.toFixed(3)],
+    ["Field external work · lifetime", l.weatheringWork.toFixed(3)],
+    ["Cell external work · lifetime", l.flows.externalWork.toFixed(3)],
     ["Reservoir travel · total", l.sourceDistance.toFixed(2)],
     ["Converted at release · lifetime", l.sourceConverted.toFixed(3)],
     ["Source conversion heat · lifetime", l.sourceHeat.toFixed(3)],
+    ["Reservoir external work · lifetime", l.sourceWork.toFixed(3)],
     ["Exported / imported · lifetime", percentage(f.exported, f.imported)],
     ["Construction / imports · lifetime", percentage(f.constructed, f.imported)],
     ["Material balance error", s.materialResidual.toExponential(2)],

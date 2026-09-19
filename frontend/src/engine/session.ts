@@ -6,8 +6,10 @@ import { createPacer, DEFAULT_SPEED, type Speed } from "../ui/pacing";
 import { type Definition, type LiveStatus, type ObservationState, type Summary } from "./types";
 import { emptySpatial, observe, regionSummaries, currentPopulation } from "./observation";
 import { ColdOperations } from "./coldOperations";
+import { ChemicalWebObservation } from "./chemicalWeb";
 
 export class Session {
+  readonly chemicalWeb = new ChemicalWebObservation();
   world: EngineWorld;
   definition: Definition;
   observation: ObservationState;
@@ -136,6 +138,7 @@ export class Session {
     return {
       kernelDigest: this.engine.sourceDigest,
       chemicals: this.chemicals,
+      chemicalWeb: this.chemicalWeb.read(this.world, summary.tick),
       summary,
       running: this.running,
       speed: this.speed,

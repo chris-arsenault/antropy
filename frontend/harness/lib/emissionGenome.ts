@@ -1,6 +1,6 @@
 import { type Engine } from "../../src/engine/client";
 import { type Genotype } from "../../src/engine/types";
-import { coordinate, type ChemicalContext } from "./chemicalGenotypes";
+import { coordinate, enzymeBetween, type ChemicalContext } from "./chemicalGenotypes";
 import { behaviorChange } from "./engineFixtures";
 
 /** Synthesis competes with nutrition for substrate and funded enzyme capacity. */
@@ -19,7 +19,7 @@ export function emissionGenome(
     c.physical[11] = investment - 1;
     c.chemistry.membrane = to;
     c.chemistry.transporters[2] = { ...to };
-    c.chemistry.enzymes[0] = { ...from, dx: to.x - from.x, dy: to.y - from.y, angle: 0 };
+    c.chemistry.enzymes[0] = enzymeBetween(from, to);
   }
   return g;
 }

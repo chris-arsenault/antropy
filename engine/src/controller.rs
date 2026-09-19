@@ -96,6 +96,17 @@ pub fn seed() -> Genome {
     }
 }
 use crate::numeric::dot;
+/// Mutable starting behavior: retain feeding, export product, repair and follow local food.
+pub fn circuit_seed() -> Genome {
+    let mut g = seed();
+    g.weights[OUTPUT_BIAS] = 0.25;
+    g.weights[OUTPUT_BIAS + 2] = 1.4;
+    for s in [2, 3] {
+        g.weights[OUTPUT + (5 + s) * HIDDEN + 20] = 0.;
+        g.weights[OUTPUT_BIAS + 5 + s] = -0.15;
+    }
+    g
+}
 /// Handcrafted experimental chromosomes still execute through the ordinary RNN.
 pub fn diagnostic(logits: [f32; OUTPUTS], response: Option<(usize, usize, f32)>) -> Genome {
     let mut genome = Genome {

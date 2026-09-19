@@ -78,7 +78,7 @@ export function Settings({
     bridge.call("restart", { seed: parsed, config }).catch(error);
   }
   return (
-    <details className="panel">
+    <details className="panel" open>
       <summary>Environment and new population</summary>
       <label>
         Seed <input value={seed} onChange={(e) => setSeed(e.target.value)} />

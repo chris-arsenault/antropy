@@ -9,7 +9,7 @@ remain evidence about their particular bodies, controllers and environments.
 
 ## Independent views
 
-The map defaults to inherited membrane X coordinate on a fixed 0–15 color scale. Recent families are a
+The map defaults to usable cell energy over field energy per material. Recent families are a
 selectable map view and population-share chart. For the initial observation
 scale, a family is an ancestry branch rooted at generation 0, 4, 8, and so on. Membership follows
 parent links to the most recent such root. IDs are the root organism IDs, deterministic across
@@ -17,7 +17,7 @@ imports and unrelated to mutations, abundance or analysis sampling. Four generat
 convention, not a species boundary. Older groups can continue through younger families; disappearance
 from a group is not automatically extinction of its descendants. Founder ancestry remains available.
 
-The sidebar shows recent family and founder share charts, current counts, percentage-point changes
+The Lineage window shows recent family and founder share charts, current counts, percentage-point changes
 and clickable identities. Family rows show parent family, root birth tick and generation; inherited
 motor/core and membrane means are available separately. Family charts use retained samples from
 the last 2,000 ticks; founder charts use the complete retained timeline. Stable hues match the map's
@@ -59,6 +59,32 @@ observed medoids, and chosen partitions remain descriptive rather than discovere
 Rare-start comparisons retain the source physical/chemical configuration and explicit source
 interventions, with ancestry-based cohort accounting. They can test conditional performance;
 they cannot certify coexistence from cluster labels. See [frequency limits](experimentation.md#experiments-coexistence-criterion).
+
+<a id="population-chemical-web"></a>
+
+## Chemical roles and transformation web
+
+The Web window groups living cells by installed enzyme capability. Its default primary view
+assigns each cell to the strongest nonidentity input→output branch, weighted by funded enzyme
+stock, compiled catalytic coefficient and product weight. Ties prefer smaller chemical IDs;
+cells without funded conversions remain unassigned. Primary counts partition the population.
+The Enzyme input and Enzyme output map colors use this same assignment and chemical identity hue.
+Current map defaults remain unchanged.
+
+All supported enzyme routes includes every positive compiled branch from funded machinery.
+It counts each cell once per pair, even when duplicate enzyme slots support that pair. Counts
+across pairs overlap. Installed machinery, rather than inherited targets awaiting paid refit,
+determines both views. These are capabilities, not measured intake, export or cross-feeding.
+
+Directed arcs occupy fixed positions on the 16×16 chemical manifold. Selecting a node filters
+incoming/outgoing pairs and can select that chemical on the world map. The graph and table show
+the same 64-route page with explicit totals and paging. Environmental pathways separately shows
+the world's compiled possible local-medium transformations, including its energy gate; local
+material and exposure determine whether those routes operate. Dashed arrows are not measured
+flux. Rings identify chemicals present in currently releasing reservoirs.
+
+Only an open Web window requests these bounded reductions. They never alter simulation state
+or accumulate history. See the [implementation and verification record](../../CHEMICAL-WEB-PLAN.md).
 
 <a id="population-boundaries"></a>
 

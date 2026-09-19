@@ -7,7 +7,7 @@ export interface ChemicalDisplay {
 }
 export const initialChemicalDisplay: ChemicalDisplay = {
   species: 0,
-  base: "matter",
+  base: "potential",
   impedance: false,
   stress: false,
   exposure: 4,

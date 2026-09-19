@@ -40,14 +40,16 @@ export function habitatObserver(
   definition: Definition,
   directory: string,
   study: string,
-  nominate: boolean
+  nominate: boolean,
+  traced = true
 ) {
+  if (nominate && !traced) throw new Error("Candidate nomination requires lineage tracing");
   const candidate = join(directory, "candidate.json");
   return (world: EngineWorld) => {
     const summary = world.command<Summary>("summary");
     validateAccounts(summary);
     const habitats = world.command<HabitatCell[]>("habitatSample");
-    const groups = world.command<TraceGroup[]>("trace");
+    const groups = traced ? world.command<TraceGroup[]>("trace") : [];
     if (nominate && !existsSync(candidate)) {
       const found = habitats
         .sort((a, b) => a.id - b.id)

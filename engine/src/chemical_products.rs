@@ -1,6 +1,6 @@
 //! Smooth kinetic mixtures of exact finite chemical actions, compiled only on change.
 use crate::{
-    chemical_group::{Action, quarter_point},
+    chemical_group::Action,
     chemistry::{coordinate, reflect},
     genetics::Enzyme,
 };
@@ -17,13 +17,10 @@ pub struct ProductWeight {
 /// different enzymes; this function is not a global translation action.
 pub fn product_neighborhood(substrate: usize, offset: [f64; 2]) -> Vec<ProductWeight> {
     let [x, y] = coordinate(substrate);
-    Transform::new(Enzyme {
-        x,
-        y,
-        dx: offset[0],
-        dy: offset[1],
-        angle: 0.,
-    })
+    Transform::new(Enzyme::between(
+        [x, y],
+        [reflect(x + offset[0]), reflect(y + offset[1])],
+    ))
     .products(substrate)
 }
 
@@ -45,17 +42,15 @@ fn neighbors(value: f64) -> [(u8, f64); 2] {
 
 impl Transform {
     pub fn new(e: Enzyme) -> Self {
-        let target = [reflect(e.x + e.dx), reflect(e.y + e.dy)];
         let angle = e.angle.rem_euclid(std::f64::consts::TAU) / std::f64::consts::FRAC_PI_2;
         let mut components = Vec::with_capacity(8);
         for (q, angular_weight) in neighbors(angle) {
             if angular_weight == 0. {
                 continue;
             }
-            let quarter = (q + 2) % 4;
-            let center = quarter_point([e.x, e.y], quarter);
-            let x = neighbors(center[0] + target[0]);
-            let y = neighbors(center[1] + target[1]);
+            let quarter = q % 4;
+            let x = neighbors(2. * e.center_x);
+            let y = neighbors(2. * e.center_y);
             for (kx, wx) in x {
                 for (ky, wy) in y {
                     let weight = angular_weight * wx * wy;

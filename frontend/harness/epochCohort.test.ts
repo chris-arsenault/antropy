@@ -38,10 +38,14 @@ it("swaps inherited cohorts on common funded bodies and keeps descendant assignm
         energy: c.energy,
       }));
     expect(cells(first.world)).toEqual(cells(second.world));
-    expect(first.world.command<Genotype>("genotype", { id: 2 }).chromosomes).toEqual(a.chromosomes);
-    expect(second.world.command<Genotype>("genotype", { id: 2 }).chromosomes).toEqual(
-      b.chromosomes
-    );
+    const assigned = (w: typeof first.world) =>
+      w.command<{ cells: CellState[] }>("frame").cells[0].genome;
+    expect(
+      first.world.command<Genotype>("genotype", { id: assigned(first.world) }).chromosomes
+    ).toEqual(a.chromosomes);
+    expect(
+      second.world.command<Genotype>("genotype", { id: assigned(second.world) }).chromosomes
+    ).toEqual(b.chromosomes);
     expect(cohortCounts(first.world, first.postIds)).toEqual({ pre: 2, post: 2, postShare: 50 });
     first.world.step(10);
     expect(first.world.command<Definition>("definition").config).toMatchObject({

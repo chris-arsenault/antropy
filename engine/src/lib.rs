@@ -13,11 +13,15 @@ mod chemical_equivariance_tests;
 pub mod chemical_group;
 #[cfg(test)]
 mod chemical_group_tests;
+pub mod chemical_landscape;
 mod chemical_observation;
 pub mod chemical_operators;
 pub mod chemical_products;
 pub mod chemical_profiles;
 mod chemical_projection;
+pub mod chemical_roles;
+#[cfg(test)]
+mod chemical_roles_tests;
 pub mod chemistry;
 pub mod chemistry_atlas;
 pub mod climate;
@@ -32,12 +36,15 @@ pub mod diagnostics;
 pub mod economy;
 mod economy_report;
 #[cfg(test)]
+mod environmental_return_tests;
+#[cfg(test)]
 mod enzyme_transform_tests;
 mod exchange_vector;
 pub mod field;
 mod field_activity;
 #[cfg(test)]
 mod field_activity_tests;
+mod field_medium;
 mod field_vector;
 pub mod fixtures;
 mod footprint;
@@ -45,10 +52,14 @@ mod genealogy;
 #[cfg(test)]
 mod genealogy_tests;
 pub mod genetics;
+pub mod initial_ecology;
 pub mod inventory;
 pub mod lifecycle;
 #[cfg(test)]
 mod mechanism_tests;
+mod medium_response;
+#[cfg(test)]
+mod medium_response_tests;
 pub mod metabolism;
 pub mod movement;
 mod numeric;
@@ -77,6 +88,9 @@ mod study_trace;
 #[cfg(test)]
 mod symmetry_tests;
 mod trace;
+pub mod transformation_work;
+#[cfg(test)]
+mod transformation_work_tests;
 pub mod transport;
 pub mod weathering;
 mod weathering_budget;

@@ -13,11 +13,12 @@ fn passive_motion_rotates_without_changing_speed_or_bounds() {
         for angle in [0_f64, 0.31, std::f64::consts::FRAC_PI_4, 1.7, 3.2] {
             let direction = [angle.cos(), angle.sin()];
             let velocity = movement::passive(
-                [1., 0.],
+                [1., 0., 0.],
                 [
-                    [magnitude * direction[0], 0.],
-                    [magnitude * direction[1], 0.],
+                    [magnitude * direction[0], 0., 0.],
+                    [magnitude * direction[1], 0., 0.],
                 ],
+                0.,
                 0.3,
                 2.,
             );
@@ -74,13 +75,13 @@ fn equal_reflected_conversion_has_equal_catalytic_cost() {
     let chem = Chemistry::new(101).unwrap();
     let c = Config::default();
     let mut machinery = Machinery::seed(&chem, &chem.source_species());
-    let results = [3., -1.].map(|dx| {
+    let results = [(13.5, 7., 0.), (7., 7.5, std::f64::consts::PI)].map(|(x, y, angle)| {
         machinery.enzymes[0] = Enzyme {
             x: 14.,
             y: 7.,
-            dx,
-            dy: 0.,
-            angle: 0.,
+            center_x: x,
+            center_y: y,
+            angle,
         };
         let op = Operators::compile(&machinery, &c, &chem);
         let edge = op.enzymes[0]

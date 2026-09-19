@@ -33,7 +33,11 @@ fn weathering_commit_cannot_wake_subfloor_product_groups() {
     assert!(balance.roundoff_matter > 0.);
     assert!((before.0 - after.0 - balance.roundoff_matter).abs() < floor as f64 * 1e-6);
     assert!(
-        (before.1 - after.1 - balance.weathering_heat - balance.roundoff_energy).abs()
+        (before.1 + balance.weathering_work
+            - after.1
+            - balance.weathering_heat
+            - balance.roundoff_energy)
+            .abs()
             < floor as f64 * 1e-5
     );
     for n in 0..field.nx * field.ny {
@@ -47,14 +51,16 @@ fn weathering_commit_cannot_wake_subfloor_product_groups() {
 fn extracellular_products_wake_sparse_groups_and_close_material_and_heat() {
     let c = Config {
         weathering_rate: 1.,
+        habitat_feedback: false,
         ..config()
     };
     let chemicals = Chemistry::new(101).unwrap();
     let mut field = Field::new(c.width, c.height, c.mesh);
     let mut climate = Climate::new(&c, &chemicals);
     climate.prepare(&c);
-    field.add(0, 0, 1., &chemicals);
-    field.add(0, 240, 4., &chemicals); // A positive local profile favors 0 -> 16.
+    // Keep second-generation products above the dissolved concentration resolution.
+    field.add(0, 0, 10., &chemicals);
+    field.add(0, 240, 40., &chemicals); // A positive local profile favors 0 -> 16.
     let before = field.totals(&chemicals);
     let balance = field.advance_weathered(&chemicals, 0.8, c.washout, 1., Some(&mut climate));
     let after = field.totals(&chemicals);
@@ -65,7 +71,11 @@ fn extracellular_products_wake_sparse_groups_and_close_material_and_heat() {
     assert!(field.work_counts()[0] < field.nx * field.ny);
     assert!((before.0 - after.0 - balance.matter - balance.roundoff_matter).abs() < 1e-12);
     assert!(
-        (before.1 - after.1 - balance.energy - balance.weathering_heat - balance.roundoff_energy)
+        (before.1 + balance.weathering_work
+            - after.1
+            - balance.energy
+            - balance.weathering_heat
+            - balance.roundoff_energy)
             .abs()
             < 1e-12
     );
@@ -105,6 +115,15 @@ fn shield_changes_conversion_without_granting_material_and_empty_field_stays_idl
 fn climate_restore_continues_at_each_physiology_phase_and_source_rng_is_independent() {
     let mut c = config();
     c.source_count = 2;
+    let chemistry = Chemistry::new(c.chemistry_seed).unwrap();
+    let op = crate::weathering::Operators::new(&chemistry);
+    let species = (0..256)
+        .find(|&s| {
+            let signal = crate::weathering::signal(chemistry.properties[s].interaction);
+            op.fractions(s, signal, 1.).iter().sum::<f64>() > 0.
+        })
+        .unwrap();
+    c.source_species = vec![species];
     let mut w = World::new(27, c.clone()).unwrap();
     c.habitat_feedback = false;
     let mut control = World::new(27, c).unwrap();
@@ -125,7 +144,7 @@ fn climate_restore_continues_at_each_physiology_phase_and_source_rng_is_independ
             );
         }
     }
-    assert!(w.ledger.weathering_heat > 0.);
+    assert!(w.ledger.weathering_heat + w.ledger.weathering_work > 0.);
     assert!(w.ledger.sheltered_conversion > 0.);
     assert_ne!(w.field.amounts, control.field.amounts);
 }

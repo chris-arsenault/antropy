@@ -121,10 +121,19 @@ pub fn response(s: &Source, tick: u64, c: &Config, field: &Field, chem: &Chemist
     let sites = &s.footprint;
     let p = profile(s, tick, c, chem);
     let load = field.medium_load(sites).max(0.);
+    let total: f64 = if s.material.valid {
+        s.material.total
+    } else {
+        s.inventory.iter().sum()
+    };
+    let projected = total * p[2] / (1. + total / s.interface);
+    let self_load = crate::medium_response::self_load(projected, field.spacing.powi(2), sites);
+    let other_load = (field.pressure_load(sites) - self_load).max(0.);
     Response {
         velocity: crate::movement::passive(
-            [p[0], p[1]],
+            p,
             field.gradient(sites, true),
+            c.pressure_strength * other_load,
             crate::field::mobility(load, c.movement_impedance),
             c.source_drift,
         ),
@@ -139,6 +148,7 @@ pub fn response(s: &Source, tick: u64, c: &Config, field: &Field, chem: &Chemist
 }
 
 pub fn advance(w: &mut World) {
+    w.climate.operators.as_mut().unwrap().work_strength = w.config.environmental_work;
     let responses: Vec<_> = w
         .sources
         .iter()

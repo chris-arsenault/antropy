@@ -93,6 +93,21 @@ fn finish(mut w: World) -> World {
 }
 
 pub fn create(name: &str) -> Result<World, String> {
+    if name.starts_with("circuit-delivery") {
+        return crate::initial_ecology::delivery(!name.contains("-off"), name.ends_with("-swap"));
+    }
+    if name.starts_with("circuit-community") {
+        return crate::initial_ecology::community(name.ends_with("-swap"));
+    }
+    if let Some(value) = name.strip_prefix("regenerative-") {
+        let role = value
+            .split('-')
+            .next()
+            .and_then(|s| s.parse::<usize>().ok())
+            .filter(|r| *r < 4)
+            .ok_or("Invalid circuit role")?;
+        return crate::initial_ecology::probe(role, !name.ends_with("-off"));
+    }
     if name.starts_with("sensing-") {
         return sensing(name);
     }
@@ -150,8 +165,8 @@ fn chain(name: &str) -> Result<World, String> {
     if name.ends_with("processing-off") {
         for a in &mut recipient.chromosomes {
             for e in &mut a.chemistry.enzymes {
-                e.dx = 0.;
-                e.dy = 0.;
+                e.center_x = 0.;
+                e.center_y = 0.;
             }
         }
     }

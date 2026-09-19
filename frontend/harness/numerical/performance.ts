@@ -3,7 +3,12 @@ import { type Summary } from "../../src/engine/types";
 import { emptySpatial, observe } from "../../src/engine/observation";
 
 /** Includes the production census and packed render preparation; GPU execution is separate. */
-export function measureOperating(world: EngineWorld, ticks: number, wallSeconds: number) {
+export function measureOperating(
+  world: EngineWorld,
+  ticks: number,
+  wallSeconds: number,
+  sample?: () => void
+) {
   const initial = world.command<Summary>("summary"),
     spatial = emptySpatial(),
     start = performance.now();
@@ -22,7 +27,7 @@ export function measureOperating(world: EngineWorld, ticks: number, wallSeconds:
     stages.stepMs += duration;
     tickMs.push(duration);
     steps++;
-    observeOperating(world, steps, selected, spatial, stages);
+    observeOperating(world, steps, selected, spatial, stages, sample);
     if (steps % 20 === 0) {
       const now = performance.now();
       windows.push(20000 / (now - last));
@@ -81,7 +86,8 @@ function observeOperating(
   steps: number,
   selected: number | undefined,
   spatial: ReturnType<typeof emptySpatial>,
-  stages: { censusMs: number; renderMs: number; inspectionMs: number }
+  stages: { censusMs: number; renderMs: number; inspectionMs: number },
+  sample?: () => void
 ) {
   let at: number;
   if (steps % 4 === 0) {
@@ -99,4 +105,5 @@ function observeOperating(
       stages.inspectionMs += performance.now() - at;
     }
   }
+  if (steps % 200 === 0) sample?.();
 }

@@ -22,12 +22,14 @@ pub fn deposit_profiles(
     sites: &[Vec<(usize, f64)>],
 ) {
     field.body_signal.fill([0.; 2]);
+    field.body_load.fill(0.);
     let area = field.spacing * field.spacing;
     for (cell, row) in cells.iter().zip(sites) {
         visit_row(cell, area, row, &mut |node, values| {
-            for (k, value) in values.into_iter().enumerate() {
+            for (k, value) in values[..2].iter().enumerate() {
                 field.body_signal[node][k] += value;
             }
+            field.body_load[node] += values[2];
         });
     }
     let _ = config;
@@ -37,7 +39,7 @@ fn visit_row(
     cell: &Cell,
     area: f64,
     row: &[(usize, f64)],
-    visit: &mut impl FnMut(usize, [f64; 2]),
+    visit: &mut impl FnMut(usize, [f64; 3]),
 ) {
     let amount = cell.mass() / area;
     let profile = cell.operators.as_ref().unwrap().profile;
@@ -53,7 +55,7 @@ pub fn visit_current(w: &crate::world::World, mut visit: impl FnMut(usize, [f64;
             cell,
             w.field.spacing.powi(2),
             &sites(cell, &w.config, &w.field),
-            &mut visit,
+            &mut |node, values| visit(node, [values[0], values[1]]),
         );
     }
 }

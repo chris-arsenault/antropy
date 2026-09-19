@@ -94,12 +94,20 @@ try {
     "({kernelDigest:window.check.kernelDigest,visibility:document.visibilityState,canvas:[...document.querySelectorAll('canvas')].map(c=>[c.clientWidth,c.clientHeight]),definition:window.check.definition,last:window.check.samples.at(-1),alerts:[...document.querySelectorAll('[role=alert]')].map(e=>e.textContent)})"
   );
   if (!initial.last) throw new Error("Application did not initialize");
-  if (process.env.ANTROPY_WEATHERING === "1")
+  if (process.env.ANTROPY_WEATHERING === "1") {
+    await connection.page.evaluate(
+      "[...document.querySelectorAll('.observation-dock button')].find(b=>b.textContent==='Map').click()"
+    );
     await connection.page.evaluate(
       "const select=[...document.querySelectorAll('select')].find(s=>[...s.options].some(o=>o.value==='weathering')); if(!select) throw new Error('Weathering view unavailable'); select.value='weathering'; select.dispatchEvent(new Event('change',{bubbles:true}));"
     );
+  }
+  await connection.page.evaluate("window.callWorker('inspect',{cell:1})");
   await connection.page.evaluate(
-    "document.querySelectorAll('details').forEach(e=>e.open=true); window.callWorker('inspect',{cell:1})"
+    "[...document.querySelectorAll('.observation-dock button')].find(b=>b.textContent==='Cell').click()"
+  );
+  await connection.page.evaluate(
+    "document.querySelectorAll('dialog[open] details').forEach(e=>e.open=true)"
   );
   await connection.page.evaluate("window.callWorker('speed',{value:'max'})");
   if (process.env.ANTROPY_CLEAR_TIMINGS === "1")

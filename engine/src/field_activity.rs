@@ -1,5 +1,20 @@
 //! Derived work lists; material ownership and checkpoint layout remain in Field.
-pub const CONCENTRATION_FLOOR: f32 = 1e-9;
+// Shared concentration resolution: below 0.001% of the default recognition half-saturation.
+// Discarded extracellular material remains explicit in FieldBalance numerical accounts.
+pub const CONCENTRATION_FLOOR: f32 = 1e-6;
+
+/// Four-chemical support, consumed two lanes at a time by f64 SIMD kernels.
+pub fn pairs(mut mask: u64) -> impl Iterator<Item = usize> {
+    std::iter::from_fn(move || {
+        if mask == 0 {
+            return None;
+        }
+        let start = mask.trailing_zeros() as usize * 4;
+        mask &= mask - 1;
+        Some([start, start + 2])
+    })
+    .flatten()
+}
 
 #[derive(Clone, Debug, Default)]
 pub struct Activity {

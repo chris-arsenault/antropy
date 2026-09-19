@@ -1,6 +1,6 @@
 import { type Engine } from "../../src/engine/client";
 import { type Genotype } from "../../src/engine/types";
-import { chemicalContext, coordinate } from "./chemicalGenotypes";
+import { chemicalContext, coordinate, enzymeBetween } from "./chemicalGenotypes";
 import { frozen, install, pulse } from "./engineFixtures";
 import { type QuickScenario } from "./quickScenario";
 
@@ -26,7 +26,7 @@ function genome(
     ch.chemistry.receptors = Array.from({ length: 4 }, () => coordinate(0));
     ch.chemistry.enzymes = [240, depositProduct, 240, 240].map((species) => {
       const target = coordinate(species);
-      return { ...coordinate(0), dx: target.x, dy: target.y, angle: 0 };
+      return enzymeBetween(coordinate(0), target);
     });
     ch.chemistry.transporters = [0, 0, exported, 240].map(coordinate);
   }

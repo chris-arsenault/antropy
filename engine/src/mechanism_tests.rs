@@ -64,7 +64,14 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
     });
     let s = a.config.source_species[0];
     a.field.deposit(6., 6., s, 0.001, &a.chemistry);
+    let installed = a.cells[0].installed.clone();
     for cell in &mut a.cells {
+        cell.installed = installed.clone();
+        cell.operators = Some(crate::chemical_operators::Operators::compile(
+            &installed,
+            &a.config,
+            &a.chemistry,
+        ));
         cell.x = 6.;
         cell.y = 6.;
         cell.inventory.fill(0.);

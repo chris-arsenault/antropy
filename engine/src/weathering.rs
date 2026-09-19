@@ -1,6 +1,6 @@
 //! Sparse chemical-space redistribution shared by exposed field and reservoir inventory.
 use crate::{
-    chemical_group::neighbor,
+    chemical_group::Action,
     chemical_projection::lanes,
     chemistry::{Chemistry, SPECIES},
 };
@@ -12,14 +12,27 @@ pub struct Operators {
     pub destination: [[usize; 4]; SPECIES],
     pub coefficients: [[[f64; SPECIES]; 2]; 4],
     pub heat: [[f64; SPECIES]; 4],
+    pub work: [[f64; SPECIES]; 4],
     pub active_groups: u64,
     pub reactive: [bool; SPECIES],
+    pub work_strength: f64,
 }
 
 impl Operators {
     pub fn new(chemistry: &Chemistry) -> Self {
+        Self::with_work(chemistry, crate::transformation_work::DEFAULT_STRENGTH)
+    }
+    pub fn with_work(chemistry: &Chemistry, work_strength: f64) -> Self {
         let destination = std::array::from_fn(|s| {
-            [(0, 1), (0, -1), (1, 1), (1, -1)].map(|(axis, direction)| neighbor(s, axis, direction))
+            [(0, 1), (0, -1), (1, 1), (1, -1)].map(|(axis, direction)| {
+                let mut endpoint = [s / 16, s % 16].map(|v| v as i16);
+                let start = endpoint;
+                endpoint[axis] += direction;
+                if !(0..16).contains(&endpoint[axis]) {
+                    return s;
+                }
+                Action::intervals(std::array::from_fn(|k| (start[k] + endpoint[k]) as u8)).apply(s)
+            })
         });
         let heat: [[f64; 4]; SPECIES] = std::array::from_fn(|s| {
             destination[s].map(|t| {
@@ -30,9 +43,13 @@ impl Operators {
             let p = &chemistry.properties[s];
             std::array::from_fn(|j| {
                 let target = &chemistry.properties[destination[s][j]];
-                // The medium favors stronger interaction; reference value gates unfunded work.
+                // Medium selects direction; an uphill branch explicitly receives external work.
                 let unique = !destination[s][..j].contains(&destination[s][j]);
-                let weight = if heat[s][j] > 0. && unique { 0.25 } else { 0. };
+                let weight = if destination[s][j] != s && unique {
+                    0.25
+                } else {
+                    0.
+                };
                 [
                     weight * (target.interaction[0] - p.interaction[0]),
                     -weight * (target.interaction[1] - p.interaction[1]),
@@ -43,41 +60,92 @@ impl Operators {
             std::array::from_fn(|k| std::array::from_fn(|s| rows[s][j][k]))
         });
         Self {
+            work_strength,
             destination,
             coefficients,
             heat: std::array::from_fn(|j| std::array::from_fn(|s| heat[s][j])),
-            active_groups: heat.iter().enumerate().fold(0, |mask, (s, row)| {
-                mask | if row.iter().any(|v| *v > 0.) {
+            work: std::array::from_fn(|j| {
+                std::array::from_fn(|s| {
+                    (chemistry.properties[destination[s][j]].potential
+                        - chemistry.properties[s].potential)
+                        .max(0.)
+                })
+            }),
+            active_groups: rows.iter().enumerate().fold(0, |mask, (s, row)| {
+                mask | if row.iter().flatten().any(|v| *v != 0.) {
                     1 << (s / 4)
                 } else {
                     0
                 }
             }),
-            reactive: heat.map(|row| row.iter().any(|v| *v > 0.)),
+            reactive: rows.map(|row| row.iter().flatten().any(|v| *v != 0.)),
         }
     }
 
     /// Two shared mixture coefficients; no conversion independent of the medium.
     pub fn fractions(&self, s: usize, signal: [f64; 2], exposure_time: f64) -> [f64; 4] {
-        let rates = self
-            .coefficients
-            .each_ref()
-            .map(|c| exposure_time * (c[0][s] * signal[0] + c[1][s] * signal[1]).max(0.));
+        let rates = std::array::from_fn::<_, 4, _>(|j| {
+            let (rate, _, _) = self.local(s, j, signal);
+            exposure_time * rate
+        });
         let denominator = 1. + rates.iter().sum::<f64>();
         rates.map(|r| r / denominator)
     }
 
+    #[cfg(test)]
     pub(crate) fn engagement_pair(&self, s: usize, signal: [f64; 2]) -> [lanes::Pair; 4] {
-        self.coefficients.each_ref().map(|c| {
-            lanes::positive(lanes::add(
-                lanes::mul(lanes::load(&c[0][s..]), lanes::splat(signal[0])),
-                lanes::mul(lanes::load(&c[1][s..]), lanes::splat(signal[1])),
-            ))
-        })
+        std::array::from_fn(|j| self.local_pair(s, j, signal).0)
+    }
+
+    pub fn local(&self, s: usize, j: usize, signal: [f64; 2]) -> (f64, f64, f64) {
+        let g = crate::transformation_work::engagement(
+            [self.coefficients[j][0][s], self.coefficients[j][1][s]],
+            signal,
+        );
+        let supplied = self.work_strength * g;
+        let heat = self.heat[j][s] - self.work[j][s] + supplied;
+        (if heat >= 0. { g } else { 0. }, heat.max(0.), supplied)
+    }
+
+    /// Some finite normalized medium can fund this branch; this is not current flux.
+    pub fn possible(&self, s: usize, j: usize) -> bool {
+        let maximum = self.coefficients[j]
+            .iter()
+            .map(|v| v[s].abs())
+            .fold(0., f64::max);
+        maximum > 0.
+            && (self.heat[j][s] >= self.work[j][s]
+                || self.work_strength * maximum > self.work[j][s] - self.heat[j][s])
+    }
+
+    pub(crate) fn local_pair(
+        &self,
+        s: usize,
+        j: usize,
+        signal: [f64; 2],
+    ) -> (lanes::Pair, lanes::Pair, lanes::Pair) {
+        let c = &self.coefficients[j];
+        let g = lanes::positive(lanes::add(
+            lanes::mul(lanes::load(&c[0][s..]), lanes::splat(signal[0])),
+            lanes::mul(lanes::load(&c[1][s..]), lanes::splat(signal[1])),
+        ));
+        let work = lanes::mul(g, lanes::splat(self.work_strength));
+        let available = lanes::add(
+            work,
+            lanes::sub(
+                lanes::load(&self.heat[j][s..]),
+                lanes::load(&self.work[j][s..]),
+            ),
+        );
+        (
+            lanes::mul(g, lanes::nonnegative(available)),
+            lanes::positive(available),
+            work,
+        )
     }
 
     #[cfg(test)]
-    pub fn inventory(&self, row: &mut [f64], signal: [f64; 2], exposure_time: f64) -> [f64; 2] {
+    pub fn inventory(&self, row: &mut [f64], signal: [f64; 2], exposure_time: f64) -> [f64; 3] {
         self.inventory_active(row, signal, exposure_time, 0., u64::MAX)
             .0
     }
@@ -89,15 +157,15 @@ impl Operators {
         exposure_time: f64,
         floor: f64,
         mut mask: u64,
-    ) -> ([f64; 2], u64) {
+    ) -> ([f64; 3], u64) {
         let mut active = mask;
         mask &= self.active_groups;
         if exposure_time == 0. || mask == 0 || strength(signal) == 0. {
-            return ([0.; 2], active);
+            return ([0.; 3], active);
         }
         let minimum = minimum_donor(floor, exposure_time * strength(signal));
         let mut delta = [0.; SPECIES];
-        let mut account = [0.; 2];
+        let mut account = [0.; 3];
         while mask != 0 {
             let start = mask.trailing_zeros() as usize * 4;
             mask &= mask - 1;
@@ -124,7 +192,9 @@ impl Operators {
                     delta[self.destination[s][j]] += amount;
                     active |= 1 << (self.destination[s][j] / 4);
                     account[0] += amount;
-                    account[1] += amount * self.heat[j][s];
+                    let (_, heat, work) = self.local(s, j, signal);
+                    account[1] += amount * heat;
+                    account[2] += amount * work;
                 }
             }
         }
@@ -185,7 +255,9 @@ mod tests {
                 .map(|(q, p)| q * p.potential)
                 .sum();
             assert!(
-                (reference + account[1] - 4. * chemistry.properties[88].potential).abs() < 1e-12
+                (reference + account[1] - account[2] - 4. * chemistry.properties[88].potential)
+                    .abs()
+                    < 1e-12
             );
             assert!((row.iter().sum::<f64>() - 4.).abs() < 1e-12);
             assert_eq!(row[120], 0.); // Products cannot react during this update.
@@ -221,15 +293,13 @@ mod tests {
         let chemistry = Chemistry::new(101).unwrap();
         let op = Operators::new(&chemistry);
         let s = op.reactive.iter().position(|v| *v).unwrap();
-        let inert = op.reactive.iter().position(|v| !*v).unwrap();
         let floor = crate::field_activity::CONCENTRATION_FLOOR as f64 * 4.;
         let mut row = [0.; SPECIES];
         row[s] = floor / 2.;
-        row[inert] = 1.;
         let before = row;
-        let mask = (1 << (s / 4)) | (1 << (inert / 4));
+        let mask = 1 << (s / 4);
         let (accounts, after_mask) = op.inventory_active(&mut row, [0.; 2], 1., floor, mask);
-        assert_eq!(accounts, [0.; 2]);
+        assert_eq!(accounts, [0.; 3]);
         assert_eq!(after_mask, mask);
         assert_eq!(row, before); // Owned tiny material is retained, not discarded.
         row[s] = 1.;
@@ -237,13 +307,13 @@ mod tests {
         assert_eq!(
             op.inventory_active(&mut row, [f64::NAN; 2], 0., floor, mask)
                 .0,
-            [0.; 2]
+            [0.; 3]
         );
         assert_eq!(row, before);
         let neutral = row;
         assert_eq!(
             op.inventory_active(&mut row, [0.; 2], 1., floor, mask).0,
-            [0.; 2]
+            [0.; 3]
         );
         assert_eq!(row, neutral);
         let j = (0..4).find(|&j| op.heat[j][s] > 0.).unwrap();
@@ -270,9 +340,15 @@ mod tests {
                                 assert!((pair[lane] - expected[j]).abs() < 1e-14);
                                 assert!(pair[lane] >= 0.);
                                 if pair[lane] > 0. {
+                                    let delta = chemistry.properties[op.destination[s + lane][j]]
+                                        .potential
+                                        - chemistry.properties[s + lane].potential;
                                     assert!(
-                                        chemistry.properties[op.destination[s + lane][j]].potential
-                                            < chemistry.properties[s + lane].potential
+                                        (op.local(s + lane, j, signal).2
+                                            - op.local(s + lane, j, signal).1
+                                            - delta)
+                                            .abs()
+                                            < 1e-12
                                     );
                                 }
                             }

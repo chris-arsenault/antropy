@@ -112,6 +112,7 @@ fn diagnostic_catalog_is_atomic_and_does_not_replace_observed_cells() {
     let mut invalid = candidate.clone();
     invalid.parent = Some(9000);
     let initial = w.snapshot().unwrap();
+    let next_genome = w.next_genome;
     assert!(
         execute(
             &mut w,
@@ -125,7 +126,7 @@ fn diagnostic_catalog_is_atomic_and_does_not_replace_observed_cells() {
         &json!({"op":"appendCatalog", "genotypes":[candidate]}),
     )
     .unwrap();
-    assert_eq!(ids, json!([2]));
+    assert_eq!(ids, json!([next_genome]));
     assert_eq!(before, serde_json::to_value(&w.cells).unwrap());
     assert_eq!(w.events.last().unwrap().kind, "catalog");
     let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();

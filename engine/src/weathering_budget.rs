@@ -3,7 +3,7 @@ use crate::{chemistry, config::Config, weathering};
 use serde_json::{Value, json};
 
 pub fn report(c: &Config, chemicals: &chemistry::Chemistry) -> Value {
-    let operators = weathering::Operators::new(chemicals);
+    let operators = weathering::Operators::with_work(chemicals, c.environmental_work);
     let source = chemicals.source_species()[0];
     let deposit = chemicals
         .properties
@@ -54,7 +54,8 @@ pub fn report(c: &Config, chemicals: &chemistry::Chemistry) -> Value {
         "sourceWeatheringProduct":operators.destination[source],
         "rate":c.weathering_rate,
         "protection":c.diffusion_impedance,"rows":rows,
-        "assumptions":["Four material units over sixteen or sixty-four square units for sixty model seconds",
+        "assumptions":["Cellular yield figures are zero-medium reference values; local external work is excluded from these conditional bounds",
+        "Four material units over sixteen or sixty-four square units for sixty model seconds",
         "Deposit synthesized from the same finite feedstock; ordinary import/export work counted",
         "Frozen initial medium and impedance; no geographic escape, product feedback or deposit aging",
         "Source specialist cannot process the weathering product; terminal processing yield is a bound",

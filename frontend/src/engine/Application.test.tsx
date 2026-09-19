@@ -9,14 +9,16 @@ import { type Message, type Request } from "./protocol";
 import { type Inspection } from "./types";
 import { observationDelta, type ObservationView } from "./observationDelta";
 
-it("mounts fresh worker canvases in StrictMode and keeps controls independent with 48 paused founders", async () => {
-  const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
-  const session = new Session(await Engine.load(bytes)),
-    sent: Request[] = [],
+it("preserves the world, display controls and drafts through panel navigation", async () => {
+  const session = new Session(
+    await Engine.load(new Uint8Array(readFileSync("public/antropy-engine.wasm")))
+  );
+  const sent: Request[] = [],
     canvases: HTMLCanvasElement[] = [];
   const restoreCanvas = workerFixture(session, sent, canvases);
   const container = document.createElement("div"),
     root = createRoot(container);
+  document.body.append(container);
   try {
     await act(async () =>
       root.render(
@@ -27,60 +29,117 @@ it("mounts fresh worker canvases in StrictMode and keeps controls independent wi
     );
     expect(canvases).toHaveLength(2);
     expect(canvases[0]).not.toBe(canvases[1]);
+    const canvas = container.querySelector("canvas");
     expect(container.textContent).toContain("Tick 0");
+    expect(container.querySelector("dialog[open]")).toBeNull();
+    await click(container, "Population");
     expect(container.querySelector(".population-totals dd")?.textContent).toBe("48");
-    expect(container.textContent).toContain("Browse retained spatial samples");
-    expect(
-      container.querySelector('[aria-label="Family population shares over time"]')
-    ).not.toBeNull();
-    expect(
-      container.querySelector('[aria-label="Founder population shares over time"]')
-    ).not.toBeNull();
-    expect(session.observation.spatial.regions.length).toBeGreaterThanOrEqual(2);
-    expect(container.textContent).not.toContain("NaN");
-    const labels = Array.from(container.querySelectorAll("label"));
-    const colors = labels
-      .find((l) => l.textContent?.startsWith("Cell colors"))!
-      .querySelector("select")!;
-    const regions = labels
-      .find((l) => l.textContent?.includes("Population regions"))!
-      .querySelector("input")!;
-    const chemical = labels
-      .find((l) => l.textContent?.startsWith("Environment"))!
-      .querySelector("select")!;
-    expect(colors.value).toBe("6");
-    expect(chemical.value).toBe("matter");
-    await act(async () => regions.click());
-    expect(regions.checked).toBe(false);
-    expect(chemical.value).toBe("matter");
-    expect(colors.value).toBe("6");
-    await checkChemicalSelection(container, chemical, colors, regions);
-    const button = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent === "Run"
-    )!;
-    await act(async () => button.click());
-    expect(button.textContent).toBe("Pause");
+    expect(container.querySelector(".genealogy-panel")).toBeNull();
+    await checkMapSelection(container);
+    await checkChemicalWeb(container, session);
+    await checkLineage(container);
+    await checkSettings(container);
+    await click(container, "Run");
+    expect(button(container, "Pause")).toBeDefined();
     expect(session.world.command<{ tick: number }>("summary").tick).toBe(1);
-    const family = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent === "Founder 1"
-    )!;
-    await act(async () => family.click());
-    expect(container.textContent).toContain("Cell 1");
-    expect(container.textContent).toContain("Funded body and inherited genes");
-    expect(container.textContent).toContain("Family and genealogy");
-    expect(container.querySelector('.genealogy-tree [aria-current="true"]')?.textContent).toContain(
-      "Cell 1"
-    );
+    await click(container, "Saves");
+    expect(button(container, "Export runtime report").disabled).toBe(false);
+    expect(button(container, "Save locally").disabled).toBe(false);
+    await act(async () => restoreCanvas.fail());
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain("Fixture failure");
+    await click(container, "Chemistry");
+    await click(container, "Saves");
+    expect(button(container, "Export runtime report").disabled).toBe(false);
+    expect(container.querySelector("canvas")).toBe(canvas);
+    expect(canvases).toHaveLength(2);
+    expect(container.textContent).not.toContain("NaN");
     expect(sent.filter((r) => r.op === "view").every((r) => !("cells" in r.payload))).toBe(true);
   } finally {
     await act(async () => root.unmount());
+    container.remove();
     session.world.dispose();
     vi.unstubAllGlobals();
     restoreCanvas();
   }
 });
 
+function button(container: HTMLElement, name: string) {
+  const found = Array.from(container.querySelectorAll<HTMLButtonElement>("button")).find(
+    (b) => b.textContent?.trim() === name
+  );
+  expect(found, name).toBeDefined();
+  return found!;
+}
+async function click(container: HTMLElement, name: string) {
+  const target = button(container, name);
+  await act(async () => {
+    target.focus();
+    target.click();
+  });
+}
+function control<T extends HTMLInputElement | HTMLSelectElement>(
+  container: HTMLElement,
+  name: string
+) {
+  return Array.from(container.querySelectorAll("dialog[open] label"))
+    .find((label) => label.textContent?.trim().startsWith(name))!
+    .querySelector<T>("input, select")!;
+}
+async function checkMapSelection(container: HTMLElement) {
+  await click(container, "Map");
+  expect(container.textContent).toContain("Browse retained spatial samples");
+  expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
+  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("potential");
+  await act(async () => control<HTMLInputElement>(container, "Population regions").click());
+  await click(container, "Step");
+  await click(container, "Chemistry");
+  const chemical = container.querySelector<HTMLButtonElement>(
+    '.chemical-panel button[aria-label^="Show chemical"]'
+  )!;
+  expect(chemical).not.toBeNull();
+  await act(async () => chemical.click());
+  expect(chemical.getAttribute("aria-pressed")).toBe("true");
+  await click(container, "Map");
+  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("chemical");
+  expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
+  expect(control<HTMLInputElement>(container, "Population regions").checked).toBe(false);
+}
+async function checkLineage(container: HTMLElement) {
+  await click(container, "Lineage");
+  container.querySelector<HTMLElement>("dialog[open] .window-content")!.scrollTop = 400;
+  expect(
+    container.querySelector('[aria-label="Family population shares over time"]')
+  ).not.toBeNull();
+  expect(
+    container.querySelector('[aria-label="Founder population shares over time"]')
+  ).not.toBeNull();
+  await click(container, "Founder 1");
+  expect(container.querySelector("dialog[open] .window-content")?.scrollTop).toBe(0);
+  expect(container.querySelector("dialog[open] h2")?.textContent).toBe("Cell");
+  expect(container.textContent).toContain("Funded body and inherited genes");
+  expect(container.textContent).toContain("Family and ancestry");
+  expect(container.querySelector('.genealogy-tree [aria-current="true"]')?.textContent).toContain(
+    "Cell 1"
+  );
+}
+async function checkSettings(container: HTMLElement) {
+  await click(container, "Settings");
+  const seed = control<HTMLInputElement>(container, "Seed");
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(seed, "81");
+    seed.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await act(async () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
+  expect(container.querySelector("dialog[open]")).toBeNull();
+  expect(document.activeElement).toBe(button(container, "Settings"));
+  await click(container, "Chemistry");
+  await click(container, "Settings");
+  expect(control<HTMLInputElement>(container, "Seed").value).toBe("81");
+  await click(container, "Close Esc");
+}
+
 function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasElement[]) {
+  const workers: WorkerFixture[] = [];
   const descriptor = Object.getOwnPropertyDescriptor(
     HTMLCanvasElement.prototype,
     "transferControlToOffscreen"
@@ -93,6 +152,9 @@ function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasEl
     },
   });
   class WorkerFixture {
+    constructor() {
+      workers.push(this);
+    }
     previous: ObservationView = { status: null, inspection: null };
     onmessage: ((e: { data: Message }) => void) | null = null;
     terminated = false;
@@ -109,7 +171,8 @@ function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasEl
         }
         if (request.op === "running") session.setRunning(Boolean(request.payload.value));
         if (request.op === "step") session.step();
-        if (["initialize", "running", "inspect", "step"].includes(request.op)) {
+        if (request.op === "chemicalWeb") session.chemicalWeb.select(request.payload);
+        if (["initialize", "running", "inspect", "step", "chemicalWeb"].includes(request.op)) {
           const current = { status: session.status(), inspection: this.previous.inspection };
           if (request.op === "inspect")
             current.inspection = session.world.command<Inspection>("inspect", {
@@ -122,7 +185,12 @@ function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasEl
           });
           this.previous = current;
         }
-        this.emit({ kind: "reply", id: request.id, ok: true, value: undefined });
+        this.emit({
+          kind: "reply",
+          id: request.id,
+          ok: true,
+          value: request.op === "recoveries" ? [] : undefined,
+        });
       });
     }
     terminate() {
@@ -130,39 +198,57 @@ function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasEl
     }
   }
   vi.stubGlobal("Worker", WorkerFixture);
-  vi.stubGlobal(
-    "ResizeObserver",
-    class {
-      observe() {}
-      disconnect() {}
-    }
-  );
+  vi.stubGlobal("ResizeObserver", ResizeFixture);
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
 
-  return () => {
+  const restore = () => {
     if (descriptor)
       Object.defineProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen", descriptor);
     else Reflect.deleteProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen");
   };
+  return Object.assign(restore, {
+    fail: () => workers.at(-1)!.emit({ kind: "fault", value: "Fixture failure" }),
+  });
 }
 
-async function checkChemicalSelection(
-  container: HTMLElement,
-  field: HTMLSelectElement,
-  colors: HTMLSelectElement,
-  regions: HTMLInputElement
-) {
-  const step = Array.from(container.querySelectorAll("button")).find(
-    (b) => b.textContent === "Step"
-  )!;
-  await act(async () => step.click());
-  const chemical = container.querySelector<HTMLButtonElement>(
-    '.chemical-panel button[aria-label^="Show chemical"]'
-  )!;
-  expect(chemical).not.toBeNull();
-  await act(async () => chemical.click());
-  expect(field.value).toBe("chemical");
-  expect(chemical.getAttribute("aria-pressed")).toBe("true");
-  expect(colors.value).toBe("6");
-  expect(regions.checked).toBe(false);
+class ResizeFixture {
+  observe() {}
+  disconnect() {}
+}
+
+async function checkChemicalWeb(container: HTMLElement, session: Session) {
+  await click(container, "Web");
+  const current = session.status().chemicalWeb!;
+  expect(current.rows.reduce((sum, row) => sum + row.primary, current.unassigned)).toBe(48);
+  expect(container.querySelectorAll(".web-route-table tbody tr")).toHaveLength(current.rows.length);
+  expect(container.querySelectorAll(".web-edge path")).toHaveLength(current.rows.length);
+  await click(container, "Enzyme input");
+  expect(button(container, "Enzyme input").getAttribute("aria-pressed")).toBe("true");
+  await click(container, "Enzyme output");
+  const modes = control<HTMLSelectElement>(container, "Routes");
+  await act(async () => {
+    modes.value = "supported";
+    modes.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(session.status().chemicalWeb!.mode).toBe("supported");
+  expect(container.textContent).toContain("Counts overlap");
+  await act(async () => {
+    modes.value = "environment";
+    modes.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(container.textContent).toContain("not measured flow");
+  expect(container.querySelectorAll(".web-edge.environmental")).toHaveLength(64);
+  await click(container, "Next routes");
+  expect(session.status().chemicalWeb!.offset).toBe(64);
+  const node = container.querySelector<SVGGElement>(".web-node")!;
+  await act(async () =>
+    node.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+  );
+  expect(session.status().chemicalWeb!.focus).not.toBeNull();
+  await click(container, "Show chemical on map");
+  await click(container, "Map");
+  expect(session.status().chemicalWeb).toBeNull();
+  expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("15");
+  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("chemical");
+  expect(control<HTMLInputElement>(container, "Population regions").checked).toBe(false);
 }

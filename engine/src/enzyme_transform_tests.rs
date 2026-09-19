@@ -12,9 +12,31 @@ fn enzyme(angle: f64) -> Enzyme {
     Enzyme {
         x: 7.,
         y: 7.,
-        dx: 1.,
-        dy: -1.,
+        center_x: 1.,
+        center_y: 6.,
         angle,
+    }
+}
+
+#[test]
+fn mixtures_of_identity_components_have_exact_zero_flow_and_work() {
+    let chemistry = Chemistry::new(101).unwrap();
+    let c = Config::default();
+    let mut m = Machinery::seed(&chemistry, &chemistry.source_species());
+    let mut rng = crate::random::Random::new(27);
+    for _ in 0..256 {
+        m.enzymes[0] = Enzyme {
+            x: 15.,
+            y: 15.,
+            center_x: rng.unit(),
+            center_y: rng.unit(),
+            angle: 0.,
+        };
+        let op = Operators::compile(&m, &c, &chemistry);
+        for edge in &op.enzymes[0].conversions {
+            assert!(edge.products.iter().all(|p| p.species == edge.substrate));
+            assert_eq!((edge.changed, edge.work, edge.heat), (0., 0., 0.));
+        }
     }
 }
 #[test]
@@ -26,25 +48,24 @@ fn rotated_and_reflected_frames_preserve_compiled_products_and_costs() {
         Enzyme {
             x: 0.,
             y: 0.,
-            dx: -2.3,
-            dy: 1.1,
+            center_x: 2.3,
+            center_y: 1.1,
             angle: -1.2,
         },
     ] {
         for mirror in [false, true] {
             let map = |[x, y]: [f64; 2]| if mirror { [15. - x, y] } else { [15. - y, x] };
-            let vector = |[x, y]: [f64; 2]| if mirror { [-x, y] } else { [-y, x] };
             let id = |s| {
                 let [x, y] = map(chemistry::coordinate(s));
                 x as usize * 16 + y as usize
             };
             let [x, y] = map([e.x, e.y]);
-            let [dx, dy] = vector([e.dx, e.dy]);
+            let [dx, dy] = map([e.center_x, e.center_y]);
             let other = Enzyme {
                 x,
                 y,
-                dx,
-                dy,
+                center_x: dx,
+                center_y: dy,
                 angle: if mirror { -e.angle } else { e.angle },
             };
             let mut transformed = chemistry.clone();
@@ -92,16 +113,17 @@ fn rotated_and_reflected_frames_preserve_compiled_products_and_costs() {
 fn founders_share_a_map_instead_of_a_product_and_export_their_products() {
     let chemistry = Chemistry::new(101).unwrap();
     let c = Config::default();
-    let m = Machinery::seed(&chemistry, &[0, 80]);
-    let reversed = Machinery::seed(&chemistry, &[80, 0]);
+    let sources = chemistry.source_species();
+    let m = Machinery::seed(&chemistry, &sources);
+    let reversed = Machinery::seed(&chemistry, &[sources[1], sources[0]]);
     let products: Vec<_> = m.enzymes[..2]
         .iter()
-        .zip([0, 80])
+        .zip(sources.iter().copied())
         .map(|(e, s)| Transform::new(*e).products(s))
         .collect();
     assert_eq!(
-        [m.enzymes[0].dx, m.enzymes[0].dy],
-        [m.enzymes[1].dx, m.enzymes[1].dy]
+        [m.enzymes[0].center_x, m.enzymes[0].center_y],
+        [m.enzymes[1].center_x, m.enzymes[1].center_y]
     );
     assert!(
         products[0]
@@ -112,7 +134,7 @@ fn founders_share_a_map_instead_of_a_product_and_export_their_products() {
     for i in 0..2 {
         assert_eq!(m.enzymes[i], reversed.enzymes[1 - i]);
         assert_eq!(m.transporters[i + 2], reversed.transporters[3 - i]);
-        let s = [0, 80][i];
+        let s = sources[i];
         let edge = operators.enzymes[i]
             .conversions
             .iter()

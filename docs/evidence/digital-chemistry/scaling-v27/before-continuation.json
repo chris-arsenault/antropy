@@ -1,0 +1,880 @@
+{
+  "id": 4106,
+  "name": "default-5000",
+  "sourceDigest": "7a5eca40097439435f2d5527f1426f0ff1e795580bde65d3bb0d79bb5a5cf68a",
+  "wasmDigest": "42574d5e640d042d76d25c62ccf226ad580f3aea56f803524aa1d6934c4d4ccf",
+  "inputDigest": "0f75250108ecf0d0250277c7a04593a7e32c083b1391205fc066f8d73c035357",
+  "finalDigest": "63410995cda77c7039412acde9376e29d5efc5f14d4916409bf597b1c1acf8c8",
+  "speedup": null,
+  "activityBefore": [
+    19200,
+    283198,
+    611560
+  ],
+  "activityAfter": [
+    19200,
+    362477,
+    779370
+  ],
+  "samples": [
+    {
+      "summary": {
+        "ancestryRecords": 1236,
+        "biomass": 413.8882415802644,
+        "cellEnergy": 146.68188398110865,
+        "energyResidual": 0.0000011426418495830148,
+        "generation": 27,
+        "genomes": 219,
+        "heldEnergy": 21282.070189369184,
+        "heldMaterial": 5156.456384839839,
+        "ledger": {
+          "births": 1188,
+          "deathHeat": 0,
+          "deaths": 423,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 39.34787853813106,
+          "divisions": 594,
+          "flows": {
+            "captured": 9353.666094777187,
+            "constructed": 1167.574065693561,
+            "construction": 583.7870328467804,
+            "damage": 790.595844547089,
+            "distance": 16908.836412300272,
+            "exported": 2341.554340635567,
+            "exposure": 56923.9141265972,
+            "externalWork": 7843.863205751256,
+            "imported": 3650.1352548505133,
+            "learning": 431.0206685056144,
+            "maintenance": 2682.468395027815,
+            "motors": 317.9507598553779,
+            "reacted": 3287.322717115621,
+            "reactionHeat": 2558.058628525179,
+            "refitting": 133.75631831209142,
+            "repair": 1270.626153436848,
+            "repaired": 789.1459463307784,
+            "transport": 299.58447977430023
+          },
+          "initialEnergy": 34105.72110636419,
+          "initialMaterial": 7361.490214221373,
+          "numericalEnergy": 0.27628532437878145,
+          "numericalMaterial": 0.0696314641899874,
+          "overflowHeat": 3395.2831366183177,
+          "shelteredConversion": 416.18728580178976,
+          "sourceConverted": 43.717530104324304,
+          "sourceDistance": 315.81657602412406,
+          "sourceHeat": 62.46232123292152,
+          "sourceReleased": 5064.619878958208,
+          "sourceWork": 61.0541539985892,
+          "supplied": 724.4676122339649,
+          "suppliedEnergy": 3408.5569162595903,
+          "transfers": 0,
+          "washedOut": 2929.431809938564,
+          "washoutEnergy": 12352.754773648765,
+          "weatheredMaterial": 149.03540724682188,
+          "weatheringHeat": 173.3176477859331,
+          "weatheringWork": 163.5692875706542
+        },
+        "lineages": 22,
+        "materialResidual": 2.1274494492462548e-7,
+        "modelSeconds": 1042,
+        "population": 219,
+        "stopReason": null,
+        "tick": 5210
+      },
+      "chemistry": {
+        "other": 361.548948001765,
+        "present": 256,
+        "rows": [
+          {
+            "amount": 1095.4505855128702,
+            "id": 136,
+            "peak": 0.4985091984272003
+          },
+          {
+            "amount": 931.2572180489183,
+            "id": 0,
+            "peak": 0.731818675994873
+          },
+          {
+            "amount": 350.7120496057865,
+            "id": 128,
+            "peak": 0.14729008078575134
+          },
+          {
+            "amount": 99.0363023809196,
+            "id": 8,
+            "peak": 0.1772965043783188
+          },
+          {
+            "amount": 76.31361684916655,
+            "id": 129,
+            "peak": 0.12899702787399292
+          },
+          {
+            "amount": 43.32772436886939,
+            "id": 145,
+            "peak": 0.053786568343639374
+          },
+          {
+            "amount": 42.069422762545415,
+            "id": 137,
+            "peak": 0.02768426202237606
+          },
+          {
+            "amount": 41.4290238292465,
+            "id": 120,
+            "peak": 0.039830658584833145
+          },
+          {
+            "amount": 33.477262286035526,
+            "id": 112,
+            "peak": 0.059850648045539856
+          },
+          {
+            "amount": 18.009926086980265,
+            "id": 88,
+            "peak": 0.11843837052583694
+          },
+          {
+            "amount": 17.97821015413717,
+            "id": 66,
+            "peak": 0.027336157858371735
+          },
+          {
+            "amount": 17.461002199977333,
+            "id": 161,
+            "peak": 0.037253208458423615
+          }
+        ],
+        "tick": 5210,
+        "total": 3128.071292087218
+      }
+    },
+    {
+      "summary": {
+        "ancestryRecords": 1322,
+        "biomass": 392.3144905618873,
+        "cellEnergy": 137.5986003488091,
+        "energyResidual": 0.0000012024320312775671,
+        "generation": 25,
+        "genomes": 215,
+        "heldEnergy": 20513.208535504233,
+        "heldMaterial": 5031.134088499531,
+        "ledger": {
+          "births": 1274,
+          "deathHeat": 0,
+          "deaths": 470,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 41.56959295733676,
+          "divisions": 637,
+          "flows": {
+            "captured": 9712.767212144576,
+            "constructed": 1230.533426678655,
+            "construction": 615.2667133393275,
+            "damage": 835.6361384757384,
+            "distance": 18051.697334898414,
+            "exported": 2423.700766913927,
+            "exposure": 60207.016120430046,
+            "externalWork": 8019.66894347649,
+            "imported": 3809.3383775611737,
+            "learning": 451.7006872957104,
+            "maintenance": 2813.1882206714236,
+            "motors": 332.38317557477853,
+            "reacted": 3429.2424813272846,
+            "reactionHeat": 2657.18407318056,
+            "refitting": 141.4458410610354,
+            "repair": 1335.5250032623053,
+            "repaired": 834.1487556507979,
+            "transport": 311.65195722375074
+          },
+          "initialEnergy": 34105.72110636419,
+          "initialMaterial": 7361.490214221373,
+          "numericalEnergy": 0.3135848154504924,
+          "numericalMaterial": 0.07820587270239228,
+          "overflowHeat": 3476.3818017195417,
+          "shelteredConversion": 428.98516386651954,
+          "sourceConverted": 44.50030055559951,
+          "sourceDistance": 327.97683519705004,
+          "sourceHeat": 63.45369170959291,
+          "sourceReleased": 5169.22439953384,
+          "sourceWork": 62.018171357348244,
+          "supplied": 724.4676122339649,
+          "suppliedEnergy": 3408.5569162595903,
+          "transfers": 0,
+          "washedOut": 3054.7455318687166,
+          "washoutEnergy": 12832.63583643774,
+          "weatheredMaterial": 154.64325887912315,
+          "weatheringHeat": 178.87705354310785,
+          "weatheringWork": 168.82063204070747
+        },
+        "lineages": 20,
+        "materialResidual": 2.143886831812436e-7,
+        "modelSeconds": 1082,
+        "population": 215,
+        "stopReason": null,
+        "tick": 5410
+      },
+      "chemistry": {
+        "other": 400.9462975623601,
+        "present": 256,
+        "rows": [
+          {
+            "amount": 1089.0127500140827,
+            "id": 136,
+            "peak": 0.49754515290260315
+          },
+          {
+            "amount": 861.5512571285044,
+            "id": 0,
+            "peak": 0.7227877974510193
+          },
+          {
+            "amount": 366.49775773220824,
+            "id": 128,
+            "peak": 0.1979225128889084
+          },
+          {
+            "amount": 94.84057665060136,
+            "id": 8,
+            "peak": 0.17007364332675934
+          },
+          {
+            "amount": 81.54963986982183,
+            "id": 129,
+            "peak": 0.11916527152061462
+          },
+          {
+            "amount": 49.35168707160571,
+            "id": 145,
+            "peak": 0.0572524331510067
+          },
+          {
+            "amount": 43.436196505229425,
+            "id": 137,
+            "peak": 0.032289303839206696
+          },
+          {
+            "amount": 42.729616804009254,
+            "id": 120,
+            "peak": 0.04000440984964371
+          },
+          {
+            "amount": 35.67203117901843,
+            "id": 112,
+            "peak": 0.04697445407509804
+          },
+          {
+            "amount": 21.731554475244913,
+            "id": 161,
+            "peak": 0.04648217931389809
+          },
+          {
+            "amount": 21.483382162641657,
+            "id": 88,
+            "peak": 0.11615095287561417
+          },
+          {
+            "amount": 20.35434406145149,
+            "id": 66,
+            "peak": 0.09857866168022156
+          }
+        ],
+        "tick": 5410,
+        "total": 3129.15709121678
+      }
+    },
+    {
+      "summary": {
+        "ancestryRecords": 1438,
+        "biomass": 413.9401392757778,
+        "cellEnergy": 141.2527077014908,
+        "energyResidual": 0.0000012508880899986252,
+        "generation": 26,
+        "genomes": 240,
+        "heldEnergy": 19734.948747059974,
+        "heldMaterial": 4906.72989350169,
+        "ledger": {
+          "births": 1390,
+          "deathHeat": 0,
+          "deaths": 503,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 44.575907275674446,
+          "divisions": 695,
+          "flows": {
+            "captured": 10085.089339276547,
+            "constructed": 1307.281198945404,
+            "construction": 653.640599472702,
+            "damage": 883.4481936422885,
+            "distance": 19241.4774301558,
+            "exported": 2504.3951779102017,
+            "exposure": 63768.11975729317,
+            "externalWork": 8177.453981582058,
+            "imported": 3981.8755494372717,
+            "learning": 472.2708333509708,
+            "maintenance": 2943.726513061342,
+            "motors": 346.79670792528344,
+            "reacted": 3576.1974747564777,
+            "reactionHeat": 2759.7572608197856,
+            "refitting": 148.8245029200203,
+            "repair": 1402.1800319623862,
+            "repaired": 881.7727701633274,
+            "transport": 324.31353636737157
+          },
+          "initialEnergy": 34105.72110636419,
+          "initialMaterial": 7361.490214221373,
+          "numericalEnergy": 0.3545131568521839,
+          "numericalMaterial": 0.08748111160207245,
+          "overflowHeat": 3549.5653256915625,
+          "shelteredConversion": 441.24026572568283,
+          "sourceConverted": 45.22999514979806,
+          "sourceDistance": 339.45338885413895,
+          "sourceHeat": 64.36753587634495,
+          "sourceReleased": 5273.828920109423,
+          "sourceWork": 62.90606277859176,
+          "supplied": 724.4676122339649,
+          "suppliedEnergy": 3408.5569162595903,
+          "transfers": 0,
+          "washedOut": 3179.14045162617,
+          "washoutEnergy": 13298.956308345076,
+          "weatheredMaterial": 160.12374169667157,
+          "weatheringHeat": 184.23817133934358,
+          "weatheringWork": 173.87842889114444
+        },
+        "lineages": 18,
+        "materialResidual": 2.158765268212015e-7,
+        "modelSeconds": 1122,
+        "population": 240,
+        "stopReason": null,
+        "tick": 5610
+      },
+      "chemistry": {
+        "other": 417.5863819677993,
+        "present": 256,
+        "rows": [
+          {
+            "amount": 1076.4208457807479,
+            "id": 136,
+            "peak": 0.5039823651313782
+          },
+          {
+            "amount": 777.0895483367481,
+            "id": 0,
+            "peak": 0.700904369354248
+          },
+          {
+            "amount": 379.6073137566135,
+            "id": 128,
+            "peak": 0.18433140218257904
+          },
+          {
+            "amount": 90.23191085577312,
+            "id": 8,
+            "peak": 0.16309455037117004
+          },
+          {
+            "amount": 87.01714397014702,
+            "id": 129,
+            "peak": 0.11069601774215698
+          },
+          {
+            "amount": 57.109972721479245,
+            "id": 145,
+            "peak": 0.10059989988803864
+          },
+          {
+            "amount": 44.249744488536095,
+            "id": 137,
+            "peak": 0.027571000158786774
+          },
+          {
+            "amount": 43.62592102536569,
+            "id": 120,
+            "peak": 0.03869233280420303
+          },
+          {
+            "amount": 38.98390666695507,
+            "id": 112,
+            "peak": 0.04020705819129944
+          },
+          {
+            "amount": 24.847480096661624,
+            "id": 161,
+            "peak": 0.03536081314086914
+          },
+          {
+            "amount": 22.581250651836495,
+            "id": 144,
+            "peak": 0.029673969373106956
+          },
+          {
+            "amount": 21.848842412951758,
+            "id": 88,
+            "peak": 0.07343687117099762
+          }
+        ],
+        "tick": 5610,
+        "total": 3081.2002627316147
+      }
+    },
+    {
+      "summary": {
+        "ancestryRecords": 1574,
+        "biomass": 443.0529836585305,
+        "cellEnergy": 139.9918354003132,
+        "energyResidual": 0.00000130216903926339,
+        "generation": 26,
+        "genomes": 268,
+        "heldEnergy": 18924.861039924086,
+        "heldMaterial": 4784.616499817787,
+        "ledger": {
+          "births": 1526,
+          "deathHeat": 0,
+          "deaths": 543,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 47.936030592804705,
+          "divisions": 763,
+          "flows": {
+            "captured": 10490.634824703684,
+            "constructed": 1407.0553942474219,
+            "construction": 703.5276971237109,
+            "damage": 940.0089688945708,
+            "distance": 20701.38686323509,
+            "exported": 2589.4875920661143,
+            "exposure": 68153.86645424129,
+            "externalWork": 8329.572361477956,
+            "imported": 4182.016716173071,
+            "learning": 494.70617771637035,
+            "maintenance": 3086.2168055071475,
+            "motors": 365.4088719440108,
+            "reacted": 3742.7085468413943,
+            "reactionHeat": 2872.272458312575,
+            "refitting": 156.81325756107714,
+            "repair": 1476.3510521342203,
+            "repaired": 938.0222288941112,
+            "transport": 338.57521541195393
+          },
+          "initialEnergy": 34105.72110636419,
+          "initialMaterial": 7361.490214221373,
+          "numericalEnergy": 0.3991297335722358,
+          "numericalMaterial": 0.09747784965010116,
+          "overflowHeat": 3619.070931766464,
+          "shelteredConversion": 452.9142932987026,
+          "sourceConverted": 45.92064879965072,
+          "sourceDistance": 351.1294163043992,
+          "sourceHeat": 65.2311011430612,
+          "sourceReleased": 5372.373481001871,
+          "sourceWork": 63.7451244093722,
+          "supplied": 724.4676122339649,
+          "suppliedEnergy": 3408.5569162595903,
+          "transfers": 0,
+          "washedOut": 3301.2438485702355,
+          "washoutEnergy": 13745.572205794364,
+          "weatheredMaterial": 165.42444477771477,
+          "weatheringHeat": 189.36251277819267,
+          "weatheringWork": 178.70898023467086
+        },
+        "lineages": 17,
+        "materialResidual": 2.1766537709744238e-7,
+        "modelSeconds": 1162,
+        "population": 268,
+        "stopReason": null,
+        "tick": 5810
+      },
+      "chemistry": {
+        "other": 450.36521914557716,
+        "present": 256,
+        "rows": [
+          {
+            "amount": 1062.4606315626338,
+            "id": 136,
+            "peak": 0.48543912172317505
+          },
+          {
+            "amount": 671.4073288478698,
+            "id": 0,
+            "peak": 0.6509883403778076
+          },
+          {
+            "amount": 388.1877628790358,
+            "id": 128,
+            "peak": 0.17724663019180298
+          },
+          {
+            "amount": 91.85852820300572,
+            "id": 129,
+            "peak": 0.10253756493330002
+          },
+          {
+            "amount": 87.58446958423102,
+            "id": 8,
+            "peak": 0.15568767488002777
+          },
+          {
+            "amount": 66.0167439761533,
+            "id": 145,
+            "peak": 0.1405387818813324
+          },
+          {
+            "amount": 45.04892686447645,
+            "id": 137,
+            "peak": 0.024477481842041016
+          },
+          {
+            "amount": 44.65856825584726,
+            "id": 120,
+            "peak": 0.04275417700409889
+          },
+          {
+            "amount": 42.28666018954988,
+            "id": 112,
+            "peak": 0.030219677835702896
+          },
+          {
+            "amount": 28.07347688636593,
+            "id": 161,
+            "peak": 0.04674149677157402
+          },
+          {
+            "amount": 25.52355134951386,
+            "id": 144,
+            "peak": 0.041390515863895416
+          },
+          {
+            "amount": 24.79278628914386,
+            "id": 88,
+            "peak": 0.11295809596776962
+          }
+        ],
+        "tick": 5810,
+        "total": 3028.2646540334035
+      }
+    },
+    {
+      "summary": {
+        "ancestryRecords": 1706,
+        "biomass": 459.89069372940133,
+        "cellEnergy": 143.44860832499424,
+        "energyResidual": 0.000001346716089756228,
+        "generation": 22,
+        "genomes": 285,
+        "heldEnergy": 18103.16107737782,
+        "heldMaterial": 4664.403451046402,
+        "ledger": {
+          "births": 1658,
+          "deathHeat": 0,
+          "deaths": 592,
+          "disturbanceDeaths": 0,
+          "divisionHeat": 51.17854080572969,
+          "divisions": 829,
+          "flows": {
+            "captured": 10917.70205428859,
+            "constructed": 1505.7295293232555,
+            "construction": 752.8647646616278,
+            "damage": 1003.1055775163218,
+            "distance": 22450.02106097916,
+            "exported": 2679.2211643245278,
+            "exposure": 73263.60425834502,
+            "externalWork": 8471.029386313801,
+            "imported": 4395.655109906494,
+            "learning": 518.077328837607,
+            "maintenance": 3234.4362709737943,
+            "motors": 387.83295819593576,
+            "reacted": 3920.3755295590586,
+            "reactionHeat": 2991.4224081644643,
+            "refitting": 165.26675902770882,
+            "repair": 1555.444261618171,
+            "repaired": 1000.9455484336954,
+            "transport": 353.7438137115465
+          },
+          "initialEnergy": 34105.72110636419,
+          "initialMaterial": 7361.490214221373,
+          "numericalEnergy": 0.4461701856030001,
+          "numericalMaterial": 0.10793419731268762,
+          "overflowHeat": 3686.311044122715,
+          "shelteredConversion": 463.97923996712694,
+          "sourceConverted": 46.54869545735106,
+          "sourceDistance": 363.45169246844563,
+          "sourceHeat": 66.00691940445853,
+          "sourceReleased": 5468.276887979969,
+          "sourceWork": 64.49720057111188,
+          "supplied": 724.4676122339649,
+          "suppliedEnergy": 3408.5569162595903,
+          "transfers": 0,
+          "washedOut": 3421.4464409920165,
+          "washoutEnergy": 14172.67156517865,
+          "weatheredMaterial": 170.53899473208875,
+          "weatheringHeat": 194.2257754221631,
+          "weatheringWork": 183.28504952602216
+        },
+        "lineages": 16,
+        "materialResidual": 2.1960752825955776e-7,
+        "modelSeconds": 1202,
+        "population": 285,
+        "stopReason": null,
+        "tick": 6010
+      },
+      "chemistry": {
+        "other": 484.57623646826096,
+        "present": 256,
+        "rows": [
+          {
+            "amount": 1052.6076319620322,
+            "id": 136,
+            "peak": 0.49892890453338623
+          },
+          {
+            "amount": 561.6223487088145,
+            "id": 0,
+            "peak": 0.5305522084236145
+          },
+          {
+            "amount": 396.30646061825536,
+            "id": 128,
+            "peak": 0.17896202206611633
+          },
+          {
+            "amount": 97.50256044936611,
+            "id": 129,
+            "peak": 0.09478925168514252
+          },
+          {
+            "amount": 82.70201737883168,
+            "id": 8,
+            "peak": 0.1145591288805008
+          },
+          {
+            "amount": 75.24221080477787,
+            "id": 145,
+            "peak": 0.06952909380197525
+          },
+          {
+            "amount": 46.70596541012474,
+            "id": 112,
+            "peak": 0.04013655707240105
+          },
+          {
+            "amount": 45.95174268249605,
+            "id": 137,
+            "peak": 0.02208573743700981
+          },
+          {
+            "amount": 45.245169726416954,
+            "id": 120,
+            "peak": 0.0369618684053421
+          },
+          {
+            "amount": 31.373583114191938,
+            "id": 161,
+            "peak": 0.053198378533124924
+          },
+          {
+            "amount": 29.24636067135964,
+            "id": 144,
+            "peak": 0.037368107587099075
+          },
+          {
+            "amount": 26.11945742496384,
+            "id": 88,
+            "peak": 0.10311073809862137
+          }
+        ],
+        "tick": 6010,
+        "total": 2975.201745419892
+      }
+    }
+  ],
+  "initial": {
+    "ancestryRecords": 1158,
+    "biomass": 393.4179987072338,
+    "cellEnergy": 152.80880680416078,
+    "energyResidual": 0.000001081960363080725,
+    "generation": 25,
+    "genomes": 203,
+    "heldEnergy": 22011.40153387127,
+    "heldMaterial": 5282.359866290678,
+    "ledger": {
+      "births": 1110,
+      "deathHeat": 0,
+      "deaths": 400,
+      "disturbanceDeaths": 0,
+      "divisionHeat": 37.28504881968055,
+      "divisions": 555,
+      "flows": {
+        "captured": 8992.213154830211,
+        "constructed": 1107.7680740982225,
+        "construction": 553.8840370491113,
+        "damage": 747.5804760220203,
+        "distance": 15809.963829579305,
+        "exported": 2254.136412504697,
+        "exposure": 53819.53362404704,
+        "externalWork": 7619.722194846531,
+        "imported": 3488.6867441217687,
+        "learning": 410.275132472767,
+        "maintenance": 2551.25343418625,
+        "motors": 303.4695253939503,
+        "reacted": 3139.3093972237216,
+        "reactionHeat": 2457.7320317913036,
+        "refitting": 126.83004883516986,
+        "repair": 1206.369974192206,
+        "repaired": 746.1411309498314,
+        "transport": 287.14115783131774
+      },
+      "initialEnergy": 34105.72110636419,
+      "initialMaterial": 7361.490214221373,
+      "numericalEnergy": 0.2413186740463587,
+      "numericalMaterial": 0.06149527938785885,
+      "overflowHeat": 3313.737976983575,
+      "shelteredConversion": 403.07083815440484,
+      "sourceConverted": 42.8661241230666,
+      "sourceDistance": 302.6971754359915,
+      "sourceHeat": 61.37396836180032,
+      "sourceReleased": 4940.9834094754015,
+      "sourceWork": 59.99503591574736,
+      "supplied": 724.4676122339649,
+      "suppliedEnergy": 3408.5569162595903,
+      "transfers": 0,
+      "washedOut": 2803.536464675017,
+      "washoutEnergy": 11863.565470273055,
+      "weatheredMaterial": 143.38342123575882,
+      "weatheringHeat": 167.63706958363488,
+      "weatheringWork": 158.20247601504263
+    },
+    "lineages": 22,
+    "materialResidual": 2.1025536208613138e-7,
+    "modelSeconds": 1002,
+    "population": 203,
+    "stopReason": null,
+    "tick": 5010
+  },
+  "summary": {
+    "ancestryRecords": 1706,
+    "biomass": 459.89069372940133,
+    "cellEnergy": 143.44860832499424,
+    "energyResidual": 0.000001346716089756228,
+    "generation": 22,
+    "genomes": 285,
+    "heldEnergy": 18103.16107737782,
+    "heldMaterial": 4664.403451046402,
+    "ledger": {
+      "births": 1658,
+      "deathHeat": 0,
+      "deaths": 592,
+      "disturbanceDeaths": 0,
+      "divisionHeat": 51.17854080572969,
+      "divisions": 829,
+      "flows": {
+        "captured": 10917.70205428859,
+        "constructed": 1505.7295293232555,
+        "construction": 752.8647646616278,
+        "damage": 1003.1055775163218,
+        "distance": 22450.02106097916,
+        "exported": 2679.2211643245278,
+        "exposure": 73263.60425834502,
+        "externalWork": 8471.029386313801,
+        "imported": 4395.655109906494,
+        "learning": 518.077328837607,
+        "maintenance": 3234.4362709737943,
+        "motors": 387.83295819593576,
+        "reacted": 3920.3755295590586,
+        "reactionHeat": 2991.4224081644643,
+        "refitting": 165.26675902770882,
+        "repair": 1555.444261618171,
+        "repaired": 1000.9455484336954,
+        "transport": 353.7438137115465
+      },
+      "initialEnergy": 34105.72110636419,
+      "initialMaterial": 7361.490214221373,
+      "numericalEnergy": 0.4461701856030001,
+      "numericalMaterial": 0.10793419731268762,
+      "overflowHeat": 3686.311044122715,
+      "shelteredConversion": 463.97923996712694,
+      "sourceConverted": 46.54869545735106,
+      "sourceDistance": 363.45169246844563,
+      "sourceHeat": 66.00691940445853,
+      "sourceReleased": 5468.276887979969,
+      "sourceWork": 64.49720057111188,
+      "supplied": 724.4676122339649,
+      "suppliedEnergy": 3408.5569162595903,
+      "transfers": 0,
+      "washedOut": 3421.4464409920165,
+      "washoutEnergy": 14172.67156517865,
+      "weatheredMaterial": 170.53899473208875,
+      "weatheringHeat": 194.2257754221631,
+      "weatheringWork": 183.28504952602216
+    },
+    "lineages": 16,
+    "materialResidual": 2.1960752825955776e-7,
+    "modelSeconds": 1202,
+    "population": 285,
+    "stopReason": null,
+    "tick": 6010
+  },
+  "steps": 1000,
+  "windows": [
+    85.36660618599124,
+    82.61980938155865,
+    86.5568458796154,
+    88.14706124264774,
+    87.40633793582917,
+    89.96792378111826,
+    87.54626267346514,
+    87.43493529290177,
+    84.57906597409048,
+    79.19537091336088,
+    85.85332222608842,
+    85.7474043017381,
+    85.61208078920978,
+    85.85979021559767,
+    86.02181653482886,
+    86.45189189742482,
+    85.3308943715782,
+    85.14734537377252,
+    83.34297194803895,
+    79.34608227568252,
+    84.81603711129094,
+    82.38590910955816,
+    83.45094213693613,
+    82.70324795627565,
+    81.64836620598598,
+    82.79790789723852,
+    81.33079100871515,
+    79.2158072354942,
+    80.48748468509288,
+    76.28168089292672,
+    80.66952381179422,
+    79.59826057423496,
+    78.91233580873042,
+    78.25352928210094,
+    77.65770899360098,
+    77.69966897687736,
+    76.85900164268784,
+    76.84324624785606,
+    75.59011930558573,
+    73.24817673659953,
+    76.58795278548821,
+    75.53758513048058,
+    74.3533410924763,
+    73.31355482694967,
+    73.57327063066074,
+    74.2708469809882,
+    73.48583952490122,
+    73.07895416591761,
+    74.03112697218121,
+    69.82264827397071
+  ],
+  "stages": {
+    "stepMs": 12071.192799000004,
+    "censusMs": 128.53887499999405,
+    "renderMs": 156.41295299999933,
+    "inspectionMs": 20.420302000003517
+  },
+  "wallMs": 12437.656491,
+  "ticksPerSecond": 80.40099842953606,
+  "modelSecondsPerWallSecond": 16.080199685907214,
+  "maximumStepMs": 51.46508299999914,
+  "p95StepMs": 48.05828699999984,
+  "stop": "horizon",
+  "checkpointBytes": 29291345,
+  "memoryBytes": 262537216,
+  "rss": 375455744
+}

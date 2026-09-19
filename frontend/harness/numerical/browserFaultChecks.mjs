@@ -50,6 +50,9 @@ export async function faultChecks(connection, workerSession, scripts, records) {
     page,
     "[...document.querySelectorAll('[role=alert]')].some(e=>e.textContent.includes('Injected operational worker failure'))"
   );
+  await page.evaluate(
+    "[...document.querySelectorAll('.observation-dock button')].find(b=>b.textContent==='Saves').click()"
+  );
   const reportAvailable = await page.evaluate(
     "[...document.querySelectorAll('button')].some(e=>e.textContent.includes('Export runtime report')&&!e.disabled)"
   );

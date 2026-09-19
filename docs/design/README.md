@@ -1,6 +1,41 @@
 # Current design and work order
 
-**Canonical mathematical plan:** [transformation algebra and runtime integration](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
+**Current ecology proposal:** [resource binding](resource-binding-proposal.md) selects a shared
+six-unit attraction length, existing local repulsion/nonlinear pressure, a bounded evaluator,
+all-consumer integration and short mechanism/cost checks. The
+[investigation](resource-binding-investigation.md) retains the force diagnosis and evidence.
+The user rejected prescribed geographic basins.
+Cellular changes to local material should alter binding; homeostatic clusters are valid.
+The [50k spatial review](spatial-isolation-review.md) retains its observation and rejected
+proposal. Production changes remain proposed; external directional forcing is a later topic.
+Execution stays single-threaded; multicore implementation is in the backlog.
+
+**Performance and scaling:** the [completed serial pass](../../SCALING-PLAN.md) reduces active
+field support, transport passes and cell-exchange work. Its shared-memory 16–32-core design is
+deferred. Ecological opportunities and mathematical principles govern acceptance; trajectory
+identity is not required. The preceding
+[exact optimization](chemistry/runtime-optimization.md) retains its historical measurements.
+
+**Current mathematical work:** [regenerative ecosystem implementation](../../MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation),
+root `555cf223-16f7-4e8b-a10a-7160dbdeead2`. Physical v27 implements R0–R4; automated checks
+are complete and human motion review is pending. The [evidence](../evidence/digital-chemistry/regenerative-v27/README.md)
+records203cells at5k, producer-dependent uptake, matched cost and retained negative findings.
+The [white paper](chemistry/regenerative-ecosystem.md) scopes shared transformation work,
+finite-owner pressure correction and a funded initial community on the existing runtime.
+
+**Preceding mathematics:** [source concentration correction](../../MATHEMATICAL-SYMMETRY-PLAN.md#source-concentration-correction),
+root `b482e871-94d8-41c9-86a3-7486f13c13f3`. Physical v26 adds shared impedance pressure
+to geographic motion. The completed [geometry correction](../../MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction)
+retains definition v5's multidirectional potential basins, separate enzyme recognition/action,
+specificity-radius mutation units and explicitly funded environmental returns.
+The [runtime contract](chemistry/composed-runtime.md) owns the current laws. The v23 acceptance
+and performance below describe the earlier deployed revision.
+
+**Current UI work:** [viewport-first observation](../../UI-OBSERVATION-PLAN.md) moves the world
+to a full-screen viewport with focused information windows, preserving chemistry and improving
+lineage navigation. Phenotype analysis and long-run cleanup remain later work.
+
+**Completed canonical mathematical plan:** [transformation algebra and runtime integration](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
 Sulion root `14120639-64cd-4840-b2d4-734e0aa4e123`. A0–A5 adopt the white paper's unresolved
 work and the former M6 human-review obligation. The redundant M6 branch is retired; prior
 v21/v22 evidence remains historical. Environmental plans and their review gates remain separate.
@@ -12,8 +47,9 @@ Enzymes retain five parameters and compile mixtures of at most eight exact actio
 are irreversible kinetic operators, not group elements. Ordinary enzymes and environmental
 conversion share the action algebra; recognition, funded installation, material/work accounts
 and the compiler retain their common boundaries. The [white paper](chemistry/transformation-algebra.md)
-remains the design/evidence contract. A0–A4 pass bounded verification; A5 human motion review
-remains pending. Startup measures376ticks/s versus385 before; saturated capacity remains
+remains the design/evidence contract. A0–A5 are complete. The user accepts deployed v23,
+reporting real differentiation and acceptable speed through 100,000 ticks.
+Startup measures376ticks/s versus385 before; saturated capacity remains
 within1% of baseline and retains its below30ticks/s limit at2,000cells. These measurements
 do not establish long-run abundance, recycling or endurance.
 
@@ -183,15 +219,17 @@ the accepted direction and prior calibration. Chemistry changes require a new mo
 
 ## Current default and disabled scope
 
-Run starts seed 27, paused at tick zero, with 48 cells of the same founder genotype in two
+Run starts seed 27, paused at tick zero, with 48 cells of four mutable founder genotypes in two
 separated resource neighborhoods of a 320 × 240 periodic world. Forty-eight mobile renewing reservoirs
-have unequal richness, local mixtures and variable release. Chemistry seed 101 resolves initial
-source IDs 0 and 80; decomposition uses ID 186. These are ordinary locations in the generated space,
-not biological roles. Haploid clonal fission, mutation and paid inheritable plasticity are active.
+have unequal richness, local mixtures and variable release. Chemistry seed101 and source IDs0/136
+support the authored circuit0→128→136→8→0, with six cells of each role per colony.
+Finite initial8/128 priming starts delivery; later processing follows ordinary laws. Free and
+bound material retain actual identities through repair and death. No chemical has a privileged
+waste role. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
 The controller has 39 inputs, 24 recurrent units and nine outputs. Fifteen funded stocks support
 four receptors, four transporters and four enzymes plus core, motor and storage. Physical
-checkpoints use v23; the outer observation package remains v11.
+checkpoints use v25; the outer observation package remains v11.
 Generic stress, compatibility, repair and impedance replace named toxin/defense/
 matrix pathways. Source zones and epochs remain selectable. Disturbance and typed machinery
 transfer are experimental options, disabled by default. Light input and binding remain deferred.
@@ -213,7 +251,7 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 The source/environmental repair, v21/v22 geometric corrections and selected v23 finite action
 are implemented. The [canonical math plan](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order)
-records A0–A4 evidence and owns the pending A5 human motion gate and current operating limits.
+records A0–A4 evidence, A5 human acceptance through 100,000 ticks and current operating limits.
 The [default-seed observation](../default-seed-cycles-study.md)
 remains positive historical evidence under its original rules. The
 [source plan](../../MOBILE-SOURCES-PLAN.md) supplies short calibration; the

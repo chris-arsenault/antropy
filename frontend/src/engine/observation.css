@@ -1,0 +1,378 @@
+.application {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #070e11;
+}
+.application .viewport,
+.application .world-canvas {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+}
+.application .viewport canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+.game-hud {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  margin: 0;
+  border: 1px solid #31434a;
+  border-radius: 14px;
+  background: #101b22ed;
+  box-shadow: 0 8px 32px #0004;
+}
+.brand h1 {
+  font-size: 21px;
+}
+.brand > span {
+  color: #88a59c;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+.world-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12px;
+  color: #9eb3bd;
+  font-variant-numeric: tabular-nums;
+}
+.world-status strong {
+  color: #dcece7;
+  font-weight: 500;
+}
+.running-state {
+  color: #bcc8d2;
+}
+.running-state::before {
+  content: "●";
+  margin-right: 6px;
+  font-size: 9px;
+}
+.running-state.is-running {
+  color: #a8e6bc;
+}
+.game-hud .run-controls {
+  margin-left: auto;
+  gap: 6px;
+}
+.observation-dock {
+  position: absolute;
+  z-index: 4;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  max-width: calc(100% - 24px);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 7px;
+  border: 1px solid #344b50;
+  border-radius: 14px;
+  background: #101b22f5;
+  box-shadow: 0 6px 32px #0008;
+}
+.observation-dock button {
+  border-color: transparent;
+  background: transparent;
+  padding: 11px 15px;
+  white-space: nowrap;
+}
+.observation-dock button:hover {
+  background: #21373e;
+}
+.observation-dock button[aria-pressed="true"] {
+  color: #c5f4d7;
+  background: #24483c;
+  border-color: #50735f;
+}
+.observation-window {
+  position: fixed;
+  z-index: 3;
+  inset: 100px 20px 94px auto;
+  width: min(620px, calc(100% - 40px));
+  max-width: none;
+  max-height: none;
+  height: fit-content;
+  max-height: calc(100dvh - 194px);
+  margin: 0;
+  padding: 0;
+  color: #e0edf1;
+  background: #111e27fa;
+  border: 1px solid #3e535c;
+  border-radius: 16px;
+  box-shadow: 0 18px 70px #0009;
+  overflow: hidden;
+}
+.observation-window[open] {
+  display: flex;
+  flex-direction: column;
+}
+.observation-window:not([open]) {
+  display: none;
+}
+.window-heading {
+  flex: 0 0 auto;
+  padding: 14px 18px;
+  margin: 0;
+  border-bottom: 1px solid #324750;
+  background: #162630;
+}
+.window-heading h2 {
+  font-size: 21px;
+  margin: 2px 0 0;
+}
+.eyebrow {
+  color: #8db5a3;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 9px;
+}
+.window-close {
+  background: transparent;
+  border-color: #455b66;
+}
+kbd {
+  font: inherit;
+  color: #92aab4;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.window-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 18px;
+  scrollbar-color: #47606c transparent;
+}
+.window-content > .panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+.window-content > .panel > h2 {
+  font-size: 14px;
+  color: #b8d1d5;
+}
+.window-content > details.panel > summary {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+.window-content .map-tools {
+  background: transparent;
+  padding: 0 0 16px;
+  margin-bottom: 16px;
+}
+.window-content .map-tools label {
+  flex-wrap: wrap;
+}
+.window-content .map-legend {
+  background: transparent;
+  padding: 14px 0;
+}
+.window-content .map-legend p {
+  font-size: 12px;
+}
+.window-content .chemical-legend {
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.window-content .population-chart svg {
+  max-height: 180px;
+}
+.window-content .lineage-panel > svg {
+  max-height: 210px;
+}
+.window-content table {
+  min-width: 280px;
+}
+.lineage-guide {
+  border-left: 2px solid #77b390;
+  padding: 2px 14px;
+  margin-bottom: 18px;
+  background: #1b302c;
+}
+.lineage-guide p {
+  color: #b4ccbf;
+  margin: 8px 0;
+}
+.panel-intro {
+  margin-top: 0;
+}
+.window-content .genealogy-key {
+  gap: 6px;
+}
+.window-content .genealogy-panel button {
+  padding: 6px 8px;
+}
+.window-content label {
+  line-height: 2;
+}
+.window-content fieldset {
+  border: 1px solid #344b56;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+.window-content fieldset label,
+.window-content details.panel > label,
+.window-content details.panel > details > label {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+.window-content details.panel > button {
+  margin: 6px 6px 6px 0;
+}
+.viewport-tools {
+  position: absolute;
+  left: 20px;
+  bottom: 96px;
+  padding: 8px 10px;
+  border: 1px solid #344b5080;
+  border-radius: 10px;
+  background: #101b22d9;
+}
+.viewport-tools p {
+  margin: 6px 0 0;
+  font-size: 10px;
+}
+.viewport-tools .zoom-controls {
+  gap: 8px;
+  font-size: 12px;
+}
+.application .world-scale {
+  left: 24px;
+  bottom: 210px;
+}
+.world-notice {
+  position: absolute;
+  z-index: 5;
+  top: 100px;
+  left: 20px;
+  max-width: min(500px, calc(100% - 40px));
+  padding: 12px 16px;
+  border: 1px solid #ad785b;
+  border-radius: 10px;
+  background: #342923;
+  font-size: 13px;
+}
+.world-notice button {
+  margin-left: 10px;
+}
+@media (max-width: 1000px) {
+  .game-hud {
+    gap: 8px 16px;
+  }
+  .brand > span {
+    display: none;
+  }
+  .world-status {
+    gap: 6px 10px;
+  }
+  .throughput {
+    display: none;
+  }
+  .observation-window {
+    top: 112px;
+    max-height: calc(100dvh - 206px);
+  }
+}
+@media (max-width: 600px) {
+  .game-hud {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 10px;
+    gap: 8px;
+  }
+  .brand h1 {
+    font-size: 17px;
+  }
+  .world-status {
+    margin-left: auto;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .world-status .running-state {
+    display: none;
+  }
+  .game-hud .run-controls {
+    width: 100%;
+    margin: 0;
+    justify-content: space-between;
+  }
+  .run-controls button.primary {
+    min-width: 72px;
+  }
+  .run-controls select {
+    max-width: 130px;
+  }
+  .observation-dock {
+    max-width: calc(100% - 16px);
+    bottom: max(8px, env(safe-area-inset-bottom));
+    padding: 4px;
+  }
+  .observation-dock button {
+    padding: 10px 9px;
+    font-size: 12px;
+  }
+  .observation-window {
+    top: 114px;
+    right: 8px;
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 188px);
+  }
+  .window-content {
+    padding: 14px;
+  }
+  .viewport-tools {
+    left: 10px;
+    bottom: 78px;
+  }
+  .viewport-tools p {
+    display: none;
+  }
+  .application .world-scale {
+    left: 14px;
+    bottom: 144px;
+  }
+  .world-notice {
+    top: 116px;
+    left: 10px;
+  }
+}
+@media (max-height: 500px) {
+  .observation-window {
+    top: 84px;
+    max-height: calc(100dvh - 158px);
+  }
+  .game-hud {
+    top: 6px;
+    padding: 6px 12px;
+  }
+  .brand > span {
+    display: none;
+  }
+}

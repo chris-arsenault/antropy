@@ -6,14 +6,13 @@ use antropy_engine::{
 };
 use std::sync::Arc;
 // Independently enumerate the interval involutions at zero orientation.
-fn weight(s: usize, p: usize, center: [f64; 2], offset: [f64; 2]) -> f64 {
+fn weight(s: usize, p: usize, center: [f64; 2]) -> f64 {
     let a = coordinate(s);
     let b = coordinate(p);
     (0..2)
         .map(|k| {
-            let target = 15. - ((center[k] + offset[k]).rem_euclid(30.) - 15.).abs();
-            let pivot = 15. - center[k] + target;
-            let source = 15. - a[k];
+            let pivot = 2. * center[k];
+            let source = a[k];
             (0..=30)
                 .map(|j| {
                     let candidate = j as f64 - source;
@@ -36,9 +35,9 @@ fn weight(s: usize, p: usize, center: [f64; 2], offset: [f64; 2]) -> f64 {
 fn production_coefficients_match_dense_products_and_work_accounts() {
     let chemistry = Chemistry::new(101).unwrap();
     let config = Config::default();
-    for (center, offset) in [
+    for (center, action_center) in [
         ([0., 0.], [1., 1.]),
-        ([7.5, 7.5], [0.25, -0.75]),
+        ([7.5, 7.5], [8.25, 6.75]),
         ([14.5, 14.5], [1., 1.]),
         ([7., 7.], [0., 0.]),
     ] {
@@ -46,8 +45,8 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
         m.enzymes = [Enzyme {
             x: center[0],
             y: center[1],
-            dx: offset[0],
-            dy: offset[1],
+            center_x: action_center[0],
+            center_y: action_center[1],
             angle: 0.,
         }; 4];
         let op = Operators::compile(&m, &config, &chemistry);
@@ -61,7 +60,7 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
             let mut displacement = 0.;
             occupancy[e.substrate] += e.binding;
             for p in 0..256 {
-                let expected = weight(e.substrate, p, center, offset);
+                let expected = weight(e.substrate, p, action_center);
                 let actual = e
                     .products
                     .iter()
@@ -90,7 +89,7 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
                 .map_or(0., |a| a.value);
             assert!((expected - actual).abs() < 1e-12);
         }
-        if offset == [0., 0.] {
+        if action_center == [0., 0.] {
             assert!(
                 enzyme
                     .conversions
@@ -138,7 +137,7 @@ fn processing_is_continuous_across_product_and_recognition_boundaries() {
                 cell.energy = 10.;
                 for e in &mut cell.installed.enzymes {
                     e.x = x + delta;
-                    e.dx = offset + delta;
+                    e.center_x = 7.5 + offset + delta;
                 }
                 cell.operators = Some(Operators::compile(
                     &cell.installed,
@@ -178,8 +177,8 @@ fn an_idle_offset_and_a_tiny_offset_have_continuous_work_cost() {
         cell.inventory.fill(0.1);
         cell.energy = 10.;
         for e in &mut cell.installed.enzymes {
-            e.dx = offset;
-            e.dy = 0.;
+            e.center_x = offset;
+            e.center_y = 0.;
         }
         cell.operators = Some(Operators::compile(
             &cell.installed,

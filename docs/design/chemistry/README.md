@@ -2,7 +2,9 @@
 
 Status: fresh production World implemented September 15, with environmental chemistry added
 September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
-owns the current artificial laws and checkpoint v23. The
+owns the current artificial laws and checkpoint v27. Definition v5 corrects the potential
+landscape; recognition-independent actions and explicitly funded environmental returns are
+tracked in the [geometry correction](../../../MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction). The
 [symmetry correction](../../../MATHEMATICAL-SYMMETRY-PLAN.md) records shared geometry,
 funding, mutation and matched runtime measurements. [Bound material](../../bound-material.md)
 preserves chemical identity through the body cycle; the [physical coupling correction](../../physical-coupling-correction.md)
@@ -35,12 +37,14 @@ substrate. They are not species categories or separate action systems.
 | --- | --- |
 | [Computational foundation](computational-foundation.md) | Governing design: composed chemical-space computation, accounts, costs and decision ownership |
 | [Transformation algebra white paper](transformation-algebra.md) | Group actions, discrete representation and irreversible dynamics; design contract for the canonical plan's selected v23 implementation |
+| [Regenerative initial ecosystem white paper](regenerative-ecosystem.md) | Implemented v27 design: funded four-founder circulation, shared environmental work and finite-owner pressure; bounded evidence in the canonical plan, human review pending |
 | [Current specification responsibilities](../../specs/digital-chemistry/README.md) | Current contracts and explicitly historical M0 equations/evidence |
 | [Substrate and accounting](substrate.md) | Chemical properties, generation constraints, fields, sources, turnover, reactions, construction and death |
 | [Machinery and controllers](machinery.md) | Fixed slots, funded capacities, local observations/actions, mutation and inheritance |
 | [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
 | [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
 | [Current measurements](rebuild-results.md) | Fresh-core registrations, bounded mechanisms, capacity, default startup and storage results |
+| [v27 runtime optimization](runtime-optimization.md) | Exact weathering/stencil work reductions, archived checkpoint equality, matched timings and remaining limits |
 | [Environmental chemistry](environmental-results.md) | Geographic weathering, extracellular conversion, paid shelter, short controls and overnight evidence |
 | [Mobile sources](mobile-source-results.md) | Medium-dependent motion and release, bounded cost and short calibration |
 | [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
@@ -73,7 +77,7 @@ should establish causal opportunities and costs. They should not deliver a pre-e
 prescribe a population count or turn every possible ecological role into an acceptance gate.
 
 Retain the large periodic XY world, uneven finite local opportunities, open or marginal
-space, useful movement and at least two starting colonies of the same founder genotype. Later
+space, useful movement and at least two starting colonies containing four mutable founder types. Later
 colonies, migration, divergence and extinction remain consequences of individual cell activity.
 The current source geometry and numerical settings are revisable hypotheses. Neither a particular
 geometric metaphor nor uniformly slow movement is a permanent design constraint.

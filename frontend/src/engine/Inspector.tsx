@@ -47,8 +47,6 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
       <p>
         Founder ancestry {p.ancestor.lineage} · born at tick {p.ancestor.born} · {p.ancestor.cause}
       </p>
-      <CellGenealogy inspection={p} bridge={bridge} error={error} />
-      <Relationships inspection={p} bridge={bridge} error={error} />
       {p.cell ? (
         <>
           <CellDetails inspection={p} definition={definition} />
@@ -79,6 +77,13 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
           )}
         </>
       )}
+      <details>
+        <summary>
+          Family and ancestry · {p.genealogy.descendantCount.toLocaleString()} living descendants
+        </summary>
+        <CellGenealogy inspection={p} bridge={bridge} error={error} />
+        <Relationships inspection={p} bridge={bridge} error={error} />
+      </details>
     </section>
   );
 }
@@ -189,7 +194,13 @@ function Chemistry({
       );
     const e = genes.enzymes[i - 8];
     return (
-      "offset " + n(e.dx) + ", " + n(e.dy) + " · orientation " + n((e.angle * 180) / Math.PI) + "°"
+      "reflection center " +
+      n(e.centerX) +
+      ", " +
+      n(e.centerY) +
+      " · orientation " +
+      n((e.angle * 180) / Math.PI) +
+      "°"
     );
   };
   const species = c.inventory.amounts

@@ -5,6 +5,7 @@ export type Operation =
   | "initialize"
   | "observed"
   | "view"
+  | "chemicalWeb"
   | "frame"
   | "running"
   | "speed"

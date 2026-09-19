@@ -4,6 +4,13 @@ import { loadEngine, captureEngine } from "./engine";
 import { openLedger, recordRun } from "../lib/ledger";
 
 const names = [
+  ...[0, 1, 2, 3].flatMap((role) => [`regenerative-${role}`, `regenerative-${role}-off`]),
+  "circuit-delivery",
+  "circuit-delivery-off",
+  "circuit-delivery-swap",
+  "circuit-delivery-off-swap",
+  "circuit-community",
+  "circuit-community-swap",
   "crossfeeding",
   "crossfeeding-export-off",
   "crossfeeding-processing-off",
@@ -23,6 +30,7 @@ const names = [
   ...[4, 2].flatMap((mesh) => ["left", "right", "off"].map((side) => `sensing-${side}-h${mesh}`)),
 ];
 function horizonFor(name: string) {
+  if (name.startsWith("circuit-community")) return 1500;
   if (name.startsWith("emission")) return 100;
   if (name.startsWith("sensing")) return 120;
   return 300;
@@ -75,7 +83,7 @@ try {
     let stop = "horizon",
       steps = 0;
     while (steps < horizon) {
-      if (performance.now() - started > 30000) {
+      if (performance.now() - started > 120000) {
         stop = "wall-cap";
         break;
       }
@@ -106,8 +114,11 @@ try {
       params: {
         wasmDigest,
         horizon,
-        wallCapSeconds: 30,
-        registration: "docs/design/chemistry/rebuild-results.md",
+        wallCapSeconds: 120,
+        registration:
+          name.startsWith("regenerative-") || name.startsWith("circuit-")
+            ? "MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation"
+            : "docs/design/chemistry/rebuild-results.md",
       },
       summary: { ...summary, stop, lastLiving: last },
       wallMs,

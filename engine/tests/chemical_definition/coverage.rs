@@ -80,3 +80,19 @@ fn every_adjacent_transformation_is_accessible_and_the_graph_is_connected() {
     }
     assert!(seen.into_iter().all(|v| v));
 }
+
+#[test]
+fn potential_has_multiple_basins_and_no_globally_privileged_axis() {
+    for seed in SEEDS {
+        let mut c = Chemistry::new(seed).unwrap();
+        let t = antropy_engine::chemical_landscape::topology(&c.properties);
+        println!("seed={seed} topology={t:?}");
+        assert!(t.rising.into_iter().chain(t.falling).all(|n| n >= 60));
+        assert!(t.minima >= 2 && t.maxima >= 2);
+        // A smooth axial gradient satisfies the old range/coverage idea but fails geometry.
+        for (s, p) in c.properties.iter_mut().enumerate() {
+            p.potential = 8. - 0.5 * (s / 16) as f64;
+        }
+        assert!(antropy_engine::chemical_landscape::validate(&c.properties).is_err());
+    }
+}

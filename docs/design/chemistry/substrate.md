@@ -4,8 +4,8 @@ Historical substrate/reference description from the previous chemistry implement
 execution is defined by the [composed runtime](composed-runtime.md), under the
 [computational foundation](computational-foundation.md). The formulas, mesh, checkpoint and
 tick order below preserve earlier choices; they do not govern the fresh production World.
-That World implements v4 shared profiles, continuous installed machinery and physical checkpoint
-v13. Preserve material identity, finite resources and explicit accounts without reconstructing
+That World implements v5 chemical definitions, continuous installed machinery and physical checkpoint
+v27. Preserve material identity, finite resources and explicit accounts without reconstructing
 the old conductance, temperature or categorical machinery rules below.
 
 Status: implemented; [numerical design](numerical-engine.md) and [current results](numerical-results.md) record selected
@@ -88,8 +88,8 @@ amounts use float64 vectors with an owned material reduction. Geography is conti
 independent of mesh spacing. Default mesh 2 gives 160 × 120 nodes in the 320 × 240 world,
 about 18.75 MiB for external amount storage before work buffers, organisms or history.
 
-The September17 weathering revision rounds extracellular concentrations below
-`1e-9` to zero at field substeps and retains the September15 index of occupied groups plus their neighbor
+The September18 scaling pass rounds extracellular concentrations below
+`1e-6` to zero at field substeps and retains the index of occupied groups plus their neighbor
 halo. Numerical losses, including this floor, are recorded separately from physical washout
 in matter and potential accounts. This local resolution does not select species by global
 abundance or prune intracellular stocks. See the [current runtime](composed-runtime.md).

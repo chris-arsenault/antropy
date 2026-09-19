@@ -134,12 +134,15 @@ impl Source {
             &mut self.inventory,
             step.response.signal,
             c.dt * c.weathering_rate * c.source_processing * step.exposure,
-            crate::field_activity::CONCENTRATION_FLOOR as f64 * self.interface,
+            // Screen conversion against the owner's inventory scale, not geographic area.
+            // Retain tiny owned stocks; skip changes below f32 delivery precision.
+            total * f32::EPSILON as f64,
             self.material.mask,
         );
         self.material.mask = mask;
         ledger.source_converted += conversion[0];
         ledger.source_heat += conversion[1];
+        ledger.source_work += conversion[2];
         if conversion[0] > 0. || (self.rate > 0. && total > 0.) {
             changed = true;
             self.release(
@@ -204,7 +207,7 @@ pub fn landscape(c: &Config, rng: &mut Random) -> (Vec<[f64; 2]>, Vec<Habitat>) 
                 y: (center[1] + angle.sin() * reach).rem_euclid(c.height),
                 radius: c.source_radius * (0.6 + rng.unit()),
                 richness: 0.3 + 2. * rng.unit().powi(2),
-                share: 0.05 + 0.9 * rng.unit(),
+                share: 0.55 + 0.1 * rng.unit(),
             }
         })
         .collect();

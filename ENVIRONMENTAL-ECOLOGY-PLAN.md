@@ -1,5 +1,14 @@
 # Environmental ecology
 
+September 19: the [resource-binding proposal](docs/design/resource-binding-proposal.md)
+supersedes the fixed-basin remedy in the [50k spatial review](docs/design/spatial-isolation-review.md).
+Next work is shared, composition-dependent attraction and nonlinear repulsion that bind
+resource neighborhoods. The user rejected prescribed wells and does not require migration,
+chaos or perpetual turnover. The proposal selects a six-unit shared attraction length and
+its evaluator. Static and short source-only dynamic probes support implementation; integrated
+binding and performance remain unverified. B1–B3 in that proposal are the next work sequence.
+The v18 evidence and remaining human review below retain their historical scope.
+
 Status: local-medium weathering verified; user reports positive visual review through at least 8,000 ticks.
 The requested 50,000-tick observation and deep analysis are complete (ledger 3989).
 C3 is complete; C4's registered browser operational check remains. Earlier M0–M3 evidence is retained.

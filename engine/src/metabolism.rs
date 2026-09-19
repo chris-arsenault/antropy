@@ -10,7 +10,7 @@ impl Work {
     }
 }
 pub fn react(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) -> Work {
-    react_observed(cell, c, chemistry, dt, true)
+    react_observed(cell, c, chemistry, dt, true, [0.; 2])
 }
 pub fn react_observed(
     cell: &mut Cell,
@@ -18,6 +18,7 @@ pub fn react_observed(
     _chemistry: &Chemistry,
     dt: f64,
     record: bool,
+    signal: [f64; 2],
 ) -> Work {
     let operators = cell.operators.as_ref().unwrap();
     let factors: [f64; 4] = std::array::from_fn(|slot| {
@@ -30,17 +31,20 @@ pub fn react_observed(
         dt * c.enzyme_turnover * cell.body[11 + slot] * (1. - cell.damage)
             / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30)
     });
-    let cost = factors
-        .iter()
-        .zip(&operators.enzymes)
-        .map(|(factor, enzyme)| {
-            enzyme
-                .conversions
-                .iter()
-                .map(|e| factor * e.catalytic * cell.inventory[e.substrate] * (-e.work).max(0.))
-                .sum::<f64>()
-        })
-        .sum::<f64>();
+    // Only occupied installed rows need a local yield. Reuse it for reservation and commit.
+    let mut requests = Vec::new();
+    let mut cost = 0.;
+    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
+        for edge in &enzyme.conversions {
+            let requested = factor * edge.catalytic * cell.inventory[edge.substrate];
+            if requested == 0. {
+                continue;
+            }
+            let energy = edge.energy(c, signal);
+            cost += requested * (-energy[0]).max(0.);
+            requests.push((edge, requested, energy));
+        }
+    }
     let funding = if cost > 0. {
         (cell.energy / cost).min(1.)
     } else {
@@ -48,11 +52,8 @@ pub fn react_observed(
     };
     let funded = |work: f64| if work < 0. { funding } else { 1. };
     let mut demand = [0.; 256];
-    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
-        for edge in &enzyme.conversions {
-            demand[edge.substrate] +=
-                factor * edge.catalytic * cell.inventory[edge.substrate] * funded(edge.work);
-        }
+    for &(edge, requested, energy) in &requests {
+        demand[edge.substrate] += requested * funded(energy[0]);
     }
     for (s, value) in demand.iter_mut().enumerate() {
         if *value > 0. {
@@ -62,34 +63,29 @@ pub fn react_observed(
     let mut delta = [0.; 256];
     let mut work = Work::default();
     let mut balance = 0.;
-    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
-        for edge in &enzyme.conversions {
-            let q = factor
-                * edge.catalytic
-                * cell.inventory[edge.substrate]
-                * demand[edge.substrate]
-                * funded(edge.work);
-            if q == 0. {
+    for (edge, requested, energy) in requests {
+        let q = requested * demand[edge.substrate] * funded(energy[0]);
+        if q == 0. {
+            continue;
+        }
+        delta[edge.substrate] -= q * edge.changed;
+        cell.chemical_flows.consumed[edge.substrate] += q * edge.changed;
+        for p in &edge.products {
+            if p.species == edge.substrate {
                 continue;
             }
-            delta[edge.substrate] -= q * edge.changed;
-            cell.chemical_flows.consumed[edge.substrate] += q * edge.changed;
-            for p in &edge.products {
-                if p.species == edge.substrate {
-                    continue;
-                }
-                let amount = q * p.weight;
-                delta[p.species] += amount;
-                cell.chemical_flows.produced[p.species] += amount;
-                if record {
-                    work.edges.push((edge.substrate, p.species, amount));
-                }
+            let amount = q * p.weight;
+            delta[p.species] += amount;
+            cell.chemical_flows.produced[p.species] += amount;
+            if record {
+                work.edges.push((edge.substrate, p.species, amount));
             }
-            balance += q * edge.work;
-            cell.flows.reacted += q * edge.changed;
-            cell.flows.captured += q * edge.work.max(0.);
-            cell.flows.reaction_heat += q * edge.heat;
         }
+        balance += q * energy[0];
+        cell.flows.reacted += q * edge.changed;
+        cell.flows.captured += q * energy[0].max(0.);
+        cell.flows.reaction_heat += q * energy[1];
+        cell.flows.external_work += q * energy[2];
     }
     cell.inventory.apply(&delta);
     cell.energy = (cell.energy + balance).max(0.);

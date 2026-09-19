@@ -24,6 +24,7 @@ export interface CanvasControls {
   read(): CanvasState;
   camera(value: Camera): void;
   error(error: unknown): void;
+  selected?(): void;
 }
 /** Each mount owns a fresh canvas: React effect replay cannot transfer one canvas twice. */
 export function mountCanvas(host: HTMLDivElement, bridge: Bridge, controls: CanvasControls) {
@@ -71,10 +72,11 @@ export function mountCanvas(host: HTMLDivElement, bridge: Bridge, controls: Canv
         p = worldPoint(s.bounds, s.camera, view, point(event));
       if (p.x >= 0 && p.y >= 0 && p.x < s.bounds.width && p.y < s.bounds.height)
         bridge
-          .call("pick", {
+          .call<number | null>("pick", {
             ...p,
             padding: Math.min(10, 4 / scaleFor(s.bounds, view, s.camera.zoom)),
           })
+          .then((id) => id !== null && controls.selected?.())
           .catch(controls.error);
     }
     drag = null;

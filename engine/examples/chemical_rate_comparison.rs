@@ -24,7 +24,8 @@ fn requests<'a>(
             c.physiology_interval * c.enzyme_turnover * cell.body[11 + i] * (1. - cell.damage)
                 / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30);
         let installed = cell.installed.enzymes[i];
-        let attenuation = 1. / (1. + (installed.dx.powi(2) + installed.dy.powi(2)) / 9.);
+        let attenuation =
+            1. / (1. + (installed.center_x.powi(2) + installed.center_y.powi(2)) / 9.);
         for e in &enzyme.conversions {
             let catalytic = if old {
                 e.binding * attenuation
@@ -152,6 +153,9 @@ fn compare(cells: &[Cell], c: &Config, chemistry: &Chemistry) -> Value {
         "productionMaxError":production_error,"cases":cases})
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    if antropy_engine::world::VERSION >= 25 {
+        return Err("Historical displacement experiment retired: use its original commit and schema; reflection centers are not offsets.".into());
+    }
     let args: Vec<_> = std::env::args().skip(1).collect();
     if args.len() != 3 {
         return Err("Expected definition.json, initial-cells.json, new-output.json".into());

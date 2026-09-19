@@ -22,7 +22,7 @@ impl Buffers {
         field: bool,
         selected: u64,
     ) -> Result<(), String> {
-        if kind > 5 || species >= 256 || color > 13 {
+        if kind > 5 || species >= 256 || color > 15 {
             return Err("Invalid render selection".into());
         }
         self.colors.prepare(w, color, selected);
@@ -158,7 +158,7 @@ mod tests {
         let mut w = crate::diagnostics::nutrition(0.8, 2., true, false);
         let mut control = w.clone();
         let mut buffers = Buffers::default();
-        for color in 0..14 {
+        for color in 0..16 {
             buffers.prepare(&w, 5, 0, color, true, 1).unwrap();
             buffers.prepare(&w, 4, 0, color, true, 1).unwrap();
             w.step();

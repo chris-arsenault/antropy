@@ -16,11 +16,26 @@ pub struct Conversion {
     pub changed: f64,
     pub work: f64,
     pub heat: f64,
+    pub potential_drop: f64,
+    pub work_coefficient: [f64; 2],
+}
+impl Conversion {
+    pub fn energy(&self, c: &Config, signal: [f64; 2]) -> [f64; 3] {
+        let supplied = c.environmental_work
+            * crate::transformation_work::engagement(self.work_coefficient, signal);
+        crate::transformation_work::cellular(
+            self.potential_drop,
+            supplied,
+            self.changed,
+            c.conversion_efficiency,
+        )
+    }
 }
 #[derive(Clone, Debug)]
 pub struct EnzymeOperator {
     pub conversions: Vec<Conversion>,
     pub engagement: Vec<Affinity>,
+    pub primary: Option<crate::chemical_roles::Route>,
 }
 #[derive(Clone, Debug)]
 pub struct Operators {
@@ -28,7 +43,7 @@ pub struct Operators {
     pub transporters: [Arc<Vec<Affinity>>; 4],
     pub enzymes: [Arc<EnzymeOperator>; 4],
     pub membrane: Arc<Vec<Affinity>>,
-    pub profile: [f64; 2],
+    pub profile: [f64; 3],
 }
 fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> EnzymeOperator {
     let transform = Transform::new(e);
@@ -46,16 +61,20 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
                     )
             })
             .sum();
-        let changed = 1.
-            - products
-                .iter()
-                .filter(|p| p.species == a.species)
-                .map(|p| p.weight)
-                .sum::<f64>();
-        let potential = products
+        let changed = products
             .iter()
-            .map(|p| p.weight * chemistry.properties[p.species].potential)
-            .sum();
+            .filter(|p| p.species != a.species)
+            .map(|p| p.weight)
+            .sum::<f64>();
+        let potential = chemistry.properties[a.species].potential
+            + products
+                .iter()
+                .map(|p| {
+                    p.weight
+                        * (chemistry.properties[p.species].potential
+                            - chemistry.properties[a.species].potential)
+                })
+                .sum::<f64>();
         let (work, heat) = chemistry::reaction_energy(
             chemistry.properties[a.species].potential,
             potential,
@@ -65,6 +84,8 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
         for p in &products {
             occupancy[p.species] += a.value * p.weight;
         }
+        let work_coefficient =
+            crate::transformation_work::coefficient(chemistry, a.species, &products);
         conversions.push(Conversion {
             substrate: a.species,
             products,
@@ -73,6 +94,8 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
             changed,
             work: work - 0.05 * changed,
             heat: heat + 0.05 * changed,
+            potential_drop: chemistry.properties[a.species].potential - potential,
+            work_coefficient,
         });
     }
     let engagement = occupancy
@@ -82,6 +105,7 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
         .map(|(species, value)| Affinity { species, value })
         .collect();
     EnzymeOperator {
+        primary: crate::chemical_roles::strongest(&conversions),
         conversions,
         engagement,
     }
@@ -132,7 +156,9 @@ impl Operators {
         let profile = std::array::from_fn(|k| {
             membrane
                 .iter()
-                .map(|a| a.value * chemistry.properties[a.species].interaction[k])
+                .map(|a| {
+                    a.value * crate::medium_response::profile(&chemistry.properties[a.species])[k]
+                })
                 .sum::<f64>()
                 / total
         });
@@ -188,7 +214,10 @@ impl Operators {
             self.profile = std::array::from_fn(|k| {
                 self.membrane
                     .iter()
-                    .map(|a| a.value * chemistry.properties[a.species].interaction[k])
+                    .map(|a| {
+                        a.value
+                            * crate::medium_response::profile(&chemistry.properties[a.species])[k]
+                    })
                     .sum::<f64>()
                     / total
             });

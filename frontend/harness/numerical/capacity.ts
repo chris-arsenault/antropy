@@ -17,7 +17,7 @@ export async function runCapacity(output: string, supplied?: Engine) {
       [2000, false],
       [2000, true],
     ] as const) {
-      const world = engine.create(101, { founders: 0, sourceCount: 0 }),
+      const world = engine.create(101, { founders: 0, sourceCount: 0, sourceSpecies: [] }),
         name = `${population}${growth ? "-growth" : ""}`;
       try {
         world.command("loadFixture", { population, growth });

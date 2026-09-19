@@ -21,9 +21,14 @@ pub fn motor_limits(cell: &Cell, c: &Config, mobility: f64) -> (f64, f64) {
 pub fn motor_work_rate(body: &[f64; 15], damage: f64, swim: f64, turn: f64, c: &Config) -> f64 {
     body[1] * c.motor_power_density * (1. - damage) * (swim * swim + 0.25 * turn * turn)
 }
-pub fn passive(profile: [f64; 2], gradient: [[f64; 2]; 2], mobility: f64, drift: f64) -> [f64; 2] {
-    let force: [f64; 2] =
-        std::array::from_fn(|k| profile[0] * gradient[k][0] - profile[1] * gradient[k][1]);
+pub fn passive(
+    profile: [f64; 3],
+    gradient: [[f64; 3]; 2],
+    load: f64,
+    mobility: f64,
+    drift: f64,
+) -> [f64; 2] {
+    let force = crate::medium_response::force(profile, gradient, load);
     let bound = drift * mobility / (1. + force[0].hypot(force[1]));
     force.map(|f| bound * f)
 }
@@ -46,7 +51,15 @@ pub fn advance(cells: &mut [Cell], c: &Config, field: &Field, sites: &[Vec<(usiz
             .rem_euclid(std::f64::consts::TAU);
         let gradient = field.gradient(row, true);
         let profile = cell.operators.as_ref().unwrap().profile;
-        let passive = passive(profile, gradient, mobility, field.drift);
+        let self_load =
+            crate::medium_response::self_load(cell.mass() * profile[2], field.spacing.powi(2), row);
+        let passive = passive(
+            profile,
+            gradient,
+            c.pressure_strength * (field.pressure_load(row) - self_load).max(0.),
+            mobility,
+            field.drift,
+        );
         let swimming = speed * cell.action.swim * fraction;
         let dx = (swimming * cell.heading.cos() + passive[0]) * c.dt;
         let dy = (swimming * cell.heading.sin() + passive[1]) * c.dt;

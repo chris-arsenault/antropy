@@ -60,6 +60,7 @@ pub struct Flows {
     pub exported: f64,
     pub reacted: f64,
     pub captured: f64,
+    pub external_work: f64,
     pub constructed: f64,
     pub maintenance: f64,
     pub motors: f64,

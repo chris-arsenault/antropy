@@ -7,9 +7,10 @@ pub fn deposit(
     incoming: &[f64; 256],
     outgoing: &[f64; 256],
     weight: f64,
+    mask: u64,
 ) {
     let weight = v::splat(weight);
-    for s in (0..256).step_by(2) {
+    for s in crate::field_activity::pairs(mask) {
         let d = v::add(
             v::load(&demand[s..]),
             v::mul(weight, v::load(&incoming[s..])),
@@ -23,8 +24,8 @@ pub fn deposit(
     }
 }
 
-pub fn donors(demand: &mut [f64], changes: &mut [f64], material: &[f32]) {
-    for s in (0..256).step_by(2) {
+pub fn donors(demand: &mut [f64], changes: &mut [f64], material: &[f32], mask: u64) {
+    for s in crate::field_activity::pairs(mask) {
         let wanted = v::load(&demand[s..]);
         let available = v::load_material(&material[s..]);
         let taken = v::min(wanted, available);
@@ -37,19 +38,28 @@ pub fn donors(demand: &mut [f64], changes: &mut [f64], material: &[f32]) {
     }
 }
 
-pub fn gather(ratios: &[f64], sites: &[(usize, f64)], requests: &[f64; 256]) -> [f64; 256] {
+pub fn gather(
+    ratios: &[f64],
+    sites: &[(usize, f64)],
+    slots: &[usize],
+    requests: &[f64; 256],
+    mask: u64,
+) -> [f64; 256] {
     let mut result = [0.; 256];
     for &(node, weight) in sites {
+        if weight == 0. {
+            continue;
+        }
         let weight = v::splat(weight);
-        for s in (0..256).step_by(2) {
+        for s in crate::field_activity::pairs(mask) {
             let amount = v::add(
                 v::load(&result[s..]),
-                v::mul(weight, v::load(&ratios[node * 256 + s..])),
+                v::mul(weight, v::load(&ratios[slots[node] * 256 + s..])),
             );
             v::store(&mut result[s..], amount);
         }
     }
-    for s in (0..256).step_by(2) {
+    for s in crate::field_activity::pairs(mask) {
         let accepted = v::mul(v::load(&result[s..]), v::load(&requests[s..]));
         v::store(&mut result[s..], accepted);
     }
@@ -72,10 +82,11 @@ mod tests {
         exports[3] = 7.;
         exports[4] = 3.;
         material[3] = 1.;
-        deposit(&mut demand, &mut changes, &imports, &exports, 1.);
-        deposit(&mut demand, &mut changes, &imports, &[0.; 256], 1.);
-        donors(&mut demand, &mut changes, &material);
-        let received = gather(&demand, &[(0, 1.)], &imports);
+        let mask = 3;
+        deposit(&mut demand, &mut changes, &imports, &exports, 1., mask);
+        deposit(&mut demand, &mut changes, &imports, &[0.; 256], 1., mask);
+        donors(&mut demand, &mut changes, &material, mask);
+        let received = gather(&demand, &[(0, 1.)], &[0], &imports, mask);
         assert_eq!(received[3], 0.5);
         assert_eq!(received[4], 0.);
         assert!(received.iter().all(|q| q.is_finite()));

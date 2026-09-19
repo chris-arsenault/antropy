@@ -10,12 +10,16 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 
 | Need | Document |
 | --- | --- |
+| Current spatial isolation, source migration and directional climate review | [50k study and staged ecology proposal](design/spatial-isolation-review.md) |
+| Full-screen world and observation navigation | [Viewport UI pass](../UI-OBSERVATION-PLAN.md) |
+| Enzyme role colors, counts and transformation web | [Chemical web](../CHEMICAL-WEB-PLAN.md) |
 | Governing computable chemistry and active work | [Computational foundation](design/chemistry/computational-foundation.md), [ADR 0022](adr/0022-computable-chemistry.md), [canonical math plan](../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order), [completed rebuild](../DIGITAL-CHEMISTRY-PLAN.md), [current specification](specs/digital-chemistry/README.md) |
 | Chemical system, implementation and current evidence | [Digital chemistry](design/chemistry/README.md), [numerical contract](design/chemistry/numerical-engine.md), [measurements](design/chemistry/numerical-results.md), [migration and retirement](design/chemistry/numerical-migration.md) |
 | Current environmental extension and investigation | [Environmental plan](../ENVIRONMENTAL-ECOLOGY-PLAN.md), [weathering and shelter evidence](design/chemistry/environmental-results.md) |
 | Current 50,000-tick evolution and chemical-flow analysis | [Local-weathering trajectory](local-weathering-50k-study.md) |
 | Physical investment, body scaling and evolutionary tradeoffs | [Physical coupling audit](physical-coupling-audit.md), [v19 corrections](physical-coupling-correction.md) |
 | Group-theoretic design and implementation accountability | [Transformation algebra white paper](design/chemistry/transformation-algebra.md) — design only; earlier geometric corrections do not complete it |
+| Mathematical design of a regenerative initial ecosystem | [Initial ecosystem white paper](design/chemistry/regenerative-ecosystem.md) — proposed shared work law, four-founder material cycle and attraction/repulsion appendix |
 | Earlier symmetry corrections and remaining limitations | [Mathematical symmetry audit](mathematical-symmetry-audit.md), [v22 correction audit](symmetry-completion-audit.md) |
 | Mobile reservoirs and short calibration | [Source plan](../MOBILE-SOURCES-PLAN.md), [source laws and evidence](design/chemistry/mobile-source-results.md) |
 | World hypothesis and prior implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
@@ -156,6 +160,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Population observation
 
 - [Population views and definitions](design/population-observation.md#population-independent-views)
+- [Chemical roles and transformation web](design/population-observation.md#population-chemical-web)
 - [Strategy clusters](design/population-observation.md#population-strategy-clusters)
 - [Spatial grouping, identity and event uncertainty](design/population-observation.md#population-spatial-groups)
 - [Observation boundaries and verification](design/population-observation.md#population-boundaries)
@@ -170,6 +175,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 ## Open questions and deferred features
 
+- [Deferred multicore scaling](backlog.md#backlog-multicore-scaling)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

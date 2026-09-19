@@ -75,7 +75,7 @@ fn analysis(c: &Chemistry, radius: f64) -> Value {
             json!({"from":pair[0],"to":pair[1],"usable":usable,"heat":heat})
         })
         .collect();
-    json!({"width":radius,"neighbors":neighbors,"neighborhoods":neighborhoods,"affinityWeightedBarrierCount":barrier,"impedancePath":{"species":path,"transitions":transitions,"lawStatus":"Linear reference-value accounting; conversion also pays catalytic overhead"}})
+    json!({"width":radius,"neighbors":neighbors,"neighborhoods":neighborhoods,"affinityWeightedBarrierCount":barrier,"impedancePath":{"species":path,"transitions":transitions,"lawStatus":"Zero-medium reference-value accounting; live conversion includes local external work and catalytic overhead"}})
 }
 fn curves() -> Value {
     let distance: Vec<_> = (0..151).map(|i| i as f64 / 10.).collect();
@@ -99,14 +99,15 @@ fn operator_examples(c: &Chemistry) -> Result<Value, String> {
     let config = crate::config::Config::default();
     let examples:Vec<_> = [([7.,7.],[0.,0.]),([7.5,7.5],[0.25,-0.75]),([14.5,14.5],[1.,1.])].into_iter().map(|(point,offset)| {
         let mut machinery=crate::genetics::Machinery::seed(c,&c.source_species());
-        machinery.enzymes[0]=crate::genetics::Enzyme{x:point[0],y:point[1],dx:offset[0],dy:offset[1],angle:std::f64::consts::FRAC_PI_4};
+        machinery.enzymes[0]=crate::genetics::Enzyme::between(point, [crate::chemistry::reflect(point[0]+offset[0]), crate::chemistry::reflect(point[1]+offset[1])]);
+        machinery.enzymes[0].angle=std::f64::consts::FRAC_PI_4;
         let op=crate::chemical_operators::Operators::compile(&machinery,&config,c);
-        json!({"parameters":machinery,"membraneProfile":op.profile,
+        json!({"parameters":machinery,"membraneProfile":&op.profile[..2],
             "representativeEngagement":op.enzymes[0].engagement.iter().map(|a|json!({"species":a.species,"weight":a.value})).collect::<Vec<_>>(),
-            "representativeEnzyme":op.enzymes[0].conversions.iter().map(|e|json!({"substrate":e.substrate,"binding":e.binding,"catalytic":e.catalytic,"work":e.work,"heat":e.heat,"products":e.products.iter().map(|p|json!({"species":p.species,"weight":p.weight})).collect::<Vec<_>>() })).collect::<Vec<_>>()})
+            "representativeEnzyme":op.enzymes[0].conversions.iter().map(|e|json!({"substrate":e.substrate,"binding":e.binding,"catalytic":e.catalytic,"work":e.work,"heat":e.heat,"workCoefficient":e.work_coefficient,"products":e.products.iter().map(|p|json!({"species":p.species,"weight":p.weight})).collect::<Vec<_>>() })).collect::<Vec<_>>()})
     }).collect();
     Ok(
-        json!({"version":1,"scope":"Production World compiler; installed coefficients determine live recognition, conversion and body profiles","examples":examples}),
+        json!({"version":1,"scope":"Production World compiler; installed coefficients determine recognition and body profiles; work/heat are zero-medium reference values, live yield includes the local work coefficient","examples":examples}),
     )
 }
 
@@ -122,6 +123,7 @@ pub fn atlas(seed: u64) -> Result<Value, String> {
     let widths=[1.,2.,3.,6.].map(|width|json!({"width":width,"center":neighborhood(&c,[7.5,7.5],width),"corner":neighborhood(&c,[0.,0.],width)}));
     Ok(
         json!({"schemaVersion":6,"definition":definition,"coverage":c.coverage(),"analysis":analysis(&c,3.),
+        "potentialTopology":crate::chemical_landscape::topology(&c.properties),
         "physicalCoverage":c.physical_coverage(),"coverageNames":crate::chemistry::COVERAGE_NAMES,
         "profileRanges":[[-1,1],[-1,1]],"profileCoverage":ProfileCoverage::measure(&c.properties),
         "operators":operator_examples(&c)?,

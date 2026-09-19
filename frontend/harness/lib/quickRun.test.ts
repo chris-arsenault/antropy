@@ -21,9 +21,11 @@ it("swaps assignments with equal positions, funded packets and finite food", () 
     expect(a.command("environment")).toEqual(b.command("environment"));
     const ac = a.command<{ cells: CellState[] }>("frame").cells,
       bc = b.command<{ cells: CellState[] }>("frame").cells;
-    expect(ac.filter((c) => c.genome === 2)).toHaveLength(8);
+    const genomes = [...new Set(ac.map((c) => c.genome))].sort((x, y) => x - y);
+    expect(genomes).toHaveLength(2);
+    expect(ac.filter((c) => c.genome === genomes[0])).toHaveLength(8);
     ac.forEach((c, i) => {
-      expect(c.genome + bc[i].genome).toBe(5);
+      expect(c.genome + bc[i].genome).toBe(genomes[0] + genomes[1]);
       expect([c.x, c.y, c.heading, c.energy]).toEqual([
         bc[i].x,
         bc[i].y,

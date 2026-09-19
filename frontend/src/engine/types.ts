@@ -60,6 +60,7 @@ export interface Flows {
   exported: number;
   reacted: number;
   captured: number;
+  externalWork: number;
   constructed: number;
   maintenance: number;
   motors: number;
@@ -106,9 +107,11 @@ export interface Summary {
     deathHeat: number;
     overflowHeat: number;
     weatheringHeat: number;
+    weatheringWork: number;
     weatheredMaterial: number;
     shelteredConversion: number;
     sourceHeat: number;
+    sourceWork: number;
     sourceConverted: number;
     sourceReleased: number;
     sourceDistance: number;
@@ -137,7 +140,7 @@ export interface Target {
 export interface Machinery {
   receptors: Target[];
   transporters: Target[];
-  enzymes: (Target & { dx: number; dy: number; angle: number })[];
+  enzymes: (Target & { centerX: number; centerY: number; angle: number })[];
   membrane: Target;
 }
 export interface Genotype {
@@ -317,6 +320,7 @@ export interface ChemicalOverview {
   rows: { id: number; amount: number; peak: number }[];
 }
 export interface LiveStatus {
+  chemicalWeb: import("./chemicalWeb").ChemicalWeb | null;
   chemicals: ChemicalOverview;
   workerWork: {
     simulationMs: number;

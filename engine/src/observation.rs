@@ -73,7 +73,7 @@ pub fn summary(w: &World) -> Value {
         total_mass += c.mass();
         generation = generation.max(c.generation);
     }
-    json!({"tick":w.tick,"modelSeconds":w.tick as f64*w.config.dt,"population":w.cells.len(),"lineages":lineages.len(),"genomes":genomes.len(),"generation":generation,"cellEnergy":total_energy,"biomass":total_mass,"heldMaterial":matter,"heldEnergy":energy,"materialResidual":l.initial_material+l.supplied-matter-l.washed_out-l.numerical_material,"energyResidual":l.initial_energy+l.supplied_energy-energy-l.washout_energy-l.numerical_energy-l.heat(),"ledger":l,"ancestryRecords":w.ancestry.len(),"stopReason":w.stop_reason})
+    json!({"tick":w.tick,"modelSeconds":w.tick as f64*w.config.dt,"population":w.cells.len(),"lineages":lineages.len(),"genomes":genomes.len(),"generation":generation,"cellEnergy":total_energy,"biomass":total_mass,"heldMaterial":matter,"heldEnergy":energy,"materialResidual":l.initial_material+l.supplied-matter-l.washed_out-l.numerical_material,"energyResidual":l.initial_energy+l.supplied_energy+l.weathering_work+l.source_work+l.flows.external_work-energy-l.washout_energy-l.numerical_energy-l.heat(),"ledger":l,"ancestryRecords":w.ancestry.len(),"stopReason":w.stop_reason})
 }
 pub fn environment(w: &World) -> Value {
     let mut species = [0.; 256];

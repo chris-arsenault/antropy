@@ -120,6 +120,7 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         .cells
         .iter()
         .map(|cell| {
+            let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
             let sites = crate::footprint::sites(cell, &w.config, &w.field);
             let local = std::array::from_fn(|s| w.field.sample(s, &sites));
             json!({"cell":cell.id,"position":[cell.x,cell.y],
@@ -134,6 +135,8 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         "reservoirResponse":crate::source_medium::observe(&w),
         "cases":cases(&w),"investments":investments(&w),"startup":startup,
         "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
+            "sourceLimits terminalConversionWorkCeiling is a zero-medium reference for founder 1, not an upper bound on environmentally driven work",
+            "Budget work includes drive from the stated free-field mixture only; reservoir and embodied projections are omitted",
             "No shared depletion, export, repair, refitting or movement through gradients",
             "grossWork uses the best installed conversion per imported species without throughput limits; processingWork applies installed enzyme throughput to the assumed internal mixture",
             "constructionCeiling uses processingSurplus; extra uphill assembly cost and omitted expenses can reduce it further",

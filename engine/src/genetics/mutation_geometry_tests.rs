@@ -1,6 +1,51 @@
 use super::*;
 
 #[test]
+fn specificity_scaled_inheritance_reaches_product_neighborhoods_without_special_targets() {
+    let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
+    let config = crate::config::Config::default();
+    for (a, b) in [(0, 138), (119, 187), (15, 240)] {
+        let mut original =
+            crate::genetics::Machinery::seed(&chemistry, &chemistry.source_species());
+        original.enzymes[0] = crate::genetics::Enzyme::between(
+            crate::chemistry::coordinate(a),
+            crate::chemistry::coordinate(b),
+        );
+        let start = crate::chemistry::coordinate(a);
+        let target = crate::chemistry::coordinate(b);
+        let mut counts = vec![];
+        for multiplier in [1. / config.affinity_radius, 1.] {
+            let mut c = config.clone();
+            c.physical_mutation_scale *= multiplier;
+            let mut rng = Random::new(101);
+            let mut norms = vec![];
+            let mut hits = 0;
+            for _ in 0..100000 {
+                let mut m = original.clone();
+                m.mutate(&mut rng, &c);
+                let e = m.enzymes[0];
+                let norm = (e.x - start[0]).hypot(e.y - start[1]);
+                if norm > 0. {
+                    norms.push(norm);
+                }
+                hits += usize::from((e.x - target[0]).hypot(e.y - target[1]) < c.affinity_radius);
+            }
+            norms.sort_by(f64::total_cmp);
+            assert!((18000..20000).contains(&norms.len()));
+            println!(
+                "recognition {a}>{b} scale={} births=100000 changed={} median={} target_hits={hits}",
+                c.physical_mutation_scale * c.affinity_radius,
+                norms.len(),
+                norms[norms.len() / 2]
+            );
+            counts.push((norms.len(), hits));
+        }
+        assert_eq!(counts[0].0, counts[1].0);
+        assert!(counts[1].1 > counts[0].1);
+    }
+}
+
+#[test]
 fn geometric_events_preserve_frequency_magnitude_and_uniform_direction() {
     let mut rng = Random::new(101);
     let mut events = 0;
@@ -122,7 +167,7 @@ fn machinery_mutation_preserves_pair_rate_and_replays_without_touching_disabled_
                 .chain(m.transporters.iter().map(|p| [p.x, p.y]))
                 .chain(m.enzymes.iter().map(|p| [p.x, p.y]))
                 .chain([m.membrane.point()])
-                .chain(m.enzymes.iter().map(|p| [p.dx, p.dy]))
+                .chain(m.enzymes.iter().map(|p| [p.center_x, p.center_y]))
                 .flatten()
                 .collect::<Vec<_>>()
         };

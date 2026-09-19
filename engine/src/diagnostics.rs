@@ -74,12 +74,6 @@ pub fn retarget(g: &mut crate::genetics::Genotype, slot: usize, from: usize, to:
     for ch in &mut g.chromosomes {
         ch.chemistry.receptors[slot] = a;
         ch.chemistry.transporters[slot] = crate::genetics::Transporter { x: a.x, y: a.y };
-        ch.chemistry.enzymes[slot] = crate::genetics::Enzyme {
-            x: a.x,
-            y: a.y,
-            dx: b.x - a.x,
-            dy: b.y - a.y,
-            angle: 0.,
-        };
+        ch.chemistry.enzymes[slot] = crate::genetics::Enzyme::between(a.point(), b.point());
     }
 }

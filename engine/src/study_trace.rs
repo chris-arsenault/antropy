@@ -115,6 +115,7 @@ impl Study {
             ("damage", f.damage),
             ("repaired", f.repaired),
             ("captured", f.captured),
+            ("externalWork", f.external_work),
             ("distance", f.distance),
         ] {
             self.flow(c, name, None, None, amount);

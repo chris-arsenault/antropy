@@ -6,16 +6,19 @@ White paper, September 18, 2026. **Pure design record.** Its original publicatio
 implement or validate these ideas. Subsequent execution selected and implemented the v23
 finite action and bounded kinetic mixtures; see the canonical plan's
 [selected law](../../../MATHEMATICAL-SYMMETRY-PLAN.md#a0-execution--bounded-permutation-algebra)
-and [evidence](../../../MATHEMATICAL-SYMMETRY-PLAN.md#a4-results). Human motion review remains
-pending. Proposals, open choices and references to the current runtime below describe the
+and [evidence](../../../MATHEMATICAL-SYMMETRY-PLAN.md#a4-results). Human review passed on the
+deployed v23 run through 100,000 ticks. Proposals, open choices and references to the current runtime below describe the
 v22 design starting point; the execution record owns their disposition.
 This paper records the user's requirement for an organizing mathematical language based on
 groups and their actions. It defines what future work must demonstrate before claiming that
 requirement is complete. Completing this document does not complete the simulation work.
 
-Execution is tracked only in the [canonical mathematical plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
-root `14120639-64cd-4840-b2d4-734e0aa4e123`, phases A0–A5. This paper supplies its design
-and evidence obligations; it is not a parallel plan. Environmental plans remain separate.
+Execution is tracked only in the [canonical mathematical plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction),
+current root `dfb36e51-2cd4-4688-9978-bd82e9179238`, phases B0–B3. Completed A0–A5 remain
+historical evidence. The follow-up corrects a privileged potential slope, recognition/action
+coupling, mutation units and missing funded environmental returns. Exact group membership
+alone did not establish those ecological opportunities. This paper supplies design and
+evidence obligations; it is not a parallel plan. Environmental plans remain separate.
 
 The [computational foundation](computational-foundation.md), [principles](../../principles.md)
 and [data-sharing contract](data-ownership.md) remain governing constraints. The physical

@@ -1,0 +1,369 @@
+//! Zero-tick force diagnosis. Calls ordinary projection, gradients and source response.
+use antropy_engine::{
+    chemistry, config, field, movement, organism, source_medium, sources::Source, world,
+};
+use config::Config;
+use field::Field;
+use serde_json::{Value, json};
+use world::World;
+
+// Reuse private production modules without widening the engine's public API.
+#[allow(dead_code)]
+#[path = "../src/footprint.rs"]
+mod footprint;
+#[allow(dead_code)]
+#[path = "../src/medium_response.rs"]
+mod medium_response;
+
+fn norm(v: [f64; 2]) -> f64 {
+    v[0].hypot(v[1])
+}
+
+fn profile(s: &Source, w: &World) -> [f64; 3] {
+    if s.material.total > 0. {
+        return s.material.moments.map(|v| v / s.material.total);
+    }
+    assert!(w.config.source_zones.is_none() && w.config.source_epochs.is_none());
+    assert_eq!(w.config.source_species, [0, 136]);
+    let mut material = source_medium::Material::default();
+    material.add(0, s.habitat.share, &w.chemistry);
+    material.add(136, 1. - s.habitat.share, &w.chemistry);
+    material.moments
+}
+
+fn terms(w: &World, s: &Source) -> Value {
+    let p = profile(s, w);
+    let gradient = w.field.gradient(&s.footprint, true);
+    let own = medium_response::self_load(
+        s.material.total * p[2] / (1. + s.material.total / s.interface),
+        w.field.spacing.powi(2),
+        &s.footprint,
+    );
+    let other = (w.field.pressure_load(&s.footprint) - own).max(0.);
+    let signed = gradient.map(|g| p[0] * g[0] - p[1] * g[1]);
+    let pressure = gradient.map(|g| -p[2] * w.config.pressure_strength * other * g[2]);
+    let force = medium_response::force(p, gradient, w.config.pressure_strength * other);
+    let load = w.field.medium_load(&s.footprint);
+    let velocity = movement::passive(
+        p,
+        gradient,
+        w.config.pressure_strength * other,
+        antropy_engine::field::mobility(load, w.config.movement_impedance),
+        w.config.source_drift,
+    );
+    let ordinary = source_medium::response(s, w.tick, &w.config, &w.field, &w.chemistry);
+    for k in 0..2 {
+        assert!((velocity[k] - ordinary.velocity[k]).abs() < 1e-12);
+        assert!((force[k] - signed[k] - pressure[k]).abs() < 1e-12);
+    }
+    json!({"profile":p,"gradient":gradient,"selfLoad":own,"otherLoad":other,
+        "signed":signed,"pressure":pressure,"force":force,"velocity":velocity,
+        "load":load,"inventory":s.material.total,"interface":s.interface})
+}
+
+fn snapshot(path: &str) -> Result<Value, Box<dyn std::error::Error>> {
+    let mut w = World::restore(&std::fs::read(path)?)?;
+    // This is the body projection made immediately before source response in World::advance.
+    let sites: Vec<_> = w
+        .cells
+        .iter()
+        .map(|c| footprint::sites(c, &w.config, &w.field))
+        .collect();
+    footprint::deposit_profiles(&w.cells, &w.config, &mut w.field, &sites);
+    let mut channels = Vec::new();
+    for kind in ["reservoirs", "dissolved", "bodies"] {
+        let mut f = Field::new(w.config.width, w.config.height, w.config.mesh);
+        match kind {
+            "reservoirs" => {
+                f.source_signal.clone_from(&w.field.source_signal);
+                f.source_load.clone_from(&w.field.source_load);
+            }
+            "dissolved" => {
+                f.signal.clone_from(&w.field.signal);
+                f.impedance.clone_from(&w.field.impedance);
+            }
+            _ => {
+                f.body_signal.clone_from(&w.field.body_signal);
+                f.body_load.clone_from(&w.field.body_load);
+            }
+        }
+        channels.push((kind, f));
+    }
+    let rows: Vec<_> = w
+        .sources
+        .iter()
+        .enumerate()
+        .map(|(id, s)| {
+            let mut row = terms(&w, s);
+            let p = profile(s, &w);
+            let other = row["otherLoad"].as_f64().unwrap();
+            let mut parts = serde_json::Map::new();
+            let mut sum = [0.; 2];
+            for (name, field) in &channels {
+                let g = field.gradient(&s.footprint, true);
+                let force = medium_response::force(p, g, w.config.pressure_strength * other);
+                for k in 0..2 {
+                    sum[k] += force[k];
+                }
+                parts.insert(
+                    (*name).into(),
+                    json!({"force":force,"norm":norm(force),"gradient":g}),
+                );
+            }
+            for (k, value) in sum.iter().enumerate() {
+                assert!((value - row["force"][k].as_f64().unwrap()).abs() < 1e-11);
+            }
+            let nearest = w
+                .sources
+                .iter()
+                .enumerate()
+                .filter(|(j, _)| *j != id)
+                .map(|(_, b)| {
+                    movement::distance(
+                        [s.habitat.x, s.habitat.y],
+                        [b.habitat.x, b.habitat.y],
+                        &w.config,
+                    )
+                })
+                .fold(f64::INFINITY, f64::min);
+            row["channels"] = Value::Object(parts);
+            row["id"] = json!(id);
+            row["position"] = json!([s.habitat.x, s.habitat.y]);
+            row["radius"] = json!(s.habitat.radius);
+            row["nearest"] = json!(nearest);
+            row["remaining"] = json!(s.remaining);
+            row["wait"] = json!(s.wait);
+            row
+        })
+        .collect();
+    Ok(json!({"path":path,"tick":w.tick,"population":w.cells.len(),"sources":rows}))
+}
+
+fn fixture() -> World {
+    let c = Config {
+        width: 128.,
+        height: 64.,
+        founders: 0,
+        source_count: 2,
+        source_species: vec![0, 136],
+        source_priming: 0.,
+        ..Config::default()
+    };
+    let mut w = World::new(27, c).unwrap();
+    for (i, s) in w.sources.iter_mut().enumerate() {
+        s.habitat.x = 32.3 + 4. * i as f64;
+        s.habitat.y = 31.1;
+        s.habitat.radius = 3.;
+        s.habitat.share = 0.6;
+        s.rebuild(&w.config, &w.field);
+        s.rate = 0.;
+    }
+    w
+}
+
+fn set_pair(w: &mut World, distance: f64, ratio: f64, second: usize, empty: bool) {
+    // A candidate filter extends beyond the ordinary source-node cache. Reset it between cases.
+    w.field.source_signal.fill([0.; 2]);
+    for (j, s) in w.sources.iter_mut().enumerate() {
+        s.habitat.x = 32.3 + distance * j as f64;
+        s.rebuild(&w.config, &w.field);
+        s.inventory.fill(0.);
+        if !empty || j == 0 {
+            s.inventory[0] += 0.6 * ratio * s.interface;
+            s.inventory[second] += 0.4 * ratio * s.interface;
+        }
+    }
+    source_medium::project(w);
+}
+
+fn pair_curves() -> Vec<Value> {
+    let mut w = fixture();
+    let mut rows = Vec::new();
+    for ratio in [0.01, 0.1, 1., 10.] {
+        for second in [136, 8, 128] {
+            for empty in [false, true] {
+                for pressure in [0., 0.0003, 0.003] {
+                    w.config.pressure_strength = pressure;
+                    for distance in [1., 2., 4., 6., 8., 10., 12., 16., 20., 24., 32.] {
+                        set_pair(&mut w, distance, ratio, second, empty);
+                        let a = terms(&w, &w.sources[0]);
+                        let b = terms(&w, &w.sources[1]);
+                        let relative =
+                            b["velocity"][0].as_f64().unwrap() - a["velocity"][0].as_f64().unwrap();
+                        rows.push(json!({"ratio":ratio,"secondSpecies":second,"emptySecond":empty,
+                            "pressureStrength":pressure,"distance":distance,"separationRate":relative,
+                            "first":a,"second":b}));
+                    }
+                }
+            }
+        }
+    }
+    rows
+}
+
+fn backgrounds() -> Vec<Value> {
+    let mut w = fixture();
+    let mut rows = Vec::new();
+    for species in [0, 8, 128, 136] {
+        for concentration in [0.01, 0.1] {
+            w.field = Field::new(w.config.width, w.config.height, w.config.mesh);
+            for n in 0..w.field.nx * w.field.ny {
+                w.field.add(
+                    n,
+                    species,
+                    concentration * w.config.mesh.powi(2),
+                    &w.chemistry,
+                );
+            }
+            for distance in [2., 4., 6., 8., 10., 12., 16., 20.] {
+                set_pair(&mut w, distance, 1., 136, false);
+                let a = terms(&w, &w.sources[0]);
+                let b = terms(&w, &w.sources[1]);
+                rows.push(json!({"species":species,"concentration":concentration,"distance":distance,
+                    "separationRate":b["velocity"][0].as_f64().unwrap()-a["velocity"][0].as_f64().unwrap(),
+                    "first":a,"second":b}));
+            }
+        }
+    }
+    rows
+}
+
+// A normalized even filter gives the attractive row a distinct interaction length.
+// Diagnostic only: release footprints, pressure, profiles and velocity law stay unchanged.
+fn broaden_attraction(w: &mut World, sigma: f64) {
+    let reach = (3. * sigma / w.field.spacing).ceil() as isize;
+    let mut weights: Vec<_> = (-reach..=reach)
+        .map(|d| (-0.5 * (d as f64 * w.field.spacing / sigma).powi(2)).exp())
+        .collect();
+    let sum: f64 = weights.iter().sum();
+    for v in &mut weights {
+        *v /= sum;
+    }
+    let nx = w.field.nx;
+    let ny = w.field.ny;
+    for rows in [
+        &mut w.field.signal,
+        &mut w.field.source_signal,
+        &mut w.field.body_signal,
+    ] {
+        let mut temporary = vec![0.; nx * ny];
+        for n in 0..nx * ny {
+            for (j, &weight) in weights.iter().enumerate() {
+                let x = (n as isize % nx as isize + j as isize - reach).rem_euclid(nx as isize)
+                    as usize;
+                temporary[n] += weight * rows[n / nx * nx + x][0];
+            }
+        }
+        for (n, row) in rows.iter_mut().enumerate() {
+            row[0] = 0.;
+            for (j, &weight) in weights.iter().enumerate() {
+                let y = (n as isize / nx as isize + j as isize - reach).rem_euclid(ny as isize)
+                    as usize;
+                row[0] += weight * temporary[y * nx + n % nx];
+            }
+        }
+    }
+}
+
+fn candidate_curves() -> Vec<Value> {
+    let mut w = fixture();
+    let mut rows = Vec::new();
+    for sigma in [3., 6.] {
+        for second in [136, 8, 128] {
+            for empty in [false, true] {
+                for distance in [1., 2., 4., 6., 8., 10., 12., 16., 20., 24., 32.] {
+                    set_pair(&mut w, distance, 1., second, empty);
+                    broaden_attraction(&mut w, sigma);
+                    let a = terms(&w, &w.sources[0]);
+                    let b = terms(&w, &w.sources[1]);
+                    if empty {
+                        assert!(
+                            a["velocity"].as_array().unwrap().iter().all(|v| v
+                                .as_f64()
+                                .unwrap()
+                                .abs()
+                                < 1e-12)
+                        );
+                    }
+                    rows.push(json!({"sigma":sigma,"distance":distance,"secondSpecies":second,
+                        "emptySecond":empty,"first":a,"second":b,
+                        "separationRate":b["velocity"][0].as_f64().unwrap()-a["velocity"][0].as_f64().unwrap()}));
+                }
+            }
+        }
+    }
+    rows
+}
+
+fn cluster_curves() -> Vec<Value> {
+    let mut c = fixture().config;
+    c.source_count = 7;
+    c.height = 128.;
+    let mut w = World::new(27, c).unwrap();
+    let mut rows = Vec::new();
+    for sigma in [0., 6.] {
+        for radius in [4., 8., 12., 16., 20., 24.] {
+            for center_species in [136, 8, 128] {
+                for empty_center in [false, true] {
+                    w.field.source_signal.fill([0.; 2]);
+                    for (j, s) in w.sources.iter_mut().enumerate() {
+                        let angle = (j as f64 - 1.) * std::f64::consts::TAU / 6.;
+                        let r = if j == 0 { 0. } else { radius };
+                        s.habitat.x = 64.3 + r * angle.cos();
+                        s.habitat.y = 63.1 + r * angle.sin();
+                        s.habitat.radius = 3.;
+                        s.habitat.share = 0.6;
+                        s.rebuild(&w.config, &w.field);
+                        s.inventory.fill(0.);
+                        if j > 0 || !empty_center {
+                            s.inventory[0] = 0.6 * s.interface;
+                            s.inventory[if j == 0 { center_species } else { 136 }] +=
+                                0.4 * s.interface;
+                        }
+                    }
+                    source_medium::project(&mut w);
+                    if sigma > 0. {
+                        broaden_attraction(&mut w, sigma);
+                    }
+                    let radial: Vec<_> = w
+                        .sources
+                        .iter()
+                        .enumerate()
+                        .skip(1)
+                        .map(|(j, s)| {
+                            let angle = (j as f64 - 1.) * std::f64::consts::TAU / 6.;
+                            let v = source_medium::response(
+                                s,
+                                w.tick,
+                                &w.config,
+                                &w.field,
+                                &w.chemistry,
+                            )
+                            .velocity;
+                            v[0] * angle.cos() + v[1] * angle.sin()
+                        })
+                        .collect();
+                    rows.push(
+                        json!({"sigma":sigma,"radius":radius,"centerSpecies":center_species,
+                        "emptyCenter":empty_center,"radialVelocities":radial}),
+                    );
+                }
+            }
+        }
+    }
+    rows
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let snapshots: Vec<_> = std::env::args()
+        .skip(1)
+        .map(|p| snapshot(&p))
+        .collect::<Result<_, _>>()?;
+    println!(
+        "{}",
+        json!({"ticksAdvanced":0,"registration":"docs/design/resource-binding-investigation.md",
+        "snapshots":snapshots,"pairCurves":pair_curves(),"backgrounds":backgrounds(),
+        "candidateCurves":candidate_curves(),"clusterCurves":cluster_curves()})
+    );
+    Ok(())
+}

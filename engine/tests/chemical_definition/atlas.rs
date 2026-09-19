@@ -14,7 +14,7 @@ fn atlas_uses_live_compiler_and_validated_definition() {
     for example in report["operators"]["examples"].as_array().unwrap() {
         let m: Machinery = serde_json::from_value(example["parameters"].clone()).unwrap();
         let op = Operators::compile(&m, &Config::default(), &chemistry);
-        assert_eq!(example["membraneProfile"], json!(op.profile));
+        assert_eq!(example["membraneProfile"], json!(&op.profile[..2]));
         let rows = example["representativeEnzyme"].as_array().unwrap();
         assert_eq!(rows.len(), op.enzymes[0].conversions.len());
         for (row, e) in rows.iter().zip(&op.enzymes[0].conversions) {

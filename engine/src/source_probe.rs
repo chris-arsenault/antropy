@@ -57,6 +57,7 @@ fn advance(w: &mut World) {
     w.ledger.numerical_material += b.roundoff_matter;
     w.ledger.numerical_energy += b.roundoff_energy;
     w.ledger.weathering_heat += b.weathering_heat;
+    w.ledger.weathering_work += b.weathering_work;
     w.ledger.weathered_material += b.weathered_material;
     w.ledger.sheltered_conversion += b.sheltered_conversion;
     w.tick += 1;

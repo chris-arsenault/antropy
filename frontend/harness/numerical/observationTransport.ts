@@ -38,6 +38,7 @@ function displayFixture(world: EngineWorld): LiveStatus {
     regionCount: 64,
   }));
   return {
+    chemicalWeb: null,
     summary,
     chemicals: world.command("chemicalOverview"),
     population,

@@ -55,8 +55,8 @@ fn landscape(w: &world::World, source: usize) -> Vec<Value> {
             m.enzymes[0] = genetics::Enzyme {
                 x: input[0],
                 y: input[1],
-                dx: offset[0],
-                dy: offset[1],
+                center_x: offset[0],
+                center_y: offset[1],
                 angle: 0.,
             };
             let operators = chemical_operators::Operators::compile(&m, &w.config, &w.chemistry);
@@ -179,6 +179,9 @@ fn feedback(w: &world::World) -> Vec<Value> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    if antropy_engine::world::VERSION >= 25 {
+        return Err("Historical displacement experiment retired: use its original commit and schema; reflection centers are not offsets.".into());
+    }
     let args: Vec<_> = std::env::args().skip(1).collect();
     if !(2..=3).contains(&args.len()) {
         return Err("Expected definition.json new-report.json [feedback]".into());

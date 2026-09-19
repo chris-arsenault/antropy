@@ -141,6 +141,7 @@ def ancestral_chemical_steps(points, ancestry, genotypes):
                                ("transporters", ["x", "y"]), ("receptors", ["x", "y"])]:
             for slot, (before, after) in enumerate(zip(parent["chemistry"][category], g["chemistry"][category])):
                 for axis in axes:
+                    axis = {"dx": "centerX", "dy": "centerY"}.get(axis, axis) if "centerX" in after else axis
                     if abs(after[axis] - before[axis]) >= 4:
                         changes.append({"genome": identity, "parent": g["parent"], "born": g["born"],
                                         "category": category, "slot": slot, "axis": axis,

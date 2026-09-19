@@ -17,6 +17,7 @@ interface Props {
   status: LiveStatus;
   bridge: Bridge;
   error: (e: unknown) => void;
+  onInspect: () => void;
 }
 const groupName = (kind: GroupKind, id: number) =>
   kind === "families" ? `F${id}` : `Founder ${id}`;
@@ -30,14 +31,29 @@ const changeText = (n: number | null) => {
 export function GenealogyPanel(props: Props) {
   return (
     <div className="genealogy-panel">
-      <h3>Genealogy</h3>
-      <FindAncestor bridge={props.bridge} error={props.error} />
+      <p className="panel-intro">
+        Follow a branch through its parents, children and living descendants.
+      </p>
+      <div className="lineage-guide">
+        <p>
+          <strong>Founder ancestry</strong> follows descendants of an original cell for the whole
+          run.
+        </p>
+        <p>
+          <strong>Recent families</strong> group four generations under a more recent root cell.
+        </p>
+        <p>
+          Select a group to inspect its root, then choose a child or living descendant to follow it.
+          These groups describe parentage, not a shared diet or phenotype.
+        </p>
+      </div>
+      <FindAncestor bridge={props.bridge} error={props.error} onInspect={props.onInspect} />
       <GroupPanel {...props} kind="families" />
       <GroupPanel {...props} kind="lineages" />
     </div>
   );
 }
-function FindAncestor({ bridge, error }: Pick<Props, "bridge" | "error">) {
+function FindAncestor({ bridge, error, onInspect }: Pick<Props, "bridge" | "error" | "onInspect">) {
   const [id, setId] = useState("1");
   const inspect = () => {
     const cell = Number(id);
@@ -45,7 +61,7 @@ function FindAncestor({ bridge, error }: Pick<Props, "bridge" | "error">) {
       error(new Error("Enter a positive cell ID"));
       return;
     }
-    bridge.call("inspect", { cell }).catch(error);
+    bridge.call("inspect", { cell }).then(onInspect).catch(error);
   };
   return (
     <div className="genealogy-key">
@@ -57,12 +73,12 @@ function FindAncestor({ bridge, error }: Pick<Props, "bridge" | "error">) {
     </div>
   );
 }
-function GroupPanel({ status, bridge, error, kind }: Props & { kind: GroupKind }) {
+function GroupPanel({ status, bridge, error, onInspect, kind }: Props & { kind: GroupKind }) {
   const points = shareHistory(status, kind),
     ids = chartGroups(points, kind),
     current = points[points.length - 1];
   const rows = [...new Set([...current[kind].slice(0, 8).map(([id]) => id), ...ids])];
-  const select = (id: number) => bridge.call("inspect", { cell: id }).catch(error);
+  const select = (id: number) => bridge.call("inspect", { cell: id }).then(onInspect).catch(error);
   const title = kind === "families" ? "Recent families" : "Founder ancestry";
   return (
     <details open className="lineage-panel">

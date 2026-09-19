@@ -1,6 +1,30 @@
 use crate::{chemical_group::Action, chemical_products::Transform, genetics::Enzyme};
 
 #[test]
+fn every_pair_has_an_exchange_independent_of_recognition() {
+    for a in 0..256 {
+        for b in 0..256 {
+            let mut e = Enzyme::between(
+                crate::chemistry::coordinate(a),
+                crate::chemistry::coordinate(b),
+            );
+            let first = Transform::new(e);
+            assert_eq!(first.products(a)[0].species, b);
+            assert_eq!(first.products(b)[0].species, a);
+            assert_eq!(first.products(a).len(), 1);
+            let [x, y] = crate::chemistry::coordinate(b);
+            e.x = x;
+            e.y = y;
+            let recognized = Transform::new(e);
+            assert_eq!(
+                first.components()[0].action,
+                recognized.components()[0].action
+            );
+        }
+    }
+}
+
+#[test]
 fn discrete_generators_are_bijections_with_exact_inverses_including_boundaries() {
     let identity = Action::identity();
     for x in 0..=30 {
@@ -69,15 +93,15 @@ fn prefix_reflections_generate_adjacent_transpositions_and_reach_all_coordinates
 #[test]
 fn kinetic_mixtures_preserve_uniform_material_but_do_not_claim_an_inverse() {
     for (x, y, dx, dy, angle) in [
-        (0., 0., -2.3, 1.1, -1.2),
+        (0., 0., 2.3, 1.1, -1.2),
         (7.3, 4.6, 3.1, 7.2, 0.37),
-        (15., 15., 15., -15., 3.1),
+        (15., 15., 15., 0., 3.1),
     ] {
         let t = Transform::new(Enzyme {
             x,
             y,
-            dx,
-            dy,
+            center_x: dx,
+            center_y: dy,
             angle,
         });
         assert!(t.components().len() <= 8);
@@ -111,8 +135,8 @@ fn kinetic_parameters_are_continuous_at_orientation_seams_and_interval_edges() {
                 let t = Transform::new(Enzyme {
                     x,
                     y: 7.,
-                    dx: 1. + sign * eps,
-                    dy: -2.,
+                    center_x: 1. + sign * eps,
+                    center_y: 6.,
                     angle: angle + sign * eps,
                 });
                 for p in t.products(15 * 16) {
