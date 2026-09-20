@@ -1,7 +1,7 @@
 # Fresh composed runtime: registration and evidence
 
 September 15, 2026. [Runtime laws](composed-runtime.md) and the
-[root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) govern this rebuild. Reports below exercise
+[root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) govern this rebuild. Reports below exercise
 the sole production World; historical thermodynamic and candidate-only timings remain history.
 Artifacts are local under `frontend/harness/artifacts/rebuild-20260915/` and the existing ledger.
 

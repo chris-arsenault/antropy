@@ -1,6 +1,26 @@
 use crate::{chemical_group::Action, chemical_products::Transform, genetics::Enzyme};
 
 #[test]
+fn dyadic_generators_are_involutions_and_reach_every_identity() {
+    for s in 0..256 {
+        let mut reached = [false; 256];
+        for word in 0..256 {
+            let mut action = Action::identity();
+            for j in 0..8 {
+                let generator = Action::dyadic(j / 4, j % 4);
+                assert_eq!(generator.inverse(), generator);
+                assert_eq!(generator.compose(&generator), Action::identity());
+                if word & (1 << j) != 0 {
+                    action = action.compose(&generator);
+                }
+            }
+            reached[action.apply(s)] = true;
+        }
+        assert!(reached.into_iter().all(|v| v));
+    }
+}
+
+#[test]
 fn every_pair_has_an_exchange_independent_of_recognition() {
     for a in 0..256 {
         for b in 0..256 {

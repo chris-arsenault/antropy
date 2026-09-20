@@ -3,7 +3,7 @@
 - Status: Accepted; M0 arithmetic selection and core feasibility verified, live integration pending
 - Date: 2026-09-15
 - Governing design: [Computable chemistry](../design/chemistry/computational-foundation.md)
-- Plan: [Integrated chemistry](../../DIGITAL-CHEMISTRY-PLAN.md)
+- Plan: [Integrated chemistry](../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 - Amends: [ADR 0021](0021-integrated-digital-chemistry.md), M0 formula selections and the old M2 expansion
 - Preserves: [ADR 0020](0020-complete-rust-kernel.md) and [immutable sharing](../design/chemistry/data-ownership.md)
 

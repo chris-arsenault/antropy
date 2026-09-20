@@ -1,171 +1,17 @@
 # Current design and work order
 
-**Current ecology implementation:** [resource binding](resource-binding-proposal.md) adds a shared
-six-unit attraction length, existing local repulsion/nonlinear pressure, a bounded evaluator,
-all-consumer integration and short mechanism/cost checks. The
-[investigation](resource-binding-investigation.md) retains the force diagnosis and evidence.
-The user rejected prescribed geographic basins.
-Cellular changes to local material should alter binding; homeostatic clusters are valid.
-The [50k spatial review](spatial-isolation-review.md) retains its observation and rejected
-proposal. Physical v28 integrates the field into ordinary source, cell and dissolved motion;
-bounded checks and initial positive human review are recorded in the binding plan. External
-directional forcing is a later topic.
-Execution stays single-threaded; multicore implementation is in the backlog.
+Updated September 20, 2026. Physical v32 integrates material-supported habitats, composed local
+illumination, funded photoreception, and bounded phenotype/chemical-flow observation.
+The user reports dense, long-lived colonies and a promising initial visual result.
+The [83,980-tick checkpoint review](../material-habitats-review.md) records differentiated
+chemistry and continued turnover. The [session slowdown investigation](../session-runtime-review.md)
+records the reload-related performance report and its unresolved attribution.
 
-**Deferred research:** [cell interactions](cell-interaction-research.md) considers contact
-pressure, phenotype-dependent chemical harm and recovery of neighbor material through shared
-paid operations. This is a backlog avenue, not the next implementation or a new experiment.
-
-**Performance and scaling:** the [completed serial pass](../../SCALING-PLAN.md) reduces active
-field support, transport passes and cell-exchange work. Its shared-memory 16–32-core design is
-deferred. Ecological opportunities and mathematical principles govern acceptance; trajectory
-identity is not required. The preceding
-[exact optimization](chemistry/runtime-optimization.md) retains its historical measurements.
-
-**Current mathematical work:** [regenerative ecosystem implementation](../../MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation),
-root `555cf223-16f7-4e8b-a10a-7160dbdeead2`. Physical v27 implements R0–R4; automated checks
-are complete and human motion review is pending. The [evidence](../evidence/digital-chemistry/regenerative-v27/README.md)
-records203cells at5k, producer-dependent uptake, matched cost and retained negative findings.
-The [white paper](chemistry/regenerative-ecosystem.md) scopes shared transformation work,
-finite-owner pressure correction and a funded initial community on the existing runtime.
-
-**Preceding mathematics:** [source concentration correction](../../MATHEMATICAL-SYMMETRY-PLAN.md#source-concentration-correction),
-root `b482e871-94d8-41c9-86a3-7486f13c13f3`. Physical v26 adds shared impedance pressure
-to geographic motion. The completed [geometry correction](../../MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction)
-retains definition v5's multidirectional potential basins, separate enzyme recognition/action,
-specificity-radius mutation units and explicitly funded environmental returns.
-The [runtime contract](chemistry/composed-runtime.md) owns the current laws. The v23 acceptance
-and performance below describe the earlier deployed revision.
-
-**Current UI work:** [viewport-first observation](../../UI-OBSERVATION-PLAN.md) moves the world
-to a full-screen viewport with focused information windows, preserving chemistry and improving
-lineage navigation. Phenotype analysis and long-run cleanup remain later work.
-
-**Completed canonical mathematical plan:** [transformation algebra and runtime integration](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order),
-Sulion root `14120639-64cd-4840-b2d4-734e0aa4e123`. A0–A5 adopt the white paper's unresolved
-work and the former M6 human-review obligation. The redundant M6 branch is retired; prior
-v21/v22 evidence remains historical. Environmental plans and their review gates remain separate.
-
-**September 18, 2026: exact discrete chemical actions are implemented in v23.** The
-[canonical plan](../../MATHEMATICAL-SYMMETRY-PLAN.md#a0-execution--bounded-permutation-algebra)
-selects `(S16 × S16) semidirect C2`: bounded coordinate permutations and axis exchange.
-Enzymes retain five parameters and compile mixtures of at most eight exact actions. Mixtures
-are irreversible kinetic operators, not group elements. Ordinary enzymes and environmental
-conversion share the action algebra; recognition, funded installation, material/work accounts
-and the compiler retain their common boundaries. The [white paper](chemistry/transformation-algebra.md)
-remains the design/evidence contract. A0–A5 are complete. The user accepts deployed v23,
-reporting real differentiation and acceptable speed through 100,000 ticks.
-Startup measures376ticks/s versus385 before; saturated capacity remains
-within1% of baseline and retains its below30ticks/s limit at2,000cells. These measurements
-do not establish long-run abundance, recycling or endurance.
-
-**September 18, 2026: complete the omitted enzyme transformation.** The
-[correction and omission audit](../symmetry-completion-audit.md) adds inherited rotation,
-paid angular refitting and a shared founder translation that preserves separate food outputs.
-Physical checkpoint v22 rejects earlier saves. The earlier symmetry plan's unchanged-founder
-exclusion did not fulfill the user's intended enzyme change; its results remain v21 evidence.
-
-**September 18, 2026: mathematical symmetry correction.** The
-[executed plan](../../MATHEMATICAL-SYMMETRY-PLAN.md) corrects geographic direction bias,
-chemical distance/product costs, duplicate weathering edges, work/refit allocation and mutation
-direction. That stage ran the shared operators under physical checkpoint v21.
-Default startup measures399ticks/s versus410 before; saturated capacity remains within2% of
-baseline, with its existing below30ticks/s limits at2,000cells. Scalar mutation, funded bodies,
-full mesh2 and borrowed worker rendering remain. Human motion review is pending. These bounded
-checks do not establish waste recycling, sustained diversity or long-run browser endurance.
-
-**September 17, 2026: bound body material.** The [v20 correction](../bound-material.md)
-preserves chemical identity through construction, repair, division and death, removing the
-compulsory #186 return. It retains paid assembly/repair and the funded-capability model.
-Its bounded checks do not establish a changed long-run abundance distribution or food web.
-
-**September 17, 2026: physical coupling correction.** The
-[v19 correction](../physical-coupling-correction.md) addresses the audited body/repair scaling,
-absolute birth reserves, empty-slot refit delay and motor effort cost. It also corrects the
-analytical construction ceiling. The v18 trajectory below remains evidence under its original
-rules. The correction owns bounded validation; long-run evolutionary effects and new motion
-review remain unmeasured.
-
-**September 17, 2026: the requested 50,000-tick observation is complete.** The
-[local-weathering study](../local-weathering-50k-study.md) records ledger 3989, 21 checkpoint
-positions, repeated population recovery, changed metabolic products and funded allocation,
-and transient biomass reuptake. Raw feed supplies 95.7% of late imports; a sustained food web
-has not emerged. The user's visual review through at least 8,000 ticks is positive. C3 is complete;
-the registered C4 browser operational check remains. The display name is now **Biotropy**, with
-a dividing-cell favicon; repository and persistence identifiers are unchanged.
-
-**September 17, 2026: local-medium weathering revision.** The
-[active expansion](../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign) retains environmental
-chemistry and replaces continuously forced conversion with positive local interaction response.
-Field material and reservoir inventory use the same compiled operator. The weather clock is
-removed; the common extracellular floor is 1e-9. Physical checkpoint v18 rejects previous saves.
-The expansion owns short causal and cost evidence; earlier shelter experiments are not proof of
-this law. Core transport, funded biology, corrected mutation, mesh2 and borrowed rendering remain.
-
-**September 17, 2026: ecology correction and its audit repair pass bounded verification.** The environmental plan owns
-the [five-phase correction](../../ENVIRONMENTAL-ECOLOGY-PLAN.md#ecology-correction): shared
-extension design, production integration, local pressure and renewal checks, performance and a
-bounded seed27 comparison, then human handoff. Preserve the core mathematics and corrected
-mutation; ledger run 3952 is the comparison baseline. A user audit found unjustified reactivity
-coupling and incomplete sparse execution in the initial v16 correction. The v17 repair removes
-that coupling, applies shared activity limits, and separates source material and geographic
-cache lifetimes. The repair passes91 Rust/60 Vitest checks and a600-tick startup; the long
-comparison and human handoff remain outstanding. Keep external
-replenishment and treat abundance suppressing waste use as a hypothesis. The completed overnight
-campaign remains evidence, not an automatic new campaign.
-
-**September 16, 2026: ecology architecture correction is required.** The user rejected the
-source-specific motion and conversion implementation as inconsistent with the governing shared
-mathematical formulation. Audit of the wider environmental ecology work remains outstanding;
-the implementation records below do not establish architectural acceptance. Before correction,
-the requested [50,000-tick default-seed study](../default-seed-cycles-study.md) records the unchanged
-v15 world, its population pulses, inherited changes and chemical flows. No physics changed for
-that study. Preserve its observations without making the current operators design requirements.
-
-**September 16, 2026: mobile medium-reactive reservoirs are implemented.** The
-[source plan](../../MOBILE-SOURCES-PLAN.md) replaces fixed supply locations with chemical-gradient
-drift and medium-dependent processing of released material. Defaults drift4/processing4 make
-geographic and chemical change measurable within500ticks. The [short evidence](chemistry/mobile-source-results.md)
-records comparisons capped at3,000ticks, costs and limits. External renewal remains open and
-accounted; sun-driven transformations are deferred. Physical checkpoint v15 rejects earlier
-versions. Human review remains pending; the founder and centered seed27 are unchanged.
-
-**September 16, 2026: environmental chemistry is implemented.** The
-[environmental plan](../../ENVIRONMENTAL-ECOLOGY-PLAN.md) adds smooth geographic weathering,
-conservative extracellular conversion and chemical shelter to the ordinary world. The
-[rules and evidence](chemistry/environmental-results.md) retain the negative expensive-barrier
-result and a small positive construction return from a cheaper byproduct. That extension
-introduced checkpoint v14; borrowed worker rendering and full mesh2 remain. Four pilots, four main cases and the
-four-case selected-genotype comparison have executed. Seed27 went extinct in both arms;
-seed101 stopped at the archive limit in both arms with hundreds of cells alive. Shielding
-changed chemical uptake and funded growth, but the selected genotype's predicted
-shelter-specific construction advantage was negative. The evidence record recommends a
-short test of low-motor allocation against relocating food. Human review of the new
-environment remains pending; the default founder and centered seed27 remain unchanged.
-
-**Rebuild baseline, September 15, 2026: a fresh production core is implemented.** The
-[composed runtime](chemistry/composed-runtime.md) and
-[rebuild work order](../../DIGITAL-CHEMISTRY-PLAN.md) govern its formulas, owners and
-accepted handoff. Native/WASM builds,69 Rust and56 Vitest checks pass. Bounded
-opportunities, cold recovery and isolated browser rendering/save/fault checks pass their declared
-checks. Default mesh2 and active chemical-group processing are restored; the user accepts this
-performance correction. Saturated-field limits remain recorded. The user's initial visual
-review passes at this resolution; M3 and the rebuild plan are complete. The user has started
-a long run for continuing observation. It subsequently crashed during an unattended hour;
-the [follow-up repair](../../LONG-RUN-RELIABILITY-PLAN.md) addresses reproduced development
-timing retention. Initial visual acceptance does not establish endurance.
-Seed27 supplies a centered review layout.
-See [current measurements](chemistry/rebuild-results.md). Earlier
-implementation statuses and integration sequences below are historical; their ecological
-and ownership requirements remain. Do not restore the discarded kernels.
-
-Updated September 15, 2026. [Computable chemistry](chemistry/computational-foundation.md),
-[ADR 0022](../adr/0022-computable-chemistry.md) and the [root plan](../../DIGITAL-CHEMISTRY-PLAN.md)
-govern the redesign: artificial rules composed over the chemical manifold, designed for their
-execution cost. M0 formulas and the old M2 expansion are superseded as prescriptions.
-[Runtime numerical design](chemistry/numerical-engine.md), [measurements](chemistry/reliability-results.md)
-and [migration dispositions](chemistry/numerical-migration.md) retain earlier implementation evidence.
-The [reference snapshot](../sources/history/README.md) preserves earlier designs and work orders.
+[Composed runtime laws](chemistry/composed-runtime.md) own the current equations.
+[Decisions and evidence](decisions-and-evidence.md) explain the selected direction and failures.
+[Execution plans](../plans/README.md) preserve version-specific work without becoming a second
+current specification. The pre-cleanup [work order](../sources/history/2026-09-20-design-work-order.md)
+preserves the implementation chronology.
 
 <a id="design-goal-and-present-evidence"></a>
 
@@ -181,18 +27,16 @@ not need to evolve and certify a finished ecosystem before handoff. Long observa
 use of the simulation, not a harness task to exhaust in advance. Broad diversity is an aspiration
 supported by world design, not an outcome that can be guaranteed or inferred from colored groups.
 
-The runtime now uses a smooth 256-species chemical space, fixed funded machinery, generic reactions,
-membrane compatibility and bounded dense extracellular arrays. Short constructed tests show several
-physical opportunities, with negative results and operating limits retained in the validation record.
-Earlier chemical mechanisms and checkpoints have been replaced; their results below are historical.
+The runtime supports paid bodies, local RNN decisions, inheritance, mutation, learning, births
+and deaths on a nonuniform 256-species chemical manifold. External work can fund uphill
+transformations, while each process pays its own costs. Shared material fields influence motion,
+retention, source renewal and extracellular chemistry. Local optical sensing is paid machinery.
 
-The runtime supports resource-funded bodies, local RNN decisions, inheritance, mutation, paid
-learning, births and deaths. Earlier isolated variants gained from food access, B processing and
-lower toxin expense. The thick-medium A/B studies found inherited diet differences concentrated
-in different regions; two of three endpoint pairs gained population share in both rare-start
-contests. These are useful proof points for local selection, not certification of lasting diversity.
-The newer seven-mechanism campaign overstated its results by confusing growing counts with growing
-shares. See the [corrected analysis](../analysis-correction.md) and [evidence](bacteria-results.md).
+The v31 [200k review](../integrated-200k-review.md) found differentiated bodies and inherited
+light responses, but also feedstock dependence and source dispersion. V32 addresses those
+limitations; its public-food acquisition probe remains negative. The user's newer checkpoint
+shows broader uptake and dense colonies, with continued feedstock dependence in net material
+flow. These are distinct results, not certification of a closed ecosystem.
 
 <a id="design-design-owners"></a>
 
@@ -208,8 +52,8 @@ shares. See the [corrected analysis](../analysis-correction.md) and [evidence](b
 | [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
 | [Bodies and inheritance](funded-bodies.md) | Physical costs, genes and lifetime/inherited learning |
 | [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
-| [Environmental chemistry](chemistry/environmental-results.md) | Current weathering/shelter laws, causal evidence and registered overnight findings |
-| [Mobile sources](chemistry/mobile-source-results.md) | Local reservoir motion and processing, selected constants and short calibration |
+| [Composed runtime](chemistry/composed-runtime.md) | Current shared operators, illumination, material habitat laws and execution bounds |
+| [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
 | [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
 | [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
 | [Evidence](bacteria-results.md) | Recorded findings and version-specific limits |
@@ -233,12 +77,17 @@ Finite initial8/128 priming starts delivery; later processing follows ordinary l
 bound material retain actual identities through repair and death. No chemical has a privileged
 waste role. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
-The controller has 39 inputs, 24 recurrent units and nine outputs. Fifteen funded stocks support
-four receptors, four transporters and four enzymes plus core, motor and storage. Physical
-checkpoints use v25; the outer observation package remains v11.
+The controller has 44 inputs, 24 recurrent units and nine outputs. Sixteen funded stocks support
+four chemical receptors, four transporters and four enzymes plus core, motor, storage and
+[photoreception](../photoreception.md). The light sensor uses the same embodied sampling and
+funded response law; no automatic light-seeking behavior is supplied. Physical
+checkpoints use v32; the outer observation package remains v11.
+The [material-habitat changes](../material-habitats.md) add shared two-scale attraction,
+reversible retention, locally evolving source renewal and multiscale public chemistry.
+IDs0/136 are initial landscape choices; ordinary renewal no longer reinstates them.
 Generic stress, compatibility, repair and impedance replace named toxin/defense/
 matrix pathways. Source zones and epochs remain selectable. Disturbance and typed machinery
-transfer are experimental options, disabled by default. Light input and binding remain deferred.
+transfer are experimental options, disabled by default. Direct cell adhesion remains deferred.
 Smooth geographic weathering and chemical shelter are active. The weathering display and
 selected-cell exposure readings describe physical conditions without adding controller inputs.
 
@@ -255,34 +104,21 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
-The source/environmental repair, v21/v22 geometric corrections and selected v23 finite action
-are implemented. The [canonical math plan](../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order)
-records A0–A4 evidence, A5 human acceptance through 100,000 ticks and current operating limits.
-The [default-seed observation](../default-seed-cycles-study.md)
-remains positive historical evidence under its original rules. The
-[source plan](../../MOBILE-SOURCES-PLAN.md) supplies short calibration; the
-[environmental plan](../../ENVIRONMENTAL-ECOLOGY-PLAN.md) retains its pending human gate.
-Interpret resource flows and paid returns before inferring adaptation. Reservoir movement does
-not establish evolved pursuit, and altered release does not establish dietary specialization.
-A future sun should fund transformations through explicit work accounts and local conditions;
-no fully closed system or long agent campaign is required now.
+Keep current simulation semantics while investigating accumulated-session costs. The observed
+8→40 ticks/s reload improvement is not yet explained; forced JavaScript collection did not
+reproduce it. The retention repair expires older saves within the existing byte budget rather
+than pausing merely because the preferred save counts do not fit.
 
-The rebuild's M0 design, M1 complete production World and M2 consumer/opportunity work are
-complete. The sole Rust/WASM step integrates fields, machinery, local controllers, paid bodies
-and inheritance. M3's automated operating checks now pass, including the existing browser,
-worker WebGL2, isolated save/recovery and injected graphics/worker failures. The user passes
-the initial visual review at mesh2, completing M3 and the rebuild handoff.
+Future work belongs in the [backlog](../backlog.md): meaningful long-term specialization,
+less dependence on original feedstock, useful public-food returns, operating headroom, terrain
+and climate, and conditional cell interaction research. Multicore stays paused. Source geometry
+is a revisable initial condition, not a requirement for predetermined wells or colony counts.
+Do not turn these open questions into a mandatory verification campaign.
 
-The user accepts the restored-resolution threshold correction. Its pre-weathering default startup
-measures372ticks/s; the short software-rendered browser check observes about292ticks/s.
-Fully saturated2,000-cell growth remains slower and is a documented worst case, not a
-reason to delay continuing observation. See the [current evidence](chemistry/rebuild-results.md).
-Emission benefit, net movement payoff, colonization, sustained diversity and days/weeks
-operation remain unresolved observations. Do not invent a required long campaign to close them.
-
-Review [continuation limits](../continuing-observation.md) before depending on unattended execution.
-The user's initial visual acceptance does not establish browser endurance. The user's long run
-is ongoing; no days/weeks ecological campaign is required to finish this rebuild.
+The math, binding, illumination and observation implementation plans are reconciled in the
+[plan disposition](../plans/README.md). Older version-specific human gates are preserved as
+superseded where they were never accepted; later positive reviews do not retroactively pass them.
+Current operational and ecological limits remain explicit in [continuing observation](../continuing-observation.md).
 
 <a id="design-roadmap"></a>
 

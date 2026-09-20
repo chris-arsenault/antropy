@@ -68,7 +68,7 @@ pub struct Machinery {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Chromosome {
     pub behavior: controller::Genome,
-    pub physical: [f32; 15],
+    pub physical: [f32; crate::organism::STOCKS],
     pub chemistry: Machinery,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -86,7 +86,7 @@ pub struct Genotype {
 pub struct Compiled {
     pub sequence_fingerprint: u64,
     pub chromosome: Chromosome,
-    pub body: [f64; 15],
+    pub body: crate::organism::Body,
     pub operators: crate::chemical_operators::Operators,
 }
 
@@ -252,7 +252,7 @@ impl Genotype {
     pub fn seed(c: &Config, chemistry: &Chemistry) -> Self {
         let allele = Chromosome {
             behavior: controller::seed(),
-            physical: [0.; 15],
+            physical: [0.; crate::organism::STOCKS],
             chemistry: Machinery::seed(chemistry, &c.source_species),
         };
         let mut g = Self {
@@ -297,6 +297,7 @@ impl Genotype {
             c.enzyme_ratio,
             c.enzyme_ratio,
             c.enzyme_ratio,
+            c.receptor_ratio,
         ];
         let core = c.birth_mass * (chromosome.physical[0] as f64).exp();
         let body = std::array::from_fn(|i| {

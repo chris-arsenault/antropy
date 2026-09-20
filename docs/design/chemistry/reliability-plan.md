@@ -1,7 +1,7 @@
 # Digital chemistry reliability and validation plan
 
 September 14, 2026. Sulion plan `a3da6ddc-b43a-46bb-a42c-e63d140ed830`.
-Status: superseded by the September 15 [numerical restart](../../../DIGITAL-CHEMISTRY-PLAN.md).
+Status: superseded by the September 15 [numerical restart](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md).
 Human motion/legibility and user-device acceptance remain unperformed and carry into
 replacement acceptance. The original crash remains unattributed. The following body
 records the prior implementation and its evidence, not work to resume or certification

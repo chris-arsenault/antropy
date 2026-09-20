@@ -14,6 +14,9 @@ pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
         }
     }
     w.ledger.death_heat += cell.energy;
+    if let Some(o) = &mut w.observer {
+        o.ended(cell.id);
+    }
     w.ledger.deaths += 1;
     if matches!(cause, Cause::Disturbance) {
         w.ledger.disturbance_deaths += 1;
@@ -77,12 +80,19 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
         cause: Cause::Alive,
     });
     w.ledger.births += 1;
+    if let Some(o) = &mut w.observer {
+        o.birth(&cell);
+    }
     if let Some(t) = &mut w.trace {
         t.life(&cell, "birth", w.tick);
     }
     cell
 }
-fn division_cost(cell: &Cell, target: &[f64; 15], config: &crate::config::Config) -> Option<f64> {
+fn division_cost(
+    cell: &Cell,
+    target: &crate::organism::Body,
+    config: &crate::config::Config,
+) -> Option<f64> {
     if !cell
         .body
         .iter()
@@ -125,6 +135,9 @@ pub fn reproduce(w: &mut World) {
             study.flow(&cell, "division", None, None, paid);
         }
         w.ledger.division_heat += paid;
+        if let Some(o) = w.observer.as_mut().filter(|o| o.active()) {
+            o.division(&cell, paid);
+        }
         w.ledger.divisions += 1;
         divisions += 1;
         if let Some(t) = &mut w.trace {
@@ -136,6 +149,9 @@ pub fn reproduce(w: &mut World) {
             let record = &mut w.ancestry[cell.id as usize - 1];
             record.ended = w.tick;
             record.cause = Cause::Division;
+            if let Some(o) = &mut w.observer {
+                o.ended(cell.id);
+            }
             w.cells.push(b);
         } else {
             cell.body = cell.body.map(|q| q * 0.5);

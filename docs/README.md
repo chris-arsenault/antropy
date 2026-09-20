@@ -10,19 +10,25 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 
 | Need | Document |
 | --- | --- |
+| Current decisions, failed approaches and plan disposition | [Decision record](design/decisions-and-evidence.md), [plan archive](plans/README.md) |
+| Mature checkpoint differentiation and reload-related slowdown | [83,980-tick review](material-habitats-review.md), [runtime investigation](session-runtime-review.md) |
+| Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |
+| Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
+| 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
+| Implemented illumination: composed cycles and shared local transformation work | [Illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k user-run findings](evidence/digital-chemistry/illumination-design-143249/README.md) |
 | Deferred cell crowding, chemical antagonism and feeding research | [Cell interaction research](design/cell-interaction-research.md) — design only, not scheduled next |
 | Current spatial isolation, source migration and directional climate review | [50k study and staged ecology proposal](design/spatial-isolation-review.md) |
-| Full-screen world and observation navigation | [Viewport UI pass](../UI-OBSERVATION-PLAN.md) |
-| Enzyme role colors, counts and transformation web | [Chemical web](../CHEMICAL-WEB-PLAN.md) |
-| Governing computable chemistry and active work | [Computational foundation](design/chemistry/computational-foundation.md), [ADR 0022](adr/0022-computable-chemistry.md), [canonical math plan](../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order), [completed rebuild](../DIGITAL-CHEMISTRY-PLAN.md), [current specification](specs/digital-chemistry/README.md) |
+| Full-screen world and observation navigation | [Display contract](design/bacterial-display.md) |
+| Enzyme role colors, counts and transformation web | [Chemical web and phenotype observation](phenotype-observation.md) |
+| Governing computable chemistry and active work | [Computational foundation](design/chemistry/computational-foundation.md), [ADR 0022](adr/0022-computable-chemistry.md), [canonical math plan](plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order), [completed rebuild](plans/archive/DIGITAL-CHEMISTRY-PLAN.md), [current specification](specs/digital-chemistry/README.md) |
 | Chemical system, implementation and current evidence | [Digital chemistry](design/chemistry/README.md), [numerical contract](design/chemistry/numerical-engine.md), [measurements](design/chemistry/numerical-results.md), [migration and retirement](design/chemistry/numerical-migration.md) |
-| Current environmental extension and investigation | [Environmental plan](../ENVIRONMENTAL-ECOLOGY-PLAN.md), [weathering and shelter evidence](design/chemistry/environmental-results.md) |
+| Current environmental extension and investigation | [Environmental plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md), [weathering and shelter evidence](design/chemistry/environmental-results.md) |
 | Current 50,000-tick evolution and chemical-flow analysis | [Local-weathering trajectory](local-weathering-50k-study.md) |
 | Physical investment, body scaling and evolutionary tradeoffs | [Physical coupling audit](physical-coupling-audit.md), [v19 corrections](physical-coupling-correction.md) |
-| Group-theoretic design and implementation accountability | [Transformation algebra white paper](design/chemistry/transformation-algebra.md) — design only; earlier geometric corrections do not complete it |
-| Mathematical design of a regenerative initial ecosystem | [Initial ecosystem white paper](design/chemistry/regenerative-ecosystem.md) — proposed shared work law, four-founder material cycle and attraction/repulsion appendix |
+| Group-theoretic design and implementation accountability | [Transformation algebra white paper](design/chemistry/transformation-algebra.md) — rationale for the installed exact finite actions and bounded kinetic mixtures |
+| Mathematical design of a regenerative initial ecosystem | [Initial ecosystem white paper](design/chemistry/regenerative-ecosystem.md) — implemented shared work law, mutable four-founder starting circuit and pressure rationale |
 | Earlier symmetry corrections and remaining limitations | [Mathematical symmetry audit](mathematical-symmetry-audit.md), [v22 correction audit](symmetry-completion-audit.md) |
-| Mobile reservoirs and short calibration | [Source plan](../MOBILE-SOURCES-PLAN.md), [source laws and evidence](design/chemistry/mobile-source-results.md) |
+| Mobile reservoirs and short calibration | [Source plan](plans/archive/MOBILE-SOURCES-PLAN.md), [source laws and evidence](design/chemistry/mobile-source-results.md) |
 | World hypothesis and prior implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
 | Open hypotheses from observed evolution | [Evolution and ecology hypothesis log](hypothesis-log.md) |
 | Analytical resource budgets, source calibration and current viability checks | [Resource economy](design/chemistry/resource-economy.md) |
@@ -56,9 +62,10 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Decisions | [ADR index](adr/README.md) |
 | Original supplied sources | [Source index](sources/README.md) |
 
-Study records in the table above, except the current numerical chemistry and continuation
-record, retain pre-chemistry evidence. Their commands are historical; current invocations live in
-Development. Original contracts are preserved in the pre-chemistry snapshot.
+Studies retain the physical version and configuration stated in each record. The earlier named
+A/B, toxin and ant studies are historical; recent illumination, photoreception and habitat records
+describe later chemistry versions. Current commands live in Development; archived commands are
+provenance, not instructions to rerun old campaigns.
 
 The following index covers every active design, principle, calibration and backlog section.
 Historical indexes remain in the archive; they are not additional work queues.

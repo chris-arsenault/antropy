@@ -147,6 +147,36 @@ pub fn project(material: &[f32], rows: &Rows) -> [f64; 6] {
     project_active(material, rows, u64::MAX)
 }
 
+/// Account physical washout separately from rounded commits and numerical culling.
+pub fn decay(
+    material: &mut [f32],
+    rows: &Rows,
+    mask: u64,
+    retained: f64,
+    floor: f32,
+) -> (u64, [f64; 2]) {
+    let mut loss = [lanes::zero(); 2];
+    let mut active = 0;
+    for s in crate::field_activity::pairs(mask) {
+        let before = lanes::load_material(&material[s..]);
+        let removed = lanes::mul(before, lanes::splat(1. - retained));
+        loss[0] = lanes::add(loss[0], removed);
+        loss[1] = lanes::add(loss[1], lanes::mul(removed, lanes::load(&rows.0[0][s..])));
+        lanes::store_material(
+            &mut material[s..],
+            lanes::mul(before, lanes::splat(retained)),
+        );
+        for (i, q) in material[s..s + 2].iter_mut().enumerate() {
+            if *q < floor {
+                *q = 0.;
+            } else if *q > 0. {
+                active |= 1 << ((s + i) / 4);
+            }
+        }
+    }
+    (active, loss.map(lanes::total))
+}
+
 pub fn project_active(material: &[f32], rows: &Rows, mut mask: u64) -> [f64; 6] {
     assert_eq!(material.len(), SPECIES);
     let mut values = [lanes::zero(); 6];

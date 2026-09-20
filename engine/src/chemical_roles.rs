@@ -62,6 +62,7 @@ pub fn color(cell: &Cell, output: bool) -> [f32; 3] {
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum Mode {
+    Measured,
     Primary,
     Supported,
     Environment,
@@ -159,8 +160,8 @@ fn environmental_routes(w: &World) -> Vec<Row> {
     };
     let mut rows = Vec::new();
     for input in 0..256 {
-        for j in 0..4 {
-            if !operators.possible(input, j) {
+        for j in 0..crate::weathering::BRANCHES {
+            if !operators.possible(input, j, 1. + w.config.illumination_contrast) {
                 continue;
             }
             rows.push(Row {
@@ -176,6 +177,9 @@ fn environmental_routes(w: &World) -> Vec<Row> {
 }
 
 pub fn overview(w: &World, query: &Query) -> Value {
+    if query.mode == Mode::Measured {
+        return crate::phenotype_report::web(w, query);
+    }
     let (mut rows, assigned) = if query.mode == Mode::Environment {
         (
             environmental_routes(w),
@@ -211,6 +215,12 @@ pub fn overview(w: &World, query: &Query) -> Value {
         .offset
         .min(pairs.saturating_sub(1) / PAGE_SIZE * PAGE_SIZE);
     let page: Vec<_> = rows.into_iter().skip(offset).take(PAGE_SIZE).collect();
+    json!({"tick":w.tick, "population":w.cells.len(), "assigned":assigned,
+        "unassigned":w.cells.len()-assigned, "mode":query.mode, "focus":query.focus,
+        "offset":offset, "pairs":pairs, "rows":page, "sources":source_species(w)})
+}
+
+pub fn source_species(w: &World) -> Vec<usize> {
     let mut sources = [false; 256];
     for source in &w.sources {
         if source.remaining > 0. {
@@ -219,8 +229,5 @@ pub fn overview(w: &World, query: &Query) -> Value {
             }
         }
     }
-    let sources: Vec<_> = (0..256).filter(|s| sources[*s]).collect();
-    json!({"tick":w.tick, "population":w.cells.len(), "assigned":assigned,
-        "unassigned":w.cells.len()-assigned, "mode":query.mode, "focus":query.focus,
-        "offset":offset, "pairs":pairs, "rows":page, "sources":sources})
+    (0..256).filter(|s| sources[*s]).collect()
 }

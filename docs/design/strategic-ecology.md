@@ -2,8 +2,8 @@
 
 Digital chemistry supplies physical opportunities for an unresolved ecological history. A mechanism,
 a constructed benefit and an evolved role remain different claims. Current evidence is in
-[environmental measurements](chemistry/environmental-results.md) and
-[rebuild measurements](chemistry/rebuild-results.md); earlier named-mechanism studies retain their
+[material-habitat measurements](../material-habitats.md) and
+[the user checkpoint review](../material-habitats-review.md); earlier named-mechanism studies retain their
 [original contract](../sources/history/2026-09-13-pre-chemistry/design/strategic-ecology.md).
 
 <a id="ecology-resource-opportunities"></a>
@@ -13,8 +13,8 @@ a constructed benefit and an evolved role remain different claims. Current evide
 Reservoirs release mixtures of ordinary chemical IDs into localized neighborhoods. They vary
 in richness, radius, composition and lifetime, and drift in response to local chemical gradients
 and impedance. Renewal waits are exponential; renewals replenish finite inventory at its current
-location indefinitely. There is no relocation lottery. Local chemical signals can transform the
-released mixture downhill with accounted potential loss. Sources do not respond to organism
+location indefinitely. There is no relocation lottery. The shared chemical operator processes inventory and the persisted renewal mixture. Local
+external work can fund uphill changes, with accepted work accounted explicitly. Sources do not respond to organism
 ancestry or select successful genotypes. [Short calibration](chemistry/mobile-source-results.md)
 establishes motion and altered output, not evolved pursuit or a closed resource cycle.
 
@@ -31,7 +31,8 @@ equal-matter and equal-potential budgets. They do not establish evolved speciali
 Unary intracellular transformations conserve matter and exchange chemical potential with usable
 energy and heat. Intermediate products can pass between cells through export and import.
 There is no named carbon/oxygen cycle, photosynthesis stock or atmospheric exchange fallback.
-Nonchemical external energy, including light, remains deferred. The cross-feeding probe shows
+Composed local illumination modulates external transformation work across intracellular,
+extracellular and reservoir chemistry. It does not credit free energy directly to a cell. The cross-feeding probe shows
 recipient benefit and a substantial donor cost; it does not show cooperation.
 
 <a id="ecology-predation"></a>
@@ -106,8 +107,8 @@ conversion reduced injury but also reduced construction. Relatedness does not en
 ## Accumulation, impedance and degradation
 
 Concentration-weighted impedance slows movement and symmetric extracellular diffusion. Paid export
-can build persistent, low-diffusion accumulations. Uniform slow washout removes all extracellular
-species at the same first-order rate. Generic extracellular weathering also changes chemical
+can build persistent, low-diffusion accumulations. The same cohesion-dependent slow washout law applies to every species. Shared material
+attraction and retention can concentrate deposits; dilution releases them again. Generic extracellular weathering also changes chemical
 identity and accounts the lost potential. Geographic activity changes its rate; concentration-
 weighted impedance shelters local material. There is no separate matrix material, binding reservoir,
 solid-wall mode or builder action.
@@ -128,16 +129,17 @@ evolved builder strategy. The full costs and negative findings remain in the evi
 | --- | --- |
 | Disturbance and horizontal transfer | Shared-kernel experimental paths; disabled in the default |
 | Source zones and epochs | Selectable mixture schedules, with matter and potential tracked separately |
-| Binding, solid walls, general extracellular catalysis | Absent; medium-dependent source processing is a bounded release operator |
-| Light input, multiple-substrate reactions, variable genome length | Deferred by the chemistry design |
+| Shared material binding and extracellular conversion | Implemented with the same profiles and compiled transformation language; direct adhesion and solid walls remain absent |
+| Illumination and optical sensing | Shared external work and paid local photoreception are implemented |
+| Multiple-substrate reactions and variable genome length | Deferred |
 | Named toxins, signaling fields, automatic sharing and prey yield | Replaced by generic chemistry; retired controls rejected |
 
 <a id="ecology-consequences-and-boundaries"></a>
 
 ## Consequences and boundaries
 
-The starting world has two colonies of the same mutable founder, no assigned ecological roles and
-no endpoint population target. Sparse geography and ordinary motion are intended to permit local
+The starting world has two colonies containing four mutable chemical-circuit founder types and
+no endpoint population target. The authored starting roles are not prescribed eventual species. Sparse geography and ordinary motion are intended to permit local
 history and consequential dispersal. Current short movement and nutrition controls do not
 establish successful founding elsewhere. Long-term divergence, coexistence and extinction belong
 to future observation. Dormancy, adhesion and new life stages still require a reviewed purpose.

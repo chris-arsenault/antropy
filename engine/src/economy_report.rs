@@ -74,8 +74,9 @@ fn source_budget(w: &World) -> Value {
     if c.washout > 0. {
         for source in &w.sources {
             let q = mean_rate(source.habitat.richness) / (c.washout * c.width * c.height);
-            mean_local[c.source_species[0]] += q * source.habitat.share;
-            mean_local[c.source_species[1]] += q * (1. - source.habitat.share);
+            for (mean, share) in mean_local.iter_mut().zip(&source.replenishment) {
+                *mean += q * share;
+            }
         }
     }
     let uniform = economy::budget(
@@ -92,7 +93,7 @@ fn source_budget(w: &World) -> Value {
         "noConsumerMeanFieldMaterial":(c.washout>0.).then(||release/c.washout),
         "noConsumerMeanConcentration":(c.washout>0.).then(||release/c.washout/c.width/c.height),
         "washoutHalfLife":(c.washout>0.).then(||2_f64.ln()/c.washout),"sites":sites,
-        "uniformMeanConcentrations":c.source_species.iter().map(|s|mean_local[*s]).collect::<Vec<_>>(),
+        "uniformMeanConcentrations":mean_local.to_vec(),
         "hypotheticalUniformMeanBudget":(c.washout>0.).then_some(uniform)})
 }
 pub fn report(seed: u64, config: Config) -> Result<Value, String> {
@@ -136,13 +137,13 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         "cases":cases(&w),"investments":investments(&w),"startup":startup,
         "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
             "sourceLimits terminalConversionWorkCeiling is a zero-medium reference for founder 1, not an upper bound on environmentally driven work",
-            "Budget work includes drive from the stated free-field mixture only; reservoir and embodied projections are omitted",
+            "Budget work uses uniform illumination and drive from the stated free-field mixture only; local illumination, reservoir and embodied projections are omitted",
             "No shared depletion, export, repair, refitting or movement through gradients",
             "grossWork uses the best installed conversion per imported species without throughput limits; processingWork applies installed enzyme throughput to the assumed internal mixture",
             "constructionCeiling uses processingSurplus; extra uphill assembly cost and omitted expenses can reduce it further",
             "Closure holds internal inventory fixed and removes a proportional mixture as construction",
             "Renewal average excludes initial priming transient and timestep overshoot",
-            "Uniform composition budgets assume raw incoming feedstock; medium-dependent source processing and weathering change actual chemical delivery",
+            "Uniform budgets freeze the current replenishment distribution and assume bare washout; evolving supply, cohesion and weathering change actual delivery and retention",
             "Positive calculated surplus is conditional; actual delivery, controller expression and product occupancy must be measured"]}),
     )
 }

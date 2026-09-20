@@ -1,7 +1,7 @@
 # Regenerative ecosystem v27 evidence
 
 September18,2026. Registration, derivations and dispositions live in the
-[canonical plan](../../../../MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation).
+[canonical plan](../../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation).
 This directory retains the existing runners' result files. Complete binary builds, checkpoints,
 traces and the pre-change source archive remain local under
 `frontend/harness/artifacts/regenerative-20260918/`; ledger rows4059–4079 identify the runs.

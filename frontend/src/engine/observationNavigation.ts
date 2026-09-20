@@ -2,6 +2,7 @@ export const PANELS = {
   chemistry: "Chemistry",
   web: "Web",
   population: "Population",
+  phenotypes: "Phenotypes",
   lineage: "Lineage",
   cell: "Cell",
   map: "Map",

@@ -1,0 +1,300 @@
+[
+  {
+    "label": "restored-closed",
+    "ticks": 102,
+    "wallMs": 10032,
+    "work": {
+      "simulationMs": 6408.599997520447,
+      "renderMs": 173.40000200271606,
+      "observationMs": 189.2999997138977,
+      "frames": 71,
+      "skippedFrames": 1
+    },
+    "sampleWallMs": 12007,
+    "main": {
+      "usedSize": 9417268,
+      "totalSize": 24788992,
+      "embedderHeapUsedSize": 2032560,
+      "backingStorageSize": 2132321
+    },
+    "worker": {
+      "usedSize": 2508896,
+      "totalSize": 6819840,
+      "embedderHeapUsedSize": 702608,
+      "backingStorageSize": 143778154
+    },
+    "wasmBytes": 689766400,
+    "tick": 84082,
+    "population": 3783,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "measured-web",
+    "ticks": 91,
+    "wallMs": 10286,
+    "work": {
+      "simulationMs": 6266.0999965667725,
+      "renderMs": 182.70000171661377,
+      "observationMs": 231.49999952316284,
+      "frames": 75,
+      "skippedFrames": 1
+    },
+    "sampleWallMs": 22294,
+    "main": {
+      "usedSize": 9877552,
+      "totalSize": 38420480,
+      "embedderHeapUsedSize": 2359816,
+      "backingStorageSize": 2132314
+    },
+    "worker": {
+      "usedSize": 2481568,
+      "totalSize": 7077888,
+      "embedderHeapUsedSize": 507368,
+      "backingStorageSize": 149486356
+    },
+    "wasmBytes": 857604096,
+    "tick": 84173,
+    "population": 3772,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "closed-again",
+    "ticks": 99,
+    "wallMs": 10205,
+    "work": {
+      "simulationMs": 6414.999998092651,
+      "renderMs": 188.5999984741211,
+      "observationMs": 189.60000085830688,
+      "frames": 78,
+      "skippedFrames": 1
+    },
+    "sampleWallMs": 32510,
+    "main": {
+      "usedSize": 19411860,
+      "totalSize": 40779776,
+      "embedderHeapUsedSize": 3850248,
+      "backingStorageSize": 2132314
+    },
+    "worker": {
+      "usedSize": 2398380,
+      "totalSize": 8650752,
+      "embedderHeapUsedSize": 451968,
+      "backingStorageSize": 149456926
+    },
+    "wasmBytes": 857604096,
+    "tick": 84272,
+    "population": 3790,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "save",
+    "wallMs": 4662,
+    "sampleWallMs": 37233,
+    "main": {
+      "usedSize": 21686204,
+      "totalSize": 40779776,
+      "embedderHeapUsedSize": 4046936,
+      "backingStorageSize": 2132314
+    },
+    "worker": {
+      "usedSize": 2058844,
+      "totalSize": 9437184,
+      "embedderHeapUsedSize": 718080,
+      "backingStorageSize": 284700043
+    },
+    "wasmBytes": 857604096,
+    "tick": 84272,
+    "population": 3790,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "save",
+    "wallMs": 2572,
+    "sampleWallMs": 39822,
+    "main": {
+      "usedSize": 21746288,
+      "totalSize": 40779776,
+      "embedderHeapUsedSize": 4216584,
+      "backingStorageSize": 2132314
+    },
+    "worker": {
+      "usedSize": 2088096,
+      "totalSize": 9961472,
+      "embedderHeapUsedSize": 745824,
+      "backingStorageSize": 122382895
+    },
+    "wasmBytes": 857604096,
+    "tick": 84272,
+    "population": 3790,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "save",
+    "wallMs": 2512,
+    "sampleWallMs": 42350,
+    "main": {
+      "usedSize": 21803636,
+      "totalSize": 40779776,
+      "embedderHeapUsedSize": 4259976,
+      "backingStorageSize": 2132314
+    },
+    "worker": {
+      "usedSize": 2083652,
+      "totalSize": 10485760,
+      "embedderHeapUsedSize": 664568,
+      "backingStorageSize": 119781139
+    },
+    "wasmBytes": 857604096,
+    "tick": 84272,
+    "population": 3790,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "save",
+    "wallMs": 2442,
+    "sampleWallMs": 44802,
+    "main": {
+      "usedSize": 4982760,
+      "totalSize": 11681792,
+      "embedderHeapUsedSize": 1336784,
+      "backingStorageSize": 2132098
+    },
+    "worker": {
+      "usedSize": 2090020,
+      "totalSize": 10747904,
+      "embedderHeapUsedSize": 643160,
+      "backingStorageSize": 119781139
+    },
+    "wasmBytes": 857604096,
+    "tick": 84272,
+    "population": 3790,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "after-saves",
+    "ticks": 83,
+    "wallMs": 10459,
+    "work": {
+      "simulationMs": 5761.200000762939,
+      "renderMs": 202.30000114440918,
+      "observationMs": 221.39999914169312,
+      "frames": 83,
+      "skippedFrames": 1
+    },
+    "sampleWallMs": 55268,
+    "main": {
+      "usedSize": 8976684,
+      "totalSize": 18759680,
+      "embedderHeapUsedSize": 1703000,
+      "backingStorageSize": 2132314
+    },
+    "worker": {
+      "usedSize": 2647352,
+      "totalSize": 12079104,
+      "embedderHeapUsedSize": 792576,
+      "backingStorageSize": 123264453
+    },
+    "wasmBytes": 857604096,
+    "tick": 84355,
+    "population": 3817,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "after-forced-gc",
+    "ticks": 80,
+    "wallMs": 10168,
+    "work": {
+      "simulationMs": 5602.800000190735,
+      "renderMs": 199.10000133514404,
+      "observationMs": 242.0999994277954,
+      "frames": 80,
+      "skippedFrames": 0
+    },
+    "sampleWallMs": 65467,
+    "main": {
+      "usedSize": 4995508,
+      "totalSize": 17186816,
+      "embedderHeapUsedSize": 975032,
+      "backingStorageSize": 2132074
+    },
+    "worker": {
+      "usedSize": 2593784,
+      "totalSize": 4980736,
+      "embedderHeapUsedSize": 713704,
+      "backingStorageSize": 131287192
+    },
+    "wasmBytes": 857604096,
+    "tick": 84435,
+    "population": 3814,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  },
+  {
+    "label": "restored-same-worker",
+    "ticks": 83,
+    "wallMs": 10487,
+    "work": {
+      "simulationMs": 5808.900002479553,
+      "renderMs": 197.50000095367432,
+      "observationMs": 232.90000009536743,
+      "frames": 82,
+      "skippedFrames": 1
+    },
+    "sampleWallMs": 81371,
+    "main": {
+      "usedSize": 6522100,
+      "totalSize": 31604736,
+      "embedderHeapUsedSize": 1978064,
+      "backingStorageSize": 2132290
+    },
+    "worker": {
+      "usedSize": 2702484,
+      "totalSize": 8155136,
+      "embedderHeapUsedSize": 789456,
+      "backingStorageSize": 128395947
+    },
+    "wasmBytes": 1086259200,
+    "tick": 84518,
+    "population": 3794,
+    "timing": {
+      "count": 0,
+      "examples": [],
+      "marks": 0
+    }
+  }
+]

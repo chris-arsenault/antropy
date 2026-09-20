@@ -49,19 +49,22 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
     species: 0,
     color: 6,
     selected: -1,
-    layers: [true, false, false, false, false, false],
+    layers: [true, false, false, false, false, false, false, false, false, true],
     regions: true,
     sources: true,
     exposure: 4,
   };
   const view = world.render(5),
-    buffer = view.cells.buffer;
+    buffer = view.cells.buffer,
+    expectedMatter = view.field[0];
   renderer.draw(world, [24, 24], options, true);
   expect(g.uploads.length).toBe(3);
   expect(g.uploads.every((v) => v.buffer === buffer)).toBe(true);
   expect(g.uploads[0].byteOffset).toBe(view.cells.byteOffset);
   expect([view.nx, view.ny]).toEqual([12, 12]);
   expect(g.uploads[1].byteLength).toBe(12 * 12 * 8 * 4);
+  // The illumination overlay must retain amount/energy data, not select the dedicated light map.
+  expect((g.uploads[1] as Float32Array)[0]).toBe(expectedMatter);
   const fieldUploads = () => g.uploads.filter((v) => v.byteOffset === view.field.byteOffset).length;
   const textures = fieldUploads();
   g.completion.ready = false;
@@ -71,6 +74,14 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
   g.completion.ready = true;
   renderer.draw(world, [24, 24], { ...options, camera: { ...options.camera, scale: 30 } }, false);
   expect(fieldUploads()).toBe(textures);
+  const lit = {
+    ...options,
+    layers: [false, false, false, false, false, false, true, false, false, true],
+  };
+  renderer.draw(world, [24, 24], lit, false);
+  expect(fieldUploads()).toBe(textures + 1);
+  renderer.draw(world, [24, 24], options, false);
+  expect(fieldUploads()).toBe(textures + 2);
   expect(g.calls).not.toContain("drawArraysInstanced");
   expect(world.snapshot()).toEqual(before);
   renderer.dispose();

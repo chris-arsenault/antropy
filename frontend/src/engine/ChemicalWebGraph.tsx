@@ -1,5 +1,11 @@
 import { useId } from "react";
-import { type ChemicalWeb, type ChemicalRoute } from "./chemicalWeb";
+import {
+  type ChemicalWeb,
+  type ChemicalRoute,
+  routeWeight,
+  routeCaption,
+  routeRate,
+} from "./chemicalWeb";
 import { identityColor } from "./genealogyHistory";
 
 const point = (id: number) => [32 + Math.floor(id / 16) * 42, 32 + (id % 16) * 28];
@@ -108,15 +114,13 @@ function ChemicalNode({
 }
 
 function GraphEdges({ web, marker }: { web: ChemicalWeb; marker: string }) {
-  const largest = Math.max(
-    1,
-    ...web.rows.map((r) => (web.mode === "primary" ? r.primary : r.cells))
-  );
+  const weight = (r: ChemicalRoute) => routeWeight(web, r);
+  const largest = Math.max(1e-30, ...web.rows.map(weight));
   return (
     <>
       {" "}
       {web.rows.map((route) => {
-        const count = web.mode === "primary" ? route.primary : route.cells,
+        const count = weight(route),
           line = geometry(route);
         return (
           <g
@@ -131,14 +135,13 @@ function GraphEdges({ web, marker }: { web: ChemicalWeb; marker: string }) {
             >
               <title>
                 {route.input} → {route.output}
-                {web.mode === "environment"
-                  ? " · local-medium pathway"
-                  : ` · ${route.primary} primary cells · ${route.cells} supporting cells`}
+                {" · "}
+                {routeCaption(web, route)}
               </title>
             </path>
-            {web.rows.length <= 12 && count > 0 && (
+            {web.rows.length <= 12 && count >= largest * 0.01 && count > 0 && (
               <text x={line.x} y={line.y - 5} className="web-edge-count">
-                {count} cells
+                {web.mode === "measured" ? `${routeRate(web, route)} / s` : `${count} cells`}
               </text>
             )}
           </g>

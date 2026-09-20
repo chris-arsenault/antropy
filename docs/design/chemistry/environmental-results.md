@@ -1,6 +1,6 @@
 # Environmental chemistry: rules and evidence
 
-September 16, 2026. The [environmental plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md)
+September 16, 2026. The [environmental plan](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md)
 adds geographic weathering, extracellular transformations and chemical shelter to the ordinary
 Rust/WASM world. The [composed runtime](composed-runtime.md) retains the other physical laws.
 The implementation uses checkpoint v14 and rejects earlier physical checkpoints.

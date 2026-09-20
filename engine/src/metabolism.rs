@@ -114,7 +114,8 @@ pub fn assemble(
     (built, built * cost)
 }
 pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64) {
-    let need: [f64; 15] = std::array::from_fn(|i| (2. * g.body[i] - cell.body[i]).max(0.));
+    let need: crate::organism::Body =
+        std::array::from_fn(|i| (2. * g.body[i] - cell.body[i]).max(0.));
     let total = need.iter().sum::<f64>();
     if total == 0. {
         return;

@@ -126,21 +126,27 @@ fn installed_round_trip_restores_material_without_creating_usable_work() {
 }
 
 #[test]
-fn environmental_actions_match_unique_in_bounds_edges_and_square_frames() {
+fn environmental_actions_span_dyadic_scales_and_commute_with_square_frames() {
     let chemistry = Chemistry::new(101).unwrap();
     let op = crate::weathering::Operators::new(&chemistry);
     let source: Vec<f64> = (0..256).map(|s| 0.01 * (1 + s % 7) as f64).collect();
     let mut expected = source.clone();
     let account = op.inventory(&mut expected, [0.3, -0.2], 0.7);
     for s in 0..256 {
-        let p = chemistry::coordinate(s);
-        let mut allowed: Vec<_> = (0..256)
-            .filter(|&t| chemistry::distance_squared(p, chemistry::coordinate(t)) == 1.)
-            .collect();
         let mut actual: Vec<_> = op.destination[s].into_iter().filter(|&t| t != s).collect();
-        allowed.sort_unstable();
         actual.sort_unstable();
-        assert_eq!(actual, allowed);
+        actual.dedup();
+        assert_eq!(actual.len(), 8);
+        let mut distances: Vec<_> = actual
+            .iter()
+            .map(|&t| {
+                assert!(op.destination[t].contains(&s));
+                chemistry::distance_squared(chemistry::coordinate(s), chemistry::coordinate(t))
+                    as usize
+            })
+            .collect();
+        distances.sort_unstable();
+        assert_eq!(distances, [1, 1, 4, 4, 16, 16, 64, 64]);
     }
     for q in 0..4 {
         for mirror in [false, true] {

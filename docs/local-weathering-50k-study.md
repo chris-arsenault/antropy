@@ -1,7 +1,7 @@
 # Local-weathering trajectory: 50,000 ticks
 
 September 17, 2026. Ledger **3989**, seed **27**, chemistry **101**, physical checkpoint **v18**.
-The [registration](../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-50k) authorized one unchanged
+The [registration](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-50k) authorized one unchanged
 default run, observations every 250 ticks and checkpoints every 2,500 ticks. No simulation
 rules, mutation parameters, controllers or founders changed during this study.
 

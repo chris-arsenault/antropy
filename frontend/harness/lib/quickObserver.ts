@@ -134,6 +134,7 @@ export class QuickObserver {
         action: cell.action,
         inputs: cell.inputs,
         receptors: cell.receptors,
+        photoreceptor: cell.photoreceptor,
         contacts: cell.contacts,
         flows: cell.flows,
         task: cell.brain.task,

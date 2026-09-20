@@ -4,6 +4,22 @@ Open hypotheses raised while observing the simulation. Entries preserve the ques
 evidence; they are not accepted explanations, implementation specifications or automatic experiment
 orders. Append findings and decisions without erasing the original hypothesis.
 
+## Current disposition — September20
+
+The dated descriptions below retain their original equations and evidence. They are not all
+current runtime behavior. H1 led to the shared heavy-tail law and geometric mutation now
+documented in [funded inheritance](design/funded-bodies.md#bodies-policy-composition-and-mutation);
+the first formula's suppressed physical changes and later excessive domain scaling remain
+failed steps in the [decision record](design/decisions-and-evidence.md). Accessible large changes
+are implemented, but mutation alone did not establish waste feeding.
+
+H2 remains open as a question about inherited extraction differences. Shared local external
+work now changes reaction returns with the medium and illumination; conversion efficiency for
+an otherwise identical transition remains shared. This is not implementation of a heritable
+efficiency gene. The v31 [200k review](integrated-200k-review.md) found feedstock dependence;
+the v32 [user checkpoint](material-habitats-review.md) broadens uptake but still has feedstock-heavy
+net flow. H3 keeps its original history-dependent conclusion; H4 remains deferred.
+
 ## Context: September 16, 2026
 
 The [default seed 27 run](default-seed-cycles-study.md) produced an interesting positive result:

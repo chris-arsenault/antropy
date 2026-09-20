@@ -178,6 +178,7 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         .collect();
     let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":cell.map(|c| crate::sensing::stress_load(c,w.genomes[&c.genome].compiled.as_ref().unwrap(),&w.config,&w.field,&w.chemistry)),"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
+    result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));
     if request.get("machinery").and_then(Value::as_u64) != cell.map(|c| c.machinery_revision)
         || cell.is_none()
     {

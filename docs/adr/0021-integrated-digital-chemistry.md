@@ -2,7 +2,7 @@
 
 - Status: Amended by ADR 0022; identity and ownership retained, mathematical prescriptions revised
 - Date: 2026-09-15
-- Plan: [Integrated digital chemistry](../../DIGITAL-CHEMISTRY-PLAN.md)
+- Plan: [Integrated digital chemistry](../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 - Preserves: [ADR 0020 ownership](0020-complete-rust-kernel.md) and the
   [immutable sharing contract](../design/chemistry/data-ownership.md)
 

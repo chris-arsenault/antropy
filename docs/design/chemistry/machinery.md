@@ -2,7 +2,7 @@
 
 The [composed runtime](composed-runtime.md) implements [computable chemistry](computational-foundation.md):
 heritable manifold kernels, weighted mixture reductions and bounded product mappings with
-actual funded capacity. Checkpoint v27 persists continuous targets and separate actual installed
+actual funded capacity. Checkpoint v32 persists continuous targets and separate actual installed
 coordinates. Earlier categorical direction, integer products and birth-time recycling are retired.
 
 Status: implemented, with resolved choices in [numerical design](numerical-engine.md). The user specified a small
@@ -24,7 +24,8 @@ not a runtime setting that can reinterpret existing genomes or checkpoints.
 | Membrane | One compatibility x/y coordinate for the cell | Included in ordinary core/membrane construction |
 | General body | Core, motor and storage construction targets | Core, motor and storage stocks |
 
-There are 15 material stocks: core, motor, storage and twelve machinery stocks. Chemical
+There are16 material stocks: core, motor, storage, twelve chemical machinery stocks and a
+separately funded photoreceptor. Optical sensing grants no harvesting or automatic steering. Chemical
 inventory and usable energy are separate. Dedicated A/B processors, weapon, matrix builder, light harvester and universal chemical-defense
 stocks are removed. General repair
 remains a core-supported action, with energy and replacement-material costs.
@@ -87,7 +88,7 @@ and is persisted. The controller receives no list of species or direct U/D/I/S l
 
 ## Neural input and output layout
 
-Retain one 24-unit recurrent controller. The controller has 39 inputs:
+Retain one 24-unit recurrent controller. The controller has44 inputs:
 
 | Indices | Reading |
 | --- | --- |
@@ -102,6 +103,8 @@ Retain one 24-unit recurrent controller. The controller has 39 inputs:
 | 35–36 | Actual motor and storage capacity |
 | 37 | Total internal chemical amount / actual storage capacity |
 | 38 | Functional damage |
+| 39–42 | Paid optical level, change, body-forward contrast and body-left contrast |
+| 43 | Actual photoreceptor stock relative to its target |
 
 Normalize installed capacities by actual stock and a reference newborn stock as in the current
 body observations. Inputs describe funded physiology. There is no membrane coordinate, chemical
@@ -134,7 +137,7 @@ and physical resources.
 Requests are simultaneous within the substrate's declared phases. No automatic optimizer chooses
 profitable reactions, and no special metabolic fallback runs when the RNN is quiet. Founder import biases are explicit ordinary mutable weights; enzyme operation needs no action channel.
 
-This network has 1,761 weights and biases plus eleven plasticity loci: 39*24 input weights,
+This network has1,881 weights and biases plus eleven plasticity loci:44*24 input weights,
 24*24 recurrent weights, 24 hidden biases, 24*9 output weights and nine output biases. Its schema
 is incompatible with the former 35-input/eight-output controller; old genomes are rejected.
 
@@ -166,14 +169,15 @@ and expression rules as descent; a genotype transfer is not a stock grant.
 
 ## Founder and UI interpretation
 
-Seed at least two spatial colonies with the same modest viable genotype, funded internal inventory
-and usable energy included in initial accounting. A candidate four-transporter arrangement can
+Seed at least two spatial colonies with four mutable founder genotypes, funded internal inventory
+and usable energy included in initial accounting. The [initial ecosystem design](regenerative-ecosystem.md)
+selects the starting chemical circuit; ordinary mutation can leave those roles. A candidate four-transporter arrangement can
 use two import and two export slots, but their species targets and expression are founder genes,
 not population roles or permanent slot semantics. Preserve free mutation of those targets.
 
-A short authored founder check must establish that local sensing, paid import, downhill processing
+A short authored founder check must establish that local sensing, paid import, externally funded processing
 and generic construction can run before its starting energy expires. Do not choose a founder by
-long-run dominance or seed a panel of diagnostic specialists into the live world. Authored reflexes
+long-run dominance or substitute harness diagnostic winners for the declared starting circuit. Authored reflexes
 and bootstrap inventory must be visible in the handoff record.
 
 Show target coordinates, installed versus desired capacity, effort, actual flux and costs in the

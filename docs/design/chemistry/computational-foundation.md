@@ -2,7 +2,7 @@
 
 Accepted design direction, September 15, 2026. This document governs mathematical design for
 the integrated chemistry revision, under [ADR 0022](../../adr/0022-computable-chemistry.md) and
-the [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md). It records the user's clarification after
+the [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md). It records the user's clarification after
 M2's failed spatial cost measurements. The replacement equations and runtime are not implemented
 by this documentation revision.
 
@@ -238,7 +238,7 @@ model time. Release WASM takes 8.82/19.24 ms per tick at 48/2,000 cells, within 
 14 new bounded checks and full CI pass. [Evidence](../../specs/digital-chemistry/validation.md)
 records failed revisions, final binary, actual work, accounts, memory and remaining 11.3 ms budget.
 
-The [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) preserves those results and the concrete
+The [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) preserves those results and the concrete
 downstream contracts. M1 now supplies one canonical compiler and the subsequent composition
 correction: one-row conservative field transport, CSR W/W-transpose local allocation, compiled
 enzyme engagement, material projection reuse and dependency-local installed refresh. Final

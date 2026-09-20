@@ -10,7 +10,7 @@ pub fn observe(w: &World) -> Value {
     }
     let reference = w.genomes[&1].compiled.as_ref().unwrap();
     let mut signatures = BTreeMap::<u64, Vec<u64>>::new();
-    let mut target_sums = [0.; 15];
+    let mut target_sums = [0.; crate::organism::STOCKS];
     let mut distances = BTreeMap::new();
     for (&id, &n) in &counts {
         let g = &w.genomes[&id];
@@ -46,7 +46,7 @@ pub fn observe(w: &World) -> Value {
             }
         })
         .collect();
-    let body: Vec<_> = (0..15)
+    let body: Vec<_> = (0..crate::organism::STOCKS)
         .map(|i| {
             distribution(
                 w.cells.iter().map(|c| c.body[i]).collect(),

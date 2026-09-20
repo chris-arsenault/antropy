@@ -28,6 +28,11 @@ function shader(gl: WebGL2RenderingContext, type: number, source: string) {
     throw new Error(gl.getShaderInfoLog(value) ?? "Shader compilation failed");
   return value;
 }
+function illuminationMode(layers: boolean[]) {
+  if (layers[6]) return 1;
+  if (layers[7]) return 2;
+  return layers[8] ? 3 : 0;
+}
 function program(gl: WebGL2RenderingContext, vertex: string, fragment: string) {
   const p = gl.createProgram()!;
   const stages = [shader(gl, gl.VERTEX_SHADER, vertex), shader(gl, gl.FRAGMENT_SHADER, fragment)];
@@ -50,6 +55,7 @@ export class Renderer {
   private textureSize = "";
   private pending: WebGLSync | null = null;
   private refreshPending = false;
+  private fieldKind = -1;
 
   constructor(private readonly canvas: OffscreenCanvas) {
     // Circle edges are smoothed in the fragment shader; a multisample framebuffer
@@ -74,20 +80,17 @@ export class Renderer {
     if (gl.isContextLost())
       throw new Error("Graphics context lost; simulation paused with its state retained");
     this.refreshPending ||= refreshField;
-    if (this.pending) {
-      const state = gl.clientWaitSync(this.pending, 0, 0);
-      if (state === gl.WAIT_FAILED) throw new Error("Graphics completion check failed");
-      if (state === gl.TIMEOUT_EXPIRED) return null;
-      gl.deleteSync(this.pending);
-      this.pending = null;
-    }
+    if (!this.ready()) return null;
     refreshField = this.refreshPending;
     this.refreshPending = false;
+    const kind = illuminationMode(options.layers) > 0 ? 6 : 5;
+    refreshField ||= kind !== this.fieldKind;
+    this.fieldKind = kind;
     if (this.canvas.width !== options.width) this.canvas.width = options.width;
     if (this.canvas.height !== options.height) this.canvas.height = options.height;
     gl.viewport(0, 0, options.width, options.height);
     const frame = world.render(
-      5,
+      kind,
       options.species,
       options.color,
       refreshField,
@@ -97,6 +100,7 @@ export class Renderer {
     this.drawField(size, options);
     this.drawCells(size, options, frame.count);
     this.drawMarkers(size, options, frame.markers, frame.markerCount);
+    this.drawShadow(size, options);
     this.pending = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
     if (!this.pending) throw new Error("Graphics completion fence unavailable");
     gl.flush();
@@ -141,6 +145,17 @@ export class Renderer {
       );
   }
 
+  private ready() {
+    if (!this.pending) return true;
+    const gl = this.gl;
+    const state = gl.clientWaitSync(this.pending, 0, 0);
+    if (state === gl.WAIT_FAILED) throw new Error("Graphics completion check failed");
+    if (state === gl.TIMEOUT_EXPIRED) return false;
+    gl.deleteSync(this.pending);
+    this.pending = null;
+    return true;
+  }
+
   private common(p: WebGLProgram, o: ViewOptions) {
     const gl = this.gl;
     gl.useProgram(p);
@@ -169,11 +184,17 @@ export class Renderer {
       }
   }
 
-  private drawField(size: [number, number], o: ViewOptions) {
+  private drawShadow(size: [number, number], o: ViewOptions) {
+    if (!o.layers[9] || illuminationMode(o.layers) > 0) return;
+    this.drawField(size, o, true);
+  }
+
+  private drawField(size: [number, number], o: ViewOptions, shadow = false) {
     const gl = this.gl,
       p = this.fieldProgram;
     this.common(p, o);
-    gl.disable(gl.BLEND);
+    if (shadow) gl.enable(gl.BLEND);
+    else gl.disable(gl.BLEND);
     gl.bindVertexArray(this.empty);
     gl.uniform2f(gl.getUniformLocation(p, "worldSize"), ...size);
     gl.uniform4f(
@@ -185,6 +206,8 @@ export class Renderer {
     );
     gl.uniform1f(gl.getUniformLocation(p, "selectedLayer"), Number(o.layers[4]));
     gl.uniform1f(gl.getUniformLocation(p, "weatheringLayer"), Number(o.layers[5] ?? false));
+    gl.uniform1i(gl.getUniformLocation(p, "illuminationMode"), illuminationMode(o.layers));
+    gl.uniform1i(gl.getUniformLocation(p, "shadowPass"), Number(shadow));
     gl.uniform1f(gl.getUniformLocation(p, "exposure"), o.exposure);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }

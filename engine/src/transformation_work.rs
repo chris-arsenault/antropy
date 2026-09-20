@@ -3,6 +3,10 @@ use crate::{chemical_products::ProductWeight, chemistry::Chemistry};
 
 pub const DEFAULT_STRENGTH: f64 = 119.31341917861687;
 
+pub fn kinetic(distance_squared: f64, radius: f64) -> f64 {
+    1. / (1. + distance_squared / radius.powi(2))
+}
+
 pub fn coefficient(
     chemistry: &Chemistry,
     substrate: usize,

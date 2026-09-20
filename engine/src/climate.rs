@@ -18,9 +18,10 @@ pub struct Climate {
 impl Climate {
     pub fn new(config: &Config, chemistry: &Chemistry) -> Self {
         Self {
-            operators: Some(weathering::Operators::with_work(
+            operators: Some(weathering::Operators::with_radius(
                 chemistry,
                 config.environmental_work,
+                config.affinity_radius,
             )),
             changes: vec![0.; 256],
             floor: crate::field_activity::CONCENTRATION_FLOOR as f64 * config.mesh.powi(2),
@@ -39,14 +40,19 @@ impl Climate {
         self.prevented = 0.;
     }
 
+    pub fn convert(&mut self, row: &mut [f32], mask: u64, medium: ([f64; 2], f64), dt: f64) -> u64 {
+        self.convert_lit(row, mask, medium, dt, [1.; 2])
+    }
+
     // Keep this chemical loop separate from the already large geographic stencil in WASM.
     #[inline(never)]
-    pub fn convert(
+    pub fn convert_lit(
         &mut self,
         row: &mut [f32],
         mut mask: u64,
         medium: ([f64; 2], f64),
         dt: f64,
+        light: [f64; 2],
     ) -> u64 {
         if self.rate == 0. || mask == 0 {
             return mask;
@@ -64,11 +70,12 @@ impl Climate {
         }
         let minimum =
             weathering::minimum_donor(self.floor, elapsed[0] * weathering::strength(signal));
+        let medium = crate::reaction_medium::Medium::illuminated(signal, light);
         while mask != 0 {
             let start = mask.trailing_zeros() as usize * 4;
             mask &= mask - 1;
-            active |= self.convert_pair(row, start, signal, elapsed, minimum);
-            active |= self.convert_pair(row, start + 2, signal, elapsed, minimum);
+            active |= self.convert_pair(row, start, medium, elapsed, minimum);
+            active |= self.convert_pair(row, start + 2, medium, elapsed, minimum);
         }
         // One rounded commit after every donor has reserved against the original row.
         let mut changed = active;
@@ -88,7 +95,7 @@ impl Climate {
         &mut self,
         row: &[f32],
         s: usize,
-        signal: [f64; 2],
+        signal: crate::reaction_medium::Medium,
         elapsed: [f64; 2],
         minimum: f64,
     ) -> u64 {
@@ -99,7 +106,9 @@ impl Climate {
         if !operators.reactive[s] && !operators.reactive[s + 1] {
             return 0;
         }
-        let local = std::array::from_fn::<_, 4, _>(|j| operators.local_pair(s, j, signal));
+        let local = std::array::from_fn::<_, { weathering::BRANCHES }, _>(|j| {
+            operators.local_pair(s, j, signal)
+        });
         let engagement = local.map(|e| e.0);
         let total = engagement
             .iter()

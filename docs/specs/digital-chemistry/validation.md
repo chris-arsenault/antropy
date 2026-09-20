@@ -1,7 +1,7 @@
 # M0 evidence and later proof registrations
 
 Current acceptance authority, September 15: [computable chemistry](../../design/chemistry/computational-foundation.md)
-and the [root plan](../../../DIGITAL-CHEMISTRY-PLAN.md) govern new work. The M0/M1 results below
+and the [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) govern new work. The M0/M1 results below
 remain evidence for those versions. M0's future registrations are suspended pending M2–M4
 re-expansion: retain their causal questions, controls and bounded scope, but replace predictions
 that require superseded equations, capacitor charge, full-F descent or stalled remnants.
@@ -115,7 +115,7 @@ checks pass. No implementation or throughput conclusion is inferred merely from 
 This section records the preceding compiler-v2 implementation; the correction above supersedes
 its current-work status and representation bounds, while preserving its measured evidence.
 
-September 15, 2026. The [M1 expansion](../../../DIGITAL-CHEMISTRY-PLAN.md#m1-execution-expansion--canonical-computable-representation)
+September 15, 2026. The [M1 expansion](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md#m1-execution-expansion--canonical-computable-representation)
 consolidates the canonical parameter/compiler owners with M0's executable arithmetic.
 Parameter v2 has 34 coordinates; operator v2 has originating-substrate forward maps with weighted
 products and static work/heat. The numerical duplicate compiler and production endpoint barriers
@@ -468,7 +468,7 @@ root then sorted child `.rs` files as relative path, NUL, file bytes. M1 remains
 
 ## M1 definition and compiler evidence
 
-Executed September 15, 2026 under the [eight-step plan](../../../DIGITAL-CHEMISTRY-M1-PLAN.md).
+Executed September 15, 2026 under the [eight-step plan](../../plans/archive/DIGITAL-CHEMISTRY-M1-PLAN.md).
 The [representation contract](representation.md) records the implemented owners and remaining
 integration boundaries. The new `chemical_definition` integration target contains 16 bounded
 tests. One new TypeScript boundary test supplements existing ownership/restore tests.

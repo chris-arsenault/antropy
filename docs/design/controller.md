@@ -2,7 +2,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 39×24×9 Rust controller in checkpoint v11.
+the 44×24×9 Rust controller in physical checkpoint v32.
 
 <a id="controller-observation-contract"></a>
 
@@ -19,6 +19,8 @@ the 39×24×9 Rust controller in checkpoint v11.
 | 35–36 | Motor/storage stock divided by itself plus reference newborn stock |
 | 37 | Internal chemical matter / actual storage capacity |
 | 38 | Injury fraction |
+| 39–42 | Funded optical level, temporal change, forward difference and left difference |
+| 43 | Photoreceptor stock divided by itself plus genetic target |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
 Actual receptor stock supplies gain. Level is C/(C+K), with K=0.1; directional differences use
@@ -37,13 +39,13 @@ or reproductive score. Machinery inputs distinguish installed capacity from gene
 | ---: | --- |
 | 0 | Positive saturation: forward swimming effort |
 | 1 | Signed saturation: turning effort |
-| 2 | Positive tanh: paid repair effort |
+| 2 | Positive saturation: paid repair effort |
 | 3 | Rounded 127.5×(1+saturation(logit/2)): candidate private byte |
 | 4 | Nonnegative logit commits the candidate |
-| 5–8 | Positive tanh: independent effort for each transporter |
+| 5–8 | Half of one plus signed saturation: independent transporter direction/effort |
 
-A transporter's inherited allele selects import or export and its target coordinate. The action
-controls effort. Actual transport requires machinery, available species, storage, conductance and
+A transporter's allele selects its chemical target. Neural output selects direction and effort:
+0 exports fully, 0.5 holds, and 1 imports fully. Actual transport requires machinery, available species, storage, conductance and
 usable energy. Enzymes are constitutive; no extra neural enzyme controls or named secretion outputs
 exist. Repair competes with growth. Movement costs remain physical even when contact restricts it.
 The task byte has no task semantics in physics; manual writes are recorded diagnostic interventions.
@@ -52,12 +54,12 @@ The task byte has no task semantics in physics; manual writes are recorded diagn
 
 ## Topology and founder
 
-The network has 39 inputs, 24 recurrent saturating units and nine output logits: 936 input weights,
+The network has 44 inputs, 24 recurrent saturating units and nine output logits: 1,056 input weights,
 576 recurrent weights, 24 hidden biases, 216 output weights and nine output biases, totaling
-1,761 parameters. Eleven additional inherited loci define private plasticity.
+1,881 parameters. Eleven additional inherited loci define private plasticity.
 
 Private state includes 24 hidden values, 576 bounded traces, the private byte and previous
-energy fill. The four receptor baselines belong to body state. Weights/traces/hidden values
+energy fill. The four chemical and one optical receptor baselines belong to body state. Weights/traces/hidden values
 use float32 storage and SIMD arithmetic. The shared rational activation is
 `x*(27+x²)/(27+9x²)` within [-3,3], saturated outside. Its maximum checked difference from tanh
 is below 0.024. This is an explicit modeling approximation, not preserved old trajectories.
@@ -65,10 +67,10 @@ Inference and paid learning occur every 0.8 model seconds; actions are held betw
 
 Ordinary mutable founder weights encode local chemical-gradient steering, reduced swimming when
 the first two receptor levels rise, contact turns, damage-dependent repair and active transport.
-Chemical genes initially recognize bootstrap sources, convert them toward the decomposition
-coordinate, retain it for construction and export when storage exceeds roughly 75% capacity.
-The membrane initially matches that product. Both the export response and chemical targets remain
-ordinary mutable alleles. All founders share one genotype. This seed is a declared initial
+Four mutable founder types start the circuit 0→128→136→8→0, six of each type in each colony.
+They recognize their input, use input-centered membrane compatibility, and express mild product
+export. Optical connections begin at zero and can mutate; there is no seeded light-seeking policy.
+The [initial ecosystem design](chemistry/regenerative-ecosystem.md) explains their paid budgets. This seed is a declared initial
 condition, not an evolved discovery or an authored final community.
 
 <a id="controller-learning-and-module-boundary"></a>

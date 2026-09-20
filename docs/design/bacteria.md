@@ -13,8 +13,8 @@ One periodic 320 × 240 XY plane contains continuous circular organisms and a me
 field. Neither axis is height. Sampling, motion, contact, offspring placement and rendering
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
 
-A cell owns position, heading, fifteen actual material stocks, a 256-element float64 intracellular chemical
-mixture, usable energy, injury, four adaptive receptor baselines, contact state, private brain
+A cell owns position, heading, sixteen actual material stocks, a 256-element float64 intracellular chemical
+mixture, usable energy, injury, four chemical and one optical adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
 drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile
 response share local impedance-dependent mobility. A bounded local pair correction resolves
@@ -26,9 +26,9 @@ overlaps approximately. There is no temperature, Brownian rule or fluid solver.
 
 The world persists a constrained 16×16 chemical manifold. Every ID has potential, diffusivity,
 impedance and stress. IDs have no privileged food, toxin, signal or matrix role. Dense node-major float32 arrays store all 256 species per mesh node. Conservative SIMD
-destination-row diffusion plus shared-profile drift and one slow extracellular washout rate apply to all chemicals. Float32 rounding
+destination-row diffusion plus shared-profile drift and a shared slow washout law apply to all chemicals. Float32 rounding
 has explicit matter/energy accounts. Active chemical groups skip empty stencil work; concentrations
-below 1e-9 are rounded to zero with signed numerical accounts. Storage remains dense. See the
+below 1e-6 are rounded to zero with signed numerical accounts. Storage remains dense. See the
 [selected numerical laws](chemistry/composed-runtime.md).
 
 Local mixture profiles favor compatible chemical transformations through a compact compiled
@@ -40,18 +40,19 @@ Controllers receive the resulting chemistry through their ordinary local sensors
 
 Forty-eight reservoirs start in seven unequal abiotic neighborhoods. Local chemical gradients
 move them with impedance-dependent drag, including during renewal waits. Richness and radii
-persist; renewal uses the current location and configured incoming mixture. Independent renewals
+persist; renewal uses the current location and a persisted mixture that changes with local processing. Independent renewals
 continue indefinitely, importing accounted matter and potential. Release is an internal transfer
-whose chemical identities can change with the local medium, conserving material and dissipating
-potential. Expiration uses the same processing rule. See [source laws and short evidence](chemistry/mobile-source-results.md).
+from an inventory processed through the shared chemical operator. Accounted external work can
+fund uphill changes. Empty sites retain their evolving renewal mixture; no ordinary renewal
+reinstates a hardcoded food ID. See [current source laws](chemistry/composed-runtime.md) and
+[material-habitat evidence](../material-habitats.md).
 
-The default chemistry seed is 101, independent of geography seed. Its physical source-selection
-rule chooses IDs 0 and 80. This bootstrap composition is provisional. Ten percent of initial
-source inventory is dissolved locally, with zero uniform background grant. Forty-eight identical
-mutable founders occupy two separated source neighborhoods, 24 per colony. Their membrane
-is centered between the two initial product centers; the mutable controller exports only near storage
-capacity. [Small numerical probes](chemistry/numerical-results.md) support supplied growth and resource exhaustion;
-the integrated capacity check retains 48 founders and tests two 2,000-cell loads.
+The default chemistry seed is 101, independent of geography seed27. Reservoirs initially supply
+IDs0/136; four mutable founder types process 0→128→136→8→0. Each of two colonies starts with
+six cells of each type. Finite initial8/128 priming starts circulation without an ongoing special
+source. Membranes recognize each role's input; controllers express mild product export.
+The [initial ecosystem](chemistry/regenerative-ecosystem.md) and [habitat record](../material-habitats.md)
+retain the starting budgets, successful constructed opportunities and negative findings.
 Single-site/no-source diagnostic
 worlds retain their corresponding placement behavior.
 
@@ -82,7 +83,7 @@ before their updates; actions remain held between inferences. The phase order is
 
 Transport cannot use prospective export to create import headroom; released material becomes
 available in the next transport phase. Enzymes see one starting intracellular inventory, so products
-cannot cascade by enzyme iteration order. Uphill reactions use energy already held. Downhill
+cannot cascade by enzyme iteration order. Uphill reactions use already held energy or explicitly accepted external transformation work. Downhill
 overflow becomes heat. Growth/refitting protect upkeep and current motor/learning work through
 the next physiology interval. Motor and transport effort otherwise compete for available work.
 
@@ -123,16 +124,16 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v23 stores complete chemistry, free and bound mixtures, actual stocks and installed coordinates/orientation/revision, chemical/behavioral genes,
+Checkpoint v32 stores complete chemistry, free and bound mixtures, actual stocks and installed coordinates/orientation/revision, chemical/behavioral genes,
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs
 as provenance, and unavailable genetic comparisons must be labeled.
 
-Browser observation is a separately versioned projection. IndexedDB retains six automatic and
-two manual gzip recovery points within 256 MiB; a raw checkpoint is limited to 192 MiB.
+Browser observation is a separately versioned projection. IndexedDB retains up to six automatic and
+two manual gzip recovery points within 256 MiB, expiring older points to fit; a raw checkpoint is limited to 192 MiB.
 Automatic saves occur every 30 wall seconds and on pause. Failed writes pause execution and
 preserve the last committed recovery. Visibility/exit saves are best effort; restoration is
 explicit and starts paused. UUID generation supports browsers without `crypto.randomUUID`.
 See [continuation limits](../continuing-observation.md) and the
-[current load measurements](chemistry/numerical-results.md). Days/weeks browser endurance remains unverified.
+[current accumulated-state measurements](../session-runtime-review.md). Days/weeks browser endurance remains unverified.

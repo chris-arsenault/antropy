@@ -66,7 +66,7 @@ fn extracellular_products_wake_sparse_groups_and_close_material_and_heat() {
     let after = field.totals(&chemicals);
     assert!(balance.weathered_material > 0. && balance.weathering_heat > 0.);
     assert!(field.amounts[16] > 0.);
-    assert_eq!(field.amounts[32], 0.); // No same-update cascade.
+    assert_eq!(field.amounts[48], 0.); // Two coordinate bits: no same-update cascade.
     assert_ne!(field.active_groups(0) & (1 << 4), 0);
     assert!(field.work_counts()[0] < field.nx * field.ny);
     assert!((before.0 - after.0 - balance.matter - balance.roundoff_matter).abs() < 1e-12);

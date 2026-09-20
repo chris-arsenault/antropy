@@ -7,7 +7,7 @@ medium and changes their released mixtures according to that medium. Defaults ar
 
 The system remains open. Each deposit has finite inventory, but independent external renewal
 continues indefinitely. No sun, external usable-work input or closed resource cycle is implemented.
-The [source plan](../../../MOBILE-SOURCES-PLAN.md) records authorization, selected laws and the
+The [source plan](../../plans/archive/MOBILE-SOURCES-PLAN.md) records authorization, selected laws and the
 fixed experiment budget. The [environmental findings](environmental-results.md) remain separate
 v14 evidence, including their negative inherited shelter-benefit result.
 

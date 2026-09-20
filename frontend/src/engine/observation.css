@@ -264,7 +264,7 @@ kbd {
 }
 .application .world-scale {
   left: 24px;
-  bottom: 210px;
+  bottom: 248px;
 }
 .world-notice {
   position: absolute;
@@ -356,7 +356,7 @@ kbd {
   }
   .application .world-scale {
     left: 14px;
-    bottom: 144px;
+    bottom: 184px;
   }
   .world-notice {
     top: 116px;

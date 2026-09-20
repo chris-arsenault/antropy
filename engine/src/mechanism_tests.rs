@@ -95,7 +95,7 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
             &mut w.field,
             &w.chemistry,
             &sites,
-            &mut w.ledger,
+            (&mut w.ledger, None),
         );
     }
     for cell in &a.cells {

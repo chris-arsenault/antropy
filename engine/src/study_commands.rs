@@ -125,6 +125,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         wait: 0.,
         rate: s.rate,
         inventory: vec![0.; 256],
+        replenishment: vec![0.; 256],
         footprint: vec![],
         kernel: Default::default(),
         material: Default::default(),
@@ -133,6 +134,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
     for &id in &w.config.source_species {
         let q = s.duration * s.rate / w.config.source_species.len() as f64;
         source.inventory[id] += q;
+        source.replenishment[id] += 1. / w.config.source_species.len() as f64;
         w.ledger.supplied += q;
         w.ledger.supplied_energy += q * w.chemistry.properties[id].potential;
     }

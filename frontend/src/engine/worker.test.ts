@@ -73,7 +73,7 @@ it("retries the latest paused view and manual step after GPU backpressure withou
     species: 0,
     color: 6,
     selected: -1,
-    layers: [true, false, false, false, false, false],
+    layers: [true, false, false, false, false, false, false, false, false, false],
     regions: true,
     sources: true,
     exposure: 4,

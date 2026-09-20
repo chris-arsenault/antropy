@@ -50,11 +50,14 @@ mod field_activity_tests;
 mod field_medium;
 mod field_vector;
 pub mod fixtures;
-mod footprint;
+pub mod footprint;
 mod genealogy;
 #[cfg(test)]
 mod genealogy_tests;
 pub mod genetics;
+pub mod illumination;
+#[cfg(test)]
+mod illumination_tests;
 pub mod initial_ecology;
 pub mod inventory;
 pub mod lifecycle;
@@ -69,9 +72,18 @@ mod numeric;
 pub mod observation;
 pub mod opportunities;
 pub mod organism;
+pub mod phenotype;
+mod phenotype_activity;
+mod phenotype_commands;
+mod phenotype_report;
+#[cfg(test)]
+mod phenotype_tests;
+#[cfg(test)]
+mod photoreception_tests;
 mod population_diagnostics;
 mod presentation;
 pub mod random;
+pub mod reaction_medium;
 mod refitting;
 mod relationships;
 mod render;

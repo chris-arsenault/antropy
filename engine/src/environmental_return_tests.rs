@@ -15,7 +15,7 @@ fn environmental_routes_use_the_same_exchange_and_reverse_with_the_medium() {
     let op = weathering::Operators::new(&chemistry);
     let mut uphill = 0;
     for s in 0..256 {
-        for j in 0..4 {
+        for j in 0..weathering::BRANCHES {
             let t = op.destination[s][j];
             if s == t {
                 continue;
@@ -24,7 +24,9 @@ fn environmental_routes_use_the_same_exchange_and_reverse_with_the_medium() {
             assert_eq!(transform.products(s)[0].species, t);
             assert_eq!(transform.products(t)[0].species, s);
             let medium = weathering::signal([op.coefficients[j][0][s], op.coefficients[j][1][s]]);
-            let reverse = (0..4).find(|&k| op.destination[t][k] == s).unwrap();
+            let reverse = (0..weathering::BRANCHES)
+                .find(|&k| op.destination[t][k] == s)
+                .unwrap();
             let forward = op.fractions(s, medium, 1.)[j];
             let available = op.local(s, j, medium);
             assert_eq!(forward > 0., available.0 > 0.);
@@ -41,7 +43,7 @@ fn environmental_routes_use_the_same_exchange_and_reverse_with_the_medium() {
             uphill += usize::from(op.work[j][s] > 0.);
         }
     }
-    assert_eq!(uphill, 480);
+    assert_eq!(uphill, 256 * weathering::BRANCHES / 2);
 }
 
 #[test]
@@ -93,7 +95,7 @@ fn a_funded_environmental_return_can_feed_an_ordinary_cell_without_creating_work
                 .total_cmp(&chemistry.properties[b].potential)
         })
         .unwrap();
-    let j = (0..4)
+    let j = (0..weathering::BRANCHES)
         .max_by(|&a, &b| op.work[a][low].total_cmp(&op.work[b][low]))
         .unwrap();
     let high = op.destination[low][j];

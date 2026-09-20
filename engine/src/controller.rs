@@ -1,7 +1,8 @@
 use crate::{config::Config, random::Random};
 use serde::{Deserialize, Serialize};
 
-pub const INPUTS: usize = 39;
+pub const LIGHT_INPUT: usize = 39;
+pub const INPUTS: usize = 44;
 pub mod diagnostics;
 #[cfg(test)]
 mod symmetry_tests;

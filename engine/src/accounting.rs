@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 /// Automatic construction/refitting protects already funded work until the next physiology event.
 pub fn interval_reserve(
     cell: &crate::organism::Cell,
-    body: &[f64; 15],
+    body: &crate::organism::Body,
     c: &crate::config::Config,
 ) -> f64 {
     let maintenance = crate::organism::maintenance_rate(body, cell.damage, c);

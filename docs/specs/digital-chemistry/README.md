@@ -2,7 +2,7 @@
 
 **Numerical restart, September 15, 2026.** The previous live engine and separate candidate
 were deleted. The [fresh production contract](../../design/chemistry/composed-runtime.md)
-owns the new implementation. The [restart work order](../../../DIGITAL-CHEMISTRY-PLAN.md)
+owns the new implementation. The [restart work order](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 supersedes this index's implementation status and the chapters' selected numerical
 prescriptions. Preserve the semantic obligations and negative evidence. Revision-4
 formulas, compiler layouts and isolated cost gates are historical choices, not a
@@ -10,7 +10,7 @@ specification to reconstruct. The chapters have not yet been rewritten for the n
 
 The [computational foundation](../../design/chemistry/computational-foundation.md) and
 [ADR 0022](../../adr/0022-computable-chemistry.md) govern the
-[root plan](../../../DIGITAL-CHEMISTRY-PLAN.md). Antropy designs computable artificial rules
+[root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md). Antropy designs computable artificial rules
 using physics as conceptual language. Its reference is the selected discrete system and intended
 causal behavior, not reproduction of a known physical process.
 

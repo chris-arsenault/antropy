@@ -25,7 +25,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(28);
+  expect(definition.version).toBe(32);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -41,7 +41,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v28 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v32 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });
@@ -152,4 +152,23 @@ it("pauses on failed recovery and preserves the last successful physical checkpo
   expect(session.recovery).toContain("Paused: recovery failed");
   expect((await decodePackage(await loadRecovery())).snapshot).toEqual(first);
   session.world.dispose();
+});
+
+it("keeps running and restores the latest save when large recovery points fill the budget", async () => {
+  const session = new Session(await Engine.load(bytes));
+  session.restart(27, compact);
+  session.setRunning(true);
+  // Model the uploaded checkpoint's compressed size without allocating six large blobs.
+  vi.spyOn(Blob.prototype, "size", "get").mockReturnValue(55_419_868);
+  try {
+    for (let tick = 1; tick <= 6; tick++) {
+      session.world.step(1);
+      await session.save("automatic");
+      expect(session.running).toBe(true);
+    }
+    expect((await listRecoveries()).map((r) => r.tick)).toEqual([6, 5, 4, 3]);
+    expect((await decodePackage(await loadRecovery())).snapshot).toEqual(session.world.snapshot());
+  } finally {
+    session.world.dispose();
+  }
 });

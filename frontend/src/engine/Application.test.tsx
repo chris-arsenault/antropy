@@ -32,11 +32,16 @@ it("preserves the world, display controls and drafts through panel navigation", 
     const canvas = container.querySelector("canvas");
     expect(container.textContent).toContain("Tick 0");
     expect(container.querySelector("dialog[open]")).toBeNull();
+    expect(button(container, "Light").getAttribute("aria-pressed")).toBe("true");
+    expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("true");
+    expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("true");
+    await click(container, "Light");
     await click(container, "Population");
     expect(container.querySelector(".population-totals dd")?.textContent).toBe("48");
     expect(container.querySelector(".genealogy-panel")).toBeNull();
     await checkMapSelection(container);
     await checkChemicalWeb(container, session);
+    await checkPhenotypes(container, session);
     await checkLineage(container);
     await checkSettings(container);
     await click(container, "Run");
@@ -90,6 +95,9 @@ async function checkMapSelection(container: HTMLElement) {
   expect(container.textContent).toContain("Browse retained spatial samples");
   expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
   expect(control<HTMLSelectElement>(container, "Environment").value).toBe("potential");
+  expect(control<HTMLInputElement>(container, "Sunlight and shadow").checked).toBe(false);
+  expect(control<HTMLInputElement>(container, "Movement resistance").checked).toBe(true);
+  await act(async () => control<HTMLInputElement>(container, "Stress exposure").click());
   await act(async () => control<HTMLInputElement>(container, "Population regions").click());
   await click(container, "Step");
   await click(container, "Chemistry");
@@ -103,6 +111,9 @@ async function checkMapSelection(container: HTMLElement) {
   expect(control<HTMLSelectElement>(container, "Environment").value).toBe("chemical");
   expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
   expect(control<HTMLInputElement>(container, "Population regions").checked).toBe(false);
+  expect(button(container, "Light").getAttribute("aria-pressed")).toBe("false");
+  expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("false");
+  expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("true");
 }
 async function checkLineage(container: HTMLElement) {
   await click(container, "Lineage");
@@ -117,6 +128,9 @@ async function checkLineage(container: HTMLElement) {
   expect(container.querySelector("dialog[open] .window-content")?.scrollTop).toBe(0);
   expect(container.querySelector("dialog[open] h2")?.textContent).toBe("Cell");
   expect(container.textContent).toContain("Funded body and inherited genes");
+  expect(container.textContent).toContain("Photoreceptor: level");
+  expect(container.textContent).toContain("Light left − right");
+  expect(container.textContent).toContain("Built photoreceptor capacity");
   expect(container.textContent).toContain("Family and ancestry");
   expect(container.querySelector('.genealogy-tree [aria-current="true"]')?.textContent).toContain(
     "Cell 1"
@@ -140,17 +154,7 @@ async function checkSettings(container: HTMLElement) {
 
 function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasElement[]) {
   const workers: WorkerFixture[] = [];
-  const descriptor = Object.getOwnPropertyDescriptor(
-    HTMLCanvasElement.prototype,
-    "transferControlToOffscreen"
-  );
-  Object.defineProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen", {
-    configurable: true,
-    value: function (this: HTMLCanvasElement) {
-      canvases.push(this);
-      return {};
-    },
-  });
+  const restore = stubCanvas(canvases);
   class WorkerFixture {
     constructor() {
       workers.push(this);
@@ -171,8 +175,13 @@ function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasEl
         }
         if (request.op === "running") session.setRunning(Boolean(request.payload.value));
         if (request.op === "step") session.step();
-        if (request.op === "chemicalWeb") session.chemicalWeb.select(request.payload);
-        if (["initialize", "running", "inspect", "step", "chemicalWeb"].includes(request.op)) {
+        if (request.op === "chemicalWeb") session.setChemicalWeb(request.payload);
+        if (request.op === "phenotype") session.setPhenotype(request.payload);
+        if (
+          ["initialize", "running", "inspect", "step", "chemicalWeb", "phenotype"].includes(
+            request.op
+          )
+        ) {
           const current = { status: session.status(), inspection: this.previous.inspection };
           if (request.op === "inspect")
             current.inspection = session.world.command<Inspection>("inspect", {
@@ -201,14 +210,28 @@ function workerFixture(session: Session, sent: Request[], canvases: HTMLCanvasEl
   vi.stubGlobal("ResizeObserver", ResizeFixture);
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
 
-  const restore = () => {
+  return Object.assign(restore, {
+    fail: () => workers.at(-1)!.emit({ kind: "fault", value: "Fixture failure" }),
+  });
+}
+
+function stubCanvas(canvases: HTMLCanvasElement[]) {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLCanvasElement.prototype,
+    "transferControlToOffscreen"
+  );
+  Object.defineProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen", {
+    configurable: true,
+    value: function (this: HTMLCanvasElement) {
+      canvases.push(this);
+      return {};
+    },
+  });
+  return () => {
     if (descriptor)
       Object.defineProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen", descriptor);
     else Reflect.deleteProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen");
   };
-  return Object.assign(restore, {
-    fail: () => workers.at(-1)!.emit({ kind: "fault", value: "Fixture failure" }),
-  });
 }
 
 class ResizeFixture {
@@ -216,8 +239,45 @@ class ResizeFixture {
   disconnect() {}
 }
 
+async function checkPhenotypes(container: HTMLElement, session: Session) {
+  await click(container, "Web");
+  const mode = control<HTMLSelectElement>(container, "Routes");
+  await act(async () => {
+    mode.value = "primary";
+    mode.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  const compare = container.querySelector<HTMLButtonElement>(
+    ".web-route-table tbody tr td:last-child button"
+  )!;
+  await act(async () => compare.click());
+  expect(session.status().phenotype!.selection.kind).toBe("role");
+  expect(container.querySelector(".phenotype-panel")).not.toBeNull();
+  await click(container, "Pin selected descendants");
+  const pin = session.status().phenotype!.pin!;
+  expect(pin.roots).toBe(session.status().phenotype!.groups[1].count);
+  await click(container, "Highlight selected group");
+  await click(container, "Phenotypes");
+  expect(container.querySelector(".phenotype-panel")).toBeNull();
+  expect(container.querySelector(".group-highlight")).not.toBeNull();
+  await click(container, "Clear highlight");
+  await click(container, "Phenotypes");
+  await click(container, "Pinned descendants");
+  expect(container.querySelector(".phenotype-history")).not.toBeNull();
+  await click(container, "Remove pin");
+  expect(session.observation.pin).toBeNull();
+  await click(container, "Map");
+  expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("15");
+  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("chemical");
+}
+
 async function checkChemicalWeb(container: HTMLElement, session: Session) {
   await click(container, "Web");
+  expect(session.status().chemicalWeb!.mode).toBe("measured");
+  const modes = control<HTMLSelectElement>(container, "Routes");
+  await act(async () => {
+    modes.value = "primary";
+    modes.dispatchEvent(new Event("change", { bubbles: true }));
+  });
   const current = session.status().chemicalWeb!;
   expect(current.rows.reduce((sum, row) => sum + row.primary, current.unassigned)).toBe(48);
   expect(container.querySelectorAll(".web-route-table tbody tr")).toHaveLength(current.rows.length);
@@ -225,7 +285,6 @@ async function checkChemicalWeb(container: HTMLElement, session: Session) {
   await click(container, "Enzyme input");
   expect(button(container, "Enzyme input").getAttribute("aria-pressed")).toBe("true");
   await click(container, "Enzyme output");
-  const modes = control<HTMLSelectElement>(container, "Routes");
   await act(async () => {
     modes.value = "supported";
     modes.dispatchEvent(new Event("change", { bubbles: true }));

@@ -90,7 +90,8 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
             substrate: a.species,
             products,
             binding: a.value,
-            catalytic: a.value / (1. + displacement / c.affinity_radius.powi(2)),
+            catalytic: a.value
+                * crate::transformation_work::kinetic(displacement, c.affinity_radius),
             changed,
             work: work - 0.05 * changed,
             heat: heat + 0.05 * changed,

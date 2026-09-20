@@ -12,6 +12,7 @@ use serde::Serialize;
 pub struct Response {
     pub velocity: [f64; 2],
     pub signal: [f64; 2],
+    pub light: [f64; 2],
     pub load: f64,
 }
 
@@ -61,7 +62,7 @@ impl Material {
     }
 }
 
-fn profile(s: &Source, tick: u64, c: &Config, chem: &Chemistry) -> [f64; 3] {
+fn profile(s: &Source, chem: &Chemistry) -> [f64; 3] {
     let fresh;
     let material = if s.material.valid {
         &s.material
@@ -72,15 +73,7 @@ fn profile(s: &Source, tick: u64, c: &Config, chem: &Chemistry) -> [f64; 3] {
     if material.total > 0. {
         return material.moments.map(|v| v / material.total);
     }
-    let mut incoming = Material::default();
-    for (&species, share) in c
-        .source_species
-        .iter()
-        .zip(crate::sources::composition(&s.habitat, tick, c))
-    {
-        incoming.add(species, share, chem);
-    }
-    incoming.moments
+    Material::read(&s.replenishment, chem).moments
 }
 
 /// Explicit intervention/restore boundary. Ordinary stepping uses already refreshed owners.
@@ -90,7 +83,11 @@ pub fn project(w: &mut World) {
     }
     project_current(w);
     w.field.attraction_length = w.config.attraction_length;
+    w.field.attraction_strength = w.config.attraction_strength;
     w.field.prepare_attraction();
+    w.field
+        .illumination
+        .prepare(w.seed, w.tick, &w.config, w.field.nx, w.field.ny);
 }
 
 fn project_current(w: &mut World) {
@@ -119,9 +116,9 @@ fn project_current(w: &mut World) {
     }
 }
 
-pub fn response(s: &Source, tick: u64, c: &Config, field: &Field, chem: &Chemistry) -> Response {
+pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemistry) -> Response {
     let sites = &s.footprint;
-    let p = profile(s, tick, c, chem);
+    let p = profile(s, chem);
     let load = field.medium_load(sites).max(0.);
     let total: f64 = if s.material.valid {
         s.material.total
@@ -132,6 +129,7 @@ pub fn response(s: &Source, tick: u64, c: &Config, field: &Field, chem: &Chemist
     let self_load = crate::medium_response::self_load(projected, field.spacing.powi(2), sites);
     let other_load = (field.pressure_load(sites) - self_load).max(0.);
     Response {
+        light: field.illumination.sample(sites),
         velocity: crate::movement::passive(
             p,
             field.gradient(sites),

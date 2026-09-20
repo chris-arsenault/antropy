@@ -75,3 +75,40 @@
 .field-ramp.weathering {
   background: linear-gradient(90deg, #091f3b, #b8661f);
 }
+.field-ramp.illumination,
+.field-ramp.response0,
+.field-ramp.response1 {
+  background: linear-gradient(90deg, #020304 15%, #77766a 50%, #b8b39e 85%);
+}
+.map-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.map-context button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 6px;
+  min-height: 28px;
+  font-size: 11px;
+}
+.map-context button[aria-pressed="false"] {
+  opacity: 0.5;
+}
+.context-swatch {
+  width: 14px;
+  height: 12px;
+  border-radius: 2px;
+}
+.context-swatch.illumination {
+  border-radius: 50%;
+  background: linear-gradient(100deg, #75b8a1 35%, #23494b 55%, #08111a 70%);
+}
+.context-swatch.impedance {
+  background: repeating-linear-gradient(135deg, transparent 0 3px, #d8b883 3px 4px);
+}
+.context-swatch.stress {
+  background: radial-gradient(circle, #ed829b 1px, transparent 2px) 0 0 / 5px 5px;
+}

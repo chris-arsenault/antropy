@@ -84,7 +84,7 @@ material and exposure determine whether those routes operate. Dashed arrows are 
 flux. Rings identify chemicals present in currently releasing reservoirs.
 
 Only an open Web window requests these bounded reductions. They never alter simulation state
-or accumulate history. See the [implementation and verification record](../../CHEMICAL-WEB-PLAN.md).
+or accumulate history. See the [implementation and verification record](../plans/archive/CHEMICAL-WEB-PLAN.md).
 
 <a id="population-boundaries"></a>
 

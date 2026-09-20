@@ -1,8 +1,13 @@
 //! Local embodied recognition. No property, coordinate, route or lineage input reaches the RNN.
 use crate::{
-    chemistry::Chemistry, config::Config, field::Field, genetics::Compiled, organism::Cell,
+    chemistry::Chemistry,
+    config::Config,
+    controller::LIGHT_INPUT,
+    field::Field,
+    genetics::Compiled,
+    organism::{Cell, PHOTO_STOCK},
 };
-fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 4] {
+fn sample_rows(cell: &Cell, c: &Config, field: &Field) -> Vec<(usize, [f64; 5])> {
     let row = crate::footprint::sites(cell, c, field);
     let radius = cell.radius(c);
     let forward = [radius * cell.heading.cos(), radius * cell.heading.sin()];
@@ -25,38 +30,66 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 4] {
             }
         }
     }
+    nodes
+}
+
+fn response(readings: [f64; 5], stock: f64, core: f64, reference: f64, c: &Config) -> [f64; 3] {
+    let gain = stock / (stock + c.receptor_ratio * core).max(1e-30);
+    let r = readings.map(|v| gain * v / (reference + v));
+    [r[0], r[1] - r[3], r[2] - r[4]]
+}
+
+fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
+    let nodes = sample_rows(cell, c, field);
     std::array::from_fn(|slot| {
+        let stock = if slot == 4 { PHOTO_STOCK } else { 3 + slot };
+        if cell.body[stock] == 0. {
+            return [0.; 3];
+        }
         let mut readings = [0.; 5];
-        let kernel = &cell.operators.as_ref().unwrap().receptors[slot];
         for &(node, weights) in &nodes {
-            let local = kernel
-                .iter()
-                .map(|a| a.value * field.amounts[node * 256 + a.species] as f64)
-                .sum::<f64>()
-                / field.spacing.powi(2);
+            let local = if slot == 4 {
+                let light = field.illumination.node(node);
+                (light[0] + light[1]) * 0.5
+            } else {
+                cell.operators.as_ref().unwrap().receptors[slot]
+                    .iter()
+                    .map(|a| a.value * field.amounts[node * 256 + a.species] as f64)
+                    .sum::<f64>()
+                    / field.spacing.powi(2)
+            };
             for k in 0..5 {
                 readings[k] += weights[k] * local;
             }
         }
-        let gain = cell.body[3 + slot]
-            / (cell.body[3 + slot] + c.receptor_ratio * cell.body[0]).max(1e-30);
-        let r = readings.map(|v| gain * v / (c.receptor_k + v));
-        [r[0], r[1] - r[3], r[2] - r[4]]
+        response(
+            readings,
+            cell.body[stock],
+            cell.body[0],
+            if slot == 4 { 1. } else { c.receptor_k },
+            c,
+        )
     })
 }
 
 pub fn initialize(cell: &mut Cell, g: &Compiled, c: &Config, field: &Field) {
     let values = readings(cell, c, field);
-    cell.receptors = values.map(|r| r[0]);
+    cell.receptors = std::array::from_fn(|i| values[i][0]);
+    cell.photoreceptor = values[4][0];
     observe(cell, g, g, c, field);
 }
 pub fn observe(cell: &mut Cell, g: &Compiled, _installed: &Compiled, c: &Config, field: &Field) {
     let values = readings(cell, c, field);
     for (i, r) in values.iter().enumerate() {
-        cell.inputs[4 * i] = r[0] as f32;
-        cell.inputs[4 * i + 1] = (r[0] - cell.receptors[i]) as f32;
-        cell.inputs[4 * i + 2] = r[1] as f32;
-        cell.inputs[4 * i + 3] = r[2] as f32;
+        let (input, baseline) = if i == 4 {
+            (LIGHT_INPUT, cell.photoreceptor)
+        } else {
+            (4 * i, cell.receptors[i])
+        };
+        cell.inputs[input] = r[0] as f32;
+        cell.inputs[input + 1] = (r[0] - baseline) as f32;
+        cell.inputs[input + 2] = r[1] as f32;
+        cell.inputs[input + 3] = r[2] as f32;
     }
     let stock = |q: f64, reference: f64| (q / (q + reference).max(1e-30)) as f32;
     for i in 0..12 {
@@ -72,12 +105,14 @@ pub fn observe(cell: &mut Cell, g: &Compiled, _installed: &Compiled, c: &Config,
     cell.inputs[36] = stock(cell.body[2], g.body[2]);
     cell.inputs[37] = (cell.material() / cell.capacity(c).max(1e-30)).clamp(0., 1.) as f32;
     cell.inputs[38] = cell.damage as f32;
+    cell.inputs[LIGHT_INPUT + 4] = stock(cell.body[PHOTO_STOCK], g.body[PHOTO_STOCK]);
 }
 pub fn adapt(cell: &mut Cell, c: &Config, dt: f64) {
     let alpha = 1. - (-dt / c.receptor_tau).exp();
     for i in 0..4 {
         cell.receptors[i] += alpha * (cell.inputs[i * 4] as f64 - cell.receptors[i]);
     }
+    cell.photoreceptor += alpha * (cell.inputs[LIGHT_INPUT] as f64 - cell.photoreceptor);
 }
 pub fn stress_load(
     cell: &Cell,

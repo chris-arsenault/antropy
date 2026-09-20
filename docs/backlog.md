@@ -16,9 +16,9 @@ local populations. Implementation phases and acceptance live in that design docu
 The user deferred multicore implementation on September 18. Preserve
 [the shared-memory design and P0–P4 milestones](../SCALING-PLAN.md#multicore-design)
 in paused Sulion plan `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
-Current work remains single-threaded. Ecology, persistent geography and directional climate
-design proceed in [the spatial isolation review](design/spatial-isolation-review.md);
-they do not depend on first implementing multicore execution.
+Current work remains single-threaded. Composed local illumination, funded optical sensing and
+material-supported habitats are implemented; they do not depend on multicore execution. Elevation and rotational transport remain later extensions;
+the earlier spatial review retains evidence and its rejected fixed-well proposal.
 
 <a id="backlog-cell-interactions"></a>
 
@@ -61,6 +61,12 @@ ant admission sequence and roughly 2,000-worker gate impose no new prerequisite.
 
 ## Evolutionary questions
 
+The environmental plan's optional E2 initial-geometry/supply review moves here. Change starting
+neighborhoods only for a demonstrated delivery or opportunity limitation, using existing source
+budgets and shared forces. No prescribed wells, cluster count or automatic new campaign follows.
+The [latest checkpoint](material-habitats-review.md) supplies evidence of dense, differentiated
+colonies while source renewal and net flow remain feedstock-heavy.
+
 The next design decision is a coherent world to observe. For each candidate mechanism, state its
 ecological purpose, existing proof point, competing explanation and smallest missing test. Select
 settings on those grounds, not by the number of clusters produced in a long run.
@@ -85,8 +91,9 @@ settings on those grounds, not by the number of clusters produced in a long run.
   cost; receiver benefit is not cooperation and a sensed emission is not communication.
 - Optional typed gene transfer and disturbance are implemented. Local recolonization, persistence
   of unchanged traits under transfer and effects on diversity remain open.
-- Light and nonchemical energy, binding, extracellular reactions and variable genome structure
-  remain deferred by the chemistry design; old named mechanisms are removed, not disabled.
+- Shared external work, illumination, material binding and extracellular transformations are
+  implemented. Useful public-food specialization remains unestablished: the constructed v32
+  consumer lost against its control. Variable genome structure remains deferred.
 - Paid acquired-weight transmission exists; adaptive usefulness is a conditional research question.
   Preserve the earlier negative findings under their old physics.
 - Generic source epochs/zones are available. Earlier A/B cohort benefits remain historical and
@@ -108,7 +115,7 @@ These are unimplemented choices requiring a reviewed purpose and design:
 | Evolvable mutation machinery or neural topology | A demonstrated representation or variation limitation |
 | Physical adhesion | Attachment, detachment, forces and costs; reserve sharing alone adds none |
 | Dormancy or additional life stages | An opportunity current physiology cannot express |
-| Nonchemical energy, binding, multiple-substrate reactions and variable genome structure | A measured limitation of the present 256-species unary chemistry; no parallel named pathway |
+| Terrain, rotational climate, multiple-substrate reactions and variable genome structure | A measured limitation of the present shared fields/unary chemistry; no parallel named pathway |
 
 Chemical attack, recipient feeding and resource capture must use the generic shared substrate.
 Optional disturbance and gene transfer remain available. Their implementation does not establish
@@ -130,13 +137,13 @@ The implementation and remaining operational checks are separate from ecological
 
 | Requirement | Current implementation and gap |
 | --- | --- |
-| Continue after interruption | Six automatic and two manual compressed recovery points, plus file export; transactional retention tested with emulated IndexedDB. Actual browser termination, quota and suspension behavior still need review. A new session starts at tick zero; restore is explicit. |
+| Continue after interruption | Up to six automatic and two manual compressed recovery points, expiring older points to fit256MiB, plus file export; transactional retention tested with emulated IndexedDB. Actual browser termination, quota and suspension behavior still need review. A new session starts at tick zero; restore is explicit. |
 | Bounded storage and memory | Complete ancestry uses compact numeric records; default limit two million records, with safe pause. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. A 30-minute browser fixture with 70 cells/100k ancestors retains stable GPU and WASM memory; peak costs under large ecological growth and an archive beyond the limit remain open. |
 | Preserve observation | Browser checkpoints retain 240 thinned spatial frames, 2,048 recent spatial events and the current population census. Dropped events are counted. The kernel retains 512 ordinary events and up to 4,096 explicit interventions; reaching the intervention limit rejects further manual changes. Complete replay and unobserved history remain unavailable. |
 | Sustained execution | A worker owns physics and rendering. One queued task yields simulation work; the main animation loop permits one unanswered presentation request. GPU completion fences bound outstanding frames. Background throttling and sleep can still stop execution. Days/weeks responsiveness is unverified. |
-| Useful throughput | Current headless capacity reaches 224.0/61.3/35.9 ticks/s for 48/2,000/2,000-growth. Actual software-rendered browser observations reach 214/54/32.6 ticks/s with drawing and diagnostics. Growth has little headroom; cold save pauses and frame rates are separate measurements. See [current evidence](design/chemistry/reliability-results.md). |
-| Honest visual interpretation | Fixed membrane-X colors and spatial regions describe current cells. Independent controls and zoom transitions are tested. The prior spatial world was accepted; digital chemistry still needs human motion and legibility review. |
-| Exact continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
+| Useful throughput | V32 fixtures measure63.78/32.00 ticks/s at48/2,000 cells. The mature3,774-cell checkpoint measures17.79 headless with measured observation closed. Forced browser GC did not restore speed in the short test; the user's8→40 reload difference remains unattributed. See [runtime investigation](session-runtime-review.md). |
+| Honest visual interpretation | Default usable-energy colors and independent context layers describe current cells. The user reports promising dense colonies; that review does not establish indefinite diversity. Measured-flow and phenotype panels retain their denominators and observation limits. |
+| Meaningful continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
 
 Design recovery, history retention and ancestry storage together, then validate their operational
 properties proportionately. Do not discard scientific parentage silently to bound memory. Do not

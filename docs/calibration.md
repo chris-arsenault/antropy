@@ -2,7 +2,7 @@
 
 [Configuration](../engine/src/config.rs) and the persisted chemical definition specify authored
 model scales. [Composed runtime](design/chemistry/composed-runtime.md) and
-[environmental measurements](design/chemistry/environmental-results.md)
+[habitat measurements](material-habitats.md)
 record formula selection, rejected candidates and measured limits.
 The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibration.md) is historical.
 
@@ -13,23 +13,25 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Quantity | Current value |
 | --- | --- |
 | World / timestep / founders | 320 × 240 periodic XY / 0.2 model seconds / 48 in two colonies |
-| Controller | 39 inputs, 24 recurrent units, nine outputs |
-| Machinery | Four receptor, four transporter, four unary-enzyme slots; fifteen funded stocks |
+| Controller | 44 inputs, 24 recurrent units, nine outputs |
+| Machinery | Four receptor, four transporter, four unary-enzyme slots; sixteen funded stocks including a photoreceptor |
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
 | Compact affinity support / minimum susceptibility | R=3 coordinate units / 0.05 |
-| Renewing reservoirs | 48 initially around seven unequal regions, spread 18; rate scale 0.2, radius 3, lifetime scale 600 s, mean renewal wait 1,200 s; indefinite external replenishment |
-| Reservoir drift / medium processing | 4 / 4; local gradients and impedance bound motion, local signals select downhill release branches |
-| Source bootstrap | IDs 0 and 80 for chemistry seed 101, ranked by deliverable potential; 10% finite stock dissolved locally |
-| Extracellular washout | 0.001 per second for every species; half-life 693 model seconds |
-| Field mesh / physiology interval | 2 world units / 0.8 model seconds; active four-species groups, accounted concentration floor 1e-9 |
+| Renewing reservoirs | 48 initially around seven unequal regions, spread 18; rate scale 0.2, radius 3, lifetime scale 600 s, mean renewal wait2,400 s; indefinite external replenishment |
+| Reservoir drift / medium processing | 4 / 0.25; shared material forces move finite owners; shared funded transformations process inventory and evolving renewal mixtures |
+| Source bootstrap | Initial IDs0/136; finite8/128 priming; four mutable founder types process0→128→136→8→0 |
+| Extracellular washout | Base0.001 per second, reduced by shared local cohesion; base half-life693 model seconds |
+| Field mesh / physiology interval | 2 world units / 0.8 model seconds; active four-species groups, accounted concentration floor1e-6 |
 | Weathering rate / local response | 0.025 × positive interaction difference with the bounded medium profile; existing diffusion impedance attenuates exposure; no weather clock |
-| Founder homeostasis | Membrane matches retained product; export begins near 75% storage fill |
+| Founder homeostasis | Input-centered membrane, local food response, mild product export; ordinary mutable alleles |
+| Attraction length / amplitude | 6 / 4; opposing second scale12; shared local repulsion remains |
+| Illumination contrast / periods | 0.8 / 6,000,18,000,62,000 model seconds (30k/90k/310k ticks) |
 | Movement / diffusion impedance coefficients | 0.5 / 1 |
 | Viscosity | 0.004; no thermal-energy state or temperature solver |
 | Transport turnover / work | 2.5 per installed stock per second / 0.05 per material |
 | Enzyme turnover / downhill capture efficiency | 2.5 per installed stock per second / 0.8 |
-| Construction work / growth rate | 0.5 per material plus potential deficit / 0.06 |
+| Construction work / growth rate | 0.5 per material transferred to bound mixture / 0.06 |
 | Founder internal matter / usable energy | 0.8 / 0.5 |
 | Core / motor / storage stock | 1 / 0.08 / 0.08 |
 | Each receptor / transporter / enzyme stock | 0.01 / 0.04 / 0.04 |
@@ -39,19 +41,19 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Motor power density / efficiency | 0.2 / 0.5 |
 | Behavioral mutation probability / scale | 0.0015 / 0.08 |
 | Physical mutation probability / scale | 0.1 / 0.12; includes fixed-slot chemical alleles |
-| Decomposition | Built material becomes ID 186; internal species retain identity |
+| Death | Bound and free mixtures retain actual chemical identities; no privileged waste ID |
 | Horizontal transfer / disturbance | Rate zero / absent by default |
 | UI pacing / population ceiling | Requested 30 ticks/s / pause at 10,000 cells |
 | Field nodes / ancestry ceiling | 19,200 default; maximum 80,000 / 2,000,000 organism records |
-| Recovery retention | Six automatic and two manual saves; 256 MiB compressed total, 192 MiB individual raw |
+| Recovery retention | Up to six automatic and two manual saves, expiring older points to fit; 256 MiB compressed total, 192 MiB individual raw |
 
 Potential is stored in chemical matter and generic biomass; usable energy is a separate stock.
 Transport, upkeep, motor work, repair and reaction losses dissipate energy. No automatic catabolism
 converts an untyped reserve. Ploidy, birth-local assimilation and expression are described in
 [bodies](design/funded-bodies.md). Parameters remain revisable hypotheses, not empirical constants.
 
-The [analytical resource economy](design/chemistry/resource-economy.md) derives the current
-source and turnover settings. Positive local growth budgets coexist with an unaffordable
+The [analytical resource economy](design/chemistry/resource-economy.md) retains earlier delivery and turnover derivations. Current source settings also include the
+[regenerative starting-state design](design/chemistry/regenerative-ecosystem.md). Positive local growth budgets coexist with an unaffordable
 uniform-background reference. Both daughters at one finite site reproduce; an isolated weak
 site remained unable to support its resident in those earlier probes. The earlier fixed-source weathering
 startup starts with 48 cells and reaches 54 after 600 ticks, with 54 divisions and maximum
@@ -67,7 +69,11 @@ continued access, not evolved pursuit or long-term survival.
 
 ## Measured throughput
 
-The [mobile-source measurements](design/chemistry/mobile-source-results.md) give
+Current v32 [capacity fixtures](material-habitats.md) measure63.78/32.00 ticks/s at48/2,000 cells.
+The mature3,774-cell checkpoint measures17.79 headless with measured observation closed and
+15.95 active, below the30-tick target. See [session costs](session-runtime-review.md).
+
+The historical v15 [mobile-source measurements](design/chemistry/mobile-source-results.md) give
 39.31/24.55/20.18 ticks/s on fully occupied 48/2,000/2,000-growth fixtures, including packed
 render preparation, census and inspection. Large saturated workloads miss the30ticks/s floor.
 These source-free capacity fixtures retain the prior environmental limits; brief report

@@ -103,7 +103,7 @@ fn weathering_has_one_rate_per_distinct_destination() {
     let op = crate::weathering::Operators::new(&chem);
     let mut checked = 0;
     for s in 0..256 {
-        for j in 0..4 {
+        for j in 0..crate::weathering::BRANCHES {
             if op.destination[s][j] == s {
                 assert_eq!(
                     [op.coefficients[j][0][s], op.coefficients[j][1][s]],
@@ -113,7 +113,7 @@ fn weathering_has_one_rate_per_distinct_destination() {
             }
         }
     }
-    assert_eq!(checked, 64);
+    assert_eq!(checked, 0); // Total involutions have no outward/identity boundary branches.
     assert!(
         (crate::chemistry::compile_affinity([0., 0.], 3.)
             .iter()

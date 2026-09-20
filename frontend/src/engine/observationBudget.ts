@@ -1,4 +1,5 @@
 import { type ObservationDelta } from "./observationDelta";
+import { checkActivity, checkPhenotypeBudget } from "./phenotypeBudget";
 
 const STATUS_KEYS = new Set([
   "kernelDigest",
@@ -6,6 +7,7 @@ const STATUS_KEYS = new Set([
   "summary",
   "chemicals",
   "chemicalWeb",
+  "phenotype",
   "running",
   "speed",
   "throughput",
@@ -20,6 +22,8 @@ const STATUS_KEYS = new Set([
 
 /** Fail before structured clone. This is a display budget, never an ecology/population limit. */
 export function checkObservationBudget(delta: ObservationDelta) {
+  checkPhenotypeBudget(delta.status.phenotype);
+  checkActivity(delta.status.chemicalWeb?.activity);
   if (
     delta.status.chemicalWeb &&
     (delta.status.chemicalWeb.rows.length > 64 || delta.status.chemicalWeb.sources.length > 256)

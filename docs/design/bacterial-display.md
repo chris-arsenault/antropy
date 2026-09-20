@@ -10,6 +10,12 @@ replacement remains separate from acceptance of the previous spatial world.
 
 ## World and camera
 
+The viewport fills the screen. A compact dock opens observation and control windows rather than
+reserving a permanent sidebar. Cell colors default to usable energy and the map to energy per
+material. Illumination, impedance bands, stress dots, sources and regions have independent controls.
+[Phenotypes and measured chemical flow](../phenotype-observation.md) distinguish recent activity
+from possible enzyme routes; their windows do not change camera or background selections.
+
 Worker WebGL2 renders one clipped periodic world, not a tiled grid of complete copies. Body/deposit
 fragments at seams appear at the corresponding opposite edge. Panning stays bounded; Fit world
 is minimum zoom and maximum zoom is 12×. Wheel zoom anchors the pointer subject to boundary clamping.
@@ -31,7 +37,8 @@ select wrapped bodies. Camera actions never alter simulation state or randomness
 | Source marks | Persistent source-size marks: bright ring and center cross while releasing, dim dashed ring while dormant; one Gaussian width, not a resource boundary |
 | Soft population region | Nearby actual cells, each contributing its own color; a viewing aggregate with no biological authority |
 | Small isolated mark | An actual ungrouped cell, kept visible at world scale |
-| Colored body rim / population color | Inherited membrane X coordinate on a fixed 0–15 scale by default; selectable family, founder, relatedness, genetic-distance or other trait view |
+| Colored body rim / population color | Usable-energy fraction by default; selectable enzyme input/output, membrane, ancestry, distance or other trait view |
+| Day/night context | Cool darkness composited over chemistry, cells and sources, with warm daylight; a physical illumination reading, not an extra food or energy layer |
 | Body brightness | Usable-energy fraction; damage also darkens the body |
 | Darkened interior | Increasing functional damage |
 | White tip | Heading |
@@ -124,7 +131,7 @@ cell colors, source/region overlays and inherited settings are independently con
 
 The default pacing target is 30 ticks/s. Display refresh and simulation rate are separate; measured
 throughput can fall below the request. Maximum means CPU-limited execution, not model-time seconds.
-The timer-driven simulation redraws the map as it advances; the stats panel and inspector refresh at most every 500 ms
+Maximum-speed simulation yields through one queued worker task; animation requests allow one unanswered presentation at a time; the stats panel and inspector refresh at most every 500 ms
 while running, and immediately on pause, stop or a manual intervention.
 The [numerical evidence](chemistry/numerical-results.md) records measured throughput and recovery limits.
 The cell inspector shows installed machinery, chemical targets, transporter effort, internal and
@@ -147,7 +154,7 @@ other amount, present count and tick. The worker caches this by observed tick an
 on world replacement. It runs on the half-second status publication path, not at simulation
 or render frequency. Unchanged paused observations omit it from the revisioned packet.
 The ordinary 16 KiB reply limit and observation budget apply; no raw field is admitted to
-browser diagnostic commands. Two hazard scalars and weathering exposure use the existing
+browser diagnostic commands. Hazards, weathering and local illumination reuse the existing packed
 texture channels. The worker still renders borrowed WASM views; no full field crosses to React.
 
 The bounded display check is `node harness/numerical/browserChemicals.mjs CHROMIUM EXISTING_SITE NEW_OUTPUT`

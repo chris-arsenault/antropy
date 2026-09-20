@@ -9,6 +9,7 @@ import { PersistenceControls } from "./PersistenceControls";
 import { Settings } from "./Settings";
 import { StatsPanel } from "./StatsPanel";
 import { ChemicalWebPanel } from "./ChemicalWebPanel";
+import { PhenotypePanel } from "./PhenotypePanel";
 
 interface Props {
   bridge: Bridge;
@@ -21,6 +22,7 @@ interface Props {
   error: (e: unknown) => void;
   color: number;
   setColor: (color: number) => void;
+  compareRole: (input: number, output: number) => void;
 }
 
 export function ObservationPanels(props: Props) {
@@ -30,7 +32,7 @@ export function ObservationPanels(props: Props) {
       {active && active !== "map" && active !== "settings" && (
         <Overlay
           title={active === "web" ? "Chemical web" : PANELS[active]}
-          layout={active === "web" ? "wide" : "standard"}
+          layout={active === "web" || active === "phenotypes" ? "wide" : "standard"}
           open
           close={close}
         >
@@ -63,11 +65,14 @@ function PanelContent({
   error,
   color,
   setColor,
+  compareRole,
 }: Props) {
   const { status, definition } = view;
   if (active === "saves") return <SavePanel view={view} bridge={bridge} />;
   if (!status || !definition) return <p>Waiting for the world to load.</p>;
   switch (active) {
+    case "phenotypes":
+      return <PhenotypePanel bridge={bridge} status={status} error={error} />;
     case "web":
       return (
         <ChemicalWebPanel
@@ -77,6 +82,7 @@ function PanelContent({
           setColor={setColor}
           selectChemical={selectChemical}
           error={error}
+          compareRole={compareRole}
         />
       );
     case "chemistry":

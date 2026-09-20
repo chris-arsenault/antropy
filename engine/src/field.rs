@@ -20,7 +20,13 @@ pub struct Field {
     #[serde(skip)]
     pub attraction_length: f64,
     #[serde(skip)]
+    pub attraction_strength: f64,
+    #[serde(skip)]
     pub(crate) attraction: crate::attraction::Attraction,
+    #[serde(skip)]
+    pub(crate) broad_attraction: crate::attraction::Attraction,
+    #[serde(skip)]
+    pub illumination: crate::illumination::Illumination,
     #[serde(skip)]
     next: Vec<f32>,
     #[serde(skip)]
@@ -75,7 +81,10 @@ impl Field {
             drift: 0.25,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
             attraction_length: 0.,
+            attraction_strength: 4.,
             attraction: Default::default(),
+            broad_attraction: Default::default(),
+            illumination: Default::default(),
             next: vec![],
             neighbors: vec![],
             body_signal: vec![],
@@ -92,6 +101,8 @@ impl Field {
     }
     pub fn rebuild(&mut self) {
         self.attraction = Default::default();
+        self.broad_attraction = Default::default();
+        self.illumination = Default::default();
         let n = self.nx * self.ny;
         self.next.resize(n * SPECIES, 0.);
         self.next.fill(0.);
@@ -218,6 +229,9 @@ impl Field {
             .sum();
         [self.activity.nodes.len(), groups, self.last_groups]
     }
+    pub fn has_active_material(&self) -> bool {
+        !self.activity.nodes.is_empty()
+    }
     pub fn refresh(&mut self, chemistry: &Chemistry) {
         self.activity.rebuild(&self.amounts);
         self.totals = [0.; 2];
@@ -276,7 +290,7 @@ impl Field {
             })
         });
         let before = self.totals;
-        let decay = (-washout * dt).exp();
+        let mut lost = [0.; 2];
         let projection = crate::chemical_projection::Rows::new(chemistry);
         let floor = crate::field_activity::CONCENTRATION_FLOOR * self.spacing.powi(2) as f32;
         self.last_groups = 0;
@@ -290,18 +304,32 @@ impl Field {
                     self.coefficients(n, dt / steps as f64, impedance, maximum_impedance);
                 let inputs =
                     self.neighbors[n].map(|j| &self.amounts[j * SPECIES..(j + 1) * SPECIES]);
+                let decay = (-washout * dt * self.retention(n, impedance)).exp();
                 let mut mask = crate::field_vector::redistribute(
                     &self.amounts[n * SPECIES..(n + 1) * SPECIES],
                     inputs,
                     &mut self.next[n * SPECIES..(n + 1) * SPECIES],
                     &rows,
                     coefficients,
-                    if step + 1 == steps { decay as f32 } else { 1. },
+                    1.,
                     crate::field_vector::Work {
                         mask: self.activity.candidates[n],
                         floor,
                     },
                 );
+                if step + 1 == steps && washout > 0. {
+                    let (retained, loss) = crate::chemical_projection::decay(
+                        &mut self.next[n * SPECIES..(n + 1) * SPECIES],
+                        &projection,
+                        mask,
+                        decay,
+                        floor,
+                    );
+                    mask = retained;
+                    for k in 0..2 {
+                        lost[k] += loss[k];
+                    }
+                }
                 if step + 1 == steps
                     && let Some(weather) = climate.as_deref_mut()
                 {
@@ -309,11 +337,12 @@ impl Field {
                         self.medium_signal(n),
                         self.impedance[n] + self.source_load[n],
                     );
-                    mask = weather.convert(
+                    mask = weather.convert_lit(
                         &mut self.next[n * SPECIES..(n + 1) * SPECIES],
                         mask,
                         medium,
                         dt,
+                        self.illumination.node(n),
                     );
                 }
                 self.activity.set(n, mask);
@@ -343,10 +372,12 @@ impl Field {
         let weathering_heat = climate.as_ref().map_or(0., |c| c.heat);
         let weathering_work = climate.as_ref().map_or(0., |c| c.work);
         FieldBalance {
-            matter: before[0] * (1. - decay),
-            energy: before[1] * (1. - decay),
-            roundoff_matter: before[0] * decay - self.totals[0],
-            roundoff_energy: before[1] * decay + weathering_work - self.totals[1] - weathering_heat,
+            matter: lost[0],
+            energy: lost[1],
+            roundoff_matter: before[0] - lost[0] - self.totals[0],
+            roundoff_energy: before[1] - lost[1] + weathering_work
+                - self.totals[1]
+                - weathering_heat,
             weathering_heat,
             weathering_work,
             weathered_material: climate.as_ref().map_or(0., |c| c.converted),

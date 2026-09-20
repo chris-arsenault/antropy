@@ -79,8 +79,13 @@ pub struct Config {
     pub enzyme_turnover: f64,
     pub conversion_efficiency: f64,
     pub environmental_work: f64,
+    pub illumination_contrast: f64,
+    pub illumination_fast_period: f64,
+    pub illumination_slow_period: f64,
+    pub illumination_modulation_period: f64,
     pub pressure_strength: f64,
     pub attraction_length: f64,
+    pub attraction_strength: f64,
     pub growth_rate: f64,
     pub construction_energy: f64,
     pub protected_inventory_fraction: f64,
@@ -168,8 +173,13 @@ impl Default for Config {
             enzyme_turnover: 2.5,
             conversion_efficiency: 0.8,
             environmental_work: crate::transformation_work::DEFAULT_STRENGTH,
+            illumination_contrast: 0.8,
+            illumination_fast_period: 6000.,
+            illumination_slow_period: 18000.,
+            illumination_modulation_period: 62000.,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
             attraction_length: 6.,
+            attraction_strength: 4.,
             growth_rate: 0.06,
             construction_energy: 0.5,
             protected_inventory_fraction: 0.125,
@@ -229,6 +239,12 @@ impl Config {
             ("transportEnergy", self.transport_energy),
             ("constructionEnergy", self.construction_energy),
             ("sourceLifetime", self.source_lifetime),
+            ("illuminationFastPeriod", self.illumination_fast_period),
+            ("illuminationSlowPeriod", self.illumination_slow_period),
+            (
+                "illuminationModulationPeriod",
+                self.illumination_modulation_period,
+            ),
         ] {
             if x <= 0. {
                 return Err(format!("Positive configuration required: {name}"));
@@ -252,11 +268,19 @@ impl Config {
             || self.physiology_interval > 2.
             || self.mesh < 0.5
             || self.attraction_length > self.width.min(self.height) / 2.
+            || [
+                self.illumination_fast_period,
+                self.illumination_slow_period,
+                self.illumination_modulation_period,
+            ]
+            .iter()
+            .any(|p| *p < 100. * self.physiology_interval)
         {
             return Err("Unsupported numerical resolution or update interval".into());
         }
         for x in [
             self.source_priming,
+            self.illumination_contrast,
             self.susceptibility_floor,
             self.conversion_efficiency,
             self.protected_inventory_fraction,

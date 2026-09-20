@@ -6,7 +6,7 @@ Capabilities depend on material actually installed. Genetic targets cannot grant
 
 ## Construction and physical genes
 
-Each chromosome has fifteen bounded float32 investment loci plus fixed chemical alleles:
+Each chromosome has sixteen bounded float32 investment loci plus fixed chemical alleles:
 
 | Loci | Actual stock / allele | Reference newborn stock |
 | --- | --- | ---: |
@@ -15,12 +15,16 @@ Each chromosome has fifteen bounded float32 investment loci plus fixed chemical 
 | 2 | Storage | 0.08 |
 | 3–6 | Four receptors, each with a chemical target coordinate | 0.01 each |
 | 7–10 | Four transporters, each with a target; neural effort chooses direction | 0.04 each |
-| 11–14 | Four unary enzymes, each with target, continuous product offset and orientation mixture | 0.04 each |
+| 11–14 | Four unary enzymes, each with recognition target, independent reflection center and orientation mixture | 0.04 each |
+| 15 | Photoreceptor, sampling local mean illumination | 0.01 |
 
 A membrane coordinate controls chemical compatibility. Slot count is fixed; no variable-length
 genome structure is implemented. Core target is reference core × exp(g0). Other stocks use
 core target × reference ratio × max(0,1+gi). Zero investment is reachable and can mutate back.
 All actual stocks occupy volume and require maintenance.
+
+[Photoreception](../photoreception.md) uses the same funded gain and adaptation law as chemical
+receptors, with unit reference illumination. It adds no harvesting or automatic steering.
 
 Growth shares paid assembly across deficits toward twice the newborn target. Birth splits actual
 stock and inherits installed identity. Changed slot instructions retain their former function until
@@ -54,12 +58,12 @@ specifies occupancy, shared demand and the simultaneous commitment.
 ## Accounting
 
 Matter includes extracellular mixtures, unreleased source inventory, cellular mixtures and all
-built stocks. Uniform washout is an external sink. Energy includes each chemical's potential,
+built stocks. Shared cohesion-dependent washout is an external sink. Energy includes each chemical's potential,
 generic body potential and usable energy, with all external supply, washout and dissipated work
 recorded separately.
 
-Unary reactions preserve scalar material and change identity. Downhill conversion captures
-0.8×potential drop; uphill conversion charges potential rise/0.8. A .05 catalytic price applies
+Unary reactions preserve scalar material and change identity. The shared local external-work term augments the potential difference before applying
+0.8 conversion efficiency: a positive difference funds usable energy; a deficit charges it. A .05 catalytic price applies
 per unit that changes identity and vanishes continuously for an idle offset. Enzymes share
 starting substrate and cannot consume each other's new products in the same phase. Overflow is heat.
 
@@ -110,9 +114,9 @@ Haploid/diploid, clonal/selfing transmission, uniform/one-point crossover,
 fission/budding and static/plastic learning remain independent configured policies. Selfing requires
 diploidy and uses two gametes from one parent; outcrossing and multi-parent ancestry remain deferred.
 
-Diploid linear alleles average, including enzyme offsets. Angles use the circular mean;
+Diploid linear alleles average, including enzyme reflection centers. Angles use the circular mean;
 antipodal alleles use a declared zero-angle convention because no unique mean exists.
-Chemical coordinates and offsets mutate with reflection, while angles wrap periodically;
+Chemical coordinates and reflection centers mutate with reflection, while angles wrap periodically;
 parameters compile mixtures of exact bounded chemical permutations with at most eight
 product species per substrate. These mixtures are not group elements; component actions
 have exact composition and inverses. Neural effort can reverse any transporter. No slot count evolves.
@@ -120,19 +124,20 @@ have exact composition and inverses. Neural effort can reverse any transporter. 
 All mutations use the same heavy-tail law: for signed uniform u, the proposed scalar
 step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
 P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
-Default behavioral probability/scale is 0.0015/0.08; physical alleles use0.1/0.12 in their
-existing parameter units. Scalar neural and fifteen investment loci retain independent opportunities.
+Default behavioral probability/scale is0.0015/0.08; physical probability/scale is0.1/0.12.
+Chemical coordinates and reflection centers multiply scale by the existing specificity radius R.
+Scalar neural and sixteen investment loci retain independent opportunities.
 Each of17 chemical coordinate pairs has Binomial(2,p) vector events: each event uses the same
-absolute-step law and a uniform direction. These pairs and body loci contribute4.9 expected
-events per birth at p=.1. Four enzyme-angle loci add0.4 events, for5.3 total. Their scale is
-physicalMutationScale/R radians, making the corresponding arc length use the same chemical
-step units. Expected changed coordinates are approximately8.36, including angles, because
+absolute-step law and a uniform direction. These pairs and body loci contribute5.0 expected
+events per birth at p=.1. Four enzyme-angle loci add0.4 events, for5.4 total. Their scale is
+physicalMutationScale radians, making the corresponding radius-R arc length use the same chemical
+step units. Expected changed coordinates are approximately8.46, including angles, because
 a vector event changes both axes.
-The [symmetry measurements](../../MATHEMATICAL-SYMMETRY-PLAN.md#m4-execution) check event
+The [symmetry measurements](../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#m4-execution) check event
 rates and realized magnitudes separately. Reflection respects the finite square's boundary;
 arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
-chemical coordinates within [0,15] and offsets within [-15,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v23 preserves complete allele and actual-state
+chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
+No score selects parents or filters mutants. Checkpoint v32 preserves complete allele and actual-state
 distinctions; unavailable pruned genotype payloads remain labeled provenance.

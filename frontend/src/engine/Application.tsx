@@ -25,6 +25,15 @@ export function Application() {
   const view = useSyncExternalStore(bridge.subscribe, bridge.getSnapshot);
   const error = useCallback((e: unknown) => setMessage(String(e)), []);
   const dismiss = useCallback(() => setMessage(""), []);
+  const compareRole = useCallback(
+    (input: number, output: number) => {
+      bridge
+        .call("phenotype", { action: "select", selection: { kind: "role", input, output } })
+        .then(() => setActive("phenotypes"))
+        .catch(error);
+    },
+    [bridge, error]
+  );
   useVisibilitySave(bridge, error);
   return (
     <main className="application">
@@ -62,6 +71,7 @@ export function Application() {
         chemistry={chemistry}
         selectChemical={selectChemical}
         inspect={inspect}
+        compareRole={compareRole}
         color={color}
         setColor={setColor}
       />

@@ -4,7 +4,7 @@ Date: 2026-09-18. Runtime under review: physical checkpoint v20, commit `f48943c
 This is an audit of live simulation rules, not authorization to change them.
 Existing uncommitted bound-material analysis is independent of this audit.
 
-Follow-up: the [symmetry plan](../MATHEMATICAL-SYMMETRY-PLAN.md) implements and measures the
+Follow-up: the [symmetry plan](plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md) implements and measures the
 v21 corrections. This audit retains the original v20 findings and evidence; source links now
 point to corrected live code. Current rules are in the
 [composed runtime](design/chemistry/composed-runtime.md).

@@ -3,7 +3,8 @@ use crate::{chemistry, config::Config, weathering};
 use serde_json::{Value, json};
 
 pub fn report(c: &Config, chemicals: &chemistry::Chemistry) -> Value {
-    let operators = weathering::Operators::with_work(chemicals, c.environmental_work);
+    let operators =
+        weathering::Operators::with_radius(chemicals, c.environmental_work, c.affinity_radius);
     let source = chemicals.source_species()[0];
     let deposit = chemicals
         .properties

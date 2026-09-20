@@ -9,7 +9,7 @@ supersedes the original sequence below; [migration audit](migration-audit.md) gi
 The September17 local-weathering revision uses physical checkpoint v18 and rejects earlier
 physical bytes. The independent weather clock and `weatheringPeriod`/`--weathering-period`
 settings are retired and rejected; see the [current runtime](composed-runtime.md) and
-[revision evidence](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign).
+[revision evidence](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign).
 
 Review used the complete supplied proposals, current world/controller/body/ecology contracts,
 the current interface, accounting and reproduction code, and the

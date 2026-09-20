@@ -2,7 +2,7 @@
 
 Mathematical design, September 18, 2026. **Implemented in physical v27; human review pending.**
 
-[Implementation plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation):
+[Implementation plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation):
 R0–R4 implementation and automated checks are complete; the plan records validation and operating limits. The conditional calculations
 below remain the design derivation, not claims that every location meets those conditions.
 

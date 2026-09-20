@@ -173,7 +173,7 @@ fn main() {
         ]
     };
     let report = json!({"registration":"docs/design/resource-binding-proposal.md",
-        "physicalVersion":28,"driver":"native-ordinary-World","cases":cases});
+        "physicalVersion":antropy_engine::world::VERSION,"driver":"native-ordinary-World","cases":cases});
     std::fs::write(
         output.join("results.json"),
         serde_json::to_vec_pretty(&report).unwrap(),

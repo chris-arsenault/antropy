@@ -86,7 +86,7 @@ fn attraction_transport_commutes_with_grid_frames_and_chemical_relabeling() {
 
 #[test]
 fn binding_changes_from_repulsion_to_restoring_response_without_anchors() {
-    for distance in [4., 16., 24.] {
+    for distance in [4., 12., 16., 40.] {
         let mut w = World::new(
             27,
             Config {
@@ -114,9 +114,48 @@ fn binding_changes_from_repulsion_to_restoring_response_without_anchors() {
             .iter()
             .map(|s| source_medium::response(s, 0, &w.config, &w.field, &w.chemistry).velocity[0])
             .collect();
-        assert_eq!(v[0] > 0., distance > 4., "distance={distance}, v={v:?}");
+        assert_eq!(
+            v[0] > 0.,
+            distance > 4. && distance < 40.,
+            "distance={distance}, v={v:?}"
+        );
         assert!((v[0] + v[1]).abs() < 1e-10, "distance={distance}, v={v:?}");
     }
+}
+
+#[test]
+fn cohesion_retains_material_reversibly_and_accounts_actual_loss() {
+    let mut chemistry = Chemistry::new(101).unwrap();
+    // Isolate the shared mechanical law from diffusion and chemical response.
+    for p in &mut chemistry.properties {
+        p.interaction = [1., 0.];
+        p.impedance = 0.1;
+        p.diffusion = 0.;
+    }
+    let mut compact = Field::new(64., 64., 2.);
+    compact.attraction_length = 6.;
+    compact.drift = 0.;
+    for y in 12..20 {
+        for x in 12..20 {
+            compact.add(y * 32 + x, 73, 100., &chemistry);
+        }
+    }
+    compact.prepare_attraction();
+    let center = 16 * 32 + 16;
+    assert!(compact.retention(center, 1.) < 0.1);
+    let before = compact.totals(&chemistry);
+    let balance = compact.advance(&chemistry, 0.8, 0.001, 1.);
+    let after = compact.totals(&chemistry);
+    assert!(balance.matter > 0. && balance.matter < before.0 * 0.0004);
+    assert!((before.0 - after.0 - balance.matter - balance.roundoff_matter).abs() < 1e-10);
+    assert!((before.1 - after.1 - balance.energy - balance.roundoff_energy).abs() < 1e-10);
+    compact.amounts.fill(0.);
+    compact.refresh(&chemistry);
+    compact.prepare_attraction();
+    assert_eq!(compact.retention(center, 1.), 1.);
+    compact.signal.fill([1., 0.]);
+    compact.prepare_attraction();
+    assert!((compact.retention(center, 1.) - 1.).abs() < 1e-12);
 }
 
 #[test]

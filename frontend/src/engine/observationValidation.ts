@@ -1,4 +1,5 @@
 import { type ObservationState, type Region, type SpatialEvent, type HistoryPoint } from "./types";
+import { validatePin, validatePhenotypePoint } from "./phenotypeValidation";
 
 function check(condition: boolean): asserts condition {
   if (!condition) throw new Error("Invalid retained observation");
@@ -42,6 +43,7 @@ function event(e: SpatialEvent, tick: number) {
 }
 function point(p: HistoryPoint, previous: number, tick: number) {
   check(!!p && count(p.tick) && p.tick > previous && p.tick <= tick);
+  validatePhenotypePoint(p.phenotype, p.population);
   check(
     [p.population, p.divisions, p.deaths, p.regionCount].every(count) &&
       finite(p.biomass) &&
@@ -63,6 +65,7 @@ function histogram(values: number[], length: number, population: number) {
 }
 export function validateObservation(o: ObservationState, tick: number) {
   check(!!o && typeof o.runId === "string" && o.runId.length > 0 && o.runId.length <= 128);
+  validatePin(o.pin, tick);
   list(o.history, 240);
   validateRecent(o.recent, tick);
   let previous = -1;

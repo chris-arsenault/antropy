@@ -17,7 +17,7 @@ Future implementation uses the existing environmental root
 The original E1 fixed-basin milestone must not be executed. Earlier environmental
 evidence and its unresolved review remain recorded in that same root.
 This extends [spatial ecology](spatial-ecology.md) and the
-[environmental ecology work](../../ENVIRONMENTAL-ECOLOGY-PLAN.md).
+[environmental ecology work](../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md).
 Multicore implementation remains [deferred](../../SCALING-PLAN.md).
 
 ## Observation registration

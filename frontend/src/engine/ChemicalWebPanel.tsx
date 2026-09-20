@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { type Bridge } from "./bridge";
-import { type ChemicalWeb, type WebQuery, type WebMode } from "./chemicalWeb";
+import { type ChemicalWeb, type WebQuery, type WebMode, routeValue } from "./chemicalWeb";
 import { ChemicalWebGraph } from "./ChemicalWebGraph";
 import { identityColor } from "./genealogyHistory";
+import { MaterialActivity, WindowLabel } from "./ActivityView";
+import "./phenotypes.css";
 import "./chemicalWeb.css";
 
 interface Props {
@@ -12,9 +14,18 @@ interface Props {
   setColor: (color: number) => void;
   selectChemical: (species: number) => void;
   error: (error: unknown) => void;
+  compareRole: (input: number, output: number) => void;
 }
-export function ChemicalWebPanel({ bridge, web, color, setColor, selectChemical, error }: Props) {
-  const [query, setQuery] = useState<WebQuery>({ mode: "primary", focus: null, offset: 0 });
+export function ChemicalWebPanel({
+  bridge,
+  web,
+  color,
+  setColor,
+  selectChemical,
+  error,
+  compareRole,
+}: Props) {
+  const [query, setQuery] = useState<WebQuery>({ mode: "measured", focus: null, offset: 0 });
   const focus = useCallback((id: number) => setQuery((q) => ({ ...q, focus: id, offset: 0 })), []);
   useEffect(() => {
     bridge.call("chemicalWeb", { ...query }).catch(error);
@@ -43,7 +54,7 @@ export function ChemicalWebPanel({ bridge, web, color, setColor, selectChemical,
       </div>
       <WebMeaning mode={query.mode} />
       {current ? (
-        <WebResult web={current} focus={focus} setQuery={setQuery} />
+        <WebResult web={current} focus={focus} setQuery={setQuery} compareRole={compareRole} />
       ) : (
         <p role="status">Reading current chemical routes…</p>
       )}
@@ -52,6 +63,14 @@ export function ChemicalWebPanel({ bridge, web, color, setColor, selectChemical,
 }
 
 function WebMeaning({ mode }: { mode: WebMode }) {
+  if (mode === "measured")
+    return (
+      <p className="web-meaning">
+        Accepted cellular conversions, ranked by material transformed per model second. Uptake and
+        export show accepted transporter flow. These measurements alone do not establish
+        cross-feeding.
+      </p>
+    );
   if (mode === "environment")
     return (
       <p className="web-meaning">
@@ -77,16 +96,27 @@ function WebMeaning({ mode }: { mode: WebMode }) {
     </div>
   );
 }
-function RouteTable({ web, focus }: { web: ChemicalWeb; focus: (id: number) => void }) {
+function RouteTable({
+  web,
+  focus,
+  compareRole,
+}: {
+  web: ChemicalWeb;
+  focus: (id: number) => void;
+  compareRole: Props["compareRole"];
+}) {
   if (!web.rows.length) return <p>No routes in this view.</p>;
   const environment = web.mode === "environment";
+  const measured = web.mode === "measured";
+  const countLabel = environment ? "Process" : "Primary cells";
   return (
     <table className="web-route-table">
       <thead>
         <tr>
           <th>Input → output</th>
-          <th>{environment ? "Process" : "Primary cells"}</th>
-          <th>{environment ? "" : "Supporting cells"}</th>
+          <th>{measured ? "Material / s" : countLabel}</th>
+          <th>{environment || measured ? "" : "Supporting cells"}</th>
+          <th>Compare</th>
         </tr>
       </thead>
       <tbody>
@@ -97,8 +127,13 @@ function RouteTable({ web, focus }: { web: ChemicalWeb; focus: (id: number) => v
               <span aria-hidden="true"> → </span>
               <ChemicalLink id={row.output} focus={focus} />
             </td>
-            <td>{environment ? "Environmental conversion" : row.primary.toLocaleString()}</td>
-            <td>{environment ? "" : row.cells.toLocaleString()}</td>
+            <td>{routeValue(web, row)}</td>
+            <td>{environment || measured ? "" : row.cells.toLocaleString()}</td>
+            <td>
+              {!environment && (
+                <button onClick={() => compareRole(row.input, row.output)}>Primary role</button>
+              )}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -134,6 +169,7 @@ function WebFilter({
           value={query.mode}
           onChange={(e) => setQuery((q) => ({ ...q, mode: e.target.value as WebMode, offset: 0 }))}
         >
+          <option value="measured">Measured cellular flow</option>
           <option value="primary">Primary cell roles</option>
           <option value="supported">All supported enzyme routes</option>
           <option value="environment">Environmental pathways</option>
@@ -169,23 +205,33 @@ function WebResult({
   web,
   focus,
   setQuery,
+  compareRole,
 }: {
   web: ChemicalWeb;
   focus: (id: number) => void;
   setQuery: SetQuery;
+  compareRole: Props["compareRole"];
 }) {
   return (
     <>
       <p className="web-census">
         Tick {web.tick.toLocaleString()} · {web.population.toLocaleString()} living cells ·{" "}
-        {web.unassigned.toLocaleString()} without a funded conversion
+        {web.mode !== "measured" &&
+          `${web.unassigned.toLocaleString()} without a funded conversion`}
       </p>
+      {web.window && <WindowLabel window={web.window} />}
       <ChemicalWebGraph web={web} focus={focus} />
       <p className="web-caption">
         Select a chemical to follow its incoming and outgoing routes. Ringed nodes are present in
         releasing reservoirs. Colors match the enzyme map views.
       </p>
-      <RouteTable web={web} focus={focus} />
+      <RouteTable web={web} focus={focus} compareRole={compareRole} />
+      {web.mode === "measured" && (
+        <>
+          <h3>Whole-population uptake and export</h3>
+          <MaterialActivity activity={web.activity ?? null} seconds={web.window?.seconds ?? 0} />
+        </>
+      )}
       <div className="web-pages">
         <button
           disabled={web.offset === 0}

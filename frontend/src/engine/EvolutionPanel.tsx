@@ -17,6 +17,7 @@ const STOCKS = [
   "Enzyme 1",
   "Enzyme 2",
   "Enzyme 3",
+  "Photoreceptor",
 ];
 const EFFORTS = [
   "Swim",

@@ -6,6 +6,10 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
+pub const STOCKS: usize = 16;
+pub const PHOTO_STOCK: usize = 15;
+pub type Body = [f64; STOCKS];
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cell {
@@ -23,13 +27,14 @@ pub struct Cell {
     pub x: f64,
     pub y: f64,
     pub heading: f64,
-    pub body: [f64; 15],
+    pub body: Body,
     pub bound_material: crate::inventory::Inventory,
     pub inventory: crate::inventory::Inventory,
     pub energy: f64,
     pub damage: f64,
     pub brain: State,
     pub receptors: [f64; 4],
+    pub photoreceptor: f64,
     pub contacts: [f64; 4],
     pub inputs: Vec<f32>,
     pub action: Action,
@@ -114,6 +119,7 @@ impl Cell {
             damage: 0.,
             brain: State::default(),
             receptors: [0.; 4],
+            photoreceptor: 0.,
             contacts: [0.; 4],
             inputs: vec![0.; INPUTS],
             action: Action::default(),
@@ -129,7 +135,7 @@ impl Cell {
     }
     /// Explicit diagnostic grant/removal, preserving the existing material proportions.
     /// Ordinary growth and inheritance must transfer actual funded mixtures instead.
-    pub fn set_fixture_body(&mut self, body: [f64; 15]) {
+    pub fn set_fixture_body(&mut self, body: Body) {
         self.bound_material
             .scale(body.iter().sum::<f64>() / self.bound_material.material().max(1e-30));
         self.body = body;
@@ -202,7 +208,11 @@ impl Cell {
         {
             return Err("Invalid cell state".into());
         }
-        if self.receptors.iter().any(|x| !x.is_finite() || *x < 0.)
+        if self
+            .receptors
+            .iter()
+            .chain([&self.photoreceptor])
+            .any(|x| !x.is_finite() || *x < 0.)
             || self.contacts.iter().any(|x| !(0. ..=1.).contains(x))
             || self.brain.last_energy.is_some_and(|x| !x.is_finite())
             || self
@@ -219,7 +229,7 @@ impl Cell {
     }
 }
 
-pub fn maintenance_rate(body: &[f64; 15], damage: f64, c: &Config) -> f64 {
+pub fn maintenance_rate(body: &Body, damage: f64, c: &Config) -> f64 {
     (1. + damage)
         * (body[0] * c.maintenance
             + body[1] * c.motor_maintenance

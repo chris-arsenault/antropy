@@ -250,7 +250,7 @@ function validateLayers(next: ViewOptions) {
   validateColor(next);
   if (
     !Array.isArray(next.layers) ||
-    next.layers.length !== 6 ||
+    next.layers.length !== 10 ||
     next.layers.some((v) => typeof v !== "boolean")
   )
     throw new Error("Invalid field layers");
@@ -269,8 +269,13 @@ const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => un
   },
   view: setView,
   chemicalWeb(p) {
-    requireSession().chemicalWeb.select(p);
+    requireSession().setChemicalWeb(p);
     publish();
+  },
+  phenotype(p) {
+    requireSession().setPhenotype(p);
+    publish();
+    draw(performance.now());
   },
   frame: present,
   running(p) {

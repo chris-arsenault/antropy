@@ -22,6 +22,8 @@ pub struct Source {
     pub wait: f64,
     pub rate: f64,
     pub inventory: Vec<f64>,
+    /// External supply composition, not stored material or a mechanical projection.
+    pub replenishment: Vec<f64>,
     #[serde(skip)]
     pub footprint: Vec<(usize, f64)>,
     #[serde(skip)]
@@ -37,16 +39,18 @@ impl Source {
         let remaining = c.source_lifetime * duration * (0.5 + rng.unit());
         let rate = c.source_rate * (0.4 + 1.2 * rng.unit()) / duration.sqrt() * habitat.richness;
         let shares = composition(&habitat, tick, c);
-        let mut inventory = vec![0.; SPECIES];
+        let mut replenishment = vec![0.; SPECIES];
         for (i, &s) in c.source_species.iter().enumerate() {
-            inventory[s] += remaining * rate * shares[i];
+            replenishment[s] += shares[i];
         }
+        let inventory = replenishment.iter().map(|q| remaining * rate * q).collect();
         let mut source = Self {
             habitat,
             remaining,
             wait: 0.,
             rate,
             inventory,
+            replenishment,
             footprint: vec![],
             kernel: Default::default(),
             material: Default::default(),
@@ -106,6 +110,7 @@ impl Source {
     ) -> bool {
         let c = step.config;
         let chemistry = step.chemistry;
+        self.evolve_replenishment(step);
         let [dx, dy] = step.response.velocity.map(|v| v * c.dt);
         let mut changed = dx != 0. || dy != 0.;
         if dx != 0. || dy != 0. {
@@ -119,7 +124,7 @@ impl Source {
             if self.wait > 0. {
                 return changed;
             }
-            *self = Self::new(self.habitat.clone(), step.tick, c, rng, field);
+            self.renew(step.tick, c, rng);
             changed = true;
             for (s, q) in self.inventory.iter().enumerate() {
                 ledger.supplied += q;
@@ -132,7 +137,7 @@ impl Source {
         let total = self.material.total;
         let (conversion, mask) = step.operators.inventory_active(
             &mut self.inventory,
-            step.response.signal,
+            crate::reaction_medium::Medium::illuminated(step.response.signal, step.response.light),
             c.dt * c.weathering_rate * c.source_processing * step.exposure,
             // Screen conversion against the owner's inventory scale, not geographic area.
             // Retain tiny owned stocks; skip changes below f32 delivery precision.
@@ -160,6 +165,47 @@ impl Source {
             self.wait = -(1. - rng.unit()).ln() * c.source_gap;
         }
         changed
+    }
+
+    fn evolve_replenishment(&mut self, step: &crate::source_medium::Step<'_>) {
+        let c = step.config;
+        if c.source_epochs.is_some() || c.source_zones.is_some() {
+            return; // Explicit experimental boundary conditions own their supply schedule.
+        }
+        step.operators.inventory_active(
+            &mut self.replenishment,
+            crate::reaction_medium::Medium::illuminated(step.response.signal, step.response.light),
+            c.dt * c.weathering_rate * c.source_processing * step.exposure,
+            f32::EPSILON as f64,
+            u64::MAX,
+        );
+        // This is a normalized boundary distribution; work/material enter only at renewal.
+        let total: f64 = self.replenishment.iter().sum();
+        for q in &mut self.replenishment {
+            *q /= total;
+        }
+    }
+
+    fn renew(&mut self, tick: u64, c: &Config, rng: &mut Random) {
+        if c.source_epochs.is_some() || c.source_zones.is_some() {
+            self.replenishment.fill(0.);
+            for (&s, q) in c
+                .source_species
+                .iter()
+                .zip(composition(&self.habitat, tick, c))
+            {
+                self.replenishment[s] += q;
+            }
+        }
+        let duration = 0.5 + 4. * rng.unit().powi(2);
+        self.remaining = c.source_lifetime * duration * (0.5 + rng.unit());
+        self.rate =
+            c.source_rate * (0.4 + 1.2 * rng.unit()) / duration.sqrt() * self.habitat.richness;
+        self.wait = 0.;
+        for (q, share) in self.inventory.iter_mut().zip(&self.replenishment) {
+            *q = self.remaining * self.rate * share;
+        }
+        self.material.valid = false;
     }
 }
 pub(crate) fn composition(h: &Habitat, tick: u64, c: &Config) -> Vec<f64> {

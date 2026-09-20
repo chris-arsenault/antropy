@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-20 — Material habitats, local light and observation
+
+- Integrate shared two-scale attraction, reversible material retention, evolving reservoir
+  replenishment and multiscale public chemistry in physical checkpoint v32. Initial0/136
+  feedstocks are seed choices, not ordinary renewal resets. Keep negative public-food findings.
+- Compose illumination across spatial axes and30k/90k/310k-tick periods; render darkness over
+  the world. Add paid local photoreception with44 controller inputs and16 funded stocks.
+- Add bounded measured chemical flows, phenotype comparisons, descendant pins and retained
+  history. Preserve borrowed worker rendering and independent map controls.
+- Expire older recovery saves within256MiB instead of pausing when preferred counts do not
+  fit. Keep the newest valid save and prioritize older manual points over automatic points.
+- Investigate the reported reload speed gain. Forced JavaScript collection did not improve
+  the short mature-state check; WASM allocation and save costs are recorded, with cause unresolved.
+- Reconcile current contracts, decisions and failed experiments; archive completed execution
+  plans and close stale environmental/illumination queues. Multicore remains paused.
+
+The entries below retain their original implementation versions; they are not current defaults.
+
 ## 2026-09-07 — Modular runtime and independent environment controls
 
 - Extract typed deterministic kernel, feature registrations and local controller adapters.

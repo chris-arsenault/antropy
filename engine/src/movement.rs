@@ -18,7 +18,13 @@ pub fn motor_limits(cell: &Cell, c: &Config, mobility: f64) -> (f64, f64) {
     ((power * c.motor_efficiency * mobility / drag).sqrt(), power)
 }
 /// Efforts specify velocity fractions; their squared norm prices the requested motion.
-pub fn motor_work_rate(body: &[f64; 15], damage: f64, swim: f64, turn: f64, c: &Config) -> f64 {
+pub fn motor_work_rate(
+    body: &crate::organism::Body,
+    damage: f64,
+    swim: f64,
+    turn: f64,
+    c: &Config,
+) -> f64 {
     body[1] * c.motor_power_density * (1. - damage) * (swim * swim + 0.25 * turn * turn)
 }
 pub fn passive(

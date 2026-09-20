@@ -7,6 +7,7 @@ pub struct Buffers {
     pub cells: Vec<f32>,
     pub field: Vec<f32>,
     body_signal: Vec<[f64; 2]>,
+    illumination: crate::illumination::Illumination,
     pub markers: Vec<f32>,
     pub descriptor: [u32; 13],
     selection: Option<(u32, usize)>,
@@ -22,7 +23,7 @@ impl Buffers {
         field: bool,
         selected: u64,
     ) -> Result<(), String> {
-        if kind > 5 || species >= 256 || color > 15 {
+        if kind > 6 || species >= 256 || color > 15 {
             return Err("Invalid render selection".into());
         }
         self.colors.prepare(w, color, selected);
@@ -43,7 +44,10 @@ impl Buffers {
                 c.damage as f32,
                 c.id as f32,
                 u8::from(c.born > 0 && w.tick - c.born < 50) as f32,
-                c.brain.task as f32,
+                w.observer
+                    .as_ref()
+                    .filter(|o| o.highlight)
+                    .map_or(-1., |o| u8::from(o.selected(c)) as f32),
             ]);
         }
         self.markers.clear();
@@ -75,12 +79,16 @@ impl Buffers {
                 ]);
             }
         }
-        let channels = if kind == 5 { 8 } else { 1 };
+        let channels = if kind >= 5 { 8 } else { 1 };
         if field
             || self.selection != Some((kind, species))
             || self.field.len() != w.field.nx * w.field.ny * channels
         {
             let area = w.field.spacing * w.field.spacing;
+            if kind >= 5 {
+                self.illumination
+                    .prepare(w.seed, w.tick, &w.config, w.field.nx, w.field.ny);
+            }
             if kind == 5 {
                 self.body_signal.resize(w.field.nx * w.field.ny, [0.; 2]);
                 self.body_signal.fill([0.; 2]);
@@ -92,32 +100,40 @@ impl Buffers {
             }
             self.field.clear();
             for (i, node) in w.field.amounts.as_chunks::<256>().0.iter().enumerate() {
-                if kind == 5 {
-                    let [matter, energy] =
-                        w.field.material_values(i, &w.chemistry).map(|q| q / area);
+                if kind >= 5 {
+                    let light = self.illumination.node(i);
+                    let [matter, energy] = if kind == 6 {
+                        light
+                    } else {
+                        w.field.material_values(i, &w.chemistry).map(|q| q / area)
+                    };
                     self.field.extend([
                         matter as f32,
                         energy as f32,
-                        (w.field.impedance[i] + w.field.source_load[i]) as f32,
-                        w.field.stress[i] as f32,
+                        light[0] as f32,
+                        light[1] as f32,
                         node[species] / area as f32,
                         (1. - crate::movement::mobility(
                             w.field.impedance[i] + w.field.source_load[i],
                             w.config.movement_impedance,
                         )) as f32,
                         (w.field.stress[i] / (w.config.stress_k + w.field.stress[i])) as f32,
-                        crate::weathering::exposure(
-                            crate::weathering::strength(crate::weathering::signal(
-                                std::array::from_fn(|k| {
-                                    w.field.signal[i][k]
-                                        + self.body_signal[i][k]
-                                        + w.field.source_signal[i][k]
-                                }),
-                            )),
-                            w.field.impedance[i] + w.field.source_load[i],
-                            w.config.habitat_feedback,
-                            w.config.diffusion_impedance,
-                        ) as f32,
+                        if kind == 6 {
+                            0.
+                        } else {
+                            crate::weathering::exposure(
+                                crate::weathering::strength(crate::weathering::signal(
+                                    std::array::from_fn(|k| {
+                                        w.field.signal[i][k]
+                                            + self.body_signal[i][k]
+                                            + w.field.source_signal[i][k]
+                                    }),
+                                )),
+                                w.field.impedance[i] + w.field.source_load[i],
+                                w.config.habitat_feedback,
+                                w.config.diffusion_impedance,
+                            ) as f32
+                        },
                     ]);
                     continue;
                 }
@@ -159,6 +175,9 @@ mod tests {
         let mut control = w.clone();
         let mut buffers = Buffers::default();
         for color in 0..16 {
+            w.config.illumination_contrast = 0.8;
+            control.config.illumination_contrast = 0.8;
+            buffers.prepare(&w, 6, 0, color, true, 1).unwrap();
             buffers.prepare(&w, 5, 0, color, true, 1).unwrap();
             buffers.prepare(&w, 4, 0, color, true, 1).unwrap();
             w.step();
@@ -210,6 +229,9 @@ mod tests {
                 < 1e-6
         );
         assert_eq!(buffers.field[6], 0.5);
+        let light = crate::illumination::at(&w, w.field.spacing / 2., w.field.spacing / 2.);
+        assert!((buffers.field[2] as f64 - light[0]).abs() < 1e-6);
+        assert!((buffers.field[3] as f64 - light[1]).abs() < 1e-6);
         let ambient =
             crate::weathering::strength(crate::weathering::signal(std::array::from_fn(|k| {
                 w.field.signal[0][k] + buffers.body_signal[0][k] + w.field.source_signal[0][k]

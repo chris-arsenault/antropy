@@ -79,6 +79,9 @@ pub fn environment(w: &World) -> Result<(), String> {
                 .any(|v| !v.is_finite() || *v < 0.)
             || s.inventory.len() != 256
             || s.inventory.iter().any(|q| !q.is_finite() || *q < 0.)
+            || s.replenishment.len() != 256
+            || s.replenishment.iter().any(|q| !q.is_finite() || *q < 0.)
+            || (s.replenishment.iter().sum::<f64>() - 1.).abs() > 1e-10
         {
             return Err("Invalid source state".into());
         }

@@ -6,11 +6,15 @@ unverified. Development establishes physical opportunities; it does not precompu
 future community.
 
 The September 15 unattended tab crash prompted a separate
-[memory investigation and repair](../LONG-RUN-RELIABILITY-PLAN.md). Active development-page
+[memory investigation and repair](plans/archive/LONG-RUN-RELIABILITY-PLAN.md). Active development-page
 checks reproduced retained React performance records and rapid renderer-process growth.
 Development startup now releases completed React timing records after observer delivery;
 the simulation and shared WASM renderer are unchanged. The lost tab's exact cause remains
-unverified without its runtime trace. Current repair measurements belong to that record.
+unverified without its runtime trace. Those version-specific repair measurements belong to that record. The separate September20
+[reload slowdown investigation](session-runtime-review.md) does not reproduce a JavaScript
+collection benefit: forced GC left throughput near8 ticks/s in the short isolated test. WASM
+high-water memory and multi-second save costs remain operational concerns; the user's reported
+8→40 improvement is not yet causally explained.
 
 The September 14 [reliability evidence](design/chemistry/reliability-results.md) adds browser
 retention, save-concurrency and presentation measurements. The older headless figures below
@@ -19,9 +23,9 @@ and 32.6 during constructed growth, using software graphics, full layers and exp
 Presentation rates are approximately 15 and 9 frames/s. Cold saves interrupt stepping; these
 figures do not certify the user's device or unattended days/weeks operation.
 
-## Measured operating workload
+## Historical operating workload — September 14
 
-[Current measurements](design/chemistry/numerical-results.md), ledger 3666–3668, use 100 ticks
+[Version-specific measurements](design/chemistry/numerical-results.md), ledger 3666–3668, use 100 ticks
 after ten warm-up ticks, 320 × 240 units, mesh 2, all 256 external channels, distinct genomes
 and private learning. Packed five-layer rendering preparation, 25-tick census and selected
 inspection are included.
@@ -44,14 +48,26 @@ Earlier TypeScript measurements, including the 52.6-tick/s default and quantizat
 remain in [population performance](design/chemistry/population-performance.md).
 They do not describe the current engine.
 
+## Current operating evidence
+
+V32 fixture measurements reach63.78 ticks/s at48 cells and32.00 at2,000; the mature3,774-cell
+checkpoint reaches17.79 headless with measured observation closed and15.95 active. These loads
+are different and cannot be used as a time-series speed comparison. See [habitat evidence](material-habitats.md)
+and [session measurements](session-runtime-review.md). Current mature-state throughput misses
+the30-tick target on this host. The older figures below must not be presented as current capacity.
+
 ## Recovery behavior
 
 The worker saves every 30 wall seconds while running and on pause; visibility/page-exit attempts
-are best effort. IndexedDB transactions retain six automatic and two manual compressed packages
-within 256 MiB. Each raw physical checkpoint is limited to 192 MiB. Failed saves pause the
+are best effort. IndexedDB transactions retain up to six automatic and two manual compressed packages
+within 256 MiB. The September20 repair removes the former requirement that all preferred save
+counts fit before expiry: that requirement paused the3,774-cell run when five roughly53MiB
+packages exceeded the budget. Four such packages fit. The newest save always takes priority; older manual saves have priority over older
+automatic saves, and only points fitting the remaining byte budget are retained. Each raw physical
+checkpoint is limited to 192 MiB. Failed saves pause the
 simulation and preserve the last good save and live world. Explicit restore starts paused.
 
-V11 physical bytes contain chemistry, sources, bodies, installed machinery identity, neural state, inherited genomes, parentage,
+V32 physical bytes contain chemistry, sources, bodies, installed machinery identity, neural state, inherited genomes, parentage,
 random streams, integration clock, ledgers and interventions. Gzip packages separately include
 bounded observations and execution provenance. Old physical schemas are rejected; no adapter
 guesses missing chemistry. The previous manual-save store is untouched and never used as fallback.

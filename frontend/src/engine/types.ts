@@ -9,6 +9,10 @@ export interface EngineConfig extends Record<string, unknown> {
   dt: number;
   physiologyInterval: number;
   weatheringRate: number;
+  illuminationContrast: number;
+  illuminationFastPeriod: number;
+  illuminationSlowPeriod: number;
+  illuminationModulationPeriod: number;
   habitatFeedback: boolean;
   founders: number;
   chemistrySeed: number;
@@ -176,6 +180,7 @@ export interface CellState {
   damage: number;
   inputs: number[];
   receptors: number[];
+  photoreceptor: number;
   contacts: number[];
   brain: { hidden: number[]; traces: number[]; task: number; lastEnergy: number | null };
   action: { swim: number; turn: number; repair: number; transport: number[] };
@@ -208,6 +213,7 @@ export interface Inspection {
   impedance: number | null;
   mobility: number | null;
   weathering: [number, number, number] | null;
+  illumination: [number, number] | null;
   expressed: Genotype["chromosomes"][number] | null;
   local: number[] | null;
   relationships: {
@@ -294,6 +300,7 @@ export interface RegionSummary extends Omit<Region, "members"> {
   count: number;
 }
 export interface HistoryPoint {
+  phenotype?: import("./phenotypes").PhenotypePoint;
   membrane: number[];
   tick: number;
   population: number;
@@ -307,6 +314,7 @@ export interface HistoryPoint {
   regionCount: number;
 }
 export interface ObservationState {
+  pin?: import("./phenotypes").SavedPin | null;
   recent: BehaviorSample[];
   history: HistoryPoint[];
   runId: string;
@@ -321,6 +329,7 @@ export interface ChemicalOverview {
   rows: { id: number; amount: number; peak: number }[];
 }
 export interface LiveStatus {
+  phenotype: import("./phenotypes").PhenotypeReport | null;
   chemicalWeb: import("./chemicalWeb").ChemicalWeb | null;
   chemicals: ChemicalOverview;
   workerWork: {

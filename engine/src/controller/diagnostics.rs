@@ -1,6 +1,20 @@
 //! Fixture authoring stays behind the controller boundary; inference remains ordinary act().
 use super::*;
 
+pub fn authored(
+    logits: [f32; OUTPUTS],
+    response: Option<(usize, usize, f32)>,
+) -> Result<Genome, String> {
+    if response.is_some_and(|(i, o, gain)| {
+        i >= INPUTS || o >= OUTPUTS || !gain.is_finite() || gain.abs() > 16.
+    }) {
+        return Err("Invalid diagnostic response".into());
+    }
+    let g = diagnostic(logits, response);
+    validate(&g)?;
+    Ok(g)
+}
+
 /// Fixed capacity-fixture variation; callers do not inspect the controller representation.
 pub fn perturb_weights(genome: &mut Genome, rng: &mut Random) {
     mutate_vector(&mut genome.weights, rng, 0.1, 0.03, 16.);

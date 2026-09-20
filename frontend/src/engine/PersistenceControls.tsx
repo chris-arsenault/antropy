@@ -65,9 +65,10 @@ export function PersistenceControls({ bridge, ready }: { bridge: Bridge; ready: 
       </label>
       <p role="status">{message}</p>
       <p>
-        Keeps six automatic and two manual recovery points across runs, within 256 MiB. Export keeps
-        a separate copy with ancestry and retained observation. Restores start paused. Sleep or
-        browser suspension can stop execution; recovery continues from the last completed save.
+        Keeps up to six automatic and two manual recovery points across runs, within 256 MiB. Older
+        points expire as space is needed; the newest save takes priority. Export keeps a separate
+        copy with ancestry and retained observation. Restores start paused. Sleep or browser
+        suspension can stop execution; recovery continues from the last completed save.
       </p>
     </details>
   );

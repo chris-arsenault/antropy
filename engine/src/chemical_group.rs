@@ -79,6 +79,14 @@ impl Action {
         result.axes[axis].swap(lower, lower + 1);
         result
     }
+
+    /// Coordinate-bit exchange: a total involution at one of four dyadic scales.
+    pub fn dyadic(axis: usize, bit: usize) -> Self {
+        assert!(axis < 2 && bit < 4);
+        let mut result = Self::identity();
+        result.axes[axis] = std::array::from_fn(|i| (i ^ (1 << bit)) as u8);
+        result
+    }
 }
 
 /// D4 action on continuous recognition parameters, not a projection.

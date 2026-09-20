@@ -21,6 +21,50 @@ fn config() -> Config {
 }
 
 #[test]
+fn replenishment_keeps_local_history_through_empty_interval_and_restore() {
+    let mut c = config();
+    c.founders = 0;
+    c.source_count = 1;
+    c.source_drift = 0.;
+    c.source_priming = 0.;
+    let mut w = World::new(27, c).unwrap();
+    w.sources[0].inventory.fill(0.);
+    w.sources[0].remaining = 0.;
+    w.sources[0].wait = 10.;
+    let seed = w.sources[0].replenishment.clone();
+    for n in 0..w.field.nx * w.field.ny {
+        w.field.add(n, 15, 4., &w.chemistry);
+    }
+    source_medium::project(&mut w);
+    let held = w.held();
+    for _ in 0..8 {
+        source_medium::advance(&mut w);
+    }
+    assert_eq!(held, w.held()); // Boundary composition adds no material or work.
+    assert_eq!(w.ledger.supplied, 0.);
+    assert!(w.field.source_load.iter().all(|q| *q == 0.));
+    assert_ne!(seed, w.sources[0].replenishment);
+    w.sources[0].wait = 0.;
+    w.config.source_processing = 0.;
+    let profile = w.sources[0].replenishment.clone();
+    let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
+    source_medium::advance(&mut w);
+    source_medium::advance(&mut restored);
+    assert_eq!(profile, w.sources[0].replenishment);
+    assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
+    let source = &w.sources[0];
+    let total: f64 = source.inventory.iter().sum();
+    for (q, share) in source.inventory.iter().zip(profile) {
+        assert!((q / total - share).abs() < 1e-12);
+    }
+    let after = w.held();
+    assert!((after.0 - held.0 - w.ledger.supplied).abs() < 1e-5);
+    assert!((after.1 - held.1 - w.ledger.supplied_energy).abs() < 1e-5);
+    w.sources[0].replenishment[0] = f64::NAN;
+    assert!(World::restore(&w.snapshot().unwrap()).is_err());
+}
+
+#[test]
 fn source_caches_match_owned_material_and_clear_retired_geography() {
     let mut w = World::new(27, config()).unwrap();
     for _ in 0..12 {
@@ -119,7 +163,7 @@ fn common_conversion_preserves_inventory_and_field_agreement_without_cascades() 
         }
         assert!((stored.iter().sum::<f64>() - 4.).abs() < 1e-12);
         assert!(stored.iter().all(|v| *v >= 0.));
-        assert_eq!(stored[32], 0.);
+        assert_eq!(stored[17], 0.); // Two-bit products cannot cascade in one update.
         assert!((account[1] - climate.heat).abs() < 1e-12);
     }
 }
@@ -134,7 +178,8 @@ fn stored_inventory_changes_without_release_and_source_responses_are_frozen() {
     let species = (0..256)
         .find(|&s| {
             let signal = crate::weathering::signal(chemistry.properties[s].interaction);
-            (0..4).any(|j| op.heat[j][s] > 0. && op.local(s, j, signal).0 > 0.)
+            (0..crate::weathering::BRANCHES)
+                .any(|j| op.heat[j][s] > 0. && op.local(s, j, signal).0 > 0.)
         })
         .unwrap();
     c.source_species = vec![species];
@@ -298,7 +343,8 @@ fn moving_sources_rebuild_exactly_and_account_for_inventory_conversion_across_re
     let species = (0..256)
         .find(|&s| {
             let signal = crate::weathering::signal(chemistry.properties[s].interaction);
-            (0..4).any(|j| op.heat[j][s] > 0. && op.local(s, j, signal).0 > 0.)
+            (0..crate::weathering::BRANCHES)
+                .any(|j| op.heat[j][s] > 0. && op.local(s, j, signal).0 > 0.)
         })
         .unwrap();
     c.source_species = vec![species];

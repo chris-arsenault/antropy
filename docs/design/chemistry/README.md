@@ -2,20 +2,22 @@
 
 Status: fresh production World implemented September 15, with environmental chemistry added
 September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
-owns the current artificial laws and checkpoint v27. Definition v5 corrects the potential
+owns the current artificial laws and checkpoint v32. [Material-supported habitats](../../material-habitats.md)
+record reversible retention, evolving source composition and multiscale public transformations.
+Definition v5 corrects the potential
 landscape; recognition-independent actions and explicitly funded environmental returns are
-tracked in the [geometry correction](../../../MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction). The
-[symmetry correction](../../../MATHEMATICAL-SYMMETRY-PLAN.md) records shared geometry,
+tracked in the [geometry correction](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction). The
+[symmetry correction](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md) records shared geometry,
 funding, mutation and matched runtime measurements. [Bound material](../../bound-material.md)
 preserves chemical identity through the body cycle; the [physical coupling correction](../../physical-coupling-correction.md)
-records the retained mass/capacity/motor costs. The [correction plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign)
-records current verification. Historical [source evidence](mobile-source-results.md) records medium-driven reservoir
+records the retained mass/capacity/motor costs. The [correction plan](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-redesign)
+retains version-specific verification. Historical [source evidence](mobile-source-results.md) records medium-driven reservoir
 motion, transformed release and short calibration. [Environmental evidence](environmental-results.md) records weathering,
 shelter, short opportunities and the overnight investigation; [rebuild evidence](rebuild-results.md)
 preserves the preceding implementation's measurements.
 [Computable chemistry](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
-govern formula selection. The [canonical math plan](../../../MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order)
-tracks current transformation-algebra work; the [rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md)
+govern formula selection. The [canonical math plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order)
+records completed transformation-algebra work; the [rebuild plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 retains completed integration evidence.
 Design rules around shared manifold reductions, vector fields, diffusion plus drift and bounded
 transformations. Physics supplies concepts; reproducing a known physical process is not the target.
@@ -37,18 +39,19 @@ substrate. They are not species categories or separate action systems.
 | --- | --- |
 | [Computational foundation](computational-foundation.md) | Governing design: composed chemical-space computation, accounts, costs and decision ownership |
 | [Transformation algebra white paper](transformation-algebra.md) | Group actions, discrete representation and irreversible dynamics; design contract for the canonical plan's selected v23 implementation |
-| [Regenerative initial ecosystem white paper](regenerative-ecosystem.md) | Implemented v27 design: funded four-founder circulation, shared environmental work and finite-owner pressure; bounded evidence in the canonical plan, human review pending |
+| [Regenerative initial ecosystem white paper](regenerative-ecosystem.md) | Implemented v27 design: funded four-founder circulation, shared environmental work and finite-owner pressure; bounded version-specific evidence in the archived math plan |
 | [Current specification responsibilities](../../specs/digital-chemistry/README.md) | Current contracts and explicitly historical M0 equations/evidence |
 | [Substrate and accounting](substrate.md) | Chemical properties, generation constraints, fields, sources, turnover, reactions, construction and death |
 | [Machinery and controllers](machinery.md) | Fixed slots, funded capacities, local observations/actions, mutation and inheritance |
 | [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
 | [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
-| [Current measurements](rebuild-results.md) | Fresh-core registrations, bounded mechanisms, capacity, default startup and storage results |
+| [Current habitat measurements](../../material-habitats.md) | V32 mechanisms, cost and negative public-food result |
+| [Rebuild measurements](rebuild-results.md) | Historical fresh-core registrations, mechanisms, capacity and storage |
 | [v27 runtime optimization](runtime-optimization.md) | Exact weathering/stencil work reductions, archived checkpoint equality, matched timings and remaining limits |
 | [Environmental chemistry](environmental-results.md) | Geographic weathering, extracellular conversion, paid shelter, short controls and overnight evidence |
 | [Mobile sources](mobile-source-results.md) | Medium-dependent motion and release, bounded cost and short calibration |
 | [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
-| [Reliability evidence](reliability-results.md) | Current browser failures/limits, chemical-space revision and ordinary habitat checks |
+| [Reliability evidence](reliability-results.md) | Historical browser failures/limits and their repairs; [current session investigation](../../session-runtime-review.md) adds mature-state costs |
 | [Installed machinery](installed-machinery.md) | Inherited targets, retained function, paid refitting and historical findings |
 | [Diagnostic continuity](diagnostic-continuity.md) | Genealogy, inherited/body comparisons and bounded recent/longitudinal observations |
 | [Migration and retirement](numerical-migration.md) | Current commands, reports, retained semantics and removed implementations |
@@ -95,7 +98,7 @@ behavior; the computational foundation governs revised formulas and coherent con
 | Decision | Implemented first version | Reason |
 | --- | --- | --- |
 | Slot counts | Four receptors, four transporters and four enzymes per chromosome | Accommodates several local cues and import/export/reaction choices without evolving genome length |
-| Machinery control | Fixed slot-indexed neural channels; 39 inputs, 24 recurrent units, nine outputs; enzymes constitutive | Makes the controller boundary explicit without named chemical actions |
+| Machinery control | Fixed slot-indexed neural channels; 44 inputs, 24 recurrent units, nine outputs; enzymes constitutive; separately funded photoreception | Makes the controller boundary explicit without named chemical actions |
 | New capabilities | Retarget and reinvest in existing slots through local mutation; no insertion/deletion | Keeps genome architecture bounded; existing slots can become quiet and later become useful |
 | Biomass energy | One fixed energy density for built material, equal to the configured decomposition species' potential | Closes the construction/death energy cycle without requiring a biomass ingredient |
 | Assimilation | Any internal species pays assembly energy and any uphill energy gap; excess chemical potential becomes heat | Prevents generic construction from granting free energy or bypassing metabolism |
@@ -132,9 +135,9 @@ will emerge. Measure a missing link before adding a new reaction class.
 
 The user authorized the complete replacement. It is implemented through one production kernel,
 with short constructed opportunity checks and explicit rejection of old physical checkpoints.
-The [rebuild plan](../../../DIGITAL-CHEMISTRY-PLAN.md) is complete; the
-[environmental plan](../../../ENVIRONMENTAL-ECOLOGY-PLAN.md) retains its pending human review.
-The [source plan](../../../MOBILE-SOURCES-PLAN.md) owns mobile reservoir implementation and
+The [rebuild plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) is complete; the
+[environmental plan](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md) retains its pending human review.
+The [source plan](../../plans/archive/MOBILE-SOURCES-PLAN.md) owns mobile reservoir implementation and
 short calibration. The restored-resolution saturated workloads remain below the200ticks/s target, and
 large saturated cases also miss30ticks/s. These accepted operating limits remain explicit.
 Isolated browser rendering/save/fault checks have run; human review of the new environmental

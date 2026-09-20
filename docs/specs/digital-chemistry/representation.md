@@ -10,7 +10,7 @@ govern execution. [ADR 0022](../../adr/0022-computable-chemistry.md) and the
 ## M0 replacement handoff
 
 The numerical compiler described below was deleted on September 15, 2026. This is a
-historical representation record; the [restart work order](../../../DIGITAL-CHEMISTRY-PLAN.md)
+historical representation record; the [restart work order](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 governs. Deleted source is available at pre-removal Git commit
 `41fd5d2edb06be5d6ab0c342ffa4fe1456baa87c`, under `engine/src/chemical_operators.rs`.
 

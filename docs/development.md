@@ -122,21 +122,21 @@ chemical injury or motor/scheduled-resource questions. Historical batch defaults
 
 ## Persistence, reporting and verification
 
-Physical checkpoint v19 preserves chemical definitions, source response settings, environmental configuration, inventories,
+Physical checkpoint v32 preserves chemical definitions, source response settings, environmental configuration, inventories,
 installed stocks and identity, immutable genes,
 private state, random streams, ledgers, complete parentage and bounded browser history. Older
-versions are rejected. Recovery retains six automatic/two manual points within 256 MiB and
+versions are rejected. Recovery retains up to six automatic/two manual points within256MiB, expiring older points to fit and
 pauses on failure; raw snapshots are limited to 192 MiB. Field amounts use float32 with explicit rounding accounts; mesh geometry bounds allocation. Browser suspension, quota behavior and long-run responsiveness remain open.
 The separately versioned browser observation package remains v11.
 
 The registered environmental investigation reuses `runRecorded`, optional lineage traces and
 the existing ledger. Its `harness/numerical/habitatBatch.ts` entry point has separate `pilot`
 and `main` stages; inspect all pilots before invoking main. The fixed registration and resource
-bounds live in `ENVIRONMENTAL-ECOLOGY-PLAN.md`. New case directories are required. Run the
+bounds live in `docs/plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md`. New case directories are required. Run the
 read-only report with `python3 harness/habitat_report.py STUDY NEW_REPORT`; it advances no ticks.
 Headless recording limits do not change browser history or IndexedDB retention.
 
-The [mobile-source registration](../MOBILE-SOURCES-PLAN.md) uses six 300-tick cell-free probes
+The [mobile-source registration](plans/archive/MOBILE-SOURCES-PLAN.md) uses six 300-tick cell-free probes
 and ordinary comparisons capped at 3,000 ticks. From `frontend`, create a new study directory
 with `pnpm exec tsx harness/numerical/mobileSources.ts probe harness/artifacts/NEW-STUDY`.
 Inspect `probes.json` before invoking `case ROOT SEED DRIFT PROCESSING TICKS` on that entry point.
@@ -147,7 +147,7 @@ These are registered investigation tools; their available parameter values do no
 additional sweeps. Headless source output observations are prospective normal release rates,
 excluding expiration flushes; actual converted/released material is counted separately.
 
-The cell inspector exposes 39 local inputs, stocks/targets, chemical mixtures, U/D/I/S properties,
+The cell inspector exposes44 local chemical/optical/body inputs, stocks/targets, chemical mixtures, U/D/I/S properties,
 membrane compatibility, actual transfers, private recurrence and task state. Manual interventions
 remain diagnostic and durable. Views never select reproduction or feed hidden information to RNNs.
 

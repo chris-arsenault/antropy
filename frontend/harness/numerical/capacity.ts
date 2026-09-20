@@ -4,19 +4,25 @@ import { measureOperating, measureStorage } from "./performance";
 import { openLedger, recordRun } from "../lib/ledger";
 import { type Engine } from "../../src/engine/client";
 
+const standardWorkloads = [
+  [48, false],
+  [2000, false],
+  [2000, true],
+] as const;
+
 /** Fixed registered 48/2000/2000-growth workloads; no horizon expansion. */
-export async function runCapacity(output: string, supplied?: Engine) {
+export async function runCapacity(
+  output: string,
+  supplied?: Engine,
+  workloads: readonly (readonly [number, boolean])[] = standardWorkloads
+) {
   mkdirSync(output);
   const engine = supplied ?? (await loadEngine()),
     wasmDigest = captureEngine(output, engine),
     results: unknown[] = [],
     database = openLedger();
   try {
-    for (const [population, growth] of [
-      [48, false],
-      [2000, false],
-      [2000, true],
-    ] as const) {
+    for (const [population, growth] of workloads) {
       const world = engine.create(101, { founders: 0, sourceCount: 0, sourceSpecies: [] }),
         name = `${population}${growth ? "-growth" : ""}`;
       try {

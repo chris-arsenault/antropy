@@ -52,6 +52,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         "habitatSample" => Ok(crate::trace::habitat(w)),
         "summary" => Ok(observation::summary(w)),
         "chemicalOverview" => Ok(crate::chemical_observation::overview(w)),
+        "phenotype" => crate::phenotype_commands::execute(w, v),
         "chemicalWeb" => Ok(crate::chemical_roles::overview(
             w,
             &crate::chemical_roles::Query::parse(v)?,
@@ -193,7 +194,12 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             if logits.iter().any(|x| !x.is_finite() || x.abs() > 16.) {
                 return Err("Invalid diagnostic logits".into());
             }
-            Ok(json!(crate::controller::diagnostic(logits, None)))
+            let response =
+                serde_json::from_value(v.get("response").cloned().unwrap_or(Value::Null))
+                    .map_err(|e| e.to_string())?;
+            Ok(json!(crate::controller::diagnostics::authored(
+                logits, response
+            )?))
         }
         "definition" => Ok(
             json!({"seed":w.seed,"version":w.version,"config":w.config,"chemistry":w.chemistry,"sources":w.sources.iter().map(|s| &s.habitat).collect::<Vec<_>>(),"patchCenters":w.patch_centers}),

@@ -7,9 +7,11 @@ import { type Definition, type LiveStatus, type ObservationState, type Summary }
 import { emptySpatial, observe, regionSummaries, currentPopulation } from "./observation";
 import { ColdOperations } from "./coldOperations";
 import { ChemicalWebObservation } from "./chemicalWeb";
+import { PhenotypeObservation } from "./phenotypeObservation";
 
 export class Session {
   readonly chemicalWeb = new ChemicalWebObservation();
+  private phenotypes = new PhenotypeObservation();
   world: EngineWorld;
   definition: Definition;
   observation: ObservationState;
@@ -46,6 +48,16 @@ export class Session {
   setSpeed(speed: Speed) {
     this.speed = speed;
     this.pacer = createPacer(speed, performance.now());
+  }
+  setChemicalWeb(payload: Record<string, unknown>) {
+    this.chemicalWeb.select(payload);
+    this.phenotypes.configure(this.world, this.observation.spatial, this.chemicalWeb.measuring);
+  }
+  setPhenotype(payload: Record<string, unknown>) {
+    this.phenotypes.change(this.world, payload);
+    this.phenotypes.configure(this.world, this.observation.spatial, this.chemicalWeb.measuring);
+    this.observation.pin = this.phenotypes.pin;
+    if (payload.action === "pin") this.record(this.world.command<Summary>("summary"));
   }
   advance(now: number) {
     if (!this.running) return 0;
@@ -94,6 +106,7 @@ export class Session {
   }
   private sample() {
     this.population = observe(this.world, this.observation.spatial);
+    this.phenotypes.configure(this.world, this.observation.spatial, this.chemicalWeb.measuring);
     const tick = this.population.tick;
     this.observation.recent = [
       ...this.observation.recent.filter((p) => p.tick >= tick - 2000 && p.tick < tick),
@@ -108,6 +121,7 @@ export class Session {
   private record(summary: Summary) {
     const regions = regionSummaries(this.observation.spatial);
     const point = {
+      phenotype: this.phenotypes.point(this.world, summary.tick),
       tick: summary.tick,
       population: summary.population,
       biomass: summary.biomass,
@@ -139,6 +153,7 @@ export class Session {
       kernelDigest: this.engine.sourceDigest,
       chemicals: this.chemicals,
       chemicalWeb: this.chemicalWeb.read(this.world, summary.tick),
+      phenotype: this.phenotypes.read(this.world, summary.tick),
       summary,
       running: this.running,
       speed: this.speed,
@@ -163,10 +178,14 @@ export class Session {
   }
   private replace(next: EngineWorld, observation: ObservationState) {
     let definition: Definition, population: LiveStatus["population"];
+    const phenotypes = new PhenotypeObservation();
+    phenotypes.enabled = this.phenotypes.enabled;
     try {
       definition = next.command<Definition>("definition");
       population =
         observation.spatial.tick < 0 ? observe(next, observation.spatial) : currentPopulation(next);
+      phenotypes.restore(next, observation.pin ?? null);
+      phenotypes.configure(next, observation.spatial, this.chemicalWeb.measuring);
     } catch (error) {
       next.dispose();
       throw error;
@@ -177,6 +196,7 @@ export class Session {
     this.definition = definition;
     this.observation = observation;
     this.population = population;
+    this.phenotypes = phenotypes;
     this.lastSaved = -1;
     this.error = null;
     this.recovery = "Restored or new population; paused";

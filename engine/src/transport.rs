@@ -144,8 +144,9 @@ impl Exchange {
         field: &mut Field,
         chemistry: &Chemistry,
         sites: &[Vec<(usize, f64)>],
-        ledger: &mut Ledger,
+        accounting: (&mut Ledger, Option<&mut crate::phenotype::Observer>),
     ) {
+        let (ledger, mut observer) = accounting;
         let started = if self.profile {
             crate::abi::clock()
         } else {
@@ -185,6 +186,9 @@ impl Exchange {
                     .set(s, (cell.inventory[s] + q - export).max(0.));
                 cell.chemical_flows.imported[s] += q;
                 cell.chemical_flows.exported[s] += export;
+                if let Some(o) = observer.as_deref_mut() {
+                    o.transfer(cell.id, s, q, export);
+                }
                 incoming += q;
                 outgoing += export;
             }

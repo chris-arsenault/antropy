@@ -6,7 +6,7 @@ explains why the reflected/interpolated maps below do not represent SE(2) on the
 chemical state, and defines the outstanding design and evidence obligations.
 
 September 18, 2026. Execution plan: `7a658d05-7255-46a3-88c9-150b87344b7b`.
-This corrects the scope of the earlier [symmetry plan](../MATHEMATICAL-SYMMETRY-PLAN.md).
+This corrects the scope of the earlier [symmetry plan](plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md).
 The user's request for structured enzyme transformations was narrowed into geometric cost
 corrections while the transformation family and convergent founder products were retained.
 Those exclusions were implementation decisions, not user requirements.

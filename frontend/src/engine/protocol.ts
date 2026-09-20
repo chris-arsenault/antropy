@@ -6,6 +6,7 @@ export type Operation =
   | "observed"
   | "view"
   | "chemicalWeb"
+  | "phenotype"
   | "frame"
   | "running"
   | "speed"

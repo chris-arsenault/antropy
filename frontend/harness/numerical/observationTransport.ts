@@ -39,6 +39,7 @@ function displayFixture(world: EngineWorld): LiveStatus {
   }));
   return {
     chemicalWeb: null,
+    phenotype: null,
     summary,
     chemicals: world.command("chemicalOverview"),
     population,

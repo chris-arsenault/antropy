@@ -1,0 +1,110 @@
+//! Separable periodic external drive, locally sampled by funded photoreceptors.
+use crate::{config::Config, random::Random};
+use std::f64::consts::TAU;
+
+#[derive(Clone, Debug, Default)]
+pub struct Illumination {
+    geometry: (usize, usize),
+    basis: [Vec<[f64; 2]>; 2],
+    rotated: [Vec<[f64; 2]>; 2],
+    key: Option<(u64, u64, [f64; 4])>,
+    modulation: [f64; 2],
+    contrast: f64,
+}
+
+pub fn phases(seed: u64, seconds: f64, periods: [f64; 3]) -> [f64; 3] {
+    let mut rng = Random::new(seed ^ 0x6c696768745f7068);
+    periods.map(|period| TAU * (rng.unit() + seconds.rem_euclid(period) / period))
+}
+
+fn circle(angle: f64) -> [f64; 2] {
+    let (sin, cos) = angle.sin_cos();
+    [cos, sin]
+}
+
+fn subtract([a, b]: [f64; 2], [c, d]: [f64; 2]) -> [f64; 2] {
+    [a * c + b * d, b * c - a * d]
+}
+
+pub fn response(x: [f64; 2], y: [f64; 2], modulation: [f64; 2], contrast: f64) -> [f64; 2] {
+    // Tensor products: the cross axis gates each sweep, rather than adding an offset.
+    // Each factor is bounded by one and has zero mean on its own periodic axis.
+    [
+        1. + contrast * x[0] * subtract(y, modulation)[0],
+        1. + contrast * y[0] * subtract(x, modulation)[0],
+    ]
+}
+
+impl Illumination {
+    pub fn prepare(&mut self, seed: u64, tick: u64, c: &Config, nx: usize, ny: usize) {
+        self.contrast = c.illumination_contrast;
+        if self.contrast == 0. {
+            self.key = None;
+            return;
+        }
+        let periods = [
+            c.illumination_fast_period,
+            c.illumination_slow_period,
+            c.illumination_modulation_period,
+        ];
+        let key = (seed, tick, [c.dt, periods[0], periods[1], periods[2]]);
+        if self.geometry != (nx, ny) {
+            self.geometry = (nx, ny);
+            self.basis = [nx, ny].map(|size| {
+                (0..size)
+                    .map(|j| circle(TAU * (j as f64 + 0.5) / size as f64))
+                    .collect()
+            });
+            self.rotated = [vec![[0.; 2]; nx], vec![[0.; 2]; ny]];
+            self.key = None;
+        }
+        if self.key == Some(key) {
+            return;
+        }
+        self.key = Some(key);
+        let phase = phases(seed, tick as f64 * c.dt, periods).map(circle);
+        for (axis, &angle) in phase[..2].iter().enumerate() {
+            for (out, &basis) in self.rotated[axis].iter_mut().zip(&self.basis[axis]) {
+                *out = subtract(basis, angle);
+            }
+        }
+        self.modulation = phase[2];
+    }
+
+    pub fn node(&self, node: usize) -> [f64; 2] {
+        if self.contrast == 0. {
+            return [1.; 2];
+        }
+        response(
+            self.rotated[0][node % self.geometry.0],
+            self.rotated[1][node / self.geometry.0],
+            self.modulation,
+            self.contrast,
+        )
+    }
+
+    pub fn sample(&self, sites: &[(usize, f64)]) -> [f64; 2] {
+        if self.contrast == 0. {
+            return [1.; 2];
+        }
+        let mut value = [0.; 2];
+        for &(node, weight) in sites {
+            let light = self.node(node);
+            for k in 0..2 {
+                value[k] += weight * light[k];
+            }
+        }
+        value
+    }
+}
+
+pub fn drive(signal: [f64; 2], light: [f64; 2]) -> [f64; 2] {
+    [signal[0] * light[0], signal[1] * light[1]]
+}
+
+/// Bounded on-demand inspection; never refresh the frozen physical cache for an observer.
+pub fn at(w: &crate::world::World, x: f64, y: f64) -> [f64; 2] {
+    let mut light = Illumination::default();
+    light.prepare(w.seed, w.tick, &w.config, w.field.nx, w.field.ny);
+    light.sample(&w.field.stencil(x, y))
+}

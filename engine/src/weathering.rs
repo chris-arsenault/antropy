@@ -6,13 +6,15 @@ use crate::{
 };
 
 pub const DEFAULT_RATE: f64 = 0.025;
+pub const BRANCHES: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct Operators {
-    pub destination: [[usize; 4]; SPECIES],
-    pub coefficients: [[[f64; SPECIES]; 2]; 4],
-    pub heat: [[f64; SPECIES]; 4],
-    pub work: [[f64; SPECIES]; 4],
+    pub destination: Vec<[usize; BRANCHES]>,
+    pub coefficients: Vec<[[f64; SPECIES]; 2]>,
+    pub heat: Vec<[f64; SPECIES]>,
+    pub work: Vec<[f64; SPECIES]>,
+    kinetic: Vec<[f64; SPECIES]>,
     pub active_groups: u64,
     pub reactive: [bool; SPECIES],
     pub work_strength: f64,
@@ -23,54 +25,68 @@ impl Operators {
         Self::with_work(chemistry, crate::transformation_work::DEFAULT_STRENGTH)
     }
     pub fn with_work(chemistry: &Chemistry, work_strength: f64) -> Self {
-        let destination = std::array::from_fn(|s| {
-            [(0, 1), (0, -1), (1, 1), (1, -1)].map(|(axis, direction)| {
-                let mut endpoint = [s / 16, s % 16].map(|v| v as i16);
-                let start = endpoint;
-                endpoint[axis] += direction;
-                if !(0..16).contains(&endpoint[axis]) {
-                    return s;
-                }
-                Action::intervals(std::array::from_fn(|k| (start[k] + endpoint[k]) as u8)).apply(s)
+        Self::with_radius(
+            chemistry,
+            work_strength,
+            crate::chemical_products::RECOGNITION_RADIUS,
+        )
+    }
+    pub fn with_radius(chemistry: &Chemistry, work_strength: f64, radius: f64) -> Self {
+        let destination: Vec<[usize; BRANCHES]> = (0..SPECIES)
+            .map(|s| std::array::from_fn(|j| Action::dyadic(j / 4, j % 4).apply(s)))
+            .collect();
+        let heat: Vec<[f64; BRANCHES]> = (0..SPECIES)
+            .map(|s| {
+                destination[s].map(|t| {
+                    (chemistry.properties[s].potential - chemistry.properties[t].potential).max(0.)
+                })
             })
-        });
-        let heat: [[f64; 4]; SPECIES] = std::array::from_fn(|s| {
-            destination[s].map(|t| {
-                (chemistry.properties[s].potential - chemistry.properties[t].potential).max(0.)
+            .collect();
+        let rows: Vec<[[f64; 2]; BRANCHES]> = (0..SPECIES)
+            .map(|s| {
+                std::array::from_fn(|j| {
+                    crate::transformation_work::coefficient(
+                        chemistry,
+                        s,
+                        &[crate::chemical_products::ProductWeight {
+                            species: destination[s][j],
+                            weight: 1.,
+                        }],
+                    )
+                })
             })
-        });
-        let rows: [[[f64; 2]; 4]; SPECIES] = std::array::from_fn(|s| {
-            let p = &chemistry.properties[s];
-            std::array::from_fn(|j| {
-                let target = &chemistry.properties[destination[s][j]];
-                // Medium selects direction; an uphill branch explicitly receives external work.
-                let unique = !destination[s][..j].contains(&destination[s][j]);
-                let weight = if destination[s][j] != s && unique {
-                    0.25
-                } else {
-                    0.
-                };
-                [
-                    weight * (target.interaction[0] - p.interaction[0]),
-                    -weight * (target.interaction[1] - p.interaction[1]),
-                ]
-            })
-        });
-        let coefficients = std::array::from_fn(|j| {
-            std::array::from_fn(|k| std::array::from_fn(|s| rows[s][j][k]))
-        });
+            .collect();
+        let coefficients = (0..BRANCHES)
+            .map(|j| std::array::from_fn(|k| std::array::from_fn(|s| rows[s][j][k])))
+            .collect();
         Self {
             work_strength,
-            destination,
             coefficients,
-            heat: std::array::from_fn(|j| std::array::from_fn(|s| heat[s][j])),
-            work: std::array::from_fn(|j| {
-                std::array::from_fn(|s| {
-                    (chemistry.properties[destination[s][j]].potential
-                        - chemistry.properties[s].potential)
-                        .max(0.)
+            kinetic: (0..BRANCHES)
+                .map(|j| {
+                    std::array::from_fn(|s| {
+                        let distance = crate::chemistry::distance_squared(
+                            crate::chemistry::coordinate(s),
+                            crate::chemistry::coordinate(destination[s][j]),
+                        );
+                        // The shared coefficient includes 1/4; normalize only kinetics to 1/N.
+                        4. / BRANCHES as f64 * crate::transformation_work::kinetic(distance, radius)
+                    })
                 })
-            }),
+                .collect(),
+            heat: (0..BRANCHES)
+                .map(|j| std::array::from_fn(|s| heat[s][j]))
+                .collect(),
+            work: (0..BRANCHES)
+                .map(|j| {
+                    std::array::from_fn(|s| {
+                        (chemistry.properties[destination[s][j]].potential
+                            - chemistry.properties[s].potential)
+                            .max(0.)
+                    })
+                })
+                .collect(),
+            destination,
             active_groups: rows.iter().enumerate().fold(0, |mask, (s, row)| {
                 mask | if row.iter().flatten().any(|v| *v != 0.) {
                     1 << (s / 4)
@@ -78,13 +94,19 @@ impl Operators {
                     0
                 }
             }),
-            reactive: rows.map(|row| row.iter().flatten().any(|v| *v != 0.)),
+            reactive: std::array::from_fn(|s| rows[s].iter().flatten().any(|v| *v != 0.)),
         }
     }
 
     /// Two shared mixture coefficients; no conversion independent of the medium.
-    pub fn fractions(&self, s: usize, signal: [f64; 2], exposure_time: f64) -> [f64; 4] {
-        let rates = std::array::from_fn::<_, 4, _>(|j| {
+    pub fn fractions(
+        &self,
+        s: usize,
+        medium: impl Into<crate::reaction_medium::Medium>,
+        exposure_time: f64,
+    ) -> [f64; BRANCHES] {
+        let signal = medium.into();
+        let rates = std::array::from_fn::<_, BRANCHES, _>(|j| {
             let (rate, _, _) = self.local(s, j, signal);
             exposure_time * rate
         });
@@ -93,43 +115,62 @@ impl Operators {
     }
 
     #[cfg(test)]
-    pub(crate) fn engagement_pair(&self, s: usize, signal: [f64; 2]) -> [lanes::Pair; 4] {
+    pub(crate) fn engagement_pair(&self, s: usize, signal: [f64; 2]) -> [lanes::Pair; BRANCHES] {
         std::array::from_fn(|j| self.local_pair(s, j, signal).0)
     }
 
-    pub fn local(&self, s: usize, j: usize, signal: [f64; 2]) -> (f64, f64, f64) {
-        let g = crate::transformation_work::engagement(
-            [self.coefficients[j][0][s], self.coefficients[j][1][s]],
-            signal,
-        );
-        let supplied = self.work_strength * g;
+    pub fn local(
+        &self,
+        s: usize,
+        j: usize,
+        medium: impl Into<crate::reaction_medium::Medium>,
+    ) -> (f64, f64, f64) {
+        let medium = medium.into();
+        let coefficient = [self.coefficients[j][0][s], self.coefficients[j][1][s]];
+        let g = crate::transformation_work::engagement(coefficient, medium.signal);
+        let supplied =
+            self.work_strength * crate::transformation_work::engagement(coefficient, medium.drive);
         let heat = self.heat[j][s] - self.work[j][s] + supplied;
-        (if heat >= 0. { g } else { 0. }, heat.max(0.), supplied)
+        (
+            if heat >= 0. {
+                g * self.kinetic[j][s]
+            } else {
+                0.
+            },
+            heat.max(0.),
+            supplied,
+        )
     }
 
     /// Some finite normalized medium can fund this branch; this is not current flux.
-    pub fn possible(&self, s: usize, j: usize) -> bool {
+    pub fn possible(&self, s: usize, j: usize, maximum_light: f64) -> bool {
         let maximum = self.coefficients[j]
             .iter()
             .map(|v| v[s].abs())
             .fold(0., f64::max);
         maximum > 0.
             && (self.heat[j][s] >= self.work[j][s]
-                || self.work_strength * maximum > self.work[j][s] - self.heat[j][s])
+                || self.work_strength * maximum_light * maximum > self.work[j][s] - self.heat[j][s])
     }
 
     pub(crate) fn local_pair(
         &self,
         s: usize,
         j: usize,
-        signal: [f64; 2],
+        medium: impl Into<crate::reaction_medium::Medium>,
     ) -> (lanes::Pair, lanes::Pair, lanes::Pair) {
+        let medium = medium.into();
+        let signal = medium.signal;
         let c = &self.coefficients[j];
         let g = lanes::positive(lanes::add(
             lanes::mul(lanes::load(&c[0][s..]), lanes::splat(signal[0])),
             lanes::mul(lanes::load(&c[1][s..]), lanes::splat(signal[1])),
         ));
-        let work = lanes::mul(g, lanes::splat(self.work_strength));
+        let powered = lanes::positive(lanes::add(
+            lanes::mul(lanes::load(&c[0][s..]), lanes::splat(medium.drive[0])),
+            lanes::mul(lanes::load(&c[1][s..]), lanes::splat(medium.drive[1])),
+        ));
+        let work = lanes::mul(powered, lanes::splat(self.work_strength));
         let available = lanes::add(
             work,
             lanes::sub(
@@ -138,7 +179,10 @@ impl Operators {
             ),
         );
         (
-            lanes::mul(g, lanes::nonnegative(available)),
+            lanes::mul(
+                lanes::mul(g, lanes::load(&self.kinetic[j][s..])),
+                lanes::nonnegative(available),
+            ),
             lanes::positive(available),
             work,
         )
@@ -153,11 +197,13 @@ impl Operators {
     pub fn inventory_active(
         &self,
         row: &mut [f64],
-        signal: [f64; 2],
+        medium: impl Into<crate::reaction_medium::Medium>,
         exposure_time: f64,
         floor: f64,
         mut mask: u64,
     ) -> ([f64; 3], u64) {
+        let medium = medium.into();
+        let signal = medium.signal;
         let mut active = mask;
         mask &= self.active_groups;
         if exposure_time == 0. || mask == 0 || strength(signal) == 0. {
@@ -180,7 +226,7 @@ impl Operators {
                     continue;
                 }
                 for (j, fraction) in self
-                    .fractions(s, signal, exposure_time)
+                    .fractions(s, medium, exposure_time)
                     .into_iter()
                     .enumerate()
                 {
@@ -192,7 +238,7 @@ impl Operators {
                     delta[self.destination[s][j]] += amount;
                     active |= 1 << (self.destination[s][j] / 4);
                     account[0] += amount;
-                    let (_, heat, work) = self.local(s, j, signal);
+                    let (_, heat, work) = self.local(s, j, medium);
                     account[1] += amount * heat;
                     account[2] += amount * work;
                 }
@@ -215,7 +261,10 @@ pub fn minimum_donor(floor: f64, elapsed: f64) -> f64 {
     floor / (2. * elapsed).min(1.)
 }
 
-pub(crate) fn allocate_pair(engagement: [lanes::Pair; 4], elapsed: f64) -> [lanes::Pair; 4] {
+pub(crate) fn allocate_pair(
+    engagement: [lanes::Pair; BRANCHES],
+    elapsed: f64,
+) -> [lanes::Pair; BRANCHES] {
     let rates = engagement.map(|e| lanes::mul(e, lanes::splat(elapsed)));
     let sum = rates.iter().fold(lanes::zero(), |a, &b| lanes::add(a, b));
     let denominator = lanes::add(lanes::splat(1.), sum);
@@ -260,14 +309,13 @@ mod tests {
                     < 1e-12
             );
             assert!((row.iter().sum::<f64>() - 4.).abs() < 1e-12);
-            assert_eq!(row[120], 0.); // Products cannot react during this update.
+            assert_eq!(row[122], 0.); // Two-bit products cannot react during this update.
             outcomes.push(row);
         }
-        assert_eq!(outcomes[0][87], 0.);
-        assert!(outcomes[1][87] > 0.01);
-        assert!(outcomes[0][104] > 0. && outcomes[1][104] > 0.);
+        assert_ne!(outcomes[0], outcomes[1]);
+        assert!(outcomes[..2].iter().any(|row| row[88] < 4.));
         assert_eq!(outcomes[2][88], 4.);
-        assert!(outcomes[3][87] < 1e-11);
+        assert!((outcomes[3][88] - 4.).abs() < 1e-11);
     }
 
     #[test]
@@ -282,7 +330,7 @@ mod tests {
         assert_eq!(before.coefficients, after.coefficients);
         assert_eq!(before.destination, after.destination);
         for s in 0..SPECIES {
-            for j in 0..4 {
+            for j in 0..BRANCHES {
                 assert!((after.heat[j][s] - 7. * before.heat[j][s]).abs() < 1e-13);
             }
         }
@@ -316,7 +364,7 @@ mod tests {
             [0.; 3]
         );
         assert_eq!(row, neutral);
-        let j = (0..4).find(|&j| op.heat[j][s] > 0.).unwrap();
+        let j = (0..BRANCHES).find(|&j| op.heat[j][s] > 0.).unwrap();
         let medium = signal([op.coefficients[j][0][s], op.coefficients[j][1][s]]);
         assert!(op.inventory_active(&mut row, medium, 1., floor, mask).0[0] > 0.);
     }
@@ -334,7 +382,7 @@ mod tests {
                         for lane in 0..2 {
                             let expected = op.fractions(s + lane, signal, dt);
                             assert!(expected.iter().sum::<f64>() < 1.);
-                            for j in 0..4 {
+                            for j in 0..BRANCHES {
                                 let mut pair = [0.; 2];
                                 lanes::store(&mut pair, actual[j]);
                                 assert!((pair[lane] - expected[j]).abs() < 1e-14);

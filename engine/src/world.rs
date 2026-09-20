@@ -6,7 +6,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 28;
+pub const VERSION: u32 = 32;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -40,6 +40,8 @@ pub struct World {
     #[serde(skip)]
     pub trace: Option<crate::trace::Trace>,
     #[serde(skip)]
+    pub observer: Option<Box<crate::phenotype::Observer>>,
+    #[serde(skip)]
     exchange: crate::transport::Exchange,
     #[serde(skip)]
     pub(crate) climate: crate::climate::Climate,
@@ -55,6 +57,9 @@ impl World {
         let mut environment_rng = Random::new(seed ^ 0x656e765f726e67);
         let mut field = Field::new(config.width, config.height, config.mesh);
         field.pressure_strength = config.pressure_strength;
+        field
+            .illumination
+            .prepare(seed, 0, &config, field.nx, field.ny);
         let (patch_centers, habitats) = crate::sources::landscape(&config, &mut environment_rng);
         let mut sources: Vec<_> = habitats
             .into_iter()
@@ -146,6 +151,7 @@ impl World {
             stop_reason: None,
             field_elapsed: 0.,
             trace: None,
+            observer: None,
             exchange: Default::default(),
             climate,
         };
@@ -191,8 +197,21 @@ impl World {
         let mut started = now();
         self.field.pressure_strength = self.config.pressure_strength;
         self.field.attraction_length = self.config.attraction_length;
+        self.field.attraction_strength = self.config.attraction_strength;
+        if !self.cells.is_empty() || !self.sources.is_empty() || self.field.has_active_material() {
+            self.field.illumination.prepare(
+                self.seed,
+                self.tick,
+                &self.config,
+                self.field.nx,
+                self.field.ny,
+            );
+        }
         for c in &mut self.cells {
             c.flows = Default::default();
+        }
+        if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
+            o.begin(&self.cells);
         }
         if let Some(t) = &mut self.trace {
             t.before(&self.cells, &self.config, &self.field);
@@ -243,11 +262,12 @@ impl World {
             let signals: Vec<_> = sites
                 .iter()
                 .map(|row| {
-                    crate::weathering::signal(std::array::from_fn(|k| {
+                    let signal = crate::weathering::signal(std::array::from_fn(|k| {
                         row.iter()
                             .map(|&(n, a)| a * self.field.medium_signal(n)[k])
                             .sum()
-                    }))
+                    }));
+                    crate::illumination::drive(signal, self.field.illumination.sample(row))
                 })
                 .collect();
             for (row, c) in sites.iter_mut().zip(&self.cells) {
@@ -262,7 +282,10 @@ impl World {
                 &mut self.field,
                 &self.chemistry,
                 &sites,
-                &mut self.ledger,
+                (
+                    &mut self.ledger,
+                    self.observer.as_deref_mut().filter(|o| o.active()),
+                ),
             );
             stages[4] = now() - started;
             stages[8] = self.exchange.preparation_ms;
@@ -276,12 +299,18 @@ impl World {
             let paid = c.pay(c.basal(&self.config));
             c.flows.maintenance += paid;
             self.ledger.accumulate(&c.flows);
+            if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
+                o.capture(c, self.config.dt);
+            }
             if let Some(t) = &mut self.trace {
                 t.capture(c, self.tick);
             }
         }
         self.tick += 1;
         crate::lifecycle::advance(self);
+        if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
+            o.finish(self.tick);
+        }
         if self.tick.is_multiple_of(128) {
             self.prune_genotypes();
         }
@@ -334,11 +363,14 @@ impl World {
                 &self.config,
                 &self.chemistry,
                 dt,
-                self.trace.is_some(),
+                self.trace.is_some() || self.observer.as_ref().is_some_and(|o| o.active()),
                 signal,
             );
             if let Some(t) = &mut self.trace {
                 t.reactions(cell, &work);
+            }
+            if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
+                o.reactions(cell, &work);
             }
             crate::metabolism::repair(cell, &self.config, &self.chemistry, dt);
             crate::refitting::advance(cell, g, &self.config, &self.chemistry, dt);
@@ -346,6 +378,9 @@ impl World {
             let excess = (cell.energy - cell.energy_capacity(&self.config)).max(0.);
             cell.energy -= excess;
             self.ledger.overflow_heat += excess;
+            if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
+                o.overflow(cell, excess);
+            }
         }
     }
     pub fn intervention_budget(&self) -> Result<(), String> {
@@ -397,12 +432,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY28\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY32\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY28\0")
-            .ok_or("Unsupported physical checkpoint; v28 required")?;
+            .strip_prefix(b"ANTROPY32\0")
+            .ok_or("Unsupported physical checkpoint; v32 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {

@@ -44,7 +44,7 @@ it("recurrent ablation preserves feed-forward weights and its source genome", ()
   const before = base.chromosomes[0].behavior.weights,
     after = changed.chromosomes[0].behavior.weights;
   expect(base).toEqual(copy);
-  expect(after.slice(0, 39 * 24)).toEqual(before.slice(0, 39 * 24));
-  expect(after.slice(39 * 24, 39 * 24 + 24 * 24).every((w) => w === 0)).toBe(true);
-  expect(after.slice(39 * 24 + 24 * 24)).toEqual(before.slice(39 * 24 + 24 * 24));
+  expect(after.slice(0, 44 * 24)).toEqual(before.slice(0, 44 * 24));
+  expect(after.slice(44 * 24, 44 * 24 + 24 * 24).every((w) => w === 0)).toBe(true);
+  expect(after.slice(44 * 24 + 24 * 24)).toEqual(before.slice(44 * 24 + 24 * 24));
 });

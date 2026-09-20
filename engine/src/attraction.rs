@@ -95,13 +95,25 @@ impl crate::field::Field {
             (self.nx, self.ny, self.spacing, self.attraction_length),
             [&self.signal, &self.source_signal, &self.body_signal],
         );
+        self.broad_attraction.prepare(
+            (self.nx, self.ny, self.spacing, 2. * self.attraction_length),
+            [&self.signal, &self.source_signal, &self.body_signal],
+        );
     }
 
     pub(crate) fn attractive(&self, n: usize) -> f64 {
         if self.attraction_length == 0. {
             self.medium_signal(n)[0]
         } else {
-            self.attraction.output[n]
+            self.attraction_strength * (self.attraction.output[n] - self.broad_attraction.output[n])
         }
+    }
+
+    /// Material-supported cohesion; removing the supporting medium restores bare loss.
+    pub(crate) fn retention(&self, n: usize, scale: f64) -> f64 {
+        let [a, b] = self.medium_signal(n);
+        let load = self.impedance[n] + self.source_load[n] + self.body_load[n];
+        let cohesion = (a * self.attractive(n) - b * b).max(0.) / (1. + load.max(0.));
+        crate::field::mobility(cohesion, scale)
     }
 }

@@ -8,7 +8,7 @@ import { CellGenealogy } from "./CellGenealogy";
 const MACHINERY = ["Receptor", "Transporter", "Enzyme"].flatMap((part) =>
   Array.from({ length: 4 }, (_, i) => part + " " + i)
 );
-const PARTS = ["Core", "Motor", "Storage", ...MACHINERY];
+const PARTS = ["Core", "Motor", "Storage", ...MACHINERY, "Photoreceptor"];
 const INPUTS = [
   ...Array.from({ length: 4 }, (_, i) =>
     ["level", "change", "forward", "left"].map((v) => "Receptor " + i + " " + v)
@@ -25,6 +25,11 @@ const INPUTS = [
   "Built storage capacity",
   "Internal inventory fill",
   "Damage",
+  "Light level",
+  "Light change",
+  "Light front − back",
+  "Light left − right",
+  "Built photoreceptor capacity",
 ];
 interface Props {
   bridge: Bridge;
@@ -140,6 +145,14 @@ function CellDetails({
         {n(p.exposure)} · impedance {n(p.impedance)} · mobility {n(p.mobility)}.
       </p>
       <Chemistry inspection={p} definition={definition} />
+      <Photoreception cell={c} />
+      {p.illumination && (
+        <p>
+          Local illumination: response 1 {n(p.illumination[0])}× · response 2 {n(p.illumination[1])}
+          ×. External work accepted this tick {n(c.flows.externalWork)}; zero between physiology
+          updates.
+        </p>
+      )}
       {p.weathering && (
         <p>
           Chemical weathering: medium activity {n(p.weathering[0])} · exposed activity{" "}
@@ -173,6 +186,14 @@ function CellDetails({
 function transportDirection(effort: number) {
   if (effort < 0.5) return "export";
   return effort > 0.5 ? "import" : "hold";
+}
+function Photoreception({ cell: c }: { cell: CellState }) {
+  return (
+    <p>
+      Photoreceptor: level {n(c.inputs[39])} · change {n(c.inputs[40])} · front − back{" "}
+      {n(c.inputs[41])} · left − right {n(c.inputs[42])}. Built stock {n(c.body[15])}.
+    </p>
+  );
 }
 function Chemistry({
   inspection: p,

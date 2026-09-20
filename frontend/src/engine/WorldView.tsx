@@ -3,6 +3,8 @@ import { type Bridge, type ViewState } from "./bridge";
 import { fitCamera, type Camera } from "./camera";
 import { mountCanvas, type CanvasState } from "./canvas";
 import { MapPanel } from "./MapPanel";
+import { MapContext } from "./MapContext";
+import { GroupHighlight } from "./PhenotypePanel";
 import { Overlay } from "./Overlay";
 import { chemicalLayers, type ChemicalDisplay } from "./chemicalDisplay";
 const INITIAL_BOUNDS = { width: 320, height: 240 };
@@ -87,10 +89,10 @@ export function WorldView({
     <section className="viewport" aria-label="World viewport">
       <div className="world-canvas" ref={host} />
       <div className="viewport-tools">
-        <div className="zoom-controls">
-          <ZoomControls camera={camera} setCamera={setCamera} bounds={bounds} />
-        </div>
+        <ZoomControls camera={camera} setCamera={setCamera} bounds={bounds} />
         <p>Drag to pan · scroll to zoom · select a cell</p>
+        <MapContext value={chemistry} change={setChemistry} />
+        <GroupHighlight bridge={bridge} status={view.status} error={error} />
       </div>
       {mapOpen && (
         <Overlay title="Map" layout="standard" open close={close}>
@@ -121,7 +123,7 @@ function ZoomControls({
   bounds: { width: number; height: number };
 }) {
   return (
-    <>
+    <div className="zoom-controls">
       {" "}
       <button onClick={() => setCamera(fitCamera(bounds))}>Fit world</button>
       <button
@@ -139,6 +141,6 @@ function ZoomControls({
       >
         +
       </button>
-    </>
+    </div>
   );
 }

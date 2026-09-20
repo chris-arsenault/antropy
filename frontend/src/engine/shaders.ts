@@ -16,6 +16,8 @@ uniform vec3 camera;
 uniform vec4 layers;
 uniform float selectedLayer;
 uniform float weatheringLayer;
+uniform int illuminationMode;
+uniform bool shadowPass;
 uniform float exposure;
 in vec2 pixel;
 out vec4 color;
@@ -27,9 +29,17 @@ vec4 sampleSelected(ivec2 p, ivec2 n) {
   ivec2 node=(p+n)%n;
   return texelFetch(chemistry,ivec2(node.x*2+1,node.y),0);
 }
+float daylight(float drive) {
+  // A visible soft terminator around the uniform reference, not a new physical night rule.
+  return smoothstep(0.8,1.2,drive);
+}
+vec3 solarGround(float day) {
+  return mix(vec3(0.008,0.01,0.016),vec3(0.72,0.70,0.62),day);
+}
 void main() {
   vec2 world = (vec2(pixel.x, 1.0-pixel.y)-0.5)*viewport/camera.z+camera.xy;
   if(any(lessThan(world,vec2(0.0))) || any(greaterThanEqual(world,worldSize))) {
+    if(shadowPass) discard;
     color=vec4(0.015,0.022,0.03,1.0); return;
   }
   vec2 size = vec2(textureSize(chemistry, 0))/vec2(2.0,1.0);
@@ -38,20 +48,33 @@ void main() {
   ivec2 n = ivec2(size);
   vec2 f = fract(position);
   vec4 amount=max(vec4(0.0),mix(mix(sampleField(base,n),sampleField(base+ivec2(1,0),n),f.x),mix(sampleField(base+ivec2(0,1),n),sampleField(base+ivec2(1,1),n),f.x),f.y));
+  if(shadowPass) {
+    // A translucent night layer shades the finished map, including organisms and markers.
+    float night=1.0-daylight((amount.z+amount.w)*0.5);
+    color=vec4(0.008,0.015,0.028,0.72*night);
+    return;
+  }
   vec4 detail=mix(mix(sampleSelected(base,n),sampleSelected(base+ivec2(1,0),n),f.x),mix(sampleSelected(base+ivec2(0,1),n),sampleSelected(base+ivec2(1,1),n),f.x),f.y);
   float presence=1.0-exp(-exposure*amount.x);
-  vec3 background=vec3(0.022,0.035,0.044);
+  // A constant slate surface leaves room for shadow without inventing field detail.
+  vec3 background=vec3(0.09,0.17,0.21);
   vec3 light=mix(background,vec3(0.36,0.68,0.65),presence*layers.x);
   float quality=clamp((amount.y/max(amount.x,1e-20)-0.5)/7.5,0.0,1.0);
   vec3 energy=mix(vec3(0.22,0.4,0.8),vec3(0.93,0.69,0.3),quality);
   light=mix(light,energy,presence*layers.y);
   light=mix(light,mix(vec3(0.035,0.12,0.23),vec3(0.72,0.4,0.12),clamp(detail.w,0.0,1.0)),weatheringLayer);
   light=mix(light,vec3(0.83,0.64,0.93),selectedLayer*(1.0-exp(-exposure*max(0.0,detail.x))));
+  if(illuminationMode>0) {
+    float drive=(amount.x+amount.y)*0.5;
+    if(illuminationMode==2) drive=amount.x;
+    if(illuminationMode==3) drive=amount.y;
+    light=solarGround(daylight(drive));
+  }
   // Screen-space patterns keep hazards distinguishable at every zoom.
-  float band=1.0-smoothstep(0.16,0.25,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/10.0)-0.5));
+  float band=1.0-smoothstep(0.025,0.075,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/12.0)-0.5));
   float dotMark=1.0-smoothstep(0.13,0.23,length(fract(gl_FragCoord.xy/8.0)-0.5));
-  light=mix(light,vec3(0.95,0.65,0.22),layers.z*detail.y*band*0.85);
-  light=mix(light,vec3(1.0,0.35,0.5),layers.w*detail.z*dotMark*0.9);
+  light=mix(light,vec3(0.95,0.75,0.42),layers.z*detail.y*band*0.38);
+  light=mix(light,vec3(1.0,0.35,0.5),layers.w*detail.z*dotMark*0.65);
   color=vec4(light,1.0);
 }`;
 
@@ -65,6 +88,7 @@ uniform float halo;
 out vec2 local;
 out vec4 shade;
 out vec4 details;
+out float membership;
 out vec2 worldPoint;
 void main() {
   vec2 corners[6] = vec2[6](vec2(-1,-1),vec2(1,-1),vec2(-1,1),vec2(-1,1),vec2(1,-1),vec2(1,1));
@@ -81,6 +105,7 @@ void main() {
   gl_Position = vec4(clip.x,-clip.y,0.0,1.0);
   shade = appearance;
   details = vec4(detail.x,detail.y,geometry.w,detail.z);
+  membership = detail.w;
 }`;
 
 export const cellFragment = `#version 300 es
@@ -94,6 +119,7 @@ uniform vec2 worldSize;
 in vec2 local;
 in vec4 shade;
 in vec4 details;
+in float membership;
 in vec2 worldPoint;
 out vec4 color;
 void main() {
@@ -122,8 +148,9 @@ void main() {
     vec2 direction=vec2(cos(details.z),sin(details.z));
     float front=step(0.62,dot(local,direction));
     fill=mix(fill,vec3(0.95),front*0.65);
-    if(abs(details.y-selected)<0.25 || details.w>0.5) fill=mix(fill,vec3(1.0),edge);
+    if(abs(details.y-selected)<0.25 || details.w>0.5 || membership>0.5) fill=mix(fill,vec3(1.0),edge);
     else fill*=1.0-edge*0.55;
     color = vec4(fill,opacity*(1.0-smoothstep(0.96,1.0,d)));
   }
+  if(halo<1.5 && membership>=0.0 && membership<0.5) color*=vec4(0.32,0.32,0.32,0.35);
 }`;

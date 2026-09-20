@@ -5,6 +5,7 @@ const BROWSER_COMMANDS = new Set([
   "summary",
   "chemicalOverview",
   "chemicalWeb",
+  "phenotype",
   "stepStatus",
   "census",
   "inspectSelected",
