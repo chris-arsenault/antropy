@@ -40,9 +40,9 @@ Geography is a separate periodic XY plane. U prices material conversions; D cont
 spread; I impedes motion; S creates compatible or incompatible exposure. Two shared
 signed profiles supply geographic transport signals. They store no usable work.
 
-Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, sixteen funded
+Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, twenty bounded funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v32 persists actual installed
+The same worker renders borrowed WASM views. Checkpoint v33 persists actual installed
 coordinates independently of inherited instructions and rejects earlier physical bytes.
 There is no exporter allele or thermal-energy setting in this version.
 
@@ -251,7 +251,7 @@ The kernel samples each existing discrete species once, without edge normalizati
 therefore have less total recognition support. Product mixtures instead preserve unit-sum
 material weights. These operators have different roles and need not share normalization.
 Each cell retains four receptor,
-four transporter and four enzyme targets plus a membrane coordinate. Enzymes carry continuous
+four transporter and one to eight enzyme programs plus a membrane coordinate. Enzymes carry continuous
 recognition center a, global reflection center c and periodic orientation theta. Exact chemical actions
 belong to `(S16 × S16) semidirect C2`, represented by two 16-entry permutations and an axis
 exchange bit. Bounded interval reflections and axis exchange generate this closed group;
@@ -283,7 +283,7 @@ receptor supplies tonic, temporal, body-forward and body-left readings. Stock-de
 gain vanishes with absent stock. A separately funded photoreceptor samples mean local
 illumination through those same rows and supplies the same four cues; its investment uses
 the existing receptor reference mass and upkeep. See [photoreception](../../photoreception.md).
-The 44-input, 24-recurrent-unit, nine-output private RNN
+The 56-input, 24-recurrent-unit, 38-output private RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
 
@@ -303,7 +303,7 @@ five property rows, retaining six f64 reductions including total material. Exact
 donor demand is handled explicitly. Exchange does not prune material; the extracellular
 numerical floor is applied at field substeps as described above.
 
-Enzymes act constitutively. Recognition, finite-action mixtures and the pullback of
+Enzymes act under bounded neural activity requests. Recognition, finite-action mixtures and the pullback of
 product occupancy are compiled once. Each substrate s has attenuation
 `1/(1 + sum_t(productWeight(t) × distance²(s,t))/R²)`, using actual compiled products
 and the shared affinity radius R. Binding times attenuation is compiled into its catalytic
@@ -376,8 +376,12 @@ This is a display mapping; apparent darkness does not remove physical work.
 All internal species can fund biomass, selected proportionally. Assembly pays .5 work per
 unit and transfers the consumed mixture into bound material without changing chemical identity.
 Bound reference value is its mixture dotted with chemical reference values; no usable work is
-captured by construction. Bound mass equals total funded stock. Growth approaches twice the inherited newborn
-blueprint, bounded by actual material, work and core-dependent construction rate.
+captured by construction. Bound mass equals total funded stock. Growth approaches the neural
+construction request (`2*g*b` optional, `g*(1+b)` core), bounded by actual material, work and
+core-dependent construction rate. Surplus stock can be retired with the shared effort request.
+Construction and retirement use frozen free/bound mixtures, one handling/work budget, and
+storage headroom after any storage retirement. Both pay assembly-price work. Returned material
+or newly created capacity cannot fund the same event.
 Growth protects work for the proposed larger body's upkeep, current motor effort and learning
 through a complete physiology interval plus one movement tick. Refitting uses the same reserve
 for the current body. This prevents optional construction from consuming the next interval's upkeep.
@@ -399,7 +403,8 @@ Empty slots can finish freely without creating stock. Completed slots borrow tar
 arrays immediately, even while others remain partial. Unpaid funded target changes leave installed
 response intact. Excess usable work dissipates.
 
-Local division requires funded double body, inventory, work and division cost. Fission
+Local division requires funded double core, actual-capacity inventory/work reserves and division cost. Optional
+machinery is partitioned as actually built, including zero stock. Fission
 ends the parent and creates two daughters; budding retains a reduced parent and one
 daughter. Stocks and inventories split, damage fraction persists, private memory resets,
 and inherited targets can mutate or receive paid birth-local assimilation. Supported
@@ -414,6 +419,38 @@ All chemical point coordinates use the common heavy-tail vector mutation with sc
 R is the existing recognition radius: a local specificity change is measured against this
 radius, not the full chemical-domain width. The initial v25 width15 multiplier caused excessive
 ordinary changes and was rejected after the user's early-extinction report.
+
+### Cellular organization and contact extension (v33)
+
+The [joint design](../cellular-organization-and-exchange.md) supplies the full derivation.
+Each cell has one free mixture and one chemically identified bound mixture. Define
+`m=sum_s((I_s+B_s)*p_s)/(K*area+sum_s(I_s+B_s))`. For a compiled work coefficient
+`a=J*Delta_p/4`, reaction throughput gains `mu=1+z/(1+abs(z))`, `z=4*a dot m`.
+This changes rates, not per-conversion work. Activity, actual stock, damage, substrate and
+product occupancy still bound flux. Zero stock/activity and retired programs skip rows.
+
+Receptor stock splits by a paid installed inward fraction. Four additional tonic/change pairs
+sense recognized free internal concentration. Outward chemical readings, uptake and stress
+share the actual overlap relation: `Cij=max(0,1-distance/(ri+rj))`, `beta=1/(1+sum C)` and
+`Wij=beta*Cij`. Accessible concentration is `beta*field+sum_j Wij*damage_j*I_j/area_j`.
+Intact cells expose no private inventory. Export throughput is multiplied by beta and releases
+only to the field. All imports share one recipient work/headroom budget. Cell donors reserve
+own export and every neighbor withdrawal together, against frozen inventory, then commit.
+Imports cannot finance same-stage exports. Transport pays only accepted receiver/own-export work.
+Separate contact-received/lost flows distinguish paid uptake from involuntary donor loss.
+
+Pair overlap correction uses `min(overlap*(1-exp(-dt))/2, dt/2)` per endpoint. This replaces
+the earlier per-tick quarter-overlap rule with a one-model-second decay and retains the speed
+bound. It introduces no wider contact radius or compression injury. Dense many-body geometry
+still requires visual review; isolated pair decay is invariant to timestep subdivision below
+the speed cap.
+
+One to eight genetic enzyme programs and retired stock share eight stable records. The first
+four enzyme stocks retain indices11–14; photo remains15; extra enzyme stocks use16–19.
+Neutral duplication divides target/actual stock, copies neural readouts and splits stock-input
+contributions. Deletion disables its program and leaves installed mass/upkeep until paid
+retirement. Counts use the same heavy-tailed mutation in program units, stochastic rounding
+and reflected bounds. This representation does not add intracellular compartments.
 Event rates, body-unit scales and neural scales are unchanged. The same reflected distribution
 has local and rare large steps. Chemical centers lie in[0,15]; orientation is periodic.
 There is no special mutation aimed at waste or a known useful route.

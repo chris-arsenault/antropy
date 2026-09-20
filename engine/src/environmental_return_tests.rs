@@ -111,7 +111,8 @@ fn a_funded_environmental_return_can_feed_an_ordinary_cell_without_creating_work
     let mut cell = w.cells[0].clone();
     cell.energy = 0.;
     cell.inventory = row.into_iter().collect();
-    cell.installed.enzymes = [Enzyme::between(coordinate(high), coordinate(low)); 4];
+    cell.installed.enzymes =
+        [Enzyme::between(coordinate(high), coordinate(low)); crate::organism::MAX_ENZYMES];
     cell.operators = Some(Operators::compile(&cell.installed, &w.config, chemistry));
     crate::metabolism::react(&mut cell, &w.config, chemistry, 1e6);
     assert!(cell.energy > 0. && cell.inventory[low] > before);

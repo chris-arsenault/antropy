@@ -105,7 +105,10 @@ fn values(w: &World, genome: u64) -> [f64; 9] {
         100. * b[1] / b[0],
         100. * b[3..7].iter().sum::<f64>() / b[0],
         100. * import / b[0],
-        100. * b[11..15].iter().sum::<f64>() / b[0],
+        100. * (0..crate::organism::MAX_ENZYMES)
+            .map(|s| b[crate::organism::enzyme_stock(s)])
+            .sum::<f64>()
+            / b[0],
         m.membrane.x,
         m.membrane.y,
         x / import.max(1e-30),

@@ -1,9 +1,15 @@
 # Cell interaction: crowding, antagonism and feeding
 
-September 19, 2026. **Deferred research avenue, not the next work item.** Requested while
+September 19, 2026. **Historical research and pre-feature mechanism inventory.** Requested while
 the user was observing the v28 world and described it as mostly healthy. This document
-proposes future investigation; it changes no simulation defaults, genes or controller interface.
+records the original investigation direction.
 [Backlog ownership](../backlog.md#backlog-cell-interactions).
+
+September 20: the [joint cellular organization and exchange design](cellular-organization-and-exchange.md)
+supersedes this paper's recommended implementation sequence and conditional-extension status.
+Its v33 implementation joins intracellular organization, crowded interface access and paid uptake
+from injured neighbors. The original research below retains its dated mechanism inventory and
+rationale; it is not a second active implementation plan. See the joint design for current laws.
 
 ## Direction
 
@@ -191,3 +197,70 @@ When selected, set budgets from the ordinary economy before running any cells.
 The opening question is whether these interactions create meaningful conditional advantages,
 not whether we can make the display look combative. Adhesion, engulfment, new life stages,
 dedicated attack genes and universal armor remain outside this research proposal.
+
+## Intracellular organization
+
+Added September 20, 2026 at the user's request. Extend the research to interactions within
+a cell and the possibility of evolving different machinery counts and transformation kinds.
+This is an investigation direction, not a selected redesign or a claim that the existing
+couplings have produced evolved metabolic coordination.
+
+[Intracellular organization and evolutionary strategy](intracellular-organization.md) owns
+the whole-cell design hypothesis and conditional incentives. The inventory and questions below
+describe mechanisms and candidate extensions; they do not establish reasons to add each feature.
+
+### Current implementation
+
+The ordinary runtime connects paid import, private chemical inventory, constitutive enzyme
+conversion, paid export, repair and body construction. These are real shared-resource
+couplings, with important limits:
+
+| Coupling | Current behavior and limit |
+| --- | --- |
+| Transport and storage | Four independently controlled transporters share inventory headroom and usable energy. Recognized chemicals compete for each transporter's finite throughput. Uptake supplies material; it does not directly award energy. |
+| Enzymes and intermediate products | Four enzyme programs share substrates and usable energy. Recognition-weighted substrate and product occupancy limits throughput, so accumulated products can inhibit their upstream enzyme. Another enzyme or export can remove those products. Reactions read a frozen inventory: newly produced intermediates feed later physiology updates. |
+| Stored mixture and physiology | Retained chemicals supply future reactions, construction and repair. Their identity affects reaction availability and internal stress through membrane susceptibility. Inventory increases occupied volume and drag, changes concentrations, and can fill storage enough to prevent further import. |
+| Construction and repair | Growth consumes a proportional mixture of available chemicals and pays assembly work. Repair exchanges free and bound mixtures and pays work. Particular machinery does not require particular chemical precursors; body material retains its identity without granting a composition-specific body function. |
+| Sensing and regulation | The controller senses external chemical neighborhoods, light, contact, body stocks, energy, damage and total inventory fill. It has no direct reading of internal chemical composition. It controls transport, movement and repair, but has no enzyme activation or selective construction-allocation output. Growth follows deficits against inherited targets. |
+| Repertoire and inheritance | Recognition, transformation parameters and machinery investment mutate. Investment can reach zero and recover, allowing different effective active counts within four fixed slots per class. There is no duplication, deletion or fifth enzyme. Changed identities require paid refitting of inherited stock. |
+| Transformation kinds | Each enzyme recognizes multiple nearby chemicals and applies weighted shared finite chemical actions, potentially producing several products. This is unary conversion of one substrate amount into a conserved product mixture, not a reaction requiring two substrates together. No separately evolving cofactor dependency or intracellular regulatory network exists. |
+
+For example, import A followed by enzyme A-to-B, enzyme B-to-C and export C can form an
+internal processing chain across updates. B accumulation can slow the first enzyme;
+downstream consumption can relieve that inhibition. Whether this chain repays its costs
+depends on actual transformations, environmental work, concentrations and funded machinery.
+The code permits this dependency; this inspection does not establish its evolved use.
+
+Sources: [transport](../../engine/src/transport.rs),
+[enzyme compilation](../../engine/src/chemical_operators.rs),
+[product actions](../../engine/src/chemical_products.rs),
+[metabolism](../../engine/src/metabolism.rs), [sensing](../../engine/src/sensing.rs),
+[body geometry](../../engine/src/organism.rs), [runtime order](../../engine/src/world.rs),
+and the [machinery contract](chemistry/machinery.md).
+
+### Research questions and constraints
+
+1. **Useful internal dependencies.** Identify when retaining, converting or exporting an
+   intermediate helps the whole cell, and when one installed enzyme deprives another of
+   substrate or work. Separate an available physical opportunity from controller use or
+   evolved adaptation. Reuse current selected-cell and chemical-flow observations.
+2. **Internal sensing and regulation.** Assess whether the shared recognition machinery can
+   expose useful intracellular composition and support conditional processing or investment.
+   Avoid species-specific sensors, bespoke reaction switches and an automatic optimizer.
+3. **Evolvable repertoire size.** Investigate duplication/loss of funded machinery programs,
+   including inheritance, paid installation, controller boundaries and execution cost.
+   Distinguish adding a distinct transformation from building more copies of an existing
+   enzyme. The current four-slot limit is a baseline to reconsider, not a research veto.
+4. **Transformation repertoire.** Determine which useful dependencies the existing unary
+   compositions can express and which require a richer operator, such as shared-substrate
+   coupling. Any extension must compose with the existing chemical algebra, account for
+   material and work, and avoid a catalog of privileged reactions or chemical identities.
+5. **Construction specificity.** Assess whether chemically interchangeable construction
+   removes a useful reason to retain or synthesize intermediates. Do not introduce named
+   molecular recipes merely to resemble biology; any proposed distinction needs a shared
+   mathematical rule and a concrete ecological opportunity.
+
+Start from these implemented connections and identified limits. More slots alone do not
+establish coordinated metabolism, and the lack of internal composition sensing does not
+erase the existing substrate competition, product inhibition or physical storage effects.
+Keep this avenue in the backlog until selected; no simulation change accompanies the review.

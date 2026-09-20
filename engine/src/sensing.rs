@@ -62,9 +62,19 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
                 readings[k] += weights[k] * local;
             }
         }
+        if slot < 4 {
+            for (k, value) in readings.iter_mut().enumerate() {
+                *value = *value * cell.interface.field + cell.interface.recognition[slot][k];
+            }
+        }
         response(
             readings,
-            cell.body[stock],
+            cell.body[stock]
+                * if slot == 4 {
+                    1.
+                } else {
+                    1. - cell.installed.inward[slot]
+                },
             cell.body[0],
             if slot == 4 { 1. } else { c.receptor_k },
             c,
@@ -76,6 +86,7 @@ pub fn initialize(cell: &mut Cell, g: &Compiled, c: &Config, field: &Field) {
     let values = readings(cell, c, field);
     cell.receptors = std::array::from_fn(|i| values[i][0]);
     cell.photoreceptor = values[4][0];
+    cell.inward_receptors = inward(cell, c);
     observe(cell, g, g, c, field);
 }
 pub fn observe(cell: &mut Cell, g: &Compiled, _installed: &Compiled, c: &Config, field: &Field) {
@@ -95,6 +106,20 @@ pub fn observe(cell: &mut Cell, g: &Compiled, _installed: &Compiled, c: &Config,
     for i in 0..12 {
         cell.inputs[16 + i] = stock(cell.body[3 + i], g.body[3 + i]);
     }
+    for slot in 0..crate::organism::MAX_ENZYMES {
+        let i = crate::organism::enzyme_stock(slot);
+        cell.inputs[crate::controller::programs::stock_input(slot)] =
+            if cell.installed.programs[slot] {
+                stock(cell.body[i], g.body[i])
+            } else {
+                0.
+            };
+    }
+    for (i, value) in inward(cell, c).iter().enumerate() {
+        cell.inputs[crate::controller::INWARD_INPUT + 2 * i] = *value as f32;
+        cell.inputs[crate::controller::INWARD_INPUT + 2 * i + 1] =
+            (*value - cell.inward_receptors[i]) as f32;
+    }
     cell.inputs[28] = (cell.energy / cell.energy_capacity(c).max(1e-30)).clamp(0., 1.) as f32;
     cell.inputs[29] = ((cell.body[0] / g.body[0] - 1.).clamp(0., 1.)) as f32;
     for i in 0..4 {
@@ -111,8 +136,26 @@ pub fn adapt(cell: &mut Cell, c: &Config, dt: f64) {
     let alpha = 1. - (-dt / c.receptor_tau).exp();
     for i in 0..4 {
         cell.receptors[i] += alpha * (cell.inputs[i * 4] as f64 - cell.receptors[i]);
+        cell.inward_receptors[i] += alpha
+            * (cell.inputs[crate::controller::INWARD_INPUT + 2 * i] as f64
+                - cell.inward_receptors[i]);
     }
     cell.photoreceptor += alpha * (cell.inputs[LIGHT_INPUT] as f64 - cell.photoreceptor);
+}
+fn inward(cell: &Cell, c: &Config) -> [f64; 4] {
+    let volume = cell.volume(c).max(1e-30);
+    std::array::from_fn(|slot| {
+        let stock = cell.body[3 + slot] * cell.installed.inward[slot];
+        if stock == 0. {
+            return 0.;
+        }
+        let local = cell.operators.as_ref().unwrap().receptors[slot]
+            .iter()
+            .map(|a| a.value * cell.inventory[a.species])
+            .sum::<f64>()
+            / volume;
+        response([local; 5], stock, cell.body[0], c.receptor_k, c)[0]
+    })
 }
 pub fn stress_load(
     cell: &Cell,
@@ -120,6 +163,15 @@ pub fn stress_load(
     c: &Config,
     field: &Field,
     chemistry: &Chemistry,
+) -> f64 {
+    stress_boundary(cell, c, field, chemistry, &cell.interface)
+}
+pub fn stress_boundary(
+    cell: &Cell,
+    c: &Config,
+    field: &Field,
+    chemistry: &Chemistry,
+    interface: &crate::interfaces::Reading,
 ) -> f64 {
     let row = crate::footprint::sites(cell, c, field);
     let mut load = field.scalar(&field.stress, &row);
@@ -130,6 +182,7 @@ pub fn stress_load(
             * chemistry.properties[a.species].stress
             * field.sample(a.species, &row);
     }
+    load = load * interface.field + interface.stress;
     let mut internal = cell
         .inventory
         .iter()

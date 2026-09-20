@@ -25,7 +25,7 @@ pub fn circuit(c: &crate::config::Config, chemistry: &Chemistry, index: usize) -
             center_x: if index.is_multiple_of(2) { 4. } else { 0. },
             center_y: if index.is_multiple_of(2) { 0. } else { 4. },
             angle: 0.,
-        }; 4];
+        }; crate::organism::MAX_ENZYMES];
     }
     g.compile(c, chemistry);
     g

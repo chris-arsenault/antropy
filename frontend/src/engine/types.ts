@@ -67,6 +67,9 @@ export interface Flows {
   captured: number;
   externalWork: number;
   constructed: number;
+  retired: number;
+  contactImported: number;
+  contactLost: number;
   maintenance: number;
   motors: number;
   learning: number;
@@ -144,6 +147,8 @@ export interface Target {
 }
 export interface Machinery {
   receptors: Target[];
+  inward: number[];
+  programs: boolean[];
   transporters: Target[];
   enzymes: (Target & { centerX: number; centerY: number; angle: number })[];
   membrane: Target;
@@ -183,11 +188,20 @@ export interface CellState {
   photoreceptor: number;
   contacts: number[];
   brain: { hidden: number[]; traces: number[]; task: number; lastEnergy: number | null };
-  action: { swim: number; turn: number; repair: number; transport: number[] };
+  action: {
+    swim: number;
+    turn: number;
+    repair: number;
+    transport: number[];
+    activity: number[];
+    allocation: number[];
+    retirement: number;
+  };
   flows: Flows;
   chemicalFlows: { imported: number[]; exported: number[]; consumed: number[]; produced: number[] };
 }
 export interface Inspection {
+  fieldInterface: number | null;
   installedChemistry: Machinery | null;
   genealogy: {
     generation: number;

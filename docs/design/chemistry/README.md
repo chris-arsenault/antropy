@@ -2,7 +2,9 @@
 
 Status: fresh production World implemented September 15, with environmental chemistry added
 September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
-owns the current artificial laws and checkpoint v32. [Material-supported habitats](../../material-habitats.md)
+owns the current artificial laws and checkpoint v33. [Cellular organization](../cellular-organization-and-exchange.md)
+adds funded regulation, bounded variable enzyme repertoires and shared interfaces.
+[Material-supported habitats](../../material-habitats.md)
 record reversible retention, evolving source composition and multiscale public transformations.
 Definition v5 corrects the potential
 landscape; recognition-independent actions and explicitly funded environmental returns are
@@ -42,7 +44,7 @@ substrate. They are not species categories or separate action systems.
 | [Regenerative initial ecosystem white paper](regenerative-ecosystem.md) | Implemented v27 design: funded four-founder circulation, shared environmental work and finite-owner pressure; bounded version-specific evidence in the archived math plan |
 | [Current specification responsibilities](../../specs/digital-chemistry/README.md) | Current contracts and explicitly historical M0 equations/evidence |
 | [Substrate and accounting](substrate.md) | Chemical properties, generation constraints, fields, sources, turnover, reactions, construction and death |
-| [Machinery and controllers](machinery.md) | Fixed slots, funded capacities, local observations/actions, mutation and inheritance |
+| [Machinery and controllers](machinery.md) | Bounded enzyme programs, funded capacities, local observations/actions, mutation and inheritance |
 | [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
 | [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
 | [Current habitat measurements](../../material-habitats.md) | V32 mechanisms, cost and negative public-food result |

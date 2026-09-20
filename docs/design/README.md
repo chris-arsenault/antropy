@@ -1,8 +1,8 @@
 # Current design and work order
 
-Updated September 20, 2026. Physical v32 integrates material-supported habitats, composed local
+Updated September 20, 2026. Physical v33 adds cellular organization and exchange to material-supported habitats, composed local
 illumination, funded photoreception, and bounded phenotype/chemical-flow observation.
-The user reports dense, long-lived colonies and a promising initial visual result.
+Before this feature, the user reported dense, long-lived colonies and a promising visual result.
 The [83,980-tick checkpoint review](../material-habitats-review.md) records differentiated
 chemistry and continued turnover. The [session slowdown investigation](../session-runtime-review.md)
 records the reload-related performance report and its unresolved attribution.
@@ -46,7 +46,8 @@ flow. These are distinct results, not certification of a closed ecosystem.
 | --- | --- |
 | [Computational foundation](chemistry/computational-foundation.md) | Governing mathematical design, composed manifold operations and cost-first selection |
 | [Transformation algebra white paper](chemistry/transformation-algebra.md) | Group-theoretic direction, finite-state constraints and evidence contract; selected v23 implementation tracked in the canonical plan |
-| [Digital chemistry](chemistry/README.md) | Chemical identity, fixed machinery, implementation records and replacement decisions |
+| [Digital chemistry](chemistry/README.md) | Chemical identity, funded machinery, implementation records and replacement decisions |
+| [Cellular organization](cellular-organization-and-exchange.md) | Retained-mixture response, regulated machinery, variable enzyme programs and shared interfaces; [delivery evidence](../cellular-organization-results.md) |
 | [Sparse spatial ecology](spatial-ecology.md) | Implemented world hypothesis, movement retuning, spatial populations, multiscale observation and handoff |
 | [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
 | [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
@@ -77,11 +78,11 @@ Finite initial8/128 priming starts delivery; later processing follows ordinary l
 bound material retain actual identities through repair and death. No chemical has a privileged
 waste role. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
-The controller has 44 inputs, 24 recurrent units and nine outputs. Sixteen funded stocks support
-four chemical receptors, four transporters and four enzymes plus core, motor, storage and
+The controller has 56 inputs, 24 recurrent units and 38 outputs. Twenty bounded stock records support
+four chemical receptors, four transporters and up to eight enzyme programs plus core, motor, storage and
 [photoreception](../photoreception.md). The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v32; the outer observation package remains v11.
+checkpoints use v33; the outer observation package remains v11.
 The [material-habitat changes](../material-habitats.md) add shared two-scale attraction,
 reversible retention, locally evolving source renewal and multiscale public chemistry.
 IDs0/136 are initial landscape choices; ordinary renewal no longer reinstates them.
@@ -114,6 +115,12 @@ less dependence on original feedstock, useful public-food returns, operating hea
 and climate, and conditional cell interaction research. Multicore stays paused. Source geometry
 is a revisable initial condition, not a requirement for predetermined wells or colony counts.
 Do not turn these open questions into a mandatory verification campaign.
+
+The [joint cellular organization and exchange design](cellular-organization-and-exchange.md)
+connects retained composition, funded local control, evolvable enzyme repertoires and contested
+material access. Cells retain one mixture. Its [execution plan](../CELLULAR-ORGANIZATION-PLAN.md)
+records integration and [bounded evidence](../cellular-organization-results.md). These mechanisms provide possible paths to cooperative larger
+organizations and antagonism; they do not assign roles or establish evolved meta-organisms.
 
 The math, binding, illumination and observation implementation plans are reconciled in the
 [plan disposition](../plans/README.md). Older version-specific human gates are preserved as

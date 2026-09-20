@@ -1,24 +1,7 @@
 import { useState } from "react";
 import { type LiveStatus } from "./types";
+import { BODY_PARTS } from "./bodyParts";
 
-const STOCKS = [
-  "Core",
-  "Motor",
-  "Storage",
-  "Receptor 0",
-  "Receptor 1",
-  "Receptor 2",
-  "Receptor 3",
-  "Transporter 0",
-  "Transporter 1",
-  "Transporter 2",
-  "Transporter 3",
-  "Enzyme 0",
-  "Enzyme 1",
-  "Enzyme 2",
-  "Enzyme 3",
-  "Photoreceptor",
-];
 const EFFORTS = [
   "Swim",
   "Turn",
@@ -71,7 +54,7 @@ function EvolutionDetails({ status }: { status: LiveStatus }) {
         <tbody>
           {e.body.map((body, i) => (
             <tr key={i}>
-              <td>{STOCKS[i]}</td>
+              <td>{BODY_PARTS[i]}</td>
               <td>
                 {e.targetPercentFounder[i] === null
                   ? "—"

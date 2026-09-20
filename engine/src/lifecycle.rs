@@ -31,10 +31,22 @@ pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
 }
 fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
     let genotype = &w.genomes[&parent.genome];
-    let g = genotype.inherit(
+    let mut g = genotype.inherit(
         w.next_genome,
         w.tick,
         &parent.brain,
+        &mut w.genetic_rng,
+        &w.config,
+        &w.chemistry,
+    );
+    let mut cell = parent.clone();
+    cell.body = cell.body.map(|q| q * 0.5);
+    cell.bound_material.scale(0.5);
+    cell.inventory = cell.inventory.half();
+    cell.energy *= 0.5;
+    crate::genetics::repertoire::mutate(
+        &mut g,
+        &mut cell,
         &mut w.genetic_rng,
         &w.config,
         &w.chemistry,
@@ -45,17 +57,12 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
         w.next_genome += 1;
         w.genomes.insert(g.id, g);
     }
-    let mut cell = parent.clone();
     cell.id = w.next_cell;
     w.next_cell += 1;
     cell.parent = Some(parent.id);
     cell.genome = genome;
     cell.born = w.tick;
     cell.generation += 1;
-    cell.body = cell.body.map(|q| q * 0.5);
-    cell.bound_material.scale(0.5);
-    cell.inventory = cell.inventory.half();
-    cell.energy *= 0.5;
     cell.brain = controller::State::default();
     cell.action = controller::Action::default();
     cell.contacts = [0.; 4];
@@ -93,26 +100,20 @@ fn division_cost(
     target: &crate::organism::Body,
     config: &crate::config::Config,
 ) -> Option<f64> {
-    if !cell
-        .body
-        .iter()
-        .zip(target)
-        .all(|(q, t)| *q + 1e-12 >= 2. * t)
-    {
+    if cell.body[0] + 1e-12 < 2. * target[0] {
         return None;
     }
     let (material, energy, cost) = crate::accounting::division_requirements(cell, config);
     (cell.material() >= material && cell.energy >= energy).then_some(cost)
 }
 pub fn reproduce(w: &mut World) {
-    let parents = std::mem::take(&mut w.cells);
+    let mut parents = std::mem::take(&mut w.cells);
     let original = parents.len();
     let mut divisions = 0;
-    for mut cell in parents {
+    parents.retain_mut(|cell| {
         let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
-        let Some(division) = division_cost(&cell, &g.body, &w.config) else {
-            w.cells.push(cell);
-            continue;
+        let Some(division) = division_cost(cell, &g.body, &w.config) else {
+            return true;
         };
         let fission = w.config.reproduction == "fission";
         let records = if fission { 2 } else { 1 };
@@ -127,25 +128,24 @@ pub fn reproduce(w: &mut World) {
                 }
                 .into(),
             );
-            w.cells.push(cell);
-            continue;
+            return true;
         }
         let paid = cell.pay(division);
         if let Some(study) = w.trace.as_mut().and_then(|t| t.study.as_mut()) {
-            study.flow(&cell, "division", None, None, paid);
+            study.flow(cell, "division", None, None, paid);
         }
         w.ledger.division_heat += paid;
         if let Some(o) = w.observer.as_mut().filter(|o| o.active()) {
-            o.division(&cell, paid);
+            o.division(cell, paid);
         }
         w.ledger.divisions += 1;
         divisions += 1;
         if let Some(t) = &mut w.trace {
-            t.life(&cell, "division", w.tick);
+            t.life(cell, "division", w.tick);
         }
-        let a = child(w, &cell, 1.);
+        let a = child(w, cell, 1.);
         if fission {
-            let b = child(w, &cell, -1.);
+            let b = child(w, cell, -1.);
             let record = &mut w.ancestry[cell.id as usize - 1];
             record.ended = w.tick;
             record.cause = Cause::Division;
@@ -158,10 +158,12 @@ pub fn reproduce(w: &mut World) {
             cell.bound_material.scale(0.5);
             cell.inventory.scale(0.5);
             cell.energy *= 0.5;
-            w.cells.push(cell);
         }
         w.cells.push(a);
-    }
+        !fission
+    });
+    parents.append(&mut w.cells);
+    w.cells = parents;
     w.cells.sort_unstable_by_key(|c| c.id);
 }
 pub fn transfer(w: &mut World) {
@@ -182,12 +184,27 @@ pub fn transfer(w: &mut World) {
         let mut g = w.genomes[&targets[recipient]].clone();
         let donor_cell = w.cells[donor].id;
         let donor = &w.genomes[&targets[donor]];
-        let slot = w.genetic_rng.index(13);
+        let slot = w.genetic_rng.index(9 + crate::organism::MAX_ENZYMES);
         for (a, b) in g.chromosomes.iter_mut().zip(&donor.chromosomes) {
             match slot {
-                0..=3 => a.chemistry.receptors[slot] = b.chemistry.receptors[slot],
+                0..=3 => {
+                    a.chemistry.receptors[slot] = b.chemistry.receptors[slot];
+                    a.chemistry.inward[slot] = b.chemistry.inward[slot];
+                }
                 4..=7 => a.chemistry.transporters[slot - 4] = b.chemistry.transporters[slot - 4],
-                8..=11 => a.chemistry.enzymes[slot - 8] = b.chemistry.enzymes[slot - 8],
+                s if s < 8 + crate::organism::MAX_ENZYMES => {
+                    let slot = s - 8;
+                    if !b.chemistry.programs[slot]
+                        && a.chemistry.programs.iter().filter(|v| **v).count() <= 1
+                    {
+                        continue;
+                    }
+                    a.chemistry.enzymes[slot] = b.chemistry.enzymes[slot];
+                    a.chemistry.programs[slot] = b.chemistry.programs[slot];
+                    a.physical[crate::organism::enzyme_stock(slot)] =
+                        b.physical[crate::organism::enzyme_stock(slot)];
+                    controller::programs::copy_from(&mut a.behavior, &b.behavior, slot);
+                }
                 _ => a.chemistry.membrane = b.chemistry.membrane,
             }
         }
@@ -271,19 +288,21 @@ pub fn disturb(w: &mut World) {
     }
 }
 pub fn advance(w: &mut World) {
-    let cells = std::mem::take(&mut w.cells);
-    for cell in cells {
+    let mut cells = std::mem::take(&mut w.cells);
+    cells.retain(|cell| {
         if cell.energy <= 0. || cell.damage >= 1. {
             let cause = if cell.damage >= 1. {
                 Cause::Damage
             } else {
                 Cause::Starvation
             };
-            release(w, &cell, cause);
+            release(w, cell, cause);
+            false
         } else {
-            w.cells.push(cell);
+            true
         }
-    }
+    });
+    w.cells = cells;
     disturb(w);
     transfer(w);
     reproduce(w);

@@ -1,7 +1,7 @@
 # Paid refitting and installed machinery
 
 The [fresh composed runtime](composed-runtime.md) implements paid continuous refitting in
-physical checkpoint v23. Enzyme parameters now describe mixtures of exact finite chemical
+physical checkpoint v33. Enzyme parameters describe mixtures of exact finite chemical
 actions; refitting follows a funded path through those coefficients, not an interpolated
 group element. The September14 measurements below preserve the reason to retain
 installed function; their whole-slot v11 replacement law is historical.
@@ -17,8 +17,11 @@ Paid refitting charges constructionEnergy × affected actual stock × coordinate
 Each funded slot requests at most .25 units/model-second. Distance is Euclidean for a coordinate
 pair; an enzyme sums its center and offset-vector edit lengths plus recognition radius times
 the shortest angular edit in radians. Angular interpolation wraps through the circle's seam.
-Shared work above the full
-interval reserve funds all requests proportionally. Partial changes persist and change function
+The same work charge funds inward/outward receptor reallocation, with distance R times the
+fraction change added to that receptor's edit length. Deleted enzyme programs remain installed
+but inactive until paid retirement returns their body material to the shared free mixture.
+Duplication splits existing stock and copies identity, never constructing a replacement.
+Shared work above the full interval reserve funds all requests proportionally. Partial changes persist and change function
 continuously. Zero-stock slots can finish without work while funded slots remain partial;
 constructing functioning stock still costs material/work.
 Only changed slots recompile; completed slots borrow matching target coefficients. Unaffected

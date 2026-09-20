@@ -3,6 +3,19 @@
 Antropy is a browser-based 2D artificial-life simulation built as a Vite, React, TypeScript, and
 worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara platform.
 
+## Primary delivery rule: correctness and impact
+
+Choose and implement the most correct, impactful solution to the user's goal within the
+established principles and authorized scope. Never use "the smallest coherent change", minimum
+diff size, or an easy interim slice as the objective. Complete the necessary interacting parts
+of the design; do not leave the intended outcome incomplete merely to keep a change small.
+
+Phases organize delivery and validation of the complete solution. They must not silently reduce
+its ambition or postpone dependencies that make it useful. Use an interim result only when the
+user explicitly requests one. Avoid unnecessary complexity through sound design and shared
+mathematics, not by substituting a less consequential result. Bounded experiments control the
+cost of obtaining evidence; they do not set the scope of the implementation.
+
 ## Primary design constraint: shared mathematics and few controls
 
 This applies to proposals as well as implementation. Build behavior from a small set of
@@ -43,7 +56,7 @@ Plans record execution, not additional governing equations.
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
 | Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
-| Current measurements | [Habitat evidence](docs/material-habitats.md), [runtime investigation](docs/session-runtime-review.md) |
+| Current measurements | [Cellular delivery](docs/cellular-organization-results.md), [habitat evidence](docs/material-habitats.md), [runtime investigation](docs/session-runtime-review.md) |
 | Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
 | Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
@@ -58,14 +71,19 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v32 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v33 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 320 × 240 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 48 finite renewing
 reservoirs. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
-Current physiology has 44 local RNN inputs, 24 recurrent units, nine outputs, sixteen funded
-stocks, four receptors/transporters/enzymes, membrane compatibility and paid photoreception.
+Current physiology has 56 local RNN inputs, 24 recurrent units and 38 outputs, twenty bounded
+stock records, four receptors/transporters, one to eight enzyme programs, membrane compatibility
+and paid photoreception. Cells retain one internal mixture; internal compartments were rejected.
+Retained composition modulates rates without changing per-conversion work. Funded inward sensing,
+activity/construction control, paid retirement and shared field/contact access implement the
+[joint design](docs/design/cellular-organization-and-exchange.md). Injured cells expose free
+inventory through ordinary paid transport. No role, kin rule or community reward assigns cooperation.
 Genotypes are immutable; private experience transmits only through explicit birth-local
 assimilation. Installed machinery retains its function until paid refitting. Reproduction cannot
 grant newly targeted machinery. No fallback policy, remote parent selector, coordinates, compass,
@@ -85,7 +103,7 @@ must never be serialized or copied to React. The [ownership contract](docs/desig
 and its CI guards remain mandatory.
 
 Source zones/epochs and optional disturbance/typed transfer remain available; disturbance and
-transfer are off by default. Direct adhesion, multiple substrates, variable genome structure,
+transfer are off by default. Direct adhesion, multiple substrates, unrestricted genome/neural topology,
 terrain and rotational climate are deferred. Multicore remains explicitly paused in the
 [backlog](docs/backlog.md); current execution stays single-threaded.
 
@@ -204,7 +222,7 @@ expensive ecological panels merely for formatting or documentation changes.
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive forty-four local chemical,
+- Author physical pressures and local carriers. Controllers receive fifty-six local chemical,
   light, body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
@@ -212,8 +230,9 @@ expensive ecological panels merely for formatting or documentation changes.
 - Measurements outrank plans and historical appendices. Documents under
   [docs/sources/](docs/sources/README.md) preserve provenance and rejected work; they do not govern
   current implementation.
-- Change one mechanism, predict its effect, and measure it. When parameter motion does not change
-  the claimed outcome, stop tuning and record a structural finding.
+- Isolate causal changes when measuring mechanisms, predict their effects, and measure them.
+  This is an evidence rule, not a limit on delivering a complete interacting design. When
+  parameter motion does not change the claimed outcome, stop tuning and record a structural finding.
 - Human review is a real gate for motion. Ratios and final counts cannot certify circling, jitter,
   congestion, or other visibly broken trajectories.
 - Treat the controller as a pluggable module behind `seed`, `createState`, `act`, `assimilate`, `mutate`, `recombine`, and

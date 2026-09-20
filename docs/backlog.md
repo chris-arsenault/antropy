@@ -22,18 +22,27 @@ the earlier spatial review retains evidence and its rejected fixed-well proposal
 
 <a id="backlog-cell-interactions"></a>
 
-## Deferred cell interaction research
+## Cellular organization and remaining interaction research
 
-Added September 19 at the user's request; **not selected as the next work item**.
-[Cell interaction research](design/cell-interaction-research.md) owns the design: useful
-crowding/contact pressure, phenotype-dependent chemical harm, and paid recovery of a
-neighbor's actual material. Start from current pressure, contact sensing, membrane
-susceptibility and transport. Damaged-membrane access is a conditional extension if ordinary
-injury/release cannot provide a useful return. No phenotype enemy labels, kill rewards,
-dedicated combat economy or live changes accompany this entry.
+Added September 19; expanded into a joint design at the user's request on September 20.
+[Cellular organization and exchange](design/cellular-organization-and-exchange.md) owns the
+implemented v33 mathematics: retained chemical composition changes relative enzyme rates;
+funded inward sensing, neural allocation and variable enzyme repertoires organize processing;
+crowding divides interfaces between the field and paid uptake from injured neighbors.
+Existing chemical injury, repair, export and death connect private and public consequences.
+The [intracellular hypothesis](design/intracellular-organization.md) preserves the strategic
+reasoning, and [earlier interaction research](design/cell-interaction-research.md) preserves
+the original inventory and conditional proposal.
 
-Selection requires a budgeted small opportunity check; no implementation or campaign is
-scheduled. This does not reprioritize environmental work or the multicore backlog.
+The design includes conditional benefits, individual costs, conservation, symmetry and
+computational bounds. [Delivery results](cellular-organization-results.md) establish bounded
+physical opportunities and costs; they do not establish evolved strategies.
+No phenotype enemy labels, kill rewards, named chemical bonuses or automatic metabolic
+optimizer are introduced. The [implementation plan](CELLULAR-ORGANIZATION-PLAN.md) tracks the
+v33 implementation. Internal compartments were withdrawn; meta-organism opportunities
+remain intercellular. Evolved cooperation, adhesion, direct consumption of living structure and
+larger reaction arity remain open research. No evolutionary campaign is required for delivery.
+Multicore remains paused.
 
 <a id="backlog-plan-carryover"></a>
 
@@ -93,7 +102,8 @@ settings on those grounds, not by the number of clusters produced in a long run.
   of unchanged traits under transfer and effects on diversity remain open.
 - Shared external work, illumination, material binding and extracellular transformations are
   implemented. Useful public-food specialization remains unestablished: the constructed v32
-  consumer lost against its control. Variable genome structure remains deferred.
+  consumer lost against its control. V33 adds bounded enzyme duplication/deletion; arbitrary
+  genome and neural-topology changes remain deferred.
 - Paid acquired-weight transmission exists; adaptive usefulness is a conditional research question.
   Preserve the earlier negative findings under their old physics.
 - Generic source epochs/zones are available. Earlier A/B cohort benefits remain historical and
@@ -115,7 +125,7 @@ These are unimplemented choices requiring a reviewed purpose and design:
 | Evolvable mutation machinery or neural topology | A demonstrated representation or variation limitation |
 | Physical adhesion | Attachment, detachment, forces and costs; reserve sharing alone adds none |
 | Dormancy or additional life stages | An opportunity current physiology cannot express |
-| Terrain, rotational climate, multiple-substrate reactions and variable genome structure | A measured limitation of the present shared fields/unary chemistry; no parallel named pathway |
+| Terrain, rotational climate, multiple-substrate reactions and unrestricted genome structure | A measured limitation of the present shared fields/unary chemistry; no parallel named pathway; bounded enzyme repertoires already exist |
 
 Chemical attack, recipient feeding and resource capture must use the generic shared substrate.
 Optional disturbance and gene transfer remain available. Their implementation does not establish

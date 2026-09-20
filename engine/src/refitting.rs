@@ -8,13 +8,21 @@ use crate::{
 fn distance(a: Target, b: Target) -> f64 {
     crate::chemistry::distance_squared(a.point(), b.point()).sqrt()
 }
-fn distances(a: &Machinery, b: &Machinery, radius: f64) -> [f64; 13] {
-    let mut result = [0.; 13];
-    result[12] = distance(a.membrane, b.membrane);
+const MEMBRANE: usize = 8 + crate::organism::MAX_ENZYMES;
+const PARTS: usize = MEMBRANE + 1;
+fn distances(a: &Machinery, b: &Machinery, radius: f64) -> [f64; PARTS] {
+    let mut result = [0.; PARTS];
+    result[MEMBRANE] = distance(a.membrane, b.membrane);
     for i in 0..4 {
-        result[i] = distance(a.receptors[i], b.receptors[i]);
+        result[i] =
+            distance(a.receptors[i], b.receptors[i]) + radius * (a.inward[i] - b.inward[i]).abs();
         let (x, y) = (a.transporters[i], b.transporters[i]);
         result[4 + i] = crate::chemistry::distance_squared([x.x, x.y], [y.x, y.y]).sqrt();
+    }
+    for i in 0..crate::organism::MAX_ENZYMES {
+        if !b.programs[i] {
+            continue;
+        }
         let (x, y) = (a.enzymes[i], b.enzymes[i]);
         result[8 + i] = crate::chemistry::distance_squared([x.x, x.y], [y.x, y.y]).sqrt()
             + crate::chemistry::distance_squared(
@@ -40,42 +48,56 @@ pub fn advance(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry,
     }
     let old = cell.installed.clone();
     let distances = distances(&old, target, c.affinity_radius);
-    let stocks: [f64; 13] = std::array::from_fn(|i| {
-        if i == 12 {
+    let stocks: [f64; PARTS] = std::array::from_fn(|i| {
+        if i == MEMBRANE {
             cell.body[0]
+        } else if i >= 8 {
+            cell.body[crate::organism::enzyme_stock(i - 8)]
         } else {
             cell.body[i + 3]
         }
     });
-    let mut fractions: [f64; 13] = std::array::from_fn(|i| {
+    let mut fractions: [f64; PARTS] = std::array::from_fn(|i| {
         if stocks[i] == 0. || distances[i] == 0. {
             1.
         } else {
             (dt * 0.25 / distances[i]).min(1.)
         }
     });
-    let cost: f64 = (0..13)
+    let cost: f64 = (0..PARTS)
         .map(|i| fractions[i] * distances[i] * stocks[i] * c.construction_energy)
         .sum();
     let surplus = (cell.energy - crate::accounting::interval_reserve(cell, &cell.body, c)).max(0.);
     let paid = cell.pay(cost.min(surplus));
     let funding = if cost > 0. { (paid / cost).min(1.) } else { 1. };
-    for i in 0..13 {
+    for i in 0..PARTS {
         if stocks[i] > 0. {
             fractions[i] *= funding;
         }
     }
     cell.flows.refitting += paid;
-    move_target(&mut cell.installed.membrane, target.membrane, fractions[12]);
+    move_target(
+        &mut cell.installed.membrane,
+        target.membrane,
+        fractions[MEMBRANE],
+    );
+    cell.installed.programs = target.programs;
     for i in 0..4 {
         move_target(
             &mut cell.installed.receptors[i],
             target.receptors[i],
             fractions[i],
         );
+        cell.installed.inward[i] =
+            move_coordinate(cell.installed.inward[i], target.inward[i], fractions[i]);
         let (a, b) = (&mut cell.installed.transporters[i], target.transporters[i]);
         a.x = move_coordinate(a.x, b.x, fractions[4 + i]);
         a.y = move_coordinate(a.y, b.y, fractions[4 + i]);
+    }
+    for i in 0..crate::organism::MAX_ENZYMES {
+        if !target.programs[i] {
+            continue;
+        }
         let (a, b) = (&mut cell.installed.enzymes[i], target.enzymes[i]);
         a.x = move_coordinate(a.x, b.x, fractions[8 + i]);
         a.y = move_coordinate(a.y, b.y, fractions[8 + i]);

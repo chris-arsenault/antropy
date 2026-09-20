@@ -1,30 +1,32 @@
-# Fixed machinery and controller contract
+# Funded machinery and controller contract
 
 The [composed runtime](composed-runtime.md) implements [computable chemistry](computational-foundation.md):
 heritable manifold kernels, weighted mixture reductions and bounded product mappings with
-actual funded capacity. Checkpoint v32 persists continuous targets and separate actual installed
+actual funded capacity. Checkpoint v33 persists continuous targets and separate actual installed
 coordinates. Earlier categorical direction, integer products and birth-time recycling are retired.
 
-Status: implemented, with resolved choices in [numerical design](numerical-engine.md). The user specified a small
-fixed-slot genome; four slots per class were selected during implementation. See the [overview](README.md) and
+Status: the [joint organization design](../cellular-organization-and-exchange.md) extends the
+earlier fixed repertoire with bounded program duplication/deletion and funded local regulation. See the [overview](README.md) and
 [substrate](substrate.md) for scope and chemistry rules.
 
-## Fixed genome shape
+## Bounded genome shape
 
-Start with four receptors, four transporters and four unary enzymes per chromosome. Slots have
-stable indices 0–3 in each class. There is no insertion, deletion, duplication, variable-length
-genome or mutation that changes the neural interface size. Counts belong to a versioned schema,
-not a runtime setting that can reinterpret existing genomes or checkpoints.
+Start with four receptors, four transporters and four unary enzyme programs per chromosome.
+One to eight enzyme programs occupy stable records. Genetic programs and retired actual stock
+share that bound: deletion cannot hide unbounded orphan machinery. A template may have zero
+investment; inactive records provide no chemical function. Controller ports are bounded by the
+same eight-record arena. Counts belong to the versioned schema.
 
 | Gene group | Heritable values per slot | Actual funded material |
 | --- | --- | --- |
-| Receptor | Target x/y, investment | Receptor stock |
+| Receptor | Target x/y, inward fraction, investment | Stock divided between inward/outward sensing |
 | Transporter | Target x/y, investment | Transporter stock |
 | Enzyme | Recognition x/y, reflection centerX/centerY, orientation, investment | Enzyme stock |
 | Membrane | One compatibility x/y coordinate for the cell | Included in ordinary core/membrane construction |
 | General body | Core, motor and storage construction targets | Core, motor and storage stocks |
 
-There are16 material stocks: core, motor, storage, twelve chemical machinery stocks and a
+There are20 bounded material stock records: core, motor, storage, eight fixed receptor/transporter
+stocks, eight enzyme records and a
 separately funded photoreceptor. Optical sensing grants no harvesting or automatic steering. Chemical
 inventory and usable energy are separate. Dedicated A/B processors, weapon, matrix builder, light harvester and universal chemical-defense
 stocks are removed. General repair
@@ -53,8 +55,11 @@ off transporter effort does not recover its construction cost.
 Conversion yield includes the same accounted local environmental work as abiotic transformations;
 the [runtime contract](composed-runtime.md) defines funding, frozen sampling and dissipation.
 
-Keep the current proportional-deficit growth rule toward twice the newborn blueprint, using the
-new stock vector. Include every stock and internal amount in body volume, storage and drag.
+Use proportional-deficit growth toward neural construction requests: `2*g*b` for optional
+stocks and `g*(1+b)` for core. Surplus stocks may be retired with paid work, one shared
+handling budget and frozen storage headroom. Division requires twice the core target plus
+actual daughter reserves; it grants no missing optional machinery. Include every stock and
+internal amount in body volume, storage and drag.
 Receptor gain depends on actual receptor stock relative to core; transporter/enzyme throughput is
 bounded by installed stock, damage and actual supply. Per-class scales should be shared, not tuned
 per slot or per species to manufacture distinct roles.
@@ -76,8 +81,10 @@ center and perimeter positions. Apply an installed-stock gain, for example
 `g = receptorStock / (receptorStock + referenceReceptorPerCore * coreStock)`, before normalization.
 Zero built receptor gives zero signal; infinitesimal stock must not provide full sensing for free.
 
-Each receptor supplies four readings in a fixed order: local tonic level, temporal change,
-body-forward contrast and body-left contrast. Retain bounded concentration normalization and
+Each receptor divides funded stock by its paid installed inward fraction. Outward stock supplies
+local tonic level, temporal change, body-forward contrast and body-left contrast. Inward stock
+supplies tonic level and temporal change of recognized free inventory divided by area.
+Retain bounded concentration normalization and
 body-relative sampling. Contrast is across the cell, not a geographic bearing. Use one shared
 receptor normalization scale initially; differential specificity comes from genes, not labels.
 
@@ -88,7 +95,7 @@ and is persisted. The controller receives no list of species or direct U/D/I/S l
 
 ## Neural input and output layout
 
-Retain one 24-unit recurrent controller. The controller has44 inputs:
+Retain one 24-unit recurrent controller. The controller has56 inputs:
 
 | Indices | Reading |
 | --- | --- |
@@ -105,18 +112,20 @@ Retain one 24-unit recurrent controller. The controller has44 inputs:
 | 38 | Functional damage |
 | 39–42 | Paid optical level, change, body-forward contrast and body-left contrast |
 | 43 | Actual photoreceptor stock relative to its target |
+| 44–51 | Four inward receptor tonic/phasic pairs |
+| 52–55 | Enzyme records 4–7 actual capacities relative to targets |
 
 Normalize installed capacities by actual stock and a reference newborn stock as in the current
 body observations. Inputs describe funded physiology. There is no membrane coordinate, chemical
 potential, compartment species list, global time, population demand or reproductive score input.
-Receptors sense extracellular chemistry in v1; internal mixture composition is not individually
-observable through these channels. Inventory fill, energy, damage and private memory provide the
-controller's internal feedback. Record this limit when testing metabolic regulation.
+Receptors sample the same normalized accessible interface as transport, including exposed
+free material of injured neighbors. Intact neighbors reveal no inventory. Inward sensing
+adds chemical-specific internal observations, not direct property-table or rate-profit inputs.
 
 Inference runs every 0.8 model seconds. The rational saturation and compact affinity are
 specified in [the controller contract](../controller.md); actions are held between inferences.
 
-Nine output logits:
+Thirty-eight output logits:
 
 | Index | Action | Decoding |
 | --- | --- | --- |
@@ -126,20 +135,24 @@ Nine output logits:
 | 3 | Candidate private byte | `round(127.5 * (1 + saturation(logit/2)))` |
 | 4 | Commit byte | Commit if logit is nonnegative |
 | 5–8 | Transporter slot effort | Signed `saturation(logit)`, stored as `(1 + effort)/2` |
+| 9–16 | Enzyme activity | Positive saturation |
+| 17–36 | Stock construction allocation | Positive saturation |
+| 37 | Shared retirement effort | Positive saturation |
 
-Negative effort exports, zero holds, positive effort imports. Enzymes operate constitutively from
-installed stock, internal substrate and actual installed actions. Receptor expression and biomass growth
-remain physiology, not additional action selectors. Synthesis followed by export is ordinary
+Negative effort exports, zero holds, positive effort imports. Enzymes combine neural activity,
+installed stock, internal substrate, product occupancy and retained-mixture rate response.
+Physical physiology funds every requested construction, refit and retirement. Synthesis followed by export is ordinary
 enzyme and transporter use; no output means toxin, signal, wall or sharing.
 
-Transport uses neural effort; constitutive reactions with substrate/product occupancy are limited by installed stock
+Transport and enzymes use neural effort; reactions with substrate/product occupancy are limited by installed stock
 and physical resources.
 Requests are simultaneous within the substrate's declared phases. No automatic optimizer chooses
-profitable reactions, and no special metabolic fallback runs when the RNN is quiet. Founder import biases are explicit ordinary mutable weights; enzyme operation needs no action channel.
+profitable reactions, and no special metabolic fallback runs when the RNN is quiet. Founder
+import, enzyme activity and construction biases are explicit ordinary mutable weights.
 
-This network has1,881 weights and biases plus eleven plasticity loci:44*24 input weights,
-24*24 recurrent weights, 24 hidden biases, 24*9 output weights and nine output biases. Its schema
-is incompatible with the former 35-input/eight-output controller; old genomes are rejected.
+This network has2,894 weights and biases plus eleven plasticity loci:56*24 input weights,
+24*24 recurrent weights, 24 hidden biases, 24*38 output weights and 38 output biases. Its schema
+is incompatible with earlier controllers; old genomes are rejected.
 
 ## Learning and genetic ownership
 
@@ -149,7 +162,7 @@ plus the existing energy-change modulation and other learning terms. This change
 schema; do not leave privileged named-chemical channels in an otherwise generic controller.
 
 The controller owns weights, private state, inference, learning, assimilation, mutation,
-recombination, distance and its codec. Organism genetics owns the fixed machinery genes, body
+recombination, program-port transformations, distance and its codec. Organism genetics owns machinery genes, body
 targets, chromosomes and inheritance. Chemistry owns affinities and affordable transfers/reactions.
 Code outside the controller does not inspect its weight arrays to decide metabolism.
 

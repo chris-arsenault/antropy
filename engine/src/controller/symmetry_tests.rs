@@ -15,7 +15,7 @@ fn permute(g: &Genome) -> Genome {
             p.weights[RECURRENT + index(i) * HIDDEN + index(j)] =
                 g.weights[RECURRENT + i * HIDDEN + j];
         }
-        for o in 0..OUTPUTS {
+        for o in 0..TOTAL_OUTPUTS {
             p.weights[OUTPUT + o * HIDDEN + index(i)] = g.weights[OUTPUT + o * HIDDEN + i];
         }
     }

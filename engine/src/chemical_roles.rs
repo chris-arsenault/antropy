@@ -42,8 +42,11 @@ pub fn strongest(conversions: &[Conversion]) -> Option<Route> {
 pub fn primary(cell: &Cell) -> Option<Route> {
     let mut best = None;
     for (slot, enzyme) in cell.operators.as_ref()?.enzymes.iter().enumerate() {
+        if !cell.installed.programs[slot] {
+            continue;
+        }
         if let Some(mut route) = enzyme.primary {
-            route.strength *= cell.body[11 + slot];
+            route.strength *= cell.body[crate::organism::enzyme_stock(slot)];
             if route.strength > 0. && stronger(route, best) {
                 best = Some(route);
             }
@@ -107,7 +110,10 @@ fn cell_routes(w: &World) -> (Vec<Row>, usize) {
             continue;
         };
         for (slot, enzyme) in operators.enzymes.iter().enumerate() {
-            let stock = cell.body[11 + slot];
+            let stock = cell.body[crate::organism::enzyme_stock(slot)];
+            if !cell.installed.programs[slot] {
+                continue;
+            }
             if stock <= 0. {
                 continue;
             }

@@ -177,7 +177,8 @@ fn machinery_mutation_preserves_pair_rate_and_replays_without_touching_disabled_
             .filter(|(a, b)| **a != *b)
             .count();
     }
-    let expected = 10000. * 34. * (2. * 0.1 - 0.1 * 0.1);
+    let coordinates = 18 + 4 * crate::organism::MAX_ENZYMES;
+    let expected = 10000. * coordinates as f64 * (2. * 0.1 - 0.1 * 0.1);
     assert!((changed_coordinates as f64 - expected).abs() < 1600.);
     println!(
         "chemical changed_coordinates_per_birth={} predicted=6.46; scalar body predicted=1.5; total event opportunities=4.9",

@@ -48,7 +48,7 @@ fn production_coefficients_match_dense_products_and_work_accounts() {
             center_x: action_center[0],
             center_y: action_center[1],
             angle: 0.,
-        }; 4];
+        }; antropy_engine::organism::MAX_ENZYMES];
         let op = Operators::compile(&m, &config, &chemistry);
         let enzyme = &op.enzymes[0];
         assert!(enzyme.conversions.len() <= 36);

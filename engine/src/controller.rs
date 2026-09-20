@@ -2,17 +2,23 @@ use crate::{config::Config, random::Random};
 use serde::{Deserialize, Serialize};
 
 pub const LIGHT_INPUT: usize = 39;
-pub const INPUTS: usize = 44;
+pub const INWARD_INPUT: usize = 44;
+pub const INPUTS: usize = 52 + crate::organism::MAX_ENZYMES - 4;
 pub mod diagnostics;
+pub mod programs;
 #[cfg(test)]
 mod symmetry_tests;
 pub const HIDDEN: usize = 24;
 pub const OUTPUTS: usize = 9;
+pub const ACTIVITY: usize = OUTPUTS;
+pub const ALLOCATION: usize = ACTIVITY + crate::organism::MAX_ENZYMES;
+pub const RETIREMENT: usize = ALLOCATION + crate::organism::STOCKS;
+pub const TOTAL_OUTPUTS: usize = RETIREMENT + 1;
 pub const RECURRENT: usize = INPUTS * HIDDEN;
 const BIAS: usize = RECURRENT + HIDDEN * HIDDEN;
 const OUTPUT: usize = BIAS + HIDDEN;
-const OUTPUT_BIAS: usize = OUTPUT + OUTPUTS * HIDDEN;
-pub const PARAMETERS: usize = OUTPUT_BIAS + OUTPUTS;
+const OUTPUT_BIAS: usize = OUTPUT + TOTAL_OUTPUTS * HIDDEN;
+pub const PARAMETERS: usize = OUTPUT_BIAS + TOTAL_OUTPUTS;
 
 /// Monotone odd C1 saturation. Its derivative inside [-3,3] is
 /// 9*(x*x-9)^2/(27+9*x*x)^2; no expensive transcendental is needed per neuron.
@@ -41,6 +47,9 @@ pub struct Action {
     pub turn: f64,
     pub repair: f64,
     pub transport: [f64; 4],
+    pub activity: [f64; crate::organism::MAX_ENZYMES],
+    pub allocation: [f64; crate::organism::STOCKS],
+    pub retirement: f64,
 }
 impl Default for Action {
     fn default() -> Self {
@@ -49,6 +58,9 @@ impl Default for Action {
             turn: 0.,
             repair: 0.,
             transport: [0.5; 4],
+            activity: [1.; crate::organism::MAX_ENZYMES],
+            allocation: [1.; crate::organism::STOCKS],
+            retirement: 0.,
         }
     }
 }
@@ -65,6 +77,7 @@ impl Default for State {
 }
 pub fn seed() -> Genome {
     let mut w = vec![0.; PARAMETERS];
+    programs::seed_requests(&mut w);
     for i in 0..16 {
         w[i * INPUTS + i] = 1.5;
     }
@@ -114,7 +127,8 @@ pub fn diagnostic(logits: [f32; OUTPUTS], response: Option<(usize, usize, f32)>)
         weights: vec![0.; PARAMETERS],
         plasticity: vec![0.; 11],
     };
-    genome.weights[OUTPUT_BIAS..].copy_from_slice(&logits);
+    programs::seed_requests(&mut genome.weights);
+    genome.weights[OUTPUT_BIAS..OUTPUT_BIAS + OUTPUTS].copy_from_slice(&logits);
     if let Some((input, output, gain)) = response {
         assert!(input < INPUTS && output < OUTPUTS);
         genome.weights[input] = 1.;
@@ -132,13 +146,18 @@ pub fn act(g: &Genome, inputs: &[f32], state: &mut State, config: &Config, learn
     for (h, value) in next.iter_mut().enumerate() {
         let recurrent = &g.weights[RECURRENT + h * HIDDEN..RECURRENT + (h + 1) * HIDDEN];
         let trace = &state.traces[h * HIDDEN..(h + 1) * HIDDEN];
+        let private = if alpha == 0. {
+            0.
+        } else {
+            alpha * dot(trace, &state.hidden)
+        };
         let sum = dot(&g.weights[h * INPUTS..(h + 1) * INPUTS], inputs)
             + dot(recurrent, &state.hidden)
-            + alpha * dot(trace, &state.hidden)
+            + private
             + g.weights[BIAS + h];
         *value = squash(sum);
     }
-    let mut logits = [0.; OUTPUTS];
+    let mut logits = [0.; TOTAL_OUTPUTS];
     for (o, value) in logits.iter_mut().enumerate() {
         *value = dot(
             &g.weights[OUTPUT + o * HIDDEN..OUTPUT + (o + 1) * HIDDEN],
@@ -155,6 +174,9 @@ pub fn act(g: &Genome, inputs: &[f32], state: &mut State, config: &Config, learn
         turn: squash(logits[1]) as f64,
         repair: squash(logits[2]).max(0.) as f64,
         transport: std::array::from_fn(|s| (1. + squash(logits[5 + s]) as f64) * 0.5),
+        activity: std::array::from_fn(|s| squash(logits[ACTIVITY + s]).max(0.) as f64),
+        allocation: std::array::from_fn(|s| squash(logits[ALLOCATION + s]).max(0.) as f64),
+        retirement: squash(logits[RETIREMENT]).max(0.) as f64,
     }
 }
 fn update_traces(

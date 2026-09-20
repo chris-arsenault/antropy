@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type Definition, type Machinery, type Target } from "./types";
+import { machineryLabel } from "./bodyParts";
 
 const PROPERTIES = ["potential", "diffusion", "impedance", "stress"] as const;
 export function ChemicalAtlas({
@@ -14,7 +15,15 @@ export function ChemicalAtlas({
   const min = Math.min(...values),
     max = Math.max(...values);
   const targets = machinery
-    ? [...machinery.receptors, ...machinery.transporters, ...machinery.enzymes, machinery.membrane]
+    ? [...machinery.receptors, ...machinery.transporters, ...machinery.enzymes]
+        .map((point, i) => ({
+          point,
+          label: machineryLabel(i),
+          membrane: false,
+          active: i < 8 || machinery.programs[i - 8],
+        }))
+        .filter((p) => p.active)
+        .concat([{ point: machinery.membrane, label: "Membrane", membrane: true, active: true }])
     : [];
   return (
     <details>
@@ -69,24 +78,20 @@ export function ChemicalAtlas({
   );
 }
 
-function Targets({ targets }: { targets: Target[] }) {
+function Targets({ targets }: { targets: { point: Target; label: string; membrane: boolean }[] }) {
   return (
     <>
       {" "}
       {targets.map((p, i) => (
         <circle
           key={i}
-          cx={p.x * 10 + 5}
-          cy={p.y * 10 + 5}
-          r={i === 12 ? 5 : 3}
+          cx={p.point.x * 10 + 5}
+          cy={p.point.y * 10 + 5}
+          r={p.membrane ? 5 : 3}
           fill="none"
-          stroke={i === 12 ? "white" : "black"}
+          stroke={p.membrane ? "white" : "black"}
         >
-          <title>
-            {i === 12
-              ? "Membrane"
-              : `${["Receptor", "Transporter", "Enzyme"][Math.floor(i / 4)]} ${i % 4}`}
-          </title>
+          <title>{p.label}</title>
         </circle>
       ))}
     </>

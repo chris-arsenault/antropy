@@ -6,7 +6,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 32;
+pub const VERSION: u32 = 33;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -326,6 +326,8 @@ impl World {
         stages
     }
     fn control(&mut self, dt: f64) {
+        let interface = crate::interfaces::Graph::new(&self.cells, &self.config);
+        interface.prepare(&mut self.cells, &self.config, &self.chemistry);
         let mut config = self.config.clone();
         config.dt = dt;
         for cell in &mut self.cells {
@@ -432,12 +434,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY32\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY33\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY32\0")
-            .ok_or("Unsupported physical checkpoint; v32 required")?;
+            .strip_prefix(b"ANTROPY33\0")
+            .ok_or("Unsupported physical checkpoint; v33 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {

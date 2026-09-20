@@ -13,8 +13,8 @@ One periodic 320 × 240 XY plane contains continuous circular organisms and a me
 field. Neither axis is height. Sampling, motion, contact, offspring placement and rendering
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
 
-A cell owns position, heading, sixteen actual material stocks, a 256-element float64 intracellular chemical
-mixture, usable energy, injury, four chemical and one optical adaptive receptor baselines, contact state, private brain
+A cell owns position, heading, twenty actual material-stock records, a 256-element float64 intracellular chemical
+mixture, usable energy, injury, four outward/four inward chemical and one optical adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
 drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile
 response share local impedance-dependent mobility. A bounded local pair correction resolves
@@ -97,11 +97,12 @@ for every chemical, with fixed points and susceptibility determined by the chemi
 ## Growth, death and reproduction
 
 Any internal chemical can fund generic biomass, paying assembly work and retaining its identity
-in the bound mixture. Growth fills deficits toward twice the inherited newborn target. Genes
+in the bound mixture. Growth fills deficits toward neural construction requests bounded by
+twice the inherited target. Paid retirement shares handling/work and preserves chemical identity. Genes
 prescribe targets; only installed stocks provide capability. Repair pays work and exchanges equal
 amounts of the frozen inventory and bound mixtures before growth. Replaced material retains its identity.
 
-Fission requires all division stocks, daughter inventory/energy, the division charge and local
+Fission requires twice the inherited core target, actual daughter inventory/energy reserves, the division charge and local
 placement in the periodic plane. Daughters separate along the parent's heading and subsequently
 participate in ordinary local overlap resolution. Fission splits stocks, each chemical and
 post-cost energy equally; budding uses the same split while retaining the experienced parent.
@@ -124,7 +125,7 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v32 stores complete chemistry, free and bound mixtures, actual stocks and installed coordinates/orientation/revision, chemical/behavioral genes,
+Checkpoint v33 stores complete chemistry, free and bound mixtures, actual stocks, bounded enzyme programs, inward allocation and installed coordinates/orientation/revision, chemical/behavioral genes,
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs

@@ -2,7 +2,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 44×24×9 Rust controller in physical checkpoint v32.
+the 56×24×38 Rust controller in physical checkpoint v33.
 
 <a id="controller-observation-contract"></a>
 
@@ -21,6 +21,8 @@ the 44×24×9 Rust controller in physical checkpoint v32.
 | 38 | Injury fraction |
 | 39–42 | Funded optical level, temporal change, forward difference and left difference |
 | 43 | Photoreceptor stock divided by itself plus genetic target |
+| 44–51 | Four funded inward receptors, each level and temporal change |
+| 52–55 | Enzyme records 4–7 stock relative to their genetic targets |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
 Actual receptor stock supplies gain. Level is C/(C+K), with K=0.1; directional differences use
@@ -43,27 +45,36 @@ or reproductive score. Machinery inputs distinguish installed capacity from gene
 | 3 | Rounded 127.5×(1+saturation(logit/2)): candidate private byte |
 | 4 | Nonnegative logit commits the candidate |
 | 5–8 | Half of one plus signed saturation: independent transporter direction/effort |
+| 9–16 | Positive saturation: activity of each enzyme program |
+| 17–36 | Positive saturation: requested construction allocation for each stock record |
+| 37 | Positive saturation: shared retirement effort |
 
 A transporter's allele selects its chemical target. Neural output selects direction and effort:
 0 exports fully, 0.5 holds, and 1 imports fully. Actual transport requires machinery, available species, storage, conductance and
-usable energy. Enzymes are constitutive; no extra neural enzyme controls or named secretion outputs
-exist. Repair competes with growth. Movement costs remain physical even when contact restricts it.
+usable energy. Enzyme activity multiplies funded turnover; construction requests define desired
+stock, and retirement pays to return surplus bound material to free inventory. These requests
+cannot grant material or work. Repair competes with growth. Movement costs remain physical even when contact restricts it.
 The task byte has no task semantics in physics; manual writes are recorded diagnostic interventions.
 
 <a id="controller-topology-and-founder"></a>
 
 ## Topology and founder
 
-The network has 44 inputs, 24 recurrent saturating units and nine output logits: 1,056 input weights,
-576 recurrent weights, 24 hidden biases, 216 output weights and nine output biases, totaling
-1,881 parameters. Eleven additional inherited loci define private plasticity.
+The network has 56 inputs, 24 recurrent saturating units and 38 output logits: 1,344 input weights,
+576 recurrent weights, 24 hidden biases, 912 output weights and 38 output biases, totaling
+2,894 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
+belong to program records; inactive records have no funded function. Neutral duplication copies
+activity/construction readouts and divides incoming stock contributions. Deletion removes the
+program's ports but leaves its physical stock until paid retirement.
 
 Private state includes 24 hidden values, 576 bounded traces, the private byte and previous
-energy fill. The four chemical and one optical receptor baselines belong to body state. Weights/traces/hidden values
+energy fill. Four outward, four inward and one optical receptor baselines belong to body state. Weights/traces/hidden values
 use float32 storage and SIMD arithmetic. The shared rational activation is
 `x*(27+x²)/(27+9x²)` within [-3,3], saturated outside. Its maximum checked difference from tanh
 is below 0.024. This is an explicit modeling approximation, not preserved old trajectories.
 Inference and paid learning occur every 0.8 model seconds; actions are held between updates.
+Controller matrices use SIMD; an attempted sparse-support cache increased complete workload
+cost and was rejected. Private traces remain dynamic. Static learning skips its unused trace dot product.
 
 Ordinary mutable founder weights encode local chemical-gradient steering, reduced swimming when
 the first two receptor levels rise, contact turns, damage-dependent repair and active transport.
@@ -72,6 +83,10 @@ They recognize their input, use input-centered membrane compatibility, and expre
 export. Optical connections begin at zero and can mutate; there is no seeded light-seeking policy.
 The [initial ecosystem design](chemistry/regenerative-ecosystem.md) explains their paid budgets. This seed is a declared initial
 condition, not an evolved discovery or an authored final community.
+
+Activity and construction biases start at saturation 3 (effort 1); retirement and inward
+allocation start at zero. These are mutable alleles. Saturation reaches exactly one, allowing
+core construction to reach its division threshold. A reduced core allocation can defer division.
 
 <a id="controller-learning-and-module-boundary"></a>
 

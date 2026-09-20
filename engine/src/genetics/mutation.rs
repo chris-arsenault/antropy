@@ -5,6 +5,15 @@ use crate::random::Random;
 // median proposed step, while P(|step| > d) = b / (b + d), b = scale * this value.
 const NORMAL_ABS_MEDIAN: f64 = 0.6744897501960817;
 
+pub(crate) fn count(value: usize, maximum: usize, scale: f64, rng: &mut Random) -> usize {
+    let u = rng.signed().clamp(-1. + f64::EPSILON, 1. - f64::EPSILON);
+    let period = 2. * (maximum - 1) as f64;
+    let step = (NORMAL_ABS_MEDIAN * scale * u / (1. - u.abs())).rem_euclid(period);
+    let rounded = step.floor() + f64::from(rng.unit() < step.fract());
+    let phase = (value as f64 - 1. + rounded).rem_euclid(period);
+    (1. + (maximum - 1) as f64 - (phase - (maximum - 1) as f64).abs()) as usize
+}
+
 pub(crate) trait Gene: Copy + PartialEq {
     fn read(self) -> f64;
     fn write(value: f64) -> Self;

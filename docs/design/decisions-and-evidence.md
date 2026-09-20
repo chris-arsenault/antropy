@@ -1,4 +1,4 @@
-# Design decisions and evidence through physical v32
+# Design decisions and evidence through physical v33
 
 This is the decision record for the current [work order](README.md). The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
@@ -107,6 +107,29 @@ The short finite-food probes all died, despite demonstrating controllable optica
 The later200k run shows inherited optical connections affecting actions; it does not establish
 successful light navigation or a specific fitness advantage.
 
+## Cellular organization and shared interfaces
+
+V33 implements the [joint design](cellular-organization-and-exchange.md). The user withdrew internal
+compartments: each cell retains access to all 256 chemicals through one free mixture. Retained
+free/bound composition changes relative enzyme rates through the existing signed profiles;
+work per conversion remains separate. Paid inward sensing and neural requests connect this
+environment to activity, construction and retirement. One to eight enzyme templates can duplicate
+or disappear without granting machinery or erasing installed material. Core-funded division
+allows optional machinery expression without requiring every inherited target before birth.
+
+Crowding divides a finite interface between the field and exposed free material in injured
+neighbors. Shared donor reservation includes the donor's own export. Existing chemical injury,
+repair and public export can support antagonism or assistance without prescribed roles, kin
+recognition or community rewards. Living bound structure remains private.
+
+[Bounded delivery evidence](../cellular-organization-results.md) records an ordinary-turnover
+recipient return, conserved/permutable operations and functioning 600-tick startup. The latter
+had no contact import or retirement. Neither profitable deliberate injury nor evolved
+cooperation was established. A sparse-controller optimization was rejected after worsening
+cost; exact inactive-work skips and in-place lifecycle compaction remain. Standard 2,000-cell
+mean throughput is30.07 ticks/s versus31.69 before the feature; growth and the eight-program
+stress case remain below30. There is no unqualified performance or meta-organism claim.
+
 ## Operational limits and remaining direction
 
 The prior React development timing leak was reproduced and repaired. One injected graphics
@@ -117,5 +140,5 @@ speed benefit from forced JavaScript collection; WASM high-water allocation and 
 concerns, and the reported fivefold difference remains unattributed.
 
 Keep execution single-threaded for now. [Multicore and terrain](../../SCALING-PLAN.md), direct
-cell interaction research, useful public-food returns, and long-run performance remain backlog
+adhesion and interaction research beyond v33, useful public-food returns, and long-run performance remain backlog
 work. Neither retrospective documentation cleanup nor a passing CI run resolves those questions.

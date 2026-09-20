@@ -32,6 +32,7 @@ pub mod climate;
 mod climate_tests;
 pub mod commands;
 pub mod config;
+pub mod contact_exchange;
 pub mod controller;
 #[cfg(test)]
 mod coupling_tests;
@@ -59,6 +60,9 @@ pub mod illumination;
 #[cfg(test)]
 mod illumination_tests;
 pub mod initial_ecology;
+#[cfg(test)]
+mod interface_tests;
+pub mod interfaces;
 pub mod inventory;
 pub mod lifecycle;
 #[cfg(test)]
@@ -72,6 +76,9 @@ mod numeric;
 pub mod observation;
 pub mod opportunities;
 pub mod organism;
+pub mod organization;
+#[cfg(test)]
+mod organization_tests;
 pub mod phenotype;
 mod phenotype_activity;
 mod phenotype_commands;

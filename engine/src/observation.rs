@@ -158,6 +158,14 @@ pub fn inspect(w: &World, id: u64) -> Result<Value, String> {
 /// One explicitly selected organism; immutable genes and parentage are revisions.
 pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     let cell = w.cells.iter().find(|c| c.id == id);
+    let interface = w.cells.iter().position(|c| c.id == id).map(|i| {
+        crate::interfaces::Graph::new(&w.cells, &w.config).reading(
+            i,
+            &w.cells,
+            &w.config,
+            &w.chemistry,
+        )
+    });
     let ancestor = w
         .ancestry
         .get(id.checked_sub(1).ok_or("Invalid organism id")? as usize)
@@ -176,7 +184,11 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         .rev()
         .take(16)
         .collect();
-    let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":cell.map(|c| crate::sensing::stress_load(c,w.genomes[&c.genome].compiled.as_ref().unwrap(),&w.config,&w.field,&w.chemistry)),"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
+    let exposure = cell.zip(interface.as_ref()).map(|(c, boundary)| {
+        crate::sensing::stress_boundary(c, &w.config, &w.field, &w.chemistry, boundary)
+    });
+    let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":exposure,"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
+    result["fieldInterface"] = json!(interface.map(|r| r.field));
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));
     if request.get("machinery").and_then(Value::as_u64) != cell.map(|c| c.machinery_revision)

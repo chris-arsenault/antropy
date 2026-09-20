@@ -31,7 +31,7 @@ fn circuit_private_returns_close_against_external_input() {
             center_x: if i % 2 == 0 { 4. } else { 0. },
             center_y: if i % 2 == 1 { 4. } else { 0. },
             angle: 0.,
-        }; 4];
+        }; crate::organism::MAX_ENZYMES];
         cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
         let initial = cell.clone();
         metabolism::react_observed(&mut cell, &w.config, &w.chemistry, 1e6, true, signal);
@@ -139,7 +139,11 @@ fn default_starts_with_four_funded_mutable_roles_in_each_colony() {
                 assert!((cell.mass() - cell.bound_material.material()).abs() < 1e-12);
                 assert_eq!(cell.installed, w.genomes[&cell.genome].express().chemistry);
                 assert!(cell.inventory[input] > 0. && cell.inventory[output] > 0.);
-                for enzyme in &cell.operators.as_ref().unwrap().enzymes {
+                for (slot, enzyme) in cell.operators.as_ref().unwrap().enzymes.iter().enumerate() {
+                    if !cell.installed.programs[slot] {
+                        assert!(enzyme.conversions.is_empty());
+                        continue;
+                    }
                     let row = enzyme
                         .conversions
                         .iter()

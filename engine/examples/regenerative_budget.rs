@@ -31,7 +31,7 @@ fn main() {
                 center_x: if i % 2 == 0 { 4. } else { 0. },
                 center_y: if i % 2 == 1 { 4. } else { 0. },
                 angle: 0.,
-            }; 4];
+            }; antropy_engine::organism::MAX_ENZYMES];
         }
         g.compile(&c, &w.chemistry);
         let compiled = g.compiled.as_ref().unwrap();

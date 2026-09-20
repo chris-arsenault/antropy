@@ -16,7 +16,10 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
 | 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
 | Implemented illumination: composed cycles and shared local transformation work | [Illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k user-run findings](evidence/digital-chemistry/illumination-design-143249/README.md) |
-| Deferred cell crowding, chemical antagonism and feeding research | [Cell interaction research](design/cell-interaction-research.md) — design only, not scheduled next |
+| Joint design for intracellular organization, specialization and cell interactions | [Cellular organization and exchange](design/cellular-organization-and-exchange.md) — implemented v33 laws |
+| Cellular delivery, opportunities and costs | [Delivery results](cellular-organization-results.md) — bounded mechanics, startup and operating limits |
+| Earlier crowding, antagonism and feeding research | [Cell interaction research](design/cell-interaction-research.md) — original inventory and proposal |
+| Whole-cell metabolic organization and conditional incentives | [Intracellular organization](design/intracellular-organization.md) — strategic hypothesis underlying the joint design |
 | Current spatial isolation, source migration and directional climate review | [50k study and staged ecology proposal](design/spatial-isolation-review.md) |
 | Full-screen world and observation navigation | [Display contract](design/bacterial-display.md) |
 | Enzyme role colors, counts and transformation web | [Chemical web and phenotype observation](phenotype-observation.md) |

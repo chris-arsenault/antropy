@@ -255,7 +255,13 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         }
         "loadFixture" => {
             let count = number(v, "population")? as usize;
-            load_fixture(w, count)?;
+            let programs = v.get("programs").and_then(Value::as_u64).unwrap_or(4) as usize;
+            load_program_fixture(
+                w,
+                count,
+                programs,
+                v.get("dense").and_then(Value::as_bool).unwrap_or(false),
+            )?;
             if v.get("growth").and_then(Value::as_bool) == Some(true) {
                 for (i, cell) in w.cells.iter_mut().enumerate() {
                     cell.set_fixture_body(
@@ -406,9 +412,18 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
     Ok(observation::summary(w))
 }
 pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
+    load_program_fixture(w, population, 4, false)
+}
+fn load_program_fixture(
+    w: &mut World,
+    population: usize,
+    programs: usize,
+    dense: bool,
+) -> Result<(), String> {
     if w.tick != 0
         || population > w.config.max_population
         || population > w.config.max_ancestry_records
+        || !(1..=crate::organism::MAX_ENZYMES).contains(&programs)
     {
         return Err("Load fixture requires tick zero and valid capacity".into());
     }
@@ -434,6 +449,7 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
         g.parent = Some(1);
         g.compiled = None;
         for a in &mut g.chromosomes {
+            a.chemistry.programs = std::array::from_fn(|s| s < programs);
             for e in &mut a.chemistry.enzymes {
                 e.x = rng.unit() * 15.;
                 e.y = rng.unit() * 15.;
@@ -463,11 +479,18 @@ pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {
             g.compiled.as_ref().unwrap(),
             &w.config,
             &w.chemistry,
-            [x, y],
+            if dense {
+                [w.config.width * 0.5, w.config.height * 0.5]
+            } else {
+                [x, y]
+            },
             rng.unit() * std::f64::consts::TAU,
         );
         cell.energy = cell.energy_capacity(&w.config);
         cell.inventory.fill(0.001);
+        if dense {
+            cell.damage = 0.5;
+        }
         w.ancestry.push(Ancestor {
             id: cell.id,
             parent: 0,

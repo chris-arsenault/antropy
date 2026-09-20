@@ -6,7 +6,7 @@ Capabilities depend on material actually installed. Genetic targets cannot grant
 
 ## Construction and physical genes
 
-Each chromosome has sixteen bounded float32 investment loci plus fixed chemical alleles:
+Each chromosome has twenty bounded float32 investment records plus chemical alleles:
 
 | Loci | Actual stock / allele | Reference newborn stock |
 | --- | --- | ---: |
@@ -17,16 +17,24 @@ Each chromosome has sixteen bounded float32 investment loci plus fixed chemical 
 | 7–10 | Four transporters, each with a target; neural effort chooses direction | 0.04 each |
 | 11–14 | Four unary enzymes, each with recognition target, independent reflection center and orientation mixture | 0.04 each |
 | 15 | Photoreceptor, sampling local mean illumination | 0.01 |
+| 16–19 | Additional enzyme program records 4–7 | 0.04 each when present |
 
-A membrane coordinate controls chemical compatibility. Slot count is fixed; no variable-length
-genome structure is implemented. Core target is reference core × exp(g0). Other stocks use
+A membrane coordinate controls chemical compatibility. One to eight enzyme programs occupy
+a bounded arena shared with retired installed stock. Four programs start present. Duplication
+splits actual stock and target, copying controls and splitting sensory contributions; deletion
+leaves stock retired and maintained until paid decommission. Core target is reference core × exp(g0). Other stocks use
 core target × reference ratio × max(0,1+gi). Zero investment is reachable and can mutate back.
 All actual stocks occupy volume and require maintenance.
 
 [Photoreception](../photoreception.md) uses the same funded gain and adaptation law as chemical
 receptors, with unit reference illumination. It adds no harvesting or automatic steering.
 
-Growth shares paid assembly across deficits toward twice the newborn target. Birth splits actual
+Growth shares paid assembly across deficits toward neural requests: optional stock targets are
+`2*g*b`, core is `g*(1+b)`. A shared retirement request decommissions surplus, returning the
+bound mixture unchanged and paying assembly-price work. Both operations share core handling,
+frozen donors and work reserve; retirement reserves lost storage capacity. Core at `2*g` and
+actual daughter material/work reserves permit division without requiring every optional stock.
+Birth splits actual
 stock and inherits installed identity. Changed slot instructions retain their former function until
 usable energy above the protected reserve pays refitting work on that stock. Refitting conserves
 built material and dissipates work as heat; it grants neither new function nor new biomass for free.
@@ -119,25 +127,28 @@ antipodal alleles use a declared zero-angle convention because no unique mean ex
 Chemical coordinates and reflection centers mutate with reflection, while angles wrap periodically;
 parameters compile mixtures of exact bounded chemical permutations with at most eight
 product species per substrate. These mixtures are not group elements; component actions
-have exact composition and inverses. Neural effort can reverse any transporter. No slot count evolves.
+have exact composition and inverses. Neural effort can reverse any transporter. Enzyme program
+count mutates with the same scalar heavy tail in program units, stochastically rounded before
+reflection into 1–8. Vacant records must have zero retired stock before duplication can use them.
 
 All mutations use the same heavy-tail law: for signed uniform u, the proposed scalar
 step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
 P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
 Default behavioral probability/scale is0.0015/0.08; physical probability/scale is0.1/0.12.
 Chemical coordinates and reflection centers multiply scale by the existing specificity radius R.
-Scalar neural and sixteen investment loci retain independent opportunities.
-Each of17 chemical coordinate pairs has Binomial(2,p) vector events: each event uses the same
-absolute-step law and a uniform direction. These pairs and body loci contribute5.0 expected
-events per birth at p=.1. Four enzyme-angle loci add0.4 events, for5.4 total. Their scale is
+Scalar neural and twenty investment loci retain independent opportunities.
+Each of25 chemical coordinate pairs has Binomial(2,p) vector events: each event uses the same
+absolute-step law and a uniform direction. Four inward fractions also mutate on [0,1].
+The bounded arena includes dormant alleles, which do not confer a physical function.
+Eight enzyme-angle loci use
 physicalMutationScale radians, making the corresponding radius-R arc length use the same chemical
-step units. Expected changed coordinates are approximately8.46, including angles, because
-a vector event changes both axes.
+step units. Count mutation adds one physical-rate opportunity per birth. A vector event changes
+both axes; changed genotype counts alone do not establish expressed phenotypic change.
 The [symmetry measurements](../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#m4-execution) check event
 rates and realized magnitudes separately. Reflection respects the finite square's boundary;
 arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
 chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v32 preserves complete allele and actual-state
+No score selects parents or filters mutants. Checkpoint v33 preserves complete allele and actual-state
 distinctions; unavailable pruned genotype payloads remain labeled provenance.

@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 mod angle_tests;
 pub mod angles;
 pub(crate) mod mutation;
+pub mod repertoire;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -61,8 +62,10 @@ impl Enzyme {
 #[serde(deny_unknown_fields)]
 pub struct Machinery {
     pub receptors: [Target; 4],
+    pub inward: [f64; 4],
     pub transporters: [Transporter; 4],
-    pub enzymes: [Enzyme; 4],
+    pub enzymes: [Enzyme; crate::organism::MAX_ENZYMES],
+    pub programs: [bool; crate::organism::MAX_ENZYMES],
     pub membrane: Target,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -102,6 +105,10 @@ impl Machinery {
         if points
             .flatten()
             .any(|v| !v.is_finite() || !(0. ..=15.).contains(&v))
+            || self
+                .inward
+                .iter()
+                .any(|v| !v.is_finite() || !(0. ..=1.).contains(v))
             || self.enzymes.iter().any(|e| {
                 !e.center_x.is_finite()
                     || !e.center_y.is_finite()
@@ -143,6 +150,8 @@ impl Machinery {
         );
         Self {
             receptors: [from[0], from[1], to, stress],
+            inward: [0.; 4],
+            programs: std::array::from_fn(|i| i < 4),
             transporters: std::array::from_fn(|i| {
                 let p = if i < 2 { from[i] } else { products[i - 2] };
                 Transporter { x: p.x, y: p.y }
@@ -194,11 +203,21 @@ impl Machinery {
             c.physical_mutation_rate,
             chemical_scale / c.affinity_radius,
         );
-        points_changed || centers_changed || angles_changed
+        let inward_changed = mutation::mutate(
+            &mut self.inward,
+            rng,
+            c.physical_mutation_rate,
+            c.physical_mutation_scale,
+            0.,
+            1.,
+        );
+        points_changed || centers_changed || angles_changed || inward_changed
     }
     fn express(a: &Self, b: &Self) -> Self {
         let mean = |x: f64, y: f64| ((x + y) * 0.5) as f32 as f64;
         Self {
+            inward: std::array::from_fn(|i| mean(a.inward[i], b.inward[i])),
+            programs: std::array::from_fn(|i| a.programs[i] || b.programs[i]),
             receptors: std::array::from_fn(|i| Target {
                 x: mean(a.receptors[i].x, b.receptors[i].x),
                 y: mean(a.receptors[i].y, b.receptors[i].y),
@@ -223,6 +242,8 @@ impl Machinery {
     fn combine(a: &Self, b: &Self, rng: &mut Random, kind: &str) -> Self {
         let mask = controller::combine(&[true; 13], &[false; 13], rng, kind);
         Self {
+            inward: std::array::from_fn(|i| if mask[i] { a.inward[i] } else { b.inward[i] }),
+            programs: a.programs,
             receptors: std::array::from_fn(|i| {
                 if mask[i] {
                     a.receptors[i]
@@ -238,7 +259,7 @@ impl Machinery {
                 }
             }),
             enzymes: std::array::from_fn(|i| {
-                if mask[8 + i] {
+                if mask[8 + i % 4] {
                     a.enzymes[i]
                 } else {
                     b.enzymes[i]
@@ -248,166 +269,4 @@ impl Machinery {
         }
     }
 }
-impl Genotype {
-    pub fn seed(c: &Config, chemistry: &Chemistry) -> Self {
-        let allele = Chromosome {
-            behavior: controller::seed(),
-            physical: [0.; crate::organism::STOCKS],
-            chemistry: Machinery::seed(chemistry, &c.source_species),
-        };
-        let mut g = Self {
-            id: 1,
-            parent: None,
-            born: 0,
-            learned: 0.,
-            mutated: false,
-            chromosomes: vec![allele; if c.ploidy == "diploid" { 2 } else { 1 }],
-            compiled: None,
-        };
-        g.compile(c, chemistry);
-        g
-    }
-    pub fn express(&self) -> Chromosome {
-        let a = &self.chromosomes[0];
-        let Some(b) = self.chromosomes.get(1) else {
-            return a.clone();
-        };
-        Chromosome {
-            behavior: controller::express(&a.behavior, &b.behavior),
-            physical: std::array::from_fn(|i| (a.physical[i] + b.physical[i]) * 0.5),
-            chemistry: Machinery::express(&a.chemistry, &b.chemistry),
-        }
-    }
-    pub fn compile(&mut self, c: &Config, chemistry: &Chemistry) {
-        let chromosome = self.express();
-        let m = &chromosome.chemistry;
-        let ratios = [
-            1.,
-            c.motor_ratio,
-            c.storage_ratio,
-            c.receptor_ratio,
-            c.receptor_ratio,
-            c.receptor_ratio,
-            c.receptor_ratio,
-            c.transporter_ratio,
-            c.transporter_ratio,
-            c.transporter_ratio,
-            c.transporter_ratio,
-            c.enzyme_ratio,
-            c.enzyme_ratio,
-            c.enzyme_ratio,
-            c.enzyme_ratio,
-            c.receptor_ratio,
-        ];
-        let core = c.birth_mass * (chromosome.physical[0] as f64).exp();
-        let body = std::array::from_fn(|i| {
-            if i == 0 {
-                core
-            } else {
-                core * ratios[i] * (1. + chromosome.physical[i] as f64).max(0.)
-            }
-        });
-        let operators = if let Some(previous) = &self.compiled {
-            let mut op = previous.operators.clone();
-            op.update(&previous.chromosome.chemistry, m, c, chemistry);
-            op
-        } else {
-            crate::chemical_operators::Operators::compile(m, c, chemistry)
-        };
-        self.compiled = Some(Compiled {
-            sequence_fingerprint: {
-                use std::hash::{Hash, Hasher};
-                let mut hash = std::collections::hash_map::DefaultHasher::new();
-                postcard::to_stdvec(&self.chromosomes)
-                    .unwrap()
-                    .hash(&mut hash);
-                hash.finish()
-            },
-            chromosome,
-            body,
-            operators,
-        });
-    }
-    pub fn inherit(
-        &self,
-        id: u64,
-        tick: u64,
-        state: &controller::State,
-        rng: &mut Random,
-        c: &Config,
-        chemistry: &Chemistry,
-    ) -> Self {
-        let expressed = &self.compiled.as_ref().unwrap().chromosome.behavior;
-        let mut acquired = self.chromosomes.clone();
-        if c.learning == "plastic" {
-            for a in &mut acquired {
-                a.behavior =
-                    controller::assimilate(&a.behavior, expressed, state, c.learning_retention);
-            }
-        }
-        let learned =
-            controller::genome_distance(&self.chromosomes[0].behavior, &acquired[0].behavior);
-        if c.transmission == "selfing" {
-            acquired = (0..2)
-                .map(|_| Chromosome {
-                    behavior: controller::recombine(
-                        &acquired[0].behavior,
-                        &acquired[1].behavior,
-                        rng,
-                        &c.crossover,
-                    ),
-                    physical: controller::combine(
-                        &acquired[0].physical,
-                        &acquired[1].physical,
-                        rng,
-                        &c.crossover,
-                    )
-                    .try_into()
-                    .unwrap(),
-                    chemistry: Machinery::combine(
-                        &acquired[0].chemistry,
-                        &acquired[1].chemistry,
-                        rng,
-                        &c.crossover,
-                    ),
-                })
-                .collect();
-        }
-        let mut mutated = false;
-        for a in &mut acquired {
-            mutated |= controller::mutate(&mut a.behavior, rng, c);
-            mutated |= controller::mutate_vector(
-                &mut a.physical,
-                rng,
-                c.physical_mutation_rate,
-                c.physical_mutation_scale,
-                3.,
-            );
-            mutated |= a.chemistry.mutate(rng, c);
-        }
-        let mut child = Self {
-            id,
-            parent: Some(self.id),
-            born: tick,
-            learned,
-            mutated,
-            chromosomes: acquired,
-            compiled: self.compiled.clone(),
-        };
-        child.compile(c, chemistry);
-        child
-    }
-    pub fn validate(&self, c: &Config) -> Result<(), String> {
-        if self.chromosomes.len() != if c.ploidy == "diploid" { 2 } else { 1 } {
-            return Err("Invalid chromosome count".into());
-        }
-        for a in &self.chromosomes {
-            controller::validate(&a.behavior)?;
-            if a.physical.iter().any(|x| !x.is_finite() || x.abs() > 3.) {
-                return Err("Invalid physical loci".into());
-            }
-            a.chemistry.validate()?;
-        }
-        Ok(())
-    }
-}
+mod genotype;

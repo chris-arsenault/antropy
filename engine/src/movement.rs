@@ -145,11 +145,15 @@ pub fn pairs(cells: &[Cell], c: &Config) -> Vec<(usize, usize)> {
 }
 fn contacts(cells: &mut [Cell], c: &Config) {
     let mut shifts = vec![[0.; 2]; cells.len()];
+    let mut normalization = vec![1.; cells.len()];
     for (i, j) in pairs(cells, c) {
         let a = &cells[i];
         let b = &cells[j];
         let d = [delta(b.x - a.x, c.width), delta(b.y - a.y, c.height)];
         let length = d[0].hypot(d[1]);
+        let contact = (1. - length / (a.radius(c) + b.radius(c))).max(0.);
+        normalization[i] += contact;
+        normalization[j] += contact;
         let unit = if length > 0. {
             [d[0] / length, d[1] / length]
         } else {
@@ -164,7 +168,10 @@ fn contacts(cells: &mut [Cell], c: &Config) {
                 [0.; 2]
             }
         };
-        let correction = ((a.radius(c) + b.radius(c) - length) * 0.25).min(c.dt * 0.5);
+        // Continuous soft-contact relaxation: a fixed physical duration has the same
+        // pair overlap decay when split into smaller steps (before the speed bound).
+        let correction =
+            ((a.radius(c) + b.radius(c) - length) * 0.5 * (1. - (-c.dt).exp())).min(c.dt * 0.5);
         for k in 0..2 {
             shifts[i][k] -= unit[k] * correction;
             shifts[j][k] += unit[k] * correction;
@@ -180,11 +187,12 @@ fn contacts(cells: &mut [Cell], c: &Config) {
                 (-left).max(0.),
             ];
             for (v, r) in cells[index].contacts.iter_mut().zip(reads) {
-                *v = v.max(r);
+                *v += contact * r;
             }
         }
     }
-    for (cell, d) in cells.iter_mut().zip(shifts) {
+    for ((cell, d), normalization) in cells.iter_mut().zip(shifts).zip(normalization) {
+        cell.contacts.iter_mut().for_each(|v| *v /= normalization);
         cell.x = (cell.x + d[0]).rem_euclid(c.width);
         cell.y = (cell.y + d[1]).rem_euclid(c.height);
     }

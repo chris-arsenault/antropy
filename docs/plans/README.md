@@ -5,6 +5,14 @@ Current behavior belongs to the [design work order](../design/README.md),
 [decision/evidence record](../design/decisions-and-evidence.md). Plans below preserve execution,
 registrations and failures. Their old future-tense instructions are historical, not work to replay.
 
+## Latest completed execution
+
+[Cellular organization and exchange](../CELLULAR-ORGANIZATION-PLAN.md), Sulion root
+`ec58a567-39b5-49fa-841d-de4da572fa1b`, completed all implementation phases locally in v33.
+[Delivery results](../cellular-organization-results.md) retain costs and evidence limits. It preserves one
+intracellular mixture. The internal-compartment plan `60e1c9a1-5a0e-4c61-9ba9-362ed6f97a6f`
+was canceled at the user's request before any compartment edits.
+
 ## Completed or superseded execution records
 
 | Record | Disposition and surviving owner |

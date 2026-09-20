@@ -6,8 +6,12 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-pub const STOCKS: usize = 16;
+pub const MAX_ENZYMES: usize = 8;
+pub const STOCKS: usize = 12 + MAX_ENZYMES;
 pub const PHOTO_STOCK: usize = 15;
+pub const fn enzyme_stock(slot: usize) -> usize {
+    if slot < 4 { 11 + slot } else { 12 + slot }
+}
 pub type Body = [f64; STOCKS];
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -34,8 +38,11 @@ pub struct Cell {
     pub damage: f64,
     pub brain: State,
     pub receptors: [f64; 4],
+    pub inward_receptors: [f64; 4],
     pub photoreceptor: f64,
     pub contacts: [f64; 4],
+    #[serde(skip)]
+    pub interface: crate::interfaces::Reading,
     pub inputs: Vec<f32>,
     pub action: Action,
     pub flows: Flows,
@@ -67,6 +74,9 @@ pub struct Flows {
     pub captured: f64,
     pub external_work: f64,
     pub constructed: f64,
+    pub retired: f64,
+    pub contact_imported: f64,
+    pub contact_lost: f64,
     pub maintenance: f64,
     pub motors: f64,
     pub learning: f64,
@@ -119,8 +129,10 @@ impl Cell {
             damage: 0.,
             brain: State::default(),
             receptors: [0.; 4],
+            inward_receptors: [0.; 4],
             photoreceptor: 0.,
             contacts: [0.; 4],
+            interface: Default::default(),
             inputs: vec![0.; INPUTS],
             action: Action::default(),
             flows: Flows::default(),
@@ -211,6 +223,7 @@ impl Cell {
         if self
             .receptors
             .iter()
+            .chain(&self.inward_receptors)
             .chain([&self.photoreceptor])
             .any(|x| !x.is_finite() || *x < 0.)
             || self.contacts.iter().any(|x| !(0. ..=1.).contains(x))
@@ -219,6 +232,9 @@ impl Cell {
                 .action
                 .transport
                 .iter()
+                .chain(&self.action.activity)
+                .chain(&self.action.allocation)
+                .chain([&self.action.retirement])
                 .chain([&self.action.swim, &self.action.repair])
                 .any(|x| !(0. ..=1.).contains(x))
             || !(-1. ..=1.).contains(&self.action.turn)

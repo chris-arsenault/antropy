@@ -12,22 +12,31 @@ pub struct Exchange {
     masks: Vec<u64>,
     imports: Vec<[f64; 256]>,
     exports: Vec<[f64; 256]>,
+    contact: crate::contact_exchange::Allocation,
     pub profile: bool,
     pub preparation_ms: f64,
 }
 
-fn requests(cell: &Cell, c: &Config, local: &[f32; 256]) -> ([f64; 256], [f64; 256]) {
+fn requests(cell: &Cell, c: &Config, local: &[f64; 256]) -> ([f64; 256], [f64; 256]) {
     let mut imports = [0.; 256];
     let mut exports = [0.; 256];
     let volume = cell.volume(c).max(1e-30);
     for slot in 0..4 {
         let effort = 2. * cell.action.transport[slot] - 1.;
-        let capacity =
-            c.dt * c.transporter_turnover * cell.body[7 + slot] * (1. - cell.damage) * effort.abs();
+        let capacity = c.dt
+            * c.transporter_turnover
+            * cell.body[7 + slot]
+            * (1. - cell.damage)
+            * effort.abs()
+            * if effort < 0. {
+                cell.interface.field
+            } else {
+                1.
+            };
         let recognition = &cell.operators.as_ref().unwrap().transporters[slot];
         let available = |s| {
             if effort >= 0. {
-                local[s] as f64
+                local[s]
             } else {
                 cell.inventory[s] / volume
             }
@@ -102,14 +111,42 @@ impl Exchange {
         c: &Config,
         field: &Field,
         sites: &[Vec<(usize, f64)>],
+        graph: &crate::interfaces::Graph,
     ) {
         self.prepare_nodes(field.nx * field.ny, sites);
         self.imports.resize(cells.len(), [0.; 256]);
         self.exports.resize(cells.len(), [0.; 256]);
         self.masks.resize(cells.len(), 0);
+        let exposed = graph
+            .neighbors
+            .iter()
+            .flatten()
+            .any(|n| cells[n.donor].damage > 0.);
+        self.contact.begin(if exposed { cells.len() } else { 0 });
         for (i, cell) in cells.iter().enumerate() {
-            let local = crate::numeric::mixture(field, &sites[i]);
+            let field_local = crate::numeric::mixture(field, &sites[i]);
+            let local = graph.local(i, cells, c, &field_local);
             (self.imports[i], self.exports[i]) = requests(cell, c, &local);
+            if !graph.neighbors[i]
+                .iter()
+                .any(|n| cells[n.donor].damage > 0.)
+            {
+                continue;
+            }
+            let intensity = std::array::from_fn(|s| {
+                if local[s] > 0. {
+                    self.imports[i][s] / local[s]
+                } else {
+                    0.
+                }
+            });
+            self.contact.request(i, cells, c, graph, &intensity);
+            for s in 0..256 {
+                self.imports[i][s] = intensity[s] * graph.field[i] * field_local[s] as f64;
+            }
+        }
+        self.contact.allocate(cells, &mut self.exports);
+        for (i, site) in sites.iter().enumerate() {
             let mask = self.imports[i]
                 .iter()
                 .zip(&self.exports[i])
@@ -118,7 +155,7 @@ impl Exchange {
                     m | if a > 0. || b > 0. { 1 << (s / 4) } else { 0 }
                 });
             self.masks[i] = mask;
-            for &(node, weight) in &sites[i] {
+            for &(node, weight) in site {
                 if weight == 0. || mask == 0 {
                     continue;
                 }
@@ -152,7 +189,9 @@ impl Exchange {
         } else {
             0.
         };
-        self.prepare_requests(cells, c, field, sites);
+        let graph = crate::interfaces::Graph::new(cells, c);
+        graph.prepare(cells, c, chemistry);
+        self.prepare_requests(cells, c, field, sites, &graph);
         self.preparation_ms = if self.profile {
             crate::abi::clock() - started
         } else {
@@ -178,16 +217,21 @@ impl Exchange {
             let mut incoming = 0.;
             let mut outgoing = 0.;
             for (s, &q) in accepted.iter().enumerate() {
+                let contact = self.contact.received.get(i).map_or(0., |row| row[s]);
+                let lost = self.contact.withdrawn.get(i).map_or(0., |row| row[s]);
+                let q = q + contact;
                 let export = self.exports[i][s];
-                if q == 0. && export == 0. {
+                if q == 0. && export == 0. && lost == 0. {
                     continue;
                 }
                 cell.inventory
-                    .set(s, (cell.inventory[s] + q - export).max(0.));
+                    .set(s, (cell.inventory[s] - export - lost).max(0.) + q);
                 cell.chemical_flows.imported[s] += q;
-                cell.chemical_flows.exported[s] += export;
+                cell.chemical_flows.exported[s] += export + lost;
+                cell.flows.contact_imported += contact;
+                cell.flows.contact_lost += lost;
                 if let Some(o) = observer.as_deref_mut() {
-                    o.transfer(cell.id, s, q, export);
+                    o.transfer(cell.id, s, q, export + lost);
                 }
                 incoming += q;
                 outgoing += export;

@@ -4,11 +4,13 @@ import { type Definition, type Inspection, type CellState } from "./types";
 import { ChemicalAtlas } from "./ChemicalAtlas";
 import { Table, numberText as n } from "./Table";
 import { CellGenealogy } from "./CellGenealogy";
+import { BODY_PARTS, enzymeStock, machineryLabel } from "./bodyParts";
+import { CellOrganization } from "./CellOrganization";
 
 const MACHINERY = ["Receptor", "Transporter", "Enzyme"].flatMap((part) =>
   Array.from({ length: 4 }, (_, i) => part + " " + i)
 );
-const PARTS = ["Core", "Motor", "Storage", ...MACHINERY, "Photoreceptor"];
+const PARTS = BODY_PARTS;
 const INPUTS = [
   ...Array.from({ length: 4 }, (_, i) =>
     ["level", "change", "forward", "left"].map((v) => "Receptor " + i + " " + v)
@@ -30,6 +32,11 @@ const INPUTS = [
   "Light front − back",
   "Light left − right",
   "Built photoreceptor capacity",
+  ...Array.from({ length: 4 }, (_, i) => [
+    `Inward receptor ${i} level`,
+    `Inward receptor ${i} change`,
+  ]).flat(),
+  ...Array.from({ length: 4 }, (_, i) => `Built enzyme ${i + 4}`),
 ];
 interface Props {
   bridge: Bridge;
@@ -145,6 +152,7 @@ function CellDetails({
         {n(p.exposure)} · impedance {n(p.impedance)} · mobility {n(p.mobility)}.
       </p>
       <Chemistry inspection={p} definition={definition} />
+      <CellOrganization inspection={p} />
       <Photoreception cell={c} />
       {p.illumination && (
         <p>
@@ -206,7 +214,7 @@ function Chemistry({
     genes = c.installed;
   const slots = [...genes.receptors, ...genes.transporters, ...genes.enzymes];
   const operation = (i: number) => {
-    if (i < 4) return "sense";
+    if (i < 4) return `sense · ${(100 * genes.inward[i]).toFixed(0)}% inward`;
     if (i < 8)
       return (
         transportDirection(c.action.transport[i - 4]) +
@@ -236,10 +244,10 @@ function Chemistry({
       <Table
         columns={["Slot", "Installed coordinate", "Operation", "Stock"]}
         rows={slots.map((g, i) => [
-          MACHINERY[i],
+          machineryLabel(i),
           n(g.x) + ", " + n(g.y),
           operation(i),
-          n(c.body[i + 3]),
+          n(c.body[i < 8 ? i + 3 : enzymeStock(i - 8)]),
         ])}
       />
       <ChemicalAtlas definition={definition} machinery={genes} />

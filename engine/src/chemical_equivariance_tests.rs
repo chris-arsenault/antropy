@@ -37,9 +37,11 @@ fn transformed_cell(cell: &Cell, chemistry: &Chemistry, q: u8, mirror: bool) -> 
     let u = frame(q, mirror);
     let mut cell = cell.clone();
     let original = cell.inventory.clone();
+    let original_bound = cell.bound_material.clone();
     let mut transformed = chemistry.clone();
     for s in 0..256 {
         cell.inventory.set(u.apply(s), original[s]);
+        cell.bound_material.set(u.apply(s), original_bound[s]);
         transformed.properties[u.apply(s)] = chemistry.properties[s].clone();
     }
     cell.installed.enzymes = cell
@@ -57,11 +59,11 @@ fn ordinary_funded_reactions_commute_with_all_square_frames() {
         initial.energy = energy;
         initial.inventory = (0..256).map(|s| 0.001 * (1 + s % 17) as f64).collect();
         initial.installed.enzymes = std::array::from_fn(|i| Enzyme {
-            x: [0.2, 7.5, 14.7, 8.][i],
-            y: [0.3, 4.2, 15., 9.][i],
-            center_x: [8.3, 4.1, 2.2, 1.][i],
-            center_y: [10., 7., 2.3, 3.][i],
-            angle: [0.4, -0.9, 2.1, 0.][i],
+            x: [0.2, 7.5, 14.7, 8.][i % 4],
+            y: [0.3, 4.2, 15., 9.][i % 4],
+            center_x: [8.3, 4.1, 2.2, 1.][i % 4],
+            center_y: [10., 7., 2.3, 3.][i % 4],
+            angle: [0.4, -0.9, 2.1, 0.][i % 4],
         });
         initial.operators = Some(Operators::compile(
             &initial.installed,

@@ -15,28 +15,40 @@ pub fn react(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) -> Wor
 pub fn react_observed(
     cell: &mut Cell,
     c: &Config,
-    _chemistry: &Chemistry,
+    chemistry: &Chemistry,
     dt: f64,
     record: bool,
     signal: [f64; 2],
 ) -> Work {
     let operators = cell.operators.as_ref().unwrap();
-    let factors: [f64; 4] = std::array::from_fn(|slot| {
+    let mixture = retained_response(cell, c, chemistry);
+    let volume = cell.volume(c);
+    let factors: [f64; crate::organism::MAX_ENZYMES] = std::array::from_fn(|slot| {
+        let stock = cell.body[crate::organism::enzyme_stock(slot)];
+        if stock == 0. || !cell.installed.programs[slot] || cell.action.activity[slot] == 0. {
+            return 0.;
+        }
         let enzyme = &operators.enzymes[slot];
         let occupancy = enzyme
             .engagement
             .iter()
             .map(|a| a.value * cell.inventory[a.species])
             .sum::<f64>();
-        dt * c.enzyme_turnover * cell.body[11 + slot] * (1. - cell.damage)
-            / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30)
+        dt * c.enzyme_turnover * stock * cell.action.activity[slot] * (1. - cell.damage)
+            / (c.receptor_k * volume + occupancy).max(1e-30)
     });
     // Only occupied installed rows need a local yield. Reuse it for reservation and commit.
     let mut requests = Vec::new();
     let mut cost = 0.;
     for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
+        if *factor == 0. {
+            continue;
+        }
         for edge in &enzyme.conversions {
-            let requested = factor * edge.catalytic * cell.inventory[edge.substrate];
+            let requested = factor
+                * edge.catalytic
+                * cell.inventory[edge.substrate]
+                * response(edge.work_coefficient, mixture);
             if requested == 0. {
                 continue;
             }
@@ -114,24 +126,24 @@ pub fn assemble(
     (built, built * cost)
 }
 pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64) {
-    let need: crate::organism::Body =
-        std::array::from_fn(|i| (2. * g.body[i] - cell.body[i]).max(0.));
-    let total = need.iter().sum::<f64>();
-    if total == 0. {
-        return;
+    let _ = chemistry;
+    crate::organization::remodel(cell, g, c, dt);
+}
+
+pub fn retained_response(cell: &Cell, c: &Config, chemistry: &Chemistry) -> [f64; 2] {
+    let mut sum = [0.; 2];
+    for (s, p) in chemistry.properties.iter().enumerate() {
+        let q = cell.inventory[s] + cell.bound_material[s];
+        sum[0] += q * p.interaction[0];
+        sum[1] += q * p.interaction[1];
     }
-    let request = total.min(dt * c.growth_rate * cell.body[0] * (1. - cell.damage));
-    // Construction must leave work for the entire interval without another metabolic update.
-    // Price the largest proposed body, so growth itself cannot invalidate that reserve.
-    let proposed = std::array::from_fn(|i| cell.body[i] + request * need[i] / total);
-    let reserve = crate::accounting::interval_reserve(cell, &proposed, c);
-    let material_reserve = cell.capacity(c) * c.protected_inventory_fraction;
-    let (built, heat) = assemble(cell, chemistry, c, request, material_reserve, reserve);
-    for (stock, n) in cell.body.iter_mut().zip(need) {
-        *stock += built * n / total;
-    }
-    cell.flows.constructed += built;
-    cell.flows.construction += heat;
+    let denominator =
+        c.receptor_k * cell.volume(c) + cell.material() + cell.bound_material.material();
+    sum.map(|v| v / denominator.max(1e-30))
+}
+pub fn response(coefficient: [f64; 2], mixture: [f64; 2]) -> f64 {
+    let z = 4. * (coefficient[0] * mixture[0] + coefficient[1] * mixture[1]);
+    1. + z / (1. + z.abs())
 }
 pub fn repair(cell: &mut Cell, c: &Config, _chemistry: &Chemistry, dt: f64) {
     let mass = cell.mass();

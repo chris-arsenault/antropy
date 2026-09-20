@@ -27,7 +27,9 @@ pub fn conversion_work_ceiling(g: &Compiled, species: usize) -> f64 {
     g.operators
         .enzymes
         .iter()
-        .flat_map(|e| &e.conversions)
+        .enumerate()
+        .filter(|(s, _)| g.chromosome.chemistry.programs[*s])
+        .flat_map(|(_, e)| &e.conversions)
         .filter(|edge| edge.substrate == species)
         .map(|edge| edge.work)
         .fold(0., f64::max)
@@ -36,7 +38,9 @@ pub fn local_work_ceiling(g: &Compiled, species: usize, c: &Config, signal: [f64
     g.operators
         .enzymes
         .iter()
-        .flat_map(|e| &e.conversions)
+        .enumerate()
+        .filter(|(s, _)| g.chromosome.chemistry.programs[*s])
+        .flat_map(|(_, e)| &e.conversions)
         .filter(|e| e.substrate == species)
         .map(|e| e.energy(c, signal)[0])
         .fold(0., f64::max)
@@ -93,17 +97,25 @@ pub fn budget(
         })
         .collect();
     let mut processing_capacity = vec![0.; 256];
+    cell.inventory = inside.clone().into();
+    let mixture = crate::metabolism::retained_response(&cell, c, chemistry);
     let mut processing_value = vec![0.; 256];
     for (slot, e) in g.operators.enzymes.iter().enumerate() {
+        if !cell.installed.programs[slot] {
+            continue;
+        }
         let occupancy = e
             .engagement
             .iter()
             .map(|a| a.value * inside[a.species])
             .sum::<f64>();
-        let rate = cell.body[11 + slot] * c.enzyme_turnover
+        let rate = cell.body[crate::organism::enzyme_stock(slot)] * c.enzyme_turnover
             / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30);
         for edge in &e.conversions {
-            let q = rate * edge.catalytic * inside[edge.substrate];
+            let q = rate
+                * edge.catalytic
+                * inside[edge.substrate]
+                * crate::metabolism::response(edge.work_coefficient, mixture);
             processing_capacity[edge.substrate] += q;
             processing_value[edge.substrate] += q * edge.energy(c, signal)[0];
         }

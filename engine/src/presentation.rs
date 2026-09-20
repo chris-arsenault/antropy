@@ -62,6 +62,8 @@ pub fn links(w: &World, reference: u64, id: u64, path: &BTreeMap<u64, u64>) -> O
 fn physical(g: &Chromosome) -> Vec<f64> {
     let mut out: Vec<_> = g.physical.iter().map(|v| *v as f64).collect();
     let m = &g.chemistry;
+    out.extend(m.inward);
+    out.extend(m.programs.map(f64::from));
     for r in &m.receptors {
         out.extend([r.x / 15., r.y / 15.]);
     }
@@ -92,7 +94,7 @@ pub fn physical_distance(a: &Chromosome, b: &Chromosome) -> f64 {
             .zip(&right)
             .map(|(x, y)| (x - y).powi(2))
             .sum::<f64>())
-        / (left.len() + 4) as f64)
+        / (left.len() + crate::organism::MAX_ENZYMES) as f64)
         .sqrt()
 }
 fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32; 3] {
@@ -111,7 +113,13 @@ fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32
                 / b[0]
                 / 0.32
         }
-        10 => b[11..15].iter().sum::<f64>() / b[0] / 0.32,
+        10 => {
+            (0..crate::organism::MAX_ENZYMES)
+                .map(|s| b[crate::organism::enzyme_stock(s)])
+                .sum::<f64>()
+                / b[0]
+                / 0.32
+        }
         12 | 13 => {
             let Some(r) = reference else {
                 return [0.3, 0.35, 0.4];

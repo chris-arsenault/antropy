@@ -93,7 +93,12 @@ fn mixed_routes_are_complete_pageable_and_match_the_installed_compiler() {
     let mut expected = std::collections::BTreeMap::new();
     for cell in &w.cells {
         let mut pairs = std::collections::BTreeSet::new();
-        for enzyme in &cell.operators.as_ref().unwrap().enzymes {
+        for (slot, enzyme) in cell.operators.as_ref().unwrap().enzymes.iter().enumerate() {
+            if !cell.installed.programs[slot]
+                || cell.body[crate::organism::enzyme_stock(slot)] == 0.
+            {
+                continue;
+            }
             for edge in &enzyme.conversions {
                 for p in &edge.products {
                     if p.species != edge.substrate && edge.catalytic * p.weight > 0. {

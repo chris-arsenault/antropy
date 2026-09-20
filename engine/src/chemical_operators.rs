@@ -31,7 +31,7 @@ impl Conversion {
         )
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct EnzymeOperator {
     pub conversions: Vec<Conversion>,
     pub engagement: Vec<Affinity>,
@@ -41,7 +41,7 @@ pub struct EnzymeOperator {
 pub struct Operators {
     pub receptors: [Arc<Vec<Affinity>>; 4],
     pub transporters: [Arc<Vec<Affinity>>; 4],
-    pub enzymes: [Arc<EnzymeOperator>; 4],
+    pub enzymes: [Arc<EnzymeOperator>; crate::organism::MAX_ENZYMES],
     pub membrane: Arc<Vec<Affinity>>,
     pub profile: [f64; 3],
 }
@@ -136,6 +136,8 @@ impl Operators {
                 self.transporters[i] = compiled.transporters[i].clone();
                 pending.transporters[i] = after.transporters[i];
             }
+        }
+        for i in 0..crate::organism::MAX_ENZYMES {
             if after.enzymes[i] == target.enzymes[i] && before.enzymes[i] != after.enzymes[i] {
                 self.enzymes[i] = compiled.enzymes[i].clone();
                 pending.enzymes[i] = after.enzymes[i];
@@ -176,7 +178,13 @@ impl Operators {
                     c.affinity_radius,
                 ))
             }),
-            enzymes: std::array::from_fn(|i| Arc::new(enzyme(m.enzymes[i], c, chemistry))),
+            enzymes: std::array::from_fn(|i| {
+                Arc::new(if m.programs[i] {
+                    enzyme(m.enzymes[i], c, chemistry)
+                } else {
+                    EnzymeOperator::default()
+                })
+            }),
             membrane,
             profile,
         }
@@ -202,8 +210,16 @@ impl Operators {
                     c.affinity_radius,
                 ));
             }
-            if before.enzymes[i] != after.enzymes[i] {
-                self.enzymes[i] = Arc::new(enzyme(after.enzymes[i], c, chemistry));
+        }
+        for i in 0..crate::organism::MAX_ENZYMES {
+            if before.programs[i] != after.programs[i]
+                || (after.programs[i] && before.enzymes[i] != after.enzymes[i])
+            {
+                self.enzymes[i] = Arc::new(if after.programs[i] {
+                    enzyme(after.enzymes[i], c, chemistry)
+                } else {
+                    EnzymeOperator::default()
+                });
             }
         }
         if before.membrane != after.membrane {
