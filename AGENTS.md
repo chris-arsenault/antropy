@@ -125,6 +125,8 @@ Deploy only through the shared GitHub Actions CI/CD pipeline. Push authorized ch
 calling AWS, Terraform apply or the Komodo proxy from the terminal. Terminal AWS credentials
 are intentionally unavailable and are not a deployment prerequisite. Project CI permissions
 are managed in `ahara-infra` and must land through that repository's pipeline first.
+Use the credential-broker-backed `gh` CLI to inspect CI runs and logs. Never use the connected
+GitHub app. A denied credential remains a boundary until the user enables that same path.
 
 Recovery retains up to six automatic and two manual compressed IndexedDB saves within 256 MiB,
 expiring older points to fit. A raw checkpoint is capped at 192 MiB. Compact complete parentage

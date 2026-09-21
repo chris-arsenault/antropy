@@ -304,11 +304,9 @@ artifacts, applies Terraform, publishes the image and deploys through the shared
 The local deploy target and script are removed, along with the manual workflow trigger.
 Deployment starts only from a push to `main`; PRs retain the existing validation path.
 
-GitHub API inspection through `with-cred -- gh` was also denied with exit 66:
-`credential-helper: broker denied access for with-cred (403 Forbidden): {"error":"secret is not unlocked for this terminal"}`.
-This prevents reading live repository settings and deployment logs; it does not require AWS
-terminal credentials. Normal Git publication remains available. No alternate credential path
-is used. Public routing remains outside authorization.
+The user enabled the intended `gh` credential after the initial broker denial. CI monitoring
+uses `with-cred -- gh`; the connected GitHub app is prohibited. Public routing remains outside
+authorization.
 
 Local validation: `make ci` passed 275 kernel tests, five native service tests and 78 frontend
 tests, plus formatting, lint, typechecking, documentation and Terraform formatting. The registered
@@ -320,11 +318,17 @@ and advanced without any viewer. It was stopped after the bounded startup check.
 browser review, TrueNAS deployment, private-host resource inspection or live 32-core acceptance
 is claimed. Hosted deployment success remains to be verified through CI/CD.
 
-CI configuration closeout: `ahara-infra` commit `58c858c` adds the two policy modules and
-exact operator parameter path. Infrastructure and application `make ci` both passed, as did
-Compose validation. Application publication follows
-confirmation of the infrastructure workflow; its result cannot currently be inspected because
-GitHub credential access is denied. The VPN route and public server default remain disabled.
+CI configuration: `ahara-infra` commit `58c858c` adds the two policy modules and exact operator
+parameter path. Run `35627605602` successfully applied Terraform; the separate engineering-report
+ingestion failed with HTTP 502. Infrastructure and application `make ci` both passed, as did
+Compose validation. App commits through `f611d3a` were then pushed to `main`.
+
+App run `35632695332` passed its checks and release builds but failed Terraform's website MIME
+lookup on `engine-threads/engine.d.ts`. The browser loader uses generated JavaScript/WASM and
+its own TypeScript interface; declarations are not runtime assets. The build now asks wasm-bindgen
+not to emit declarations and clears its generated output directory before regenerating, including
+incremental builds. No Terraform MIME exception is needed. The next push runs ordinary CI/CD.
+The VPN route and public server default remain disabled.
 
 ## Technical references
 

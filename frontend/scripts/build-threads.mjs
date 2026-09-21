@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { executable } from "./toolchain.mjs";
 
@@ -64,10 +64,13 @@ run(
   ],
   { env: { ...process.env, RUSTFLAGS: flags } }
 );
+// Replace generated output so incremental builds cannot retain declarations or old snippets.
+rmSync(new URL("../public/engine-threads/", import.meta.url), { recursive: true, force: true });
 run("wasm-bindgen", [
   "engine/target/threads/wasm32-unknown-unknown/release/antropy_engine.wasm",
   "--target",
   "web",
+  "--no-typescript",
   "--out-dir",
   "frontend/public/engine-threads",
   "--out-name",
