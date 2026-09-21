@@ -327,8 +327,14 @@ App run `35632695332` passed its checks and release builds but failed Terraform'
 lookup on `engine-threads/engine.d.ts`. The browser loader uses generated JavaScript/WASM and
 its own TypeScript interface; declarations are not runtime assets. The build now asks wasm-bindgen
 not to emit declarations and clears its generated output directory before regenerating, including
-incremental builds. No Terraform MIME exception is needed. The next push runs ordinary CI/CD.
-The VPN route and public server default remain disabled.
+incremental builds. No Terraform MIME exception is needed.
+
+Run `35633901855` then uploaded the corrected assets but was denied
+`cloudfront:CreateResponseHeadersPolicy` for the browser isolation headers. The user approved
+the shared managed-role correction: `ahara-infra` commit `28fcf3d` grants create/update/delete
+for account-scoped response-header-policy ARNs. Infrastructure run `35636094435` passed,
+including Terraform, so that prerequisite is deployed. This documentation push resumes ordinary
+application CI/CD. The VPN route and public server default remain disabled.
 
 ## Technical references
 
