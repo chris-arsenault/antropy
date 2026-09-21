@@ -1,4 +1,4 @@
-.PHONY: ci engine-check engine-build lint lint-fix fmt format typecheck test docs-check terraform-fmt-check build deploy
+.PHONY: ci engine-check engine-build lint lint-fix fmt format typecheck test docs-check terraform-fmt-check build
 
 ci: engine-check lint fmt typecheck test docs-check terraform-fmt-check
 
@@ -37,6 +37,3 @@ terraform-fmt-check:
 
 build:
 	cd frontend && pnpm run build
-
-deploy:
-	scripts/deploy.sh

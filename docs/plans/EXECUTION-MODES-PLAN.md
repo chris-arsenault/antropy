@@ -301,7 +301,8 @@ exact additional operator parameter path. These requirements follow from the cur
 bodies: the website bundle does not grant SSM writes. Publish and verify that infrastructure
 pipeline before the app commit. The app's main-triggered workflow builds native/frontend
 artifacts, applies Terraform, publishes the image and deploys through the shared Komodo action.
-The local deploy entry point now dispatches CI instead of invoking Terraform directly.
+The local deploy target and script are removed, along with the manual workflow trigger.
+Deployment starts only from a push to `main`; PRs retain the existing validation path.
 
 GitHub API inspection through `with-cred -- gh` was also denied with exit 66:
 `credential-helper: broker denied access for with-cred (403 Forbidden): {"error":"secret is not unlocked for this terminal"}`.
@@ -321,7 +322,7 @@ is claimed. Hosted deployment success remains to be verified through CI/CD.
 
 CI configuration closeout: `ahara-infra` commit `58c858c` adds the two policy modules and
 exact operator parameter path. Infrastructure and application `make ci` both passed, as did
-Compose validation and deployment-script syntax checks. Application publication follows
+Compose validation. Application publication follows
 confirmation of the infrastructure workflow; its result cannot currently be inspected because
 GitHub credential access is denied. The VPN route and public server default remain disabled.
 

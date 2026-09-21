@@ -82,7 +82,7 @@ The `ahara-infra` registration supplies `komodo-deploy` and `ssm-write`, with th
 parameter's exact `ahara/antropy/operator-token` path added to the project write scope. Publish
 and verify that infrastructure pipeline before pushing the dependent application change.
 These are CI permissions; terminal AWS access is neither needed nor an approved deployment path.
-`make deploy` only dispatches the workflow for published `main`. Inspect the pipeline result
+There is no local deployment command or manual workflow trigger. Inspect the pipeline result
 and the private service before claiming successful deployment or live 32-core performance.
 
 Public route activation is deliberately excluded from this delivery: no API hostname, ALB

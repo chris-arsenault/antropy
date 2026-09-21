@@ -201,7 +201,6 @@ applies its Terraform and deploys the private native service through Komodo. Pro
 permissions are managed in `ahara-infra`; publish those changes and verify their pipeline
 before publishing a dependent app change. See [execution modes](execution-modes.md).
 
-`make deploy` dispatches that same workflow for the already-published `main` branch. It does
-not deploy local files or call AWS directly. In the managed terminal use `with-cred -- make deploy`
-for GitHub authentication; other environments use their normal GitHub CLI credentials.
+There is no local deployment command or manual workflow trigger. Publish authorized changes
+through Git; the push starts CI/CD.
 Deployment is separate authorization from local implementation. Public VPN routing remains disabled.

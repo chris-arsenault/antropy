@@ -120,7 +120,8 @@ public VPN routing and the hosted server default must remain disabled until expl
 Do not add save migration or a second physical economy to this feature.
 
 Deploy only through the shared GitHub Actions CI/CD pipeline. Push authorized changes to
-`main`; CI builds artifacts, applies Terraform and deploys through Komodo. Never deploy by
+`main`; CI builds artifacts, applies Terraform and deploys through Komodo. Do not add a
+`make deploy` target, deployment script or manual workflow dispatch. Never deploy by
 calling AWS, Terraform apply or the Komodo proxy from the terminal. Terminal AWS credentials
 are intentionally unavailable and are not a deployment prerequisite. Project CI permissions
 are managed in `ahara-infra` and must land through that repository's pipeline first.
@@ -291,7 +292,6 @@ expensive ecological panels merely for formatting or documentation changes.
 | ------------------------------------------------ | ------------------------------------------------------------------------ |
 | `make ci`                                        | Lint, format check, typecheck, bounded tests, docs, and Terraform format |
 | `make build`                                     | Production SPA build                                                     |
-| `make deploy`                                    | Dispatch CI/CD for the published main branch                              |
 | `cd frontend && pnpm harness bacteria` | Run live bacterial ecology and save evidence |
 | `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
 | `cd frontend && pnpm harness bacteria-capacity` | Fixed 48/2000/2000-growth loads with census, inspection and render preparation |
