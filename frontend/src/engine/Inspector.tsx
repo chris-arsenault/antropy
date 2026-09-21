@@ -73,7 +73,9 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
                 <pre>{JSON.stringify(p.installedChemistry, null, 2)}</pre>
               </details>
             )}
-          <Task bridge={bridge} id={p.cell.id} error={error} />
+          {bridge.getSnapshot().status?.execution?.operator !== false && (
+            <Task bridge={bridge} id={p.cell.id} error={error} />
+          )}
         </>
       ) : (
         <>

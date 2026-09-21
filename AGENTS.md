@@ -111,6 +111,20 @@ still coordinates the sole World and renders borrowed views after every phase jo
 requires cross-origin isolation; unsupported browsers use the same operators in the serial build.
 P3 large-world persistence and 16/32-core acceptance remain open; default dimensions are unchanged.
 
+[Execution modes](docs/execution-modes.md) extends this with explicit browser 1/4 selection and
+one native server World feeding the same UI through bounded display projections. Local rendering
+still borrows WASM views. Remote packets remain in the renderer worker; physical/private state
+stays native. Multiple spectators share publication work and cannot change physical or run-level
+cohort controls without operator authentication. Private TrueNAS/Komodo deployment is authorized;
+public VPN routing and the hosted server default must remain disabled until explicitly requested.
+Do not add save migration or a second physical economy to this feature.
+
+Deploy only through the shared GitHub Actions CI/CD pipeline. Push authorized changes to
+`main`; CI builds artifacts, applies Terraform and deploys through Komodo. Never deploy by
+calling AWS, Terraform apply or the Komodo proxy from the terminal. Terminal AWS credentials
+are intentionally unavailable and are not a deployment prerequisite. Project CI permissions
+are managed in `ahara-infra` and must land through that repository's pipeline first.
+
 Recovery retains up to six automatic and two manual compressed IndexedDB saves within 256 MiB,
 expiring older points to fit. A raw checkpoint is capped at 192 MiB. Compact complete parentage
 defaults to two million records; bounded chart/spatial history is distinct from ancestry.
@@ -277,7 +291,7 @@ expensive ecological panels merely for formatting or documentation changes.
 | ------------------------------------------------ | ------------------------------------------------------------------------ |
 | `make ci`                                        | Lint, format check, typecheck, bounded tests, docs, and Terraform format |
 | `make build`                                     | Production SPA build                                                     |
-| `make deploy`                                    | Parameterless local deploy script                                        |
+| `make deploy`                                    | Dispatch CI/CD for the published main branch                              |
 | `cd frontend && pnpm harness bacteria` | Run live bacterial ecology and save evidence |
 | `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
 | `cd frontend && pnpm harness bacteria-capacity` | Fixed 48/2000/2000-growth loads with census, inspection and render preparation |

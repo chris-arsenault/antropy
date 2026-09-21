@@ -2,6 +2,19 @@ import { type EngineWorld } from "./client";
 import { cellFragment, cellVertex, fieldFragment, fieldVertex } from "./shaders";
 import { SpriteBatch } from "./spriteBatch";
 
+export type DisplayFrame = ReturnType<EngineWorld["render"]> & {
+  extent?: [number, number, number, number];
+};
+export interface RenderSource {
+  render(
+    kind: number,
+    species: number,
+    color: number,
+    field: boolean,
+    selected: number
+  ): DisplayFrame;
+}
+
 export interface Camera {
   x: number;
   y: number;
@@ -54,6 +67,7 @@ export class Renderer {
   private pending: WebGLSync | null = null;
   private refreshPending = false;
   private fieldKind = -1;
+  private fieldExtent: [number, number, number, number] = [0, 0, 320, 240];
 
   constructor(private readonly canvas: OffscreenCanvas) {
     // Circle edges are smoothed in the fragment shader; a multisample framebuffer
@@ -73,7 +87,7 @@ export class Renderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
   }
 
-  draw(world: EngineWorld, size: [number, number], options: ViewOptions, refreshField: boolean) {
+  draw(world: RenderSource, size: [number, number], options: ViewOptions, refreshField: boolean) {
     const gl = this.gl;
     if (gl.isContextLost())
       throw new Error("Graphics context lost; simulation paused with its state retained");
@@ -94,7 +108,7 @@ export class Renderer {
       refreshField,
       Math.max(0, options.selected)
     );
-    this.upload(frame, refreshField);
+    this.upload(frame, refreshField, size);
     this.drawField(size, options);
     this.drawCells(size, options, frame.count);
     this.drawMarkers(size, options, frame.markers, frame.markerCount);
@@ -111,7 +125,8 @@ export class Renderer {
     };
   }
 
-  private upload(frame: ReturnType<EngineWorld["render"]>, refresh: boolean) {
+  private upload(frame: DisplayFrame, refresh: boolean, size: [number, number]) {
+    this.fieldExtent = frame.extent ?? [0, 0, ...size];
     const gl = this.gl;
     this.sprites.upload(frame.cells);
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -195,6 +210,7 @@ export class Renderer {
     else gl.disable(gl.BLEND);
     gl.bindVertexArray(this.empty);
     gl.uniform2f(gl.getUniformLocation(p, "worldSize"), ...size);
+    gl.uniform4f(gl.getUniformLocation(p, "fieldExtent"), ...this.fieldExtent);
     gl.uniform4f(
       gl.getUniformLocation(p, "layers"),
       Number(o.layers[0]),

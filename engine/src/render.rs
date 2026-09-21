@@ -23,6 +23,19 @@ impl Buffers {
         field: bool,
         selected: u64,
     ) -> Result<(), String> {
+        self.prepare_window(
+            w,
+            (kind, species, color, field, selected),
+            crate::render_window::Window::full(w),
+        )
+    }
+    pub fn prepare_window(
+        &mut self,
+        w: &World,
+        selection: (u32, usize, u32, bool, u64),
+        window: crate::render_window::Window,
+    ) -> Result<(), String> {
+        let (kind, species, color, field, selected) = selection;
         if kind > 6 || species >= 256 || color > 15 {
             return Err("Invalid render selection".into());
         }
@@ -30,6 +43,9 @@ impl Buffers {
         self.cells.clear();
         self.cells.reserve(w.cells.len() * STRIDE);
         for c in &w.cells {
+            if !window.contains(w, c.x, c.y, (c.radius(&w.config) * 3.5).max(2.)) {
+                continue;
+            }
             let energy = (c.energy / c.energy_capacity(&w.config).max(1e-12)).clamp(0., 1.);
             let rgb = self.colors.color(w, c, color, selected, energy);
             self.cells.extend([
@@ -52,6 +68,9 @@ impl Buffers {
         }
         self.markers.clear();
         for s in &w.sources {
+            if !window.contains(w, s.habitat.x, s.habitat.y, s.habitat.radius) {
+                continue;
+            }
             let active = s.remaining > 0. && s.inventory.iter().any(|q| *q > 0.);
             let h = &s.habitat;
             self.markers.extend([
@@ -74,6 +93,9 @@ impl Buffers {
                 continue;
             }
             if let Some([x, y, r]) = e.location {
+                if !window.contains(w, x, y, r) {
+                    continue;
+                }
                 self.markers.extend([
                     x as f32, y as f32, r as f32, 0., 1., 0.5, 0.35, 1., 1., -1., 0., 0.,
                 ]);
@@ -82,7 +104,7 @@ impl Buffers {
         let channels = if kind >= 5 { 8 } else { 1 };
         if field
             || self.selection != Some((kind, species))
-            || self.field.len() != w.field.nx * w.field.ny * channels
+            || self.field.len() != window.nx * window.ny * channels
         {
             let area = w.field.spacing * w.field.spacing;
             if kind >= 5 {
@@ -99,7 +121,9 @@ impl Buffers {
                 });
             }
             self.field.clear();
-            for (i, node) in w.field.amounts.as_chunks::<256>().0.iter().enumerate() {
+            for n in 0..window.nx * window.ny {
+                let i = window.node(w, n);
+                let node = &w.field.amounts[i * 256..(i + 1) * 256];
                 if kind >= 5 {
                     let light = self.illumination.node(i);
                     let [matter, energy] = if kind == 6 {
@@ -149,13 +173,13 @@ impl Buffers {
         }
         self.descriptor = [
             2,
-            w.cells.len() as u32,
+            (self.cells.len() / STRIDE) as u32,
             self.cells.as_ptr() as usize as u32,
             self.cells.len() as u32,
             self.field.as_ptr() as usize as u32,
             self.field.len() as u32,
-            w.field.nx as u32,
-            w.field.ny as u32,
+            window.nx as u32,
+            window.ny as u32,
             w.tick as u32,
             (w.tick >> 32) as u32,
             self.markers.as_ptr() as usize as u32,

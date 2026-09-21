@@ -2,6 +2,7 @@ import { type Definition, type Inspection, type LiveStatus } from "./types";
 import { type Message, type Operation } from "./protocol";
 import { type ViewOptions } from "./renderer";
 import { applyObservation } from "./observationDelta";
+import { executionMode, remoteEndpoint } from "./executionMode";
 
 export interface ViewState {
   definition: Definition | null;
@@ -34,7 +35,11 @@ export class Bridge {
 
   start(canvas: OffscreenCanvas, wasmUrl: string) {
     this.update({ definition: null, status: null, inspection: null, error: null });
-    const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+    const execution = executionMode();
+    const worker =
+      execution.mode === "server"
+        ? new Worker(new URL("./remoteWorker.ts", import.meta.url), { type: "module" })
+        : new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
     this.worker = worker;
     this.lastResponseAt = performance.now();
     this.watchdog = setInterval(() => {
@@ -69,7 +74,16 @@ export class Bridge {
       // An uncaught worker error must not leave an unobserved simulation advancing.
       this.stop();
     };
-    this.call("initialize", { canvas, wasmUrl }, [canvas]).catch((error) => {
+    this.call(
+      "initialize",
+      {
+        canvas,
+        wasmUrl,
+        threads: execution.mode === "browser4" ? 4 : 1,
+        endpoint: execution.mode === "server" ? remoteEndpoint(execution.endpoint) : "",
+      },
+      [canvas]
+    ).catch((error) => {
       if (this.worker === worker) {
         this.update({ error: String(error) });
         this.stop();

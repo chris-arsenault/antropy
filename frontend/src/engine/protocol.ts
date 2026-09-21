@@ -2,6 +2,7 @@ import { type Definition } from "./types";
 import { type ObservationDelta } from "./observationDelta";
 
 export type Operation =
+  | "authenticate"
   | "initialize"
   | "observed"
   | "view"

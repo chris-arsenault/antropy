@@ -5,7 +5,21 @@ Current behavior belongs to the [design work order](../design/README.md),
 [decision/evidence record](../design/decisions-and-evidence.md). Plans below preserve execution,
 registrations and failures. Their old future-tense instructions are historical, not work to replay.
 
-## Latest completed execution
+## Browser and server execution
+
+[Browser and headless server execution](EXECUTION-MODES-PLAN.md), Sulion root
+`14e9bf4a-fc5f-4c8c-ba92-6dd961848f57`, implements explicit Browser 1/4 and native TrueNAS
+32-thread operation with the same UI. Local implementation and validation are in progress;
+private deployment is authorized, with public VPN routing explicitly excluded.
+The [runtime guide](../execution-modes.md) owns operating configuration and boundaries.
+It reuses the installed multicore runtime and adds a bounded remote display boundary and
+headless run loop. The revised scope excludes new persistence and cross-context transfer.
+The intended public experience is immediate observation of one continuing server world by
+multiple spectators, through the platform's public ingress and VPN upstream. Shared publication
+avoids repeating common projection work; physical controls remain owner-only.
+It does not supersede the ecological design.
+
+## Latest completed cellular execution
 
 [Cellular organization and exchange](../CELLULAR-ORGANIZATION-PLAN.md), Sulion root
 `ec58a567-39b5-49fa-841d-de4da572fa1b`, completed all implementation phases locally in v33.
@@ -42,9 +56,11 @@ into passes. Pre-cleanup [agent instructions](../sources/history/2026-09-20-agen
 | `9380f93e-71a8-45f1-93ed-0503b73ba5e6` — environmental handoff | Old v14-only human gate skipped as superseded; original missing acceptance stays missing. |
 | `5e88cd8a-1314-4622-9989-4bb02af68581` — environmental root | Completed implemented work after child reconciliation. E2 optional geometry/supply moves to backlog; rejected E1 fixed wells remain skipped. Terrain and rotation are not marked implemented. |
 
-The [multicore design](../../SCALING-PLAN.md) remains under paused plan
-`e3517c4b-b3df-4786-bcf4-10a488a294d1`, all P0–P4 pending at the user's request. It is the
-remaining future execution design, not an active optimization mandate.
+The [multicore design](../../SCALING-PLAN.md) remains under plan
+`e3517c4b-b3df-4786-bcf4-10a488a294d1`. P0–P2 were implemented and pushed September 21;
+P3 representative operating-envelope acceptance and P4 terrain remain open. The execution-modes
+proposal supplies the native host and remote ownership design; shared performance targets remain
+in the scaling record.
 
 ## Open questions with durable owners
 

@@ -343,6 +343,12 @@ export interface ChemicalOverview {
   rows: { id: number; amount: number; peak: number }[];
 }
 export interface LiveStatus {
+  execution?: {
+    location: "browser" | "server";
+    threads: number;
+    operator: boolean;
+    connected: boolean;
+  };
   phenotype: import("./phenotypes").PhenotypeReport | null;
   chemicalWeb: import("./chemicalWeb").ChemicalWeb | null;
   chemicals: ChemicalOverview;

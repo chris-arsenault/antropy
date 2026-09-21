@@ -85,35 +85,38 @@ export function Settings({
   return (
     <details className="panel" open>
       <summary>Environment and new population</summary>
-      <label>
-        Seed <input value={seed} onChange={(e) => setSeed(e.target.value)} />
-      </label>
-      <SourceComposition config={config} setConfig={setConfig} />
-      <details>
-        <summary>Ecology and mutation settings</summary>
-        {fields.map(([key, label, min]) => (
-          <label key={key}>
-            {label}{" "}
-            <input
-              type="number"
-              min={min}
-              step="any"
-              value={config[key]}
-              onChange={(e) => setConfig((c) => ({ ...c, [key]: Number(e.target.value) }))}
-            />
-          </label>
-        ))}
-      </details>
-      <Policies config={config} select={select} />
-      <p>
-        Reservoirs contain finite deposits and receive external replenishment after a wait. They
-        drift with the local medium, which can change the chemicals they release.
-      </p>
-      <p>
-        Changes take effect on restart. Selfing uses two gametes from one diploid parent. Zero
-        mutation probabilities freeze inherited mutation; private learning is controlled separately.
-      </p>
-      <button onClick={restart}>Apply and restart</button>
+      <fieldset disabled={bridge.getSnapshot().status?.execution?.operator === false}>
+        <label>
+          Seed <input value={seed} onChange={(e) => setSeed(e.target.value)} />
+        </label>
+        <SourceComposition config={config} setConfig={setConfig} />
+        <details>
+          <summary>Ecology and mutation settings</summary>
+          {fields.map(([key, label, min]) => (
+            <label key={key}>
+              {label}{" "}
+              <input
+                type="number"
+                min={min}
+                step="any"
+                value={config[key]}
+                onChange={(e) => setConfig((c) => ({ ...c, [key]: Number(e.target.value) }))}
+              />
+            </label>
+          ))}
+        </details>
+        <Policies config={config} select={select} />
+        <p>
+          Reservoirs contain finite deposits and receive external replenishment after a wait. They
+          drift with the local medium, which can change the chemicals they release.
+        </p>
+        <p>
+          Changes take effect on restart. Selfing uses two gametes from one diploid parent. Zero
+          mutation probabilities freeze inherited mutation; private learning is controlled
+          separately.
+        </p>
+        <button onClick={restart}>Apply and restart</button>
+      </fieldset>
     </details>
   );
 }

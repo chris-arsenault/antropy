@@ -6,6 +6,8 @@ import { ObservationDock } from "./ObservationDock";
 import { type PanelKey } from "./observationNavigation";
 import { ObservationPanels } from "./ObservationPanels";
 import { RunControls, WorldStatus } from "./RunControls";
+import { ExecutionControls } from "./ExecutionControls";
+import { type LiveStatus } from "./types";
 import "./observation.css";
 
 export function Application() {
@@ -27,6 +29,10 @@ export function Application() {
   const dismiss = useCallback(() => setMessage(""), []);
   const compareRole = useCallback(
     (input: number, output: number) => {
+      if (bridge.getSnapshot().status?.execution?.operator === false) {
+        setActive("phenotypes");
+        return;
+      }
       bridge
         .call("phenotype", { action: "select", selection: { kind: "role", input, output } })
         .then(() => setActive("phenotypes"))
@@ -49,14 +55,7 @@ export function Application() {
         color={color}
         setColor={setColor}
       />
-      <header className="game-hud">
-        <div className="brand">
-          <h1>Biotropy</h1>
-          <span>Living chemistry</span>
-        </div>
-        <WorldStatus status={view.status} />
-        <RunControls bridge={bridge} status={view.status} error={error} />
-      </header>
+      <GameHud bridge={bridge} status={view.status} error={error} />
       <WorldNotices
         error={view.error || message}
         stop={view.status?.summary.stopReason ?? null}
@@ -77,6 +76,28 @@ export function Application() {
       />
       <ObservationDock active={active} select={selectPanel} />
     </main>
+  );
+}
+
+function GameHud({
+  bridge,
+  status,
+  error,
+}: {
+  bridge: Bridge;
+  status: LiveStatus | null;
+  error: (e: unknown) => void;
+}) {
+  return (
+    <header className="game-hud">
+      <div className="brand">
+        <h1>Biotropy</h1>
+        <span>Living chemistry</span>
+      </div>
+      <WorldStatus status={status} />
+      <ExecutionControls bridge={bridge} status={status} />
+      <RunControls bridge={bridge} status={status} error={error} />
+    </header>
   );
 }
 
@@ -101,7 +122,9 @@ function WorldNotices({
 function useVisibilitySave(bridge: Bridge, error: (e: unknown) => void) {
   useEffect(() => {
     const save = () => {
-      if (bridge.getSnapshot().status) bridge.call("save", { reason: "automatic" }).catch(error);
+      const status = bridge.getSnapshot().status;
+      if (status && status.execution?.location !== "server")
+        bridge.call("save", { reason: "automatic" }).catch(error);
     };
     const visibility = () => {
       if (document.visibilityState === "hidden") save();

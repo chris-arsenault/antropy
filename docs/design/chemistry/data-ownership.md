@@ -52,6 +52,35 @@ pool must stop the coordinator rather than publishing partially updated physical
 
 ## Reduced observations
 
+### Authorized remote execution extension
+
+The September 21 execution-mode implementation explicitly extends the transport boundary for a
+native server. The native process remains the sole physical owner. It encodes derived cell/marker
+display records and eight display-field lanes as bounded binary packets; native pointers and the
+256-chemical physical field never leave the host. A remote browser worker owns these packets and
+feeds the same WebGL renderer. It runs no physical kernel. Local browser execution continues to
+borrow WASM views synchronously without a network-shaped copy path.
+
+The server shares encoded common observations and matching projections across connections, with
+32 viewers, 16 distinct display selections, 32 queued commands and 64 cached queries per publication
+as current ceilings. Display sampling uses padded windows at large dimensions, bounded to roughly
+65,536 nodes; this changes display detail only, never the physical mesh. A packet exceeding 16 MiB
+fails visibly rather than truncating cells. Each viewer has one unacknowledged display and at most
+16 pending worker requests. An unresponsive socket expires; no viewer acknowledgement stops World.
+Full independently usable updates carry generation, sequence and view revision. Reconnect does not
+replay controls. Common status is sampled at most twice per second while attached; without viewers,
+only scalar health is prepared. Remote charts describe sampled observation periods, with gaps when
+no one is attached, rather than inventing unattended history.
+
+Public commands are read-only. Physical and run-level phenotype changes require an operator
+credential; a WebSocket upgrade alone never grants that authority. Operator credentials are sent
+as an explicit authentication message, never a URL or stored browser setting. Production keys are
+SSM-backed and injected by the existing Komodo deploy action. Public VPN ingress remains disabled.
+
+The browser observation budget and revisioned selected-cell/React publication paths still apply.
+Server-side native ancestry and region membership remain behind the host boundary. No save,
+cross-context transfer, or alternate simulation economy is introduced.
+
 React owns display observations, never continuation state. The permitted data is global scalar
 accounting, population distributions, retained chart samples, reduced spatial summaries, and one
 explicitly selected organism's inspection. A selected-cell snapshot is a bounded observation copy,

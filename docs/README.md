@@ -16,6 +16,7 @@ them. See the [storage policy](evidence/README.md).
 
 | Need | Document |
 | --- | --- |
+| Browser 1/4, shared native server and private Komodo deployment | [Execution modes](execution-modes.md) |
 | Current decisions, failed approaches and plan disposition | [Decision record](design/decisions-and-evidence.md), [plan archive](plans/README.md) |
 | Mature checkpoint differentiation and reload-related slowdown | [83,980-tick review](material-habitats-review.md), [runtime investigation](session-runtime-review.md) |
 | Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |

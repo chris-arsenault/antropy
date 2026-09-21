@@ -103,7 +103,8 @@ pub mod random;
 pub mod reaction_medium;
 mod refitting;
 mod relationships;
-mod render;
+pub mod render;
+pub mod render_window;
 #[cfg(test)]
 mod runtime_tests;
 pub mod sensing;

@@ -31,22 +31,30 @@ export function PhenotypePanel({ bridge, status, error }: Props) {
         Compare built bodies, inherited targets and recent chemical activity. Chemical roles
         describe installed enzymes; they are not species or evidence of a feeding relationship.
       </p>
-      <GroupFilter report={report} regions={status.regions} change={change} />
-      <div className="web-controls">
-        <button
-          aria-pressed={report.highlight}
-          onClick={() => change({ action: "highlight", enabled: !report.highlight })}
-        >
-          {report.highlight ? "Clear group highlight" : "Highlight selected group"}
-        </button>
-        <button
-          disabled={!!report.pin || report.groups[1].count === 0}
-          onClick={() => change({ action: "pin" })}
-        >
-          Pin selected descendants
-        </button>
-        {report.pin && <button onClick={() => change({ action: "unpin" })}>Remove pin</button>}
-      </div>
+      {status.execution?.operator === false && (
+        <p>
+          Shared measurements are selected by the operator. These reports describe the current
+          run-level cohort.
+        </p>
+      )}
+      <fieldset disabled={status.execution?.operator === false}>
+        <GroupFilter report={report} regions={status.regions} change={change} />
+        <div className="web-controls">
+          <button
+            aria-pressed={report.highlight}
+            onClick={() => change({ action: "highlight", enabled: !report.highlight })}
+          >
+            {report.highlight ? "Clear group highlight" : "Highlight selected group"}
+          </button>
+          <button
+            disabled={!!report.pin || report.groups[1].count === 0}
+            onClick={() => change({ action: "pin" })}
+          >
+            Pin selected descendants
+          </button>
+          {report.pin && <button onClick={() => change({ action: "unpin" })}>Remove pin</button>}
+        </div>
+      </fieldset>
       {report.pin && (
         <p className="pin-label">
           Pinned: {report.pin.label} · {report.pin.roots.toLocaleString()} cells at tick{" "}
@@ -174,7 +182,7 @@ export function GroupHighlight({
   error: (e: unknown) => void;
 }) {
   const report = status?.phenotype;
-  if (!report?.highlight) return null;
+  if (!report?.highlight || status?.execution?.operator === false) return null;
   return (
     <div className="group-highlight">
       <span>{selectionLabel(report.selection)}</span>

@@ -7,6 +7,19 @@ publish = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[[bin]]
+name = "biotropy-server"
+path = "server/main.rs"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+axum = { version = "0.8", features = ["ws"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "sync", "time", "signal", "macros"] }
+futures-util = "0.3"
+tower-http = { version = "0.6", features = ["fs", "set-header"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+tokio-tungstenite = "0.29"
+
 [dependencies]
 rayon = "1.11"
 serde = { version = "1", features = ["derive", "rc"] }

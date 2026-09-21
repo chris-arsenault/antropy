@@ -31,7 +31,8 @@ export class Engine {
   private constructor(
     private readonly exports: EngineExports,
     readonly sourceDigest: string,
-    private readonly browser: boolean
+    private readonly browser: boolean,
+    readonly workers = 1
   ) {}
 
   static async load(bytes: Uint8Array<ArrayBuffer>, browser = false) {
@@ -43,10 +44,12 @@ export class Engine {
     return new Engine(module.instance.exports as unknown as EngineExports, digest, browser);
   }
 
-  static async loadBrowser(url: string) {
+  static async loadBrowser(url: string, workers: 1 | 4 = 1) {
     const { loadBrowserEngine } = await import("./threadedLoader");
-    const loaded = await loadBrowserEngine(url);
-    if (loaded) return new Engine(loaded.exports, loaded.sourceDigest, true);
+    const loaded = workers === 4 ? await loadBrowserEngine(url, 4) : null;
+    if (loaded) return new Engine(loaded.exports, loaded.sourceDigest, true, loaded.workers);
+    if (workers === 4)
+      throw new Error("Browser 4 requires cross-origin isolation; choose Browser 1");
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error(`Engine download failed: ${response.status}`);
     return Engine.load(new Uint8Array(await response.arrayBuffer()), true);
@@ -55,7 +58,7 @@ export class Engine {
     const { loadBrowserEngine } = await import("./threadedLoader");
     const loaded = await loadBrowserEngine(url, workers);
     if (!loaded) throw new Error("Shared engine requires cross-origin isolation");
-    return new Engine(loaded.exports, loaded.sourceDigest, false);
+    return new Engine(loaded.exports, loaded.sourceDigest, false, loaded.workers);
   }
 
   private invoke<T>(

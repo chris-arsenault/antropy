@@ -10,11 +10,13 @@ on:
 permissions:
   id-token: write
   contents: read
+  packages: write
   actions: read
 
 jobs:
   ci:
     uses: chris-arsenault/ahara/.github/workflows/ci.yml@main
     with:
+      deploy: true
       rust_extra_ci_commands: node frontend/scripts/build-engine.mjs
     secrets: inherit

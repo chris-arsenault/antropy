@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!dist/
+!dist/biotropy-server
+!frontend/
+!frontend/dist/
+!frontend/dist/**

@@ -132,7 +132,7 @@ function present() {
 }
 async function initialize(payload: Record<string, unknown>) {
   if (session) throw new Error("Worker is already initialized");
-  const engine = await Engine.loadBrowser(String(payload.wasmUrl));
+  const engine = await Engine.loadBrowser(String(payload.wasmUrl), payload.threads === 4 ? 4 : 1);
   session = new Session(engine);
   const canvas = payload.canvas as OffscreenCanvas;
   renderer = new Renderer(canvas);

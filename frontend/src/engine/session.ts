@@ -150,6 +150,12 @@ export class Session {
       this.chemicals = this.world.command<LiveStatus["chemicals"]>("chemicalOverview");
     if (!this.observation.history.length) this.record(summary);
     return {
+      execution: {
+        location: "browser",
+        threads: this.engine.workers,
+        operator: true,
+        connected: true,
+      },
       kernelDigest: this.engine.sourceDigest,
       chemicals: this.chemicals,
       chemicalWeb: this.chemicalWeb.read(this.world, summary.tick),

@@ -12,6 +12,7 @@ precision highp float;
 uniform sampler2D chemistry;
 uniform vec2 viewport;
 uniform vec2 worldSize;
+uniform vec4 fieldExtent;
 uniform vec3 camera;
 uniform vec4 layers;
 uniform float selectedLayer;
@@ -43,7 +44,7 @@ void main() {
     color=vec4(0.015,0.022,0.03,1.0); return;
   }
   vec2 size = vec2(textureSize(chemistry, 0))/vec2(2.0,1.0);
-  vec2 position = fract(world/worldSize)*size-0.5;
+  vec2 position = (world-fieldExtent.xy)/fieldExtent.zw*size-0.5;
   ivec2 base = ivec2(floor(position));
   ivec2 n = ivec2(size);
   vec2 f = fract(position);

@@ -13,6 +13,9 @@ chemistry and continued turnover. The [session slowdown investigation](../sessio
 records the reload-related performance report and its unresolved attribution.
 
 [Composed runtime laws](chemistry/composed-runtime.md) own the current equations.
+[Browser/native execution](../execution-modes.md) adds explicit browser 1/4 and a shared
+headless server with the same UI. Private Komodo deployment is authorized; public ingress and
+the hosted server default remain disabled. This changes execution and observation, not chemistry.
 [Decisions and evidence](decisions-and-evidence.md) explain the selected direction and failures.
 [Execution plans](../plans/README.md) preserve version-specific work without becoming a second
 current specification. The pre-cleanup [work order](../sources/history/2026-09-20-design-work-order.md)

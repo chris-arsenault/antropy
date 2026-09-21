@@ -5,5 +5,8 @@ stack:
   - typescript
   - terraform
 rust_dir: engine
-rust_artifacts: {}
+rust_artifacts:
+  binaries:
+    - { bin: biotropy-server, image: . }
+truenas: true
 typescript_dir: frontend

@@ -1,0 +1,33 @@
+services:
+  simulation:
+    image: ghcr.io/chris-arsenault/antropy:${IMAGE_TAG:?Set the deployed commit SHA}
+    restart: unless-stopped
+    init: true
+    cpus: 32
+    mem_limit: 8g
+    pids_limit: 256
+    ports:
+      - "8095:8095"
+    environment:
+      BIOTROPY_THREADS: "32"
+      BIOTROPY_BIND: "0.0.0.0:8095"
+      BIOTROPY_SEED: "27"
+      BIOTROPY_OPERATOR_TOKEN: "${BIOTROPY_OPERATOR_TOKEN:-}"
+      # No public ingress or VPN route is enabled by this stack.
+      BIOTROPY_ORIGINS: "${BIOTROPY_ORIGINS:-}"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8095/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

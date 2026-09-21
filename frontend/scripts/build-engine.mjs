@@ -10,6 +10,7 @@ execFileSync(
   executable("cargo"),
   [
     "build",
+    "--lib",
     "--locked",
     "--manifest-path",
     "engine/Cargo.toml",

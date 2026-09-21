@@ -113,6 +113,8 @@ function PanelContent({
 }
 
 function SavePanel({ view, bridge }: Pick<Props, "view" | "bridge">) {
+  if (view.status?.execution?.location === "server")
+    return <p>This world runs on the server. Browser recovery saves apply to local runs.</p>;
   return (
     <>
       <p role="status">{view.status?.recovery ?? "Waiting for the world to load."}</p>

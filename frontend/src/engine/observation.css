@@ -376,3 +376,25 @@ kbd {
     display: none;
   }
 }
+.execution-controls {
+  position: relative;
+  padding: 0.35rem 0.6rem;
+  background: #101c26;
+  border: 1px solid #36515e;
+  border-radius: 0.4rem;
+}
+.execution-controls[open] {
+  position: absolute;
+  right: 1rem;
+  top: 4rem;
+  width: min(24rem, calc(100vw - 2rem));
+  z-index: 20;
+  padding: 1rem;
+}
+.execution-controls label {
+  display: block;
+  margin: 0.6rem 0;
+}
+.execution-controls input {
+  max-width: 100%;
+}

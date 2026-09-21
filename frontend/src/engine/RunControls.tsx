@@ -11,6 +11,8 @@ export function RunControls({
   status: LiveStatus | null;
   error: (e: unknown) => void;
 }) {
+  if (s?.execution?.operator === false)
+    return <div className="run-controls">Watching shared world</div>;
   return (
     <div className="run-controls">
       <button

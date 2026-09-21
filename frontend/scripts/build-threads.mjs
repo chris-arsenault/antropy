@@ -48,6 +48,7 @@ run(
     toolchain,
     "cargo",
     "build",
+    "--lib",
     "--locked",
     "--manifest-path",
     "engine/Cargo.toml",

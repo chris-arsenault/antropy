@@ -2,6 +2,7 @@ import { type ObservationDelta } from "./observationDelta";
 import { checkActivity, checkPhenotypeBudget } from "./phenotypeBudget";
 
 const STATUS_KEYS = new Set([
+  "execution",
   "kernelDigest",
   "workerWork",
   "summary",
