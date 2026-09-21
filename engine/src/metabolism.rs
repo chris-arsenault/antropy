@@ -23,6 +23,9 @@ pub fn react_observed(
     let operators = cell.operators.as_ref().unwrap();
     let mixture = retained_response(cell, c, chemistry);
     let volume = cell.volume(c);
+    // Retain unresolved material in its owner. Uptake can accumulate it until this
+    // concentration is meaningful; no reaction work or waste is booked below it.
+    let resolved = crate::field_activity::CONCENTRATION_FLOOR as f64 * volume;
     let factors: [f64; crate::organism::MAX_ENZYMES] = std::array::from_fn(|slot| {
         let stock = cell.body[crate::organism::enzyme_stock(slot)];
         if stock == 0. || !cell.installed.programs[slot] || cell.action.activity[slot] == 0. {
@@ -45,6 +48,9 @@ pub fn react_observed(
             continue;
         }
         for edge in &enzyme.conversions {
+            if cell.inventory[edge.substrate] <= resolved {
+                continue;
+            }
             let requested = factor
                 * edge.catalytic
                 * cell.inventory[edge.substrate]
@@ -164,4 +170,53 @@ pub fn repair(cell: &mut Cell, c: &Config, _chemistry: &Chemistry, dt: f64) {
     cell.damage = (cell.damage - actual).max(0.);
     cell.flows.repaired += actual;
     cell.flows.repair += paid;
+}
+
+#[cfg(test)]
+mod resolution_tests {
+    use super::*;
+
+    #[test]
+    fn unresolved_substrate_is_retained_and_accumulation_reenables_paid_conversion() {
+        for scale in [0.01, 1., 100.] {
+            let mut w = crate::diagnostics::nutrition(0.8, 2., false, false);
+            let c = &mut w.cells[0];
+            c.body.iter_mut().for_each(|q| *q *= scale);
+            c.bound_material.scale(scale);
+            c.inventory.fill(0.);
+            c.energy = scale;
+            c.action.activity.fill(1.);
+            let substrate = c.operators.as_ref().unwrap().enzymes[0]
+                .conversions
+                .iter()
+                .max_by(|a, b| a.binding.total_cmp(&b.binding))
+                .unwrap()
+                .substrate;
+            let quantum = crate::field_activity::CONCENTRATION_FLOOR as f64 * c.volume(&w.config);
+            c.inventory.set(substrate, quantum * 0.5);
+            let before = (c.material(), c.energy);
+            react_observed(c, &w.config, &w.chemistry, 0.8, true, [1.; 2]);
+            assert_eq!((c.material(), c.energy), before);
+            assert_eq!(c.flows.reacted, 0.);
+            c.inventory.set(substrate, quantum * 4.);
+            let potential = |cell: &Cell| {
+                cell.energy
+                    + cell
+                        .inventory
+                        .iter()
+                        .zip(&w.chemistry.properties)
+                        .map(|(q, p)| q * p.potential)
+                        .sum::<f64>()
+            };
+            let before = (c.material(), potential(c));
+            react_observed(c, &w.config, &w.chemistry, 0.8, true, [1.; 2]);
+            assert!(c.flows.reacted > 0.);
+            assert!((c.material() - before.0).abs() < 1e-12 * scale);
+            assert!(
+                (potential(c) + c.flows.reaction_heat - c.flows.external_work - before.1).abs()
+                    < 1e-12 * scale
+            );
+            c.inventory.validate().unwrap();
+        }
+    }
 }

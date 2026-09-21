@@ -1,0 +1,30 @@
+{
+  "activeReactionEdges": [
+    950811,
+    692682,
+    581987,
+    354235
+  ],
+  "floors": [
+    0.0,
+    1e-8,
+    1e-6,
+    0.0001
+  ],
+  "partiallyRefittedCells": 6827,
+  "population": 6975,
+  "retainedFreeMaterial": [
+    714.9838062455723,
+    714.9837469736156,
+    714.9749203826025,
+    713.4895011332046
+  ],
+  "subnormalInventoryEntries": 0,
+  "tick": 180000,
+  "unfundedRequestedMaterial": [
+    91.76565175492884,
+    91.76564902368592,
+    91.76498113739052,
+    91.66456474907628
+  ]
+}

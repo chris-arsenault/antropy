@@ -103,15 +103,15 @@ impl Buffers {
                 if kind >= 5 {
                     let light = self.illumination.node(i);
                     let [matter, energy] = if kind == 6 {
-                        light
+                        [light, 0.]
                     } else {
                         w.field.material_values(i, &w.chemistry).map(|q| q / area)
                     };
                     self.field.extend([
                         matter as f32,
                         energy as f32,
-                        light[0] as f32,
-                        light[1] as f32,
+                        light as f32,
+                        0., // Reserved packed lane; illumination is scalar.
                         node[species] / area as f32,
                         (1. - crate::movement::mobility(
                             w.field.impedance[i] + w.field.source_load[i],
@@ -230,8 +230,8 @@ mod tests {
         );
         assert_eq!(buffers.field[6], 0.5);
         let light = crate::illumination::at(&w, w.field.spacing / 2., w.field.spacing / 2.);
-        assert!((buffers.field[2] as f64 - light[0]).abs() < 1e-6);
-        assert!((buffers.field[3] as f64 - light[1]).abs() < 1e-6);
+        assert!((buffers.field[2] as f64 - light).abs() < 1e-6);
+        assert_eq!(buffers.field[3], 0.);
         let ambient =
             crate::weathering::strength(crate::weathering::signal(std::array::from_fn(|k| {
                 w.field.signal[0][k] + buffers.body_signal[0][k] + w.field.source_signal[0][k]

@@ -44,6 +44,23 @@ remain intercellular. Evolved cooperation, adhesion, direct consumption of livin
 larger reaction arity remain open research. No evolutionary campaign is required for delivery.
 Multicore remains paused.
 
+<a id="backlog-light-ecology"></a>
+
+## Light ecology: shelter, emission and conditional activity
+
+The [light ecology design](design/light-ecology.md) preserves the September 21 direction:
+day/night activity, hiding from illumination and paid local emitters that cells can respond to.
+V34 implements only the scalar illumination correction. Current paid receptors can influence
+activity, but nocturnal benefit is unestablished; material does not yet cast optical shade.
+
+Design finite optical-work ownership, shared material attenuation and funded emission together.
+The present throughput-based external drive cannot accept paid emitted light without allowing
+multiple recipients to reclaim the same work. Resolve power per area, opacity, loss/escape,
+emission machinery and bounded transport cost before implementation. Preserve the existing
+chemical work law and controller boundary. Dense colonies remain valid; finite capture and
+screening should supply conditional opportunities for other organizations without colony caps,
+assigned roles or forced motion. Dormancy remains a separate conditional physiology question.
+
 <a id="backlog-plan-carryover"></a>
 
 ## Requirements migrated from earlier plans
@@ -148,11 +165,11 @@ The implementation and remaining operational checks are separate from ecological
 | Requirement | Current implementation and gap |
 | --- | --- |
 | Continue after interruption | Up to six automatic and two manual compressed recovery points, expiring older points to fit256MiB, plus file export; transactional retention tested with emulated IndexedDB. Actual browser termination, quota and suspension behavior still need review. A new session starts at tick zero; restore is explicit. |
-| Bounded storage and memory | Complete ancestry uses compact numeric records; default limit two million records, with safe pause. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. A 30-minute browser fixture with 70 cells/100k ancestors retains stable GPU and WASM memory; peak costs under large ecological growth and an archive beyond the limit remain open. |
+| Bounded storage and memory | Complete ancestry uses compact numeric records; default limit two million records, with safe pause. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. The [v33 observation](cellular-200k-review.md#demonstrated-browser-persistence-limit) reaches 243.28 MiB at 180k and 6,975 cells. Removing unreferenced genotype slack still leaves 215.03 MiB. Fix save/export for necessary live state; neither discarding ancestry nor changing save retention addresses this boundary. |
 | Preserve observation | Browser checkpoints retain 240 thinned spatial frames, 2,048 recent spatial events and the current population census. Dropped events are counted. The kernel retains 512 ordinary events and up to 4,096 explicit interventions; reaching the intervention limit rejects further manual changes. Complete replay and unobserved history remain unavailable. |
 | Sustained execution | A worker owns physics and rendering. One queued task yields simulation work; the main animation loop permits one unanswered presentation request. GPU completion fences bound outstanding frames. Background throttling and sleep can still stop execution. Days/weeks responsiveness is unverified. |
-| Useful throughput | V32 fixtures measure63.78/32.00 ticks/s at48/2,000 cells. The mature3,774-cell checkpoint measures17.79 headless with measured observation closed. Forced browser GC did not restore speed in the short test; the user's8→40 reload difference remains unattributed. See [runtime investigation](session-runtime-review.md). |
-| Honest visual interpretation | Default usable-energy colors and independent context layers describe current cells. The user reports promising dense colonies; that review does not establish indefinite diversity. Measured-flow and phenotype panels retain their denominators and observation limits. |
+| Useful throughput | [Continued optimization](bounded-computation.md) raises the matched 180k world from the preceding 8.14 to 12.77 ticks/s (10.87 with measured panels active). Physical stepping averages 71.74 ms; census adds 4.77 ms per measured tick. Approximate stage costs remain exchange 18.30, physiology 17.42, sensing/controller 12.25 and movement 12.33 ms/tick. The next gains require reducing these operators' work. The 30 ticks/s mature-world goal remains unmet. The separate earlier 8→40 reload difference remains unattributed in the [runtime investigation](session-runtime-review.md). |
+| Honest visual interpretation | Default usable-energy colors and independent context layers describe current cells. The user reports promising dense colonies; that review does not establish indefinite diversity. Measured-flow route keys can repeat after zero-amount observations. The v33 study deduplicates exact copies and reconciles accepted totals, but the runtime observer still needs correction. Its full route sorting per page also makes exhaustive recording expensive. |
 | Meaningful continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
 
 Design recovery, history retention and ancestry storage together, then validate their operational

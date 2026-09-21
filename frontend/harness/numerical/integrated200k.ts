@@ -1,4 +1,4 @@
-/** One registered default trajectory; see docs/integrated-200k-review.md. */
+/** One registered default trajectory; explicit registration owns its interpretation. */
 import { closeSync, mkdirSync, openSync, statfsSync, writeSync } from "node:fs";
 import { join } from "node:path";
 import { type EngineWorld } from "../../src/engine/client";
@@ -13,12 +13,15 @@ interface Web {
   window: { start: number; end: number };
 }
 const directory = process.argv[2];
-if (!directory) throw new Error("Expected a new output directory");
+const registration = process.argv[3];
+if (!directory || !registration)
+  throw new Error("Expected a new output directory and registration");
 mkdirSync(directory);
 const engine = await loadEngine(),
   world = engine.create(27, {}),
   flowFile = openSync(join(directory, "flows.jsonl"), "wx"),
   started = performance.now();
+const version = world.command<{ version: number }>("definition").version;
 let lastAt = started,
   nextResourceCheck = 0,
   resourceFailure: string | null = null;
@@ -49,12 +52,12 @@ try {
   runRecorded(engine, observed, {
     directory: join(directory, "trajectory"),
     experiment: "integrated-200k-review",
-    label: "v31 seed27; binding, composed illumination, photoreception; default evolution",
+    label: `v${version} seed27; registered default evolution`,
     ticks: 200000,
     cadence: 1000,
     checkpointEvery: 10000,
-    wallSeconds: 4 * 3600,
-    provenance: { registration: "docs/integrated-200k-review.md", flowWindowTicks: 250 },
+    wallSeconds: 8 * 3600,
+    provenance: { registration, flowWindowTicks: 250 },
     observation(w) {
       const summary = w.command<Summary>("summary");
       validateAccounts(summary);

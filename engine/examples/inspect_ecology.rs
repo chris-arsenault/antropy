@@ -1,7 +1,11 @@
-//! Read-only checkpoint reductions for docs/integrated-200k-review.md; no World stepping.
+//! Read-only checkpoint reductions for registered integrated studies; no World stepping.
 use antropy_engine::{controller, footprint, organism::Cell, sensing, world::World};
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, fs, io::Write, path::Path};
+#[path = "inspection/cellular.rs"]
+mod cellular;
+#[path = "inspection/connections.rs"]
+mod connections;
 
 fn actions(a: controller::Action) -> [f64; 7] {
     [
@@ -101,10 +105,15 @@ impl Group {
 
 fn cells(w: &World) -> (Vec<Value>, Value) {
     let mut groups = BTreeMap::<u64, Group>::new();
+    let graph = antropy_engine::interfaces::Graph::new(&w.cells, &w.config);
+    let bodies = connections::body_signals(w);
     let rows = w
         .cells
         .iter()
-        .map(|c| {
+        .enumerate()
+        .map(|(index, c)| {
+            let mut observed = c.clone();
+            observed.interface = graph.reading(index, &w.cells, &w.config, &w.chemistry);
             groups.entry(c.lineage).or_default().add(w, c);
             let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
             let sites = footprint::sites(c, &w.config, &w.field);
@@ -114,7 +123,8 @@ fn cells(w: &World) -> (Vec<Value>, Value) {
             "body":c.body,"target":g.body,"energyFraction":c.energy/c.energy_capacity(&w.config),
             "damage":c.damage,"inventory":c.inventory.material(),"primary":route,
             "installed":c.installed,"light":w.field.illumination.sample(&sites),
-            "action":actions(c.action),"optical":optical_response(w,c),"diet":diet(c),
+            "action":actions(c.action),"optical":optical_response(w,&observed),"diet":diet(c),
+            "organization":cellular::inspect(w,&observed,&graph,index,&bodies),
             "lastStepFlows":c.flows,"chemicalFlows":c.chemical_flows})
         })
         .collect();
@@ -144,7 +154,8 @@ fn geography(w: &World) -> Value {
         .map(|s| {
             json!({
                 "position":[s.habitat.x,s.habitat.y],"radius":s.habitat.radius,
-                "inventory":s.inventory,"remaining":s.remaining,"wait":s.wait,"rate":s.rate
+                "inventory":s.inventory,"replenishment":s.replenishment,
+                "remaining":s.remaining,"wait":s.wait,"rate":s.rate
             })
         })
         .collect();
@@ -153,19 +164,76 @@ fn geography(w: &World) -> Value {
         "activeGroups":active_groups,"sources":sources})
 }
 
+fn storage(w: &World, bytes: usize) -> Result<Value, postcard::Error> {
+    fn size<T: serde::Serialize>(value: &T) -> Result<usize, postcard::Error> {
+        Ok(postcard::to_stdvec(value)?.len())
+    }
+    let sections = [
+        ("cells", size(&w.cells)?),
+        ("genomes", size(&w.genomes)?),
+        ("field", size(&w.field)?),
+        ("ancestry", size(&w.ancestry)?),
+        ("sources", size(&w.sources)?),
+        ("chemistry", size(&w.chemistry)?),
+        ("events", size(&w.events)?),
+    ];
+    let accounted: usize = sections.iter().map(|(_, n)| n).sum();
+    let live: std::collections::BTreeSet<_> = w
+        .cells
+        .iter()
+        .flat_map(|c| [c.genome, c.machinery_genome])
+        .collect();
+    let catalog: std::collections::BTreeSet<_> = w
+        .events
+        .iter()
+        .filter(|e| e.kind == "catalog")
+        .flat_map(|e| e.values.iter().copied())
+        .collect();
+    let mut genotypes = BTreeMap::<&str, [usize; 2]>::new();
+    for (id, g) in &w.genomes {
+        let kind = if live.contains(id) {
+            "liveReferences"
+        } else if g.parent.is_none() || catalog.contains(id) {
+            "foundersOrCatalog"
+        } else {
+            "awaitingPruning"
+        };
+        let row = genotypes.entry(kind).or_default();
+        row[0] += 1;
+        row[1] += size(&(id, g))?;
+    }
+    Ok(
+        json!({"tick":w.tick,"population":w.cells.len(),"checkpointBytes":bytes,
+        "sections":sections.into_iter().collect::<BTreeMap<_,_>>(),
+        "otherBytes":bytes-accounted,"genotypeCountAndEntryBytes":genotypes}),
+    )
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    if args.len() != 2 && !(args.len() == 3 && args[2] == "--ancestry") {
-        return Err("Expected checkpoint, new output JSON path and optional --ancestry".into());
+    if args.len() != 2
+        && !(args.len() == 3
+            && matches!(
+                args[2].as_str(),
+                "--ancestry" | "--storage" | "--connections"
+            ))
+    {
+        return Err(
+            "Expected checkpoint, new output JSON path and optional --ancestry, --storage or --connections".into(),
+        );
     }
     let raw = fs::read(&args[0])?;
     let w = World::restore(&raw)?;
     let before = w.snapshot()?;
-    let result = if args.len() == 3 {
+    let result = if args.get(2).is_some_and(|arg| arg == "--storage") {
+        storage(&w, raw.len())?
+    } else if args.get(2).is_some_and(|arg| arg == "--connections") {
+        connections::inspect(&w)
+    } else if args.len() == 3 {
         json!({"tick":w.tick,"ancestry":w.ancestry})
     } else {
         let (cells, groups) = cells(&w);
-        json!({"tick":w.tick,"seed":w.seed,"config":w.config,
+        json!({"tick":w.tick,"seed":w.seed,"config":w.config,"chemistry":w.chemistry,
             "summary":antropy_engine::observation::summary(&w),"cells":cells,
             "survivorLifetimeGroups":groups,"geography":geography(&w)})
     };

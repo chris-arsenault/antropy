@@ -49,8 +49,7 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
         let mut readings = [0.; 5];
         for &(node, weights) in &nodes {
             let local = if slot == 4 {
-                let light = field.illumination.node(node);
-                (light[0] + light[1]) * 0.5
+                field.illumination.node(node)
             } else {
                 cell.operators.as_ref().unwrap().receptors[slot]
                     .iter()

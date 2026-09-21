@@ -19,9 +19,7 @@ export function ChemicalControls({
           <option value="potential">Energy per material</option>
           <option value="chemical">Chemical #{value.species}</option>
           <option value="weathering">Chemical weathering</option>
-          <option value="illumination">Illumination: mean sunlight</option>
-          <option value="response0">Illumination: response 1</option>
-          <option value="response1">Illumination: response 2</option>
+          <option value="illumination">Illumination: sunlight</option>
           <option value="none">No background field</option>
         </select>
       </label>
@@ -77,10 +75,7 @@ function baseLegend(value: ChemicalDisplay) {
       "Blue → amber: low → high local chemical interaction, attenuated by medium resistance. Actual conversion depends on the chemicals present.";
   if (value.base === "illumination")
     legend =
-      "Dark shadow → ivory sunlight: equal-weight mean of both responses, with a soft transition around the uniform 1× drive. Shadow means reduced drive, not zero available work.";
-  if (value.base === "response0" || value.base === "response1")
-    legend =
-      "Dark shadow → ivory sunlight: response below → above the uniform 1× drive. The soft transition spans 0.8–1.2×; endpoints saturate. This is supplied drive, not usable cell energy.";
+      "Dark shadow → ivory sunlight: local light below → above the uniform 1× level. The soft transition spans 0.8–1.2×. Shadow means reduced illumination; the default minimum is 0.2×.";
   return legend;
 }
 
@@ -105,11 +100,11 @@ export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
           depends on membrane compatibility and repair.
         </p>
       )}
-      {value.illumination && !["illumination", "response0", "response1"].includes(value.base) && (
+      {value.illumination && value.base !== "illumination" && (
         <p>
           Sunlight leaves map colors intact. Translucent night shadow dims fields, cells and sources
           together, with a soft boundary around the mean 1× illumination. Detail remains visible in
-          shadow. Use the separate response views to inspect differences hidden by the mean.
+          shadow. Cells sense the same illumination shown here.
         </p>
       )}
     </div>

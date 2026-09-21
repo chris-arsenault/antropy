@@ -9,7 +9,11 @@ export function checkPhenotypeBudget(report: PhenotypeReport | null | undefined)
   if (report.groups.length !== 3 || (report.pin && typeof report.pin.roots !== "number"))
     throw new Error("Phenotype observation must contain three reductions and no member list");
   for (const group of report.groups) {
-    if (group.actual.length !== 7 || group.target.length !== 5 || group.illumination.length !== 2)
+    if (
+      group.actual.length !== 7 ||
+      group.target.length !== 5 ||
+      (group.illumination !== null && !Number.isFinite(group.illumination))
+    )
       throw new Error("Phenotype trait reduction exceeds its display shape");
     checkActivity(group.activity);
   }

@@ -41,7 +41,7 @@ impl Climate {
     }
 
     pub fn convert(&mut self, row: &mut [f32], mask: u64, medium: ([f64; 2], f64), dt: f64) -> u64 {
-        self.convert_lit(row, mask, medium, dt, [1.; 2])
+        self.convert_lit(row, mask, medium, dt, 1.)
     }
 
     // Keep this chemical loop separate from the already large geographic stencil in WASM.
@@ -52,7 +52,7 @@ impl Climate {
         mut mask: u64,
         medium: ([f64; 2], f64),
         dt: f64,
-        light: [f64; 2],
+        light: f64,
     ) -> u64 {
         if self.rate == 0. || mask == 0 {
             return mask;

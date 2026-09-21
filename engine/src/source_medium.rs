@@ -12,7 +12,7 @@ use serde::Serialize;
 pub struct Response {
     pub velocity: [f64; 2],
     pub signal: [f64; 2],
-    pub light: [f64; 2],
+    pub light: f64,
     pub load: f64,
 }
 

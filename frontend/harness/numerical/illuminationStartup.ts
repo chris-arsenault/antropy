@@ -18,7 +18,9 @@ try {
     cadence: 100,
     checkpointEvery: 3000,
     wallSeconds: 120,
-    provenance: { registration: "ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination" },
+    provenance: {
+      registration: "docs/design/light-ecology.md#scalar-correction-verification-registration",
+    },
     observation(w) {
       validateAccounts(w.command<Summary>("summary"));
       return {};

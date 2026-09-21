@@ -5,6 +5,17 @@ September 20, 2026. Physical checkpoint v33. Implementation of the
 [execution plan](CELLULAR-ORGANIZATION-PLAN.md). These are mechanics and bounded operating
 measurements, not evidence that a meta-organism has evolved.
 
+Subsequently published as `fad7fa9`. The requested long observation was shortened by the user
+to a validated 180k analysis endpoint; [results and operating failures](cellular-200k-review.md)
+document inherited differentiation, private recycling, weak selective activity, mature contact
+search cost and an oversized browser checkpoint. The measurements below remain the original
+delivery fixtures, not claims about that mature population.
+
+The [deeper connected analysis](cellular-180k-connections.md) follows the retrieved design
+history through source renewal, collective habitat effects, illumination-driven work opportunity,
+inherited branch replacement and intracellular recycling. It also corrects an omitted derived
+body signal in the earlier checkpoint inspector's local-work examples.
+
 ## Delivered behavior
 
 Cells retain one well-mixed free inventory covering all 256 chemicals and their chemically

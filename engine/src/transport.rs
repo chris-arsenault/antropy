@@ -33,6 +33,9 @@ fn requests(cell: &Cell, c: &Config, local: &[f64; 256]) -> ([f64; 256], [f64; 2
             } else {
                 1.
             };
+        if capacity == 0. {
+            continue;
+        }
         let recognition = &cell.operators.as_ref().unwrap().transporters[slot];
         let available = |s| {
             if effort >= 0. {

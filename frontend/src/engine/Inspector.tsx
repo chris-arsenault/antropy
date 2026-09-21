@@ -154,11 +154,10 @@ function CellDetails({
       <Chemistry inspection={p} definition={definition} />
       <CellOrganization inspection={p} />
       <Photoreception cell={c} />
-      {p.illumination && (
+      {p.illumination !== null && (
         <p>
-          Local illumination: response 1 {n(p.illumination[0])}× · response 2 {n(p.illumination[1])}
-          ×. External work accepted this tick {n(c.flows.externalWork)}; zero between physiology
-          updates.
+          Local illumination: {n(p.illumination)}×. External work accepted this tick{" "}
+          {n(c.flows.externalWork)}; zero between physiology updates.
         </p>
       )}
       {p.weathering && (

@@ -30,6 +30,9 @@ its display retains the modulation that v29's mean canceled.
 V31 adds funded photoreception. V32 adds [material-supported habitats and chemical renewal](../../material-habitats.md):
 shared attraction at two scales, reversible retention, persistent source composition and
 multiscale public transformations. Earlier version-specific measurements remain historical.
+V34 replaces independent chemical illumination components with one scalar light field;
+the visible composed pattern and periods remain unchanged. [Light ecology](../light-ecology.md)
+records the correction and the future shelter/emission design.
 
 ## Meaning and owners
 
@@ -42,7 +45,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, twenty bounded funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v33 persists actual installed
+The same worker renders borrowed WASM views. Checkpoint v34 persists actual installed
 coordinates independently of inherited instructions and rejects earlier physical bytes.
 There is no exporter allele or thermal-energy setting in this version.
 
@@ -99,7 +102,12 @@ it does not delete a species by its global abundance. Material and reference-val
 enter the signed numerical error accounts. The September18
 [scaling pass](../../../SCALING-PLAN.md) raises the preceding1e-9 floor after inspecting
 material and occupied-group distributions and comparing ordinary continuations.
-Intracellular stocks retain their material. There is no equilibrium shortcut.
+Intracellular stocks retain their material. Reactions now use the same 1e-6 concentration
+resolution: a substrate participates only above `amount > volume * resolution`. Below it,
+material stays stored and incoming transport can accumulate it until conversion resumes.
+This is an activity threshold, not intracellular evaporation or a special chemical rule.
+The [bounded-computation study](../../bounded-computation.md) records the support reduction,
+opportunity/account tests and performance. There is no equilibrium shortcut.
 
 The destination-row stencil gathers incoming material and retains donor remainder.
 Substeps bound total outgoing fractions by .9, retaining a positive donor coefficient;
@@ -319,8 +327,8 @@ some reserved work unused when material is scarce; it does not iterate or select
 Compile each row's weighted potential drop Δu and weighted profile difference
 `a=(sum_t P(t)*p0(t)-p0(s), -(sum_t P(t)*p1(t)-p1(s)))/4`.
 Once per physiology stage sample B at frozen pre-movement footprints, after field/source advance
-and before exchange. V29 samples two illumination responses over that same footprint,
-forms `B_light=diag(l0,l1) B`, and computes `w=ε*max(0,a dot B_light)` once for occupied rows. Use
+and before exchange. V34 samples scalar illumination L over that same footprint,
+forms `B_light=L*B`, and computes `w=ε*max(0,a dot B_light)` once for occupied rows. Use
 the same yield for funding and commit. With `d=Δu+w`, usable work is .8d when d is positive
 and d/.8 when negative, less .05 per unit that actually changes chemical identity. Accepted
 amount q adds `q*w` to cellular external input and dissipates `q*(d-yield)`. The atlas's static
@@ -333,14 +341,15 @@ charges catalytic work. Conversion efficiency remains configurable below one.
 ### Local illumination
 
 For geographic angles u=2πx/width and v=2πy/height, use three seeded phases f,s,m,
-with a=u−f and b=v−s. V30 composes the axes as
-`l0=1+c*cos(a)*cos(b−m)` and `l1=1+c*cos(b)*cos(a−m)`.
-One axis gates the other's variation; the displayed mean retains the modulation phase.
+with a=u−f and b=v−s. V34 composes the axes into one scalar:
+`L=1+(c/2)*(cos(a)*cos(b−m)+cos(b)*cos(a−m))`.
+One axis gates the other's variation; L retains the modulation phase.
+The v30–33 independent chemical-component scaling is superseded. The visible pattern is retained.
 Defaults are contrast c=.8 and periods6,000/18,000/62,000model seconds, or
 30,000/90,000/310,000ticks. Product harmonics have a shortest period of about20,977ticks.
 The common period is558,000seconds; irregular ecological feedback is possible but chaos
 is not established. V29's additive formula and shorter periods are superseded.
-Each response has geographic mean1 and lies in[.2,1.8]. Rectification and occupied
+L has geographic mean1 and lies in[.2,1.8]. Rectification and occupied
 reaction support mean accepted external work need not retain its old mean.
 
 Cells and reservoirs use normalized footprint samples; dissolved material uses its node.
@@ -355,16 +364,15 @@ The evaluator rotates separable axis tables once per needed tick, with O(nx+ny) 
 and O(1) per queried node. It performs no extra chemical pass or diffusion step and does
 not wake empty chemical support. Seed, tick and four config scalars determine continuation;
 derived tables are not saved. Presentation prepares its own current-time cache so that
-inspection cannot change the solver's frozen stage. The optional composite/component maps
+inspection cannot change the solver's frozen stage. The optional illumination map and overlay
 reuse the existing eight-float borrowed WebGL field path. The default base remains energy
 per material, with usable-energy cell colors. The default map-context pass adds translucent
 night shadow, fine resistance hatching and stress dots, each independently switchable
 from the persistent key or Map settings. Detailed standalone layers remain available.
-Packed channels2/3 now carry the two illumination responses; normalized resistance/stress
+Packed channel2 carries scalar illumination and channel3 is reserved zero; normalized resistance/stress
 remain in channels5/6. No texture expansion, full-field message or physical change is needed.
-Sun/shadow shading uses the equal-weight mean response, with a smooth visual transition
-from0.8 to1.2 around the uniform1× reference. Separate response views retain access to
-channel differences that the mean hides. The renderer draws the ordinary map on a constant
+Sun/shadow shading uses L, with a smooth visual transition
+from0.8 to1.2 around the uniform1× reference. The renderer draws the ordinary map on a constant
 slate surface, then composites a cool shadow over fields, cells and source markers. Daylight
 leaves their colors intact; shadow opacity is capped at72% to retain detail. This final pass
 reuses the uploaded field texture and skips chemical-detail reads, adding no CPU field copies
@@ -444,6 +452,23 @@ the earlier per-tick quarter-overlap rule with a one-model-second decay and reta
 bound. It introduces no wider contact radius or compression injury. Dense many-body geometry
 still requires visual review; isolated pair decay is invariant to timestep subdivision below
 the speed cap.
+
+Overlap discovery uses sparse diameter classes, with compact positions, radii and heading
+vectors computed once per stage. Small cells query their own and larger occupied classes;
+each queried bin width bounds pair reach. Axis and squared-distance rejection precede exact
+contact geometry. The same geometry supplies movement correction and interface weights within
+each pass. Sensing, movement and exchange retain separate builds at their original positions
+in the physical update, so no stale graph crosses motion or material changes. This changes
+search cost, not the contact law. Adjacent occupied-bin lists are now looked up once per
+bin pair, rather than per cell; physical edges no longer require a global sort. Interface
+preparation shares each donor's stress reduction across recipients, and donor allocation
+visits the receiver's requested chemical support. [Initial measurements](../../contact-performance.md)
+and the [continued optimization](../../bounded-computation.md) record costs and limits.
+
+The colony census is an approximate observation: bins at most 1.5 units wide use a six-unit
+center-distance neighborhood and a three-cell density minimum. This replaces dense per-cell
+neighbor lists. Boundary membership can shift within one bin diagonal; census membership
+does not influence controllers or physical contacts.
 
 One to eight genetic enzyme programs and retired stock share eight stable records. The first
 four enzyme stocks retain indices11–14; photo remains15; extra enzyme stocks use16–19.

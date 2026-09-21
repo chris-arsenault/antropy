@@ -49,7 +49,7 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
     species: 0,
     color: 6,
     selected: -1,
-    layers: [true, false, false, false, false, false, false, false, false, true],
+    layers: [true, false, false, false, false, false, false, true],
     regions: true,
     sources: true,
     exposure: 4,
@@ -76,7 +76,7 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
   expect(fieldUploads()).toBe(textures);
   const lit = {
     ...options,
-    layers: [false, false, false, false, false, false, true, false, false, true],
+    layers: [false, false, false, false, false, false, true, true],
   };
   renderer.draw(world, [24, 24], lit, false);
   expect(fieldUploads()).toBe(textures + 1);

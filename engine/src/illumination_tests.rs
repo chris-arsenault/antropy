@@ -5,6 +5,33 @@ use crate::{
 use std::f64::consts::TAU;
 
 #[test]
+fn scalar_light_preserves_chemical_direction_under_basis_changes() {
+    let w = crate::initial_ecology::probe(1, true).unwrap();
+    let basis = |v: [f64; 2]| [2. * v[0] - v[1], v[0] + 3. * v[1]];
+    for signal in [[0., 0.], [1., -0.3], [-0.4, 0.7]] {
+        for light in [0., 0.2, 1., 1.8] {
+            let medium = crate::reaction_medium::Medium::illuminated(signal, light);
+            assert_eq!(medium.signal, signal);
+            let transformed = crate::illumination::drive(basis(signal), light);
+            for (a, b) in basis(medium.drive).into_iter().zip(transformed) {
+                assert!((a - b).abs() < 1e-12);
+            }
+            assert!((signal[0] * medium.drive[1] - signal[1] * medium.drive[0]).abs() < 1e-12);
+            if light == 0. {
+                assert_eq!(medium.drive, [0.; 2]);
+            }
+            for enzyme in &w.cells[0].operators.as_ref().unwrap().enzymes {
+                for row in &enzyme.conversions {
+                    let uniform = row.energy(&w.config, signal)[2];
+                    let lit = row.energy(&w.config, medium.drive)[2];
+                    assert!((lit - light * uniform).abs() < 1e-12);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn periodic_light_matches_law_bounds_mean_and_all_phases() {
     let mut c = Config {
         illumination_contrast: 0.8,
@@ -14,22 +41,17 @@ fn periodic_light_matches_law_bounds_mean_and_all_phases() {
     for tick in [0, 317, 6000, 200001] {
         field.prepare(27, tick, &c, 16, 12);
         let p = phases(27, tick as f64 * c.dt, [6000., 18000., 62000.]);
-        let mut mean = [0.; 2];
+        let mut mean = 0.;
         for n in 0..192 {
             let u = TAU * ((n % 16) as f64 + 0.5) / 16. - p[0];
             let v = TAU * ((n / 16) as f64 + 0.5) / 12. - p[1];
-            let expected = [
-                1. + 0.8 * u.cos() * (v - p[2]).cos(),
-                1. + 0.8 * v.cos() * (u - p[2]).cos(),
-            ];
+            let expected = 1. + 0.4 * (u.cos() * (v - p[2]).cos() + v.cos() * (u - p[2]).cos());
             let actual = field.node(n);
-            for k in 0..2 {
-                assert!((actual[k] - expected[k]).abs() < 1e-12);
-                assert!((0.2 - 1e-12..=1.8 + 1e-12).contains(&actual[k]));
-                mean[k] += actual[k] / 192.;
-            }
+            assert!((actual - expected).abs() < 1e-12);
+            assert!((0.2 - 1e-12..=1.8 + 1e-12).contains(&actual));
+            mean += actual / 192.;
         }
-        assert!(mean.iter().all(|m| (m - 1.).abs() < 1e-12));
+        assert!((mean - 1.).abs() < 1e-12);
     }
     let before = field.node(19);
     c.illumination_modulation_period = 21000.;
@@ -37,19 +59,16 @@ fn periodic_light_matches_law_bounds_mean_and_all_phases() {
     assert_ne!(field.node(19), before);
     c.illumination_contrast = 0.;
     field.prepare(27, 1, &c, 16, 12);
-    assert_eq!(field.node(19), [1.; 2]);
+    assert_eq!(field.node(19), 1.);
     c.illumination_contrast = 0.8;
     field.prepare(28, 1, &c, 8, 8);
-    assert!(field.node(63).iter().all(|v| v.is_finite()));
+    assert!(field.node(63).is_finite());
 }
 
 #[test]
 fn cross_axis_gates_sweep_and_composite_retains_modulation() {
     let circle = |a: f64| [a.cos(), a.sin()];
-    let mean = |u, v, m| {
-        let l = response(circle(u), circle(v), circle(m), 0.8);
-        (l[0] + l[1]) / 2.
-    };
+    let mean = |u, v, m| response(circle(u), circle(v), circle(m), 0.8);
     // A cross-axis quadrature suppresses the sweep; its opposite reverses it.
     for i in 0..32 {
         let u = TAU * i as f64 / 32.;
@@ -86,12 +105,7 @@ fn forcing_transforms_with_frames_and_invalid_periods_fail() {
         circle(1.1),
         0.8,
     );
-    assert!(
-        original
-            .iter()
-            .zip(translated)
-            .all(|(a, b)| (a - b).abs() < 1e-12)
-    );
+    assert!((original - translated).abs() < 1e-12);
     for bad in [0., f64::NAN, 0.1] {
         let c = Config {
             illumination_fast_period: bad,
@@ -107,8 +121,8 @@ fn illuminated_abiotic_work_closes_without_scaling_affordable_rates() {
     let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
     let op = crate::weathering::Operators::new(&chemistry);
     let signal = crate::weathering::signal([1., -1.]);
-    let dark = crate::reaction_medium::Medium::illuminated(signal, [0.; 2]);
-    let bright = crate::reaction_medium::Medium::illuminated(signal, [1.8, 1.2]);
+    let dark = crate::reaction_medium::Medium::illuminated(signal, 0.);
+    let bright = crate::reaction_medium::Medium::illuminated(signal, 1.8);
     let mut admitted = 0;
     for s in 0..256 {
         for j in 0..crate::weathering::BRANCHES {
@@ -144,7 +158,7 @@ fn illuminated_abiotic_work_closes_without_scaling_affordable_rates() {
             u64::MAX,
         )
         .0;
-    climate.convert_lit(&mut field, u64::MAX, ([1., -1.], 0.), 0.8, [1.8, 1.2]);
+    climate.convert_lit(&mut field, u64::MAX, ([1., -1.], 0.), 0.8, 1.8);
     assert!(
         field
             .iter()

@@ -29,7 +29,7 @@ export interface PhenotypeGroup {
   count: number;
   actual: Quantiles[];
   target: Quantiles[];
-  illumination: [number | null, number | null];
+  illumination: number | null;
   activity: Activity | null;
 }
 export interface PinMetadata {

@@ -227,7 +227,7 @@ export interface Inspection {
   impedance: number | null;
   mobility: number | null;
   weathering: [number, number, number] | null;
-  illumination: [number, number] | null;
+  illumination: number | null;
   expressed: Genotype["chromosomes"][number] | null;
   local: number[] | null;
   relationships: {

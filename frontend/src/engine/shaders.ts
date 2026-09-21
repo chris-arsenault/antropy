@@ -50,7 +50,7 @@ void main() {
   vec4 amount=max(vec4(0.0),mix(mix(sampleField(base,n),sampleField(base+ivec2(1,0),n),f.x),mix(sampleField(base+ivec2(0,1),n),sampleField(base+ivec2(1,1),n),f.x),f.y));
   if(shadowPass) {
     // A translucent night layer shades the finished map, including organisms and markers.
-    float night=1.0-daylight((amount.z+amount.w)*0.5);
+    float night=1.0-daylight(amount.z);
     color=vec4(0.008,0.015,0.028,0.72*night);
     return;
   }
@@ -65,9 +65,7 @@ void main() {
   light=mix(light,mix(vec3(0.035,0.12,0.23),vec3(0.72,0.4,0.12),clamp(detail.w,0.0,1.0)),weatheringLayer);
   light=mix(light,vec3(0.83,0.64,0.93),selectedLayer*(1.0-exp(-exposure*max(0.0,detail.x))));
   if(illuminationMode>0) {
-    float drive=(amount.x+amount.y)*0.5;
-    if(illuminationMode==2) drive=amount.x;
-    if(illuminationMode==3) drive=amount.y;
+    float drive=amount.z;
     light=solarGround(daylight(drive));
   }
   // Screen-space patterns keep hazards distinguishable at every zoom.

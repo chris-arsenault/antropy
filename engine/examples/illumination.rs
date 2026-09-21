@@ -1,4 +1,4 @@
-//! Registered short ordinary-World assays; see ENVIRONMENTAL-ECOLOGY-PLAN.md L4.
+//! Registered short ordinary-World assays; see docs/design/light-ecology.md.
 use antropy_engine::{footprint, illumination, initial_ecology, world::World};
 use serde_json::{Value, json};
 use std::{path::Path, time::Instant};
@@ -11,7 +11,7 @@ fn positions() -> [[f64; 2]; 2] {
         for x in 0..w.field.nx {
             let p = [x as f64 * w.config.mesh, y as f64 * w.config.mesh];
             let l = illumination::at(&w, p[0], p[1]);
-            values.push((l[0] - l[1], p));
+            values.push((l, p));
         }
     }
     values.sort_by(|a, b| a.0.total_cmp(&b.0));
@@ -180,7 +180,7 @@ fn main() {
             }
         }
     }
-    let report = json!({"registration":"ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination",
+    let report = json!({"registration":"docs/design/light-ecology.md#scalar-correction-verification-registration",
         "physicalVersion":antropy_engine::world::VERSION,"budgets":budgets,"cases":cases,
         "evaluatorCost":evaluator_cost(),"forcingSamples":forcing_samples()});
     std::fs::write(

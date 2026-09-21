@@ -250,7 +250,7 @@ function validateLayers(next: ViewOptions) {
   validateColor(next);
   if (
     !Array.isArray(next.layers) ||
-    next.layers.length !== 10 ||
+    next.layers.length !== 8 ||
     next.layers.some((v) => typeof v !== "boolean")
   )
     throw new Error("Invalid field layers");

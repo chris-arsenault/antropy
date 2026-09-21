@@ -29,9 +29,7 @@ function shader(gl: WebGL2RenderingContext, type: number, source: string) {
   return value;
 }
 function illuminationMode(layers: boolean[]) {
-  if (layers[6]) return 1;
-  if (layers[7]) return 2;
-  return layers[8] ? 3 : 0;
+  return layers[6] ? 1 : 0;
 }
 function program(gl: WebGL2RenderingContext, vertex: string, fragment: string) {
   const p = gl.createProgram()!;
@@ -185,7 +183,7 @@ export class Renderer {
   }
 
   private drawShadow(size: [number, number], o: ViewOptions) {
-    if (!o.layers[9] || illuminationMode(o.layers) > 0) return;
+    if (!o.layers[7] || illuminationMode(o.layers) > 0) return;
     this.drawField(size, o, true);
   }
 

@@ -1,7 +1,8 @@
 # Current design and work order
 
-Updated September 20, 2026. Physical v33 adds cellular organization and exchange to material-supported habitats, composed local
-illumination, funded photoreception, and bounded phenotype/chemical-flow observation.
+Updated September 21, 2026. Physical v34 uses one scalar illumination field throughout chemistry,
+photoreception and display. It retains v33 cellular organization and exchange, material-supported
+habitats, composed source periods and bounded phenotype/chemical-flow observation.
 Before this feature, the user reported dense, long-lived colonies and a promising visual result.
 The [83,980-tick checkpoint review](../material-habitats-review.md) records differentiated
 chemistry and continued turnover. The [session slowdown investigation](../session-runtime-review.md)
@@ -38,6 +39,17 @@ limitations; its public-food acquisition probe remains negative. The user's newe
 shows broader uptake and dense colonies, with continued feedstock dependence in net material
 flow. These are distinct results, not certification of a closed ecosystem.
 
+The v33 [180k analysis](../cellular-200k-review.md) finds inherited local metabolic differences,
+mixed uptake, changing enzyme repertoires and repeated die-off/recovery. Large colonies mainly
+use private chemical cycles; selective enzyme activity and direct neighbor feeding remain minor.
+The [connected review](../cellular-180k-connections.md) finds strong collective body effects on
+local work conditions, persistent divergence between northern and southern processing, and
+energy crises despite retained material. It corrects a derived body-signal omission in the
+earlier inspector; recorded flows and ancestry are unaffected.
+The run was stopped at the user's request. Its mature checkpoint measures only 2.43 ticks/s
+with observation disabled and exceeds the browser save/export limit. Contact search considers
+5.2 million candidates for 38,071 real contacts; correcting that work is the first runtime target.
+
 <a id="design-design-owners"></a>
 
 ## Design owners
@@ -54,6 +66,7 @@ flow. These are distinct results, not certification of a closed ecosystem.
 | [Bodies and inheritance](funded-bodies.md) | Physical costs, genes and lifetime/inherited learning |
 | [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
 | [Composed runtime](chemistry/composed-runtime.md) | Current shared operators, illumination, material habitat laws and execution bounds |
+| [Light ecology](light-ecology.md) | Scalar correction, day/night opportunities and future shared shelter/emission accounting |
 | [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
 | [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
 | [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
@@ -82,7 +95,7 @@ The controller has 56 inputs, 24 recurrent units and 38 outputs. Twenty bounded 
 four chemical receptors, four transporters and up to eight enzyme programs plus core, motor, storage and
 [photoreception](../photoreception.md). The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v33; the outer observation package remains v11.
+checkpoints use v34; the outer observation package remains v11.
 The [material-habitat changes](../material-habitats.md) add shared two-scale attraction,
 reversible retention, locally evolving source renewal and multiscale public chemistry.
 IDs0/136 are initial landscape choices; ordinary renewal no longer reinstates them.
@@ -109,6 +122,13 @@ Keep current simulation semantics while investigating accumulated-session costs.
 8→40 ticks/s reload improvement is not yet explained; forced JavaScript collection did not
 reproduce it. The retention repair expires older saves within the existing byte budget rather
 than pausing merely because the preferred save counts do not fit.
+The separate v33 mature-state slowdown reproduces after restore. The
+[contact-search optimization](../contact-performance.md) raised that matched world from 2.44 to
+8.14 ticks/s. The [continued pass](../bounded-computation.md) reaches 12.77 ticks/s using
+finite-resolution census grouping, occupied-bin contact queries and a shared concentration
+threshold for reaction participation. Trace intracellular material remains stored until it
+accumulates above the threshold. The 30 ticks/s goal remains unmet; reaction/exchange costs
+and save/export limits provide concrete work ahead of another ecological mechanism.
 
 Future work belongs in the [backlog](../backlog.md): meaningful long-term specialization,
 less dependence on original feedstock, useful public-food returns, operating headroom, terrain

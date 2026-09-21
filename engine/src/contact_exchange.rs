@@ -27,13 +27,19 @@ impl Allocation {
         if self.demand.is_empty() {
             return;
         }
+        let support: Vec<_> = intensity
+            .iter()
+            .copied()
+            .enumerate()
+            .filter(|(_, value)| *value > 0.)
+            .collect();
         for n in &graph.neighbors[i] {
             let donor = &cells[n.donor];
             let gain = n.weight * donor.damage / donor.volume(c).max(1e-30);
             if gain == 0. {
                 continue;
             }
-            for (s, value) in intensity.iter().enumerate() {
+            for &(s, value) in &support {
                 let q = value * gain * donor.inventory[s];
                 if q == 0. {
                     continue;

@@ -7,9 +7,9 @@ mass is the existing receptor ratio times core mass. The ordinary investment law
 inheritance, proportional assembly, maintenance, occupied area and death accounting apply.
 Chemical machinery keeps its four existing receptor channels and their installed identities.
 
-The optical stimulus is the mean of the two local illumination responses already used by
-the environment and display. These are components of the imposed illumination, not chemical
-IDs or separately named spectral bands. Sample the same body footprint and four perimeter
+The optical stimulus is the single scalar illumination used by
+the environment and display. V34 removes the former independent chemical light components;
+the [light ecology design](design/light-ecology.md) records why. Sample the same body footprint and four perimeter
 points as chemical receptors. For each sample, response is `gain * L / (1 + L)` where
 `gain = photoreceptorStock / (photoreceptorStock + receptorRatio * coreStock)`.
 Illumination is dimensionless with unit mean; its saturation reference is therefore one.
@@ -18,9 +18,9 @@ direction oracle, temporal clock, harvesting process or response policy is intro
 
 Inputs 39–42 are brightness, change, front-minus-back and left-minus-right; input 43 is
 built photoreceptor stock relative to the inherited target. Existing input indices stay fixed.
-The controller has 44 inputs, 24 recurrent units and 9 outputs. New founder weights start at
+The current controller has 56 inputs, 24 recurrent units and 38 outputs. At introduction, new founder weights started at
 zero; mutation can connect the new cues to behavior. Sensing does not establish evolved use.
-Checkpoint v31 rejects older controller/body dimensions.
+Photoreception introduced checkpoint v31; current physical semantics require v34.
 
 ## Verification registration
 
@@ -39,7 +39,7 @@ Cost check reuses the existing fixed-load harness: seed 101, 48/2,000 cells, 10 
 measured ticks, 60-second wall cap per load, observer closed. Compare saved pre-change WASM
 with the new build. This checks added sensing/inference overhead, not long-run ecology.
 
-## Results
+## Original v31 results
 
 Sulion plan `95a342c0-2fe5-4003-b6d9-83d0eb19c798` tracks the completed implementation.
 Five Rust tests cover funded sensitivity, rotation/seams, opposite neural responses,
@@ -95,7 +95,7 @@ over longer distances. Tonic and temporal inputs remain available.
 Start a new world with the rebuilt local application. Selecting a cell shows photoreceptor
 readings directly, with all five inputs under **Local inputs and private recurrent state**.
 **Funded body and inherited genes** shows built stock separately from its newborn target.
-The population's developed-body table includes photoreceptor investment. This feature introduced physical v31. Current v32 accepts its own body/controller and habitat
+The population's developed-body table includes photoreceptor investment. This feature introduced physical v31. Current v34 accepts its own body/controller and habitat
 state; older physical versions are rejected rather than migrated or reseeded.
 
 From `frontend`, rerun the registered probes with a new output directory:

@@ -1,50 +1,9 @@
 //! Reduced observer data. Grouping and trait partitions never enter the physical kernel.
-use crate::{
-    movement::{Spatial, delta, distance_squared},
-    world::World,
-};
+use crate::{movement::delta, world::World};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
-const REACH: f64 = 6.;
-const MINIMUM: usize = 3;
-
-fn groups(w: &World) -> Vec<Vec<usize>> {
-    let index = Spatial::for_observation(&w.config, &w.cells, REACH);
-    let mut neighbors = Vec::with_capacity(w.cells.len());
-    for c in &w.cells {
-        let mut near = vec![];
-        index.near(c.x, c.y, &mut near);
-        near.retain(|&i| {
-            distance_squared([c.x, c.y], [w.cells[i].x, w.cells[i].y], &w.config) <= REACH * REACH
-        });
-        near.sort_unstable();
-        neighbors.push(near);
-    }
-    let mut assigned = vec![false; w.cells.len()];
-    let mut result = vec![];
-    for i in 0..w.cells.len() {
-        if assigned[i] || neighbors[i].len() < MINIMUM {
-            continue;
-        }
-        let mut group = vec![i];
-        assigned[i] = true;
-        let mut cursor = 0;
-        while cursor < group.len() {
-            let n = &neighbors[group[cursor]];
-            if n.len() >= MINIMUM {
-                for &j in n {
-                    if !assigned[j] {
-                        assigned[j] = true;
-                        group.push(j);
-                    }
-                }
-            }
-            cursor += 1;
-        }
-        result.push(group);
-    }
-    result
-}
+#[path = "census_groups.rs"]
+mod grouping;
 fn origin(w: &World, mut id: u64, known: &BTreeMap<u64, u64>) -> Option<u64> {
     loop {
         if let Some(&region) = known.get(&id) {
@@ -192,7 +151,10 @@ pub fn observe(w: &World, v: &Value) -> Result<Value, String> {
         return Err("Too many observer origins".into());
     }
     let known: BTreeMap<_, _> = pairs.into_iter().collect();
-    let regions: Vec<_> = groups(w).iter().map(|g| region(w, g, &known)).collect();
+    let regions: Vec<_> = grouping::groups(w)
+        .iter()
+        .map(|g| region(w, g, &known))
+        .collect();
     let origins: Vec<_> = w
         .cells
         .iter()

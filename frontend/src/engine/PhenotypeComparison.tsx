@@ -58,11 +58,9 @@ export function GroupComparison({ report }: { report: PhenotypeReport }) {
               </tr>
             ))}
             <tr>
-              <th>Local light · axes 1 / 2</th>
+              <th>Local illumination</th>
               {groups.map((g, i) => (
-                <td key={i}>
-                  {g.illumination.map((q) => (q === null ? "—" : format(q))).join(" / ")}
-                </td>
+                <td key={i}>{g.illumination === null ? "—" : format(g.illumination)}</td>
               ))}
             </tr>
           </tbody>

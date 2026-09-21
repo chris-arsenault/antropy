@@ -17,11 +17,11 @@ fn traits(body: &crate::organism::Body, membrane: [f64; 2]) -> [f64; 5] {
 struct Group {
     actual: [Vec<f64>; 7],
     target: [Vec<f64>; 5],
-    light: [f64; 2],
+    light: f64,
     count: usize,
 }
 impl Group {
-    fn add(&mut self, w: &World, cell: &Cell, light: [f64; 2]) {
+    fn add(&mut self, w: &World, cell: &Cell, light: f64) {
         let compiled = w.genomes[&cell.genome].compiled.as_ref().unwrap();
         let a = traits(&cell.body, cell.installed.membrane.point());
         let b = traits(
@@ -36,15 +36,13 @@ impl Group {
         for (i, value) in b.into_iter().enumerate() {
             self.target[i].push(value);
         }
-        for (sum, value) in self.light.iter_mut().zip(light) {
-            *sum += value;
-        }
+        self.light += light;
         self.count += 1;
     }
     fn report(self, flux: Option<&Flux>) -> Value {
         json!({"count":self.count,"actual":self.actual.map(distribution),
             "target":self.target.map(distribution),
-            "illumination":self.light.map(|q| if self.count == 0 { None } else { Some(q / self.count as f64) }),
+            "illumination":if self.count == 0 { None } else { Some(self.light / self.count as f64) },
             "activity":flux.map(activity)})
     }
 }

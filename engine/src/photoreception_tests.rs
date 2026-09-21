@@ -31,6 +31,23 @@ fn observe(w: &mut World) -> [f32; 4] {
 }
 
 #[test]
+fn photoreceptor_reads_the_same_scalar_as_local_reaction_work() {
+    let mut w = world();
+    for tick in [0, 7500, 30000, 90000] {
+        w.field
+            .illumination
+            .prepare(w.seed, tick, &w.config, w.field.nx, w.field.ny);
+        let cell = &w.cells[0];
+        let sites = crate::footprint::sites(cell, &w.config, &w.field);
+        let light = w.field.illumination.sample(&sites);
+        let medium = crate::reaction_medium::Medium::illuminated([1., -0.5], light);
+        let gain = cell.body[PHOTO_STOCK]
+            / (cell.body[PHOTO_STOCK] + w.config.receptor_ratio * cell.body[0]);
+        assert!((observe(&mut w)[0] as f64 - gain * medium.drive[0] / (1. + light)).abs() < 1e-7);
+    }
+}
+
+#[test]
 fn local_optics_share_the_body_frame_and_periodic_geometry() {
     let mut w = world();
     assert_eq!(w.cells[0].inputs[LIGHT_INPUT + 1], 0.);

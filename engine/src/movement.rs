@@ -1,4 +1,9 @@
 use crate::{config::Config, field::Field, organism::Cell};
+#[path = "contact_geometry.rs"]
+pub mod geometry;
+#[cfg(test)]
+#[path = "contact_geometry_tests.rs"]
+mod geometry_tests;
 pub fn delta(x: f64, width: f64) -> f64 {
     (x + width * 0.5).rem_euclid(width) - width * 0.5
 }
@@ -125,42 +130,28 @@ impl Spatial {
     }
 }
 pub fn pairs(cells: &[Cell], c: &Config) -> Vec<(usize, usize)> {
-    let radius = cells.iter().map(|b| b.radius(c)).fold(0.1, f64::max);
-    let index = Spatial::for_observation(c, cells, 2. * radius);
-    let mut near = vec![];
-    let mut result = vec![];
-    for (i, a) in cells.iter().enumerate() {
-        index.near(a.x, a.y, &mut near);
-        for &j in &near {
-            if j > i
-                && distance([a.x, a.y], [cells[j].x, cells[j].y], c)
-                    < a.radius(c) + cells[j].radius(c)
-            {
-                result.push((i, j));
-            }
-        }
-    }
-    result.sort_unstable();
-    result
+    geometry::Contacts::new(cells, c)
+        .edges
+        .iter()
+        .map(|e| (e.i, e.j))
+        .collect()
 }
 fn contacts(cells: &mut [Cell], c: &Config) {
     let mut shifts = vec![[0.; 2]; cells.len()];
     let mut normalization = vec![1.; cells.len()];
-    for (i, j) in pairs(cells, c) {
-        let a = &cells[i];
-        let b = &cells[j];
-        let d = [delta(b.x - a.x, c.width), delta(b.y - a.y, c.height)];
-        let length = d[0].hypot(d[1]);
-        let contact = (1. - length / (a.radius(c) + b.radius(c))).max(0.);
+    let geometry = geometry::Contacts::new(cells, c);
+    let relaxation = 0.5 * (1. - (-c.dt).exp());
+    for edge in &geometry.edges {
+        let (i, j) = (edge.i, edge.j);
+        let a = geometry.bodies[i];
+        let b = geometry.bodies[j];
+        let contact = edge.weight();
         normalization[i] += contact;
         normalization[j] += contact;
-        let unit = if length > 0. {
-            [d[0] / length, d[1] / length]
+        let unit = if edge.length > 0. {
+            edge.direction()
         } else {
-            let direction = [
-                b.heading.cos() - a.heading.cos(),
-                b.heading.sin() - a.heading.sin(),
-            ];
+            let direction = [b.heading[0] - a.heading[0], b.heading[1] - a.heading[1]];
             let norm = direction[0].hypot(direction[1]);
             if norm > 1e-12 {
                 direction.map(|v| v / norm)
@@ -170,16 +161,15 @@ fn contacts(cells: &mut [Cell], c: &Config) {
         };
         // Continuous soft-contact relaxation: a fixed physical duration has the same
         // pair overlap decay when split into smaller steps (before the speed bound).
-        let correction =
-            ((a.radius(c) + b.radius(c) - length) * 0.5 * (1. - (-c.dt).exp())).min(c.dt * 0.5);
+        let correction = ((edge.extent - edge.length) * relaxation).min(c.dt * 0.5);
         for k in 0..2 {
             shifts[i][k] -= unit[k] * correction;
             shifts[j][k] += unit[k] * correction;
         }
         let headings = [a.heading, b.heading];
         for (index, heading, sign) in [(i, headings[0], 1.), (j, headings[1], -1.)] {
-            let forward = sign * (unit[0] * heading.cos() + unit[1] * heading.sin());
-            let left = sign * (-unit[0] * heading.sin() + unit[1] * heading.cos());
+            let forward = sign * (unit[0] * heading[0] + unit[1] * heading[1]);
+            let left = sign * (-unit[0] * heading[1] + unit[1] * heading[0]);
             let reads = [
                 forward.max(0.),
                 left.max(0.),

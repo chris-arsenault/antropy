@@ -27,15 +27,12 @@ pub struct Graph {
     pub neighbors: Vec<Vec<Neighbor>>,
     pub field: Vec<f64>,
 }
-fn directions(a: &Cell, b: &Cell, c: &Config) -> [f64; 4] {
-    let x = movement::delta(b.x - a.x, c.width);
-    let y = movement::delta(b.y - a.y, c.height);
-    let norm = x.hypot(y);
-    if norm == 0. {
+fn directions(heading: [f64; 2], unit: [f64; 2], length: f64) -> [f64; 4] {
+    if length == 0. {
         return [0.25; 4];
     }
-    let forward = (x * a.heading.cos() + y * a.heading.sin()) / norm;
-    let left = (-x * a.heading.sin() + y * a.heading.cos()) / norm;
+    let forward = unit[0] * heading[0] + unit[1] * heading[1];
+    let left = -unit[0] * heading[1] + unit[1] * heading[0];
     [
         forward.max(0.),
         left.max(0.),
@@ -49,20 +46,28 @@ impl Graph {
             neighbors: vec![vec![]; cells.len()],
             field: vec![1.; cells.len()],
         };
-        for (i, j) in movement::pairs(cells, c) {
-            let (a, b) = (&cells[i], &cells[j]);
-            let contact = (1.
-                - movement::distance([a.x, a.y], [b.x, b.y], c) / (a.radius(c) + b.radius(c)))
-            .max(0.);
+        let geometry = movement::geometry::Contacts::new(cells, c);
+        for edge in &geometry.edges {
+            let (i, j) = (edge.i, edge.j);
+            let contact = edge.weight();
             if contact == 0. {
                 continue;
             }
-            for (i, j) in [(i, j), (j, i)] {
+            let unit = edge.direction();
+            // Preserve the existing minimum-image convention at an exact half-world tie.
+            let opposite = std::array::from_fn(|k| {
+                if edge.displacement[k] == -[c.width, c.height][k] * 0.5 {
+                    unit[k]
+                } else {
+                    -unit[k]
+                }
+            });
+            for (i, j, direction) in [(i, j, unit), (j, i, opposite)] {
                 graph.field[i] += contact;
                 graph.neighbors[i].push(Neighbor {
                     donor: j,
                     weight: contact,
-                    direction: directions(&cells[i], &cells[j], c),
+                    direction: directions(geometry.bodies[i].heading, direction, edge.length),
                 });
             }
         }
@@ -75,8 +80,14 @@ impl Graph {
         graph
     }
     pub fn prepare(&self, cells: &mut [Cell], c: &Config, chemistry: &Chemistry) {
+        // A donor's total stress is independent of the receiver. Reduce its mixture
+        // once per frozen pass; only membrane compatibility varies across edges.
+        let stress: Vec<_> = cells
+            .iter()
+            .map(|cell| donor_stress(cell, chemistry))
+            .collect();
         let readings: Vec<_> = (0..cells.len())
-            .map(|i| self.reading(i, cells, c, chemistry))
+            .map(|i| self.reading_with(i, cells, c, chemistry, |j| stress[j]))
             .collect();
         for (i, (cell, reading)) in cells.iter_mut().zip(readings).enumerate() {
             cell.interface = reading;
@@ -89,6 +100,18 @@ impl Graph {
         }
     }
     pub fn reading(&self, i: usize, cells: &[Cell], c: &Config, chemistry: &Chemistry) -> Reading {
+        self.reading_with(i, cells, c, chemistry, |j| {
+            donor_stress(&cells[j], chemistry)
+        })
+    }
+    fn reading_with(
+        &self,
+        i: usize,
+        cells: &[Cell],
+        c: &Config,
+        chemistry: &Chemistry,
+        stress: impl Fn(usize) -> f64,
+    ) -> Reading {
         let cell = &cells[i];
         let mut reading = Reading {
             field: self.field[i],
@@ -112,12 +135,7 @@ impl Graph {
                     reading.recognition[slot][k + 1] += local * n.direction[k];
                 }
             }
-            let mut stress = donor
-                .inventory
-                .iter()
-                .zip(&chemistry.properties)
-                .map(|(q, p)| q * p.stress)
-                .sum::<f64>();
+            let mut stress = stress(n.donor);
             for a in operators.membrane.iter() {
                 stress -= (1. - c.susceptibility_floor)
                     * a.value
@@ -142,4 +160,15 @@ impl Graph {
         }
         result
     }
+}
+
+fn donor_stress(cell: &Cell, chemistry: &Chemistry) -> f64 {
+    if cell.damage == 0. {
+        return 0.;
+    }
+    cell.inventory
+        .iter()
+        .zip(&chemistry.properties)
+        .map(|(q, p)| q * p.stress)
+        .sum()
 }

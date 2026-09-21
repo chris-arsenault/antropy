@@ -1,4 +1,4 @@
-# Design decisions and evidence through physical v33
+# Design decisions and evidence through physical v34
 
 This is the decision record for the current [work order](README.md). The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
@@ -96,6 +96,14 @@ The same bounded local illumination enters shared transformation work. It remain
 periodic external forcing, not demonstrated mathematical chaos or a planetary climate solver.
 The [v30 evidence](../evidence/digital-chemistry/illumination-v30/README.md) preserves changed
 work rankings and costs; v29 survival reversals are not reassigned to v30.
+
+V34 removes independent illumination of chemical-profile components. Multiple source periods
+did not justify multiple chemical light channels; their average hid relevant work conditions
+from receptors and display. One scalar now multiplies the whole local chemical signal, preserving
+its direction and the existing visible pattern. The [light ecology design](light-ecology.md)
+separates this correction from future optical screening and paid emission. Those mechanisms need
+finite shared optical-work allocation before local emitters can safely feed the same pathway.
+No colony-size penalty or prescribed day/night strategy is introduced.
 
 The viewport uses composited day/night shading over the world, with independent hazard patterns
 and modal observation. Enzyme colors and possible routes describe installed capability;

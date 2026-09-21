@@ -107,25 +107,41 @@ def checkpoint(data):
             "activeGroupFraction": geo["activeGroups"] / (geo["nx"] * geo["ny"] * 64)}
 
 
-def flow_summaries(path):
+def flow_summaries(path, potentials=None, through=None):
     bins = {}
     last_end = 0
     for f in read_lines(path):
         window = f["window"]
+        if through is not None and window["end"] > through:
+            break
         assert window["start"] == last_end, "Missing or overlapping accepted-flow window"
         last_end = window["end"]
-        total = sum(r["amount"] for r in f["rows"])
+        # A zero-amount observation can append a route key repeatedly before its
+        # first positive flow. Pages repeat the same accumulated value, not flux.
+        unique = {}
+        for row in f["rows"]:
+            key = (row["input"], row["output"])
+            assert key not in unique or unique[key]["amount"] == row["amount"], "Conflicting route copies"
+            unique[key] = row
+        rows = list(unique.values())
+        duplicates = len(f["rows"]) - len(rows)
+        total = sum(r["amount"] for r in rows)
         assert abs(total - f["activity"]["flows"]["reacted"]) < 1e-7 * max(1, total)
         epoch = (f["tick"] - 1) // 10000
         if epoch not in bins:
             bins[epoch] = {"start": window["start"], "end": 0, "routes": collections.Counter(),
                            "imports": collections.Counter(), "exports": collections.Counter(),
                            "importTotal": 0., "exportTotal": 0., "costs": collections.Counter(),
-                           "organismSeconds": 0., "overflow": 0.}
+                           "organismSeconds": 0., "overflow": 0., "duplicateRouteRecords": 0,
+                           "chemicalPotentialDrop": 0.}
         b = bins[epoch]
         b["end"] = window["end"]
-        for row in f["rows"]:
-            b["routes"][(row["input"], row["output"])] += row["amount"]
+        b["duplicateRouteRecords"] += duplicates
+        for row in rows:
+            if row["amount"] > 0:
+                b["routes"][(row["input"], row["output"])] += row["amount"]
+                if potentials is not None:
+                    b["chemicalPotentialDrop"] += row["amount"] * (potentials[row["input"]] - potentials[row["output"]])
         for kind in ["imports", "exports"]:
             for species, value in f["activity"][kind]["rows"]:
                 b[kind][species] += value
@@ -157,6 +173,12 @@ def flow_summaries(path):
                   if b["importTotal"] else [0, 0]})
         for kind in ["imports", "exports"]:
             b[kind] = b[kind].most_common(12)
+        if potentials is not None:
+            net = b["chemicalPotentialDrop"] + b["costs"]["externalWork"] - b["costs"]["reactionHeat"]
+            b["netReactionWork"] = net
+            b["uphillWorkSpent"] = b["costs"]["captured"] - net
+        else:
+            del b["chemicalPotentialDrop"]
         result.append(b)
     return result
 
@@ -218,7 +240,8 @@ def plot_series(series, checkpoints, flows, path):
 
 
 def spatial_plot(inspections, path):
-    chosen = [d for d in inspections if d["tick"] in [0, 10000, 50000, 100000, 150000, 200000]]
+    final_tick = max(d["tick"] for d in inspections)
+    chosen = [d for d in inspections if d["tick"] in [0, 10000, 50000, 100000, 150000, final_tick]][-6:]
     fig, axes = plt.subplots(2, 3, figsize=(15, 8), constrained_layout=True)
     maximum = max(float(np.log1p(d["geography"]["material"]).max()) for d in chosen)
     for ax, data in zip(axes.flat, chosen):

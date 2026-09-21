@@ -5,7 +5,7 @@ pub struct Medium {
     pub drive: [f64; 2],
 }
 impl Medium {
-    pub fn illuminated(signal: [f64; 2], light: [f64; 2]) -> Self {
+    pub fn illuminated(signal: [f64; 2], light: f64) -> Self {
         Self {
             signal,
             drive: crate::illumination::drive(signal, light),

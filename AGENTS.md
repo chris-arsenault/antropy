@@ -71,7 +71,7 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v33 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v34 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 320 × 240 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 48 finite renewing
 reservoirs. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir

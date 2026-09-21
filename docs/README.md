@@ -15,9 +15,13 @@ The [historical snapshot](sources/history/README.md) preserves superseded contra
 | Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |
 | Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
 | 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
-| Implemented illumination: composed cycles and shared local transformation work | [Illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k user-run findings](evidence/digital-chemistry/illumination-design-143249/README.md) |
+| Scalar illumination, day/night opportunities and future shelter/emission | [Light ecology](design/light-ecology.md); earlier [illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k findings](evidence/digital-chemistry/illumination-design-143249/README.md) retain their original versions |
 | Joint design for intracellular organization, specialization and cell interactions | [Cellular organization and exchange](design/cellular-organization-and-exchange.md) — implemented v33 laws |
 | Cellular delivery, opportunities and costs | [Delivery results](cellular-organization-results.md) — bounded mechanics, startup and operating limits |
+| V33 long observation: inherited differentiation, metabolism, contacts and operating limits | [Cellular 180k analysis](cellular-200k-review.md) — shortened 200k registration, temporal analysis and evidence |
+| Mature-world contact search: exact overlap discovery and measured cost reduction | [Contact performance](contact-performance.md) |
+| Concentration resolution, bounded census work and continued mature-world optimization | [Bounded computation](bounded-computation.md) |
+| Recent design goals against the same run: collective habitats, branch replacement and private recycling | [Connected 180k analysis](cellular-180k-connections.md) — retrieved intent, corrected body signals and cross-system evidence |
 | Earlier crowding, antagonism and feeding research | [Cell interaction research](design/cell-interaction-research.md) — original inventory and proposal |
 | Whole-cell metabolic organization and conditional incentives | [Intracellular organization](design/intracellular-organization.md) — strategic hypothesis underlying the joint design |
 | Current spatial isolation, source migration and directional climate review | [50k study and staged ecology proposal](design/spatial-isolation-review.md) |
@@ -188,6 +192,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Deferred multicore scaling](backlog.md#backlog-multicore-scaling)
 - [Deferred cell interaction research](backlog.md#backlog-cell-interactions)
+- [Light ecology: shelter, emission and conditional activity](backlog.md#backlog-light-ecology)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

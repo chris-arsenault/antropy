@@ -1,14 +1,6 @@
 export interface ChemicalDisplay {
   species: number;
-  base:
-    | "matter"
-    | "potential"
-    | "chemical"
-    | "weathering"
-    | "illumination"
-    | "response0"
-    | "response1"
-    | "none";
+  base: "matter" | "potential" | "chemical" | "weathering" | "illumination" | "none";
   impedance: boolean;
   illumination: boolean;
   stress: boolean;
@@ -31,8 +23,6 @@ export function chemicalLayers(view: ChemicalDisplay) {
     view.base === "chemical",
     view.base === "weathering",
     view.base === "illumination",
-    view.base === "response0",
-    view.base === "response1",
     view.illumination,
   ];
 }

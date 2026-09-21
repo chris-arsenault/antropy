@@ -26,13 +26,9 @@ fn subtract([a, b]: [f64; 2], [c, d]: [f64; 2]) -> [f64; 2] {
     [a * c + b * d, b * c - a * d]
 }
 
-pub fn response(x: [f64; 2], y: [f64; 2], modulation: [f64; 2], contrast: f64) -> [f64; 2] {
-    // Tensor products: the cross axis gates each sweep, rather than adding an offset.
-    // Each factor is bounded by one and has zero mean on its own periodic axis.
-    [
-        1. + contrast * x[0] * subtract(y, modulation)[0],
-        1. + contrast * y[0] * subtract(x, modulation)[0],
-    ]
+pub fn response(x: [f64; 2], y: [f64; 2], modulation: [f64; 2], contrast: f64) -> f64 {
+    // Composed rotations supply one optical intensity, independent of the chemical basis.
+    1. + contrast * 0.5 * (x[0] * subtract(y, modulation)[0] + y[0] * subtract(x, modulation)[0])
 }
 
 impl Illumination {
@@ -71,9 +67,9 @@ impl Illumination {
         self.modulation = phase[2];
     }
 
-    pub fn node(&self, node: usize) -> [f64; 2] {
+    pub fn node(&self, node: usize) -> f64 {
         if self.contrast == 0. {
-            return [1.; 2];
+            return 1.;
         }
         response(
             self.rotated[0][node % self.geometry.0],
@@ -83,27 +79,24 @@ impl Illumination {
         )
     }
 
-    pub fn sample(&self, sites: &[(usize, f64)]) -> [f64; 2] {
+    pub fn sample(&self, sites: &[(usize, f64)]) -> f64 {
         if self.contrast == 0. {
-            return [1.; 2];
+            return 1.;
         }
-        let mut value = [0.; 2];
+        let mut value = 0.;
         for &(node, weight) in sites {
-            let light = self.node(node);
-            for k in 0..2 {
-                value[k] += weight * light[k];
-            }
+            value += weight * self.node(node);
         }
         value
     }
 }
 
-pub fn drive(signal: [f64; 2], light: [f64; 2]) -> [f64; 2] {
-    [signal[0] * light[0], signal[1] * light[1]]
+pub fn drive(signal: [f64; 2], light: f64) -> [f64; 2] {
+    signal.map(|value| light * value)
 }
 
 /// Bounded on-demand inspection; never refresh the frozen physical cache for an observer.
-pub fn at(w: &crate::world::World, x: f64, y: f64) -> [f64; 2] {
+pub fn at(w: &crate::world::World, x: f64, y: f64) -> f64 {
     let mut light = Illumination::default();
     light.prepare(w.seed, w.tick, &w.config, w.field.nx, w.field.ny);
     light.sample(&w.field.stencil(x, y))
