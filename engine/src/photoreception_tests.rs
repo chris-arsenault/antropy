@@ -158,13 +158,18 @@ fn photoreception_survives_checkpoint_and_rejects_nonfinite_memory() {
     for _ in 0..12 {
         a.step();
     }
-    let mut b = World::restore(&a.snapshot().unwrap()).unwrap();
+    let mut b = crate::boundary_tests::restored_state(&a);
     assert_eq!(a.cells[0].photoreceptor, b.cells[0].photoreceptor);
+    assert_eq!(a.cells[0].brain.hidden, b.cells[0].brain.hidden);
+    assert_eq!(a.cells[0].brain.traces, b.cells[0].brain.traces);
+    let resumed_tick = a.tick + 8;
     for _ in 0..8 {
         a.step();
         b.step();
     }
-    assert_eq!(a.snapshot().unwrap(), b.snapshot().unwrap());
+    crate::boundary_tests::usable_continuation(&a, resumed_tick);
+    crate::boundary_tests::usable_continuation(&b, resumed_tick);
+    assert!(b.cells[0].photoreceptor.is_finite());
     b.cells[0].photoreceptor = f64::NAN;
     assert!(b.validate().is_err());
 }

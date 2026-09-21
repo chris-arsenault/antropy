@@ -18,12 +18,12 @@ fn yields(w: &World, c: &Cell, drives: &[[f64; 2]]) -> Value {
         let occupancy: f64 = enzyme
             .engagement
             .iter()
-            .map(|a| a.value * c.inventory[a.species])
+            .map(|a| a.value * c.inventory.value(a.species))
             .sum();
         let factor = w.config.enzyme_turnover * stock * c.action.activity[slot] * (1. - c.damage)
             / (w.config.receptor_k * c.volume(&w.config) + occupancy).max(1e-30);
         for row in &enzyme.conversions {
-            let base = factor * row.catalytic * c.inventory[row.substrate];
+            let base = factor * row.catalytic * c.inventory.value(row.substrate);
             if base == 0. {
                 continue;
             }

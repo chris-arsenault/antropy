@@ -91,10 +91,10 @@ pub fn inspect(w: &World, c: &Cell, graph: &Graph, index: usize, bodies: &[[f64;
     let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
     let rates: Vec<_> = c.operators.as_ref().unwrap().enzymes.iter().enumerate().map(|(slot, op)| {
         let stock = c.body[antropy_engine::organism::enzyme_stock(slot)];
-        let rows: Vec<_> = op.conversions.iter().filter(|e| c.inventory[e.substrate] > 0. && stock > 0. && c.installed.programs[slot]).collect();
-        let weights: f64 = rows.iter().map(|e| e.catalytic * c.inventory[e.substrate]).sum();
+        let rows: Vec<_> = op.conversions.iter().filter(|e| c.inventory.value(e.substrate) > 0. && stock > 0. && c.installed.programs[slot]).collect();
+        let weights: f64 = rows.iter().map(|e| e.catalytic * c.inventory.value(e.substrate)).sum();
         let modifiers: Vec<_> = rows.iter().map(|e| metabolism::response(e.work_coefficient,mixture)).collect();
-        let mean = rows.iter().zip(&modifiers).map(|(e,m)| e.catalytic * c.inventory[e.substrate] * m).sum::<f64>() / weights.max(1e-30);
+        let mean = rows.iter().zip(&modifiers).map(|(e,m)| e.catalytic * c.inventory.value(e.substrate) * m).sum::<f64>() / weights.max(1e-30);
         json!({"slot":slot,"rowsWithSubstrate":rows.len(),"weightedMean":if weights > 0. {Some(mean)} else {None},
             "minimum":modifiers.iter().copied().reduce(f64::min),"maximum":modifiers.iter().copied().reduce(f64::max)})
     }).collect();

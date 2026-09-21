@@ -3,7 +3,7 @@ use crate::{chemical_projection::lanes, chemistry::Chemistry, config::Config, we
 
 #[derive(Clone, Debug, Default)]
 pub struct Climate {
-    pub operators: Option<weathering::Operators>,
+    pub operators: Option<std::sync::Arc<weathering::Operators>>,
     changes: Vec<f64>,
     impedance_scale: f64,
     rate: f64,
@@ -18,11 +18,11 @@ pub struct Climate {
 impl Climate {
     pub fn new(config: &Config, chemistry: &Chemistry) -> Self {
         Self {
-            operators: Some(weathering::Operators::with_radius(
+            operators: Some(std::sync::Arc::new(weathering::Operators::with_radius(
                 chemistry,
                 config.environmental_work,
                 config.affinity_radius,
-            )),
+            ))),
             changes: vec![0.; 256],
             floor: crate::field_activity::CONCENTRATION_FLOOR as f64 * config.mesh.powi(2),
             ..Self::default()
@@ -30,7 +30,8 @@ impl Climate {
     }
 
     pub fn prepare(&mut self, config: &Config) {
-        self.operators.as_mut().unwrap().work_strength = config.environmental_work;
+        std::sync::Arc::make_mut(self.operators.as_mut().unwrap()).work_strength =
+            config.environmental_work;
         self.rate = config.weathering_rate;
         self.feedback = config.habitat_feedback;
         self.impedance_scale = config.diffusion_impedance;

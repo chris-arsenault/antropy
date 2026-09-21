@@ -24,7 +24,9 @@ pub fn frame(w: &crate::world::World) -> serde_json::Value {
         let sites=w.field.stencil(c.x,c.y);
         let local:Vec<_>=(0..256).map(|s| w.field.sample(s,&sites)).collect();
         let impedance=w.field.medium_load(&sites);
-        serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":crate::movement::mobility(impedance,w.config.movement_impedance),"weathering":crate::climate::local(w,c.x,c.y),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)})
+        let mut result=serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":crate::movement::mobility(impedance,w.config.movement_impedance),"weathering":crate::climate::local(w,c.x,c.y),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)});
+        result["cell"]["brain"]=serde_json::json!(crate::controller::observed_state(&c.brain));
+        result
     }).collect();
     serde_json::json!({"tick":w.tick,"cells":cells})
 }
@@ -40,7 +42,7 @@ pub fn habitat(w: &crate::world::World) -> serde_json::Value {
                 .exported
                 .iter()
                 .enumerate()
-                .filter(|(_, q)| **q > 0.)
+                .filter(|(_, q)| *q > 0.)
                 .collect();
             serde_json::json!({"id":c.id,"lineage":c.lineage,"genome":c.genome,"born":c.born,
             "body":c.body,"installed":c.installed,"machineryGenome":c.machinery_genome,
@@ -88,8 +90,8 @@ mod tests {
                     .filter(|r| r.species == s)
                     .map(|r| r.amount)
                     .sum::<f64>()
-                    - g.chemical.consumed[s])
-                    .abs()
+                    - g.chemical.consumed.value(s))
+                .abs()
                     < 1e-12
             );
         }
@@ -209,8 +211,8 @@ impl Trace {
             &previous.consumed,
             &previous.produced,
         ]) {
-            for ((total, n), p) in sum.iter_mut().zip(now).zip(before) {
-                *total += n - p;
+            for (s, (n, p)) in now.iter().zip(before.iter()).enumerate() {
+                sum.add(s, n - p);
             }
         }
         if c.flows.imported > 0.

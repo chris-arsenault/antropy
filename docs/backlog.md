@@ -11,12 +11,14 @@ local populations. Implementation phases and acceptance live in that design docu
 
 <a id="backlog-multicore-scaling"></a>
 
-## Deferred multicore scaling
+## Remaining multicore scaling
 
-The user deferred multicore implementation on September 18. Preserve
+The user resumed multicore implementation on September 21.
 [the shared-memory design and P0–P4 milestones](../SCALING-PLAN.md#multicore-design)
-in paused Sulion plan `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
-Current work remains single-threaded. Composed local illumination, funded optical sensing and
+in Sulion plan `e3517c4b-b3df-4786-bcf4-10a488a294d1` records installed P0–P2 execution and
+six-core measurements. P3 retains large-world browser persistence, representative occupied
+workloads and 16/32-core acceptance; P4 terrain remains future work.
+Composed local illumination, funded optical sensing and
 material-supported habitats are implemented; they do not depend on multicore execution. Elevation and rotational transport remain later extensions;
 the earlier spatial review retains evidence and its rejected fixed-well proposal.
 
@@ -42,7 +44,7 @@ optimizer are introduced. The [implementation plan](CELLULAR-ORGANIZATION-PLAN.m
 v33 implementation. Internal compartments were withdrawn; meta-organism opportunities
 remain intercellular. Evolved cooperation, adhesion, direct consumption of living structure and
 larger reaction arity remain open research. No evolutionary campaign is required for delivery.
-Multicore remains paused.
+The shared-memory runtime is installed separately; it does not establish these ecological outcomes.
 
 <a id="backlog-light-ecology"></a>
 

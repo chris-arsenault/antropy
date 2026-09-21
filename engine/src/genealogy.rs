@@ -1,5 +1,5 @@
 //! Bounded presentation records derived from complete parentage, never physical inputs.
-use crate::{ancestry::Ancestor, presentation, world::World};
+use crate::{ancestry::Ancestor, world::World};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
@@ -11,17 +11,33 @@ fn parent_family(w: &World, id: u64) -> Option<u64> {
     Some(cursor)
 }
 
+pub(crate) type Profiles = BTreeMap<u64, (usize, u64, [f64; 3])>;
+
+pub(crate) fn add_profile(
+    groups: &mut Profiles,
+    family: u64,
+    c: &crate::organism::Cell,
+    g: &crate::genetics::Compiled,
+) {
+    let entry = groups.entry(family).or_default();
+    entry.0 += 1;
+    entry.1 = c.generation - c.generation % 4;
+    entry.2[0] += 100. * g.body[1] / g.body[0];
+    entry.2[1] += g.chromosome.chemistry.membrane.x;
+    entry.2[2] += g.chromosome.chemistry.membrane.y;
+}
+
+#[cfg(test)]
 pub fn profiles(w: &World) -> Value {
-    let mut groups = BTreeMap::<u64, (usize, u64, [f64; 3])>::new();
+    let mut groups = Profiles::new();
     for c in &w.cells {
         let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
-        let entry = groups.entry(presentation::family(w, c)).or_default();
-        entry.0 += 1;
-        entry.1 = c.generation - c.generation % 4;
-        entry.2[0] += 100. * g.body[1] / g.body[0];
-        entry.2[1] += g.chromosome.chemistry.membrane.x;
-        entry.2[2] += g.chromosome.chemistry.membrane.y;
+        add_profile(&mut groups, crate::presentation::family(w, c), c, g);
     }
+    profiles_from(w, groups)
+}
+
+pub(crate) fn profiles_from(w: &World, groups: Profiles) -> Value {
     let mut groups: Vec<_> = groups.into_iter().collect();
     groups.sort_by(|a, b| b.1.0.cmp(&a.1.0).then(a.0.cmp(&b.0)));
     json!(

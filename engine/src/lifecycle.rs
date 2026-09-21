@@ -7,7 +7,7 @@ use crate::{
 pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
     let row = crate::footprint::sites(cell, &w.config, &w.field);
     for s in 0..256 {
-        let q = cell.inventory[s] + cell.bound_material[s];
+        let q = cell.inventory.value(s) + cell.bound_material.value(s);
         for &(node, weight) in &row {
             let loss = w.field.add(node, s, q * weight, &w.chemistry);
             w.ledger.rounding(loss, s, &w.chemistry);

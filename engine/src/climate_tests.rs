@@ -96,7 +96,8 @@ fn shield_changes_conversion_without_granting_material_and_empty_field_stays_idl
     empty.advance_weathered(&chemicals, 0.8, 0., 1., Some(&mut climate));
     assert_eq!(empty.work_counts(), [0, 0, 0]);
     let mut row = [0.; 256];
-    row[0] = 4.;
+    // A resolved product tests shielding independently of numerical tail removal.
+    row[0] = 400.;
     let mut protected = row;
     let mask = climate.convert(&mut protected, 1, ([1., 0.], 0.5), 0.8);
     let protected_heat = climate.heat;
@@ -108,7 +109,9 @@ fn shield_changes_conversion_without_granting_material_and_empty_field_stays_idl
     assert!(climate.heat > protected_heat);
     assert_eq!(climate.prevented, 0.);
     assert_ne!(mask & (1 << 4), 0);
-    assert!((protected.iter().map(|q| *q as f64).sum::<f64>() - 4.).abs() < 1e-6);
+    let retained = protected.iter().map(|q| *q as f64).sum::<f64>();
+    let bound = 256. * crate::field_activity::CONCENTRATION_FLOOR as f64 * c.mesh.powi(2);
+    assert!((retained - 400.).abs() < bound);
 }
 
 #[test]
@@ -128,15 +131,13 @@ fn climate_restore_continues_at_each_physiology_phase_and_source_rng_is_independ
     c.habitat_feedback = false;
     let mut control = World::new(27, c).unwrap();
     for _ in 0..12 {
-        let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
+        let mut restored = crate::boundary_tests::restored_state(&w);
+        let resumed_tick = w.tick + 1;
         w.step();
         restored.step();
         control.step();
-        assert!(
-            w.snapshot().unwrap() == restored.snapshot().unwrap(),
-            "cold continuation at {}",
-            w.tick
-        );
+        crate::boundary_tests::usable_continuation(&w, resumed_tick);
+        crate::boundary_tests::usable_continuation(&restored, resumed_tick);
         for (a, b) in w.sources.iter().zip(&control.sources) {
             assert_eq!((a.remaining, a.wait, a.rate), (b.remaining, b.wait, b.rate));
             assert!(

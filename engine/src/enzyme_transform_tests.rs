@@ -207,12 +207,15 @@ fn circular_expression_validation_and_continuation_cover_nonzero_angles() {
         &w.config,
         &w.chemistry,
     ));
-    let mut restored = crate::world::World::restore(&w.snapshot().unwrap()).unwrap();
+    let mut restored = crate::boundary_tests::restored_state(&w);
+    assert_eq!(restored.cells[0].installed.enzymes[0].angle, 0.2);
+    let resumed_tick = w.tick + 8;
     for _ in 0..8 {
         w.step();
         restored.step();
     }
-    assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
+    crate::boundary_tests::usable_continuation(&w, resumed_tick);
+    crate::boundary_tests::usable_continuation(&restored, resumed_tick);
     for angle in [f64::NAN, f64::INFINITY, PI, -PI - 0.01] {
         let mut g = w.genomes[&1].clone();
         g.chromosomes[0].chemistry.enzymes[0].angle = angle;

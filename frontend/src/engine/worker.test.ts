@@ -10,7 +10,7 @@ vi.mock("./renderer", () => ({
     dispose = graphics.dispose;
   },
 }));
-vi.mock("./client", () => ({ Engine: { load: async () => ({}) } }));
+vi.mock("./client", () => ({ Engine: { loadBrowser: async () => ({}) } }));
 vi.mock("./session", () => ({
   Session: class {
     running = false;

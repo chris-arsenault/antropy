@@ -1,6 +1,6 @@
 import { browserReplyLimit, checkBrowserCommand } from "./ownership";
 
-interface EngineExports {
+export interface EngineExports {
   memory: WebAssembly.Memory;
   antropy_allocate(length: number): number;
   antropy_free(pointer: number, length: number): void;
@@ -20,6 +20,11 @@ interface EngineExports {
 }
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
+// TextDecoder rejects shared buffers. Only bounded JSON observations cross this copy;
+// render views remain borrowed and checkpoint copies belong to the explicit cold path.
+function decodeReply(bytes: Uint8Array<ArrayBufferLike>) {
+  return decoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : bytes.slice());
+}
 
 /** A complete world lives behind a versioned command boundary; no shared struct layout. */
 export class Engine {
@@ -38,13 +43,28 @@ export class Engine {
     return new Engine(module.instance.exports as unknown as EngineExports, digest, browser);
   }
 
+  static async loadBrowser(url: string) {
+    const { loadBrowserEngine } = await import("./threadedLoader");
+    const loaded = await loadBrowserEngine(url);
+    if (loaded) return new Engine(loaded.exports, loaded.sourceDigest, true);
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Engine download failed: ${response.status}`);
+    return Engine.load(new Uint8Array(await response.arrayBuffer()), true);
+  }
+  static async loadShared(url: string, workers: number) {
+    const { loadBrowserEngine } = await import("./threadedLoader");
+    const loaded = await loadBrowserEngine(url, workers);
+    if (!loaded) throw new Error("Shared engine requires cross-origin isolation");
+    return new Engine(loaded.exports, loaded.sourceDigest, false);
+  }
+
   private invoke<T>(
     bytes: Uint8Array,
-    consume: (reply: Uint8Array<ArrayBuffer>) => T,
+    consume: (reply: Uint8Array<ArrayBufferLike>) => T,
     restore = false
   ): T {
     const api = this.exports;
-    const pointer = api.antropy_allocate(bytes.length);
+    const pointer = api.antropy_allocate(bytes.length) >>> 0;
     try {
       new Uint8Array(api.memory.buffer, pointer, bytes.length).set(bytes);
       const ok = restore
@@ -52,10 +72,10 @@ export class Engine {
         : api.antropy_request(pointer, bytes.length);
       const reply = new Uint8Array(
         api.memory.buffer,
-        api.antropy_reply_pointer(),
-        api.antropy_reply_length()
+        api.antropy_reply_pointer() >>> 0,
+        api.antropy_reply_length() >>> 0
       );
-      if (!ok) throw new Error((JSON.parse(decoder.decode(reply)) as { error: string }).error);
+      if (!ok) throw new Error((JSON.parse(decodeReply(reply)) as { error: string }).error);
       return consume(reply);
     } finally {
       api.antropy_free(pointer, bytes.length);
@@ -67,7 +87,7 @@ export class Engine {
     return this.invoke(encoder.encode(JSON.stringify({ ...payload, op })), (reply) => {
       if (this.browser && reply.byteLength > browserReplyLimit(op))
         throw new Error(`Data ownership reply budget exceeded: ${op}`);
-      return JSON.parse(decoder.decode(reply)) as T;
+      return JSON.parse(decodeReply(reply)) as T;
     });
   }
 
@@ -86,7 +106,7 @@ export class Engine {
   restore(bytes: Uint8Array) {
     const { handle } = this.invoke(
       bytes,
-      (reply) => JSON.parse(decoder.decode(reply)) as { handle: number },
+      (reply) => JSON.parse(decodeReply(reply)) as { handle: number },
       true
     );
     return new EngineWorld(this, handle);
@@ -122,14 +142,8 @@ export class Engine {
     field: boolean,
     selected: number
   ) {
-    const pointer = this.exports.antropy_render(
-      handle,
-      kind,
-      species,
-      color,
-      Number(field),
-      selected
-    );
+    const pointer =
+      this.exports.antropy_render(handle, kind, species, color, Number(field), selected) >>> 0;
     if (!pointer) throw new Error("Invalid render request");
     const memory = this.exports.memory.buffer;
     const d = new Uint32Array(memory, pointer, 13);

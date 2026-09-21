@@ -97,7 +97,7 @@ impl Study {
             ("imported", &c.chemical_flows.imported, &previous.imported),
             ("exported", &c.chemical_flows.exported, &previous.exported),
         ] {
-            for (s, (n, p)) in now.iter().zip(before).enumerate() {
+            for (s, (n, p)) in now.iter().zip(before.iter()).enumerate() {
                 self.flow(c, channel, Some(s), None, n - p);
             }
         }
@@ -129,8 +129,10 @@ impl Study {
     pub fn life(&mut self, c: &Cell, kind: &str, tick: u64) {
         self.life.push(json!({"tick":tick,"cell":c.id,"parent":c.parent,"lineage":c.lineage,"genome":c.genome,"kind":kind,"x":c.x,"y":c.y}));
     }
-    pub fn genomes(&mut self, genomes: &BTreeMap<u64, Genotype>) {
-        for (id, g) in genomes {
+    pub fn genomes(&mut self, genomes: &crate::genetics::GenotypeStore) {
+        let mut entries: Vec<_> = genomes.iter().collect();
+        entries.sort_unstable_by_key(|(id, _)| **id);
+        for (id, g) in entries {
             if self.known.insert(*id) {
                 self.genomes.push(g.clone());
             }

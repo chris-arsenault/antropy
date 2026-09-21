@@ -48,7 +48,7 @@ impl Operators {
                     crate::transformation_work::coefficient(
                         chemistry,
                         s,
-                        &[crate::chemical_products::ProductWeight {
+                        [crate::chemical_products::ProductWeight {
                             species: destination[s][j],
                             weight: 1.,
                         }],

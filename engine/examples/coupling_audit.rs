@@ -56,7 +56,12 @@ fn motors(w: &World) -> Vec<Value> {
             let row = w.field.stencil(c.x, c.y).to_vec();
             let start = [c.x, c.y];
             let mut cells = vec![c];
-            movement::advance(&mut cells, &w.config, &w.field, &[row]);
+            movement::advance(
+                &mut cells,
+                &w.config,
+                &w.field,
+                &[antropy_engine::footprint::Row::from_slice(&row)],
+            );
             let c = &cells[0];
             let measured = movement::distance(start, [c.x, c.y], &w.config) / w.config.dt;
             assert!((measured - target_speed).abs() < 1e-10);
@@ -99,7 +104,7 @@ fn reactions(w: &World) -> Vec<Value> {
                 "potential":w.chemistry.properties[product].potential,
                 "stress":w.chemistry.properties[product].stress,"inputInternalLoad":load,
                 "attenuation":edge.catalytic / edge.binding,
-                "workPerUnit":edge.work,"consumed":c.chemical_flows.consumed[0],
+                "workPerUnit":edge.work,"consumed":c.chemical_flows.consumed.value(0),
                 "netWork":c.energy-energy_before,"captured":c.flows.captured}),
             );
         }

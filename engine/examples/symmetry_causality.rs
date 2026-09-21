@@ -169,7 +169,7 @@ fn feedback(w: &world::World) -> Vec<Value> {
                 let after = sensing::stress_load(&cell, g, &w.config, &w.field, &w.chemistry);
                 rows.push(
                     json!({"target":target,"accumulated186":accumulated,"compatible":compatible,
-                    "consumed":cell.chemical_flows.consumed[0],"work":cell.energy-0.5,
+                    "consumed":cell.chemical_flows.consumed.value(0),"work":cell.energy-0.5,
                     "stressBefore":before,"stressAfter":after}),
                 );
             }

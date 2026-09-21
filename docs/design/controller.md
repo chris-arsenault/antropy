@@ -2,7 +2,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 56×24×38 Rust controller in physical checkpoint v33.
+the 56×24×38 Rust controller, with a physiological evaluation clock in checkpoint v35.
 
 <a id="controller-observation-contract"></a>
 
@@ -14,7 +14,7 @@ the 56×24×38 Rust controller in physical checkpoint v33.
 | 16–27 | Twelve installed receptor/transporter/enzyme stocks divided by themselves plus their genetic targets |
 | 28 | Usable energy / actual energy capacity |
 | 29 | Core / genetic newborn core target minus one, clamped to [0,1] |
-| 30–33 | Previous-step front, left, rear and right body contact |
+| 30–33 | Current frozen-interface front, left, rear and right body contact |
 | 34 | Opaque private task byte / 255 |
 | 35–36 | Motor/storage stock divided by itself plus reference newborn stock |
 | 37 | Internal chemical matter / actual storage capacity |
@@ -67,14 +67,29 @@ belong to program records; inactive records have no funded function. Neutral dup
 activity/construction readouts and divides incoming stock contributions. Deletion removes the
 program's ports but leaves its physical stock until paid retirement.
 
-Private state includes 24 hidden values, 576 bounded traces, the private byte and previous
+Private state includes 24 hidden values, 576 bounded traces, the private byte, a physiological
+execution epoch and previous
 energy fill. Four outward, four inward and one optical receptor baselines belong to body state. Weights/traces/hidden values
 use float32 storage and SIMD arithmetic. The shared rational activation is
 `x*(27+x²)/(27+9x²)` within [-3,3], saturated outside. Its maximum checked difference from tanh
 is below 0.024. This is an explicit modeling approximation, not preserved old trajectories.
-Inference and paid learning occur every 0.8 model seconds; actions are held between updates.
-Controller matrices use SIMD; an attempted sparse-support cache increased complete workload
-cost and was rejected. Private traces remain dynamic. Static learning skips its unused trace dot product.
+Each cell evaluates its RNN once per existing physiology interval (default 0.8 model seconds).
+Physical owners publish cues at their update boundary: external sensing supplies chemistry
+and light, physiology supplies funded stocks and internal state, and base stepping supplies
+energy, contact and the private byte. Each channel retains its value and publication time;
+the next evaluation integrates their signed time average, settles paid learning, updates
+hidden state and decodes one held action. Constant channels need no repeated base-step
+normalization or accumulation. New cues never act during the interval already elapsed.
+Short exposures contribute to the average,
+opposing exposures can cancel within a channel, and weak persistent cues have no cutoff.
+Response can wait one interval. Constant inputs still advance recurrence. Task writes feed
+the following atomic evaluation. Birth and interventions initialize a fresh local clock.
+Private traces retain an affine-flow epoch and paid elapsed time, materialized for evaluation,
+inspection or assimilation. Checkpoints retain cue integrals, publication times, clock remainder
+and held action.
+The [composed runtime](chemistry/composed-runtime.md#prepared-execution-and-physical-time)
+owns the equations. Controller matrices use SIMD and reuse storage; an earlier sparse-support
+cache increased complete workload cost and was rejected. Static learning advances no trace clock.
 
 Ordinary mutable founder weights encode local chemical-gradient steering, reduced swimming when
 the first two receptor levels rise, contact turns, damage-dependent repair and active transport.

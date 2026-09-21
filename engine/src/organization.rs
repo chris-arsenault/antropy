@@ -47,12 +47,12 @@ pub fn remodel(cell: &mut Cell, g: &Compiled, c: &Config, dt: f64) {
             .transfer_to(&mut cell.inventory, removed);
     } else {
         for s in 0..256 {
-            let into_body = cell.inventory[s] * free_fraction;
-            let into_free = cell.bound_material[s] * bound_fraction;
+            let into_body = cell.inventory.value(s) * free_fraction;
+            let into_free = cell.bound_material.value(s) * bound_fraction;
             cell.inventory
-                .set(s, (cell.inventory[s] - into_body) + into_free);
+                .set(s, (cell.inventory.value(s) - into_body) + into_free);
             cell.bound_material
-                .set(s, (cell.bound_material[s] - into_free) + into_body);
+                .set(s, (cell.bound_material.value(s) - into_free) + into_body);
         }
     }
     for i in 0..cell.body.len() {

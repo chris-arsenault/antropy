@@ -66,20 +66,26 @@ compositions. No calendar, zone label or chemical ID enters the controller direc
 
 ## Turn order and resource economy
 
-Movement ticks advance 0.2 model seconds. Field/sensing/physiology accumulate 0.8 seconds
-before their updates; actions remain held between inferences. The phase order is:
+Movement ticks advance 0.2 model seconds. Field/geographic sensing/physiology accumulate
+0.8 seconds before their updates. Each controller evaluates on that physiological
+timescale and holds its hidden state and action between evaluations. Local cue integrals
+and paid learning time advance every base step. The phase order is:
 
 1. Freeze local source responses, drift and release processed material; compose chemical/body
    signals. On physiology boundaries advance
    conservative diffusion/drift/washout through the full accumulated interval, followed by
    conservative extracellular weathering and accounted potential loss.
-2. At startup and physiology boundaries form local observations and run each RNN against the common field.
+2. At startup and physiology boundaries form local geographic observations. Every base step
+   refresh body/private-byte cues, integrate their held values and pay learning. At each
+   local physiological boundary, settle private learning and evaluate the RNN once using
+   the signed average cues.
 3. Pay affordable swimming/turning and resolve movement/contact.
 4. On physiology boundaries resolve funded import/export from shared supply, storage and usable work.
 5. On those boundaries apply membrane-dependent external/internal injury, unary reactions,
    repair, paid refitting, generic construction and work overflow.
 6. Pay maintenance every movement tick; resolve death, optional disturbance/contact transfer
-   and funded reproduction. Daughters first infer on the next physiology boundary.
+   and funded reproduction. Daughters initialize from local observations and first advance
+   their private controller on the next base step.
 
 Transport cannot use prospective export to create import headroom; released material becomes
 available in the next transport phase. Enzymes see one starting intracellular inventory, so products

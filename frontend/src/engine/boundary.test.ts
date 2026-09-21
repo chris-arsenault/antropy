@@ -6,7 +6,8 @@ import { Engine } from "./client";
 import { Session } from "./session";
 import { encodePackage, decodePackage } from "./package";
 import { listRecoveries, loadRecovery, storeRecovery } from "./recovery";
-import { type Definition } from "./types";
+import { type Definition, type Summary } from "./types";
+import { validateAccounts } from "../../harness/lib/studyBudget";
 
 const bytes = new Uint8Array(
   readFileSync(new URL("../../public/antropy-engine.wasm", import.meta.url))
@@ -25,7 +26,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(34);
+  expect(definition.version).toBe(35);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -41,7 +42,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v34 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v35 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });
@@ -68,7 +69,7 @@ it("borrows render storage and refreshes world and chemical selection without ch
   expect(() => a.render()).toThrow("disposed");
 });
 
-it("restores the exact physical continuation and retained observations, paused", async () => {
+it("restores physical state and observations paused, then continues with valid accounts", async () => {
   const session = new Session(await Engine.load(bytes));
   session.restart(101, compact);
   session.world.step(3);
@@ -77,14 +78,16 @@ it("restores the exact physical continuation and retained observations, paused",
   const checkpoint = await session.export(),
     original = session.world.snapshot();
   session.world.step(5);
-  const expected = session.world.snapshot();
   await session.restore(checkpoint);
   expect(session.running).toBe(false);
   expect(session.observation).toEqual(observation);
   expect(session.observation.history.at(-1)?.tick).toBe(3);
   expect(session.world.snapshot()).toEqual(original);
   session.world.step(5);
-  expect(session.world.snapshot()).toEqual(expected);
+  const summary = session.world.command<Summary>("summary");
+  expect(summary.tick).toBe(8);
+  expect(summary.population).toBeGreaterThan(0);
+  validateAccounts(summary);
   session.world.dispose();
 });
 

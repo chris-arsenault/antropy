@@ -2,9 +2,10 @@
 
 September 18, 2026. Optimization execution: Sulion
 `56223ae5-4332-4c46-b3dd-54f21382292b` — completed.
-Future implementation: `e3517c4b-b3df-4786-bcf4-10a488a294d1`, CLI phases 1–5 map to P0–P4;
-all are pending. Multicore implementation is paused in the backlog at the user's request.
-Single-threaded ecology and climate design proceed independently in
+Implementation resumed September 21: `e3517c4b-b3df-4786-bcf4-10a488a294d1`;
+CLI phases 1–5 map to P0–P4. The shared-memory runtime and parallel field/biology operators
+are installed. Available-core validation and P3 limits are recorded below; 16/32-core acceptance
+remains unmeasured. Ecology and climate design proceed independently in
 [the spatial isolation review](docs/design/spatial-isolation-review.md).
 P4 retains the future scaling assessment of terrain and climate; it does not block their design.
 
@@ -14,14 +15,15 @@ Reduce ordinary simulation cost substantially and prepare a concrete architectur
 16–32 cores and 10–20 times the current geographic area. Area is a planning assumption;
 10–20 times each linear dimension would require a different memory budget. Future elevation
 and sun/rotation-driven climate must enter shared local fields and transformation work.
-Their implementation and threaded execution are outside this optimization pass.
+Terrain implementation remains outside the resumed threading work. The original single-thread
+optimization record below is historical; the multicore section governs current execution.
 
 Preserve the chemical manifold and action algebra, funded local organisms, material/work
 accounts, shared vector equations, spatial resolution and Rust-owned borrowed rendering.
 Numerical approximation, changed trajectories and incompatible checkpoints are permitted.
 Do not tune toward a prescribed population or remove environmental return opportunities.
 
-## Current execution
+## Original single-thread execution (completed)
 
 1. Measure concentration/work distributions and transport bounds on the retained ordinary
    seed 27 tick 5,000 checkpoint. Reuse the prior measured WASM baseline and capacity fixtures.
@@ -150,8 +152,134 @@ not prove long-run equivalence, endurance, sustained recycling or evolved divers
 
 ## Multicore design
 
-This section plans future implementation. No threaded runtime, elevation or astronomical
-climate is implemented by the current pass.
+Implementation resumed September 21 at the user's request. The single-thread investigation
+in `docs/plans/MATURE-PERFORMANCE-PLAN.md` is ended with its throughput target unmet.
+Retain its installed operators and uncommitted source changes. This work implements P0–P2
+and measures P3 on available hardware; P4 terrain remains separate future work.
+
+Sulion root: `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
+P0 expansion: `eb487315-d9be-45d0-a55f-ac35e5bf08b3`.
+
+### P0 execution
+
+1. Add a shared serial/parallel execution adapter and thread-safe immutable program caches.
+   Keep mutation exclusive to each owner; no locks around entire cells or chemical updates.
+   Validate the inherited untested compact product refactor with the Rust suite.
+2. Factor field destination rows into independent jobs with frozen inputs, local weather
+   scratch and small account reductions. Use contiguous geographic strips within the existing
+   dense layout first; no material rearrangement or per-worker world copies. Preserve sparse
+   activity, seam flux, donor bounds, and the pre-weathering medium boundary.
+3. Verify conservation, positivity, cross-partition interactions and one/multiple-worker
+   execution using the same operators. Benchmark available 1/2/4/6 cores. This six-core host
+   cannot establish 16/32-core acceptance; retain those measurements as outstanding.
+
+### P1–P2 execution
+
+The build produces a raw serial module and a shared-memory module from the same Rust source.
+The shared loader initializes the pinned Rayon pool before creating a World. Cross-origin
+isolation selects that loader; unsupported environments execute the serial module. The existing
+scalar ABI and borrowed render projections remain the application boundary. Pool startup failure
+must be visible and must not leave a partial World running.
+
+Cell sensing, control, movement and physiology use disjoint owners. Reactions keep worker-local
+scratch and reduce optional observer accounts after joining. Exchange compiles a transposed
+footprint adjacency so node jobs see all competing requests before allocation. Registry and
+ancestry commits remain coordinator-owned. Detailed experiment trace mode may run physiology
+serially; ordinary live reduced observations must remain parallel.
+
+Validate a 1/4-worker bounded shared-kernel comparison with observer accounts, seam interactions,
+save/restore and positive inventories. Browser registration: isolated Chromium on the existing
+port 26000 server; verify pool startup, shared-memory borrowed WebGL uploads, scalar stepping,
+save/restore, restart and failure reporting. Use small constructed worlds and at most 100 measured
+ticks per capacity arm, 60 seconds per arm; no ecological inference or long campaign. Preserve
+artifacts only under ignored `frontend/harness/artifacts/`.
+
+### September 21 implementation evidence
+
+P3 local admission probe: replace the unrelated 80,000-node limit with a 2 GiB geographic
+reservation at 4096 bytes/node: two material buffers, 1024 bytes/node reserved for scalar,
+index, coefficient and display storage, plus one field snapshot. Cell/genome/ancestry costs
+remain additional and must be reported; this does not guarantee arbitrary population growth.
+Measure 1×/10×/20× area at mesh 2 with 2000 fixed cells, and 48/480/960 cells at constant density,
+one and six workers. Each case is 10 warmup and at most 100 measured ticks/60 seconds, plus
+bounded save/render checks. The constructed load retains its existing initial field and funding;
+it is not a demonstration of carrying capacity. No trajectory matching requirement.
+
+The shared kernel and browser pool are installed, including destination field strips, local
+weather accounts, cell sensing/control/movement/physiology, spatial candidate bins, gathered
+contact pressure, and destination-grouped uptake requests. Small workload crossovers avoid
+pool dispatch. Genotype and inventory caches use synchronized immutable initialization;
+cell updates remain exclusive. Lifecycle/ancestry and reduced observation publication stay
+on the coordinator. The existing material cutoff and chemical laws are unchanged.
+
+The final default-area browser capacity probe measures 63.07/89.29/113.72/124.36 ticks/s with 1/2/4/6
+workers for the constructed 2,000-cell load. All four shared-memory WebGL uploads return
+no error, and checkpoint restore plus world replacement succeed. This measures stepping;
+rendering/storage checks are outside its timed section. It is not mature-world throughput.
+
+At 20× area, the initial six-worker result was only 20.56 ticks/s for 2,000 cells. Parallel
+geographic medium updates and attraction filters, with contiguous transposed column passes,
+raise it to 45.89 ticks/s. These execute the existing equations; no attraction reach,
+chemical cutoff or physical cadence changed. The final geographic build measures:
+
+| Area and initial cells | One worker ticks/s | Six workers ticks/s |
+| --- | ---: | ---: |
+| 20×, 2,000 | 16.71 | 45.89 |
+| 20×, 960 (48 per original area) | 19.48 | 56.95 |
+
+The preceding 10× build measured 28.17/35.74 ticks/s at 2,000 cells and 41.57/43.40 at
+480 cells before the geographic passes were parallelized. It was not remeasured on the final
+geographic build. All cases use mesh 2, no resource sources, ten warmups and 100 measured ticks.
+The fixture's tiny initial dissolved concentrations are removed by the existing cutoff during
+warmup. These are sparse constructed loads, not saturated fields or evolved 20× ecosystems.
+Observation/render/storage work is outside timing. Raw results remain in ignored
+`frontend/harness/artifacts/multicore-final/`, `multicore-scale/` and
+`multicore-large-geographic/`.
+
+The 20×, 2,000-cell six-worker case allocates 1.04 GiB of WASM memory while stepping and
+2.58 GiB at the high-water mark while retaining the original world, snapshot and restored
+world. Direct engine restore, memory growth, borrowed WebGL upload and replacement pass.
+This exposed signed JavaScript interpretations of WASM pointers above 2 GiB; the ABI adapter
+now interprets all exported pointers as unsigned 32-bit offsets.
+
+Larger-world admission is a kernel capability, not a completed browser operating envelope.
+These 20× raw snapshots are 414–444 MiB, exceeding the existing browser package limit of
+192 MiB. Ordinary automatic recovery therefore cannot sustain these worlds yet. The limit
+and retention policy were not raised. P3 remains open for a bounded large-world persistence
+design, representative occupied workloads and 16/32-core measurements. Default dimensions
+remain unchanged.
+
+The actual application passes graphics context loss/recovery, export while paused, IndexedDB
+restore and injected coordinator failure with a visible error and an available runtime report.
+It reaches tick 316 with 55 living cells in this operational check; this is not an ecological
+claim. Unit coverage checks the stalled-worker watchdog and serial capability fallback.
+Direct helper-thread failure injection and long-duration pool endurance remain unmeasured.
+
+Validation: `make ci` passes 275 Rust unit tests, 17 integration tests and 74 Vitest tests,
+Clippy, TypeScript, formatting, documentation/storage policy and Terraform formatting, with
+17 existing ESLint warnings. The initial production build failed because Vite's default IIFE
+worker output cannot split the dynamic loader. ES-module worker output fixes the build; the
+built application then passes stepping, inspection, rendering and manual save in isolated
+Chromium using the existing server with local build interception. This is not a deployment.
+
+The historical 180k checkpoint is evaluated through the existing isolated v33 fixture,
+preserving its old persisted light layout while installing current execution operators.
+One/six native workers measure 18.53/36.98 ticks/s over 100 measured ticks after ten warmups.
+The six-worker mean stage costs are 3.69 ms field/footprints, 5.19 sensing/contacts,
+6.39 local control/motion, 6.19 exchange, 4.55 physiology, and 1.03 lifecycle/upkeep.
+This roughly 2× improvement is below the 16/32-core targets. It excludes active phenotype
+observation, census, rendering and browser overhead. Raw records are local under
+`frontend/harness/artifacts/multicore-second/`.
+
+The production isolation policy is prepared locally. The website module in the sibling
+`ahara-tf-patterns` checkout adds `response_headers_policy_id` to every cache behavior;
+Antropy consumes it with COOP/COEP. Upstream publication must precede consumer deployment.
+Neither repository has been committed, pushed or deployed during this work. Terrain/climate
+P4 remains future work. The installed implementation uses 64-node contiguous strips rather
+than changing the dense material layout to square tiles: this gives safe disjoint slices and
+preserves frozen neighbor reads without a layout migration. Compact exchange commit, source
+projection, lifecycle and ancestry publication retain coordinator ownership; parallel demand,
+allocation and cell acceptance precede that commit.
 
 ### One Rust world, partitioned work
 
@@ -271,7 +399,8 @@ checks that helpers cannot publish observations or write outside their granted p
 
 ### Future milestones and acceptance
 
-These are planned work, not authorization to implement terrain or threading in this pass.
+Threading implementation is authorized. Terrain remains future work. Performance thresholds
+below remain targets until measured on the named hardware and world sizes.
 
 - **P0 — Parallel tile kernel and memory budget.** Factor destination-row work and local
   accounts into shared serial/parallel kernels; use sparse exchange and measure tile-page

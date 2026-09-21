@@ -38,10 +38,8 @@ fn intact_neighbors_are_private_and_share_one_interface() {
     let graph = Graph::new(&w.cells, &w.config);
     graph.prepare(&mut w.cells, &w.config, &w.chemistry);
     for i in 0..3 {
-        assert!(
-            (graph.field[i] + graph.neighbors[i].iter().map(|n| n.weight).sum::<f64>() - 1.).abs()
-                < 1e-12
-        );
+        assert!((graph.field[i] + graph.contacts[i].iter().sum::<f64>() - 1.).abs() < 1e-12);
+        assert!(graph.neighbors[i].is_empty());
         assert!(graph.field[i] < 1.);
         assert!(
             w.cells[i]
@@ -113,6 +111,84 @@ fn exposed_material_is_visible_and_can_be_recycled_for_paid_work() {
         cell.flows.contact_imported, cell.flows.transport, cell.flows.captured, upkeep, net
     );
     assert!(net > 0.);
+}
+
+#[test]
+fn stage_preparation_only_computes_its_consumed_interface_components() {
+    let mut control = fixture(0.5);
+    let mut exchange = control.clone();
+    let graph = Graph::new(&control.cells, &control.config);
+    graph.prepare(&mut control.cells, &control.config, &control.chemistry);
+    for cell in &mut exchange.cells {
+        cell.contacts = [0.125; 4];
+    }
+    graph.prepare_exchange(&mut exchange.cells, &exchange.config, &exchange.chemistry);
+    assert!(control.cells[1].interface.recognition[0][0] > 0.);
+    for (i, (neural, physical)) in control.cells.iter().zip(&exchange.cells).enumerate() {
+        let full = graph.reading(i, &control.cells, &control.config, &control.chemistry);
+        assert_eq!(neural.interface.field, physical.interface.field);
+        assert_eq!(neural.interface.recognition, full.recognition);
+        assert_eq!(neural.interface.stress, 0.);
+        assert_eq!(full.stress, physical.interface.stress);
+        assert_eq!(physical.interface.recognition, [[0.; 5]; 4]);
+        assert_eq!(physical.contacts, [0.125; 4]);
+    }
+}
+
+#[test]
+fn outward_recognition_requires_actual_outward_stock() {
+    let mut w = fixture(0.5);
+    w.cells[1].installed.inward[0] = 1. - f64::EPSILON;
+    let graph = Graph::new(&w.cells, &w.config);
+    assert!(
+        graph
+            .reading(1, &w.cells, &w.config, &w.chemistry)
+            .recognition[0][0]
+            > 0.
+    );
+    w.cells[1].installed.inward[0] = 1.;
+    assert_eq!(
+        graph
+            .reading(1, &w.cells, &w.config, &w.chemistry)
+            .recognition[0],
+        [0.; 5]
+    );
+    w.cells[1].installed.inward[0] = 0.;
+    w.cells[1].body[3] = 0.;
+    let graph = Graph::new(&w.cells, &w.config);
+    assert_eq!(
+        graph
+            .reading(1, &w.cells, &w.config, &w.chemistry)
+            .recognition[0],
+        [0.; 5]
+    );
+}
+
+#[test]
+fn masked_local_mixture_matches_requested_species_and_exposure() {
+    let w = fixture(0.5);
+    let graph = Graph::new(&w.cells, &w.config);
+    let field = std::array::from_fn(|s| (s + 1) as f32 * 0.01);
+    for (cell, exposure) in w.cells.iter().zip(&graph.exposure) {
+        assert_eq!(*exposure, cell.damage / cell.volume(&w.config).max(1e-30));
+    }
+    let full = graph.local(1, &w.cells, &w.config, &field);
+    let species = w.config.source_species[0];
+    let mask = (1 << (species / 4)) | (1 << 63);
+    let local = graph.local_masked(1, &w.cells, &w.config, &field, mask);
+    for s in 0..256 {
+        let expected = if mask & (1 << (s / 4)) != 0 {
+            full[s]
+        } else {
+            0.
+        };
+        assert_eq!(local[s], expected);
+    }
+    assert!(local[species] > field[species] as f64 * graph.field[1]);
+    assert_eq!(
+        graph.local_masked(1, &w.cells, &w.config, &field, 0),
+        [0.; 256]
+    );
 }
 
 #[test]

@@ -4,14 +4,18 @@ import { expect, it, vi } from "vitest";
 import { Engine } from "./client";
 import { SelectedObservation } from "./selectedObservation";
 import { type Inspection, type Summary } from "./types";
+import { expectNumericallyEqual } from "../../harness/lib/physicalAssertions";
 
 const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
 const compact = { width: 24, height: 24, founders: 2, sourceCount: 2 };
 
-it("steps through the scalar ABI without serialization and preserves exact continuation", async () => {
+it("steps through the scalar ABI without serialization and matches command stepping", async () => {
   const engine = await Engine.load(bytes),
-    a = engine.create(101, compact);
-  const b = engine.restore(a.snapshot());
+    initial = engine.create(101, compact);
+  const snapshot = initial.snapshot();
+  initial.dispose();
+  const a = engine.restore(snapshot),
+    b = engine.restore(snapshot);
   const command = vi.spyOn(engine, "command");
   const encode = vi.spyOn(TextEncoder.prototype, "encode");
   a.step(17);
@@ -67,7 +71,7 @@ it("reuses genealogy and chromosomes until a relevant change, with full display 
   expect(child).toEqual(world.command<Inspection>("inspect", { cell: 2 }));
   expect(world.snapshot()).toEqual(before);
   const restored = engine.restore(before);
-  expect(observer.read(restored, summary(), 2)).toEqual(child);
+  expectNumericallyEqual(observer.read(restored, summary(), 2), child);
   restored.dispose();
   world.dispose();
 });

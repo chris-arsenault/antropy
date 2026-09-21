@@ -135,7 +135,7 @@ fn move_once(mut cell: Cell, w: &World) -> Cell {
     cell.y = 12.;
     cell.heading = 0.;
     cell.flows = Default::default();
-    let row = w.field.stencil(cell.x, cell.y).to_vec();
+    let row = crate::footprint::Row::from_slice(&w.field.stencil(cell.x, cell.y));
     let mut cells = vec![cell];
     movement::advance(&mut cells, &w.config, &w.field, &[row]);
     cells.remove(0)

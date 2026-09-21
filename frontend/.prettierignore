@@ -4,3 +4,4 @@ node_modules/
 pnpm-lock.yaml
 # Generated evidence is append-only and hashed; never format its bytes.
 harness/artifacts/
+public/engine-threads/

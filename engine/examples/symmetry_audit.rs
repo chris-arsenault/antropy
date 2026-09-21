@@ -152,11 +152,13 @@ fn accounts(chemistry: &Chemistry) -> Value {
     free.set(0, 2.);
     free.set(80, 1.);
     bound.set(186, 3.);
-    let before: Vec<_> = (0..SPECIES).map(|s| free[s] + bound[s]).collect();
+    let before: Vec<_> = (0..SPECIES)
+        .map(|s| free.value(s) + bound.value(s))
+        .collect();
     free.transfer_to(&mut bound, 0.7);
     free.exchange_with(&mut bound, 0.4);
     let error = (0..SPECIES)
-        .map(|s| (free[s] + bound[s] - before[s]).abs())
+        .map(|s| (free.value(s) + bound.value(s) - before[s]).abs())
         .fold(0., f64::max);
     free.validate().unwrap();
     bound.validate().unwrap();

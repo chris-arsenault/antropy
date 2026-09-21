@@ -45,7 +45,7 @@ fn coincident_contacts_follow_bodies_and_permute_without_world_axis() {
         }
         let sites = cells
             .iter()
-            .map(|c| w.field.stencil(c.x, c.y).to_vec())
+            .map(|c| crate::footprint::Row::from_slice(&w.field.stencil(c.x, c.y)))
             .collect::<Vec<_>>();
         movement::advance(&mut cells, &w.config, &w.field, &sites);
         cells.sort_by_key(|c| c.id);
@@ -90,7 +90,7 @@ fn equal_reflected_conversion_has_equal_catalytic_cost() {
             .find(|e| e.substrate == 231)
             .unwrap();
         assert_eq!(edge.products.len(), 1);
-        assert_eq!(edge.products[0].species, 215);
+        assert_eq!(edge.products.get(0).species, 215);
         (edge.catalytic, edge.work, edge.heat)
     });
     assert_eq!(results[0], results[1]);
@@ -199,10 +199,10 @@ fn uphill_requests_cannot_veto_downhill_or_spend_same_event_work() {
                     .sum::<f64>();
             assert!((after + cell.flows.reaction_heat - value).abs() < 1e-12);
             assert!((cell.material() - 0.1).abs() < 1e-12);
-            assert!(cell.inventory[low] > 0.);
+            assert!(cell.inventory.value(low) > 0.);
             if energy == 0. {
-                assert_eq!(cell.inventory[high], 0.);
-                assert!((cell.inventory[low] - 0.1).abs() < 1e-12);
+                assert_eq!(cell.inventory.value(high), 0.);
+                assert!((cell.inventory.value(low) - 0.1).abs() < 1e-12);
                 assert!(cell.energy > 0.);
             }
         }

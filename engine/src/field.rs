@@ -3,6 +3,8 @@ use crate::chemistry::{Chemistry, SPECIES};
 use serde::{Deserialize, Serialize};
 #[path = "field_exchange.rs"]
 mod exchange;
+#[path = "field_parallel.rs"]
+mod parallel;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Field {
@@ -297,75 +299,26 @@ impl Field {
         for step in 0..steps {
             self.prepare_attraction();
             self.activity.prepare(&self.neighbors);
-            for i in 0..self.activity.work.len() {
-                let n = self.activity.work[i];
-                self.last_groups += self.activity.candidates[n].count_ones() as usize;
-                let coefficients =
-                    self.coefficients(n, dt / steps as f64, impedance, maximum_impedance);
-                let inputs =
-                    self.neighbors[n].map(|j| &self.amounts[j * SPECIES..(j + 1) * SPECIES]);
-                let decay = (-washout * dt * self.retention(n, impedance)).exp();
-                let mut mask = crate::field_vector::redistribute(
-                    &self.amounts[n * SPECIES..(n + 1) * SPECIES],
-                    inputs,
-                    &mut self.next[n * SPECIES..(n + 1) * SPECIES],
-                    &rows,
-                    coefficients,
-                    1.,
-                    crate::field_vector::Work {
-                        mask: self.activity.candidates[n],
-                        floor,
-                    },
-                );
-                if step + 1 == steps && washout > 0. {
-                    let (retained, loss) = crate::chemical_projection::decay(
-                        &mut self.next[n * SPECIES..(n + 1) * SPECIES],
-                        &projection,
-                        mask,
-                        decay,
-                        floor,
-                    );
-                    mask = retained;
-                    for k in 0..2 {
-                        lost[k] += loss[k];
-                    }
-                }
-                if step + 1 == steps
-                    && let Some(weather) = climate.as_deref_mut()
-                {
-                    let medium = (
-                        self.medium_signal(n),
-                        self.impedance[n] + self.source_load[n],
-                    );
-                    mask = weather.convert_lit(
-                        &mut self.next[n * SPECIES..(n + 1) * SPECIES],
-                        mask,
-                        medium,
-                        dt,
-                        self.illumination.node(n),
-                    );
-                }
-                self.activity.set(n, mask);
+            let outcome = self.advance_partitioned(
+                &rows,
+                &projection,
+                dt,
+                steps,
+                step,
+                washout,
+                impedance,
+                maximum_impedance,
+                floor,
+                climate.as_deref(),
+            );
+            for k in 0..2 {
+                lost[k] += outcome[k];
             }
-            std::mem::swap(&mut self.amounts, &mut self.next);
-            self.totals = [0.; 2];
-            for &n in &self.activity.work {
-                let range = n * SPECIES..(n + 1) * SPECIES;
-                crate::field_activity::clear(
-                    &mut self.next[range.clone()],
-                    self.activity.candidates[n],
-                );
-                let v = crate::chemical_projection::project_active(
-                    &self.amounts[range],
-                    &projection,
-                    self.activity.masks[n],
-                );
-                self.totals[0] += v[0];
-                self.totals[1] += v[1];
-                let area = self.spacing.powi(2);
-                self.impedance[n] = v[2] / area;
-                self.stress[n] = v[3] / area;
-                self.signal[n] = [v[4] / area, v[5] / area];
+            if let Some(weather) = climate.as_deref_mut() {
+                weather.heat += outcome[2];
+                weather.work += outcome[3];
+                weather.converted += outcome[4];
+                weather.prevented += outcome[5];
             }
             self.activity.finish();
         }
@@ -391,7 +344,7 @@ impl Field {
             .ok_or("Invalid field dimensions")?;
         if self.nx < 4
             || self.ny < 4
-            || n > 80000
+            || n > crate::memory_budget::MAX_FIELD_NODES
             || self.spacing <= 0.
             || !self.spacing.is_finite()
             || self.amounts.len() != n * SPECIES

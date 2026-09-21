@@ -40,8 +40,8 @@ fn transformed_cell(cell: &Cell, chemistry: &Chemistry, q: u8, mirror: bool) -> 
     let original_bound = cell.bound_material.clone();
     let mut transformed = chemistry.clone();
     for s in 0..256 {
-        cell.inventory.set(u.apply(s), original[s]);
-        cell.bound_material.set(u.apply(s), original_bound[s]);
+        cell.inventory.set(u.apply(s), original.value(s));
+        cell.bound_material.set(u.apply(s), original_bound.value(s));
         transformed.properties[u.apply(s)] = chemistry.properties[s].clone();
     }
     cell.installed.enzymes = cell
@@ -85,14 +85,16 @@ fn ordinary_funded_reactions_commute_with_all_square_frames() {
                 }
                 for s in 0..256 {
                     assert!(
-                        (actual.inventory[frame(q, mirror).apply(s)] - expected.inventory[s]).abs()
+                        (actual.inventory.value(frame(q, mirror).apply(s))
+                            - expected.inventory.value(s))
+                        .abs()
                             < 1e-10
                     );
                 }
                 assert!((actual.energy - expected.energy).abs() < 1e-10);
                 assert!((actual.flows.reaction_heat - expected.flows.reaction_heat).abs() < 1e-10);
                 assert!((actual.material() - initial.material()).abs() < 1e-10);
-                assert!(actual.inventory.iter().all(|v| *v >= 0.));
+                assert!(actual.inventory.iter().all(|v| v >= 0.));
             }
         }
     }
@@ -118,9 +120,9 @@ fn installed_round_trip_restores_material_without_creating_usable_work() {
         // Both directions are already installed and funded. A large diagnostic interval
         // exercises donor/work limiting; it is not a production clock change.
         crate::metabolism::react(&mut cell, &w.config, &w.chemistry, 1e6);
-        assert!((cell.inventory[product] - 1.).abs() < 1e-10);
+        assert!((cell.inventory.value(product) - 1.).abs() < 1e-10);
         crate::metabolism::react(&mut cell, &w.config, &w.chemistry, 1e6);
-        assert!((cell.inventory[source] - 1.).abs() < 1e-10);
+        assert!((cell.inventory.value(source) - 1.).abs() < 1e-10);
         assert!((cell.material() - 1.).abs() < 1e-10);
         assert!(cell.energy <= 100.);
         assert!((cell.energy + cell.flows.reaction_heat - heat - 100.).abs() < 1e-10);

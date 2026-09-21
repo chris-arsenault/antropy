@@ -1,5 +1,11 @@
 //! The sole physical kernel, shared by browser WebAssembly and headless assays.
 mod abi;
+pub mod memory_budget;
+pub mod parallel;
+#[cfg(test)]
+mod parallel_tests;
+#[cfg(all(target_arch = "wasm32", feature = "threads"))]
+pub use wasm_bindgen_rayon::init_thread_pool;
 pub mod accounting;
 pub mod ancestry;
 mod attraction;
@@ -44,6 +50,10 @@ mod environmental_return_tests;
 #[cfg(test)]
 mod enzyme_transform_tests;
 mod exchange_vector;
+pub mod execution;
+pub mod execution_budget;
+#[cfg(test)]
+mod execution_schedule_tests;
 pub mod field;
 mod field_activity;
 #[cfg(test)]

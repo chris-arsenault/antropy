@@ -1,5 +1,5 @@
 //! Shared compact contact geometry. No lineage labels or new encounter radius.
-use crate::{chemistry::Chemistry, config::Config, movement, organism::Cell};
+use crate::{chemistry::Chemistry, config::Config, organism::Cell};
 
 #[derive(Clone, Debug)]
 pub struct Reading {
@@ -16,95 +16,92 @@ impl Default for Reading {
         }
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Neighbor {
     pub donor: usize,
     pub weight: f64,
-    pub direction: [f64; 4],
+    /// World-frame unit displacement; receivers rotate it when sensing.
+    pub direction: [f64; 2],
+}
+/// Material adjacency contains current exposed donors; mechanical summaries include all contacts.
+#[derive(Default, Debug, Clone)]
+pub struct Neighbors {
+    rows: Vec<Vec<Neighbor>>,
+}
+impl std::ops::Index<usize> for Neighbors {
+    type Output = [Neighbor];
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.rows[i]
+    }
+}
+impl Neighbors {
+    pub fn iter(&self) -> impl Iterator<Item = &[Neighbor]> {
+        self.rows.iter().map(Vec::as_slice)
+    }
 }
 #[derive(Default, Debug, Clone)]
 pub struct Graph {
-    pub neighbors: Vec<Vec<Neighbor>>,
+    pub neighbors: Neighbors,
     pub field: Vec<f64>,
+    /// Directional contact inputs include every geometric overlap, including intact cells.
+    pub contacts: Vec<[f64; 4]>,
+    /// Current damage per donor volume; the base step's geometry stays frozen.
+    pub exposure: Vec<f64>,
 }
-fn directions(heading: [f64; 2], unit: [f64; 2], length: f64) -> [f64; 4] {
-    if length == 0. {
-        return [0.25; 4];
-    }
-    let forward = unit[0] * heading[0] + unit[1] * heading[1];
-    let left = -unit[0] * heading[1] + unit[1] * heading[0];
-    [
-        forward.max(0.),
-        left.max(0.),
-        (-forward).max(0.),
-        (-left).max(0.),
-    ]
-}
+#[path = "interface_geometry.rs"]
+mod geometry;
+#[path = "interface_reading.rs"]
+mod reading;
+pub use reading::selected;
+
 impl Graph {
-    pub fn new(cells: &[Cell], c: &Config) -> Self {
-        let mut graph = Self {
-            neighbors: vec![vec![]; cells.len()],
-            field: vec![1.; cells.len()],
-        };
-        let geometry = movement::geometry::Contacts::new(cells, c);
-        for edge in &geometry.edges {
-            let (i, j) = (edge.i, edge.j);
-            let contact = edge.weight();
-            if contact == 0. {
-                continue;
-            }
-            let unit = edge.direction();
-            // Preserve the existing minimum-image convention at an exact half-world tie.
-            let opposite = std::array::from_fn(|k| {
-                if edge.displacement[k] == -[c.width, c.height][k] * 0.5 {
-                    unit[k]
-                } else {
-                    -unit[k]
-                }
-            });
-            for (i, j, direction) in [(i, j, unit), (j, i, opposite)] {
-                graph.field[i] += contact;
-                graph.neighbors[i].push(Neighbor {
-                    donor: j,
-                    weight: contact,
-                    direction: directions(geometry.bodies[i].heading, direction, edge.length),
-                });
-            }
-        }
-        for (i, row) in graph.neighbors.iter_mut().enumerate() {
-            graph.field[i] = 1. / graph.field[i];
-            for n in row {
-                n.weight *= graph.field[i];
-            }
-        }
-        graph
-    }
     pub fn prepare(&self, cells: &mut [Cell], c: &Config, chemistry: &Chemistry) {
+        self.prepare_with::<true>(cells, c, chemistry);
+    }
+    /// Exchange consumes field access and stress, without receptor or contact inputs.
+    pub fn prepare_exchange(&self, cells: &mut [Cell], c: &Config, chemistry: &Chemistry) {
+        self.prepare_with::<false>(cells, c, chemistry);
+    }
+    fn prepare_with<const CONTROL: bool>(
+        &self,
+        cells: &mut [Cell],
+        c: &Config,
+        chemistry: &Chemistry,
+    ) {
         // A donor's total stress is independent of the receiver. Reduce its mixture
         // once per frozen pass; only membrane compatibility varies across edges.
-        let stress: Vec<_> = cells
-            .iter()
-            .map(|cell| donor_stress(cell, chemistry))
-            .collect();
-        let readings: Vec<_> = (0..cells.len())
-            .map(|i| self.reading_with(i, cells, c, chemistry, |j| stress[j]))
-            .collect();
+        let stress: Vec<_> = if CONTROL {
+            Vec::new()
+        } else {
+            cells
+                .iter()
+                .map(|cell| donor_stress(cell, chemistry))
+                .collect()
+        };
+        let mut readings = vec![Reading::default(); cells.len()];
+        crate::parallel::for_each(&mut readings, 128, |i, output| {
+            *output = {
+                if CONTROL {
+                    self.reading_with::<true, false>(i, cells, c, chemistry, |_| 0.)
+                } else {
+                    self.reading_with::<false, true>(i, cells, c, chemistry, |j| stress[j])
+                }
+            };
+        });
         for (i, (cell, reading)) in cells.iter_mut().zip(readings).enumerate() {
             cell.interface = reading;
-            cell.contacts = [0.; 4];
-            for n in &self.neighbors[i] {
-                for k in 0..4 {
-                    cell.contacts[k] += n.weight * n.direction[k];
-                }
+            if !CONTROL {
+                continue;
             }
+            cell.contacts = self.contacts[i];
         }
     }
     pub fn reading(&self, i: usize, cells: &[Cell], c: &Config, chemistry: &Chemistry) -> Reading {
-        self.reading_with(i, cells, c, chemistry, |j| {
+        self.reading_with::<true, true>(i, cells, c, chemistry, |j| {
             donor_stress(&cells[j], chemistry)
         })
     }
-    fn reading_with(
+    fn reading_with<const CONTROL: bool, const STRESS: bool>(
         &self,
         i: usize,
         cells: &[Cell],
@@ -112,50 +109,37 @@ impl Graph {
         chemistry: &Chemistry,
         stress: impl Fn(usize) -> f64,
     ) -> Reading {
-        let cell = &cells[i];
-        let mut reading = Reading {
+        reading::Boundary {
+            neighbors: &self.neighbors[i],
             field: self.field[i],
-            ..Reading::default()
-        };
-        let operators = cell.operators.as_ref().unwrap();
-        for n in &self.neighbors[i] {
-            let donor = &cells[n.donor];
-            let exposed = n.weight * donor.damage / donor.volume(c).max(1e-30);
-            if exposed == 0. {
-                continue;
-            }
-            for (slot, receptor) in operators.receptors.iter().enumerate() {
-                let local = exposed
-                    * receptor
-                        .iter()
-                        .map(|a| a.value * donor.inventory[a.species])
-                        .sum::<f64>();
-                reading.recognition[slot][0] += local;
-                for k in 0..4 {
-                    reading.recognition[slot][k + 1] += local * n.direction[k];
-                }
-            }
-            let mut stress = stress(n.donor);
-            for a in operators.membrane.iter() {
-                stress -= (1. - c.susceptibility_floor)
-                    * a.value
-                    * chemistry.properties[a.species].stress
-                    * donor.inventory[a.species];
-            }
-            reading.stress += exposed * stress.max(0.);
         }
-        reading
+        .read::<CONTROL, STRESS>(i, cells, c, chemistry, stress, |j| self.exposure[j])
     }
     pub fn local(&self, i: usize, cells: &[Cell], c: &Config, field: &[f32; 256]) -> [f64; 256] {
-        let mut result = field.map(|q| q as f64 * self.field[i]);
+        self.local_masked(i, cells, c, field, u64::MAX)
+    }
+    pub fn local_masked(
+        &self,
+        i: usize,
+        cells: &[Cell],
+        _c: &Config,
+        field: &[f32; 256],
+        mask: u64,
+    ) -> [f64; 256] {
+        let mut result = [0.; 256];
+        for s in crate::field_activity::pairs(mask) {
+            result[s] = field[s] as f64 * self.field[i];
+            result[s + 1] = field[s + 1] as f64 * self.field[i];
+        }
         for n in &self.neighbors[i] {
             let donor = &cells[n.donor];
-            let gain = n.weight * donor.damage / donor.volume(c).max(1e-30);
+            let gain = n.weight * self.exposure[n.donor];
             if gain == 0. {
                 continue;
             }
-            for (s, q) in donor.inventory.iter().enumerate() {
-                result[s] += gain * q;
+            for s in crate::field_activity::pairs(mask) {
+                result[s] += gain * donor.inventory.value(s);
+                result[s + 1] += gain * donor.inventory.value(s + 1);
             }
         }
         result
@@ -166,9 +150,9 @@ fn donor_stress(cell: &Cell, chemistry: &Chemistry) -> f64 {
     if cell.damage == 0. {
         return 0.;
     }
-    cell.inventory
-        .iter()
-        .zip(&chemistry.properties)
-        .map(|(q, p)| q * p.stress)
-        .sum()
+    cell.inventory.projection(chemistry).stress
 }
+
+#[cfg(test)]
+#[path = "mechanical_interface_tests.rs"]
+mod mechanical_tests;

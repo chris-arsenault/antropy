@@ -75,3 +75,43 @@ fn hidden_permutation_preserves_actions_learning_and_assimilation_with_roundoff(
     let mapped_child = assimilate(&other, &other, &mapped, 0.5);
     close(permute(&child).weights, mapped_child.weights);
 }
+
+#[test]
+fn physiological_clock_respects_hidden_permutation_and_input_channel_relabeling() {
+    let c = Config {
+        dt: 0.05,
+        learning: "plastic".into(),
+        ..Config::default()
+    };
+    let mut g = diagnostic([0.; OUTPUTS], Some((0, 1, 2.)));
+    g.weights[OUTPUT_BIAS + 4] = -1.;
+    g.weights[RECURRENT] = 0.7;
+    g.plasticity = vec![0.2, 0.03, 0.4, 0., 0., 0.1, 0.3, 0., 0., 0., 0.];
+    let mut other = permute(&g);
+    for row in other.weights[..RECURRENT].chunks_exact_mut(INPUTS) {
+        row.swap(0, 2);
+    }
+    let (mut state, mut mapped) = (State::default(), State::default());
+    for tick in 0..32 {
+        let mut inputs = vec![0.; INPUTS];
+        inputs[0] = 0.4 + 0.005 * tick as f32;
+        inputs[1] = 0.5;
+        inputs[2] = -0.1;
+        let a = act_owned(&g, &inputs, &mut state, &c, true, 1);
+        inputs.swap(0, 2);
+        let b = act_owned(&other, &inputs, &mut mapped, &c, true, 2);
+        close([a.turn as f32], [b.turn as f32]);
+        close(permute_state(&state).hidden, mapped.hidden.clone());
+        assert_eq!(expiry_counts(&state), expiry_counts(&mapped));
+        assert_eq!(
+            state.epoch.as_ref().unwrap().preparations,
+            mapped.epoch.as_ref().unwrap().preparations
+        );
+    }
+    let a = assimilate(&g, &g, &state, 0.5);
+    let mut b = assimilate(&other, &other, &mapped, 0.5);
+    for row in b.weights[..RECURRENT].chunks_exact_mut(INPUTS) {
+        row.swap(0, 2);
+    }
+    close(permute(&a).weights, b.weights);
+}

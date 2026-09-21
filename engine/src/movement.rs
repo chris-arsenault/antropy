@@ -4,8 +4,22 @@ pub mod geometry;
 #[cfg(test)]
 #[path = "contact_geometry_tests.rs"]
 mod geometry_tests;
+#[path = "prepared_movement.rs"]
+pub(crate) mod prepared;
+#[cfg(test)]
+#[path = "prepared_spatial_tests.rs"]
+mod prepared_tests;
 pub fn delta(x: f64, width: f64) -> f64 {
-    (x + width * 0.5).rem_euclid(width) - width * 0.5
+    let half = width * 0.5;
+    if x >= -half && x < half {
+        x
+    } else if x >= half && x < width + half {
+        x - width
+    } else if x < -half && x >= -width - half {
+        x + width
+    } else {
+        (x + half).rem_euclid(width) - half
+    }
 }
 pub fn distance_squared(a: [f64; 2], b: [f64; 2], c: &Config) -> f64 {
     delta(a[0] - b[0], c.width).powi(2) + delta(a[1] - b[1], c.height).powi(2)
@@ -43,43 +57,29 @@ pub fn passive(
     let bound = drift * mobility / (1. + force[0].hypot(force[1]));
     force.map(|f| bound * f)
 }
-pub fn advance(cells: &mut [Cell], c: &Config, field: &Field, sites: &[Vec<(usize, f64)>]) {
-    for (cell, row) in cells.iter_mut().zip(sites) {
-        let mobility = mobility(field.medium_load(row), c.movement_impedance);
-        let (speed, _) = motor_limits(cell, c, mobility);
-        let cost = motor_work_rate(
-            &cell.body,
-            cell.damage,
-            cell.action.swim,
-            cell.action.turn,
-            c,
-        ) * c.dt;
-        let paid = cell.pay(cost);
-        cell.flows.motors += paid;
-        let fraction = if cost > 0. { (paid / cost).sqrt() } else { 0. };
-        cell.heading = (cell.heading
-            + cell.action.turn * speed / (2. * cell.radius(c).max(0.01)) * c.dt * fraction)
-            .rem_euclid(std::f64::consts::TAU);
-        let gradient = field.gradient(row);
-        let profile = cell.operators.as_ref().unwrap().profile;
-        let self_load =
-            crate::medium_response::self_load(cell.mass() * profile[2], field.spacing.powi(2), row);
-        let passive = passive(
-            profile,
-            gradient,
-            c.pressure_strength * (field.pressure_load(row) - self_load).max(0.),
-            mobility,
-            field.drift,
-        );
-        let swimming = speed * cell.action.swim * fraction;
-        let dx = (swimming * cell.heading.cos() + passive[0]) * c.dt;
-        let dy = (swimming * cell.heading.sin() + passive[1]) * c.dt;
-        cell.x = (cell.x + dx).rem_euclid(c.width);
-        cell.y = (cell.y + dy).rem_euclid(c.height);
-        cell.flows.distance += dx.hypot(dy);
-        cell.contacts = [0.; 4];
-    }
-    contacts(cells, c);
+pub fn advance(cells: &mut [Cell], c: &Config, field: &Field, sites: &[crate::footprint::Row]) {
+    advance_cached(cells, c, field, sites, &mut geometry::Cache::default());
+}
+pub fn advance_cached(
+    cells: &mut [Cell],
+    c: &Config,
+    field: &Field,
+    sites: &[crate::footprint::Row],
+    cache: &mut geometry::Cache,
+) {
+    cache.prepare_local(cells, c);
+    advance_prepared(cells, c, field, sites, cache);
+}
+/// Integrate one explicit step with contact coefficients frozen before motion.
+pub fn advance_prepared(
+    cells: &mut [Cell],
+    c: &Config,
+    field: &Field,
+    sites: &[crate::footprint::Row],
+    cache: &mut geometry::Cache,
+) {
+    cache.motion.advance(cells, c, field, sites);
+    cache.motion.contacts(cells, c, &mut cache.local);
 }
 pub struct Spatial {
     nx: usize,
@@ -135,55 +135,4 @@ pub fn pairs(cells: &[Cell], c: &Config) -> Vec<(usize, usize)> {
         .iter()
         .map(|e| (e.i, e.j))
         .collect()
-}
-fn contacts(cells: &mut [Cell], c: &Config) {
-    let mut shifts = vec![[0.; 2]; cells.len()];
-    let mut normalization = vec![1.; cells.len()];
-    let geometry = geometry::Contacts::new(cells, c);
-    let relaxation = 0.5 * (1. - (-c.dt).exp());
-    for edge in &geometry.edges {
-        let (i, j) = (edge.i, edge.j);
-        let a = geometry.bodies[i];
-        let b = geometry.bodies[j];
-        let contact = edge.weight();
-        normalization[i] += contact;
-        normalization[j] += contact;
-        let unit = if edge.length > 0. {
-            edge.direction()
-        } else {
-            let direction = [b.heading[0] - a.heading[0], b.heading[1] - a.heading[1]];
-            let norm = direction[0].hypot(direction[1]);
-            if norm > 1e-12 {
-                direction.map(|v| v / norm)
-            } else {
-                [0.; 2]
-            }
-        };
-        // Continuous soft-contact relaxation: a fixed physical duration has the same
-        // pair overlap decay when split into smaller steps (before the speed bound).
-        let correction = ((edge.extent - edge.length) * relaxation).min(c.dt * 0.5);
-        for k in 0..2 {
-            shifts[i][k] -= unit[k] * correction;
-            shifts[j][k] += unit[k] * correction;
-        }
-        let headings = [a.heading, b.heading];
-        for (index, heading, sign) in [(i, headings[0], 1.), (j, headings[1], -1.)] {
-            let forward = sign * (unit[0] * heading[0] + unit[1] * heading[1]);
-            let left = sign * (-unit[0] * heading[1] + unit[1] * heading[0]);
-            let reads = [
-                forward.max(0.),
-                left.max(0.),
-                (-forward).max(0.),
-                (-left).max(0.),
-            ];
-            for (v, r) in cells[index].contacts.iter_mut().zip(reads) {
-                *v += contact * r;
-            }
-        }
-    }
-    for ((cell, d), normalization) in cells.iter_mut().zip(shifts).zip(normalization) {
-        cell.contacts.iter_mut().for_each(|v| *v /= normalization);
-        cell.x = (cell.x + d[0]).rem_euclid(c.width);
-        cell.y = (cell.y + d[1]).rem_euclid(c.height);
-    }
 }

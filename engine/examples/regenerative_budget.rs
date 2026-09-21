@@ -84,7 +84,7 @@ fn evaluate(cell: &Cell, c: &Config, chemistry: &chemistry::Chemistry, medium: [
             let occupancy: f64 = e
                 .engagement
                 .iter()
-                .map(|a| a.value * cell.inventory[a.species])
+                .map(|a| a.value * cell.inventory.value(a.species))
                 .sum();
             let factor = cell.body[11 + slot] * c.enzyme_turnover * (1. - cell.damage)
                 / (c.receptor_k * cell.volume(c) + occupancy);
@@ -115,7 +115,7 @@ fn evaluate(cell: &Cell, c: &Config, chemistry: &chemistry::Chemistry, medium: [
                         c.conversion_efficiency,
                     )
                     .0 - 0.05 * r.changed;
-                    factor * r.catalytic * cell.inventory[r.substrate] * yield_
+                    factor * r.catalytic * cell.inventory.value(r.substrate) * yield_
                 })
                 .sum::<f64>()
         })

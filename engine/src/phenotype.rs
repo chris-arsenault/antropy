@@ -91,11 +91,7 @@ impl Observer {
     }
     pub fn reactions(&mut self, cell: &Cell, work: &crate::metabolism::Work) {
         let mask = self.masks.get(&cell.id).copied().unwrap_or(1);
-        self.current.each(mask, |g| {
-            for (input, output, amount) in work.reactions() {
-                g.reaction(input, output, amount);
-            }
-        });
+        self.current.accepted(mask, work);
     }
     pub fn capture(&mut self, cell: &Cell, dt: f64) {
         let mask = self.masks.get(&cell.id).copied().unwrap_or(1);
@@ -151,6 +147,9 @@ impl Observer {
             seconds: (v.end - v.start) as f64 * dt,
             complete: v.end - v.start >= WINDOW,
         }
+    }
+    pub(crate) fn reaction_mask(&self, id: u64) -> u8 {
+        self.masks.get(&id).copied().unwrap_or(1)
     }
 }
 

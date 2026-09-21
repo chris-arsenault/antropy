@@ -1,41 +1,26 @@
 //! Immutable local operators. Coordinates select coefficients once, never a reaction search.
 use crate::{
-    chemical_products::{ProductWeight, Transform},
+    chemical_products::Transform,
     chemistry::{self, Affinity, Chemistry},
     config::Config,
     genetics::Machinery,
 };
 use std::sync::Arc;
-
-#[derive(Clone, Debug)]
-pub struct Conversion {
-    pub substrate: usize,
-    pub products: Vec<ProductWeight>,
-    pub binding: f64,
-    pub catalytic: f64,
-    pub changed: f64,
-    pub work: f64,
-    pub heat: f64,
-    pub potential_drop: f64,
-    pub work_coefficient: [f64; 2],
-}
-impl Conversion {
-    pub fn energy(&self, c: &Config, signal: [f64; 2]) -> [f64; 3] {
-        let supplied = c.environmental_work
-            * crate::transformation_work::engagement(self.work_coefficient, signal);
-        crate::transformation_work::cellular(
-            self.potential_drop,
-            supplied,
-            self.changed,
-            c.conversion_efficiency,
-        )
-    }
-}
+#[path = "reaction_products.rs"]
+mod product_storage;
+use product_storage::ProductPool;
+#[path = "reaction_rows.rs"]
+mod rows;
+use rows::CompiledRow;
+pub use rows::{Conversion, Conversions};
+#[path = "reaction_batch.rs"]
+mod batch;
 #[derive(Clone, Debug, Default)]
 pub struct EnzymeOperator {
-    pub conversions: Vec<Conversion>,
+    pub conversions: Conversions,
     pub engagement: Vec<Affinity>,
     pub primary: Option<crate::chemical_roles::Route>,
+    pub(crate) definition: Option<chemistry::PropertyTable>,
 }
 #[derive(Clone, Debug)]
 pub struct Operators {
@@ -47,10 +32,14 @@ pub struct Operators {
 }
 fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> EnzymeOperator {
     let transform = Transform::new(e);
+    let affinities = chemistry::compile_affinity([e.x, e.y], c.affinity_radius);
+    let (product_data, ranges) =
+        ProductPool::compile(&transform, affinities.iter().map(|a| a.species));
+    let product_data = Arc::new(product_data);
     let mut occupancy = [0.; 256];
-    let mut conversions = Vec::new();
-    for a in chemistry::compile_affinity([e.x, e.y], c.affinity_radius) {
-        let products = transform.products(a.species);
+    let mut conversions = Vec::with_capacity(affinities.len());
+    for (a, range) in affinities.into_iter().zip(ranges) {
+        let products = product_data.view(range.clone());
         let displacement: f64 = products
             .iter()
             .map(|p| {
@@ -86,9 +75,9 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
         }
         let work_coefficient =
             crate::transformation_work::coefficient(chemistry, a.species, &products);
-        conversions.push(Conversion {
+        conversions.push(CompiledRow {
             substrate: a.species,
-            products,
+            products: range,
             binding: a.value,
             catalytic: a.value
                 * crate::transformation_work::kinetic(displacement, c.affinity_radius),
@@ -105,10 +94,12 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
         .filter(|(_, v)| *v > 0.)
         .map(|(species, value)| Affinity { species, value })
         .collect();
+    let conversions = Conversions::new(conversions, product_data);
     EnzymeOperator {
         primary: crate::chemical_roles::strongest(&conversions),
         conversions,
         engagement,
+        definition: Some(chemistry.properties.clone()),
     }
 }
 impl Operators {

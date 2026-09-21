@@ -93,13 +93,17 @@ impl Store {
 }
 thread_local! {static STORE:RefCell<Store>=RefCell::new(Store::default());}
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", not(feature = "threads")))]
 #[link(wasm_import_module = "env")]
 unsafe extern "C" {
     fn antropy_clock() -> f64;
 }
 pub fn clock() -> f64 {
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(all(target_arch = "wasm32", feature = "threads"))]
+    {
+        browser_clock()
+    }
+    #[cfg(all(target_arch = "wasm32", not(feature = "threads")))]
     {
         unsafe { antropy_clock() }
     }
@@ -112,6 +116,13 @@ pub fn clock() -> f64 {
             .as_secs_f64()
             * 1000.
     }
+}
+
+#[cfg(all(target_arch = "wasm32", feature = "threads"))]
+#[wasm_bindgen::prelude::wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = performance, js_name = now)]
+    fn browser_clock() -> f64;
 }
 
 #[unsafe(no_mangle)]

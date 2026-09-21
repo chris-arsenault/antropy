@@ -50,7 +50,13 @@ const withEslint9ContextCompat = (rule) => ({
 
 export default tseslint.config(
   {
-    ignores: ["dist/", "node_modules/", "coverage/"],
+    ignores: [
+      "dist/",
+      "node_modules/",
+      "coverage/",
+      "harness/artifacts/",
+      "public/engine-threads/",
+    ],
   },
 
   {

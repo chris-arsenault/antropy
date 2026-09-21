@@ -7,6 +7,7 @@ import { decodePackage } from "./package";
 import { validateObservation } from "./observationValidation";
 import { applyObservation, observationDelta } from "./observationDelta";
 import { checkObservationBudget } from "./observationBudget";
+import { expectSavedPhysicalState } from "../../harness/lib/physicalAssertions";
 
 const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
 async function fixture(founders = 4) {
@@ -17,6 +18,7 @@ async function fixture(founders = 4) {
 
 it("collects measured flow only on request and preserves physics and borrowed map colors", async () => {
   const session = await fixture();
+  const reader = await Engine.load(bytes);
   const control = session.engine.restore(session.world.snapshot());
   session.setChemicalWeb({ mode: "measured", focus: null, offset: 0 });
   session.setPhenotype({ action: "panel", enabled: true });
@@ -28,7 +30,7 @@ it("collects measured flow only on request and preserves physics and borrowed ma
   expect(status.chemicalWeb!.rows.length).toBeGreaterThan(0);
   expect(status.chemicalWeb!.window!.end).toBe(25);
   expect(status.phenotype!.groups[0]).toEqual(status.phenotype!.groups[1]);
-  expect(session.world.snapshot()).toEqual(control.snapshot());
+  expectSavedPhysicalState(reader, session.world.snapshot(), control.snapshot());
   const colors = session.world.render(5, 0, 3).cells.slice();
   session.setPhenotype({ action: "select", selection: { kind: "role", input: 255, output: 255 } });
   session.setPhenotype({ action: "highlight", enabled: true });
@@ -44,7 +46,7 @@ it("collects measured flow only on request and preserves physics and borrowed ma
   expect(session.status().phenotype).toBeNull();
   session.world.step();
   control.step();
-  expect(session.world.snapshot()).toEqual(control.snapshot());
+  expectSavedPhysicalState(reader, session.world.snapshot(), control.snapshot());
   session.world.dispose();
   control.dispose();
 });

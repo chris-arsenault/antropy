@@ -38,7 +38,20 @@ pub fn dot(a: &[f32], b: &[f32]) -> f32 {
     }
     total
 }
+#[cfg(test)]
 pub fn mixture(field: &crate::field::Field, sites: &[(usize, f64)]) -> [f32; 256] {
+    mixture_masked(field, sites, u64::MAX)
+}
+
+/// Gather requested four-species groups from the same finite geographic footprint.
+pub fn mixture_masked(
+    field: &crate::field::Field,
+    sites: &[(usize, f64)],
+    requested: u64,
+) -> [f32; 256] {
+    if requested == 0 {
+        return [0.; 256];
+    }
     let amounts = &field.amounts;
     let area = field.spacing.powi(2);
     let mut result = [0.; 256];
@@ -47,7 +60,7 @@ pub fn mixture(field: &crate::field::Field, sites: &[(usize, f64)]) -> [f32; 256
         use std::arch::wasm32::*;
         for &(node, weight) in sites {
             let gain = f32x4_splat((weight / area) as f32);
-            let mut mask = field.active_groups(node);
+            let mut mask = field.active_groups(node) & requested;
             while mask != 0 {
                 let s = mask.trailing_zeros() as usize * 4;
                 mask &= mask - 1;
@@ -63,7 +76,7 @@ pub fn mixture(field: &crate::field::Field, sites: &[(usize, f64)]) -> [f32; 256
     #[cfg(not(target_arch = "wasm32"))]
     for &(node, weight) in sites {
         let gain = (weight / area) as f32;
-        let mut mask = field.active_groups(node);
+        let mut mask = field.active_groups(node) & requested;
         while mask != 0 {
             let start = mask.trailing_zeros() as usize * 4;
             mask &= mask - 1;
@@ -73,4 +86,46 @@ pub fn mixture(field: &crate::field::Field, sites: &[(usize, f64)]) -> [f32; 256
         }
     }
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{chemistry::Chemistry, field::Field};
+
+    #[test]
+    fn requested_groups_preserve_gather_and_leave_other_species_zero() {
+        let chemistry = Chemistry::new(101).unwrap();
+        let mut field = Field::new(8., 8., 2.);
+        for (node, species, amount) in [
+            (0, 0, 8.),
+            (3, 3, 4.),
+            (12, 4, 32.),
+            (15, 127, 16.),
+            (0, 252, 12.),
+            (15, 255, 20.),
+        ] {
+            field.add(node, species, amount, &chemistry);
+        }
+        let sites = field.stencil(0., 0.);
+        let before = field.amounts.clone();
+        let mut expected = [0.; 256];
+        for &(node, weight) in &sites {
+            let gain = (weight / field.spacing.powi(2)) as f32;
+            for (species, value) in expected.iter_mut().enumerate() {
+                *value += field.amounts[node * 256 + species] * gain;
+            }
+        }
+        assert_eq!(mixture(&field, &sites), expected);
+        let requested = 1 | (1 << 8) | (1 << 31) | (1 << 63);
+        let actual = mixture_masked(&field, &sites, requested);
+        for (species, value) in expected.iter_mut().enumerate() {
+            if requested & (1 << (species / 4)) == 0 {
+                *value = 0.;
+            }
+        }
+        assert_eq!(actual, expected);
+        assert_eq!(mixture_masked(&field, &sites, 0), [0.; 256]);
+        assert_eq!(field.amounts, before);
+    }
 }

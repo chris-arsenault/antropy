@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ("produced", &c.chemical_flows.produced),
         ] {
             for (s, q) in values.iter().enumerate() {
-                if *q < 0. || !q.is_finite() {
+                if q < 0. || !q.is_finite() {
                     println!(
                         "tick={} cell={} flow={name} species={s} value={q:e}",
                         world.tick, c.id

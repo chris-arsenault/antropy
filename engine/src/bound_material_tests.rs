@@ -37,8 +37,11 @@ fn growth_and_death_return_each_funded_species_with_paid_assembly() {
         cell.body[0] += built;
         close(built, 0.5);
         close(heat, built * w.config.construction_energy);
-        close(cell.bound_material[species] - initial[species], 0.35);
-        close(cell.bound_material[187] - initial[187], 0.15);
+        close(
+            cell.bound_material.value(species) - initial.value(species),
+            0.35,
+        );
+        close(cell.bound_material.value(187) - initial.value(187), 0.15);
         cell.validate(&w.config).unwrap();
         let after = w.held();
         close(before.0, after.0);
@@ -56,7 +59,9 @@ fn growth_and_death_return_each_funded_species_with_paid_assembly() {
                 .step_by(256)
                 .map(|(a, b)| *a as f64 - *b as f64)
                 .sum();
-            assert!((released - cell.inventory[s] - cell.bound_material[s]).abs() < 1e-6);
+            assert!(
+                (released - cell.inventory.value(s) - cell.bound_material.value(s)).abs() < 1e-6
+            );
         }
     }
 }
@@ -75,25 +80,28 @@ fn repeated_repair_exchanges_frozen_mixtures_without_creating_chemicals_or_work(
     cell.damage = 0.5;
     cell.action.repair = 1.;
     let before: Vec<_> = (0..256)
-        .map(|s| cell.inventory[s] + cell.bound_material[s])
+        .map(|s| cell.inventory.value(s) + cell.bound_material.value(s))
         .collect();
     let replaced = mass * w.config.repair_material * w.config.repair_rate;
     metabolism::repair(cell, &w.config, &w.chemistry, 1.);
-    close(cell.inventory[178], replaced * 0.7);
-    close(cell.inventory[240], replaced * 0.3);
-    close(cell.bound_material[0], replaced);
+    close(cell.inventory.value(178), replaced * 0.7);
+    close(cell.inventory.value(240), replaced * 0.3);
+    close(cell.bound_material.value(0), replaced);
     for _ in 0..100 {
         metabolism::repair(cell, &w.config, &w.chemistry, 1.);
     }
     for (s, amount) in before.iter().enumerate() {
-        close(*amount, cell.inventory[s] + cell.bound_material[s]);
+        close(
+            *amount,
+            cell.inventory.value(s) + cell.bound_material.value(s),
+        );
     }
     close(cell.energy + cell.flows.repair, 10.);
     close(
         cell.flows.repair,
         cell.flows.repaired * mass * w.config.repair_energy,
     );
-    assert_eq!(cell.bound_material[w.chemistry.decomposition], 0.);
+    assert_eq!(cell.bound_material.value(w.chemistry.decomposition), 0.);
     cell.validate(&w.config).unwrap();
     let frozen = cell.bound_material.clone();
     cell.energy = 0.;
@@ -122,8 +130,8 @@ fn division_splits_actual_composition_for_fission_and_budding() {
         lifecycle::reproduce(&mut w);
         assert_eq!(w.cells.len(), 2);
         for cell in &w.cells {
-            close(cell.bound_material[178], mass * 0.35);
-            close(cell.bound_material[187], mass * 0.15);
+            close(cell.bound_material.value(178), mass * 0.35);
+            close(cell.bound_material.value(187), mass * 0.15);
             cell.validate(&w.config).unwrap();
         }
     }
@@ -155,5 +163,5 @@ fn restore_preserves_mixtures_and_rejects_unfunded_body_and_old_schema() {
     let mut old = saved;
     old[7] = b'1';
     old[8] = b'9';
-    assert!(World::restore(&old).unwrap_err().contains("v34 required"));
+    assert!(World::restore(&old).unwrap_err().contains("v35 required"));
 }

@@ -69,7 +69,7 @@ fn budget(w: &World) -> Value {
         .enzymes
         .iter()
         .flat_map(|e| &e.conversions)
-        .filter(|e| cell.inventory[e.substrate] > 0.)
+        .filter(|e| cell.inventory.value(e.substrate) > 0.)
         .map(|e| {
             json!({"substrate":e.substrate,"coefficient":e.work_coefficient,
             "work":e.energy(&w.config, drive),"changed":e.changed})

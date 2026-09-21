@@ -10,7 +10,10 @@ use serde::{Deserialize, Serialize};
 mod angle_tests;
 pub mod angles;
 pub(crate) mod mutation;
+mod observation;
 pub mod repertoire;
+mod store;
+pub use store::GenotypeStore;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -91,6 +94,7 @@ pub struct Compiled {
     pub chromosome: Chromosome,
     pub body: crate::organism::Body,
     pub operators: crate::chemical_operators::Operators,
+    observation: observation::Cache,
 }
 
 impl Machinery {

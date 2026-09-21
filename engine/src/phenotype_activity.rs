@@ -36,6 +36,9 @@ impl Flux {
         self.organism_seconds = 0.;
     }
     pub fn reaction(&mut self, input: usize, output: usize, amount: f64) {
+        if amount == 0. {
+            return;
+        }
         let key = input * 256 + output;
         if self.routes[key] == 0. {
             self.touched.push(key);
@@ -77,6 +80,23 @@ impl Interval {
             g.ledger.accumulate(&cell.flows);
             g.organism_seconds += dt;
         });
+    }
+    pub fn accepted(&mut self, mask: u8, work: &crate::metabolism::Work) {
+        for (enzyme, row, amount) in work.accepted_routes() {
+            let edge = enzyme.conversions.get(row as usize);
+            for product in edge.products.iter().filter(|p| p.species != edge.substrate) {
+                self.each(mask, |group| {
+                    group.reaction(edge.substrate, product.species, amount * product.weight);
+                });
+            }
+        }
+    }
+    pub fn reactions(&self, group: usize) -> impl Iterator<Item = (usize, f64)> + '_ {
+        self.groups[group]
+            .routes
+            .iter()
+            .enumerate()
+            .filter_map(|(key, &amount)| (amount > 0.).then_some((key, amount)))
     }
 }
 

@@ -158,14 +158,11 @@ pub fn inspect(w: &World, id: u64) -> Result<Value, String> {
 /// One explicitly selected organism; immutable genes and parentage are revisions.
 pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     let cell = w.cells.iter().find(|c| c.id == id);
-    let interface = w.cells.iter().position(|c| c.id == id).map(|i| {
-        crate::interfaces::Graph::new(&w.cells, &w.config).reading(
-            i,
-            &w.cells,
-            &w.config,
-            &w.chemistry,
-        )
-    });
+    let interface = w
+        .cells
+        .iter()
+        .position(|c| c.id == id)
+        .map(|i| crate::interfaces::selected(i, &w.cells, &w.config, &w.chemistry));
     let ancestor = w
         .ancestry
         .get(id.checked_sub(1).ok_or("Invalid organism id")? as usize)
@@ -188,6 +185,9 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         crate::sensing::stress_boundary(c, &w.config, &w.field, &w.chemistry, boundary)
     });
     let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":exposure,"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
+    if let Some(cell) = cell {
+        result["cell"]["brain"] = json!(crate::controller::observed_state(&cell.brain));
+    }
     result["fieldInterface"] = json!(interface.map(|r| r.field));
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));

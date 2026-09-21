@@ -87,6 +87,7 @@ impl Genotype {
             chromosome,
             body,
             operators,
+            observation: Default::default(),
         });
     }
     pub fn inherit(

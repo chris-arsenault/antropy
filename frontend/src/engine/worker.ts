@@ -132,9 +132,7 @@ function present() {
 }
 async function initialize(payload: Record<string, unknown>) {
   if (session) throw new Error("Worker is already initialized");
-  const response = await fetch(String(payload.wasmUrl), { cache: "no-store" });
-  if (!response.ok) throw new Error(`Engine download failed: ${response.status}`);
-  const engine = await Engine.load(new Uint8Array(await response.arrayBuffer()), true);
+  const engine = await Engine.loadBrowser(String(payload.wasmUrl));
   session = new Session(engine);
   const canvas = payload.canvas as OffscreenCanvas;
   renderer = new Renderer(canvas);

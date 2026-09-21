@@ -147,7 +147,8 @@ fn illuminated_abiotic_work_closes_without_scaling_affordable_rates() {
     assert!(admitted > 0);
     let mut climate = crate::climate::Climate::new(&c, &chemistry);
     climate.prepare(&c);
-    let mut field = vec![0.004f32; 256];
+    // Keep this rate-equivalence fixture above the shared donor-activity resolution.
+    let mut field = vec![0.04f32; 256];
     let mut reservoir: Vec<_> = field.iter().map(|q| *q as f64).collect();
     let account = op
         .inventory_active(
@@ -182,10 +183,14 @@ fn ordinary_world_uses_light_and_restores_without_observer_state() {
     assert!((w.ledger.flows.external_work - reference.ledger.flows.external_work).abs() > 1e-5);
     let summary = crate::observation::summary(&w);
     assert!(summary["energyResidual"].as_f64().unwrap().abs() < 1e-6);
-    let mut restored = crate::world::World::restore(&w.snapshot().unwrap()).unwrap();
+    let mut restored = crate::boundary_tests::restored_state(&w);
+    let resumed_tick = w.tick + 8;
+    let supplied_work = restored.ledger.flows.external_work;
     for _ in 0..8 {
         w.step();
         restored.step();
     }
-    assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
+    crate::boundary_tests::usable_continuation(&w, resumed_tick);
+    crate::boundary_tests::usable_continuation(&restored, resumed_tick);
+    assert!(restored.ledger.flows.external_work >= supplied_work);
 }

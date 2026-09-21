@@ -26,7 +26,7 @@ fn main() {
         {
             partial_refits += 1;
         }
-        for &q in cell.inventory.iter() {
+        for q in cell.inventory.iter() {
             subnormal += usize::from(q.is_subnormal());
             for (i, floor) in floors.iter().enumerate() {
                 if q > floor * volume {
@@ -46,11 +46,11 @@ fn main() {
             let occupancy: f64 = enzyme
                 .engagement
                 .iter()
-                .map(|a| a.value * cell.inventory[a.species])
+                .map(|a| a.value * cell.inventory.value(a.species))
                 .sum();
             let factor = capacity / (c.receptor_k * volume + occupancy).max(1e-30);
             for edge in &enzyme.conversions {
-                let q = cell.inventory[edge.substrate];
+                let q = cell.inventory.value(edge.substrate);
                 let requested = factor
                     * edge.catalytic
                     * q

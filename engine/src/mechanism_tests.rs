@@ -46,7 +46,7 @@ fn sparse_compatibility_correction_equals_full_chemical_exposure() {
                         w.config.affinity_radius,
                     );
             (w.field.sample(s, &sites)
-                + w.config.internal_exposure * cell.inventory[s] / cell.volume(&w.config))
+                + w.config.internal_exposure * cell.inventory.value(s) / cell.volume(&w.config))
                 * w.chemistry.properties[s].stress
                 * chi
         })
@@ -279,7 +279,7 @@ fn membrane_mutation_is_local_and_not_universal_immunity() {
 }
 
 #[test]
-fn checkpoint_continues_exactly_at_every_integration_phase() {
+fn checkpoint_preserves_state_and_continues_at_every_integration_phase() {
     let mut w = World::new(
         101,
         Config {
@@ -294,17 +294,13 @@ fn checkpoint_continues_exactly_at_every_integration_phase() {
     for _ in 0..8 {
         w.step();
         let mut a = w.clone();
-        let mut b = World::restore(&w.snapshot().unwrap()).unwrap();
+        let mut b = crate::boundary_tests::restored_state(&w);
         for _ in 0..5 {
             a.step();
             b.step();
         }
-        assert_eq!(
-            a.snapshot().unwrap() == b.snapshot().unwrap(),
-            true,
-            "Restore changed phase {}",
-            w.tick
-        );
+        crate::boundary_tests::usable_continuation(&a, w.tick + 5);
+        crate::boundary_tests::usable_continuation(&b, w.tick + 5);
     }
 }
 

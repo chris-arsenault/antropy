@@ -58,13 +58,12 @@ fn diet(c: &Cell) -> Value {
     let total: f64 = imports.iter().sum();
     let mut ranking: Vec<_> = imports
         .iter()
-        .copied()
         .enumerate()
         .filter(|(_, q)| *q > 0.)
         .collect();
     ranking.sort_by(|a, b| b.1.total_cmp(&a.1));
     ranking.truncate(3);
-    json!({"imports":total,"source0":imports[0],"source136":imports[136],"top":ranking,
+    json!({"imports":total,"source0":imports.value(0),"source136":imports.value(136),"top":ranking,
         "exports":c.chemical_flows.exported.iter().sum::<f64>(),
         "processed":c.chemical_flows.consumed.iter().sum::<f64>()})
 }
@@ -91,7 +90,7 @@ impl Group {
             (&mut self.produced, &c.chemical_flows.produced),
         ] {
             total.resize(256, 0.);
-            for (a, b) in total.iter_mut().zip(source) {
+            for (a, b) in total.iter_mut().zip(source.iter()) {
                 *a += b;
             }
         }

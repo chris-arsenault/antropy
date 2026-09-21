@@ -1,5 +1,6 @@
 //! Common local external drive. Material maps and kinetic coefficients remain separate.
 use crate::{chemical_products::ProductWeight, chemistry::Chemistry};
+use std::borrow::Borrow;
 
 pub const DEFAULT_STRENGTH: f64 = 119.31341917861687;
 
@@ -7,19 +8,20 @@ pub fn kinetic(distance_squared: f64, radius: f64) -> f64 {
     1. / (1. + distance_squared / radius.powi(2))
 }
 
-pub fn coefficient(
+pub fn coefficient<P: Borrow<ProductWeight>>(
     chemistry: &Chemistry,
     substrate: usize,
-    products: &[ProductWeight],
+    products: impl IntoIterator<Item = P>,
 ) -> [f64; 2] {
     let from = chemistry.properties[substrate].interaction;
-    std::array::from_fn(|k| {
-        let delta: f64 = products
-            .iter()
-            .map(|p| p.weight * (chemistry.properties[p.species].interaction[k] - from[k]))
-            .sum();
-        delta * if k == 0 { 0.25 } else { -0.25 }
-    })
+    let mut delta = [0.; 2];
+    for p in products {
+        let p = p.borrow();
+        for k in 0..2 {
+            delta[k] += p.weight * (chemistry.properties[p.species].interaction[k] - from[k]);
+        }
+    }
+    [delta[0] * 0.25, delta[1] * -0.25]
 }
 
 pub fn engagement(coefficient: [f64; 2], signal: [f64; 2]) -> f64 {

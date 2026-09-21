@@ -151,7 +151,8 @@ pub fn advance(w: &mut World) {
     if !w.sources.is_empty() {
         w.field.prepare_attraction();
     }
-    w.climate.operators.as_mut().unwrap().work_strength = w.config.environmental_work;
+    std::sync::Arc::make_mut(w.climate.operators.as_mut().unwrap()).work_strength =
+        w.config.environmental_work;
     let responses: Vec<_> = w
         .sources
         .iter()

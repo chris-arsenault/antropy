@@ -71,7 +71,7 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v34 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v35 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 320 × 240 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 48 finite renewing
 reservoirs. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
@@ -104,8 +104,12 @@ and its CI guards remain mandatory.
 
 Source zones/epochs and optional disturbance/typed transfer remain available; disturbance and
 transfer are off by default. Direct adhesion, multiple substrates, unrestricted genome/neural topology,
-terrain and rotational climate are deferred. Multicore remains explicitly paused in the
-[backlog](docs/backlog.md); current execution stays single-threaded.
+terrain and rotational climate are deferred. The user resumed multicore execution September 21.
+The [scaling plan](SCALING-PLAN.md#multicore-design) records the installed persistent Rayon pool,
+shared WASM memory, disjoint field/cell jobs and small-work serial crossover. The owning worker
+still coordinates the sole World and renders borrowed views after every phase joins. Development
+requires cross-origin isolation; unsupported browsers use the same operators in the serial build.
+P3 large-world persistence and 16/32-core acceptance remain open; default dimensions are unchanged.
 
 Recovery retains up to six automatic and two manual compressed IndexedDB saves within 256 MiB,
 expiring older points to fit. A raw checkpoint is capped at 192 MiB. Compact complete parentage

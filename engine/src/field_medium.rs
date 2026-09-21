@@ -1,6 +1,78 @@
 //! Spatial contractions of the same three feature rows for fields and finite owners.
 use crate::{field::Field, medium_response};
 
+/// Only valid between begin and the end of one immutable-field movement pass.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct GradientCache {
+    rows: Vec<[[f64; 3]; 2]>,
+    valid: Vec<bool>,
+}
+impl GradientCache {
+    pub fn begin(&mut self, field: &Field) {
+        self.rows.resize(field.nx * field.ny, [[0.; 3]; 2]);
+        self.valid.resize(self.rows.len(), false);
+        self.valid.fill(false);
+    }
+    pub fn sample(&mut self, field: &Field, sites: &[(usize, f64)]) -> [[f64; 3]; 2] {
+        let mut result = [[0.; 3]; 2];
+        for &(node, weight) in sites {
+            if !self.valid[node] {
+                self.rows[node] = field.gradient(&[(node, 1.)]);
+                self.valid[node] = true;
+            }
+            for (out, value) in result
+                .iter_mut()
+                .flatten()
+                .zip(self.rows[node].iter().flatten())
+            {
+                *out += weight * value;
+            }
+        }
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn frozen_gradients_match_direct_reads_and_refresh_every_carrier() {
+        let mut field = Field::new(16., 16., 2.);
+        let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
+        let mut cache = GradientCache::default();
+        let sites = field.stencil(0.25, 15.75);
+        for change in 0..5 {
+            field.add(7, 43, 0.3, &chemistry);
+            field.body_signal[6] = [change as f64, -0.3];
+            field.source_signal[6] = [-0.2, change as f64];
+            field.body_load[63] = change as f64;
+            field.source_load[1] = change as f64;
+            field.attraction_length = change as f64;
+            field.prepare_attraction();
+            cache.begin(&field);
+            for _ in 0..2 {
+                let actual = cache.sample(&field, &sites);
+                let expected = field.gradient(&sites);
+                for (a, b) in actual.iter().flatten().zip(expected.iter().flatten()) {
+                    assert!((a - b).abs() < 1e-12);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn minimum_image_fast_path_preserves_periodicity_and_half_world_ties() {
+        for width in [1., 32., 320.] {
+            for i in -1000..=1000 {
+                let x = i as f64 * width / 64.;
+                let expected = (x + width * 0.5).rem_euclid(width) - width * 0.5;
+                assert_eq!(crate::movement::delta(x, width), expected);
+            }
+        }
+    }
+}
+
 impl Field {
     pub(crate) fn mechanical_load(&self, n: usize) -> f64 {
         self.impedance[n] + self.source_load[n] + self.body_load[n]

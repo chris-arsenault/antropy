@@ -21,3 +21,4 @@ docs/evidence/**
 !docs/evidence/**/README.md
 __pycache__/
 frontend/public/antropy-engine.wasm
+frontend/public/engine-threads/

@@ -27,6 +27,18 @@ class FakeWorker {
   }
 }
 afterEach(() => vi.unstubAllGlobals());
+it("terminates an unresponsive compute coordinator instead of leaving requests pending", async () => {
+  vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "performance"] });
+  vi.stubGlobal("Worker", FakeWorker);
+  const bridge = new Bridge();
+  bridge.start({} as OffscreenCanvas, "antropy-engine.wasm");
+  const worker = FakeWorker.last;
+  await vi.advanceTimersByTimeAsync(61000);
+  expect(worker.terminated).toBe(true);
+  expect(bridge.getSnapshot().error).toContain("stopped responding");
+  bridge.stop();
+  vi.useRealTimers();
+});
 const options: ViewOptions = {
   width: 800,
   height: 600,

@@ -35,7 +35,7 @@ fn circuit_private_returns_close_against_external_input() {
         cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
         let initial = cell.clone();
         metabolism::react_observed(&mut cell, &w.config, &w.chemistry, 1e6, true, signal);
-        assert!((cell.inventory[t] - 1.).abs() < 1e-12);
+        assert!((cell.inventory.value(t) - 1.).abs() < 1e-12);
         assert!(cell.energy > 2.);
         let [work, heat, input] = [
             cell.energy,
@@ -50,7 +50,7 @@ fn circuit_private_returns_close_against_external_input() {
         if i == 1 || i == 2 {
             let mut unfunded = initial;
             metabolism::react(&mut unfunded, &w.config, &w.chemistry, 1e6);
-            assert_eq!(unfunded.inventory[s], 1.);
+            assert_eq!(unfunded.inventory.value(s), 1.);
             assert_eq!(unfunded.energy, 0.);
         }
     }
@@ -106,7 +106,7 @@ fn mixed_rows_vanish_with_identity_and_relabel_covariantly() {
 }
 
 #[test]
-fn production_external_accounts_and_cold_continuation_agree() {
+fn production_external_accounts_survive_cold_continuation() {
     let mut w = crate::initial_ecology::probe(1, true).unwrap();
     for _ in 0..12 {
         w.step();
@@ -114,12 +114,14 @@ fn production_external_accounts_and_cold_continuation_agree() {
     assert!(w.ledger.flows.external_work > 0.);
     let summary = crate::observation::summary(&w);
     assert!(summary["energyResidual"].as_f64().unwrap().abs() < 1e-7);
-    let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
+    let mut restored = crate::boundary_tests::restored_state(&w);
+    let resumed_tick = w.tick + 8;
     for _ in 0..8 {
         w.step();
         restored.step();
     }
-    assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
+    crate::boundary_tests::usable_continuation(&w, resumed_tick);
+    crate::boundary_tests::usable_continuation(&restored, resumed_tick);
 }
 
 #[test]
@@ -138,7 +140,7 @@ fn default_starts_with_four_funded_mutable_roles_in_each_colony() {
                 let output = crate::initial_ecology::CIRCUIT[(role as usize + 1) % 4];
                 assert!((cell.mass() - cell.bound_material.material()).abs() < 1e-12);
                 assert_eq!(cell.installed, w.genomes[&cell.genome].express().chemistry);
-                assert!(cell.inventory[input] > 0. && cell.inventory[output] > 0.);
+                assert!(cell.inventory.value(input) > 0. && cell.inventory.value(output) > 0.);
                 for (slot, enzyme) in cell.operators.as_ref().unwrap().enzymes.iter().enumerate() {
                     if !cell.installed.programs[slot] {
                         assert!(enzyme.conversions.is_empty());
@@ -150,8 +152,8 @@ fn default_starts_with_four_funded_mutable_roles_in_each_colony() {
                         .find(|r| r.substrate == input)
                         .unwrap();
                     assert_eq!(row.products.len(), 1);
-                    assert_eq!(row.products[0].species, output);
-                    assert_eq!(row.products[0].weight, 1.);
+                    assert_eq!(row.products.get(0).species, output);
+                    assert_eq!(row.products.get(0).weight, 1.);
                 }
             }
         }

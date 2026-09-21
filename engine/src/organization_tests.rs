@@ -16,7 +16,9 @@ fn response_is_bounded_complementary_and_does_not_change_yield() {
     }
     let w = diagnostics::nutrition(0.8, 2., false, false);
     let original = &w.cells[0];
-    let edge = &original.operators.as_ref().unwrap().enzymes[0].conversions[0];
+    let edge = original.operators.as_ref().unwrap().enzymes[0]
+        .conversions
+        .get(0);
     let score = |s: usize| {
         edge.work_coefficient
             .iter()
@@ -90,7 +92,7 @@ fn retirement_preserves_identity_pays_work_and_reserves_lost_storage() {
     cell.energy = 10.;
     cell.inventory.fill(0.);
     let before: Vec<_> = (0..256)
-        .map(|s| cell.inventory[s] + cell.bound_material[s])
+        .map(|s| cell.inventory.value(s) + cell.bound_material.value(s))
         .collect();
     let mass = cell.mass();
     organization::remodel(&mut cell, g, &w.config, 100.);
@@ -99,7 +101,7 @@ fn retirement_preserves_identity_pays_work_and_reserves_lost_storage() {
     assert!(cell.material() <= cell.capacity(&w.config) + 1e-12);
     assert!((10. - cell.energy - cell.flows.retired * w.config.construction_energy).abs() < 1e-12);
     for (s, q) in before.iter().enumerate() {
-        assert!((cell.inventory[s] + cell.bound_material[s] - q).abs() < 1e-12);
+        assert!((cell.inventory.value(s) + cell.bound_material.value(s) - q).abs() < 1e-12);
     }
     cell.validate(&w.config).unwrap();
 }

@@ -4,6 +4,8 @@ use serde_json::{Value, json};
 use std::collections::BTreeMap;
 #[path = "census_groups.rs"]
 mod grouping;
+#[path = "census_reduction.rs"]
+mod reduction;
 fn origin(w: &World, mut id: u64, known: &BTreeMap<u64, u64>) -> Option<u64> {
     loop {
         if let Some(&region) = known.get(&id) {
@@ -45,35 +47,6 @@ fn region(w: &World, indices: &[usize], origins: &BTreeMap<u64, u64>) -> Value {
         "membraneX":membrane/count,"members":indices.iter().map(|&i| w.cells[i].id).collect::<Vec<_>>(),
         "votes":votes.into_iter().collect::<Vec<_>>(),"lineages":lineages.into_iter().collect::<Vec<_>>(),"youngestDescendant":youngest})
 }
-fn values(w: &World, genome: u64) -> [f64; 9] {
-    let g = w.genomes[&genome].compiled.as_ref().unwrap();
-    let b = g.body;
-    let m = &g.chromosome.chemistry;
-    let mut import = 0.;
-    let mut x = 0.;
-    let mut y = 0.;
-    for (i, t) in m.transporters.iter().enumerate() {
-        {
-            import += b[7 + i];
-            x += b[7 + i] * t.x;
-            y += b[7 + i] * t.y;
-        }
-    }
-    [
-        100. * b[0] / w.config.birth_mass,
-        100. * b[1] / b[0],
-        100. * b[3..7].iter().sum::<f64>() / b[0],
-        100. * import / b[0],
-        100. * (0..crate::organism::MAX_ENZYMES)
-            .map(|s| b[crate::organism::enzyme_stock(s)])
-            .sum::<f64>()
-            / b[0],
-        m.membrane.x,
-        m.membrane.y,
-        x / import.max(1e-30),
-        y / import.max(1e-30),
-    ]
-}
 pub(crate) fn distribution(mut samples: Vec<f64>, ceiling: f64) -> Value {
     samples.sort_by(f64::total_cmp);
     let ceiling = ceiling.max(samples.last().copied().unwrap_or(ceiling));
@@ -98,50 +71,20 @@ fn top(counts: BTreeMap<u64, usize>) -> Value {
     json!({"total":total,"rows":rows})
 }
 fn population(w: &World) -> Value {
-    let mut traits = BTreeMap::new();
-    for c in &w.cells {
-        traits
-            .entry(c.genome)
-            .or_insert_with(|| values(w, c.genome));
-    }
-    let distributions: Vec<_> = [200., 16., 16., 32., 32., 15., 15., 15., 15.]
-        .iter()
-        .enumerate()
-        .map(|(i, &max)| distribution(w.cells.iter().map(|c| traits[&c.genome][i]).collect(), max))
+    let reduced = reduction::Population::new(w);
+    let ceilings = [200., 16., 16., 32., 32., 15., 15., 15., 15.];
+    let traits: Vec<_> = reduced
+        .traits
+        .into_iter()
+        .zip(ceilings)
+        .map(|(values, ceiling)| distribution(values, ceiling))
         .collect();
-    let mut membrane = [0usize; 256];
-    let mut families = BTreeMap::<u64, usize>::new();
-    let mut lineages = BTreeMap::<u64, usize>::new();
-    for c in &w.cells {
-        let t = traits[&c.genome];
-        membrane[(t[5].round() as usize) * 16 + t[6].round() as usize] += 1;
-        let mut id = c.id;
-        for _ in 0..c.generation % 4 {
-            if let Some(parent) = w.ancestry[id as usize - 1].parent() {
-                id = parent;
-            }
-        }
-        *families.entry(id).or_default() += 1;
-        *lineages.entry(c.lineage).or_default() += 1;
-    }
-    let efforts: Vec<_> = (0..7)
-        .map(|i| {
-            distribution(
-                w.cells
-                    .iter()
-                    .map(|c| match i {
-                        0 => c.action.swim.abs(),
-                        1 => c.action.turn.abs(),
-                        2 => c.action.repair,
-                        _ => c.action.transport[i - 3],
-                    })
-                    .collect(),
-                1.,
-            )
-        })
-        .collect();
-    json!({"tick":w.tick,"traits":distributions,"efforts":efforts,"membrane":membrane.as_slice(),"families":top(families),"lineages":top(lineages),"familyProfiles":crate::genealogy::profiles(w),
-        "evolution":crate::population_diagnostics::observe(w)})
+    let efforts = reduced.efforts.map(|values| distribution(values, 1.));
+    json!({"tick":w.tick,"traits":traits,"efforts":efforts,
+        "membrane":reduced.membrane.as_slice(),"families":top(reduced.families),
+        "lineages":top(reduced.lineages),
+        "familyProfiles":crate::genealogy::profiles_from(w,reduced.profiles),
+        "evolution":reduced.evolution.report(w)})
 }
 pub fn observe(w: &World, v: &Value) -> Result<Value, String> {
     let pairs: Vec<(u64, u64)> =
@@ -200,5 +143,38 @@ mod tests {
                 .sum::<u64>(),
             7
         );
+    }
+
+    #[test]
+    fn shared_population_columns_preserve_evolution_and_family_reports_after_membership_changes() {
+        let mut w = World::new(27, crate::config::Config::default()).unwrap();
+        w.cells[0].damage = 0.4;
+        w.cells[0].body[1] *= 0.5;
+        w.cells[0].brain.traces.fill(0.25);
+        for reduced in [false, true] {
+            if reduced {
+                w.cells.reverse();
+                w.cells.truncate(w.cells.len() / 2);
+            }
+            let before = w.snapshot().unwrap();
+            let result = population(&w);
+            assert_eq!(
+                result["evolution"],
+                crate::population_diagnostics::observe(&w)
+            );
+            assert_eq!(result["familyProfiles"], crate::genealogy::profiles(&w));
+            for key in ["traits", "efforts"] {
+                for distribution in result[key].as_array().unwrap() {
+                    let n: u64 = distribution["bins"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|v| v.as_u64().unwrap())
+                        .sum();
+                    assert_eq!(n, w.cells.len() as u64);
+                }
+            }
+            assert_eq!(w.snapshot().unwrap(), before);
+        }
     }
 }

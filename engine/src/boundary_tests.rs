@@ -19,6 +19,38 @@ fn rejected(change: impl FnOnce(&mut World)) {
     change(&mut w);
     assert!(World::restore(&w.snapshot().unwrap()).is_err());
 }
+
+/// Saved physical/private state survives; derived caches may round differently after stepping.
+pub(crate) fn restored_state(w: &World) -> World {
+    let saved = w.snapshot().unwrap();
+    let restored = World::restore(&saved).unwrap();
+    assert_eq!(saved, restored.snapshot().unwrap());
+    assert_eq!(w.tick, restored.tick);
+    assert_eq!(w.field_elapsed, restored.field_elapsed);
+    assert_eq!(
+        (w.next_cell, w.next_genome),
+        (restored.next_cell, restored.next_genome)
+    );
+    restored
+}
+
+pub(crate) fn usable_continuation(w: &World, tick: u64) {
+    assert_eq!(w.tick, tick);
+    assert!(w.stop_reason.is_none());
+    w.validate().unwrap();
+    let summary = crate::observation::summary(w);
+    let material = 1. + w.ledger.initial_material.abs() + w.ledger.supplied.abs();
+    let energy = 1.
+        + w.ledger.initial_energy.abs()
+        + w.ledger.supplied_energy.abs()
+        + w.ledger.weathering_work.abs()
+        + w.ledger.source_work.abs()
+        + w.ledger.flows.external_work.abs();
+    for (name, scale) in [("materialResidual", material), ("energyResidual", energy)] {
+        let residual = summary[name].as_f64().unwrap();
+        assert!(residual.abs() <= 1e-7 * scale, "{name}: {residual}");
+    }
+}
 #[test]
 fn restore_rejects_inconsistent_bodies_and_history() {
     let mut trailing = world().snapshot().unwrap();
@@ -60,12 +92,16 @@ fn manual_interventions_survive_recent_event_rollover_and_restore() {
     w.step();
     assert_eq!(w.events.len(), 513);
     assert_eq!(w.events[0].kind, "override");
-    let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
+    let mut restored = restored_state(&w);
+    let resumed_tick = w.tick + 3;
     for _ in 0..3 {
         w.step();
         restored.step();
     }
-    assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
+    usable_continuation(&w, resumed_tick);
+    usable_continuation(&restored, resumed_tick);
+    assert_eq!(restored.events[0].kind, "override");
+    assert!(restored.events[0].values.contains(&91));
     for _ in 1..4096 {
         w.event("override", 1, vec![0, 91]);
     }
@@ -129,10 +165,19 @@ fn diagnostic_catalog_is_atomic_and_does_not_replace_observed_cells() {
     assert_eq!(ids, json!([next_genome]));
     assert_eq!(before, serde_json::to_value(&w.cells).unwrap());
     assert_eq!(w.events.last().unwrap().kind, "catalog");
-    let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
+    let mut restored = restored_state(&w);
+    let resumed_tick = w.tick + 3;
     for _ in 0..3 {
         w.step();
         restored.step();
     }
-    assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
+    usable_continuation(&w, resumed_tick);
+    usable_continuation(&restored, resumed_tick);
+    assert!(restored.genomes.contains_key(&next_genome));
+    assert!(
+        restored
+            .events
+            .iter()
+            .any(|e| e.kind == "catalog" && e.values.contains(&next_genome))
+    );
 }

@@ -1,6 +1,9 @@
 use crate::chemical_profiles::{ProfileBasis, ProfileCoverage};
 use crate::random::Random;
 use serde::{Deserialize, Serialize};
+#[path = "chemical_properties.rs"]
+mod property_table;
+pub use property_table::PropertyTable;
 
 pub const SPECIES: usize = 256;
 pub const RANGES: [(f64, f64); 4] = [(0.5, 8.), (0.005, 0.5), (0., 12.), (0., 1.)];
@@ -78,7 +81,7 @@ pub struct Chemistry {
     pub version: u32,
     pub seed: u64,
     pub coefficients: Vec<Vec<f64>>,
-    pub properties: Vec<Properties>,
+    pub properties: PropertyTable,
     pub decomposition: usize,
     pub profiles: ProfileBasis,
 }
@@ -113,7 +116,7 @@ impl Chemistry {
             version: 5,
             seed,
             coefficients,
-            properties,
+            properties: properties.into(),
             decomposition,
             profiles,
         };

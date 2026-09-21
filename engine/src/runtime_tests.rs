@@ -201,10 +201,9 @@ fn pruning_keeps_live_installations_catalogs_and_complete_parent_records() {
     w.tick = 127;
     w.cells[0].energy = 1.;
     w.step();
-    assert_eq!(
-        w.genomes.keys().copied().collect::<Vec<_>>(),
-        vec![1, 2, 3, 4]
-    );
+    let mut retained: Vec<_> = w.genomes.keys().copied().collect();
+    retained.sort_unstable();
+    assert_eq!(retained, vec![1, 2, 3, 4]);
     assert_eq!(w.ancestry[1].genome, 5);
     assert_eq!(w.ancestry[1].parent, 1);
     let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();

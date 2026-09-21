@@ -12,13 +12,13 @@ fn requests<'a>(
     op: &'a Operators,
     c: &Config,
     old: bool,
-) -> Vec<(&'a Conversion, f64)> {
+) -> Vec<(Conversion<'a>, f64)> {
     let mut rows = Vec::new();
     for (i, enzyme) in op.enzymes.iter().enumerate() {
         let occupancy = enzyme
             .engagement
             .iter()
-            .map(|a| a.value * cell.inventory[a.species])
+            .map(|a| a.value * cell.inventory.value(a.species))
             .sum::<f64>();
         let rate =
             c.physiology_interval * c.enzyme_turnover * cell.body[11 + i] * (1. - cell.damage)
@@ -32,25 +32,25 @@ fn requests<'a>(
             } else {
                 e.catalytic
             };
-            rows.push((e, rate * catalytic * cell.inventory[e.substrate]));
+            rows.push((e, rate * catalytic * cell.inventory.value(e.substrate)));
         }
     }
     rows
 }
-fn donors(rows: &[(&Conversion, f64)], cell: &Cell) -> [f64; 256] {
+fn donors(rows: &[(Conversion<'_>, f64)], cell: &Cell) -> [f64; 256] {
     let mut demand = [0.; 256];
     for (e, q) in rows {
         demand[e.substrate] += q;
     }
     std::array::from_fn(|s| {
         if demand[s] > 0. {
-            (cell.inventory[s] / demand[s]).min(1.)
+            (cell.inventory.value(s) / demand[s]).min(1.)
         } else {
             0.
         }
     })
 }
-fn fund(rows: &mut [(&Conversion, f64)], energy: f64, old: bool) {
+fn fund(rows: &mut [(Conversion<'_>, f64)], energy: f64, old: bool) {
     let cost = rows.iter().map(|(e, q)| q * (-e.work).max(0.)).sum::<f64>();
     let fraction = if cost > 0. {
         (energy / cost).min(1.)
@@ -69,7 +69,7 @@ fn accepted<'a>(
     c: &Config,
     old_rates: bool,
     old_funding: bool,
-) -> Vec<(&'a Conversion, f64)> {
+) -> Vec<(Conversion<'a>, f64)> {
     let mut rows = requests(cell, op, c, old_rates);
     if !old_funding {
         fund(&mut rows, cell.energy, false);
@@ -83,7 +83,7 @@ fn accepted<'a>(
     }
     rows
 }
-fn flux(rows: &[(&Conversion, f64)]) -> (Vec<f64>, Vec<f64>, f64) {
+fn flux(rows: &[(Conversion<'_>, f64)]) -> (Vec<f64>, Vec<f64>, f64) {
     let mut produced = vec![0.; 256];
     let mut consumed = vec![0.; 256];
     let mut work = 0.;
@@ -122,10 +122,10 @@ fn compare(cells: &[Cell], c: &Config, chemistry: &Chemistry) -> Value {
                 live.chemical_flows = ChemicalFlows::default();
                 antropy_engine::metabolism::react(&mut live, c, chemistry, c.physiology_interval);
                 for s in 0..256 {
-                    production_error =
-                        production_error.max((live.chemical_flows.produced[s] - f.0[s]).abs());
-                    production_error =
-                        production_error.max((live.chemical_flows.consumed[s] - f.1[s]).abs());
+                    production_error = production_error
+                        .max((live.chemical_flows.produced.value(s) - f.0[s]).abs());
+                    production_error = production_error
+                        .max((live.chemical_flows.consumed.value(s) - f.1[s]).abs());
                 }
                 production_error = production_error.max((live.energy - cell.energy - f.2).abs());
             }

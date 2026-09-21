@@ -19,6 +19,8 @@ export class Bridge {
   private sendingView = false;
   private animation = 0;
   private framePending = false;
+  private watchdog: ReturnType<typeof setInterval> | null = null;
+  private lastResponseAt = 0;
   private state: ViewState = { definition: null, status: null, inspection: null, error: null };
   readonly getSnapshot = () => this.state;
   readonly subscribe = (listener: () => void) => {
@@ -34,8 +36,26 @@ export class Bridge {
     this.update({ definition: null, status: null, inspection: null, error: null });
     const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
     this.worker = worker;
+    this.lastResponseAt = performance.now();
+    this.watchdog = setInterval(() => {
+      if (
+        this.worker === worker &&
+        this.pending.size &&
+        performance.now() - this.lastResponseAt > 60000
+      ) {
+        this.update({
+          error:
+            "Simulation worker stopped responding for 60 seconds; restart or reload a recovery",
+          status: this.state.status ? { ...this.state.status, running: false } : null,
+        });
+        this.stop();
+      }
+    }, 1000);
     worker.onmessage = (event) => {
-      if (this.worker === worker) this.receive(event.data as Message);
+      if (this.worker === worker) {
+        this.lastResponseAt = performance.now();
+        this.receive(event.data as Message);
+      }
     };
     worker.onerror = (event) => {
       if (this.worker !== worker) return;
@@ -50,7 +70,10 @@ export class Bridge {
       this.stop();
     };
     this.call("initialize", { canvas, wasmUrl }, [canvas]).catch((error) => {
-      if (this.worker === worker) this.update({ error: String(error) });
+      if (this.worker === worker) {
+        this.update({ error: String(error) });
+        this.stop();
+      }
     });
     this.animation = requestAnimationFrame(() => this.present(worker));
   }
@@ -70,6 +93,8 @@ export class Bridge {
     this.animation = requestAnimationFrame(() => this.present(worker));
   }
   stop() {
+    if (this.watchdog !== null) clearInterval(this.watchdog);
+    this.watchdog = null;
     cancelAnimationFrame(this.animation);
     this.framePending = false;
     this.worker?.terminate();

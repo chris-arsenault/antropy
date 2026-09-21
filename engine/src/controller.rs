@@ -4,6 +4,18 @@ use serde::{Deserialize, Serialize};
 pub const LIGHT_INPUT: usize = 39;
 pub const INWARD_INPUT: usize = 44;
 pub const INPUTS: usize = 52 + crate::organism::MAX_ENZYMES - 4;
+pub const BASE_INPUTS: u64 = (1 << 28) | (0b11111 << 30);
+pub const ENVIRONMENT_INPUTS: u64 = ((1 << 16) - 1) | (0b1111 << LIGHT_INPUT);
+pub const PHYSIOLOGY_INPUTS: u64 = ((1_u64 << INPUTS) - 1) & !(BASE_INPUTS | ENVIRONMENT_INPUTS);
+mod arithmetic;
+mod learning;
+mod prepared;
+mod weights;
+pub use prepared::{
+    Epoch, act_owned, act_published, current_traces, expiry_counts, invalidate, materialize,
+    observed_state, owns_inputs, publish_inputs, validate_state,
+};
+pub use weights::WeightStore;
 pub mod diagnostics;
 pub mod programs;
 #[cfg(test)]
@@ -30,7 +42,7 @@ pub fn squash(x: f32) -> f32 {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Genome {
-    pub weights: Vec<f32>,
+    pub weights: WeightStore,
     pub plasticity: Vec<f32>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -40,6 +52,8 @@ pub struct State {
     pub traces: Vec<f32>,
     pub task: u8,
     pub last_energy: Option<f32>,
+    #[serde(default)]
+    pub epoch: Option<Epoch>,
 }
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Action {
@@ -72,6 +86,7 @@ impl Default for State {
             traces: vec![0.; HIDDEN * HIDDEN],
             task: 0,
             last_energy: None,
+            epoch: None,
         }
     }
 }
@@ -105,11 +120,10 @@ pub fn seed() -> Genome {
         w[OUTPUT_BIAS + 5 + s] = 3. * squash(1.5_f32 * 0.75);
     }
     Genome {
-        weights: w,
+        weights: w.into(),
         plasticity: vec![0.1, 0.02, 1., 0., 0., 0., 1., 1., 0., 0., 1.],
     }
 }
-use crate::numeric::dot;
 /// Mutable starting behavior: retain feeding, export product, repair and follow local food.
 pub fn circuit_seed() -> Genome {
     let mut g = seed();
@@ -124,7 +138,7 @@ pub fn circuit_seed() -> Genome {
 /// Handcrafted experimental chromosomes still execute through the ordinary RNN.
 pub fn diagnostic(logits: [f32; OUTPUTS], response: Option<(usize, usize, f32)>) -> Genome {
     let mut genome = Genome {
-        weights: vec![0.; PARAMETERS],
+        weights: vec![0.; PARAMETERS].into(),
         plasticity: vec![0.; 11],
     };
     programs::seed_requests(&mut genome.weights);
@@ -137,35 +151,9 @@ pub fn diagnostic(logits: [f32; OUTPUTS], response: Option<(usize, usize, f32)>)
     genome
 }
 pub fn act(g: &Genome, inputs: &[f32], state: &mut State, config: &Config, learn: bool) -> Action {
-    let alpha = if config.learning == "plastic" {
-        g.plasticity[0].abs()
-    } else {
-        0.
-    };
-    let mut next = [0.; HIDDEN];
-    for (h, value) in next.iter_mut().enumerate() {
-        let recurrent = &g.weights[RECURRENT + h * HIDDEN..RECURRENT + (h + 1) * HIDDEN];
-        let trace = &state.traces[h * HIDDEN..(h + 1) * HIDDEN];
-        let private = if alpha == 0. {
-            0.
-        } else {
-            alpha * dot(trace, &state.hidden)
-        };
-        let sum = dot(&g.weights[h * INPUTS..(h + 1) * INPUTS], inputs)
-            + dot(recurrent, &state.hidden)
-            + private
-            + g.weights[BIAS + h];
-        *value = squash(sum);
-    }
-    let mut logits = [0.; TOTAL_OUTPUTS];
-    for (o, value) in logits.iter_mut().enumerate() {
-        *value = dot(
-            &g.weights[OUTPUT + o * HIDDEN..OUTPUT + (o + 1) * HIDDEN],
-            &next,
-        ) + g.weights[OUTPUT_BIAS + o];
-    }
-    update_traces(g, inputs, state, &next, config, learn);
-    state.hidden.copy_from_slice(&next);
+    prepared::advance(g, inputs, state, config, learn, None)
+}
+fn decode(logits: &[f32], state: &mut State) -> Action {
     if logits[4] >= 0. {
         state.task = (127.5 * (1. + squash(logits[3] * 0.5))).round() as u8;
     }
@@ -179,36 +167,9 @@ pub fn act(g: &Genome, inputs: &[f32], state: &mut State, config: &Config, learn
         retirement: squash(logits[RETIREMENT]).max(0.) as f64,
     }
 }
-fn update_traces(
-    g: &Genome,
-    inputs: &[f32],
-    state: &mut State,
-    next: &[f32],
-    c: &Config,
-    learn: bool,
-) {
-    let delta = state.last_energy.map_or(0., |last| inputs[28] - last);
-    state.last_energy = Some(inputs[28]);
-    if c.learning != "plastic" || !learn {
-        return;
-    }
-    let p = &g.plasticity;
-    let modulation = squash(
-        p[6] * inputs[1] + p[7] * inputs[5] + p[8] * inputs[9] + p[9] * inputs[13] + p[10] * delta,
-    );
-    let rate = p[1].abs() * c.dt as f32;
-    for (i, &y) in next.iter().enumerate() {
-        for (j, &x) in state.hidden.iter().enumerate() {
-            let h = &mut state.traces[i * HIDDEN + j];
-            *h = (*h
-                + rate * (modulation * (p[2] * x * y + p[3] * x + p[4] * y + p[5]) - y * y * (*h)))
-                .clamp(-1., 1.);
-        }
-    }
-}
 pub fn assimilate(allele: &Genome, expressed: &Genome, state: &State, retention: f64) -> Genome {
     let mut child = allele.clone();
-    for (i, h) in state.traces.iter().enumerate() {
+    for (i, h) in current_traces(state).iter().enumerate() {
         child.weights[RECURRENT + i] = (child.weights[RECURRENT + i]
             + retention as f32 * expressed.plasticity[0].abs() * h)
             .clamp(-16., 16.);
@@ -236,15 +197,20 @@ pub fn mutate_vector(
     crate::genetics::mutation::mutate(values, rng, rate, scale, -(bound as f64), bound as f64)
 }
 pub fn express(a: &Genome, b: &Genome) -> Genome {
-    let mean = |x: &[f32], y: &[f32]| x.iter().zip(y).map(|(a, b)| (a + b) * 0.5).collect();
+    let mean = |x: &[f32], y: &[f32]| {
+        x.iter()
+            .zip(y)
+            .map(|(a, b)| (a + b) * 0.5)
+            .collect::<Vec<_>>()
+    };
     Genome {
-        weights: mean(&a.weights, &b.weights),
+        weights: mean(&a.weights, &b.weights).into(),
         plasticity: mean(&a.plasticity, &b.plasticity),
     }
 }
 pub fn recombine(a: &Genome, b: &Genome, rng: &mut Random, kind: &str) -> Genome {
     Genome {
-        weights: combine(&a.weights, &b.weights, rng, kind),
+        weights: combine(&a.weights, &b.weights, rng, kind).into(),
         plasticity: combine(&a.plasticity, &b.plasticity, rng, kind),
     }
 }
@@ -277,8 +243,7 @@ pub fn acquired_rms(g: &Genome, state: &State, config: &Config) -> f64 {
     if config.learning != "plastic" {
         return 0.;
     }
-    let mean = state
-        .traces
+    let mean = current_traces(state)
         .iter()
         .map(|v| (*v as f64).powi(2))
         .sum::<f64>()
@@ -327,7 +292,7 @@ mod tests {
             act(&g, &input, &mut s, &c, true);
         }
         assert_eq!(g, original);
-        assert!(s.traces.iter().any(|x| *x != 0.));
+        assert!(current_traces(&s).iter().any(|x| *x != 0.));
         let child = assimilate(&g, &g, &s, 1.);
         assert!(genome_distance(&g, &child) > 0.);
         assert_eq!(genome_distance(&g, &assimilate(&g, &g, &s, 0.)), 0.);

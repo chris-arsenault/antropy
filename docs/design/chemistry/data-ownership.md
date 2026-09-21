@@ -31,7 +31,26 @@ still transfer CPU bytes to device memory. This contract removes intermediate CP
 not claim that WebGL uses CPU memory as GPU memory. Keeping rendering beside WASM avoids the need
 to pass a nonshared WASM pointer between workers or introduce another simulation worker.
 
-## Observation boundary
+## Shared-memory computation extension
+
+The September 21 multicore implementation was explicitly authorized through the scaling plan.
+The owning worker remains the sole World coordinator and renderer. Persistent Rayon helper
+workers instantiate the same module against one shared WASM memory; they execute scoped Rust
+jobs over disjoint mutable slices and frozen shared inputs. They never access the coordinator's
+thread-local command store, publish observations, or own a second World. Messages used to start
+helpers contain the shared module/memory and bounded pool descriptors, not copied physical frames.
+
+Every parallel phase joins synchronously before rendering, saving, restoring or lifecycle commit.
+Allocator growth uses the atomics-enabled standard library, and JavaScript reacquires borrowed
+views after engine calls. Rendering does not overlap physical writes. The serial fallback invokes
+the same operators. Worker-local chemical scratch and reduced accounts are permitted; per-worker
+world-sized buffers and per-cell atomic chemical additions are not.
+
+Cross-origin isolation is required for the shared build. Missing browser capability selects the
+serial build; a pool that fails after selection reports an initialization failure. A hung or failed
+pool must stop the coordinator rather than publishing partially updated physical state.
+
+## Reduced observations
 
 React owns display observations, never continuation state. The permitted data is global scalar
 accounting, population distributions, retained chart samples, reduced spatial summaries, and one

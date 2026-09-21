@@ -1,19 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { join, relative, delimiter, resolve } from "node:path";
+import { join, relative } from "node:path";
+import { executable } from "./toolchain.mjs";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-// Resolve the caller's installed toolchain once; execute its absolute path without a shell.
-function executable(name) {
-  for (const directory of (process.env.PATH ?? "").split(delimiter)) {
-    if (!directory) continue;
-    const path = resolve(directory, name);
-    if (existsSync(path)) return path;
-  }
-  throw new Error(`Required toolchain executable unavailable: ${name}`);
-}
 execFileSync(
   executable("cargo"),
   [
@@ -69,3 +61,4 @@ writeFileSync(
   new URL("../public/antropy-engine.wasm", import.meta.url),
   Buffer.concat([wasm, Buffer.from([0]), leb(section.length), section])
 );
+await import("./build-threads.mjs");

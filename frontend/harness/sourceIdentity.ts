@@ -16,6 +16,8 @@ export function browserSourceDigest(root: string): string {
     join(root, "../engine/Cargo.toml"),
     join(root, "../engine/Cargo.lock"),
     join(root, "scripts/build-engine.mjs"),
+    join(root, "scripts/build-threads.mjs"),
+    join(root, "scripts/toolchain.mjs"),
     join(root, "pnpm-lock.yaml"),
     join(root, "vite.config.ts"),
     join(root, "harness/sourceIdentity.ts"),

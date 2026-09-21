@@ -1,12 +1,16 @@
 //! Sole production state and schedule. Browser stepping and every assay execute this owner.
 pub use crate::ancestry::Ancestor;
 use crate::{
-    accounting::Ledger, chemistry::Chemistry, config::Config, field::Field, genetics::Genotype,
-    organism::Cell, random::Random, sources::Source,
+    accounting::Ledger, chemistry::Chemistry, config::Config, field::Field,
+    genetics::GenotypeStore, organism::Cell, random::Random, sources::Source,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
-pub const VERSION: u32 = 34;
+use std::collections::BTreeSet;
+#[path = "world_base.rs"]
+mod base;
+#[path = "world_physiology.rs"]
+mod physiology;
+pub const VERSION: u32 = 35;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -29,7 +33,7 @@ pub struct World {
     pub cells: Vec<Cell>,
     pub sources: Vec<Source>,
     pub patch_centers: Vec<[f64; 2]>,
-    pub genomes: BTreeMap<u64, Genotype>,
+    pub genomes: GenotypeStore,
     pub ancestry: Vec<Ancestor>,
     pub next_cell: u64,
     pub next_genome: u64,
@@ -43,6 +47,16 @@ pub struct World {
     pub observer: Option<Box<crate::phenotype::Observer>>,
     #[serde(skip)]
     exchange: crate::transport::Exchange,
+    #[serde(skip)]
+    pub(crate) contact_cache: crate::movement::geometry::Cache,
+    #[serde(skip)]
+    reactions: crate::metabolism::Executor,
+    #[serde(skip)]
+    physiology_jobs: Vec<physiology::Job>,
+    #[serde(skip)]
+    sites: Vec<crate::footprint::Row>,
+    #[serde(skip)]
+    footprints: crate::footprint::Projection,
     #[serde(skip)]
     pub(crate) climate: crate::climate::Climate,
 }
@@ -70,7 +84,7 @@ impl World {
             s.release(config.source_priming, &mut field, &chemistry, &mut ledger);
         }
         crate::initial_ecology::prime(&sources, &config, &chemistry, &mut field);
-        let genomes: BTreeMap<_, _> = (0..config.founders.clamp(1, 4))
+        let genomes: GenotypeStore = (0..config.founders.clamp(1, 4))
             .map(|i| {
                 let g = crate::genetics::founder::circuit(&config, &chemistry, i);
                 (g.id, g)
@@ -153,6 +167,11 @@ impl World {
             trace: None,
             observer: None,
             exchange: Default::default(),
+            contact_cache: Default::default(),
+            reactions: Default::default(),
+            physiology_jobs: Vec::new(),
+            sites: Vec::new(),
+            footprints: Default::default(),
             climate,
         };
         let (m, e) = world.held();
@@ -166,13 +185,8 @@ impl World {
         for c in &self.cells {
             matter += c.mass() + c.material();
             energy += c.energy;
-            energy += c
-                .inventory
-                .iter()
-                .zip(c.bound_material.iter())
-                .zip(&self.chemistry.properties)
-                .map(|((q, bound), p)| (q + bound) * p.potential)
-                .sum::<f64>();
+            energy += c.inventory.projection(&self.chemistry).potential
+                + c.bound_material.projection(&self.chemistry).potential;
         }
         for s in &self.sources {
             for (q, p) in s.inventory.iter().zip(&self.chemistry.properties) {
@@ -184,6 +198,27 @@ impl World {
     }
     pub fn step(&mut self) {
         self.advance(None);
+    }
+    pub(crate) fn execution_work(&self) -> serde_json::Value {
+        let mut expiry = [0_u64; 6];
+        for cell in &self.cells {
+            for (total, count) in expiry
+                .iter_mut()
+                .zip(crate::controller::expiry_counts(&cell.brain))
+            {
+                *total += count;
+            }
+        }
+        serde_json::json!({
+            "controllerExpiry": expiry,
+            "reactions": self.reactions.counts(),
+            "transport": self.exchange.counts(),
+            "footprints": {"preparations": self.footprints.preparations,
+                "reuses": self.footprints.reuses},
+            "motion": {"preparations": self.contact_cache.motion.preparations,
+                "geometry": self.contact_cache.local.counts(),
+                "contactPreparations": self.contact_cache.motion.contact_preparations},
+        })
     }
     pub fn step_measured(&mut self, clock: impl Fn() -> f64) -> [f64; 9] {
         self.advance(Some(&clock))
@@ -207,9 +242,6 @@ impl World {
                 self.field.ny,
             );
         }
-        for c in &mut self.cells {
-            c.flows = Default::default();
-        }
         if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
             o.begin(&self.cells);
         }
@@ -220,12 +252,9 @@ impl World {
         started = now();
         self.field_elapsed += self.config.dt;
         let physiology = self.field_elapsed + 1e-12 >= self.config.physiology_interval;
-        let mut sites: Vec<_> = self
-            .cells
-            .iter()
-            .map(|c| crate::footprint::sites(c, &self.config, &self.field))
-            .collect();
-        crate::footprint::deposit_profiles(&self.cells, &self.config, &mut self.field, &sites);
+        let mut sites = std::mem::take(&mut self.sites);
+        self.footprints
+            .prepare(&self.cells, &self.config, &mut self.field, &mut sites);
         crate::source_medium::advance(self);
         if physiology {
             self.climate.prepare(&self.config);
@@ -247,15 +276,13 @@ impl World {
         }
         stages[1] = now() - started;
         started = now();
+        self.contact_cache.prepare_local(&self.cells, &self.config);
         if physiology || self.tick == 0 {
-            self.control(if physiology { self.field_elapsed } else { 0. });
+            self.sense();
         }
         stages[2] = now() - started;
         started = now();
-        if !self.cells.is_empty() {
-            self.field.prepare_attraction();
-        }
-        crate::movement::advance(&mut self.cells, &self.config, &self.field, &sites);
+        self.advance_local(&sites, physiology);
         stages[3] = now() - started;
         started = now();
         if physiology {
@@ -270,19 +297,19 @@ impl World {
                     crate::illumination::drive(signal, self.field.illumination.sample(row))
                 })
                 .collect();
-            for (row, c) in sites.iter_mut().zip(&self.cells) {
-                *row = crate::footprint::sites(c, &self.config, &self.field);
-            }
+            self.footprints
+                .prepare(&self.cells, &self.config, &mut self.field, &mut sites);
             let mut interval_config = self.config.clone();
             interval_config.dt = self.field_elapsed;
             self.exchange.profile = clock.is_some();
-            self.exchange.advance(
+            self.exchange.advance_prepared(
                 &mut self.cells,
                 &interval_config,
                 &mut self.field,
                 &self.chemistry,
                 &sites,
                 (
+                    &mut self.contact_cache,
                     &mut self.ledger,
                     self.observer.as_deref_mut().filter(|o| o.active()),
                 ),
@@ -293,18 +320,11 @@ impl World {
             self.physiology(self.field_elapsed, &signals);
             self.field_elapsed = 0.;
         }
+        self.sites = sites;
         stages[5] = now() - started;
         started = now();
-        for c in &mut self.cells {
-            let paid = c.pay(c.basal(&self.config));
-            c.flows.maintenance += paid;
-            self.ledger.accumulate(&c.flows);
-            if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
-                o.capture(c, self.config.dt);
-            }
-            if let Some(t) = &mut self.trace {
-                t.capture(c, self.tick);
-            }
+        if physiology {
+            self.finish_cells();
         }
         self.tick += 1;
         crate::lifecycle::advance(self);
@@ -325,65 +345,17 @@ impl World {
         stages[7] = now() - started;
         stages
     }
-    fn control(&mut self, dt: f64) {
-        let interface = crate::interfaces::Graph::new(&self.cells, &self.config);
+    fn sense(&mut self) {
+        let interface = self.contact_cache.graph_prepared(&self.cells, &self.config);
         interface.prepare(&mut self.cells, &self.config, &self.chemistry);
-        let mut config = self.config.clone();
-        config.dt = dt;
-        for cell in &mut self.cells {
-            let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
-            crate::sensing::observe(cell, g, g, &self.config, &self.field);
-            let cost = if self.config.learning == "plastic" {
-                self.config.plasticity_cost * dt * cell.body[0]
-            } else {
-                0.
-            };
-            let learn = cell.energy >= cost;
-            let paid = if learn { cell.pay(cost) } else { 0. };
-            cell.flows.learning += paid;
-            cell.action = crate::controller::act(
-                &g.chromosome.behavior,
-                &cell.inputs,
-                &mut cell.brain,
-                &config,
-                learn,
-            );
-            crate::sensing::adapt(cell, &self.config, dt);
-        }
+        crate::parallel::for_each(&mut self.cells, 128, |_, cell| {
+            crate::sensing::observe_external(cell, &self.config, &self.field);
+        });
     }
-    fn physiology(&mut self, dt: f64, signals: &[[f64; 2]]) {
-        for (cell, &signal) in self.cells.iter_mut().zip(signals) {
-            let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
-            let load =
-                crate::sensing::stress_load(cell, g, &self.config, &self.field, &self.chemistry);
-            let damage = dt * self.config.damage_rate * load / (self.config.stress_k + load);
-            cell.damage = (cell.damage + damage).min(1.);
-            cell.flows.exposure += load * dt;
-            cell.flows.damage += damage;
-            let work = crate::metabolism::react_observed(
-                cell,
-                &self.config,
-                &self.chemistry,
-                dt,
-                self.trace.is_some() || self.observer.as_ref().is_some_and(|o| o.active()),
-                signal,
-            );
-            if let Some(t) = &mut self.trace {
-                t.reactions(cell, &work);
-            }
-            if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
-                o.reactions(cell, &work);
-            }
-            crate::metabolism::repair(cell, &self.config, &self.chemistry, dt);
-            crate::refitting::advance(cell, g, &self.config, &self.chemistry, dt);
-            crate::metabolism::grow(cell, g, &self.config, &self.chemistry, dt);
-            let excess = (cell.energy - cell.energy_capacity(&self.config)).max(0.);
-            cell.energy -= excess;
-            self.ledger.overflow_heat += excess;
-            if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
-                o.overflow(cell, excess);
-            }
-        }
+    pub(crate) fn observed_reactions(&self, group: usize) -> &[f64] {
+        self.observer
+            .as_ref()
+            .map_or(&[], |o| &o.interval().groups[group].routes)
     }
     pub fn intervention_budget(&self) -> Result<(), String> {
         if self.events.iter().filter(|e| durable(&e.kind)).count() >= 4096 {
@@ -434,12 +406,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY34\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY35\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY34\0")
-            .ok_or("Unsupported physical checkpoint; v34 required")?;
+            .strip_prefix(b"ANTROPY35\0")
+            .ok_or("Unsupported physical checkpoint; v35 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {

@@ -1,6 +1,10 @@
 # Current design and work order
 
-Updated September 21, 2026. Physical v34 uses one scalar illumination field throughout chemistry,
+Updated September 21, 2026. Physical v35 uses shared prepared geometry, direct funded
+chemical composition and physiological neural recurrence with owner-published inputs;
+the single-thread investigation ended below its throughput target. Shared-memory execution
+is now tracked in the [multicore plan](../../SCALING-PLAN.md#multicore-design), with one Rust
+World, a persistent compute pool and the existing coordinator-owned renderer. It uses one scalar illumination field throughout chemistry,
 photoreception and display. It retains v33 cellular organization and exchange, material-supported
 habitats, composed source periods and bounded phenotype/chemical-flow observation.
 Before this feature, the user reported dense, long-lived colonies and a promising visual result.
@@ -95,7 +99,7 @@ The controller has 56 inputs, 24 recurrent units and 38 outputs. Twenty bounded 
 four chemical receptors, four transporters and up to eight enzyme programs plus core, motor, storage and
 [photoreception](../photoreception.md). The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v34; the outer observation package remains v11.
+checkpoints use v35; the outer observation package remains v11.
 The [material-habitat changes](../material-habitats.md) add shared two-scale attraction,
 reversible retention, locally evolving source renewal and multiscale public chemistry.
 IDs0/136 are initial landscape choices; ordinary renewal no longer reinstates them.
@@ -127,12 +131,16 @@ The separate v33 mature-state slowdown reproduces after restore. The
 8.14 ticks/s. The [continued pass](../bounded-computation.md) reaches 12.77 ticks/s using
 finite-resolution census grouping, occupied-bin contact queries and a shared concentration
 threshold for reaction participation. Trace intracellular material remains stored until it
-accumulates above the threshold. The 30 ticks/s goal remains unmet; reaction/exchange costs
-and save/export limits provide concrete work ahead of another ecological mechanism.
+accumulates above the threshold. Those are historical single-thread measurements. The resumed
+[multicore implementation](../../SCALING-PLAN.md#multicore-design) now measures the historical
+mature checkpoint at 18.53/36.98 ticks/s with one/six native workers through its isolated legacy
+fixture. Browser capacity and scaled geography are measured separately; mature browser throughput
+and large-world save/export limits remain unresolved.
 
 Future work belongs in the [backlog](../backlog.md): meaningful long-term specialization,
 less dependence on original feedstock, useful public-food returns, operating headroom, terrain
-and climate, and conditional cell interaction research. Multicore stays paused. Source geometry
+and climate, and conditional cell interaction research. Multicore's remaining operating envelope
+is tracked in the scaling plan. Source geometry
 is a revisable initial condition, not a requirement for predetermined wells or colony counts.
 Do not turn these open questions into a mandatory verification campaign.
 

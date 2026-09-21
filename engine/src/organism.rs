@@ -5,6 +5,9 @@ use crate::{
     genetics::Compiled,
 };
 use serde::{Deserialize, Serialize};
+#[path = "chemical_flow_counter.rs"]
+mod chemical_flow_counter;
+use chemical_flow_counter::Counter;
 
 pub const MAX_ENZYMES: usize = 8;
 pub const STOCKS: usize = 12 + MAX_ENZYMES;
@@ -48,22 +51,12 @@ pub struct Cell {
     pub flows: Flows,
     pub chemical_flows: ChemicalFlows,
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ChemicalFlows {
-    pub imported: Vec<f64>,
-    pub exported: Vec<f64>,
-    pub consumed: Vec<f64>,
-    pub produced: Vec<f64>,
-}
-impl Default for ChemicalFlows {
-    fn default() -> Self {
-        Self {
-            imported: vec![0.; SPECIES],
-            exported: vec![0.; SPECIES],
-            consumed: vec![0.; SPECIES],
-            produced: vec![0.; SPECIES],
-        }
-    }
+    pub imported: Counter,
+    pub exported: Counter,
+    pub consumed: Counter,
+    pub produced: Counter,
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -173,6 +166,7 @@ impl Cell {
         amount
     }
     pub fn validate(&self, c: &Config) -> Result<(), String> {
+        crate::controller::validate_state(&self.brain)?;
         self.installed.validate()?;
         self.inventory.validate()?;
         self.bound_material.validate()?;
@@ -192,16 +186,16 @@ impl Cell {
             &self.chemical_flows.consumed,
             &self.chemical_flows.produced,
         ] {
-            if values.len() != SPECIES || values.iter().any(|q| !q.is_finite() || *q < 0.) {
+            if values.len() != SPECIES || values.iter().any(|q| !q.is_finite() || q < 0.) {
                 return Err("Invalid chemical flow history".into());
             }
         }
         if self
             .inventory
             .iter()
-            .chain(&self.body)
-            .chain([&self.energy, &self.damage])
-            .any(|q| !q.is_finite() || *q < 0.)
+            .chain(self.body.iter().copied())
+            .chain([self.energy, self.damage])
+            .any(|q| !q.is_finite() || q < 0.)
             || !self.x.is_finite()
             || !self.y.is_finite()
             || self.x < 0.

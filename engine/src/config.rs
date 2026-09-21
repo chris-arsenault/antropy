@@ -256,9 +256,10 @@ impl Config {
             || self.height / self.mesh < 4.
             || (self.width / self.mesh).fract() != 0.
             || (self.height / self.mesh).fract() != 0.
-            || (self.width / self.mesh) * (self.height / self.mesh) > 80000.
+            || (self.width / self.mesh) * (self.height / self.mesh)
+                > crate::memory_budget::MAX_FIELD_NODES as f64
         {
-            return Err("Invalid chemical mesh; dimensions must be integral multiples and at most 80000 nodes".into());
+            return Err("Invalid chemical mesh; dimensions must be integral multiples and fit the 2 GiB geographic memory reservation".into());
         }
         if self.dt > 1.
             || self.weathering_rate > 1.

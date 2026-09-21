@@ -6,6 +6,7 @@ import { loadEngine } from "../numerical/engine";
 import { foodAccess } from "./foodAccess";
 import { QuickObserver } from "./quickObserver";
 import { validateQuickOptions } from "./quickRun";
+import { expectPhysicalState } from "./physicalAssertions";
 let engine: Engine;
 beforeAll(async () => {
   engine = await loadEngine();
@@ -52,7 +53,7 @@ it("records the causal trace without changing physics or neural memory", () => {
       b.step();
       observer.frame();
     }
-    expect(a.snapshot()).toEqual(b.snapshot());
+    expectPhysicalState(a, b);
     const groups = observer.result(),
       total = a.command<Summary>("summary").ledger.flows;
     expect(groups.reduce((n, g) => n + g.flows.imported, 0)).toBeCloseTo(total.imported, 10);

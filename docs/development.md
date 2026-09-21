@@ -14,6 +14,33 @@ engine for an already-running server without starting another server. Authored c
 The browser starts a paused new world; current operation is described in
 [continuation](continuing-observation.md). No cloud resources are needed for development.
 
+## Shared-memory engine builds
+
+The engine build produces both `public/antropy-engine.wasm` and generated
+`public/engine-threads/` assets. Both execute the same Rust operators. The build script installs
+the pinned public `nightly-2026-02-01` toolchain with `rust-src` and `wasm-bindgen-cli 0.2.108`
+when absent. Native checks and the serial fallback retain the ordinary toolchain. Threaded
+WASM rebuilds the standard library with atomics; do not replace it with a prebuilt non-atomic
+standard library. Generated bindings are ignored and must not be edited.
+
+Vite development and preview responses set COOP `same-origin` and COEP `require-corp`.
+The browser coordinator initializes a persistent Rayon pool before constructing its World,
+normally using hardware concurrency minus one, capped at 32 workers. Small stages execute
+serially. A browser without isolation uses the serial asset. Renderer uploads still borrow
+WASM memory directly. Shared-buffer JSON decoding copies only bounded observation replies
+because browsers reject SharedArrayBuffer input to TextDecoder.
+
+The production Terraform consumer requires the new `response_headers_policy_id` option in
+the shared `ahara-tf-patterns` website module. Publish that module change before deploying
+this consumer. Local configuration and browser probes do not establish deployed headers.
+No agent should start an additional server to test the pool.
+
+See [the scaling plan](../SCALING-PLAN.md#multicore-design) for boundaries and measurements.
+Geographic admission now permits up to 524,288 mesh nodes within its field reservation.
+This does not enlarge the browser's 192 MiB raw package limit: 20× capacity fixtures can
+step and restore through the engine but cannot use ordinary automatic recovery. Keep the
+default dimensions for continuing browser observation until P3 persistence work lands.
+
 ## Chemistry and experiment boundaries
 
 Experimental data is not version controlled. The harness creates its SQLite ledger at

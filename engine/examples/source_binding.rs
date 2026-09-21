@@ -1,6 +1,6 @@
 //! Zero-tick force diagnosis. Calls ordinary projection, gradients and source response.
 use antropy_engine::{
-    chemistry, config, field, movement, organism, source_medium, sources::Source, world,
+    chemistry, config, field, footprint, movement, source_medium, sources::Source, world,
 };
 use config::Config;
 use field::Field;
@@ -8,9 +8,6 @@ use serde_json::{Value, json};
 use world::World;
 
 // Reuse private production modules without widening the engine's public API.
-#[allow(dead_code)]
-#[path = "../src/footprint.rs"]
-mod footprint;
 #[allow(dead_code)]
 #[path = "../src/medium_response.rs"]
 mod medium_response;

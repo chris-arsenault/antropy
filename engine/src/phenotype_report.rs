@@ -105,29 +105,30 @@ pub fn report(w: &World) -> Value {
 }
 
 pub fn web(w: &World, query: &crate::chemical_roles::Query) -> Value {
-    let flux = w
+    let interval = w
         .observer
         .as_ref()
         .filter(|o| o.active())
-        .map(|o| &o.interval().groups[0]);
-    let mut keys: Vec<_> = flux.map_or_else(Vec::new, |f| {
-        f.touched
+        .map(|o| o.interval());
+    let flux = interval.map(|v| &v.groups[0]);
+    let mut edges: Vec<_> = interval.map_or_else(Vec::new, |_| {
+        w.observed_reactions(0)
             .iter()
             .copied()
-            .filter(|&k| query.focus.is_none_or(|s| k / 256 == s || k % 256 == s))
+            .enumerate()
+            .filter(|(_, amount)| *amount > 0.)
+            .filter(|&(k, _)| query.focus.is_none_or(|s| k / 256 == s || k % 256 == s))
             .collect()
     });
-    if let Some(f) = flux {
-        keys.sort_by(|&a, &b| f.routes[b].total_cmp(&f.routes[a]).then(a.cmp(&b)));
-    }
-    let pairs = keys.len();
+    edges.sort_by(|a, b| b.1.total_cmp(&a.1).then(a.0.cmp(&b.0)));
+    let pairs = edges.len();
     let offset = query.offset.min(pairs.saturating_sub(1) / 64 * 64);
-    let rows: Vec<_> = keys
+    let rows: Vec<_> = edges
         .into_iter()
         .skip(offset)
         .take(64)
-        .map(|k| {
-            json!({"input":k/256,"output":k%256,"amount":flux.unwrap().routes[k],
+        .map(|(k, amount)| {
+            json!({"input":k/256,"output":k%256,"amount":amount,
             "cells":0,"primary":0,"capacity":0})
         })
         .collect();

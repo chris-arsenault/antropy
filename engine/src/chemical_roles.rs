@@ -1,5 +1,5 @@
 //! Read-only chemical role reductions. Installed capability is not measured reaction flux.
-use crate::{chemical_operators::Conversion, organism::Cell, world::World};
+use crate::{chemical_operators::Conversions, organism::Cell, world::World};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -19,7 +19,7 @@ fn stronger(candidate: Route, current: Option<Route>) -> bool {
     })
 }
 
-pub fn strongest(conversions: &[Conversion]) -> Option<Route> {
+pub fn strongest(conversions: &Conversions) -> Option<Route> {
     let mut best = None;
     for edge in conversions {
         for product in &edge.products {

@@ -67,9 +67,18 @@ fn external_work_is_bounded_and_field_and_reservoir_use_identical_coefficients()
             climate.prepare(&config);
             let final_mask = climate.convert(&mut field, mask, (medium, 0.), dt);
             let signal = weathering::signal(medium);
-            let accounts = op.inventory(&mut row, signal, config.weathering_rate * dt);
+            let floor = crate::field_activity::CONCENTRATION_FLOOR as f64 * config.mesh.powi(2);
+            let accounts = op
+                .inventory_active(&mut row, signal, config.weathering_rate * dt, floor, mask)
+                .0;
             for (a, b) in row.iter().zip(field) {
-                assert!((a - b as f64).abs() < 3e-7);
+                let rounded = *a as f32;
+                let expected = if (rounded as f64) < floor {
+                    0.
+                } else {
+                    rounded
+                };
+                assert!((expected - b).abs() < 3e-7);
             }
             assert!((accounts[1] - climate.heat).abs() < 1e-12);
             assert!((accounts[2] - climate.work).abs() < 1e-12);
@@ -115,7 +124,7 @@ fn a_funded_environmental_return_can_feed_an_ordinary_cell_without_creating_work
         [Enzyme::between(coordinate(high), coordinate(low)); crate::organism::MAX_ENZYMES];
     cell.operators = Some(Operators::compile(&cell.installed, &w.config, chemistry));
     crate::metabolism::react(&mut cell, &w.config, chemistry, 1e6);
-    assert!(cell.energy > 0. && cell.inventory[low] > before);
+    assert!(cell.energy > 0. && cell.inventory.value(low) > before);
     let stored: f64 = cell
         .inventory
         .iter()

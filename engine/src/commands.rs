@@ -102,7 +102,18 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             Ok(json!({}))
         }
         "profile" => Ok(json!(w.step_measured(crate::abi::clock))),
-        "fieldActivity" => Ok(json!(w.field.work_counts())),
+        "executionBudget" => Ok(crate::execution_budget::report(w)),
+        "fieldActivity" => {
+            if v.get("execution").and_then(Value::as_bool) == Some(true) {
+                Ok(
+                    json!({"field":w.field.work_counts(),"operators":w.execution_work(),
+                    "controllerPreparations":w.cells.iter().filter_map(|c| c.brain.epoch.as_ref())
+                        .map(|epoch| epoch.preparations).sum::<u64>()}),
+                )
+            } else {
+                Ok(json!(w.field.work_counts()))
+            }
+        }
         "composedCapacity" => {
             Err("Retired standalone core benchmark; use production capacity".into())
         }
@@ -229,6 +240,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
                 .find(|c| c.id == id)
                 .ok_or("Cell is no longer alive")?;
             let before = cell.brain.task;
+            crate::controller::invalidate(&mut cell.brain);
             cell.brain.task = value as u8;
             w.event("override", id, vec![before as u64, value]);
             Ok(json!({"tick":w.tick}))
@@ -321,6 +333,7 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             .position(|c| c.id == id)
             .ok_or("Unknown intervention cell")?;
         let mut cell = w.cells[index].clone();
+        crate::controller::invalidate(&mut cell.brain);
         let mut genotype = None;
         if let Some(value) = v.get("genotype") {
             let mut g: Genotype =

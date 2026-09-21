@@ -1,12 +1,43 @@
 //! Frozen-mixture conversion and proportional construction with explicit work accounts.
 use crate::{chemistry::Chemistry, config::Config, genetics::Compiled, organism::Cell};
-#[derive(Default)]
+#[path = "reaction_execution.rs"]
+mod execution;
+pub use execution::Executor;
+
+#[derive(Clone, Debug, Default)]
 pub struct Work {
-    edges: Vec<(usize, usize, f64)>,
+    enzymes: Option<
+        [std::sync::Arc<crate::chemical_operators::EnzymeOperator>; crate::organism::MAX_ENZYMES],
+    >,
+    routes: Vec<(u8, u16, f64)>,
 }
 impl Work {
+    pub(crate) fn accepted_routes(
+        &self,
+    ) -> impl Iterator<
+        Item = (
+            &std::sync::Arc<crate::chemical_operators::EnzymeOperator>,
+            u16,
+            f64,
+        ),
+    > + '_ {
+        self.routes.iter().map(|&(slot, row, amount)| {
+            (&self.enzymes.as_ref().unwrap()[slot as usize], row, amount)
+        })
+    }
     pub fn reactions(&self) -> impl Iterator<Item = (usize, usize, f64)> + '_ {
-        self.edges.iter().copied()
+        self.routes.iter().flat_map(|&(slot, row, amount)| {
+            let edge = self.enzymes.as_ref().unwrap()[slot as usize]
+                .conversions
+                .get(row as usize);
+            edge.products.iter().filter_map(move |product| {
+                (product.species != edge.substrate).then_some((
+                    edge.substrate,
+                    product.species,
+                    amount * product.weight,
+                ))
+            })
+        })
     }
 }
 pub fn react(cell: &mut Cell, c: &Config, chemistry: &Chemistry, dt: f64) -> Work {
@@ -20,94 +51,9 @@ pub fn react_observed(
     record: bool,
     signal: [f64; 2],
 ) -> Work {
-    let operators = cell.operators.as_ref().unwrap();
-    let mixture = retained_response(cell, c, chemistry);
-    let volume = cell.volume(c);
-    // Retain unresolved material in its owner. Uptake can accumulate it until this
-    // concentration is meaningful; no reaction work or waste is booked below it.
-    let resolved = crate::field_activity::CONCENTRATION_FLOOR as f64 * volume;
-    let factors: [f64; crate::organism::MAX_ENZYMES] = std::array::from_fn(|slot| {
-        let stock = cell.body[crate::organism::enzyme_stock(slot)];
-        if stock == 0. || !cell.installed.programs[slot] || cell.action.activity[slot] == 0. {
-            return 0.;
-        }
-        let enzyme = &operators.enzymes[slot];
-        let occupancy = enzyme
-            .engagement
-            .iter()
-            .map(|a| a.value * cell.inventory[a.species])
-            .sum::<f64>();
-        dt * c.enzyme_turnover * stock * cell.action.activity[slot] * (1. - cell.damage)
-            / (c.receptor_k * volume + occupancy).max(1e-30)
-    });
-    // Only occupied installed rows need a local yield. Reuse it for reservation and commit.
-    let mut requests = Vec::new();
-    let mut cost = 0.;
-    for (factor, enzyme) in factors.iter().zip(&operators.enzymes) {
-        if *factor == 0. {
-            continue;
-        }
-        for edge in &enzyme.conversions {
-            if cell.inventory[edge.substrate] <= resolved {
-                continue;
-            }
-            let requested = factor
-                * edge.catalytic
-                * cell.inventory[edge.substrate]
-                * response(edge.work_coefficient, mixture);
-            if requested == 0. {
-                continue;
-            }
-            let energy = edge.energy(c, signal);
-            cost += requested * (-energy[0]).max(0.);
-            requests.push((edge, requested, energy));
-        }
-    }
-    let funding = if cost > 0. {
-        (cell.energy / cost).min(1.)
-    } else {
-        1.
-    };
-    let funded = |work: f64| if work < 0. { funding } else { 1. };
-    let mut demand = [0.; 256];
-    for &(edge, requested, energy) in &requests {
-        demand[edge.substrate] += requested * funded(energy[0]);
-    }
-    for (s, value) in demand.iter_mut().enumerate() {
-        if *value > 0. {
-            *value = (cell.inventory[s] / *value).min(1.);
-        }
-    }
-    let mut delta = [0.; 256];
-    let mut work = Work::default();
-    let mut balance = 0.;
-    for (edge, requested, energy) in requests {
-        let q = requested * demand[edge.substrate] * funded(energy[0]);
-        if q == 0. {
-            continue;
-        }
-        delta[edge.substrate] -= q * edge.changed;
-        cell.chemical_flows.consumed[edge.substrate] += q * edge.changed;
-        for p in &edge.products {
-            if p.species == edge.substrate {
-                continue;
-            }
-            let amount = q * p.weight;
-            delta[p.species] += amount;
-            cell.chemical_flows.produced[p.species] += amount;
-            if record {
-                work.edges.push((edge.substrate, p.species, amount));
-            }
-        }
-        balance += q * energy[0];
-        cell.flows.reacted += q * edge.changed;
-        cell.flows.captured += q * energy[0].max(0.);
-        cell.flows.reaction_heat += q * energy[1];
-        cell.flows.external_work += q * energy[2];
-    }
-    cell.inventory.apply(&delta);
-    cell.energy = (cell.energy + balance).max(0.);
-    work
+    let mut executor = Executor::default();
+    executor.react(cell, c, chemistry, dt, record, signal);
+    executor.into_work()
 }
 /// Consume a proportional mixture; returns constructed material and dissipated value.
 pub fn assemble(
@@ -137,15 +83,11 @@ pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt
 }
 
 pub fn retained_response(cell: &Cell, c: &Config, chemistry: &Chemistry) -> [f64; 2] {
-    let mut sum = [0.; 2];
-    for (s, p) in chemistry.properties.iter().enumerate() {
-        let q = cell.inventory[s] + cell.bound_material[s];
-        sum[0] += q * p.interaction[0];
-        sum[1] += q * p.interaction[1];
-    }
+    let free = cell.inventory.projection(chemistry).interaction;
+    let bound = cell.bound_material.projection(chemistry).interaction;
     let denominator =
         c.receptor_k * cell.volume(c) + cell.material() + cell.bound_material.material();
-    sum.map(|v| v / denominator.max(1e-30))
+    std::array::from_fn(|k| (free[k] + bound[k]) / denominator.max(1e-30))
 }
 pub fn response(coefficient: [f64; 2], mixture: [f64; 2]) -> f64 {
     let z = 4. * (coefficient[0] * mixture[0] + coefficient[1] * mixture[1]);
