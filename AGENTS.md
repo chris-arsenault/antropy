@@ -132,6 +132,14 @@ commit `780fa4e`; it is not another runtime or a prerequisite.
 
 ## Experiment operating policy
 
+Experimental data is local-only. The harness ledger lives at
+`frontend/harness/artifacts/ledger.db`; checkpoints, samples, traces, raw reports and
+generated plots stay in ignored files. Never commit the ledger or copy generated data
+into tracked documentation. Preserve authored findings, decisions, registrations and
+reproduction instructions in Git. `docs/evidence/` keeps only authored `README.md` notes
+tracked; its existing raw files remain available locally and are optional on fresh checkouts.
+This policy supersedes earlier instructions to commit measurements or report copies.
+
 Model resource budgets before using runs to discover them. The
 [resource-economy command and derivation](docs/design/chemistry/resource-economy.md) calculate
 delivery limits, maintenance, reaction/assembly/repair, source turnover and conditional
@@ -238,7 +246,7 @@ expensive ecological panels merely for formatting or documentation changes.
 - Treat the controller as a pluggable module behind `seed`, `createState`, `act`, `assimilate`, `mutate`, `recombine`, and
   `genomeDistance`. Code outside a controller does not inspect genome internals.
 - Keep Vitest bounded to deterministic mechanics and integration invariants. Ecological and
-  long-horizon results belong in `frontend/harness/ledger.db`.
+  long-horizon results belong in ignored `frontend/harness/artifacts/ledger.db` and local artifacts.
 - Use Rust/WASM, pnpm, TypeScript, React, worker WebGL2, Rust tests and Vitest. ESLint limits complexity to 10, files to 400
   lines, and functions to 75 lines.
 - Run `make ci` before handoff after changing files. Start a development server only when the user
@@ -255,7 +263,7 @@ expensive ecological panels merely for formatting or documentation changes.
 | `engine/src/` | Sole Rust kernel: bodies, fields, local RNN, resource economy, inheritance and binary state |
 | `frontend/src/engine/` | WASM client, worker, WebGL2, React observation and recovery |
 | `frontend/src/persist/`, `frontend/src/ui/pacing.ts` | Local identity, retention policy and bounded pacing only |
-| `frontend/harness/`         | Comparative measurements and committed SQLite ledger                  |
+| `frontend/harness/`         | Experiment tooling; ignored `artifacts/` owns the local ledger and data |
 | `infrastructure/terraform/` | Static website deployment                                             |
 | `docs/`                     | Current design, evidence, decisions, and archived source material     |
 

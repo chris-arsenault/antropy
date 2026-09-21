@@ -29,6 +29,7 @@ test: engine-build
 	cd frontend && pnpm exec vitest run
 
 docs-check:
+	cd frontend && pnpm exec tsx harness/checkExperimentStorage.ts ..
 	cd frontend && pnpm exec tsx harness/checkDocs.ts ..
 
 terraform-fmt-check:

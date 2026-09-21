@@ -16,6 +16,18 @@ The browser starts a paused new world; current operation is described in
 
 ## Chemistry and experiment boundaries
 
+Experimental data is not version controlled. The harness creates its SQLite ledger at
+`frontend/harness/artifacts/ledger.db` on first use; `recent` and `sql` use that same local
+file. Checkpoints, sample arrays, traces, raw reports and generated plots also stay under
+ignored artifact paths. A fresh checkout starts with an empty ledger. Existing local
+history was moved from `frontend/harness/ledger.db` without dropping any records.
+
+Keep authored findings, decisions, registrations and reproduction commands in Git.
+Historical raw files under `docs/evidence/` remain local and ignored; only authored
+`README.md` notes there are tracked. Links to local data work when those files are present
+and are optional for documentation validation. CI rejects tracked experiment payloads.
+Removing them from the current tree does not remove copies in earlier Git commits.
+
 The [digital chemistry contract](design/chemistry/composed-runtime.md) governs current v19 checkpoints and
 schema-v3 evidence. Historical studies preserve their original results, not executable current
 registrations. Read [environmental evidence](design/chemistry/environmental-results.md) and

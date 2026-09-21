@@ -14,6 +14,12 @@ Vitest covers bounded mechanics. Comparative and long-horizon runs execute throu
 `pnpm harness` and record parameters, seeds, commit state, timing, and summaries in SQLite. Human
 visual review remains a separate gate where aggregate metrics can conceal motion defects.
 
+September 21, 2026 clarification: this SQLite ledger is local experimental data at
+`frontend/harness/artifacts/ledger.db`, not a committed repository artifact. Raw data,
+genomes, traces, reports and plots stay ignored. Git preserves authored findings and
+reproduction instructions. This replaces the earlier practice of checking in the database
+and selected raw evidence; it does not discard local records or rewrite repository history.
+
 ## Consequences
 
 Normal CI remains fast. Behavioral claims are reproducible from declared panels without pretending

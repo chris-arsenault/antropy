@@ -12,7 +12,12 @@ test-results/
 target/
 .DS_Store
 .sulion-paste/
-# Experiment dumps stay local; the ledger keeps named measurements.
+# Experimental data stays local, including the SQLite ledger and its sidecars.
 frontend/harness/artifacts/
+frontend/harness/ledger.db*
+# Retain authored evidence notes; generated reports, tables and plots stay local.
+docs/evidence/**
+!docs/evidence/**/
+!docs/evidence/**/README.md
 __pycache__/
 frontend/public/antropy-engine.wasm

@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
+import { isLocalExperiment } from "./lib/artifactPolicy";
 
 const root = resolve(process.cwd(), process.argv[2] ?? ".");
 const docsIndexPath = resolve(root, "docs/README.md");
@@ -74,7 +75,7 @@ function markdownFiles(directory: string): string[] {
     if (entry.isDirectory()) {
       return markdownFiles(path);
     }
-    return extname(entry.name) === ".md" ? [path] : [];
+    return extname(entry.name) === ".md" && !isLocalExperiment(relative(root, path)) ? [path] : [];
   });
 }
 
@@ -116,7 +117,11 @@ function checkLinks(files: readonly string[], errors: string[]): void {
   for (const file of files) {
     for (const rawTarget of readFileSync(file, "utf8").split("\n").flatMap(markdownTargets)) {
       const target = localLinkTarget(rawTarget.replace(/^<|>$/g, ""));
-      if (target !== null && !existsSync(resolve(dirname(file), target))) {
+      if (target === null) continue;
+      const resolved = resolve(dirname(file), target);
+      // Local experiment payloads are intentionally absent from a fresh checkout.
+      // Authored notes and all other source/document links still require a real target.
+      if (!isLocalExperiment(relative(root, resolved)) && !existsSync(resolved)) {
         errors.push(`${relative(root, file)}: broken local link ${rawTarget}`);
       }
     }

@@ -1,9 +1,15 @@
 import { execFileSync } from "node:child_process";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
-const DB_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "ledger.db");
+const DB_PATH = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "artifacts",
+  "ledger.db"
+);
 const GIT_PATH = "/usr/bin/git";
 
 export interface RunRecord {
@@ -32,6 +38,7 @@ function gitRevision(): string {
 }
 
 export function openLedger(): DatabaseSync {
+  mkdirSync(path.dirname(DB_PATH), { recursive: true });
   const database = new DatabaseSync(DB_PATH);
   database.exec("PRAGMA busy_timeout = 5000");
   database.exec(`

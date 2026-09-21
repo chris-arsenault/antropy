@@ -8,6 +8,12 @@ Rolling recovery, compact parentage and retained spatial observation are impleme
 days/weeks browser operation remains unverified.
 The [historical snapshot](sources/history/README.md) preserves superseded contracts and full evidence.
 
+Experimental data is local-only: the SQLite ledger and new run output live under ignored
+`frontend/harness/artifacts/`. Historical raw reports and plots under `docs/evidence/` are
+also ignored. Git retains written analyses, registrations and evidence README notes.
+Links to raw data require the corresponding local files; a fresh checkout does not include
+them. See the [storage policy](evidence/README.md).
+
 | Need | Document |
 | --- | --- |
 | Current decisions, failed approaches and plan disposition | [Decision record](design/decisions-and-evidence.md), [plan archive](plans/README.md) |
