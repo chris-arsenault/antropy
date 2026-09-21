@@ -1,6 +1,12 @@
 #[cfg(not(target_arch = "wasm32"))]
 mod display;
 #[cfg(not(target_arch = "wasm32"))]
+mod management;
+#[cfg(not(target_arch = "wasm32"))]
+mod management_owner;
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod management_tests;
+#[cfg(not(target_arch = "wasm32"))]
 mod observations;
 #[cfg(not(target_arch = "wasm32"))]
 mod runtime;
@@ -51,6 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let files =
         ServeDir::new(&static_dir).fallback(ServeFile::new(format!("{static_dir}/index.html")));
     let app = Router::new()
+        .nest("/api", management::routes(state.clone()))
         .route("/health", get(socket::health))
         .route("/stream", get(socket::upgrade))
         .route(

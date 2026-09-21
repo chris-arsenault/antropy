@@ -74,12 +74,18 @@ no one is attached, rather than inventing unattended history.
 
 Public commands are read-only. Physical and run-level phenotype changes require an operator
 credential; a WebSocket upgrade alone never grants that authority. Operator credentials are sent
-as an explicit authentication message, never a URL or stored browser setting. Production keys are
+as an explicit authentication message or HTTP Bearer header, never a URL or stored browser setting. Production keys are
 SSM-backed and injected by the existing Komodo deploy action. Public VPN ingress remains disabled.
 
 The browser observation budget and revisioned selected-cell/React publication paths still apply.
-Server-side native ancestry and region membership remain behind the host boundary. No save,
-cross-context transfer, or alternate simulation economy is introduced.
+Server-side native ancestry and region membership remain behind the observation boundary.
+The separately authorized [HTTP management API](../../server-management.md) adds explicit physical
+checkpoint export as a cold path. The owner serializes at a complete tick boundary into one
+buffer capped at 256 MiB, without cloning World. A single export permit follows that buffer
+through the command queue and HTTP response until the final reference is released. No export
+history is retained. This exception does not add full physical state to the display stream,
+React observations or local worker messages. It adds no checkpoint upload, automatic recovery,
+cross-context migration or alternate simulation economy.
 
 React owns display observations, never continuation state. The permitted data is global scalar
 accounting, population distributions, retained chart samples, reduced spatial summaries, and one

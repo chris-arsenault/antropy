@@ -10,7 +10,7 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-use tokio::sync::{mpsc, oneshot, watch};
+use tokio::sync::{Semaphore, mpsc, oneshot, watch};
 
 pub const MAX_VIEWERS: usize = 32;
 pub const MAX_VIEWS: usize = 16;
@@ -31,9 +31,32 @@ pub struct Command {
     pub payload: Value,
     pub reply: oneshot::Sender<Result<Value, String>>,
 }
+pub enum Request {
+    Socket(Command),
+    Management(super::management_owner::Request),
+}
+impl Request {
+    fn execute(self, runtime: &mut Runtime) {
+        match self {
+            Self::Management(request) => request.execute(runtime),
+            Self::Socket(c) => {
+                if c.reply.is_closed() {
+                    return;
+                }
+                let result = if c.generation != runtime.generation {
+                    Err("World changed; refresh before issuing controls".into())
+                } else {
+                    runtime.command(&c.op, c.payload)
+                };
+                let _ = c.reply.send(result);
+            }
+        }
+    }
+}
 #[derive(Clone)]
 pub struct Host {
-    pub commands: mpsc::Sender<Command>,
+    pub commands: mpsc::Sender<Request>,
+    pub exports: Arc<Semaphore>,
     pub publications: watch::Receiver<Arc<Publication>>,
     pub views: Arc<Mutex<BTreeMap<u64, ViewKey>>>,
 }
@@ -46,12 +69,12 @@ impl Host {
     ) -> Result<Value, String> {
         let (reply, received) = oneshot::channel();
         self.commands
-            .try_send(Command {
+            .try_send(Request::Socket(Command {
                 generation,
                 op: op.into(),
                 payload,
                 reply,
-            })
+            }))
             .map_err(|_| "Server command budget busy; retry".to_string())?;
         tokio::time::timeout(Duration::from_secs(30), received)
             .await
@@ -230,7 +253,7 @@ pub fn start(seed: u64, config: Config, threads: usize) -> Result<Host, String> 
     let mut runtime = pool.install(|| Runtime::new(seed, config, threads))?;
     let initial = runtime.publish(vec![], 0.)?;
     let (sender, publications) = watch::channel(Arc::new(initial));
-    let (commands, mut receiver) = mpsc::channel::<Command>(32);
+    let (commands, mut receiver) = mpsc::channel::<Request>(32);
     let views = Arc::new(Mutex::new(BTreeMap::<u64, ViewKey>::new()));
     let demand = views.clone();
     std::thread::Builder::new().name("world-owner".into()).spawn(move || {
@@ -240,10 +263,7 @@ pub fn start(seed: u64, config: Config, threads: usize) -> Result<Host, String> 
         loop {
             for _ in 0..4 {
                 let Ok(c) = receiver.try_recv() else { break; };
-                if c.reply.is_closed() { continue; }
-                let result = if c.generation != runtime.generation { Err("World changed; refresh before issuing controls".into()) }
-                    else { pool.install(|| runtime.command(&c.op, c.payload)) };
-                let _ = c.reply.send(result);
+                pool.install(|| c.execute(&mut runtime));
             }
             let now = Instant::now();
             if runtime.running && now >= next_step {
@@ -274,6 +294,7 @@ pub fn start(seed: u64, config: Config, threads: usize) -> Result<Host, String> 
     }).map_err(|e| e.to_string())?;
     Ok(Host {
         commands,
+        exports: Arc::new(Semaphore::new(1)),
         publications,
         views,
     })

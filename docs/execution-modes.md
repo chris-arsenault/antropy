@@ -40,6 +40,11 @@ viewer count and projection count. It contains no private cellular state. `/stre
 version-1 WebSocket endpoint. Protocol generations and view revisions reject stale state;
 uncertain commands are never automatically replayed after reconnect.
 
+The independent [HTTP management API](server-management.md) exposes authenticated status/config,
+controls and physical checkpoint download under `/api`. It needs no WebSocket connection. Both
+transports use the same bounded command queue and sole World owner. Existing UI controls remain
+compatible with the WebSocket protocol.
+
 ## Observation cost and access
 
 World stepping happens once. Common status and matching display selections are encoded once
@@ -59,7 +64,7 @@ can read these reports without changing the shared cohort. Charts preserve bound
 history while attached; unattended gaps are not backfilled. Browser recovery controls do not
 save a server world.
 
-Operator authentication uses an explicit WebSocket message. The key is never in a URL,
+Operator authentication uses an explicit WebSocket message or an HTTP Bearer header. The key is never in a URL,
 localStorage or a public config response. The deployment creates it as a SecureString in
 `/ahara/antropy/operator-token`; `secret-paths.yml` lets the shared Komodo action inject it.
 Use the environment's approved credential broker for secret-backed commands; other installations
