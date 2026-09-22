@@ -93,6 +93,7 @@ impl Source {
     pub fn advance(
         &mut self,
         step: &crate::source_medium::Step<'_>,
+        rng: &mut Random,
         field: &mut Field,
         ledger: &mut Ledger,
     ) -> bool {
@@ -131,7 +132,8 @@ impl Source {
                 ledger,
             );
             if self.amount == 0. {
-                self.wait = c.source_gap;
+                // Independent renewal with mean source_gap; sample only at exhaustion.
+                self.wait = -(1. - rng.unit()).ln() * c.source_gap;
             }
         } else if changed || !self.material.valid {
             self.refresh_material(chemistry);

@@ -173,6 +173,7 @@ pub fn advance(w: &mut World) {
                 exposure,
                 response,
             },
+            &mut w.environment_rng,
             &mut w.field,
             &mut w.ledger,
         );

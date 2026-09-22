@@ -179,7 +179,8 @@ composition continues responding to the local medium as an external supply condi
 contributes no material, work, force or velocity. This retains the reason supply memory was
 introduced: renewal must not reset ordinary sources to the initial feedstock.
 
-Release min(Q,r*dt) proportionally. Depletion alone starts the configured sourceGap delay;
+Release min(Q,r*dt) proportionally. Depletion alone samples an independent exponential delay
+W=-sourceGap*ln(1-U), where U is uniform on [0,1) and sourceGap is the mean empty interval;
 there is no expiry-triggered dump of remaining inventory. At renewal, supply r*sourceLifetime
 material in the current composition and account its full potential. sourceLifetime now means
 nominal batch amount divided by release rate, not a second clock. Retain explicit experimental
@@ -187,7 +188,7 @@ zone/epoch overrides at refill; they replace the one composition only when no in
 
 Set r=sourceRate*habitat.richness at initialization; it does not rerandomize at renewal.
 Initial Q=r*sourceLifetime*(0.5+U), U uniform on [0,1), gives unequal starting depletion times.
-Random initial conditions remain; random lifetime/rate coupling and random renewal waits disappear.
+Random initial conditions and independent renewal waits remain; random lifetime/rate coupling disappears.
 Mean ongoing release is r*T/(T+G), ignoring timestep quantization, where T=sourceLifetime and
 G=sourceGap. No new parameters, attraction law, transformation actions or cell behaviors.
 Initial amounts and subsequent supply statistics change; exact old ecological trajectories are
@@ -197,9 +198,12 @@ At unchanged defaults T=600 and G=2400, ongoing supply is 0.2 times the configur
 site richness. The previous random-batch expectation was approximately 0.2196006 times that
 base rate. This is an 8.93% reduction; mean initial batch material falls 21.94%. These are
 zero-tick calculations from the two laws, not measured ecological outcomes. No compensating
-calibration constant is introduced. Initial depletion is staggered, but subsequent periods are
-fixed; random long outages no longer occur. This deliberately removes a source of arbitrary
-environmental timing while local composition and material-mediated forces remain responsive.
+calibration constant is introduced. The original implementation selected fixed subsequent gaps,
+mistakenly treating independent renewal as dispensable timing noise. Staggered initial depletion
+did not prevent a common long outage: mean supply was insufficient evidence for that change.
+The correction retains the prior exponential wait law, sampled once per exhaustion. Some sources
+can return early while others remain empty; individual long outages remain possible. This changes
+neither the aggregate mean-gap budget nor the chemical and material-mediated response laws.
 
 Retained rules have distinct purposes: amount limits accessible supply; composition enables
 locally changing food; finite release creates local access; the refill delay creates deprivation;
@@ -226,7 +230,7 @@ accounted external batches keep the world open. M2 owns revisiting binding/reten
 ### M1 verification and outcome
 
 The source now has one chemical vector and three physical scalars: amount, fixed release rate,
-and empty delay. The lifetime countdown, second chemical update, randomized renewal coupling,
+and empty delay. The lifetime countdown, second chemical update, coupled random lifetime/rate selection,
 expiry dump, empty-source force response and obsolete chemical mask are removed. Existing
 public transformations, geographic binding and cellular rules are unchanged. Rendering and the
 chemical web identify an occupied source from its actual amount. Budgets use the new batch law;
@@ -249,6 +253,23 @@ updated and the full gate rerun. The four changed Python analysis readers also c
 
 These are bounded mechanism/integration checks. No long simulation, browser motion review or
 performance comparison was run; no speedup or long-term ecological benefit is claimed.
+
+### M1 renewal correction
+
+Sulion follow-up: `0b2cd54b-cbcf-44b4-9b21-86abdfc96d00`.
+The fixed-delay implementation above failed to preserve independently returning sources.
+Restore only the prior exponential empty wait, using the existing environment random stream.
+Retain one composition, finite amount, fixed local release rate and nominal refill batch;
+do not restore an expiry clock, second mixture, random rate or duration coupling. Shared
+chemistry, attraction, repulsion and crowding remain unchanged. No continuous-refill model,
+population-dependent supply policy or additional force is introduced.
+
+Bounded regression checks cover independently sampled waits after simultaneous depletion and
+again on the next cycle, mean-gap scale, finite release, delayed accounted refill and retained
+chemical composition. These establish the lifecycle correction, not long-run ecological success.
+Implemented and validated: `make ci` passes with 312 Rust tests and 79 frontend tests; one
+registered server benchmark remains ignored. Existing ESLint and WASM atomics warnings remain.
+No new long simulation or performance campaign was run for this correction.
 
 ## Refitting execution
 

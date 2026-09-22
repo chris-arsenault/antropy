@@ -32,13 +32,12 @@ fn fixture() -> World {
 fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
     let mut w = fixture();
     let before = w.held();
-    let rng = w.environment_rng.0;
     source_medium::advance(&mut w);
     assert_eq!(w.sources[0].amount, 0.25);
     assert_eq!(w.ledger.source_released, 0.5);
     source_medium::advance(&mut w);
     assert_eq!(w.sources[0].amount, 0.);
-    assert_eq!(w.sources[0].wait, 0.5);
+    assert!(w.sources[0].wait.is_finite() && w.sources[0].wait >= 0.);
     assert_eq!(w.ledger.source_released, 0.75);
     assert!(w.field.source_load.iter().all(|v| *v == 0.));
     assert!(
@@ -47,15 +46,17 @@ fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
             .unwrap()
             .is_empty()
     );
-    source_medium::advance(&mut w);
-    assert_eq!(w.sources[0].amount, 0.);
-    assert_eq!(w.ledger.supplied, 0.);
+    let wait_steps = (w.sources[0].wait / w.config.dt).ceil().max(1.) as usize;
+    for _ in 1..wait_steps {
+        source_medium::advance(&mut w);
+        assert_eq!(w.sources[0].amount, 0.);
+        assert_eq!(w.ledger.supplied, 0.);
+    }
     source_medium::advance(&mut w);
     assert_eq!(w.sources[0].amount, 1.5);
     assert_eq!(w.sources[0].rate, 2.);
     assert_eq!(w.sources[0].wait, 0.);
     assert_eq!(w.ledger.supplied, 2.);
-    assert_eq!(w.environment_rng.0, rng);
     let potential =
         0.2 * w.chemistry.properties[0].potential + 0.8 * w.chemistry.properties[80].potential;
     assert!((w.ledger.supplied_energy - 2. * potential).abs() < 1e-12);
@@ -63,6 +64,30 @@ fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
     assert!((after.0 + w.ledger.numerical_material - before.0 - 2.).abs() < 1e-10);
     assert!((after.1 + w.ledger.numerical_energy - before.1 - 2. * potential).abs() < 1e-10);
     w.validate().unwrap();
+}
+
+#[test]
+fn simultaneous_exhaustion_schedules_independent_renewals_each_cycle() {
+    let mut w = fixture();
+    w.config.source_gap = 10.;
+    w.sources = vec![w.sources[0].clone(); 128];
+    let mut previous = vec![0.; w.sources.len()];
+    for _ in 0..2 {
+        for source in &mut w.sources {
+            source.amount = source.rate * w.config.dt;
+        }
+        source_medium::advance(&mut w);
+        let waits: Vec<_> = w.sources.iter().map(|s| s.wait).collect();
+        assert!(w.sources.iter().all(|s| s.amount == 0.));
+        assert!(waits.iter().all(|w| w.is_finite() && *w >= 0.));
+        assert!(waits.iter().any(|wait| *wait < w.config.source_gap));
+        assert!(waits.iter().any(|wait| *wait > w.config.source_gap));
+        assert!(waits.windows(2).all(|pair| pair[0] != pair[1]));
+        assert!(waits.iter().zip(&previous).all(|(a, b)| a != b));
+        let mean = waits.iter().sum::<f64>() / waits.len() as f64;
+        assert!((0.7..1.3).contains(&(mean / w.config.source_gap)));
+        previous = waits;
+    }
 }
 
 #[test]
@@ -121,7 +146,7 @@ fn composition_conversion_matches_the_shared_operator_on_actual_material() {
             )
             .0;
         let mut ledger = crate::accounting::Ledger::default();
-        s.advance(&step, &mut w.field, &mut ledger);
+        s.advance(&step, &mut w.environment_rng, &mut w.field, &mut ledger);
         for (a, b) in actual.iter().zip(s.inventory()) {
             assert!((a - b).abs() < 1e-11);
         }
@@ -145,8 +170,11 @@ fn explicit_boundary_override_changes_only_the_next_empty_batch() {
     source_medium::advance(&mut w);
     assert_eq!(w.sources[0].mixture[0], 0.2);
     source_medium::advance(&mut w);
-    source_medium::advance(&mut w);
-    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].amount, 0.);
+    let wait_steps = (w.sources[0].wait / w.config.dt).ceil().max(1.) as usize;
+    for _ in 0..wait_steps {
+        source_medium::advance(&mut w);
+    }
     assert_eq!(w.sources[0].mixture[0], 0.);
     assert_eq!(w.sources[0].mixture[80], 1.);
     assert!((w.ledger.supplied_energy - 2. * w.chemistry.properties[80].potential).abs() < 1e-12);

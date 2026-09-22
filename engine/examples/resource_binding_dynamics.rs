@@ -98,6 +98,7 @@ fn advance(w: &mut World, scratch: &mut Scratch, candidate: bool) {
                 exposure,
                 response: r,
             },
+            &mut w.environment_rng,
             &mut w.field,
             &mut w.ledger,
         );

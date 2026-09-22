@@ -288,7 +288,7 @@ same-event exports cannot fund imports. Inactive rows do not allocate256-species
 
 ### Mobile resource reservoirs
 
-Two hundred forty externally renewing reservoirs start around 35 uneven neighborhoods. Locally phased renewals
+Two hundred forty externally renewing reservoirs start around 35 uneven neighborhoods. Independently timed renewals
 continue to import accounted material and reference value. Defaults are sourceDrift4,
 sourceProcessing0.25 and sourceGap2400; sourceProcessing multiplies the common weathering rate.
 The world remains open. Environmental transformations now have an explicit external work
@@ -302,12 +302,18 @@ material. The operator screens changes below f32::EPSILON in p, equivalent to
 `Q * f32::EPSILON` for the finite inventory. It retains unprocessed tiny shares. Applying the
 dissolved concentration floor times interface area would prevent useful small-owner conversions.
 
-Release min(Q,r*dt) in composition p. Actual depletion starts a fixed sourceGap delay, then a
-refill imports Q=r*sourceLifetime and its full potential. There is no lifetime countdown or
+Release min(Q,r*dt) in composition p. Actual depletion samples an independent exponential wait
+`W=-sourceGap*ln(1-U)`, with U uniform on [0,1). sourceGap is the mean empty interval;
+the draw occurs once per exhaustion, not every tick. On the first subsequent update when the
+wait has elapsed, a refill imports Q=r*sourceLifetime and its full potential. There is no lifetime countdown or
 forced dump. sourceLifetime denotes nominal batch duration at rate r. Initialization sets
 r=sourceRate*habitat.richness and Q=r*sourceLifetime*(0.5+U), with one uniform initial draw U.
-This staggers depletion without ongoing random lifetime/rate coupling or random waits. Rates
-remain fixed after creation. A zero release rate neither empties a deposit nor creates supply.
+This staggers initial depletion; independent renewal waits retain the prior system's asynchronous
+return of supply without its random lifetime/rate coupling. Rates remain fixed after creation.
+A zero release rate neither empties a deposit nor creates supply. Ignoring tick rounding, mean
+ongoing release remains r*T/(T+G), where T=sourceLifetime and G=sourceGap. This aggregate budget
+does not guarantee local food availability. The earlier fixed-gap simplification imposed a shared
+minimum outage after startup depletion and caused extinction; that timing choice is superseded.
 
 Reservoir inventory projects through the same chemical interaction and impedance properties as
 field material. Its interface area is mesh area divided by the sum of squared footprint weights.

@@ -6,8 +6,10 @@ existing versions. Rust owns the fields and sources; worker rendering still borr
 
 September 22 update: [reservoir simplification](plans/MODEL-SIMPLIFICATION-PLAN.md#m1--single-composition-reservoirs)
 replaces the two-mixture v32-v37 source lifecycle with one composition and an actual amount.
-It retains evolving refill chemistry, removes lifetime expiry and random renewal coupling,
-and stops empty-source motion. The measurements below describe the earlier laws; current
+It retains evolving refill chemistry, removes lifetime expiry and coupled random lifetime/rate
+selection, and stops empty-source motion. Independent exponential renewal waits are retained;
+the initial simplification's fixed wait caused a shared supply gap and is superseded. The
+measurements below describe the earlier laws; current
 [composed laws](design/chemistry/composed-runtime.md#mobile-resource-reservoirs) own the replacement.
 
 The same simplification's M2 replaces the two-scale attraction below with `K6*A` and
