@@ -96,7 +96,8 @@ impl Material {
         self.nodes
             .iter()
             .copied()
-            .zip(self.values.chunks_exact(WIDTH))
+            .zip(self.values.as_chunks::<WIDTH>().0)
+            .map(|(node, row)| (node, row.as_slice()))
     }
     pub fn iter(&self) -> std::slice::Iter<'_, f32> {
         self.values.iter()
@@ -143,7 +144,9 @@ impl Material {
     pub fn reclaim(&mut self) {
         let keep: Vec<_> = self
             .values
-            .chunks_exact(WIDTH)
+            .as_chunks::<WIDTH>()
+            .0
+            .iter()
             .map(|r| r.iter().any(|&q| q != 0.))
             .collect();
         let mut decision = vec![false; self.slots.len()];
