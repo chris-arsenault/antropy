@@ -52,20 +52,24 @@ pub fn mixture_masked(
     if requested == 0 {
         return [0.; 256];
     }
-    let amounts = &field.amounts;
+    let amounts = &field.amounts();
     let area = field.spacing.powi(2);
     let mut result = [0.; 256];
     #[cfg(target_arch = "wasm32")]
     unsafe {
         use std::arch::wasm32::*;
         for &(node, weight) in sites {
-            let gain = f32x4_splat((weight / area) as f32);
             let mut mask = field.active_groups(node) & requested;
+            if mask == 0 {
+                continue;
+            }
+            let row = amounts.row(node);
+            let gain = f32x4_splat((weight / area) as f32);
             while mask != 0 {
                 let s = mask.trailing_zeros() as usize * 4;
                 mask &= mask - 1;
                 let previous = v128_load(result.as_ptr().add(s).cast());
-                let q = v128_load(amounts.row(node).as_ptr().add(s).cast());
+                let q = v128_load(row.as_ptr().add(s).cast());
                 v128_store(
                     result.as_mut_ptr().add(s).cast(),
                     f32x4_add(previous, f32x4_mul(q, gain)),
@@ -75,13 +79,17 @@ pub fn mixture_masked(
     }
     #[cfg(not(target_arch = "wasm32"))]
     for &(node, weight) in sites {
-        let gain = (weight / area) as f32;
         let mut mask = field.active_groups(node) & requested;
+        if mask == 0 {
+            continue;
+        }
+        let row = amounts.row(node);
+        let gain = (weight / area) as f32;
         while mask != 0 {
             let start = mask.trailing_zeros() as usize * 4;
             mask &= mask - 1;
             for s in start..start + 4 {
-                result[s] += amounts[node * 256 + s] * gain;
+                result[s] += row[s] * gain;
             }
         }
     }
@@ -108,12 +116,12 @@ mod tests {
             field.add(node, species, amount, &chemistry);
         }
         let sites = field.stencil(0., 0.);
-        let before = field.amounts.clone();
+        let before = field.amounts().clone();
         let mut expected = [0.; 256];
         for &(node, weight) in &sites {
             let gain = (weight / field.spacing.powi(2)) as f32;
             for (species, value) in expected.iter_mut().enumerate() {
-                *value += field.amounts[node * 256 + species] * gain;
+                *value += field.amounts()[node * 256 + species] * gain;
             }
         }
         assert_eq!(mixture(&field, &sites), expected);
@@ -126,6 +134,6 @@ mod tests {
         }
         assert_eq!(actual, expected);
         assert_eq!(mixture_masked(&field, &sites, 0), [0.; 256]);
-        assert_eq!(field.amounts, before);
+        assert_eq!(field.amounts(), &before);
     }
 }

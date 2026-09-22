@@ -81,10 +81,11 @@ universal energy ordering. No organism outcome selects a landscape.
 
 ## Geographic composition
 
-The default grid is h=2 on 720×540 geography: 97,200 possible nodes. Each occupied node
-owns 256 chemical values; empty space has an immutable zero row and a four-byte row index.
-Current and destination owners contain only occupied support and its four-neighbor halo.
-Zero output rows are reclaimed using the same support masks that computed them. Presentation
+The default grid is h=2 on 720×540 geography: 97,200 possible nodes. Persistent 8×8-node
+regions own contiguous 256-chemical rows and reusable current/destination buffers. Missing
+regions read as zero; the sparse index has one entry per possible region. Active material
+and its immediate delivery halo execute. Empty regions are reclaimed after pending halo work
+ends. Material, support and feature commits share one private owner. Presentation
 still samples this physical mesh; sparse storage does not coarsen chemistry or rendering.
 The initial h4 selection was rejected after visual and performance review.
 dt=.2 model seconds and physiology=.8 remain explicit. Sources advance every
@@ -92,14 +93,18 @@ tick. Diffusion/drift integrate the full accumulated interval at physiology boun
 movement and maintenance run every tick. The schedule remainder is checkpointed.
 Resolution comparisons use matched physical fixtures and time.
 
-Carrier writes record support and revisions. One normalized three-box attraction kernel
-visits occupied line blocks and its finite halo, including periodic seams. Its continuum
+Carrier contributions share one replacement/removal owner for bodies and reservoirs. One
+normalized three-box attraction kernel retains regional stages and updates changed input
+regions plus their finite halo, including periodic seams. Its continuum
 support is three attraction lengths per axis, with integrated grid-cell endpoints. A base step projects bodies and freezes
 one mechanical convolution for source motion, field redistribution and cell motion; the next
 step sees their committed changes. A standalone field step prepares its own coefficients.
 This replaces sequential repeated attraction solves with an explicit shared force stage.
 Motion dependencies are sampled only at body footprints and the adjacent gradient nodes;
-their retained anchors still accumulate small changes. Illumination updates from external time.
+their retained anchors still accumulate small changes. Attraction inputs use the same normalized
+resolution against retained anchors, with zero/sign transitions waking immediately. Illumination
+updates from external time. The [regional execution contract](../spatial-execution.md) defines
+ownership, approximation, stage lifetimes and remaining area-dependent metadata.
 
 The extracellular concentration floor remains 1e-4 material per geographic area. Deposits
 always wake their destinations and diffusion wakes adjacent rows. Removed tails and floating
@@ -646,8 +651,9 @@ geometry is reused by pressure, sensing and material exchange; material preparat
 to damaged nonempty donors. The search and pressure have no trigonometric rotation work.
 Cost follows bodies, candidate checks and actual overlaps. A population in which every circle
 overlaps every other still has quadratic pair count; this simple law does not claim the
-discarded sampled operator's dense-limit scaling. Persistent spatial tiles and meaningful-change
-scheduling remain open in the scaling plan.
+discarded sampled operator's dense-limit scaling. Class membership, footprint delivery and movement
+dependencies now use persistent regional owners; they no longer require rebuilding sorted contact
+bins or the entire delivery transpose on every step.
 
 Body-to-geography sampling remains separate from contact geometry. Funded transport and
 outward receptors restrict gathering to installed chemical support. Stress reuses each

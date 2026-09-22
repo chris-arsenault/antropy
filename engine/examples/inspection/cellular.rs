@@ -49,7 +49,9 @@ fn external_drive(w: &World, c: &Cell, bodies: &[[f64; 2]]) -> [f64; 2] {
     let signal = antropy_engine::weathering::signal(std::array::from_fn(|k| {
         sites
             .iter()
-            .map(|&(n, a)| a * (w.field.signal[n][k] + w.field.source_signal[n][k] + bodies[n][k]))
+            .map(|&(n, a)| {
+                a * (w.field.material_signal(n)[k] + w.field.source_signal()[n][k] + bodies[n][k])
+            })
             .sum()
     }));
     antropy_engine::illumination::drive(signal, w.field.illumination.sample(&sites))

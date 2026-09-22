@@ -18,7 +18,6 @@ pub(crate) struct Motion {
     ids: Vec<u64>,
     coefficients: Vec<Coefficients>,
     medium: medium::Medium,
-    gradients: crate::field_medium::GradientCache,
     configuration: Option<[f64; 9]>,
     pub preparations: u64,
     pub contact_preparations: u64,
@@ -73,36 +72,38 @@ impl Motion {
             }
         }
         self.medium.prepare(field, c);
-        self.gradients.begin(field);
     }
     pub fn advance(&mut self, cells: &mut [Cell], c: &Config, field: &Field, sites: &[Row]) {
-        self.prepare(cells, c, field);
-        for (i, (cell, row)) in cells.iter_mut().zip(sites).enumerate() {
-            self.advance_one(i, cell, c, field, row);
+        self.prepare_all(cells, c, field, sites);
+        for (i, cell) in cells.iter_mut().enumerate() {
+            self.advance_prepared(i, cell, c);
         }
     }
-    pub(crate) fn advance_one(
-        &mut self,
-        i: usize,
-        cell: &mut Cell,
-        c: &Config,
-        field: &Field,
-        row: &Row,
-    ) {
-        self.prepare_one(i, cell, c, field, row);
-        self.advance_prepared(i, cell, c);
+    /// Refreshes shared footprint dependencies by region, then each cell's coefficients.
+    pub(crate) fn prepare_all(&mut self, cells: &[Cell], c: &Config, field: &Field, sites: &[Row]) {
+        self.prepare(cells, c, field);
+        self.medium.evaluate(sites, field, c);
+        let medium = &self.medium;
+        let mut jobs: Vec<_> = self.coefficients.iter_mut().zip(cells).zip(sites).collect();
+        let prepared = std::sync::atomic::AtomicU64::new(0);
+        let cost = crate::parallel::cost::CELL_PREPARE;
+        crate::parallel::for_each(&mut jobs, cost, |_, ((coefficients, cell), row)| {
+            if Self::prepare_one(coefficients, cell, c, field, row, medium) {
+                prepared.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            }
+        });
+        self.preparations += prepared.into_inner();
     }
-    pub(crate) fn prepare_one(
-        &mut self,
-        i: usize,
+    fn prepare_one(
+        coefficients: &mut Coefficients,
         cell: &Cell,
         c: &Config,
         field: &Field,
         row: &Row,
-    ) {
+        medium: &medium::Medium,
+    ) -> bool {
         let current = physical(cell, c);
-        let revision = self.medium.revision(row, field, c);
-        let coefficients = &mut self.coefficients[i];
+        let revision = medium.revision(row, field);
         let moved = super::distance([cell.x, cell.y], coefficients.position, c)
             > execution::RESOLUTION * c.mesh;
         let changed = current
@@ -118,13 +119,14 @@ impl Motion {
             || moved
             || changed
         {
-            let gradient = self.gradients.sample(field, row);
+            let gradient = medium.gradient(row);
             Self::prepare_cell(coefficients, cell, c, field, row, gradient);
             coefficients.physical = current;
             coefficients.medium_revision = revision;
             coefficients.footprint_revision = row.revision();
-            self.preparations += 1;
+            return true;
         }
+        false
     }
     pub(crate) fn advance_prepared(&self, i: usize, cell: &mut Cell, c: &Config) {
         Self::advance_cell(&self.coefficients[i], cell, c);

@@ -139,12 +139,14 @@ The [scaling plan](SCALING-PLAN.md#multicore-design) records the installed persi
 shared WASM memory, disjoint field/cell jobs and small-work serial crossover. The owning worker
 still coordinates the sole World and renders borrowed views after every phase joins. Development
 requires cross-origin isolation; unsupported browsers use the same operators in the serial build.
-The v36 structural replacement uses compact occupied chemical rows, support-owned finite
-convolution and footprint-local motion dependencies. Contact uses perfect circles: scalar
+The [regional execution owner](docs/design/spatial-execution.md) uses persistent 8×8 material
+regions, private commits, shared carrier lifetimes and locally invalidated finite convolution.
+Contact and delivery membership persist; chemical contractions borrow rows outside arithmetic.
+Contact uses perfect circles: scalar
 penetration, center-line soft separation and permeable material access. No contact sampling
 lattice, angular moments or heading dependence. The sampled contact replacement was rejected.
-Root S remains open for persistent tiles and meaningful-change scheduling; P3 live operating
-acceptance and human motion review remain open. V40 enlarges default area 5.0625-fold while
+The scaling plan records structural acceptance and remaining area-dependent memory/output costs.
+P3 live operating acceptance and human motion review remain open. V40 enlarges default area 5.0625-fold while
 preserving aspect ratio and mesh. There is no population-count ceiling; ancestry and memory
 budgets remain independent operating limits.
 

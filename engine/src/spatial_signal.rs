@@ -7,8 +7,10 @@ use std::ops::{Index, IndexMut};
 pub struct Signal {
     values: Vec<[f64; 2]>,
     pub nodes: Vec<usize>,
-    listed: Vec<bool>,
-    pub revision: u64,
+    slots: Vec<usize>,
+    pending: Vec<usize>,
+    touched: Vec<bool>,
+    pub(crate) exact: bool,
 }
 impl Default for Signal {
     fn default() -> Self {
@@ -22,17 +24,24 @@ impl PartialEq for Signal {
 }
 impl From<Vec<[f64; 2]>> for Signal {
     fn from(values: Vec<[f64; 2]>) -> Self {
-        let nodes = values
+        let nodes: Vec<usize> = values
             .iter()
             .enumerate()
             .filter_map(|(n, q)| (*q != [0.; 2]).then_some(n))
             .collect();
-        let listed = values.iter().map(|q| *q != [0.; 2]).collect();
+        let mut slots = vec![usize::MAX; values.len()];
+        for (slot, &n) in nodes.iter().enumerate() {
+            slots[n] = slot;
+        }
+        let pending = nodes.clone();
+        let touched = values.iter().map(|q| *q != [0.; 2]).collect();
         Self {
             values,
             nodes,
-            listed,
-            revision: 1,
+            slots,
+            pending,
+            touched,
+            exact: true,
         }
     }
 }
@@ -42,6 +51,22 @@ impl From<Signal> for Vec<[f64; 2]> {
     }
 }
 impl Signal {
+    pub(crate) fn drain_changes(
+        &mut self,
+        geometry: crate::spatial::Geometry,
+        work: &mut crate::spatial::Work,
+    ) {
+        for n in self.pending.drain(..) {
+            self.touched[n] = false;
+            work.insert(geometry.address(n).0);
+        }
+    }
+    fn touch(&mut self, n: usize) {
+        if !self.touched[n] {
+            self.pending.push(n);
+            self.touched[n] = true;
+        }
+    }
     pub fn len(&self) -> usize {
         self.values.len()
     }
@@ -55,24 +80,36 @@ impl Signal {
         &self.values
     }
     pub fn fill(&mut self, value: [f64; 2]) {
-        self.revision = self.revision.wrapping_add(1);
+        self.exact = true;
+        for n in 0..self.len() {
+            if self.values[n] != value {
+                self.touch(n);
+            }
+        }
         if value == [0.; 2] {
             for n in self.nodes.drain(..) {
                 self.values[n] = value;
-                self.listed[n] = false;
+                self.slots[n] = usize::MAX;
             }
         } else {
             self.values.fill(value);
-            self.listed.fill(true);
+            for (n, slot) in self.slots.iter_mut().enumerate() {
+                *slot = n;
+            }
             self.nodes = (0..self.len()).collect();
         }
     }
     pub fn compact(&mut self) {
-        self.nodes.retain(|&n| {
-            let active = self.values[n] != [0.; 2];
-            self.listed[n] = active;
-            active
-        });
+        for &n in &self.pending {
+            let slot = self.slots[n];
+            if self.values[n] == [0.; 2] && slot != usize::MAX {
+                self.nodes.swap_remove(slot);
+                self.slots[n] = usize::MAX;
+                if slot < self.nodes.len() {
+                    self.slots[self.nodes[slot]] = slot;
+                }
+            }
+        }
     }
 }
 impl Index<usize> for Signal {
@@ -83,11 +120,11 @@ impl Index<usize> for Signal {
 }
 impl IndexMut<usize> for Signal {
     fn index_mut(&mut self, n: usize) -> &mut Self::Output {
-        if !self.listed[n] {
+        self.touch(n);
+        if self.slots[n] == usize::MAX {
+            self.slots[n] = self.nodes.len();
             self.nodes.push(n);
-            self.listed[n] = true;
         }
-        self.revision = self.revision.wrapping_add(1);
         &mut self.values[n]
     }
 }

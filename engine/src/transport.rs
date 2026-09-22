@@ -10,6 +10,8 @@ use crate::{
 use rayon::prelude::*;
 #[path = "transport_compose.rs"]
 mod compose;
+#[path = "transport_membership.rs"]
+mod membership;
 #[path = "transport_projection.rs"]
 mod projection;
 
@@ -18,13 +20,14 @@ pub struct Exchange {
     demand: Vec<f64>,
     changes: Vec<f64>,
     nodes: Vec<(usize, u64)>,
-    slots: Vec<usize>,
+    slots: crate::spatial_slots::Slots,
     masks: Vec<u64>,
     imports: Vec<[f64; 256]>,
     exports: Vec<[f64; 256]>,
     contact_support: Vec<Vec<(usize, f64)>>,
-    site_offsets: Vec<usize>,
-    site_contributions: Vec<(usize, f64)>,
+    delivery: Vec<Vec<(usize, f64)>>,
+    delivery_links: Vec<Vec<(usize, usize)>>,
+    previous_sites: Vec<crate::footprint::Row>,
     contact: crate::contact_exchange::Allocation,
     preparations: u64,
     pub profile: bool,
@@ -65,26 +68,6 @@ impl Exchange {
             "execution":"directComposition","fieldDonors":self.nodes.len(),
             "scratchBytes":8*(self.demand.capacity()+self.changes.capacity())
                 +2048*(self.imports.capacity()+self.exports.capacity())})
-    }
-    fn prepare_nodes(&mut self, count: usize, sites: &[crate::footprint::Row]) {
-        for (slot, &(node, mask)) in self.nodes.iter().enumerate() {
-            let range = slot * 256..(slot + 1) * 256;
-            clear(&mut self.demand[range.clone()], mask);
-            clear(&mut self.changes[range], mask);
-            self.slots[node] = usize::MAX;
-        }
-        self.slots.resize(count, usize::MAX);
-        self.nodes.clear();
-        for &(node, weight) in sites.iter().flatten() {
-            if weight > 0. && self.slots[node] == usize::MAX {
-                self.slots[node] = self.nodes.len();
-                self.nodes.push((node, 0));
-            }
-        }
-        let needed = self.nodes.len() * 256;
-        for values in [&mut self.demand, &mut self.changes] {
-            values.resize(needed, 0.);
-        }
     }
     pub fn advance(
         &mut self,
@@ -160,15 +143,17 @@ impl Exchange {
             crate::exchange_vector::donors(
                 demand,
                 changes,
-                &field.amounts[node * 256..(node + 1) * 256],
+                &field.amounts()[node * 256..(node + 1) * 256],
                 mask,
             );
         };
-        if crate::parallel::enabled(self.nodes.len(), 128) {
+        let cost = crate::parallel::cost::EXCHANGE_NODE;
+        if let Some(grain) = crate::parallel::grain(self.nodes.len(), cost) {
             self.demand
                 .par_chunks_mut(256)
                 .zip(self.changes.par_chunks_mut(256))
                 .enumerate()
+                .with_min_len(grain)
                 .for_each(solve);
         } else {
             self.demand
@@ -192,10 +177,11 @@ impl Exchange {
         let demand = &self.demand;
         let slots = &self.slots;
         let masks = &self.masks;
-        crate::parallel::for_each(&mut self.imports, 128, |i, imports| {
+        let cost = crate::parallel::cost::CELL_READ;
+        crate::parallel::for_each(&mut self.imports, cost, |i, imports| {
             *imports = crate::exchange_vector::gather(demand, &sites[i], slots, imports, masks[i]);
         });
-        crate::parallel::for_each(cells, 128, |i, cell| {
+        crate::parallel::for_each(cells, cost, |i, cell| {
             let accepted = &self.imports[i];
             let mut incoming = 0.;
             let mut outgoing = 0.;

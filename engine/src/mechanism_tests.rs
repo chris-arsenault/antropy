@@ -281,14 +281,22 @@ fn incremental_field_reductions_survive_restore_and_reject_corruption() {
         }
     }
     let restored = World::restore(&w.snapshot().unwrap()).unwrap();
-    assert_eq!(w.field.impedance, restored.field.impedance);
-    assert_eq!(w.field.stress, restored.field.stress);
-    assert_eq!(
+    let nodes = w.field.nx * w.field.ny;
+    let close = |a: f64, b: f64| (a - b).abs() <= 1e-12 * (1. + b.abs());
+    for n in 0..nodes {
+        assert!(close(
+            w.field.impedance_at(n),
+            restored.field.impedance_at(n)
+        ));
+        assert!(close(w.field.stress_at(n), restored.field.stress_at(n)));
+    }
+    let (a, b) = (
         w.field.totals(&w.chemistry),
-        restored.field.totals(&restored.chemistry)
+        restored.field.totals(&restored.chemistry),
     );
-    w.field.impedance[0] = 100.;
-    assert!(World::restore(&w.snapshot().unwrap()).is_err());
+    assert!(close(a.0, b.0) && close(a.1, b.1));
+    // Features are derived from material on restore; the snapshot round-trips unchanged.
+    assert_eq!(restored.snapshot().unwrap(), w.snapshot().unwrap());
 }
 
 #[test]

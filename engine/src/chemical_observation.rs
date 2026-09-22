@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 pub fn overview(w: &World) -> Value {
     let mut amounts = [0_f64; SPECIES];
     let mut peaks = [0_f32; SPECIES];
-    for (_, node) in w.field.amounts.rows() {
+    for (_, node) in w.field.amounts().rows() {
         for (id, q) in node.iter().enumerate() {
             amounts[id] += *q as f64;
             peaks[id] = peaks[id].max(*q);
@@ -37,12 +37,16 @@ mod tests {
     #[test]
     fn ranking_closes_material_and_is_bounded_read_only_and_stable() {
         let mut w = crate::diagnostics::nutrition(0.8, 2., true, false);
-        w.field.amounts.fill(0.);
-        for id in 0..SPECIES {
-            w.field.amounts[id] = 2.;
-        }
-        w.field.amounts[SPECIES + 19] = 4.;
-        let before = w.field.amounts.clone();
+        w.field.replace_material(&w.chemistry, |i| {
+            if i < SPECIES {
+                2.
+            } else if i == SPECIES + 19 {
+                4.
+            } else {
+                0.
+            }
+        });
+        let before = w.field.amounts().clone();
         let result = overview(&w);
         let rows = result["rows"].as_array().unwrap();
         assert_eq!(rows.len(), 12);
@@ -54,8 +58,8 @@ mod tests {
         assert_eq!(listed + result["other"].as_f64().unwrap(), 516.);
         assert_eq!(result["present"], 256);
         assert!(result.to_string().len() < 4096);
-        assert_eq!(before, w.field.amounts);
-        w.field.amounts.fill(0.);
+        assert_eq!(&before, w.field.amounts());
+        w.field.replace_material(&w.chemistry, |_| 0.);
         assert_eq!(overview(&w)["rows"], json!([]));
     }
 }

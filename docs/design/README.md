@@ -12,11 +12,11 @@ duplicate reservoir mixtures and lifetime expiry with one composition, finite am
 and delayed refill. M2 removes the broad opposing attraction field, its gain control and
 cohesion-based washout discount. One finite attraction range, local repulsion and nonlinear
 crowding remain. Bounded mechanism checks pass; human motion review and long-run ecological
-effects remain unverified. The separate structural execution work below remains unfinished.
+effects remain unverified. The separate structural execution work is recorded below.
 
 <a id="design-structural-priority"></a>
 
-## Unfinished structural execution replacement
+## Regional structural execution
 
 The user's repeated direction is to address computational structure before accelerating the
 existing base. [SCALING-PLAN.md](../../SCALING-PLAN.md) is the current performance work order.
@@ -26,8 +26,10 @@ opportunities; do not treat the installed dense arrays, filters or phase schedul
 Installed threading is a tool for the replacement. V36 installs compact chemical ownership,
 support-owned finite convolution and footprint-local dependencies. The sampled contact model
 was rejected and replaced with simple circle overlap and permeability. Persistent spatial
-tiles and meaningful-change scheduling remain unfinished; the prior structural closeout was
-withdrawn. Previous optimization sequences are historical evidence only.
+tiles and local derived scheduling are now implemented in the
+[regional execution contract](spatial-execution.md), with private material/feature commits and
+shared carrier ownership. The scaling plan records acceptance measurements and remaining limits;
+its earlier withdrawn closeout remains historical evidence.
 
 <a id="design-installed-runtime"></a>
 

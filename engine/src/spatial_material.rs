@@ -1,18 +1,120 @@
-//! Compact geographic rows; absent space owns no chemical allocation.
+//! Persistent regional material. Each occupied site owns its chemical row, group mask and
+//! feature projection; every commit keeps all three consistent. Missing regions read as zero.
+use crate::chemical_projection::Rows;
+use crate::field_activity::{GroupLanes, pairs};
+use crate::spatial::{Geometry, SIDE, SITES};
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut, Range};
-
 const WIDTH: usize = 256;
 static ZERO: [f32; WIDTH] = [0.; WIDTH];
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-#[serde(try_from = "Stored", into = "Stored")]
-pub struct Material {
-    slots: Vec<u32>,
-    nodes: Vec<usize>,
-    values: Vec<f32>,
+/// Unscaled per-site sums of material, potential, impedance, stress and two signal axes.
+pub type Projection = [f64; 6];
+
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct Region {
+    pub id: usize,
+    pub values: Vec<f32>,
+    pub masks: [u64; SITES],
+    pub projection: [Projection; SITES],
+}
+impl Region {
+    fn new(id: usize) -> Self {
+        Self {
+            id,
+            values: vec![0.; SITES * WIDTH],
+            masks: [0; SITES],
+            projection: [[0.; 6]; SITES],
+        }
+    }
+    pub fn row(&self, site: usize) -> &[f32] {
+        &self.values[site * WIDTH..(site + 1) * WIDTH]
+    }
+    pub fn row_mut(&mut self, site: usize) -> &mut [f32] {
+        &mut self.values[site * WIDTH..(site + 1) * WIDTH]
+    }
+    /// Clears only previously written chemical groups.
+    fn clear(&mut self) {
+        for site in 0..SITES {
+            for s in GroupLanes::<1>::new(self.masks[site]) {
+                self.values[site * WIDTH + s] = 0.;
+            }
+            self.masks[site] = 0;
+            self.projection[site] = [0.; 6];
+        }
+    }
+    fn is_empty(&self) -> bool {
+        self.masks.iter().all(|&m| m == 0)
+    }
+    /// Rounded commit of requested groups. Returns the actual feature change, rounding loss
+    /// and whether the site's signal projection changed. Requested groups are cleared.
+    pub fn commit(
+        &mut self,
+        site: usize,
+        requested: &mut [f64],
+        mask: u64,
+        rows: &Rows,
+    ) -> (Projection, [f64; 2], bool) {
+        let row = &mut self.values[site * WIDTH..(site + 1) * WIDTH];
+        if !changes(row, requested, mask) {
+            return ([0.; 6], discard(requested, mask, rows), false);
+        }
+        let (reduction, loss) = crate::chemical_projection::commit(row, requested, rows, mask);
+        let mut occupied = self.masks[site] & !mask;
+        for s in pairs(mask) {
+            if row[s..s + 2].iter().any(|q| *q > 0.) {
+                occupied |= 1 << (s / 4);
+            }
+        }
+        self.masks[site] = occupied;
+        let before = self.projection[site];
+        // A projection is a function of its row alone, so restored worlds read identical
+        // features; the incremental change still feeds the running totals.
+        self.projection[site] = if occupied == 0 {
+            [0.; 6]
+        } else {
+            crate::chemical_projection::project_active(row, rows, occupied)
+        };
+        let after = self.projection[site];
+        (reduction, loss, before[4..] != after[4..])
+    }
 }
 
+fn changes(row: &[f32], requested: &[f64], mask: u64) -> bool {
+    GroupLanes::<1>::new(mask).any(|s| (row[s] as f64 + requested[s]).max(0.) as f32 != row[s])
+}
+
+fn discard(requested: &mut [f64], mask: u64, rows: &Rows) -> [f64; 2] {
+    let mut loss = [0.; 2];
+    for s in GroupLanes::<1>::new(mask) {
+        loss[0] += requested[s];
+        loss[1] += requested[s] * rows.potential(s);
+        requested[s] = 0.;
+    }
+    loss
+}
+
+/// Totals of one committed batch; `changed` lists regions whose signal projection moved.
+#[derive(Debug, Default)]
+pub(crate) struct Batch {
+    pub reduction: Projection,
+    pub loss: [f64; 2],
+    pub changed: Vec<usize>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(try_from = "Stored", into = "Stored")]
+pub struct Material {
+    count: usize,
+    geometry: Geometry,
+    pub(crate) regions: crate::spatial_regions::Regions<Region>,
+    allocations: u64,
+    /// Emptied regions keep their allocation for the next occupied region.
+    spare: Vec<Region>,
+    /// Reused destination set; clearing touches only regions it listed.
+    wanted: crate::spatial::Work,
+}
 #[derive(Serialize, Deserialize)]
 struct Stored {
     count: usize,
@@ -21,11 +123,21 @@ struct Stored {
 }
 impl From<Material> for Stored {
     fn from(m: Material) -> Self {
-        Self {
-            count: m.slots.len(),
-            nodes: m.nodes,
-            values: m.values,
+        let mut s = Self {
+            count: m.count,
+            nodes: Vec::new(),
+            values: Vec::new(),
+        };
+        let mut nodes = m.nodes();
+        nodes.sort_unstable();
+        for n in nodes {
+            let row = m.row(n);
+            if crate::field_activity::mask(row) != 0 {
+                s.nodes.push(n);
+                s.values.extend_from_slice(row);
+            }
         }
+        s
     }
 }
 impl TryFrom<Stored> for Material {
@@ -36,15 +148,18 @@ impl TryFrom<Stored> for Material {
         {
             return Err("Invalid sparse material dimensions".into());
         }
+        if s.values.iter().any(|v| !v.is_finite() || *v < 0.) {
+            return Err("Invalid sparse material value".into());
+        }
         let mut m = Self::new(s.count);
-        for (slot, &node) in s.nodes.iter().enumerate() {
-            if node >= s.count || m.slots[node] != 0 {
+        let mut seen = std::collections::HashSet::new();
+        for (&n, row) in s.nodes.iter().zip(s.values.chunks_exact(WIDTH)) {
+            if n >= s.count || !seen.insert(n) {
                 return Err("Invalid sparse material owner".into());
             }
-            m.slots[node] = (slot + 1) as u32;
+            m.row_mut(n).copy_from_slice(row);
         }
-        m.nodes = s.nodes;
-        m.values = s.values;
+        m.reclaim();
         Ok(m)
     }
 }
@@ -53,130 +168,354 @@ impl Default for Material {
         Self::new(0)
     }
 }
+impl PartialEq for Material {
+    fn eq(&self, other: &Self) -> bool {
+        self.len() == other.len()
+            && self.rows().all(|(n, r)| r == other.row(n))
+            && other.rows().all(|(n, r)| r == self.row(n))
+    }
+}
 impl Material {
     pub fn new(count: usize) -> Self {
+        // A compact temporary layout for the logical checkpoint rows. World rebuild assigns
+        // actual XY geometry; a one-row layout would waste seven eighths of every region.
+        let mut material = Self::with_geometry(Geometry::new(SIDE, count.div_ceil(SIDE)));
+        material.count = count;
+        material
+    }
+    pub(crate) fn with_geometry(geometry: Geometry) -> Self {
         Self {
-            slots: vec![0; count],
-            nodes: Vec::new(),
-            values: Vec::new(),
+            count: geometry.nx * geometry.ny,
+            geometry,
+            regions: crate::spatial_regions::Regions::new(geometry.count()),
+            allocations: 0,
+            spare: Vec::new(),
+            wanted: Default::default(),
         }
     }
-    pub fn len(&self) -> usize {
-        self.slots.len() * WIDTH
-    }
-    pub fn is_empty(&self) -> bool {
-        self.slots.is_empty()
-    }
-    pub fn nodes(&self) -> &[usize] {
-        &self.nodes
-    }
-    pub fn allocated_bytes(&self) -> usize {
-        self.slots.capacity() * 4
-            + self.nodes.capacity() * std::mem::size_of::<usize>()
-            + self.values.capacity() * 4
-    }
-    pub fn row(&self, node: usize) -> &[f32] {
-        let slot = self.slots[node];
-        if slot == 0 {
-            &ZERO
-        } else {
-            &self.values[(slot as usize - 1) * WIDTH..slot as usize * WIDTH]
-        }
-    }
-    pub fn row_mut(&mut self, node: usize) -> &mut [f32] {
-        if self.slots[node] == 0 {
-            self.nodes.push(node);
-            self.slots[node] = self.nodes.len() as u32;
-            self.values.resize(self.nodes.len() * WIDTH, 0.);
-        }
-        let slot = self.slots[node] as usize - 1;
-        &mut self.values[slot * WIDTH..(slot + 1) * WIDTH]
-    }
-    pub fn rows(&self) -> impl Iterator<Item = (usize, &[f32])> {
-        self.nodes
-            .iter()
-            .copied()
-            .zip(self.values.as_chunks::<WIDTH>().0)
-            .map(|(node, row)| (node, row.as_slice()))
-    }
-    pub fn iter(&self) -> std::slice::Iter<'_, f32> {
-        self.values.iter()
-    }
-    pub fn chunks_exact(&self, width: usize) -> std::slice::ChunksExact<'_, f32> {
-        assert_eq!(width, WIDTH);
-        self.values.chunks_exact(width)
-    }
-    /// Cold full-domain fixture/intervention only; never used by stepping or observations.
-    pub fn dense_values_mut(&mut self) -> std::slice::IterMut<'_, f32> {
-        let mut dense = vec![0.; self.len()];
-        for (n, row) in self.rows() {
-            dense[n * WIDTH..(n + 1) * WIDTH].copy_from_slice(row);
-        }
-        self.nodes = (0..self.slots.len()).collect();
-        for (n, slot) in self.slots.iter_mut().enumerate() {
-            *slot = (n + 1) as u32;
-        }
-        self.values = dense;
-        self.values.iter_mut()
-    }
-    pub fn fill(&mut self, value: f32) {
-        if value != 0. {
-            self.dense_values_mut().for_each(|q| *q = value);
+    pub(crate) fn reshape(&mut self, geometry: Geometry) {
+        if self.geometry == geometry {
             return;
         }
-        self.clear();
-    }
-    pub fn clear(&mut self) {
-        for n in self.nodes.drain(..) {
-            self.slots[n] = 0;
+        let mut replacement = Self::with_geometry(geometry);
+        for (n, row) in self.rows() {
+            replacement.row_mut(n).copy_from_slice(row);
         }
-        self.values.clear();
+        replacement.reclaim();
+        *self = replacement;
     }
-    pub fn prepare(&mut self, nodes: &[usize]) {
-        self.clear();
-        for &n in nodes {
-            self.row_mut(n);
+    pub fn len(&self) -> usize {
+        self.count * WIDTH
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    pub fn nodes(&self) -> Vec<usize> {
+        self.rows().map(|(n, _)| n).collect()
+    }
+    pub fn allocated_bytes(&self) -> usize {
+        let region = |r: &Region| r.values.capacity() * 4 + std::mem::size_of::<Region>();
+        self.regions.index_bytes()
+            + self
+                .regions
+                .entries
+                .iter()
+                .map(|r| region(&r.value))
+                .sum::<usize>()
+            + self.spare.iter().map(region).sum::<usize>()
+    }
+    pub(crate) fn allocations(&self) -> u64 {
+        self.allocations
+    }
+    pub(crate) fn geometry(&self) -> Geometry {
+        self.geometry
+    }
+    pub fn row(&self, node: usize) -> &[f32] {
+        let (r, s) = self.geometry.address(node);
+        self.regions.get(r).map_or(&ZERO, |v| v.row(s))
+    }
+    /// Row, occupied groups and feature projection from one regional lookup.
+    pub fn site(&self, node: usize) -> (&[f32], u64, Projection) {
+        let (r, s) = self.geometry.address(node);
+        self.regions.get(r).map_or((&ZERO, 0, [0.; 6]), |v| {
+            (v.row(s), v.masks[s], v.projection[s])
+        })
+    }
+    pub fn mask(&self, node: usize) -> u64 {
+        let (r, s) = self.geometry.address(node);
+        self.regions.get(r).map_or(0, |v| v.masks[s])
+    }
+    pub fn projection(&self, node: usize) -> Projection {
+        let (r, s) = self.geometry.address(node);
+        self.regions.get(r).map_or([0.; 6], |v| v.projection[s])
+    }
+    fn own(&mut self, region: usize) -> &mut Region {
+        if self.regions.get(region).is_none() {
+            let value = match self.spare.pop() {
+                Some(mut spare) => {
+                    spare.id = region;
+                    spare
+                }
+                None => {
+                    self.allocations += 1;
+                    Region::new(region)
+                }
+            };
+            self.regions.own(region, || value);
         }
+        self.regions.get_mut(region).unwrap()
     }
-    pub fn values_mut(&mut self) -> &mut [f32] {
-        &mut self.values
+    /// Explicit cold writes; the owner must `refresh` before physical readers see them.
+    pub(crate) fn row_mut(&mut self, node: usize) -> &mut [f32] {
+        let (r, s) = self.geometry.address(node);
+        let region = self.own(r);
+        region.masks[s] = u64::MAX;
+        region.row_mut(s)
     }
-    pub fn reclaim(&mut self) {
-        let keep: Vec<_> = self
-            .values
-            .as_chunks::<WIDTH>()
-            .0
-            .iter()
-            .map(|r| r.iter().any(|&q| q != 0.))
-            .collect();
-        let mut decision = vec![false; self.slots.len()];
-        for (&n, keep) in self.nodes.iter().zip(keep) {
-            decision[n] = keep;
+    /// One rounded commit; a write that changes no stored value never allocates.
+    pub(crate) fn commit(
+        &mut self,
+        node: usize,
+        requested: &mut [f64],
+        mask: u64,
+        rows: &Rows,
+    ) -> (Projection, [f64; 2], bool) {
+        let (r, s) = self.geometry.address(node);
+        if mask == 0 {
+            return ([0.; 6], [0.; 2], false);
         }
-        self.retain(|n| decision[n]);
+        if self.regions.get(r).is_none() && !changes(&ZERO, requested, mask) {
+            return ([0.; 6], discard(requested, mask, rows), false);
+        }
+        let result = self.own(r).commit(s, requested, mask, rows);
+        if self.regions.get(r).unwrap().is_empty() {
+            self.release(r);
+        }
+        result
     }
-    pub fn retain(&mut self, keep: impl Fn(usize) -> bool) {
-        let mut slot = 0;
-        while slot < self.nodes.len() {
-            if keep(self.nodes[slot]) {
-                slot += 1;
+    /// Commits many rows with one job per owning region. `fill(i, row)` writes entry i's
+    /// requested groups into a zeroed row; entries of one node keep their order.
+    pub(crate) fn commit_batch(
+        &mut self,
+        entries: &[(usize, u64)],
+        fill: impl Fn(usize, &mut [f64]) + Sync,
+        rows: &Rows,
+    ) -> Batch {
+        let mut batch = Batch::default();
+        let mut requested = [0.; WIDTH];
+        let mut order = Vec::with_capacity(entries.len());
+        for (i, &(node, mask)) in entries.iter().enumerate() {
+            if mask == 0 {
                 continue;
             }
-            let n = self.nodes.swap_remove(slot);
-            self.slots[n] = 0;
-            let last = self.nodes.len();
-            if slot != last {
-                self.values
-                    .copy_within(last * WIDTH..(last + 1) * WIDTH, slot * WIDTH);
-                self.slots[self.nodes[slot]] = (slot + 1) as u32;
+            let (r, _) = self.geometry.address(node);
+            if self.regions.get(r).is_none() {
+                fill(i, &mut requested);
+                if !changes(&ZERO, &requested, mask) {
+                    let loss = discard(&mut requested, mask, rows);
+                    batch.loss[0] += loss[0];
+                    batch.loss[1] += loss[1];
+                    continue;
+                }
+                for s in pairs(mask) {
+                    requested[s..s + 2].fill(0.);
+                }
+                self.own(r);
             }
-            self.values.truncate(last * WIDTH);
+            order.push((self.regions.slot(r), i));
         }
-        // Releasing a vanished colony must also release its retained high-water allocation.
-        if self.values.capacity() > 4 * self.values.len().max(WIDTH) {
-            self.values.shrink_to(self.values.len() * 2);
-            self.nodes.shrink_to(self.nodes.len() * 2);
+        order.sort_unstable();
+        let mut groups = vec![(0_u32, 0_u32); self.regions.entries.len()];
+        let mut start = 0;
+        while start < order.len() {
+            let slot = order[start].0;
+            let end = start + order[start..].partition_point(|&(s, _)| s == slot);
+            groups[slot] = (start as u32, end as u32);
+            start = end;
         }
+        let geometry = self.geometry;
+        let job = |(slot, entry): (usize, &mut crate::spatial_regions::Entry<Region>)| {
+            let (start, end) = groups[slot];
+            let mut result = (Batch::default(), false);
+            if start == end {
+                return result;
+            }
+            let mut requested = [0.; WIDTH];
+            for &(_, i) in &order[start as usize..end as usize] {
+                let (node, mask) = entries[i];
+                fill(i, &mut requested);
+                let site = geometry.address(node).1;
+                let (reduction, loss, changed) =
+                    entry.value.commit(site, &mut requested, mask, rows);
+                add(&mut result.0.reduction, reduction);
+                result.0.loss[0] += loss[0];
+                result.0.loss[1] += loss[1];
+                result.1 |= changed;
+            }
+            if result.1 {
+                result.0.changed.push(entry.id);
+            }
+            result
+        };
+        let merge = |mut a: Batch, (b, _): (Batch, bool)| {
+            add(&mut a.reduction, b.reduction);
+            a.loss[0] += b.loss[0];
+            a.loss[1] += b.loss[1];
+            a.changed.extend(b.changed);
+            a
+        };
+        // Region cost is its share of the batch; tasks group regions to one grain of rows.
+        let regions = self.regions.entries.len().max(1);
+        let cost = crate::parallel::cost::COMMIT_ROW * order.len().div_ceil(regions);
+        let committed = if let Some(grain) = crate::parallel::grain(regions, cost) {
+            self.regions
+                .entries
+                .par_iter_mut()
+                .enumerate()
+                .with_min_len(grain)
+                .map(job)
+                .fold(Batch::default, merge)
+                .reduce(Batch::default, |a, b| merge(a, (b, false)))
+        } else {
+            self.regions
+                .entries
+                .iter_mut()
+                .enumerate()
+                .map(job)
+                .fold(Batch::default(), merge)
+        };
+        let touched: Vec<_> = order.iter().map(|&(slot, _)| slot).collect();
+        let emptied: Vec<_> = touched
+            .into_iter()
+            .map(|slot| &self.regions.entries[slot].value)
+            .filter(|r| r.is_empty())
+            .map(|r| r.id)
+            .collect();
+        for r in emptied {
+            self.release(r);
+        }
+        merge(batch, (committed, false))
+    }
+    fn release(&mut self, region: usize) {
+        if let Some(mut value) = self.regions.take(region) {
+            value.clear();
+            self.spare.push(value);
+        }
+    }
+    pub fn rows(&self) -> impl Iterator<Item = (usize, &[f32])> {
+        self.regions
+            .entries
+            .iter()
+            .map(|r| &r.value)
+            .flat_map(move |r| {
+                self.geometry
+                    .sites(r.id)
+                    .filter(move |&(s, _)| r.masks[s] != 0)
+                    .map(move |(s, n)| (n, r.row(s)))
+            })
+    }
+    /// Occupied sites with their groups and projections.
+    pub(crate) fn occupied(&self) -> impl Iterator<Item = (usize, u64, Projection)> + '_ {
+        self.regions.entries.iter().flat_map(move |r| {
+            let r = &r.value;
+            self.geometry
+                .sites(r.id)
+                .filter(move |&(s, _)| r.masks[s] != 0)
+                .map(move |(s, n)| (n, r.masks[s], r.projection[s]))
+        })
+    }
+    pub fn iter(&self) -> impl Iterator<Item = &f32> {
+        self.rows().flat_map(|(_, r)| r.iter())
+    }
+    pub fn chunks_exact(&self, width: usize) -> impl Iterator<Item = &[f32]> {
+        assert_eq!(width, WIDTH);
+        self.rows().map(|(_, row)| row)
+    }
+    pub(crate) fn clear(&mut self) {
+        let ids: Vec<_> = self.regions.entries.iter().map(|e| e.id).collect();
+        for r in ids {
+            self.release(r);
+        }
+    }
+    /// Destination storage for one transport pass: every occupied region and its four
+    /// neighboring regions. Others return to the spare pool; retained regions are cleared.
+    pub(crate) fn prepare_destinations(&mut self, current: &Material) {
+        let g = self.geometry;
+        let columns = g.columns();
+        let lines = g.count() / columns.max(1);
+        let mut wanted = std::mem::take(&mut self.wanted);
+        wanted.reset(g.count());
+        for entry in &current.regions.entries {
+            let r = entry.id;
+            let (x, y) = (r % columns, r / columns);
+            wanted.insert(r);
+            wanted.insert(y * columns + (x + 1) % columns);
+            wanted.insert(y * columns + (x + columns - 1) % columns);
+            wanted.insert((y + 1) % lines * columns + x);
+            wanted.insert((y + lines - 1) % lines * columns + x);
+        }
+        let unwanted: Vec<_> = self
+            .regions
+            .entries
+            .iter()
+            .map(|e| e.id)
+            .filter(|&r| !wanted.contains(r))
+            .collect();
+        for r in unwanted {
+            self.release(r);
+        }
+        for entry in &mut self.regions.entries {
+            entry.value.clear();
+        }
+        for &r in &wanted.regions {
+            self.own(r);
+        }
+        self.wanted = wanted;
+    }
+    /// Moves regions with no occupied site to the spare pool.
+    pub(crate) fn prune(&mut self) {
+        let empty: Vec<_> = self
+            .regions
+            .entries
+            .iter()
+            .filter(|e| e.value.is_empty())
+            .map(|e| e.id)
+            .collect();
+        for r in empty {
+            self.release(r);
+        }
+    }
+    /// Recomputes masks only; cold writers call `refresh` for projections.
+    pub(crate) fn reclaim(&mut self) {
+        for entry in &mut self.regions.entries {
+            let r = &mut entry.value;
+            for s in 0..SITES {
+                r.masks[s] = crate::field_activity::mask(r.row(s));
+            }
+        }
+        self.prune();
+    }
+    /// Cold boundary: recompute every mask and projection; returns their sum.
+    pub(crate) fn refresh(&mut self, rows: &Rows) -> Projection {
+        self.reclaim();
+        let mut total = [0.; 6];
+        for entry in &mut self.regions.entries {
+            let r = &mut entry.value;
+            for s in 0..SITES {
+                r.projection[s] = if r.masks[s] == 0 {
+                    [0.; 6]
+                } else {
+                    crate::chemical_projection::project_active(r.row(s), rows, r.masks[s])
+                };
+                add(&mut total, r.projection[s]);
+            }
+        }
+        total
+    }
+}
+pub(crate) fn add(a: &mut Projection, b: Projection) {
+    for (x, y) in a.iter_mut().zip(b) {
+        *x += y;
     }
 }
 impl Index<usize> for Material {
@@ -193,13 +532,13 @@ impl IndexMut<usize> for Material {
 impl Index<Range<usize>> for Material {
     type Output = [f32];
     fn index(&self, r: Range<usize>) -> &[f32] {
-        let start = r.start % WIDTH;
-        &self.row(r.start / WIDTH)[start..start + r.len()]
+        let s = r.start % WIDTH;
+        &self.row(r.start / WIDTH)[s..s + r.len()]
     }
 }
 impl IndexMut<Range<usize>> for Material {
     fn index_mut(&mut self, r: Range<usize>) -> &mut [f32] {
-        let start = r.start % WIDTH;
-        &mut self.row_mut(r.start / WIDTH)[start..start + r.len()]
+        let s = r.start % WIDTH;
+        &mut self.row_mut(r.start / WIDTH)[s..s + r.len()]
     }
 }

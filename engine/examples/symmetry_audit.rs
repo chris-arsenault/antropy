@@ -138,8 +138,9 @@ fn spatial(chemistry: &Chemistry) -> Value {
     let mut error = 0_f32;
     for n in 0..64 {
         for s in 0..SPECIES {
-            error = error
-                .max((a.amounts[n * SPECIES + s] - b.amounts[rotate_node(n) * SPECIES + s]).abs());
+            error = error.max(
+                (a.amounts()[n * SPECIES + s] - b.amounts()[rotate_node(n) * SPECIES + s]).abs(),
+            );
         }
     }
     assert!(error < 1e-6);

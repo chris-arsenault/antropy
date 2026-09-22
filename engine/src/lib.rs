@@ -8,7 +8,7 @@ mod parallel_tests;
 pub use wasm_bindgen_rayon::init_thread_pool;
 pub mod accounting;
 pub mod ancestry;
-mod attraction;
+pub(crate) use field::attraction;
 #[cfg(test)]
 mod attraction_tests;
 #[cfg(test)]
@@ -58,7 +58,6 @@ pub mod field;
 mod field_activity;
 #[cfg(test)]
 mod field_activity_tests;
-mod field_medium;
 mod field_vector;
 pub mod fixtures;
 pub mod footprint;
@@ -115,8 +114,16 @@ mod source_probe;
 #[cfg(test)]
 mod source_tests;
 pub mod sources;
+mod spatial;
+mod spatial_carriers;
+mod spatial_filter;
 mod spatial_material;
+mod spatial_members;
+mod spatial_regions;
 mod spatial_signal;
+mod spatial_slots;
+#[cfg(test)]
+mod spatial_tests;
 mod startup_probe;
 mod storage_diagnostics;
 #[cfg(test)]

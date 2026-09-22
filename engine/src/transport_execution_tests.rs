@@ -4,7 +4,7 @@ use super::*;
 fn scratch_follows_touched_nodes_and_reuses_slots_without_stale_demands() {
     let mut exchange = Exchange::default();
     exchange.prepare_nodes(
-        19200,
+        crate::spatial::Geometry::new(160, 120),
         &[crate::footprint::Row::from_slice(&[
             (17, 0.5),
             (19000, 0.5),
@@ -20,7 +20,10 @@ fn scratch_follows_touched_nodes_and_reuses_slots_without_stale_demands() {
             exchange.changes[slot * 256 + s] = -0.01;
         }
     }
-    exchange.prepare_nodes(19200, &[crate::footprint::Row::from_slice(&[(3, 1.)])]);
+    exchange.prepare_nodes(
+        crate::spatial::Geometry::new(160, 120),
+        &[crate::footprint::Row::from_slice(&[(3, 1.)])],
+    );
     assert_eq!(exchange.nodes, [(3, 0)]);
     assert_eq!(exchange.slots[17], usize::MAX);
     assert_eq!(exchange.slots[19000], usize::MAX);
@@ -33,9 +36,9 @@ fn scratch_follows_touched_nodes_and_reuses_slots_without_stale_demands() {
             .chain(&exchange.changes)
             .all(|q| *q == 0.)
     );
-    exchange.prepare_nodes(2, &[]);
+    exchange.prepare_nodes(crate::spatial::Geometry::new(2, 1), &[]);
     assert!(exchange.nodes.is_empty() && exchange.demand.is_empty());
-    assert!(exchange.slots.iter().all(|slot| *slot == usize::MAX));
+    assert!(exchange.slots.is_empty());
 }
 
 fn advance(exchange: &mut Exchange, w: &mut crate::world::World) {
@@ -79,7 +82,7 @@ fn reused_exchange_matches_fresh_scratch_after_effort_and_population_changes() {
             assert!((actual.energy - expected.energy).abs() < 1e-12);
             assert!((actual.flows.contact_lost - expected.flows.contact_lost).abs() < 1e-12);
         }
-        assert_eq!(w.field.amounts, fresh.field.amounts);
+        assert_eq!(w.field.amounts(), fresh.field.amounts());
         assert_eq!(w.ledger.numerical_material, fresh.ledger.numerical_material);
         w.cells.reverse();
         if phase == 3 {
@@ -107,7 +110,7 @@ fn shared_field_contention_is_symmetric_and_excludes_same_stage_exports() {
     w.cells[2].inventory.set(s, 0.01);
     w.cells[2].action.transport.fill(0.);
     w.field.add(0, s, 1e-6, &w.chemistry);
-    let available = w.field.amounts[s] as f64;
+    let available = w.field.amounts()[s] as f64;
     let held = w.held().0;
     let sites = vec![crate::footprint::Row::from_slice(&[(0, 1.)]); 3];
     Exchange::default().advance(
@@ -133,4 +136,43 @@ fn shared_field_contention_is_symmetric_and_excludes_same_stage_exports() {
         );
         cell.inventory.validate().unwrap();
     }
+}
+#[test]
+fn persistent_delivery_updates_weights_and_removes_crowded_owners() {
+    let geometry = crate::spatial::Geometry::new(32, 32);
+    let mut exchange = Exchange::default();
+    let mut sites: Vec<_> = (0..100)
+        .map(|_| crate::footprint::Row::from_slice(&[(8, 0.5), (9, 0.5)]))
+        .collect();
+    for phase in 0..5 {
+        if phase == 1 {
+            sites[2] = crate::footprint::Row::from_slice(&[(8, 0.25), (9, 0.75)]);
+        } else if phase == 2 {
+            sites[0] = crate::footprint::Row::from_slice(&[(9, 0.4), (70, 0.6)]);
+        } else if phase == 3 {
+            sites.drain(1..80);
+        } else if phase == 4 {
+            sites.clear();
+        }
+        exchange.prepare_nodes(geometry, &sites);
+        for &(node, _) in &exchange.nodes {
+            let mut actual = exchange.delivery[exchange.slots[node]].clone();
+            actual.sort_by_key(|entry| entry.0);
+            let expected: Vec<_> = sites
+                .iter()
+                .enumerate()
+                .filter_map(|(i, row)| {
+                    row.iter()
+                        .find(|&&(n, _)| n == node)
+                        .map(|&(_, weight)| (i, weight))
+                })
+                .collect();
+            assert_eq!(actual, expected);
+        }
+        assert_eq!(
+            exchange.delivery.iter().map(Vec::len).sum::<usize>(),
+            sites.len() * 2
+        );
+    }
+    assert!(exchange.nodes.is_empty());
 }

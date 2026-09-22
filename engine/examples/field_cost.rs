@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let world = World::restore(&std::fs::read(path)?)?;
     let field = &world.field;
     let area = field.spacing.powi(2);
-    let total: f64 = field.amounts.iter().map(|&q| q as f64).sum();
+    let total: f64 = field.amounts().iter().map(|&q| q as f64).sum();
     let maximum = world
         .chemistry
         .properties
@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut groups = 0;
         let mut nodes = 0;
         let mut values = 0;
-        for (_, row) in field.amounts.rows() {
+        for (_, row) in field.amounts().rows() {
             let mut used = false;
             for group in row.chunks_exact(4) {
                 groups += usize::from(group.iter().any(|&q| q as f64 >= floor));

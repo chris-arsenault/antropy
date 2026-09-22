@@ -37,7 +37,7 @@ fn chemical_affinity_reverses_force_and_consuming_support_removes_it() {
         let response = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
         assert!(response.velocity[0] * sign > 1e-8);
         for &(n, _) in &site {
-            let amount = w.field.amounts[n * 256 + s] as f64;
+            let amount = w.field.amounts()[n * 256 + s] as f64;
             w.field.add(n, s, -amount, &w.chemistry);
         }
         source_medium::project(&mut w);
@@ -58,8 +58,8 @@ fn fractional_loss_is_independent_of_density_chemistry_and_body_support() {
         field.drift = 0.;
         field.attraction_length = 6.;
         field.add(55, species, amount, &chemistry);
-        field.body_signal[55] = [support, -support];
-        field.body_load[55] = support;
+        field.test_body_signal()[55] = [support, -support];
+        field.test_body_load()[55] = support;
         let before = field.totals(&chemistry);
         let balance = field.advance(&chemistry, 0.8, 0.05, 1.);
         let after = field.totals(&chemistry);
@@ -91,8 +91,8 @@ fn cell_work(active: bool) -> World {
 
 fn chemical_force(w: &World) -> [f64; 2] {
     let mut field = w.field.clone();
-    field.body_signal.fill([0.; 2]);
-    field.body_load.fill(0.);
+    field.test_body_signal().fill([0.; 2]);
+    field.test_body_load().fill(0.);
     field.prepare_attraction();
     let mut config = w.config.clone();
     config.source_drift = 4.;

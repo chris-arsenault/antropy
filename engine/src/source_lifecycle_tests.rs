@@ -39,7 +39,7 @@ fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
     assert_eq!(w.sources[0].amount, 0.);
     assert!(w.sources[0].wait.is_finite() && w.sources[0].wait >= 0.);
     assert_eq!(w.ledger.source_released, 0.75);
-    assert!(w.field.source_load.iter().all(|v| *v == 0.));
+    assert!(w.field.source_load().iter().all(|v| *v == 0.));
     assert!(
         source_medium::observe(&w)[0]["outputRate"]
             .as_array()
@@ -106,7 +106,7 @@ fn empty_reservoir_has_no_motion_or_projection_in_a_gradient() {
     source_medium::project(&mut w);
     let empty = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
     assert_eq!(empty.velocity, [0.; 2]);
-    assert!(w.field.source_load.iter().all(|q| *q == 0.));
+    assert!(w.field.source_load().iter().all(|q| *q == 0.));
     let position = [w.sources[0].habitat.x, w.sources[0].habitat.y];
     source_medium::advance(&mut w);
     assert_eq!(position, [w.sources[0].habitat.x, w.sources[0].habitat.y]);
@@ -130,6 +130,7 @@ fn composition_conversion_matches_the_shared_operator_on_actual_material() {
         operators: &operators,
         exposure: 1.,
         response,
+        release: true,
     };
     for amount in [0., 0.01, 2., 1000.] {
         let mut s = w.sources[0].clone();

@@ -42,9 +42,9 @@ fn partitioned_world_preserves_funding_observations_and_checkpoint_boundaries() 
     assert_eq!(serial.ledger.divisions, parallel.ledger.divisions);
     for (a, b) in serial
         .field
-        .amounts
+        .amounts()
         .iter()
-        .zip(parallel.field.amounts.iter())
+        .zip(parallel.field.amounts().iter())
     {
         assert!((*a as f64 - *b as f64).abs() < 1e-6);
     }

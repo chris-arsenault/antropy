@@ -80,26 +80,25 @@ fn compact_impulse_has_normalized_positive_support_and_discrete_variance() {
 fn shared_filter_preserves_signed_sums_constants_and_skips_unchanged_inputs() {
     let mut f = Field::new(32., 24., 2.);
     f.attraction_length = 6.;
-    for n in 0..f.signal.len() {
-        f.signal[n][0] = (n as f64 * 0.17).sin();
-        f.body_signal[n][0] = 0.2;
-        f.source_signal[n][0] = -0.1;
+    let nodes = f.nx * f.ny;
+    for n in 0..nodes {
+        f.test_body_signal()[n][0] = 0.2 + (n as f64 * 0.17).sin();
+        f.test_source_signal()[n][0] = -0.1;
     }
-    let raw = f.signal.clone();
+    let raw = f.body_signal().clone();
     f.prepare_attraction();
-    let expected: f64 = (0..f.signal.len()).map(|n| f.medium_signal(n)[0]).sum();
+    let expected: f64 = (0..nodes).map(|n| f.medium_signal(n)[0]).sum();
     assert!((f.attraction.output.iter().sum::<f64>() - expected).abs() < 1e-11);
-    assert_eq!(raw, f.signal);
+    assert_eq!(&raw, f.body_signal());
     let revision = f.attraction.revisions;
     f.prepare_attraction();
     assert_eq!(revision, f.attraction.revisions);
-    f.signal.fill([0.1, 0.]);
+    f.test_body_signal().fill([0.3, 0.]);
     f.prepare_attraction();
     assert!(f.attraction.output.iter().all(|q| (q - 0.2).abs() < 1e-12));
-    assert!((0..f.signal.len()).all(|n| (f.attractive(n) - 0.2).abs() < 1e-12));
-    f.signal.fill([0.; 2]);
-    f.body_signal.fill([0.; 2]);
-    f.source_signal.fill([0.; 2]);
+    assert!((0..nodes).all(|n| (f.attractive(n) - 0.2).abs() < 1e-12));
+    f.test_body_signal().fill([0.; 2]);
+    f.test_source_signal().fill([0.; 2]);
     f.prepare_attraction();
     assert!(f.attraction.output.iter().all(|q| *q == 0.));
 }
@@ -128,7 +127,12 @@ fn attraction_transport_commutes_with_grid_frames_and_chemical_relabeling() {
         other.attraction_length = 5.5;
         for n in 0..256 {
             for s in 0..256 {
-                other.add(node(n), 255 - s, initial.amounts[n * 256 + s] as f64, &chem);
+                other.add(
+                    node(n),
+                    255 - s,
+                    initial.amounts()[n * 256 + s] as f64,
+                    &chem,
+                );
             }
         }
         other.advance(&chem, 0.8, 0., 1.);
@@ -138,7 +142,8 @@ fn attraction_transport_commutes_with_grid_frames_and_chemical_relabeling() {
             );
             for s in 0..256 {
                 assert!(
-                    (other.amounts[node(n) * 256 + 255 - s] - reference.amounts[n * 256 + s]).abs()
+                    (other.amounts()[node(n) * 256 + 255 - s] - reference.amounts()[n * 256 + s])
+                        .abs()
                         < 1e-5
                 );
             }

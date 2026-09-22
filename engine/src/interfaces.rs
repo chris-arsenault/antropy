@@ -61,7 +61,7 @@ impl Graph {
                 .collect()
         };
         let mut readings = vec![Reading::default(); cells.len()];
-        crate::parallel::for_each(&mut readings, 128, |i, out| {
+        crate::parallel::for_each(&mut readings, crate::parallel::cost::CELL_READ, |i, out| {
             *out = self.read_with::<CONTROL>(i, cells, c, chemistry, &stress);
         });
         for (i, (cell, reading)) in cells.iter_mut().zip(readings).enumerate() {

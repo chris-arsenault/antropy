@@ -211,7 +211,7 @@ pub fn local(w: &crate::world::World, x: f64, y: f64) -> [f64; 3] {
     let mut medium: [f64; 2] = std::array::from_fn(|k| {
         sites
             .iter()
-            .map(|&(n, a)| a * (w.field.signal[n][k] + w.field.source_signal[n][k]))
+            .map(|&(n, a)| a * (w.field.material_signal(n)[k] + w.field.source_signal()[n][k]))
             .sum()
     });
     crate::footprint::visit_current(w, |node, profile| {

@@ -39,16 +39,12 @@ fn refine(coarse: &World) -> World {
     let mut fine = coarse.clone();
     fine.config.mesh = 2.;
     fine.field = Field::new(fine.config.width, fine.config.height, fine.config.mesh);
-    for y in 0..fine.field.ny {
-        for x in 0..fine.field.nx {
-            let source = ((y / 2) * coarse.field.nx + x / 2) * 256;
-            let destination = (y * fine.field.nx + x) * 256;
-            for s in 0..256 {
-                fine.field.amounts[destination + s] = coarse.field.amounts[source + s] * 0.25;
-            }
-        }
-    }
-    fine.field.refresh(&fine.chemistry);
+    let nx = fine.field.nx;
+    fine.field.replace_material(&fine.chemistry, |i| {
+        let (x, y) = (i / 256 % nx, i / 256 / nx);
+        let source = ((y / 2) * coarse.field.nx + x / 2) * 256;
+        coarse.field.amounts()[source + i % 256] * 0.25
+    });
     diagnostics::initialize(&mut fine);
     let before = coarse.held();
     let after = fine.held();

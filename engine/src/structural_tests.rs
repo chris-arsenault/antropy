@@ -7,8 +7,11 @@ fn unoccupied_area_adds_indices_without_chemical_rows_or_recurring_support() {
     for (width, height) in [(320., 240.), (1600., 480.), (1600., 960.)] {
         let mut field = Field::new(width, height, 2.);
         field.attraction_length = 6.;
-        assert_eq!(field.amounts.nodes().len(), 0);
-        assert_eq!(field.amounts.allocated_bytes(), field.nx * field.ny * 4);
+        assert_eq!(field.amounts().nodes().len(), 0);
+        assert_eq!(
+            field.amounts().allocated_bytes(),
+            field.nx.div_ceil(8) * field.ny.div_ceil(8) * 4
+        );
         let site = 40 * field.nx + 50;
         field.add(site, 17, 10., &chemistry);
         field.add(site + 1, 170, 5., &chemistry);
@@ -18,16 +21,16 @@ fn unoccupied_area_adds_indices_without_chemical_rows_or_recurring_support() {
         let info = field.structural_counts();
         counts.push((
             field.work_counts(),
-            field.amounts.nodes().len(),
+            field.amounts().nodes().len(),
             info["attractionVisited"].clone(),
         ));
-        assert!(field.amounts.nodes().len() < 100);
+        assert!(field.amounts().nodes().len() < 100);
         let far = field.nx * field.ny - 1;
-        assert!(field.amounts.row(far).iter().all(|q| *q == 0.));
+        assert!(field.amounts().row(far).iter().all(|q| *q == 0.));
         // Incoming material immediately creates an owner even outside every prior halo.
         field.add(far, 99, 1., &chemistry);
         field.advance(&chemistry, 0.8, 0., 1.);
-        assert!(field.amounts[99] > 0. || field.amounts[(field.nx - 1) * 256 + 99] > 0.);
+        assert!(field.amounts()[99] > 0. || field.amounts()[(field.nx - 1) * 256 + 99] > 0.);
         field.validate_reductions(&chemistry).unwrap();
     }
     assert_eq!(counts[0], counts[1]);
@@ -43,17 +46,17 @@ fn material_owner_reclaims_vanished_support_and_restore_keeps_sparse_ownership()
     }
     let before = field.totals(&chemistry).0;
     let balance = field.advance(&chemistry, 0.8, 0., 1.);
-    assert_eq!(field.amounts.nodes().len(), 0);
+    assert_eq!(field.amounts().nodes().len(), 0);
     assert!((before - balance.roundoff_matter).abs() < 1e-12);
     for _ in 0..20 {
         field.add(3, 100, 0.001, &chemistry);
     }
     field.advance(&chemistry, 0.8, 0., 1.);
-    assert!(field.amounts[3 * 256 + 100] > 0.);
-    let bytes = postcard::to_stdvec(&field.amounts).unwrap();
+    assert!(field.amounts()[3 * 256 + 100] > 0.);
+    let bytes = postcard::to_stdvec(&field.amounts()).unwrap();
     assert!(bytes.len() < 10000);
     let restored: crate::spatial_material::Material = postcard::from_bytes(&bytes).unwrap();
-    assert_eq!(restored, field.amounts);
+    assert_eq!(&restored, field.amounts());
 }
 
 #[test]
@@ -77,12 +80,14 @@ fn circle_contacts_have_no_lattice_anisotropy_or_heading_dependence() {
     let w = crate::diagnostics::nutrition(0.8, 2., false, false);
     let mut cells = vec![w.cells[0].clone(); 3];
     for (i, c) in cells.iter_mut().enumerate() {
+        c.id = i as u64 + 1;
         c.x = 10. + i as f64 * 0.07;
         c.y = 10. - i as f64 * 0.02;
     }
     let mut cache = crate::movement::geometry::Cache::default();
     cache.prepare_local(&cells, &w.config);
     let original = cache.local.pressure.rows.clone();
+    assert!(original.iter().any(|r| r.weight > 0.));
     let (sin, cos) = 0.731_f64.sin_cos();
     for cell in &mut cells {
         let x = cell.x - 10.;

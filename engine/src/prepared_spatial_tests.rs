@@ -176,7 +176,8 @@ fn new_weak_carrier_and_reciprocal_pressure_are_not_suspended() {
     movement::advance_cached(&mut cells, &c, &field, &sites, &mut cache);
     let preparations = cache.motion.preparations;
     let node = sites[0][0].0;
-    field.source_signal[field.neighbors[node][0]][1] = 1e-6;
+    let neighbor = field.neighbors[node][0];
+    field.test_source_signal()[neighbor][1] = 1e-6;
     movement::advance_cached(&mut cells, &c, &field, &sites, &mut cache);
     assert!(cache.motion.preparations > preparations);
 }

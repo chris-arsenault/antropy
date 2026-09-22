@@ -256,7 +256,7 @@ impl World {
         self.footprints
             .prepare(&self.cells, &self.config, &mut self.field, &mut sites);
         self.field.freeze_mechanical_stage();
-        crate::source_medium::advance(self);
+        crate::source_medium::advance_scheduled(self, physiology);
         if physiology {
             self.climate.prepare(&self.config);
             let balance = self.field.advance_weathered(
@@ -350,7 +350,8 @@ impl World {
     fn sense(&mut self) {
         let interface = self.contact_cache.graph_prepared(&self.cells, &self.config);
         interface.prepare(&mut self.cells, &self.config, &self.chemistry);
-        crate::parallel::for_each(&mut self.cells, 128, |_, cell| {
+        let cost = crate::parallel::cost::CELL_READ;
+        crate::parallel::for_each(&mut self.cells, cost, |_, cell| {
             crate::sensing::observe_external(cell, &self.config, &self.field);
         });
     }
@@ -415,12 +416,21 @@ impl World {
         if !tail.is_empty() || world.version != VERSION {
             return Err("Unsupported or trailing physical checkpoint data".into());
         }
+        // Site projections are derived state: recompute them before validating the world.
+        world.chemistry.validate()?;
+        world.field.validate()?;
+        world.field.refresh_features(&world.chemistry);
         world.validate()?;
-        world.field.rebuild();
         world.field.pressure_strength = world.config.pressure_strength;
         world.climate = crate::climate::Climate::new(&world.config, &world.chemistry);
         for s in &mut world.sources {
             s.rebuild(&world.config, &world.field);
+            // Release accrues with the medium interval; checkpoints carry that shared clock.
+            s.pending = if s.amount > 0. {
+                world.field_elapsed
+            } else {
+                0.
+            };
         }
         for g in world.genomes.values_mut() {
             g.compile(&world.config, &world.chemistry);

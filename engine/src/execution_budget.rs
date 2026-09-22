@@ -83,7 +83,7 @@ fn field_rates(w: &World) -> (Vec<Sample>, Vec<f64>) {
         let mut outgoing = 0_f64;
         for s in crate::contact_exchange::species(mask) {
             let p = &w.chemistry.properties[s];
-            let amount = f.amounts[n * 256 + s] as f64;
+            let amount = f.amounts()[n * 256 + s] as f64;
             let (mut loss, mut incoming) = (0., 0.);
             for (face, c) in coefficients.iter().enumerate() {
                 let diffusion = p.diffusion * c[0] as f64;
@@ -91,7 +91,7 @@ fn field_rates(w: &World) -> (Vec<Sample>, Vec<f64>) {
                     + p.interaction[1] * c[2] as f64
                     + p.impedance * c[3] as f64;
                 loss += diffusion + drift.max(0.);
-                incoming += f.amounts[f.neighbors[n][face] * 256 + s] as f64
+                incoming += f.amounts()[f.neighbors[n][face] * 256 + s] as f64
                     * (diffusion + (-drift).max(0.));
             }
             outgoing = outgoing.max(loss);

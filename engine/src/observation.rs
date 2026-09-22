@@ -77,7 +77,7 @@ pub fn summary(w: &World) -> Value {
 }
 pub fn environment(w: &World) -> Value {
     let mut species = [0.; 256];
-    for (_, node) in w.field.amounts.rows() {
+    for (_, node) in w.field.amounts().rows() {
         for (total, q) in species.iter_mut().zip(node) {
             *total += *q as f64;
         }
@@ -88,13 +88,15 @@ pub fn environment(w: &World) -> Value {
         .zip(&w.chemistry.properties)
         .map(|(q, p)| q * p.potential)
         .sum::<f64>();
-    let half_speed = w
-        .field
-        .impedance
-        .iter()
-        .zip(&w.field.source_load)
-        .filter(|(i, s)| w.config.movement_impedance * (**i + **s) >= 1.)
-        .count();
+    // Reservoir load alone everywhere, corrected at occupied sites by their material impedance.
+    let slow = |load: f64| w.config.movement_impedance * load >= 1.;
+    let loads = w.field.source_load();
+    let area = w.field.spacing * w.field.spacing;
+    let mut half_speed = loads.iter().filter(|&&s| slow(s)).count();
+    for (n, _, p) in w.field.amounts().occupied() {
+        half_speed += usize::from(slow(p[2] / area + loads[n]));
+        half_speed -= usize::from(slow(loads[n]));
+    }
     json!({"tick":w.tick,"extracellular":{"amount":amount,"potential":potential,"species":species.to_vec()},"halfSpeedArea":half_speed as f64*w.field.spacing.powi(2),"sources":w.sources,"sourceResponse":crate::source_medium::observe(w),"environmentRng":w.environment_rng})
 }
 pub fn frame(w: &World) -> Value {
@@ -109,22 +111,24 @@ pub fn field_view(w: &World, kind: &str, species: usize) -> Result<Value, String
     let values: Vec<f32> = match kind {
         "impedance" => w
             .field
-            .impedance
+            .source_load()
             .iter()
-            .zip(&w.field.source_load)
-            .map(|(x, s)| (x + s) as f32)
+            .enumerate()
+            .map(|(n, s)| (w.field.impedance_at(n) + s) as f32)
             .collect(),
-        "stress" => w.field.stress.iter().map(|x| *x as f32).collect(),
+        "stress" => (0..w.field.nx * w.field.ny)
+            .map(|n| w.field.stress_at(n) as f32)
+            .collect(),
         "chemical" => (0..w.field.nx * w.field.ny)
-            .map(|i| w.field.amounts.row(i))
+            .map(|i| w.field.amounts().row(i))
             .map(|n| n[species] / area as f32)
             .collect(),
         "material" => (0..w.field.nx * w.field.ny)
-            .map(|i| w.field.amounts.row(i))
+            .map(|i| w.field.amounts().row(i))
             .map(|n| n.iter().sum::<f32>() / area as f32)
             .collect(),
         "potential" => (0..w.field.nx * w.field.ny)
-            .map(|i| w.field.amounts.row(i))
+            .map(|i| w.field.amounts().row(i))
             .map(|n| {
                 (n.iter()
                     .zip(&w.chemistry.properties)

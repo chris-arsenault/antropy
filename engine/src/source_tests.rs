@@ -41,7 +41,7 @@ fn composition_keeps_local_history_through_empty_interval_and_restore() {
     }
     assert_eq!(held, w.held()); // Boundary composition adds no material or work.
     assert_eq!(w.ledger.supplied, 0.);
-    assert!(w.field.source_load.iter().all(|q| *q == 0.));
+    assert!(w.field.source_load().iter().all(|q| *q == 0.));
     assert_ne!(seed, w.sources[0].mixture);
     w.sources[0].wait = 0.;
     w.config.source_processing = 0.;
@@ -70,19 +70,32 @@ fn source_caches_match_owned_material_and_clear_retired_geography() {
         w.step();
         let mut reference = w.clone();
         source_medium::project(&mut reference);
-        assert_eq!(w.field.source_signal, reference.field.source_signal);
-        assert_eq!(w.field.source_load, reference.field.source_load);
+        assert!(
+            w.field
+                .source_signal()
+                .iter()
+                .flatten()
+                .zip(reference.field.source_signal().iter().flatten())
+                .all(|(a, b)| (a - b).abs() < 1e-12)
+        );
+        assert!(
+            w.field
+                .source_load()
+                .iter()
+                .zip(reference.field.source_load())
+                .all(|(a, b)| (a - b).abs() < 1e-12)
+        );
         for (a, b) in w.sources.iter().zip(&reference.sources) {
             assert_eq!(a.material.total, b.material.total);
             assert_eq!(a.material.moments, b.material.moments);
         }
     }
-    assert!(!w.field.source_nodes.is_empty());
+    assert!(w.field.source_load().iter().any(|&v| v > 0.));
     w.sources.clear();
     source_medium::project(&mut w);
-    assert!(w.field.source_nodes.is_empty());
-    assert!(w.field.source_signal.iter().all(|v| *v == [0.; 2]));
-    assert!(w.field.source_load.iter().all(|v| *v == 0.));
+    assert!(w.field.source_load().iter().all(|&v| v == 0.));
+    assert!(w.field.source_signal().iter().all(|v| *v == [0.; 2]));
+    assert!(w.field.source_load().iter().all(|v| *v == 0.));
 }
 
 #[test]
@@ -103,8 +116,8 @@ fn zero_release_retains_inventory_without_lifetime_expiry() {
         w.step();
         reference.step();
         source_medium::project(&mut reference);
-        assert_eq!(w.field.source_signal, reference.field.source_signal);
-        assert_eq!(w.field.source_load, reference.field.source_load);
+        assert_eq!(w.field.source_signal(), reference.field.source_signal());
+        assert_eq!(w.field.source_load(), reference.field.source_load());
         crate::boundary_tests::usable_continuation(&w, resumed_tick);
         crate::boundary_tests::usable_continuation(&reference, resumed_tick);
     }
@@ -131,13 +144,13 @@ fn reservoirs_project_bounded_interfaces_without_self_propulsion_or_material_gra
         let r = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
         assert!(r.velocity.iter().all(|v| v.abs() < 1e-13));
         assert_eq!(before, w.held());
-        assert!(w.field.source_load.iter().any(|v| *v > 0.));
+        assert!(w.field.source_load().iter().any(|v| *v > 0.));
     }
     w.sources[0].amount *= 1e12;
     source_medium::project(&mut w);
     assert!(
         w.field
-            .source_load
+            .source_load()
             .iter()
             .all(|v| v.is_finite() && *v < 24.)
     );

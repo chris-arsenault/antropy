@@ -100,7 +100,7 @@ impl Exchange {
         sites: &[crate::footprint::Row],
         graph: &crate::interfaces::Graph,
     ) {
-        self.prepare_nodes(field.nx * field.ny, sites);
+        self.prepare_nodes(crate::spatial::Geometry::new(field.nx, field.ny), sites);
         for (i, &mask) in self.masks.iter().enumerate() {
             clear(&mut self.imports[i], mask);
             clear(&mut self.exports[i], mask);
@@ -131,13 +131,14 @@ impl Exchange {
                 }
             }
         };
-        if crate::parallel::enabled(cells.len(), 128) {
+        if let Some(grain) = crate::parallel::grain(cells.len(), crate::parallel::cost::CELL_READ) {
             self.imports
                 .par_iter_mut()
                 .zip(self.exports.par_iter_mut())
                 .zip(self.masks.par_iter_mut())
                 .zip(self.contact_support.par_iter_mut())
                 .enumerate()
+                .with_min_len(grain)
                 .for_each(request);
         } else {
             self.imports
@@ -153,7 +154,7 @@ impl Exchange {
         }
         self.contact
             .allocate(cells, &mut self.exports, graph, &self.masks);
-        self.project_requests(sites);
+        self.project_requests();
         self.preparations += cells.len() as u64;
     }
 }

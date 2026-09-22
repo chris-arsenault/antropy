@@ -62,10 +62,13 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
         for &(node, weights) in &nodes.nodes[..nodes.length] {
             let local = if slot == 4 {
                 field.illumination.node(node)
+            } else if field.active_groups(node) == 0 {
+                0.
             } else {
+                let row = field.amounts().row(node);
                 cell.operators.as_ref().unwrap().receptors[slot]
                     .iter()
-                    .map(|a| a.value * field.amounts[node * 256 + a.species] as f64)
+                    .map(|a| a.value * row[a.species] as f64)
                     .sum::<f64>()
                     / field.spacing.powi(2)
             };
@@ -230,14 +233,26 @@ pub fn stress_boundary(
     interface: &crate::interfaces::Reading,
 ) -> f64 {
     let row = crate::footprint::sites(cell, c, field);
-    let mut load = field.scalar(&field.stress, &row);
+    let mut load = field.stress_sample(&row);
     let membrane = &cell.operators.as_ref().unwrap().membrane;
-    for a in membrane.iter() {
-        load -= (1. - c.susceptibility_floor)
-            * a.value
-            * chemistry.properties[a.species].stress
-            * field.sample(a.species, &row);
-    }
+    let attenuation = row
+        .iter()
+        .map(|&(node, weight)| {
+            if field.active_groups(node) == 0 {
+                return 0.;
+            }
+            let values = field.amounts().row(node);
+            weight
+                * membrane
+                    .iter()
+                    .map(|a| {
+                        a.value * chemistry.properties[a.species].stress * values[a.species] as f64
+                    })
+                    .sum::<f64>()
+        })
+        .sum::<f64>()
+        / field.spacing.powi(2);
+    load -= (1. - c.susceptibility_floor) * attenuation;
     load = load * interface.field + interface.stress;
     let mut internal = cell.inventory.projection(chemistry).stress;
     for a in membrane.iter() {

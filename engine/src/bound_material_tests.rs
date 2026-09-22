@@ -47,11 +47,11 @@ fn growth_and_death_return_each_funded_species_with_paid_assembly() {
         close(before.0, after.0);
         close(before.1, after.1 + heat);
         let cell = w.cells.remove(0);
-        let field = w.field.amounts.clone();
+        let field = w.field.amounts().clone();
         lifecycle::release(&mut w, &cell, Cause::Starvation);
         for s in 0..256 {
             let released: f64 = (0..w.field.nx * w.field.ny)
-                .map(|n| w.field.amounts[n * 256 + s] as f64 - field[n * 256 + s] as f64)
+                .map(|n| w.field.amounts()[n * 256 + s] as f64 - field[n * 256 + s] as f64)
                 .sum();
             assert!(
                 (released - cell.inventory.value(s) - cell.bound_material.value(s)).abs() < 1e-6

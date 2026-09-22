@@ -32,7 +32,6 @@ fn fixture() -> World {
 }
 
 struct Scratch {
-    original: Vec<[f64; 3]>,
     combined: Vec<f64>,
     filter: kernel::Kernel,
     climate: antropy_engine::climate::Climate,
@@ -41,30 +40,38 @@ impl Scratch {
     fn new(w: &World) -> Self {
         let f = &w.field;
         Self {
-            original: vec![[0.; 3]; f.nx * f.ny],
             combined: vec![0.; f.nx * f.ny],
             filter: kernel::Kernel::new(f.nx, f.ny, f.spacing, 6.),
             climate: antropy_engine::climate::Climate::new(&w.config, &w.chemistry),
         }
     }
-    fn install(&mut self, f: &mut Field) {
-        for n in 0..self.combined.len() {
-            self.original[n] = [f.signal[n][0], f.source_signal[n][0], f.body_signal[n][0]];
-            self.combined[n] = self.original[n].iter().sum();
+    fn prepare(&mut self, f: &Field) {
+        for (n, value) in self.combined.iter_mut().enumerate() {
+            *value = f.medium_signal(n)[0];
         }
         self.filter.apply(&self.combined, f.nx, f.ny);
-        for n in 0..self.combined.len() {
-            f.signal[n][0] = self.filter.output[n];
-            f.source_signal[n][0] = 0.;
-            f.body_signal[n][0] = 0.;
-        }
     }
-    fn restore(&self, f: &mut Field) {
-        for (n, row) in self.original.iter().enumerate() {
-            f.signal[n][0] = row[0];
-            f.source_signal[n][0] = row[1];
-            f.body_signal[n][0] = row[2];
+    fn gradient(&self, f: &Field, sites: &[(usize, f64)]) -> [[f64; 3]; 2] {
+        let mut gradient = f.gradient(sites);
+        gradient[0][0] = 0.;
+        gradient[1][0] = 0.;
+        for &(n, weight) in sites {
+            let x = n % f.nx;
+            let adjacent = [
+                n - x + (x + 1) % f.nx,
+                n - x + (x + f.nx - 1) % f.nx,
+                (n + f.nx) % (f.nx * f.ny),
+                (n + f.nx * f.ny - f.nx) % (f.nx * f.ny),
+            ];
+            for (axis, (a, b)) in [(adjacent[0], adjacent[1]), (adjacent[2], adjacent[3])]
+                .into_iter()
+                .enumerate()
+            {
+                gradient[axis][0] +=
+                    weight * (self.filter.output[a] - self.filter.output[b]) / (2. * f.spacing);
+            }
         }
+        gradient
     }
 }
 
@@ -75,12 +82,17 @@ fn advance(w: &mut World, scratch: &mut Scratch, candidate: bool) {
         .map(|s| source_medium::response(s, w.tick, &w.config, &w.field, &w.chemistry))
         .collect();
     if candidate {
-        scratch.install(&mut w.field);
+        scratch.prepare(&w.field);
         for (s, r) in w.sources.iter().zip(&mut responses) {
-            r.velocity =
-                source_medium::response(s, w.tick, &w.config, &w.field, &w.chemistry).velocity;
+            r.velocity = source_medium::response_with_gradient(
+                s,
+                &w.config,
+                &w.field,
+                &w.chemistry,
+                scratch.gradient(&w.field, &s.footprint),
+            )
+            .velocity;
         }
-        scratch.restore(&mut w.field);
     }
     for (s, r) in w.sources.iter_mut().zip(responses) {
         let exposure = weathering::exposure(
@@ -97,6 +109,7 @@ fn advance(w: &mut World, scratch: &mut Scratch, candidate: bool) {
                 operators: scratch.climate.operators.as_ref().unwrap(),
                 exposure,
                 response: r,
+                release: true,
             },
             &mut w.environment_rng,
             &mut w.field,

@@ -86,8 +86,7 @@ fn sample(w: &mut World) -> Value {
         .collect();
     let chemical_response = if w.trace.is_some() {
         let mut field = w.field.clone();
-        field.body_signal.fill([0.; 2]);
-        field.body_load.fill(0.);
+        antropy_engine::footprint::deposit_profiles(&[], &w.config, &mut field, &[]);
         field.prepare_attraction();
         Some(source_medium::response(
             &w.sources[0],

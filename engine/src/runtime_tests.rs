@@ -87,14 +87,13 @@ fn world() -> World {
 #[test]
 fn composed_field_preserves_every_species_and_accounts_its_numeric_error() {
     let mut w = world();
-    for (i, q) in w.field.amounts.dense_values_mut().enumerate() {
-        *q = (0.01 + (i % 197) as f32 * 0.0001) * (1. + (i % 11) as f32);
-    }
-    w.field.refresh(&w.chemistry);
+    w.field.replace_material(&w.chemistry, |i| {
+        (0.01 + (i % 197) as f32 * 0.0001) * (1. + (i % 11) as f32)
+    });
     let totals = |w: &World| {
         std::array::from_fn::<_, 256, _>(|s| {
             w.field
-                .amounts
+                .amounts()
                 .chunks_exact(256)
                 .map(|n| n[s] as f64)
                 .sum::<f64>()
@@ -110,7 +109,7 @@ fn composed_field_preserves_every_species_and_accounts_its_numeric_error() {
     for (a, b) in before.into_iter().zip(after) {
         assert!((a - b).abs() < 1e-6 * (1. + a));
     }
-    assert!(w.field.amounts.iter().all(|q| *q >= 0.));
+    assert!(w.field.amounts().iter().all(|q| *q >= 0.));
     assert!((initial.0 - final_total.0 - balance.roundoff_matter).abs() < 1e-10);
     assert!((initial.1 - final_total.1 - balance.roundoff_energy).abs() < 1e-10);
 }

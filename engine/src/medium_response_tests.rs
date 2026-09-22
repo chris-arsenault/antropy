@@ -44,7 +44,7 @@ fn embodied_pressure_has_no_self_propulsion_at_off_grid_or_periodic_positions() 
             1.,
             4.,
         );
-        assert!(w.field.body_load.iter().any(|x| *x > 0.));
+        assert!(w.field.body_load().iter().any(|x| *x > 0.));
         assert!(v.iter().all(|x| x.abs() < 1e-12));
     }
 }
@@ -126,7 +126,7 @@ fn self_load_uses_actual_interface_and_retains_foreign_background() {
         w.config.mesh.powi(2),
         &row,
     );
-    let bodies: f64 = row.iter().map(|&(n, a)| a * w.field.body_load[n]).sum();
+    let bodies: f64 = row.iter().map(|&(n, a)| a * w.field.body_load()[n]).sum();
     assert!((own - bodies).abs() < 1e-12);
     source_medium::project(&mut w);
     let source = &w.sources[0];
@@ -135,7 +135,7 @@ fn self_load_uses_actual_interface_and_retains_foreign_background() {
     let deposited: f64 = source
         .footprint
         .iter()
-        .map(|&(n, a)| a * w.field.source_load[n])
+        .map(|&(n, a)| a * w.field.source_load()[n])
         .sum();
     assert!((own - deposited).abs() < 1e-12);
     for n in 0..w.field.nx * w.field.ny {
@@ -159,7 +159,7 @@ fn pressure_flux_preserves_material_and_commutes_with_chemical_relabeling_and_ge
         (initial.totals(&chemistry).0 - field.totals(&chemistry).0 - balance.roundoff_matter).abs()
             < 1e-12
     );
-    assert!(field.amounts.iter().all(|x| *x >= 0. && x.is_finite()));
+    assert!(field.amounts().iter().all(|x| *x >= 0. && x.is_finite()));
     for mode in 0..3 {
         let node = |n: usize| match mode {
             0 => (n % 12) * 12 + n / 12,
@@ -177,7 +177,7 @@ fn pressure_flux_preserves_material_and_commutes_with_chemical_relabeling_and_ge
                 other.add(
                     node(n),
                     species(s),
-                    initial.amounts[n * 256 + s] as f64,
+                    initial.amounts()[n * 256 + s] as f64,
                     &relabeled,
                 );
             }
@@ -186,7 +186,8 @@ fn pressure_flux_preserves_material_and_commutes_with_chemical_relabeling_and_ge
         for n in 0..144 {
             for s in 0..256 {
                 assert!(
-                    (other.amounts[node(n) * 256 + species(s)] - field.amounts[n * 256 + s]).abs()
+                    (other.amounts()[node(n) * 256 + species(s)] - field.amounts()[n * 256 + s])
+                        .abs()
                         < 1e-5
                 );
             }

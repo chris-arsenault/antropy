@@ -152,7 +152,7 @@ pub fn delivery(enabled: bool, swap: bool) -> Result<World, String> {
     w.next_genome = 3;
     for n in 0..w.field.nx * w.field.ny {
         for s in [8, 128] {
-            let q = w.field.amounts[n * 256 + s] as f64;
+            let q = w.field.amounts()[n * 256 + s] as f64;
             w.field.add(n, s, -q, &w.chemistry);
         }
     }

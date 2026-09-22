@@ -1,221 +1,159 @@
-//! Compact diameter-class bins are rebuilt from current bodies, without candidate lifetimes.
+//! Persistent diameter-class membership; large bodies do not widen small-body queries.
 use super::{Body, Contacts, Edge};
-use crate::{config::Config, organism::Cell};
-
-#[derive(Clone, Copy, Debug, Default)]
-struct Grid {
-    shape: [usize; 2],
-    size: [f64; 2],
-}
-impl Grid {
-    fn new(diameter: f64, count: usize, c: &Config) -> Self {
-        let extent = [c.width, c.height];
-        let shape = extent.map(|v| (v / diameter).floor().clamp(1., count as f64) as usize);
-        Self {
-            shape,
-            size: std::array::from_fn(|k| extent[k] / shape[k] as f64),
-        }
-    }
-    fn key(&self, body: Body) -> usize {
-        let bin: [usize; 2] = std::array::from_fn(|k| {
-            ((body.position[k] / self.size[k]) as usize).min(self.shape[k] - 1)
-        });
-        bin[1] * self.shape[0] + bin[0]
-    }
-    fn neighbors(&self, key: usize) -> ([usize; 9], usize) {
-        let [x, y] = [key % self.shape[0], key / self.shape[0]];
-        let mut keys = [usize::MAX; 9];
-        let mut count = 0;
-        for dy in -1..=1 {
-            for dx in -1..=1 {
-                let key = (y as isize + dy).rem_euclid(self.shape[1] as isize) as usize
-                    * self.shape[0]
-                    + (x as isize + dx).rem_euclid(self.shape[0] as isize) as usize;
-                if !keys[..count].contains(&key) {
-                    keys[count] = key;
-                    count += 1;
-                }
-            }
-        }
-        (keys, count)
-    }
-}
-
+use crate::{config::Config, organism::Cell, spatial::Geometry, spatial_members::Members};
+use rayon::prelude::*;
+use std::collections::BTreeMap;
 #[derive(Clone, Debug)]
-struct Bin {
-    key: usize,
-    start: usize,
-    end: usize,
+struct Level {
+    members: Members,
+    geometry: Geometry,
+    scale: [f64; 2],
+    radius: f64,
 }
-#[derive(Clone, Debug, Default)]
-struct Rows {
-    entries: Vec<(usize, usize)>,
-    bins: Vec<Bin>,
-}
-impl Rows {
-    fn prepare(&mut self, owners: impl Iterator<Item = usize>, bodies: &[Body], grid: Grid) {
-        self.entries.clear();
-        self.entries
-            .extend(owners.map(|i| (grid.key(bodies[i]), i)));
-        self.entries.sort_unstable();
-        self.bins.clear();
-        for (position, &(key, _)) in self.entries.iter().enumerate() {
-            if let Some(bin) = self.bins.last_mut()
-                && bin.key == key
-            {
-                bin.end = position + 1;
-            } else {
-                self.bins.push(Bin {
-                    key,
-                    start: position,
-                    end: position + 1,
-                });
-            }
+impl Level {
+    fn new(class: i32, c: &Config, capacity: usize) -> Self {
+        let bound = 2_f64.powi(class);
+        let shape =
+            [c.width, c.height].map(|v| (v / bound).floor().clamp(1., capacity as f64) as usize);
+        Self {
+            members: Members::default(),
+            geometry: Geometry::new(shape[0], shape[1]),
+            scale: [c.width / shape[0] as f64, c.height / shape[1] as f64],
+            radius: 0.,
         }
     }
-    fn find(&self, key: usize) -> Option<&Bin> {
-        self.bins
-            .binary_search_by_key(&key, |b| b.key)
-            .ok()
-            .map(|i| &self.bins[i])
+    fn node(&self, position: [f64; 2]) -> usize {
+        let x = (position[0] / self.scale[0]) as usize;
+        let y = (position[1] / self.scale[1]) as usize;
+        y.min(self.geometry.ny - 1) * self.geometry.nx + x.min(self.geometry.nx - 1)
     }
-}
-#[derive(Clone, Debug, Default)]
-struct Level {
-    grid: Grid,
-    rows: Rows,
 }
 #[derive(Clone, Debug, Default)]
 pub(super) struct Search {
-    classes: Vec<(i32, usize)>,
-    levels: Vec<Level>,
-    projected: Rows,
+    levels: BTreeMap<i32, Level>,
+    jobs: Vec<(i32, usize)>,
+    configuration: Option<(f64, f64, usize)>,
 }
 impl Search {
     pub fn update(&mut self, cells: &[Cell], c: &Config, contacts: &mut Contacts) {
+        let capacity = cells.len().max(1).next_power_of_two();
+        if self.configuration != Some((c.width, c.height, capacity)) {
+            self.levels.clear();
+            self.configuration = Some((c.width, c.height, capacity));
+        }
         contacts.bodies.clear();
-        contacts.bodies.extend(cells.iter().map(|cell| Body {
-            position: [cell.x.rem_euclid(c.width), cell.y.rem_euclid(c.height)],
-            radius: cell.radius(c),
-        }));
-        self.prepare(&contacts.bodies, c);
+        for level in self.levels.values_mut() {
+            level.members.begin(level.geometry);
+            level.radius = 0.;
+        }
+        for (i, cell) in cells.iter().enumerate() {
+            let body = Body {
+                position: [cell.x.rem_euclid(c.width), cell.y.rem_euclid(c.height)],
+                radius: cell.radius(c),
+            };
+            let class = (2. * body.radius).log2().ceil() as i32;
+            let level = self.levels.entry(class).or_insert_with(|| {
+                let mut level = Level::new(class, c, capacity);
+                level.members.begin(level.geometry);
+                level
+            });
+            level.members.update(cell.id, i, level.node(body.position));
+            level.radius = level.radius.max(body.radius);
+            contacts.bodies.push(body);
+        }
+        for level in self.levels.values_mut() {
+            level.members.finish();
+        }
+        self.levels.retain(|_, level| level.radius > 0.);
+        self.jobs.clear();
+        for (&class, level) in &self.levels {
+            self.jobs
+                .extend(level.members.occupied().map(|n| (class, n)));
+        }
+        self.visit(c, contacts);
+    }
+    fn visit(&self, c: &Config, contacts: &mut Contacts) {
         contacts.edges.clear();
         contacts.candidates = 0;
-        for (class, level) in self.levels.iter().enumerate() {
-            for (offset, target) in self.levels[class..].iter().enumerate() {
-                let source = if offset == 0 {
-                    &level.rows
-                } else {
-                    self.projected.prepare(
-                        level.rows.entries.iter().map(|&(_, i)| i),
-                        &contacts.bodies,
-                        target.grid,
-                    );
-                    &self.projected
-                };
-                let checks = visit(source, target, offset == 0, contacts, c);
-                contacts.candidates += checks;
+        if let Some(grain) =
+            crate::parallel::grain(self.jobs.len(), crate::parallel::cost::CONTACT_BIN)
+        {
+            let results: Vec<_> = self
+                .jobs
+                .par_chunks(grain)
+                .map(|jobs| {
+                    let mut edges = Vec::new();
+                    let count = jobs
+                        .iter()
+                        .map(|&job| self.query(job, &contacts.bodies, c, &mut edges))
+                        .sum::<usize>();
+                    (count, edges)
+                })
+                .collect();
+            for (count, edges) in results {
+                contacts.candidates += count;
+                contacts.edges.extend(edges);
+            }
+        } else {
+            for &job in &self.jobs {
+                contacts.candidates += self.query(job, &contacts.bodies, c, &mut contacts.edges);
             }
         }
     }
-    fn prepare(&mut self, bodies: &[Body], c: &Config) {
-        self.classes.clear();
-        self.classes.extend(
-            bodies
-                .iter()
-                .enumerate()
-                .map(|(i, b)| ((2. * b.radius).log2().ceil() as i32, i)),
-        );
-        self.classes.sort_unstable();
-        let mut start = 0;
-        let mut count = 0;
-        while start < self.classes.len() {
-            let class = self.classes[start].0;
-            let end = start + self.classes[start..].partition_point(|&(k, _)| k == class);
-            if count == self.levels.len() {
-                self.levels.push(Level::default());
+    fn query(
+        &self,
+        (source_class, source_node): (i32, usize),
+        bodies: &[Body],
+        c: &Config,
+        edges: &mut Vec<Edge>,
+    ) -> usize {
+        let mut checks = 0;
+        let source = &self.levels[&source_class];
+        let owners = source.members.indices(source_node);
+        let mut low = [f64::INFINITY; 2];
+        let mut high = [f64::NEG_INFINITY; 2];
+        for &i in owners {
+            for k in 0..2 {
+                low[k] = low[k].min(bodies[i].position[k]);
+                high[k] = high[k].max(bodies[i].position[k]);
             }
-            let level = &mut self.levels[count];
-            let diameter = self.classes[start..end]
-                .iter()
-                .map(|&(_, i)| 2. * bodies[i].radius)
-                .fold(0., f64::max);
-            level.grid = Grid::new(diameter, bodies.len(), c);
-            level.rows.prepare(
-                self.classes[start..end].iter().map(|&(_, i)| i),
-                bodies,
-                level.grid,
-            );
-            count += 1;
-            start = end;
         }
-        self.levels.truncate(count);
-    }
-}
-
-fn visit(source: &Rows, target: &Level, same: bool, contacts: &mut Contacts, c: &Config) -> usize {
-    use rayon::prelude::*;
-    if !crate::parallel::enabled(source.entries.len(), 128) {
-        return visit_bins(
-            &source.bins,
-            source,
-            target,
-            same,
-            &contacts.bodies,
-            c,
-            &mut contacts.edges,
-        );
-    }
-    let results: Vec<_> = source
-        .bins
-        .par_chunks(8)
-        .map(|bins| {
-            let mut edges = Vec::new();
-            let count = visit_bins(bins, source, target, same, &contacts.bodies, c, &mut edges);
-            (count, edges)
-        })
-        .collect();
-    let mut total = 0;
-    for (count, edges) in results {
-        total += count;
-        contacts.edges.extend(edges);
-    }
-    total
-}
-
-fn visit_bins(
-    bins: &[Bin],
-    source: &Rows,
-    target: &Level,
-    same: bool,
-    bodies: &[Body],
-    c: &Config,
-    edges: &mut Vec<Edge>,
-) -> usize {
-    let mut count = 0;
-    for bin in bins {
-        let (keys, len) = target.grid.neighbors(bin.key);
-        for &key in &keys[..len] {
-            if same && key < bin.key {
-                continue;
-            }
-            let Some(other) = target.rows.find(key) else {
-                continue;
-            };
-            for &(_, i) in &source.entries[bin.start..bin.end] {
-                for &(_, j) in &target.rows.entries[other.start..other.end] {
-                    if same && key == bin.key && j <= i {
+        for (&class, level) in self.levels.range(source_class..) {
+            let reach = source.radius + level.radius;
+            let start: [isize; 2] =
+                std::array::from_fn(|k| ((low[k] - reach) / level.scale[k]).floor() as isize);
+            let end: [isize; 2] =
+                std::array::from_fn(|k| ((high[k] + reach) / level.scale[k]).floor() as isize);
+            let g = level.geometry;
+            let count = [
+                (end[0] - start[0] + 1).min(g.nx as isize),
+                (end[1] - start[1] + 1).min(g.ny as isize),
+            ];
+            for dy in 0..count[1] {
+                let y = (start[1] + dy).rem_euclid(g.ny as isize) as usize;
+                for dx in 0..count[0] {
+                    let x = (start[0] + dx).rem_euclid(g.nx as isize) as usize;
+                    let target = y * g.nx + x;
+                    if class == source_class && target < source_node {
                         continue;
                     }
-                    count += 1;
-                    if let Some(edge) = overlap(i, j, bodies, c) {
-                        edges.push(edge);
+                    let neighbors = level.members.indices(target);
+                    for &i in owners {
+                        for &j in neighbors {
+                            if class == source_class && target == source_node && j <= i {
+                                continue;
+                            }
+                            checks += 1;
+                            if let Some(edge) = overlap(i, j, bodies, c) {
+                                edges.push(edge);
+                            }
+                        }
                     }
                 }
             }
         }
+        checks
     }
-    count
 }
 
 fn overlap(i: usize, j: usize, bodies: &[Body], c: &Config) -> Option<Edge> {

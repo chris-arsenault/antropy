@@ -1,4 +1,4 @@
-//! Derived work lists; material ownership and checkpoint layout remain in Field.
+//! Shared chemical-group support; the regional material owner keeps each site's groups.
 // Shared concentration resolution: 0.1% of the default recognition half-saturation.
 // Discarded extracellular material remains explicit in FieldBalance numerical accounts.
 pub const CONCENTRATION_FLOOR: f32 = 1e-4;
@@ -42,16 +42,6 @@ impl<const STRIDE: usize> Iterator for GroupLanes<STRIDE> {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct Activity {
-    pub masks: Vec<u64>,
-    pub nodes: Vec<usize>,
-    listed: Vec<bool>,
-    pub work: Vec<usize>,
-    pub candidates: Vec<u64>,
-    queued: Vec<bool>,
-}
-
 pub fn mask(row: &[f32]) -> u64 {
     let mut bits = 0;
     for (i, group) in row.as_chunks::<4>().0.iter().enumerate() {
@@ -60,73 +50,4 @@ pub fn mask(row: &[f32]) -> u64 {
         }
     }
     bits
-}
-
-impl Activity {
-    pub fn rebuild(&mut self, amounts: &crate::spatial_material::Material) {
-        let count = amounts.len() / 256;
-        self.masks = vec![0; count];
-        self.listed = vec![false; count];
-        self.candidates = vec![0; count];
-        self.queued = vec![false; count];
-        self.nodes.clear();
-        self.work.clear();
-        for (node, row) in amounts.rows() {
-            self.set(node, mask(row));
-        }
-    }
-    pub fn set(&mut self, node: usize, mask: u64) {
-        self.masks[node] = mask;
-        if mask != 0 {
-            self.retain(node);
-        }
-    }
-    pub fn retain(&mut self, node: usize) {
-        if !self.listed[node] {
-            self.listed[node] = true;
-            self.nodes.push(node);
-        }
-    }
-    fn queue(&mut self, node: usize, mask: u64) {
-        if !self.queued[node] {
-            self.queued[node] = true;
-            self.work.push(node);
-        }
-        self.candidates[node] |= mask;
-    }
-    pub fn prepare(&mut self, neighbors: &[[usize; 4]]) {
-        if self.nodes.len() > neighbors.len() / 2 {
-            for (node, adjacent) in neighbors.iter().enumerate() {
-                let mask = adjacent
-                    .iter()
-                    .fold(self.masks[node], |m, &n| m | self.masks[n]);
-                if mask != 0 || self.listed[node] {
-                    self.queue(node, mask);
-                }
-                self.listed[node] = false;
-            }
-            self.nodes.clear();
-            return;
-        }
-        for i in 0..self.nodes.len() {
-            let node = self.nodes[i];
-            let mask = self.masks[node];
-            self.queue(node, mask);
-            if mask != 0 {
-                for &other in &neighbors[node] {
-                    self.queue(other, mask);
-                }
-            }
-            self.listed[node] = false;
-        }
-        self.nodes.clear();
-        self.work.sort_unstable();
-    }
-    pub fn finish(&mut self) {
-        for &node in &self.work {
-            self.candidates[node] = 0;
-            self.queued[node] = false;
-        }
-        self.work.clear();
-    }
 }

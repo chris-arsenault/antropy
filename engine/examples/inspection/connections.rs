@@ -55,9 +55,12 @@ pub fn body_signals(w: &World) -> Vec<[f64; 2]> {
 
 fn cell(w: &World, c: &Cell, bodies: &[[f64; 2]]) -> Value {
     let sites = antropy_engine::footprint::sites(c, &w.config, &w.field);
+    let material: Vec<_> = (0..w.field.nx * w.field.ny)
+        .map(|n| w.field.material_signal(n))
+        .collect();
     let components = [
-        w.field.signal.as_slice(),
-        w.field.source_signal.as_slice(),
+        material.as_slice(),
+        w.field.source_signal().as_slice(),
         bodies,
     ];
     let signals: [[f64; 2]; 3] = components

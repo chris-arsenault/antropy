@@ -399,13 +399,12 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
         w.field.deposit(x, y, s, q, &w.chemistry);
     }
     if v.get("clearField").and_then(Value::as_bool) == Some(true) {
-        w.field.amounts.fill(0.);
-        w.field.refresh(&w.chemistry);
+        w.field.replace_material(&w.chemistry, |_| 0.);
     }
     if let Some(s) = remove_species {
         for i in 0..w.field.nx * w.field.ny {
             w.field
-                .add(i, s, -(w.field.amounts[i * 256 + s] as f64), &w.chemistry);
+                .add(i, s, -(w.field.amounts()[i * 256 + s] as f64), &w.chemistry);
         }
     }
     if v.get("clearSources").and_then(Value::as_bool) == Some(true) {
@@ -513,10 +512,9 @@ fn load_program_fixture(
         w.next_cell += 1;
         w.next_genome += 1;
     }
-    for (i, q) in w.field.amounts.dense_values_mut().enumerate() {
-        *q = (1e-5 * (1. + 0.2 * ((i % 997) as f64).sin())) as f32;
-    }
-    w.field.refresh(&w.chemistry);
+    w.field.replace_material(&w.chemistry, |i| {
+        (1e-5 * (1. + 0.2 * ((i % 997) as f64).sin())) as f32
+    });
     for cell in &mut w.cells {
         sensing::initialize(
             cell,

@@ -61,7 +61,9 @@ impl World {
         let observer = self.observer.as_deref_mut().filter(|o| o.active());
         // Detailed experiment traces retain their existing serial stream. Live reduced
         // observations use per-job interval accounts, never per-cell route frame copies.
-        if !crate::parallel::enabled(self.cells.len(), 128) || self.trace.is_some() {
+        let grain =
+            crate::parallel::grain(self.cells.len(), crate::parallel::cost::CELL_PHYSIOLOGY);
+        if grain.is_none() || self.trace.is_some() {
             let mut observer = observer;
             for (cell, &signal) in self.cells.iter_mut().zip(signals) {
                 let recording = observer.as_deref_mut().map(|o| {
@@ -85,11 +87,12 @@ impl World {
             }
             return;
         }
+        // Each job owns an executor; tasks carry at least one grain of estimated work.
         let chunk = self
             .cells
             .len()
             .div_ceil(rayon::current_num_threads() * 2)
-            .max(32);
+            .max(grain.unwrap_or(1));
         let jobs = self.cells.len().div_ceil(chunk);
         self.physiology_jobs.resize_with(jobs, Job::default);
         for job in &mut self.physiology_jobs {

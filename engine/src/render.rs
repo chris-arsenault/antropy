@@ -123,13 +123,16 @@ impl Buffers {
             self.field.clear();
             for n in 0..window.nx * window.ny {
                 let i = window.node(w, n);
-                let node = &w.field.amounts[i * 256..(i + 1) * 256];
+                // One regional read gives the row and its feature projection.
+                let (node, _, p) = w.field.amounts().site(i);
+                let impedance = p[2] / area + w.field.source_load()[i];
+                let stress = p[3] / area;
                 if kind >= 5 {
                     let light = self.illumination.node(i);
                     let [matter, energy] = if kind == 6 {
                         [light, 0.]
                     } else {
-                        w.field.material_values(i, &w.chemistry).map(|q| q / area)
+                        [p[0] / area, p[1] / area]
                     };
                     self.field.extend([
                         matter as f32,
@@ -137,23 +140,21 @@ impl Buffers {
                         light as f32,
                         0., // Reserved packed lane; illumination is scalar.
                         node[species] / area as f32,
-                        (1. - crate::movement::mobility(
-                            w.field.impedance[i] + w.field.source_load[i],
-                            w.config.movement_impedance,
-                        )) as f32,
-                        (w.field.stress[i] / (w.config.stress_k + w.field.stress[i])) as f32,
+                        (1. - crate::movement::mobility(impedance, w.config.movement_impedance))
+                            as f32,
+                        (stress / (w.config.stress_k + stress)) as f32,
                         if kind == 6 {
                             0.
                         } else {
                             crate::weathering::exposure(
                                 crate::weathering::strength(crate::weathering::signal(
                                     std::array::from_fn(|k| {
-                                        w.field.signal[i][k]
+                                        p[4 + k] / area
                                             + self.body_signal[i][k]
-                                            + w.field.source_signal[i][k]
+                                            + w.field.source_signal()[i][k]
                                     }),
                                 )),
-                                w.field.impedance[i] + w.field.source_load[i],
+                                impedance,
                                 w.config.habitat_feedback,
                                 w.config.diffusion_impedance,
                             ) as f32
@@ -162,9 +163,9 @@ impl Buffers {
                     continue;
                 }
                 let value = match kind {
-                    0 | 1 => w.field.material_values(i, &w.chemistry)[kind as usize] / area,
-                    2 => w.field.impedance[i] + w.field.source_load[i],
-                    3 => w.field.stress[i],
+                    0 | 1 => p[kind as usize] / area,
+                    2 => impedance,
+                    3 => stress,
                     _ => node[species] as f64 / area,
                 };
                 self.field.push(value as f32);
@@ -233,39 +234,33 @@ mod tests {
             },
         )
         .unwrap();
-        w.field.amounts.fill(0.);
-        w.field.amounts[0] = 4.;
-        w.field.refresh(&w.chemistry);
-        w.field.impedance[0] = 2.;
-        w.field.stress[0] = w.config.stress_k;
+        w.field
+            .replace_material(&w.chemistry, |i| if i == 0 { 4. } else { 0. });
+        // Features derive from the deposited material rather than injected arrays.
+        let impedance = w.field.impedance_at(0) + w.field.source_load()[0];
+        let stress = w.field.stress_at(0);
         let mut buffers = Buffers::default();
         buffers.prepare(&w, 5, 0, 6, true, 0).unwrap();
         assert_eq!(buffers.markers.len(), 2 * STRIDE);
         assert!(buffers.markers.chunks_exact(STRIDE).all(|m| m[7] == 1.));
         assert!(
             (buffers.field[5] as f64
-                - (1.
-                    - crate::movement::mobility(
-                        2. + w.field.source_load[0],
-                        w.config.movement_impedance
-                    )))
+                - (1. - crate::movement::mobility(impedance, w.config.movement_impedance)))
             .abs()
                 < 1e-6
         );
-        assert_eq!(buffers.field[6], 0.5);
+        assert!((buffers.field[6] as f64 - stress / (w.config.stress_k + stress)).abs() < 1e-6);
         let light = crate::illumination::at(&w, w.field.spacing / 2., w.field.spacing / 2.);
         assert!((buffers.field[2] as f64 - light).abs() < 1e-6);
         assert_eq!(buffers.field[3], 0.);
         let ambient =
             crate::weathering::strength(crate::weathering::signal(std::array::from_fn(|k| {
-                w.field.signal[0][k] + buffers.body_signal[0][k] + w.field.source_signal[0][k]
+                w.field.material_signal(0)[k]
+                    + buffers.body_signal[0][k]
+                    + w.field.source_signal()[0][k]
             })));
-        let expected = crate::weathering::exposure(
-            ambient,
-            2. + w.field.source_load[0],
-            true,
-            w.config.diffusion_impedance,
-        );
+        let expected =
+            crate::weathering::exposure(ambient, impedance, true, w.config.diffusion_impedance);
         assert!((buffers.field[7] as f64 - expected).abs() < 1e-7);
         assert_eq!(buffers.field[4], 4. / w.field.spacing.powi(2) as f32);
         assert!(

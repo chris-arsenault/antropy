@@ -59,27 +59,13 @@ pub fn field(w: &mut World, kind: &str) -> Result<Value, String> {
     }
     w.sources.clear();
     crate::source_medium::project(w);
-    w.field.amounts.fill(0.);
-    if kind == "patchy" {
-        let node = (w.field.ny / 2 * w.field.nx + w.field.nx / 2) * 256;
-        for s in (0..256).step_by(16) {
-            w.field.amounts[node + s] = 1.;
-        }
-    }
-    if kind == "widespread" {
-        for n in 0..w.field.nx * w.field.ny {
-            let node = w.field.amounts.row_mut(n);
-            for s in (0..256).step_by(16) {
-                node[s] = 0.001;
-            }
-        }
-    }
-    if kind == "dense" {
-        for (i, q) in w.field.amounts.dense_values_mut().enumerate() {
-            *q = (0.001 * (1. + 0.2 * ((i % 997) as f64).sin())) as f32;
-        }
-    }
-    w.field.refresh(&w.chemistry);
+    let center = w.field.ny / 2 * w.field.nx + w.field.nx / 2;
+    w.field.replace_material(&w.chemistry, |i| match kind {
+        "patchy" if i / 256 == center && i % 16 == 0 => 1.,
+        "widespread" if i % 16 == 0 => 0.001,
+        "dense" => (0.001 * (1. + 0.2 * ((i % 997) as f64).sin())) as f32,
+        _ => 0.,
+    });
     diagnostics::initialize(w);
     w.event("synthetic-chemical-load", 0, vec![]);
     Ok(crate::observation::summary(w))

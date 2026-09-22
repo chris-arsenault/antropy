@@ -259,7 +259,7 @@ pub fn diffusion_probe(w: &World) -> serde_json::Value {
                 background.add(
                     i,
                     15,
-                    -(background.amounts[i * 256 + 15] as f64),
+                    -(background.amounts()[i * 256 + 15] as f64),
                     &w.chemistry,
                 );
             }
@@ -279,7 +279,7 @@ pub fn diffusion_probe(w: &World) -> serde_json::Value {
         let (mut amount, mut moment) = (0., 0.);
         for i in 0..tracer.nx * tracer.ny {
             let added =
-                tracer.amounts[i * 256 + 240] as f64 - background.amounts[i * 256 + 240] as f64;
+                tracer.amounts()[i * 256 + 240] as f64 - background.amounts()[i * 256 + 240] as f64;
             let point = [
                 (i % tracer.nx) as f64 * tracer.spacing + tracer.spacing / 2.,
                 (i / tracer.nx) as f64 * tracer.spacing + tracer.spacing / 2.,

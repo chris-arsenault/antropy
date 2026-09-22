@@ -110,6 +110,7 @@ fn an_outlier_does_not_widen_every_small_body_search() {
     for y in 0..20 {
         for x in 0..20 {
             let mut cell = small.clone();
+            cell.id = cells.len() as u64 + 1;
             cell.x = x as f64 * 0.5;
             cell.y = y as f64 * 0.5;
             cells.push(cell);

@@ -136,7 +136,7 @@ fn geography(w: &World) -> Value {
     let mut material = Vec::new();
     let mut light = Vec::new();
     let mut active_groups = 0;
-    for (i, row) in w.field.amounts.rows() {
+    for (i, row) in w.field.amounts().rows() {
         material.push(row.iter().map(|v| *v as f64).sum::<f64>());
         light.push(w.field.illumination.node(i));
         for (a, b) in species.iter_mut().zip(row) {

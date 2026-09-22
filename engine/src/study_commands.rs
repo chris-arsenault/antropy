@@ -129,6 +129,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         kernel: Default::default(),
         material: Default::default(),
         interface: 0.,
+        pending: 0.,
     };
     for &id in &w.config.source_species {
         let q = s.duration * s.rate / w.config.source_species.len() as f64;

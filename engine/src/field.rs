@@ -1,52 +1,50 @@
 //! Geographic material owner. Shared features drive bounded conservative redistribution.
 use crate::chemistry::{Chemistry, SPECIES};
-use serde::{Deserialize, Serialize};
+#[path = "attraction.rs"]
+pub(crate) mod attraction;
+#[path = "field_carriers.rs"]
+mod carriers;
 #[path = "field_exchange.rs"]
 mod exchange;
+#[path = "field_medium.rs"]
+pub(crate) mod medium;
 #[path = "field_parallel.rs"]
 mod parallel;
+#[path = "field_read.rs"]
+mod read;
+#[path = "field_stored.rs"]
+mod stored;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Material and its per-site features are owned by `amounts`; impedance, stress and signal
+/// are read from each site's projection rather than kept as separate geographic arrays.
+#[derive(Clone, Debug)]
 pub struct Field {
     pub nx: usize,
     pub ny: usize,
     pub spacing: f64,
-    pub amounts: crate::spatial_material::Material,
-    pub impedance: Vec<f64>,
-    pub stress: Vec<f64>,
-    pub signal: crate::spatial_signal::Signal,
+    amounts: crate::spatial_material::Material,
     totals: [f64; 2],
     pub drift: f64,
-    #[serde(skip)]
     pub pressure_strength: f64,
-    #[serde(skip)]
     pub attraction_length: f64,
-    #[serde(skip)]
     pub(crate) attraction: crate::attraction::Attraction,
-    #[serde(skip)]
     pub illumination: crate::illumination::Illumination,
-    #[serde(skip)]
     next: crate::spatial_material::Material,
-    #[serde(skip)]
     pub(crate) neighbors: Vec<[usize; 4]>,
-    #[serde(skip)]
-    pub body_signal: crate::spatial_signal::Signal,
-    #[serde(skip)]
-    pub body_load: Vec<f64>,
-    #[serde(skip)]
-    pub source_signal: crate::spatial_signal::Signal,
-    #[serde(skip)]
-    pub source_load: Vec<f64>,
-    #[serde(skip)]
-    pub source_nodes: Vec<usize>,
-    #[serde(skip)]
-    pub source_listed: Vec<bool>,
-    #[serde(skip)]
-    activity: crate::field_activity::Activity,
-    #[serde(skip)]
+    body_signal: crate::spatial_signal::Signal,
+    body_load: Vec<f64>,
+    source_signal: crate::spatial_signal::Signal,
+    source_load: Vec<f64>,
+    pub(crate) carriers: crate::spatial_carriers::Carriers,
+    /// Regions whose material signal projection changed since attraction last read them.
+    signal_changes: crate::spatial::Work,
+    /// Set by cold replacement; the next attraction update compares exactly.
+    material_exact: bool,
+    rows: Option<std::sync::Arc<crate::chemical_projection::Rows>>,
     last_groups: usize,
-    #[serde(skip)]
     pub(crate) mechanical_frozen: bool,
+    pub profile: bool,
+    pub profile_ms: [f64; 2],
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -69,16 +67,30 @@ impl Field {
     pub fn new(width: f64, height: f64, spacing: f64) -> Self {
         let nx = (width / spacing) as usize;
         let ny = (height / spacing) as usize;
+        Self::from_material(
+            nx,
+            ny,
+            spacing,
+            crate::spatial_material::Material::new(nx * ny),
+            [0.; 2],
+            0.25,
+        )
+    }
+    fn from_material(
+        nx: usize,
+        ny: usize,
+        spacing: f64,
+        amounts: crate::spatial_material::Material,
+        totals: [f64; 2],
+        drift: f64,
+    ) -> Self {
         let mut field = Self {
             nx,
             ny,
             spacing,
-            amounts: crate::spatial_material::Material::new(nx * ny),
-            impedance: vec![0.; nx * ny],
-            stress: vec![0.; nx * ny],
-            signal: vec![[0.; 2]; nx * ny].into(),
-            totals: [0.; 2],
-            drift: 0.25,
+            amounts,
+            totals,
+            drift,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
             attraction_length: 0.,
             attraction: Default::default(),
@@ -89,45 +101,47 @@ impl Field {
             body_load: vec![],
             source_signal: Default::default(),
             source_load: vec![],
-            source_nodes: vec![],
-            source_listed: vec![],
-            activity: Default::default(),
+            carriers: Default::default(),
+            signal_changes: Default::default(),
+            material_exact: true,
+            rows: None,
             last_groups: 0,
             mechanical_frozen: false,
+            profile: false,
+            profile_ms: [0.; 2],
         };
         field.rebuild();
         field
     }
+    /// Geometry-dependent derived state. Projections need chemistry: see `refresh`.
     pub fn rebuild(&mut self) {
         self.attraction = Default::default();
         self.illumination = Default::default();
         let n = self.nx * self.ny;
-        self.next = crate::spatial_material::Material::new(n);
-        self.activity.rebuild(&self.amounts);
-        // Retain pending cleanup of rounding in fully withdrawn rows across restore.
-        for node in 0..n {
-            if self.impedance[node] != 0. || self.stress[node] != 0. || self.signal[node] != [0.; 2]
-            {
-                self.activity.retain(node);
-            }
-        }
+        let geometry = crate::spatial::Geometry::new(self.nx, self.ny);
+        self.amounts.reshape(geometry);
+        self.next = crate::spatial_material::Material::with_geometry(geometry);
+        self.signal_changes = Default::default();
+        self.signal_changes.reset(geometry.count());
+        self.material_exact = true;
         self.body_signal = vec![[0.; 2]; n].into();
         self.body_load = vec![0.; n];
         self.source_signal = vec![[0.; 2]; n].into();
         self.source_load = vec![0.; n];
-        self.source_nodes.clear();
-        self.source_listed = vec![false; n];
+        self.carriers = crate::spatial_carriers::Carriers::new(geometry);
         self.neighbors = (0..n)
-            .map(|i| {
-                let x = i % self.nx;
-                [
-                    i - x + (x + 1) % self.nx,
-                    i - x + (x + self.nx - 1) % self.nx,
-                    (i + self.nx) % n,
-                    (i + n - self.nx) % n,
-                ]
-            })
+            .map(|i| [(1, 0), (-1, 0), (0, 1), (0, -1)].map(|(x, y)| geometry.offset(i, x, y)))
             .collect();
+    }
+    pub(crate) fn projection_rows(
+        &mut self,
+        chemistry: &Chemistry,
+    ) -> std::sync::Arc<crate::chemical_projection::Rows> {
+        self.rows
+            .get_or_insert_with(|| {
+                std::sync::Arc::new(crate::chemical_projection::Rows::new(chemistry))
+            })
+            .clone()
     }
     pub fn stencil(&self, x: f64, y: f64) -> [(usize, f64); 4] {
         let gx = x / self.spacing - 0.5;
@@ -145,49 +159,75 @@ impl Field {
             (node(ix + 1, iy + 1), a * b),
         ]
     }
+    fn area(&self) -> f64 {
+        self.spacing * self.spacing
+    }
+    /// Material impedance concentration at one node.
+    pub fn impedance_at(&self, n: usize) -> f64 {
+        self.amounts.projection(n)[2] / self.area()
+    }
+    pub fn stress_at(&self, n: usize) -> f64 {
+        self.amounts.projection(n)[3] / self.area()
+    }
+    pub fn material_signal(&self, n: usize) -> [f64; 2] {
+        let p = self.amounts.projection(n);
+        [p[4] / self.area(), p[5] / self.area()]
+    }
     pub fn medium_load(&self, sites: &[(usize, f64)]) -> f64 {
         sites
             .iter()
-            .map(|&(n, w)| w * (self.impedance[n] + self.source_load[n]))
+            .map(|&(n, w)| w * (self.impedance_at(n) + self.source_load[n]))
             .sum()
     }
     pub fn medium_signal(&self, n: usize) -> [f64; 2] {
-        std::array::from_fn(|k| {
-            self.signal[n][k] + self.body_signal[n][k] + self.source_signal[n][k]
-        })
+        let material = self.material_signal(n);
+        std::array::from_fn(|k| material[k] + self.body_signal[n][k] + self.source_signal[n][k])
     }
     pub fn sample(&self, species: usize, sites: &[(usize, f64)]) -> f64 {
         sites
             .iter()
             .map(|&(n, w)| w * self.amounts[n * SPECIES + species] as f64)
             .sum::<f64>()
-            / self.spacing.powi(2)
+            / self.area()
+    }
+    pub fn stress_sample(&self, sites: &[(usize, f64)]) -> f64 {
+        sites.iter().map(|&(n, w)| w * self.stress_at(n)).sum()
+    }
+    pub fn amounts(&self) -> &crate::spatial_material::Material {
+        &self.amounts
+    }
+    /// Explicit cold replacement; callers cannot observe material without its derived state.
+    pub fn replace_material(&mut self, chemistry: &Chemistry, mut value: impl FnMut(usize) -> f32) {
+        self.amounts.clear();
+        for i in 0..self.nx * self.ny * SPECIES {
+            let q = value(i);
+            assert!(q.is_finite() && q >= 0.);
+            if q != 0. {
+                self.amounts[i] = q;
+            }
+        }
+        self.refresh(chemistry);
     }
     pub fn scalar(&self, values: &[f64], sites: &[(usize, f64)]) -> f64 {
         sites.iter().map(|&(n, w)| w * values[n]).sum()
     }
+    /// One chemical at one node through the shared row commit; returns the rounding loss.
     pub fn add(&mut self, node: usize, species: usize, amount: f64, chemistry: &Chemistry) -> f64 {
-        let index = node * SPECIES + species;
-        let before = self.amounts[index] as f64;
-        let after = (before + amount).max(0.) as f32;
-        self.amounts[index] = after;
-        if after > 0. {
-            self.activity
-                .set(node, self.activity.masks[node] | (1 << (species / 4)));
-        }
-        let change = after as f64 - before;
-        self.record(node, species, change, chemistry);
-        amount - change
+        let mut requested = [0.; SPECIES];
+        requested[species] = amount;
+        let rows = self.projection_rows(chemistry);
+        let (reduction, loss, changed) =
+            self.amounts
+                .commit(node, &mut requested, 1 << (species / 4), &rows);
+        self.record(node, reduction, changed);
+        loss[0]
     }
-    fn record(&mut self, node: usize, species: usize, change: f64, chemistry: &Chemistry) {
-        let p = &chemistry.properties[species];
-        let concentration = change / self.spacing.powi(2);
-        self.totals[0] += change;
-        self.totals[1] += change * p.potential;
-        self.impedance[node] += concentration * p.impedance;
-        self.stress[node] += concentration * p.stress;
-        for k in 0..2 {
-            self.signal[node][k] += concentration * p.interaction[k];
+    fn record(&mut self, node: usize, reduction: [f64; 6], changed: bool) {
+        self.totals[0] += reduction[0];
+        self.totals[1] += reduction[1];
+        if changed {
+            let geometry = self.amounts.geometry();
+            self.signal_changes.insert(geometry.address(node).0);
         }
     }
     pub fn deposit(&mut self, x: f64, y: f64, species: usize, amount: f64, c: &Chemistry) -> f64 {
@@ -200,61 +240,44 @@ impl Field {
         (self.totals[0], self.totals[1])
     }
     pub(crate) fn active_groups(&self, node: usize) -> u64 {
-        self.activity.masks[node]
-    }
-    pub(crate) fn material_values(&self, node: usize, chemistry: &Chemistry) -> [f64; 2] {
-        let mut values = [0.; 2];
-        let mut mask = self.active_groups(node);
-        while mask != 0 {
-            let start = mask.trailing_zeros() as usize * 4;
-            mask &= mask - 1;
-            for s in start..start + 4 {
-                let q = self.amounts[node * SPECIES + s] as f64;
-                values[0] += q;
-                values[1] += q * chemistry.properties[s].potential;
-            }
-        }
-        values
+        self.amounts.mask(node)
     }
     /// Scalar diagnostics only; no physical field frame crosses the worker boundary.
     pub fn work_counts(&self) -> [usize; 3] {
-        let groups = self
-            .activity
-            .nodes
-            .iter()
-            .map(|&n| self.activity.masks[n].count_ones() as usize)
-            .sum();
-        [self.activity.nodes.len(), groups, self.last_groups]
+        let (rows, groups) = self
+            .amounts
+            .occupied()
+            .fold((0, 0), |(r, g), (_, mask, _)| {
+                (r + 1, g + mask.count_ones() as usize)
+            });
+        [rows, groups, self.last_groups]
     }
     pub fn has_active_material(&self) -> bool {
-        !self.activity.nodes.is_empty()
+        !self.amounts.regions.entries.is_empty()
     }
     pub fn structural_counts(&self) -> serde_json::Value {
         serde_json::json!({"materialRows":self.amounts.nodes().len(),
             "materialAllocatedBytes":self.amounts.allocated_bytes()+self.next.allocated_bytes(),
             "geographicNodes":self.nx*self.ny,
-            "attractionVisited":self.attraction.visited})
+            "materialRegions":self.amounts.regions.entries.len(),
+            "regionAllocations":self.amounts.allocations()+self.next.allocations(),
+            "attractionVisited":self.attraction.visited,
+            "attractionDirtyRegions":self.attraction.dirty_regions})
     }
+    /// Cold boundary: recompute every mask, projection and total from material.
     pub fn refresh(&mut self, chemistry: &Chemistry) {
-        self.amounts.reclaim();
-        self.activity.rebuild(&self.amounts);
-        self.totals = [0.; 2];
-        self.impedance.fill(0.);
-        self.stress.fill(0.);
-        self.signal.fill([0.; 2]);
-        let rows = crate::chemical_projection::Rows::new(chemistry);
-        for &n in self.amounts.nodes() {
-            let values = crate::chemical_projection::project(
-                &self.amounts[n * SPECIES..(n + 1) * SPECIES],
-                &rows,
-            );
-            self.totals[0] += values[0];
-            self.totals[1] += values[1];
-            let a = self.spacing.powi(2);
-            self.impedance[n] = values[2] / a;
-            self.stress[n] = values[3] / a;
-            self.signal[n] = [values[4] / a, values[5] / a];
+        let total = self.refresh_features(chemistry);
+        self.totals = [total[0], total[1]];
+    }
+    /// Restore boundary: saved totals remain the incremental account; features are derived.
+    pub(crate) fn refresh_features(&mut self, chemistry: &Chemistry) -> [f64; 6] {
+        let rows = self.projection_rows(chemistry);
+        let total = self.amounts.refresh(&rows);
+        self.material_exact = true;
+        for r in 0..self.amounts.geometry().count() {
+            self.signal_changes.insert(r);
         }
+        total
     }
     pub fn advance(
         &mut self,
@@ -278,7 +301,7 @@ impl Field {
             .iter()
             .map(|p| p.diffusion)
             .fold(0., f64::max);
-        let rate = 4. * (maximum / self.spacing.powi(2) + self.drift / self.spacing);
+        let rate = 4. * (maximum / self.area() + self.drift / self.spacing);
         // Faces <= D/h² + drift/h: outgoing <= 0.9 retains positive, conservative weights.
         let steps = (dt * rate / 0.9).ceil().max(1.) as usize;
         let maximum_impedance = chemistry
@@ -298,18 +321,15 @@ impl Field {
         });
         let before = self.totals;
         let mut lost = [0.; 2];
-        let projection = crate::chemical_projection::Rows::new(chemistry);
-        let floor = crate::field_activity::CONCENTRATION_FLOOR * self.spacing.powi(2) as f32;
+        let projection = self.projection_rows(chemistry);
+        let floor = crate::field_activity::CONCENTRATION_FLOOR * self.area() as f32;
         self.last_groups = 0;
         for step in 0..steps {
             self.prepare_attraction();
-            self.activity.prepare(&self.neighbors);
             let outcome = self.advance_partitioned(
                 &rows,
                 &projection,
-                dt,
-                steps,
-                step,
+                (dt, steps, step),
                 washout,
                 impedance,
                 maximum_impedance,
@@ -325,7 +345,6 @@ impl Field {
                 weather.converted += outcome[4];
                 weather.prevented += outcome[5];
             }
-            self.activity.finish();
         }
         let weathering_heat = climate.as_ref().map_or(0., |c| c.heat);
         let weathering_work = climate.as_ref().map_or(0., |c| c.work);
@@ -341,57 +360,5 @@ impl Field {
             weathered_material: climate.as_ref().map_or(0., |c| c.converted),
             sheltered_conversion: climate.as_ref().map_or(0., |c| c.prevented),
         }
-    }
-    pub fn validate(&self) -> Result<(), String> {
-        let n = self
-            .nx
-            .checked_mul(self.ny)
-            .ok_or("Invalid field dimensions")?;
-        if self.nx < 4
-            || self.ny < 4
-            || n > crate::memory_budget::MAX_FIELD_NODES
-            || self.spacing <= 0.
-            || !self.spacing.is_finite()
-            || self.amounts.len() != n * SPECIES
-            || self.impedance.len() != n
-            || self.stress.len() != n
-            || self.signal.len() != n
-            || self.amounts.iter().any(|q| !q.is_finite() || *q < 0.)
-            || !self.drift.is_finite()
-            || !(0. ..=1.).contains(&self.drift)
-        {
-            return Err("Invalid field state".into());
-        }
-        Ok(())
-    }
-    pub fn validate_reductions(&self, c: &Chemistry) -> Result<(), String> {
-        let mut reference = self.clone();
-        reference.refresh(c);
-        let close = |a: f64, b: f64| a.is_finite() && (a - b).abs() <= 1e-9 * (1. + b.abs());
-        if !self
-            .totals
-            .iter()
-            .zip(reference.totals)
-            .all(|(&a, b)| close(a, b))
-            || !self
-                .impedance
-                .iter()
-                .zip(&reference.impedance)
-                .all(|(&a, &b)| close(a, b))
-            || !self
-                .stress
-                .iter()
-                .zip(&reference.stress)
-                .all(|(&a, &b)| close(a, b))
-            || !self
-                .signal
-                .iter()
-                .flatten()
-                .zip(reference.signal.iter().flatten())
-                .all(|(&a, &b)| close(a, b))
-        {
-            return Err("Field reductions disagree with material".into());
-        }
-        Ok(())
     }
 }

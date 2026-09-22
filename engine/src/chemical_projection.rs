@@ -3,7 +3,16 @@ use crate::chemistry::{Chemistry, SPECIES};
 
 pub struct Rows([[f64; SPECIES]; 5]);
 
+impl std::fmt::Debug for Rows {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Rows")
+    }
+}
+
 impl Rows {
+    pub fn potential(&self, species: usize) -> f64 {
+        self.0[0][species]
+    }
     pub fn new(chemistry: &Chemistry) -> Self {
         Self(std::array::from_fn(|k| {
             std::array::from_fn(|s| {
@@ -217,7 +226,10 @@ pub fn commit(
         rounding[1] = lanes::add(rounding[1], lanes::mul(loss, lanes::load(&rows.0[0][s..])));
         accumulate(&mut values, actual, rows, s);
     }
-    changes.fill(0.);
+    // Callers only write requested groups; clearing those keeps the row reusable.
+    for s in crate::field_activity::pairs(mask) {
+        changes[s..s + 2].fill(0.);
+    }
     (values.map(lanes::total), rounding.map(lanes::total))
 }
 

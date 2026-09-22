@@ -3,13 +3,17 @@ services:
     image: ghcr.io/chris-arsenault/antropy:${IMAGE_TAG:?Set the deployed commit SHA}
     restart: unless-stopped
     init: true
-    cpus: 32
+    # One socket's physical cores (NUMA node 0 on the private host; siblings 36-53 excluded).
+    # Pinned threads allocate world memory on the same node. Measured scaling flattens well
+    # before this width; see SCALING-PLAN.md.
+    cpuset: "0-17"
+    cpus: 18
     mem_limit: 8g
     pids_limit: 256
     ports:
       - "8095:8095"
     environment:
-      BIOTROPY_THREADS: "32"
+      BIOTROPY_THREADS: "16"
       BIOTROPY_BIND: "0.0.0.0:8095"
       BIOTROPY_SEED: "27"
       BIOTROPY_OPERATOR_TOKEN: "${BIOTROPY_OPERATOR_TOKEN:-}"

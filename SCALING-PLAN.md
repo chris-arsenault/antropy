@@ -1,5 +1,283 @@
 # Structural runtime scaling
 
+## September 22 systemic spatial ownership execution
+
+Execution: `5fd3d7d0-9fd9-422b-95c6-ce1dace47ab3`, under root S. This section is the
+current implementation contract. Earlier execution records below preserve their evidence;
+their completion claims do not establish persistent regional ownership.
+
+The audit found independently maintained material slots, chemical masks, carrier lists,
+global revisions and reconstructed work buffers. Replace that convention with an encapsulated
+spatial owner and reusable regional storage/dependency primitives. Ordinary writers must not
+coordinate separate support, projection and invalidation structures themselves.
+
+### Decisions
+
+- One periodic geometry maps positions/nodes to persistent regions and finite halos. Start
+  with 8×8-node regions, a numerical storage choice to assess with the populated checkpoint.
+- Material commits own actual changes, masks, feature reductions, accounts and local wakes.
+  Arrays are private; readers receive immutable rows/samples. Explicit diagnostic replacement
+  has one bulk commit boundary. Retain contiguous chemical arithmetic and activity masks.
+- Regions retain current/destination storage and clear only previously written chemical groups.
+  Empty regions release material storage when no physical or pending work needs it.
+- The same carrier contribution owner handles source and cell footprints, including removal
+  and old/new neighborhoods. Their physical projection formulas remain distinct and unchanged.
+- Derived operators use region/channel changes and cumulative anchors. Reach includes composed
+  filter support and gradient neighbors. Periodic boundaries are resolved by the shared geometry.
+- Physical due work is distinct from stale derived work: chemistry, decay, illumination and
+  source renewal continue on model-time deadlines. No sleeping state freezes funded turnover.
+- Parallel phases read a declared committed state and own disjoint destination regions. Donor
+  contention remains jointly allocated before commit. Browser and native use the same operators.
+- Keep chemical transformations, circle contact, reservoir renewal and funded biology. This
+  work changes connected storage, dependency scheduling and consumers, not ecological capabilities.
+- Local borrowing, bounded remote projections and cold exports retain the data-sharing contract.
+  No deployment, new backend, checkpoint adapter or long ecological campaign is included.
+
+### Milestones
+
+1. **M0 Spatial owner and material transactions.** Replace disposable row ownership with
+   persistent regional storage and move material/support/reduction writes behind one boundary.
+   Migrate readers, diagnostics and parallel field commitment. Acceptance: the ordinary World
+   uses the owner; no production mutable escape hatch; accounts, wake/reclaim and reuse tests pass.
+2. **M1 Local dependencies and shared carriers.** Replace global carrier revision invalidation
+   and whole-source reprojection with region-local updates and shared contribution ownership.
+   Acceptance: a local change adds derived work only inside the declared halo; no-op writes do
+   not invalidate; accumulated changes, source movement and periodic seams remain visible.
+3. **M2 World execution and consumers.** Integrate region-owned parallel jobs, time-driven wakes,
+   local contact/transport membership and committed read interfaces through ordinary stepping,
+   rendering and observations. Acceptance: one/four workers, static illumination receivers,
+   birth/death/region crossing and cross-region donor contention obey the same contracts.
+4. **M3 Acceptance.** Run bounded local-work tests, existing mechanics tests, make ci and short
+   populated-world measurements. Use the saved tick-15k world plus empty-area and populated-region
+   comparisons. Record executed regions, invalidations, allocation/reuse, complete stepping and
+   publication costs; no reliance on source-free cell fixtures alone. A failed locality invariant
+   or a material performance regression reopens implementation rather than weakening the gate.
+
+### M0 execution expansion
+
+Files: `engine/src/field*`, `spatial_*`, connected field readers/writers and focused ownership tests.
+1. Introduce the common periodic region geometry, stable regional storage and work sets.
+2. Move material write/commit, support masks and reductions into the owner; reuse destination
+   buffers and route every ordinary producer through its transactions.
+3. Migrate immutable readers and explicit bulk fixtures, then verify donor/material closure,
+   empty activation/reclamation and persistent allocation before advancing M1.
+
+M0 implementation now uses persistent regional current/destination material and a private
+Field material owner. Read-only callers use `amounts()`; cold fixtures use atomic replacement.
+Region storage and local work ownership are reusable objects. Tests caught an empty-halo
+allocation churn bug; destination halos now remain until no pending physical work needs them.
+
+### M1 execution expansion
+
+Replace the whole-support force rebuild with six persistent finite-support regional operators.
+Use the existing 0.1 prepared-operator resolution against the last published carrier input;
+zero/sign transitions and explicit cold replacements wake immediately. One carrier contribution
+owner tracks cell and reservoir additions/removals and clears a node when its last owner leaves.
+Test no-op writes, accumulated changes, distant populated regions, fractional reach and seams.
+
+### M2 execution expansion
+
+Move movement dependencies and contact membership onto reusable regional ownership. Keep current
+circle overlap and joint donor allocation. Reuse transport membership when footprints are unchanged;
+changed footprints must update donor membership before allocation. Use committed carrier readers
+for rendering where their stage is appropriate. Retain explicit external clocks and immutable worker
+publication. No independently sleeping physical economy is introduced.
+
+### Bounded acceptance registration
+
+Question: does local ownership remove support-wide rebuilds and improve complete ordinary stepping
+in the existing populated world? Competing failure: region padding, lookup or reconciliation costs
+could exceed the work removed. Use the existing tick-15000, 972-cell checkpoint from the independent
+renewal test, unchanged starting configuration. Compare one and four workers, ten warm-up and 100
+measured ticks, 60-second wall cap per case, initially one pair. No seed or horizon expansion.
+Acceptance includes accounts/validity, local perturbation versus distant populated regions,
+allocation reuse and whole-step time against the recorded 28.03/20.90 ms baseline. A regression
+requires implementation correction, not a looser acceptance statement. Generated reports stay in
+ignored `frontend/harness/artifacts/regional-ownership/`. Full CI follows connected integration.
+
+Area acceptance uses the existing fixed 48-founder/48-source fixture at 1×/10×/20× the
+original 320×240 area, one worker. Also check the existing 2,000-cell concentrated fixture
+at 1× and 20× area, one worker, to catch regional membership overhead under dense overlap.
+Each case has ten warm-up and 100 measured ticks with a 60-second wall cap. These fixtures
+retain positions and add geography, rather than multiplying populations. Periodic boundaries
+and resulting physical support can differ; record work counts rather than claim identical work.
+
+### M3 measured result
+
+The populated comparison uses HEAD `b224525` as its recorded baseline and the ordinary native
+World restored from tick 15000 (972 cells, 720×540 geography). Final measurements run sequentially
+without concurrent compilation. Ten warm-up plus 100 measured ticks finish at tick 15110 with
+1,009 cells and no stop reason in both worker configurations.
+
+| Workers | Before TPS | Regional owner TPS | Before ms/tick | Regional owner ms/tick |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 35.68 | 40.71 | 28.03 | 24.57 |
+| 4 | 47.84 | 64.69 | 20.90 | 15.46 |
+
+Attraction preparation averages 3.38/1.96 ms per tick at one/four workers; the physical field
+partition averages 7.86/2.79 ms. These are subsets of environment time, not additional costs.
+The final force preparation changes 63 input regions and visits 146,576 destinations across six
+stages. Material occupies 58,647 rows in 1,065 current regions. Both material buffers together
+allocate 147,323,040 bytes, including region padding; 2,130 regional allocations are retained.
+Bounded tests independently establish buffer reuse after warm-up and local invalidation in a
+world with distant populated regions. The saved continuation's final material/work residuals
+are approximately 5.83e-6/3.13e-5; ordinary state validation passes.
+
+Stepping excludes output publication. A separate cold full-map projection costs 8.29/8.57 ms;
+census plus environment observation costs 23.44/23.41 ms. The display buffers hold 3,170,352
+bytes. These measurements exclude network encoding, GPU upload, selected-cell inspection and
+active-phenotype observations. They do not establish live 32-core server performance.
+
+| Fixed 48-founder/48-source fixture | 1× area | 10× area | 20× area |
+| --- | ---: | ---: | ---: |
+| Stepping, TPS | 306.44 | 283.43 | 265.74 |
+| Cold full-map projection, ms | 1.45 | 10.32 | 20.81 |
+| Environment observation, ms | 0.77 | 0.91 | 1.04 |
+| Process peak RSS, KiB | 33,752 | 89,416 | 143,664 |
+| Active material nodes | 2,610 | 2,955 | 2,955 |
+
+Adding empty geography therefore has a modest measured stepping cost, while full-map output
+and scalar/index memory still grow with area. Different periodic boundaries produce different
+support, so this is not an identical-work or asymptotic logarithmic-scaling claim.
+
+Dense-query acceptance found per-cell neighborhood discovery, repeated regional lookup inside
+chemical contractions and repeated crowded-donor scans. The query integration sub-plan
+`4d4dc91c-c501-41fa-9916-57af2aaf8fe2` replaces those with occupied-bin traversal, borrowed rows
+and delivery reverse links. Because unchanged biology stages also slowed against the earlier
+baseline, the sub-plan registered one back-to-back old/new comparison at 1×/20× concentrated area, using the
+same ten warm-up/100 measured ticks and 60-second case cap. Retain both binaries to avoid a
+compilation interval between paired measurements; no horizon or seed expansion.
+
+The first dense result was 43 TPS against 53 TPS. Correcting only allocation/bounds was
+insufficient; completing bin-level sharing, row contractions and direct delivery updates was
+necessary. The final pair after empty-row early exits measures:
+
+| Concentrated 2,000-cell start, one worker | Before | Regional owner |
+| --- | ---: | ---: |
+| 1× area stepping, TPS | 53.19 | 52.65 |
+| 20× area stepping, TPS | 53.47 | 51.88 |
+| 20× cold full-map projection, ms | 17.09 | 21.51 |
+| 20× process peak RSS, KiB | 344,068 | 316,948 |
+
+The remaining 1–3% dense stepping difference is retained as an operating cost; this workload
+has no demonstrated speedup. Full-map output at 20× is still more expensive than the baseline.
+Neither result is hidden by the populated-world improvement. The revised owner meets the
+30-TPS floor on these bounded fixtures, and the locality/account/membership tests establish
+the selected structural obligations independently of the timing floor.
+
+Failures retained: the first regional implementation measured 23.59 TPS on the populated
+single-worker case. Node-by-node halo discovery and expensive inner filter addressing erased
+the intended gain; shared interval halo traversal and regional rolling filters corrected them.
+The final audit also caught empty-row reduction residue, no-op allocation and invalid restored
+rows being pruned before validation; each now has a regression test. One final timing pair was
+accidentally launched concurrently and is excluded (`contended-workers-*`). Final results
+are `verified-*`; earlier measurements and all raw reports remain ignored local artifacts.
+
+### Post-review ownership corrections
+
+A callgrind profile of the same tick-15000 continuation found two remaining bypasses of the
+owner. Reservoir release wrote every chemical of every footprint node through scalar
+`Field::add`: about 2,200 calls per release, each repeating region lookup, group mask,
+projection and carrier bookkeeping. That was 23% of stepping instructions, more than attraction.
+The attraction filter also expanded its halo by a whole region at each of six box stages,
+so one dirty region cost about 120 region visits although three radius-3 boxes reach 9 nodes.
+
+- Release now commits one mixture row per footprint node through the shared row commit that
+  cell exchange uses (`Field::release_mixture`, `commit_row`).
+- The medium diffuses, is sensed and exchanges only at the physiology interval. Reservoirs now
+  accrue stocked time and commit `rate × elapsed` at that boundary instead of writing the
+  medium every tick. Restore derives accrued time from the checkpointed medium clock.
+  Between boundaries the attraction input lacks at most 0.6 s of release.
+- Each attraction axis gathers one input line per destination row and applies its three boxes
+  in sequence. Only the x-pass and y-pass planes persist; each halo spans three box radii.
+  The direct-convolution, wrapped-reach and local-invalidation tests pass unchanged.
+
+Same checkpoint, ten warm-up and 100 measured ticks, sequential native release runs:
+
+| Workers | Before TPS | After TPS | Environment ms/tick before → after |
+| --- | ---: | ---: | --- |
+| 1 | 41.2 | 53.3 | 17.76 → 12.24 |
+| 4 | 64.3 | 97.4 | 11.59 → 6.43 |
+| 6 | — | 103.1 | — → 5.93 |
+
+Attraction falls from 3.31 to 1.95 ms per tick at one worker; visited sites per update fall
+from 146,576 to 41,600. Population, generation and ledger totals match the earlier continuation;
+the material residual is 5.81e-6 against 5.83e-6. Released supply is 3.67 lower because the
+final tick leaves accrued release pending. The fixed 48-founder fixture rises from 306/283/266
+to 679/621/590 TPS at 1×/10×/20× area. The dense 2,000-cell fixture is unchanged at
+52.7/52.6 TPS because cell work dominates it.
+
+Field transport is now the largest stage, 7.84 ms at one worker and 2.77 ms at four. All
+58,679 active rows hold material above the concentration floor, 7,053 units in total, so this
+cost follows real coverage rather than numerical haze. Further reduction needs a temporal or
+numerical-method decision for the medium, not another bookkeeping repair.
+
+### Region-owned commits and the serial fraction
+
+Sulion plan: "Region-owned parallel commit and serial-stage removal". A stage model fitted to
+one through six workers on the same checkpoint (T = serial + parallel/n + k·(n−1), three repeats)
+attributed 7.21 ms of the 18.7 ms single-worker tick to single-threaded code: 39%, which caps
+this CPU at about 139 TPS for any number of cores. The parallel sections themselves scaled
+nearly linearly and rayon fork/join measured about 1.3 µs per extra thread. The limit was
+serial write-back after each parallel pass and stages that were never parallelized.
+
+- Each material region owns its rows, group masks and per-site projections (material, potential,
+  impedance, stress, two signal axes). Every commit updates all three; the separate dense
+  impedance, stress and material-signal arrays, the `Activity` node lists and the transport
+  write-back loop are removed. Readers use the projection; restore recomputes it from material.
+- The transport pass derives each destination region's candidate groups from neighboring masks
+  inside the region job and commits masks, projections, totals and signal changes there.
+  Destinations are occupied regions and their four neighbors; emptied regions return to a
+  reuse pool.
+- Exchange rows and reservoir release commit through one region-parallel batch
+  (`Material::commit_batch`); rows of one node keep their order.
+- Reservoirs advance in parallel from the frozen field; the medium commit, ledger and ordered
+  renewal draws follow.
+- Attraction reads material signal from region projections and checks changed inputs in
+  parallel. Material changes are tracked per region by the owner.
+- Cell motion marks footprint nodes, refreshes dependency anchors and gradients per region in
+  parallel, then prepares each cell's coefficients in parallel without mutation.
+- Scheduling uses one rule (`parallel::grain`): each task carries at least 20 µs of estimated
+  work, and a section with less than two tasks stays on the calling thread. Per-item estimates
+  are measured single-worker averages and change only task granularity.
+- Node addressing uses a precomputed reciprocal instead of a division per lookup.
+
+Checkpoint layout is unchanged: v40 still stores the derived feature arrays, now written from
+material and ignored on load. Same checkpoint and protocol, three repeats:
+
+| Workers | 1 | 2 | 3 | 4 | 5 | 6 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Before, TPS | 53.5 | 76.2 | 89.5 | 96.5 | 103.0 | 103.6 |
+| After, TPS | 51.4 | 80.6 | 104.4 | 121.3 | 131.4 | 136.0 |
+
+A single confirmation run after projections became a pure function of each row (required for
+exact checkpoint continuation) measured 51.8/79.5/103.1/116.7/131.0/133.5 TPS, within 4%.
+The fitted serial time falls from 7.21 to 4.78 ms (25% of the single-worker tick); the fitted
+per-core overhead is indistinguishable from zero. The single-core ceiling rises from about
+139 to 209 TPS on this CPU. Population, generation and account residuals match. Remaining
+serial time is spread across contact-search membership and pressure scatter, body and
+reservoir carrier projection, exchange delivery-link maintenance, interface preparation and
+tick bookkeeping, each at most about 0.4 ms.
+
+The fixed 48-founder fixture measures 605–616/544–566/564–565 TPS at 1×/10×/20× area on one
+worker, against 679/621/590 before this change: region-level bookkeeping costs 3–10% when there
+is little work to parallelize. Peak memory at 20× area falls from 143 to 67 MB because the
+area-sized feature arrays are gone. Full-map render and observation return to 21.8/1.2 ms
+after reading each site once. The dense 2,000-cell fixture is 52.3/53.3 TPS at 1×/20× on one
+worker and 107.0 TPS at 20× with six workers.
+
+The production host has two 18-core sockets with hyperthreading. `compose.yaml` now pins the
+container to one socket's physical cores with 16 compute threads, so workers share one memory
+node and never share a core with the serial owner. A 32-core measurement remains open.
+
+M0–M3 are complete locally. `make ci` passes: 320 Rust tests, 79 frontend tests, serial/threaded
+WASM builds, ownership/storage guards, type/lint/format checks, docs and Terraform formatting.
+The registered server publication benchmark remains ignored by the ordinary suite; the cold
+publication measurements above were run separately. Existing frontend warnings and the Rust
+WASM atomics warning remain. Root S implementation is complete; P3 deployed operating acceptance,
+32-core measurement and human motion review remain open. P4 terrain/climate remains separate.
+This work does not claim evolved-community results and has not been committed or deployed.
+
 ## September 22 correction: simple circular contacts
 
 The prior completion claim is withdrawn. Persistent spatial tiles and meaningful-change

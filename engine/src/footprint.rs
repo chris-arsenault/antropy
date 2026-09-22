@@ -61,16 +61,16 @@ pub fn sites(cell: &Cell, config: &Config, field: &Field) -> Row {
     result
 }
 pub fn deposit_profiles(cells: &[Cell], config: &Config, field: &mut Field, sites: &[Row]) {
-    field.body_signal.fill([0.; 2]);
-    field.body_load.fill(0.);
+    field.reset_carriers(0);
     let area = field.spacing * field.spacing;
     for (cell, row) in cells.iter().zip(sites) {
-        visit_row(cell, area, row, &mut |node, values| {
-            for (k, value) in values[..2].iter().enumerate() {
-                field.body_signal[node][k] += value;
-            }
-            field.body_load[node] += values[2];
-        });
+        let profile = cell
+            .operators
+            .as_ref()
+            .unwrap()
+            .profile
+            .map(|p| p * cell.mass() / area);
+        field.carrier(0, cell.id, row, profile);
     }
     let _ = config;
 }

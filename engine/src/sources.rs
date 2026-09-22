@@ -31,6 +31,18 @@ pub struct Source {
     pub material: crate::source_medium::Material,
     #[serde(skip)]
     pub interface: f64,
+    /// Stocked time not yet released; restore derives it from the shared medium clock.
+    #[serde(skip)]
+    pub pending: f64,
+}
+/// One reservoir's step results that touch shared state: ledger flows and medium release.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Outcome {
+    pub changed: bool,
+    pub conversion: [f64; 3],
+    pub distance: f64,
+    pub supplied: [f64; 2],
+    pub released: f64,
 }
 impl Source {
     pub fn new(habitat: Habitat, tick: u64, c: &Config, rng: &mut Random, field: &Field) -> Self {
@@ -51,6 +63,7 @@ impl Source {
             kernel: Default::default(),
             material: Default::default(),
             interface: 0.,
+            pending: 0.,
         };
         source.rebuild(c, field);
         source
@@ -69,20 +82,18 @@ impl Source {
         chemistry: &Chemistry,
         ledger: &mut Ledger,
     ) {
+        let released = self.withdraw(fraction, chemistry);
+        ledger.source_released += released;
+        let loss = field.release_mixtures(&[(&self.footprint, &self.mixture, released)], chemistry);
+        ledger.numerical_material += loss[0];
+        ledger.numerical_energy += loss[1];
+    }
+    /// Removes a fraction of the inventory; the caller commits it to the medium.
+    fn withdraw(&mut self, fraction: f64, chemistry: &Chemistry) -> f64 {
         let released = self.amount * fraction.clamp(0., 1.);
         self.amount -= released;
-        ledger.source_released += released;
-        for (s, share) in self.mixture.iter().enumerate() {
-            let q = released * share;
-            if q <= 0. {
-                continue;
-            }
-            for &(node, w) in &self.footprint {
-                let loss = field.add(node, s, q * w, chemistry);
-                ledger.rounding(loss, s, chemistry);
-            }
-        }
         self.refresh_material(chemistry);
+        released
     }
     pub fn inventory(&self) -> impl Iterator<Item = f64> + '_ {
         self.mixture.iter().map(|share| self.amount * share)
@@ -90,6 +101,7 @@ impl Source {
     pub fn refresh_material(&mut self, chemistry: &Chemistry) {
         self.material = crate::source_medium::Material::read(self.inventory(), chemistry);
     }
+    /// Serial composition of the two phases; World runs `advance_local` across reservoirs.
     pub fn advance(
         &mut self,
         step: &crate::source_medium::Step<'_>,
@@ -97,48 +109,83 @@ impl Source {
         field: &mut Field,
         ledger: &mut Ledger,
     ) -> bool {
+        let outcome = self.advance_local(step, field);
+        if outcome.released > 0. {
+            let loss = field.release_mixtures(
+                &[(&self.footprint, &self.mixture, outcome.released)],
+                step.chemistry,
+            );
+            ledger.numerical_material += loss[0];
+            ledger.numerical_energy += loss[1];
+        }
+        self.finish(&outcome, step.config, rng, ledger);
+        outcome.changed
+    }
+
+    /// Conversion, motion, renewal and withdrawal of accrued release. Reads only the frozen
+    /// field; the medium commit, ledger and ordered random draws follow in `finish`.
+    pub fn advance_local(
+        &mut self,
+        step: &crate::source_medium::Step<'_>,
+        field: &Field,
+    ) -> Outcome {
         let c = step.config;
         let chemistry = step.chemistry;
         let conversion = self.convert(step);
-        ledger.source_converted += self.amount * conversion[0];
-        ledger.source_heat += self.amount * conversion[1];
-        ledger.source_work += self.amount * conversion[2];
+        let mut outcome = Outcome {
+            conversion: conversion.map(|v| self.amount * v),
+            ..Outcome::default()
+        };
         let [dx, dy] = step.response.velocity.map(|v| v * c.dt);
-        let mut changed = dx != 0. || dy != 0. || (self.amount > 0. && conversion[0] > 0.);
+        outcome.changed = dx != 0. || dy != 0. || (self.amount > 0. && conversion[0] > 0.);
         if dx != 0. || dy != 0. {
             self.habitat.x = (self.habitat.x + dx).rem_euclid(c.width);
             self.habitat.y = (self.habitat.y + dy).rem_euclid(c.height);
-            ledger.source_distance += dx.hypot(dy);
+            outcome.distance = dx.hypot(dy);
             self.rebuild(c, field);
         }
         if self.amount == 0. {
+            self.pending = 0.;
             self.wait = (self.wait - c.dt).max(0.);
             if self.wait > 0. || self.rate == 0. {
-                return changed;
+                return outcome;
             }
             self.renew(step.tick, c);
-            changed = true;
+            outcome.changed = true;
             for (s, q) in self.inventory().enumerate() {
-                ledger.supplied += q;
-                ledger.supplied_energy += q * chemistry.properties[s].potential;
+                outcome.supplied[0] += q;
+                outcome.supplied[1] += q * chemistry.properties[s].potential;
             }
         }
         if self.rate > 0. && self.amount > 0. {
-            changed = true;
-            self.release(
-                (self.rate * c.dt / self.amount).min(1.),
-                field,
-                chemistry,
-                ledger,
-            );
-            if self.amount == 0. {
-                // Independent renewal with mean source_gap; sample only at exhaustion.
-                self.wait = -(1. - rng.unit()).ln() * c.source_gap;
-            }
-        } else if changed || !self.material.valid {
+            self.pending += c.dt;
+        }
+        if step.release && self.pending > 0. && self.amount > 0. {
+            // The medium diffuses, is sensed and exchanges only at its interval; release
+            // accrues until then and commits the same rate-times-time supply in one pass.
+            outcome.changed = true;
+            let elapsed = std::mem::take(&mut self.pending);
+            outcome.released =
+                self.withdraw((self.rate * elapsed / self.amount).min(1.), chemistry);
+        } else if outcome.changed || !self.material.valid {
             self.refresh_material(chemistry);
         }
-        changed
+        outcome
+    }
+
+    /// Ledger accounts and, at exhaustion, the ordered renewal draw.
+    pub fn finish(&mut self, outcome: &Outcome, c: &Config, rng: &mut Random, ledger: &mut Ledger) {
+        ledger.source_converted += outcome.conversion[0];
+        ledger.source_heat += outcome.conversion[1];
+        ledger.source_work += outcome.conversion[2];
+        ledger.source_distance += outcome.distance;
+        ledger.supplied += outcome.supplied[0];
+        ledger.supplied_energy += outcome.supplied[1];
+        ledger.source_released += outcome.released;
+        if outcome.released > 0. && self.amount == 0. {
+            // Independent renewal with mean source_gap; sample only at exhaustion.
+            self.wait = -(1. - rng.unit()).ln() * c.source_gap;
+        }
     }
 
     fn convert(&mut self, step: &crate::source_medium::Step<'_>) -> [f64; 3] {

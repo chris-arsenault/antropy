@@ -37,7 +37,7 @@ fn fixture(scale: usize, dense: bool) -> World {
     w.field = Field::new(w.config.width, w.config.height, w.config.mesh);
     for n in 0..old.nx * old.ny {
         for s in 0..256 {
-            let q = old.amounts[n * 256 + s];
+            let q = old.amounts()[n * 256 + s];
             if q != 0. {
                 w.field.add(
                     n / old.nx * w.field.nx + n % old.nx,

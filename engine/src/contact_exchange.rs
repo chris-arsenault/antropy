@@ -110,6 +110,7 @@ mod tests {
             let mut w = crate::diagnostics::nutrition(0.8, 2., false, false);
             w.cells = vec![w.cells[0].clone(); count];
             for (i, cell) in w.cells.iter_mut().enumerate() {
+                cell.id = i as u64 + 1;
                 cell.x = 12. + i as f64 * 0.01;
                 cell.damage = i as f64 / count as f64;
                 for s in 0..256 {
@@ -117,6 +118,7 @@ mod tests {
                 }
             }
             let graph = Graph::new(&w.cells, &w.config);
+            assert!(!graph.neighbors(0).is_empty());
             let intensity: Vec<[f64; 256]> = (0..count)
                 .map(|i| std::array::from_fn(|s| if s % 3 == i % 3 { 30. } else { 0. }))
                 .collect();
@@ -167,6 +169,7 @@ mod tests {
         let mut w = crate::diagnostics::nutrition(0.8, 2., false, false);
         w.cells = vec![w.cells[0].clone(); 3];
         for (i, cell) in w.cells.iter_mut().enumerate() {
+            cell.id = i as u64 + 1;
             cell.x = 12. + i as f64 * 0.01;
             cell.damage = 0.5;
             cell.inventory.fill(0.01);

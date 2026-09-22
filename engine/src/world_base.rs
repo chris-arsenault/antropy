@@ -13,17 +13,13 @@ impl World {
         }
         self.contact_cache
             .motion
-            .prepare(&self.cells, &self.config, &self.field);
-        for (i, cell) in self.cells.iter().enumerate() {
-            self.contact_cache
-                .motion
-                .prepare_one(i, cell, &self.config, &self.field, &sites[i]);
-        }
+            .prepare_all(&self.cells, &self.config, &self.field, sites);
         let pressure = self.contact_cache.local.pressure_at(self.config.dt);
         let motion = &self.contact_cache.motion;
         let genomes = &self.genomes;
         let config = &self.config;
-        crate::parallel::for_each(&mut self.cells, 128, |i, cell| {
+        let cost = crate::parallel::cost::CELL_STEP;
+        crate::parallel::for_each(&mut self.cells, cost, |i, cell| {
             cell.flows = Default::default();
             cell.contacts = pressure[i].contacts();
             let g = genomes[&cell.genome].compiled.as_ref().unwrap();
@@ -38,11 +34,18 @@ impl World {
         }
     }
 
+    /// Basal maintenance is cell-local; ledger, observer and trace records keep cell order.
     pub(super) fn finish_cells(&mut self) {
+        let config = &self.config;
+        let cost = crate::parallel::cost::CELL_READ;
+        crate::parallel::for_each(&mut self.cells, cost, |_, cell| {
+            let paid = cell.pay(cell.basal(config));
+            cell.flows.maintenance += paid;
+        });
         for cell in &mut self.cells {
-            finish(
+            record(
                 cell,
-                &self.config,
+                config.dt,
                 &mut self.ledger,
                 self.observer.as_deref_mut(),
                 self.trace.as_mut(),
@@ -76,19 +79,17 @@ fn control(cell: &mut Cell, g: &Compiled, c: &Config) {
     crate::sensing::adapt(cell, c, c.dt);
 }
 
-fn finish(
+fn record(
     cell: &mut Cell,
-    c: &Config,
+    dt: f64,
     ledger: &mut crate::accounting::Ledger,
     observer: Option<&mut crate::phenotype::Observer>,
     trace: Option<&mut crate::trace::Trace>,
     tick: u64,
 ) {
-    let paid = cell.pay(cell.basal(c));
-    cell.flows.maintenance += paid;
     ledger.accumulate(&cell.flows);
     if let Some(o) = observer.filter(|o| o.active()) {
-        o.capture(cell, c.dt);
+        o.capture(cell, dt);
     }
     if let Some(t) = trace {
         t.capture(cell, tick);

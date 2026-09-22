@@ -31,8 +31,7 @@ impl Projection {
             c.inventory_density,
         ];
         if self.configuration != Some(configuration) {
-            field.body_signal.fill([0.; 2]);
-            field.body_load.fill(0.);
+            field.reset_carriers(0);
             self.owners.clear();
             rows.clear();
             self.configuration = Some(configuration);
@@ -152,28 +151,25 @@ fn expired(owner: &Owner, cell: &Cell, radius: f64, c: &Config, spacing: f64) ->
 }
 
 fn update_material(field: &mut Field, owner: &mut Owner, row: &Row, mass: f64, profile: [f64; 3]) {
-    let delta: [f64; 3] = std::array::from_fn(|k| {
-        (mass * profile[k] - owner.mass * owner.profile[k]) / field.spacing.powi(2)
-    });
-    for &(node, weight) in row {
-        for (value, change) in field.body_signal[node].iter_mut().zip(&delta) {
-            *value += weight * change;
-        }
-        field.body_load[node] = (field.body_load[node] + weight * delta[2]).max(0.);
-    }
+    field.carrier(
+        0,
+        owner.id,
+        row,
+        profile.map(|p| mass * p / field.spacing.powi(2)),
+    );
     owner.mass = mass;
     owner.profile = profile;
 }
 
 fn deposit(field: &mut Field, owner: &Owner, row: &Row, sign: f64) {
-    let density = sign * owner.mass / field.spacing.powi(2);
-    for &(node, weight) in row {
-        for k in 0..2 {
-            field.body_signal[node][k] += weight * density * owner.profile[k];
-        }
-        field.body_load[node] =
-            (field.body_load[node] + weight * density * owner.profile[2]).max(0.);
-    }
+    let profile = if sign < 0. {
+        [0.; 3]
+    } else {
+        owner
+            .profile
+            .map(|p| owner.mass * p / field.spacing.powi(2))
+    };
+    field.carrier(0, owner.id, row, profile);
 }
 
 #[cfg(test)]

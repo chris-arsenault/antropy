@@ -6,35 +6,9 @@ type ProjectionRow<'a> = (
 );
 
 impl Exchange {
-    pub(super) fn project_requests(&mut self, sites: &[crate::footprint::Row]) {
-        self.site_offsets.clear();
-        self.site_offsets.resize(self.nodes.len() + 1, 0);
-        for site in sites {
-            for &(node, weight) in site {
-                if weight > 0. {
-                    self.site_offsets[self.slots[node] + 1] += 1;
-                }
-            }
-        }
-        for i in 1..self.site_offsets.len() {
-            self.site_offsets[i] += self.site_offsets[i - 1];
-        }
-        self.site_contributions
-            .resize(*self.site_offsets.last().unwrap(), (0, 0.));
-        let mut cursor = self.site_offsets.clone();
-        for (cell, site) in sites.iter().enumerate() {
-            for &(node, weight) in site {
-                if weight > 0. {
-                    let slot = self.slots[node];
-                    self.site_contributions[cursor[slot]] = (cell, weight);
-                    cursor[slot] += 1;
-                }
-            }
-        }
+    pub(super) fn project_requests(&mut self) {
         let project = |(slot, ((demand, changes), node)): ProjectionRow<'_>| {
-            for &(cell, weight) in
-                &self.site_contributions[self.site_offsets[slot]..self.site_offsets[slot + 1]]
-            {
+            for &(cell, weight) in &self.delivery[slot] {
                 let mask = self.masks[cell];
                 node.1 |= mask;
                 crate::exchange_vector::deposit(
@@ -47,12 +21,14 @@ impl Exchange {
                 );
             }
         };
-        if crate::parallel::enabled(self.nodes.len(), 128) {
+        let cost = crate::parallel::cost::EXCHANGE_NODE;
+        if let Some(grain) = crate::parallel::grain(self.nodes.len(), cost) {
             self.demand
                 .par_chunks_mut(256)
                 .zip(self.changes.par_chunks_mut(256))
                 .zip(self.nodes.par_iter_mut())
                 .enumerate()
+                .with_min_len(grain)
                 .for_each(project);
         } else {
             self.demand

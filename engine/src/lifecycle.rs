@@ -189,14 +189,14 @@ pub fn disturb(w: &mut World) {
         for s in 0..256 {
             let mean = nodes
                 .iter()
-                .map(|i| w.field.amounts[i * 256 + s] as f64)
+                .map(|i| w.field.amounts()[i * 256 + s] as f64)
                 .sum::<f64>()
                 / nodes.len() as f64;
             for &i in &nodes {
                 let loss = w.field.add(
                     i,
                     s,
-                    d.mixing * (mean - w.field.amounts[i * 256 + s] as f64),
+                    d.mixing * (mean - w.field.amounts()[i * 256 + s] as f64),
                     &w.chemistry,
                 );
                 w.ledger.rounding(loss, s, &w.chemistry);

@@ -23,6 +23,8 @@ pub struct Step<'a> {
     pub operators: &'a crate::weathering::Operators,
     pub exposure: f64,
     pub response: Response,
+    /// True at the medium interval, when accrued reservoir release is committed.
+    pub release: bool,
 }
 
 /// Derived inventory reduction; rebuilt from owned material after every mutation and restore.
@@ -76,6 +78,8 @@ fn profile(s: &Source, chem: &Chemistry) -> [f64; 3] {
 
 /// Explicit intervention/restore boundary. Ordinary stepping uses already refreshed owners.
 pub fn project(w: &mut World) {
+    w.field.reset_carriers(1);
+    w.field.attraction = Default::default();
     for source in &mut w.sources {
         source.refresh_material(&w.chemistry);
     }
@@ -88,32 +92,31 @@ pub fn project(w: &mut World) {
 }
 
 fn project_current(w: &mut World) {
-    for n in w.field.source_nodes.drain(..) {
-        w.field.source_signal[n] = [0.; 2];
-        w.field.source_load[n] = 0.;
-        w.field.source_listed[n] = false;
-    }
     let area = w.field.spacing.powi(2);
-    for source in &w.sources {
+    for (id, source) in w.sources.iter().enumerate() {
         let total = source.material.total;
-        if total == 0. {
-            continue;
-        }
         let scale = 1. / (1. + total / source.interface) / area;
-        for &(node, a) in &source.footprint {
-            if !w.field.source_listed[node] {
-                w.field.source_nodes.push(node);
-                w.field.source_listed[node] = true;
-            }
-            for (k, value) in source.material.moments[..2].iter().enumerate() {
-                w.field.source_signal[node][k] += a * scale * value;
-            }
-            w.field.source_load[node] += a * scale * source.material.moments[2];
-        }
+        w.field.carrier(
+            1,
+            id as u64,
+            &source.footprint,
+            source.material.moments.map(|v| scale * v),
+        );
     }
 }
 
 pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemistry) -> Response {
+    response_with_gradient(s, c, field, chem, field.gradient(&s.footprint))
+}
+
+/// Pure response evaluation also supports controlled gradient probes without mutating carriers.
+pub fn response_with_gradient(
+    s: &Source,
+    c: &Config,
+    field: &Field,
+    chem: &Chemistry,
+    gradient: [[f64; 3]; 2],
+) -> Response {
     let sites = &s.footprint;
     let p = profile(s, chem);
     let load = field.medium_load(sites).max(0.);
@@ -125,7 +128,7 @@ pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemis
         light: field.illumination.sample(sites),
         velocity: crate::movement::passive(
             p,
-            field.gradient(sites),
+            gradient,
             c.pressure_strength * other_load,
             crate::field::mobility(load, c.movement_impedance),
             c.source_drift,
@@ -140,43 +143,60 @@ pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemis
     }
 }
 
+/// Standalone assays treat every call as a medium interval.
 pub fn advance(w: &mut World) {
+    advance_scheduled(w, true);
+}
+
+pub fn advance_scheduled(w: &mut World, release: bool) {
     if !w.sources.is_empty() {
         w.field.prepare_attraction();
     }
     std::sync::Arc::make_mut(w.climate.operators.as_mut().unwrap()).work_strength =
         w.config.environmental_work;
-    let responses: Vec<_> = w
+    // Each reservoir reads the frozen field and owns its inventory; shared writes follow.
+    let (field, config, chemistry) = (&w.field, &w.config, &w.chemistry);
+    let operators = w.climate.operators.as_ref().unwrap();
+    let tick = w.tick;
+    let mut outcomes = vec![crate::sources::Outcome::default(); w.sources.len()];
+    let mut jobs: Vec<_> = w.sources.iter_mut().zip(outcomes.iter_mut()).collect();
+    let cost = crate::parallel::cost::RESERVOIR;
+    crate::parallel::for_each(&mut jobs, cost, |_, (source, outcome)| {
+        let r = response(source, tick, config, field, chemistry);
+        let exposure = crate::weathering::exposure(
+            1.,
+            r.load,
+            config.habitat_feedback,
+            config.diffusion_impedance,
+        );
+        let step = Step {
+            tick,
+            config,
+            chemistry,
+            operators,
+            exposure,
+            response: r,
+            release,
+        };
+        **outcome = source.advance_local(&step, field);
+    });
+    drop(jobs);
+    let releases: Vec<_> = w
         .sources
         .iter()
-        .map(|s| {
-            let r = response(s, w.tick, &w.config, &w.field, &w.chemistry);
-            (
-                r,
-                crate::weathering::exposure(
-                    1.,
-                    r.load,
-                    w.config.habitat_feedback,
-                    w.config.diffusion_impedance,
-                ),
-            )
-        })
+        .zip(&outcomes)
+        .filter(|(_, o)| o.released > 0.)
+        .map(|(s, o)| (s.footprint.as_slice(), s.mixture.as_slice(), o.released))
         .collect();
+    if !releases.is_empty() {
+        let loss = w.field.release_mixtures(&releases, &w.chemistry);
+        w.ledger.numerical_material += loss[0];
+        w.ledger.numerical_energy += loss[1];
+    }
     let mut changed = false;
-    for (source, (response, exposure)) in w.sources.iter_mut().zip(responses) {
-        changed |= source.advance(
-            &Step {
-                tick: w.tick,
-                config: &w.config,
-                chemistry: &w.chemistry,
-                operators: w.climate.operators.as_ref().unwrap(),
-                exposure,
-                response,
-            },
-            &mut w.environment_rng,
-            &mut w.field,
-            &mut w.ledger,
-        );
+    for (source, outcome) in w.sources.iter_mut().zip(&outcomes) {
+        source.finish(outcome, &w.config, &mut w.environment_rng, &mut w.ledger);
+        changed |= outcome.changed;
     }
     if changed {
         project_current(w);

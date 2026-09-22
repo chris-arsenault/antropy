@@ -22,14 +22,14 @@ fn check(field: &Field, cells: &[Cell], c: &Config, rows: &[Row]) {
     let mut expected = field.clone();
     crate::footprint::deposit_profiles(cells, c, &mut expected, rows);
     for (a, b) in field
-        .body_signal
+        .body_signal()
         .iter()
         .flatten()
-        .zip(expected.body_signal.iter().flatten())
+        .zip(expected.body_signal().iter().flatten())
     {
         assert!((a - b).abs() < 1e-12);
     }
-    for (a, b) in field.body_load.iter().zip(&expected.body_load) {
+    for (a, b) in field.body_load().iter().zip(expected.body_load()) {
         assert!((a - b).abs() < 1e-12);
     }
     for row in rows {

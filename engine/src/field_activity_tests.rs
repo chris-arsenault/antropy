@@ -11,9 +11,9 @@ fn sparse_halo_crosses_both_periodic_seams_without_processing_empty_geography() 
         let diffusion = chemistry.properties[17].diffusion;
         let outgoing = (diffusion as f32 * (0.2 / 4.) as f32) as f64;
         for node in [1, field.nx - 1, field.nx, field.nx * (field.ny - 1)] {
-            assert!((field.amounts[node * 256 + 17] as f64 - outgoing).abs() < 1e-8);
+            assert!((field.amounts()[node * 256 + 17] as f64 - outgoing).abs() < 1e-8);
         }
-        assert!((field.amounts[17] as f64 - (1. - 4. * outgoing)).abs() < 1e-7);
+        assert!((field.amounts()[17] as f64 - (1. - 4. * outgoing)).abs() < 1e-7);
         assert_eq!(field.work_counts(), [5, 5, 5]);
         field.validate_reductions(&chemistry).unwrap();
     }
@@ -34,7 +34,7 @@ fn truncation_is_accounted_and_empty_nodes_can_reactivate_without_stale_buffer_m
     assert_eq!(field.work_counts(), [0, 0, 0]);
     field.add(0, 213, 2., &chemistry);
     field.advance(&chemistry, 0.8, 0., 0.);
-    assert!(field.amounts.rows().all(|(_, r)| r[17] == 0.));
+    assert!(field.amounts().rows().all(|(_, r)| r[17] == 0.));
     assert!(field.work_counts()[0] > 0);
     field.validate_reductions(&chemistry).unwrap();
 }
@@ -104,27 +104,24 @@ fn source_and_row_commit_wake_previously_empty_chemical_groups() {
 fn default_transport_uses_one_pass_with_positive_conservative_extreme_medium() {
     let chemistry = Chemistry::new(101).unwrap();
     let mut field = Field::new(16., 16., 2.);
-    for (i, q) in field.amounts.dense_values_mut().enumerate() {
-        *q = 0.01 + (i % 23) as f32 * 0.002;
-    }
-    field.refresh(&chemistry);
+    field.replace_material(&chemistry, |i| 0.01 + (i % 23) as f32 * 0.002);
     for n in 0..field.nx * field.ny {
         let sign = if n % 2 == 0 { 1. } else { -1. };
-        field.source_signal[n] = [sign * 1e6, -sign * 1e6];
-        field.source_load[n] = if n % 3 == 0 { 1e6 } else { 0. };
-        field.body_load[n] = if n % 5 == 0 { 1e8 } else { 0. };
+        field.test_source_signal()[n] = [sign * 1e6, -sign * 1e6];
+        field.test_source_load()[n] = if n % 3 == 0 { 1e6 } else { 0. };
+        field.test_body_load()[n] = if n % 5 == 0 { 1e8 } else { 0. };
     }
     let initial = field.totals(&chemistry);
     let balance = field.advance(&chemistry, 0.8, 0., 1.);
     assert_eq!(field.work_counts()[2], field.nx * field.ny * 64);
-    assert!(field.amounts.iter().all(|q| q.is_finite() && *q > 0.));
+    assert!(field.amounts().iter().all(|q| q.is_finite() && *q > 0.));
     assert!((field.totals(&chemistry).0 - initial.0).abs() < 1e-4);
     assert!(balance.roundoff_matter.abs() < 1e-4);
     field.validate_reductions(&chemistry).unwrap();
     // Larger intervals must still subdivide; the one-pass optimization is not unconditional.
     field.advance(&chemistry, 2., 0., 1.);
     assert_eq!(field.work_counts()[2], 3 * field.nx * field.ny * 64);
-    assert!(field.amounts.iter().all(|q| q.is_finite() && *q >= 0.));
+    assert!(field.amounts().iter().all(|q| q.is_finite() && *q >= 0.));
 }
 
 #[test]
@@ -139,14 +136,14 @@ fn common_cutoff_retains_useful_dilute_material_and_accounts_discarded_tails() {
     field.drift = 0.;
     let expected_loss = field.totals(&chemistry).0
         - field
-            .amounts
+            .amounts()
             .chunks_exact(256)
             .map(|r| r[255] as f64)
             .sum::<f64>();
     let balance = field.advance(&chemistry, 0.8, 0., 0.);
     assert!(
         field
-            .amounts
+            .amounts()
             .chunks_exact(256)
             .all(|r| r[0] == 0. && r[255] > 0.)
     );
@@ -160,11 +157,11 @@ fn checkpoint_retains_pending_zero_row_reduction_cleanup() {
     for species in 0..256 {
         world.field.add(0, species, 1., &world.chemistry);
         world.field.add(0, species, 0.3, &world.chemistry);
-        let amount = world.field.amounts[species] as f64;
+        let amount = world.field.amounts()[species] as f64;
         world.field.add(0, species, -amount, &world.chemistry);
     }
     crate::diagnostics::initialize(&mut world);
-    assert!(world.field.amounts.iter().all(|q| *q == 0.));
+    assert!(world.field.amounts().iter().all(|q| *q == 0.));
     let mut restored = crate::world::World::restore(&world.snapshot().unwrap()).unwrap();
     for _ in 0..8 {
         world.step();

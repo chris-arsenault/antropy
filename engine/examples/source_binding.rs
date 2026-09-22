@@ -70,16 +70,16 @@ fn snapshot(path: &str) -> Result<Value, Box<dyn std::error::Error>> {
         let mut f = Field::new(w.config.width, w.config.height, w.config.mesh);
         match kind {
             "reservoirs" => {
-                f.source_signal.clone_from(&w.field.source_signal);
-                f.source_load.clone_from(&w.field.source_load);
+                let mut isolated = w.clone();
+                isolated.field = f;
+                source_medium::project(&mut isolated);
+                f = isolated.field;
             }
             "dissolved" => {
-                f.signal.clone_from(&w.field.signal);
-                f.impedance.clone_from(&w.field.impedance);
+                f.replace_material(&w.chemistry, |i| w.field.amounts()[i]);
             }
             _ => {
-                f.body_signal.clone_from(&w.field.body_signal);
-                f.body_load.clone_from(&w.field.body_load);
+                footprint::deposit_profiles(&w.cells, &w.config, &mut f, &sites);
             }
         }
         channels.push((kind, f));
@@ -158,8 +158,6 @@ fn fixture() -> World {
 }
 
 fn set_pair(w: &mut World, distance: f64, ratio: f64, second: usize, empty: bool) {
-    // A candidate filter extends beyond the ordinary source-node cache. Reset it between cases.
-    w.field.source_signal.fill([0.; 2]);
     for (j, s) in w.sources.iter_mut().enumerate() {
         s.habitat.x = 32.3 + distance * j as f64;
         s.rebuild(&w.config, &w.field);
@@ -227,41 +225,11 @@ fn backgrounds() -> Vec<Value> {
 }
 
 // A normalized even filter gives the attractive row a distinct interaction length.
-// Diagnostic only: release footprints, pressure, profiles and velocity law stay unchanged.
-fn broaden_attraction(w: &mut World, sigma: f64) {
-    let reach = (3. * sigma / w.field.spacing).ceil() as isize;
-    let mut weights: Vec<_> = (-reach..=reach)
-        .map(|d| (-0.5 * (d as f64 * w.field.spacing / sigma).powi(2)).exp())
-        .collect();
-    let sum: f64 = weights.iter().sum();
-    for v in &mut weights {
-        *v /= sum;
-    }
-    let nx = w.field.nx;
-    let ny = w.field.ny;
-    for rows in [
-        &mut w.field.signal,
-        &mut w.field.source_signal,
-        &mut w.field.body_signal,
-    ] {
-        let mut temporary = vec![0.; nx * ny];
-        for n in 0..nx * ny {
-            for (j, &weight) in weights.iter().enumerate() {
-                let x = (n as isize % nx as isize + j as isize - reach).rem_euclid(nx as isize)
-                    as usize;
-                temporary[n] += weight * rows[n / nx * nx + x][0];
-            }
-        }
-        for n in 0..rows.len() {
-            let row = &mut rows[n];
-            row[0] = 0.;
-            for (j, &weight) in weights.iter().enumerate() {
-                let y = (n as isize / nx as isize + j as isize - reach).rem_euclid(ny as isize)
-                    as usize;
-                row[0] += weight * temporary[y * nx + n % nx];
-            }
-        }
-    }
+// Probe the selected compact operator through its configuration boundary.
+// The earlier Gaussian carrier mutation experiment is historical; it must not bypass ownership.
+fn broaden_attraction(w: &mut World, length: f64) {
+    w.field.attraction_length = length;
+    w.field.prepare_attraction();
 }
 
 fn candidate_curves() -> Vec<Value> {
@@ -304,7 +272,6 @@ fn cluster_curves() -> Vec<Value> {
         for radius in [4., 8., 12., 16., 20., 24.] {
             for center_species in [136, 8, 128] {
                 for empty_center in [false, true] {
-                    w.field.source_signal.fill([0.; 2]);
                     for (j, s) in w.sources.iter_mut().enumerate() {
                         let angle = (j as f64 - 1.) * std::f64::consts::TAU / 6.;
                         let r = if j == 0 { 0. } else { radius };
