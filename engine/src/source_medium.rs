@@ -29,7 +29,6 @@ pub struct Step<'a> {
 #[derive(Clone, Debug, Default)]
 pub struct Material {
     pub valid: bool,
-    pub mask: u64,
     pub total: f64,
     pub moments: [f64; 3],
 }
@@ -39,7 +38,6 @@ impl Material {
         if q <= 0. {
             return;
         }
-        self.mask |= 1 << (s / 4);
         self.total += q;
         let p = &chem.properties[s];
         for (sum, value) in
@@ -50,12 +48,12 @@ impl Material {
             *sum += q * value;
         }
     }
-    pub fn read(row: &[f64], chem: &Chemistry) -> Self {
+    pub fn read(row: impl IntoIterator<Item = f64>, chem: &Chemistry) -> Self {
         let mut result = Self {
             valid: true,
             ..Self::default()
         };
-        for (s, &q) in row.iter().enumerate() {
+        for (s, q) in row.into_iter().enumerate() {
             result.add(s, q, chem);
         }
         result
@@ -67,23 +65,22 @@ fn profile(s: &Source, chem: &Chemistry) -> [f64; 3] {
     let material = if s.material.valid {
         &s.material
     } else {
-        fresh = Material::read(&s.inventory, chem);
+        fresh = Material::read(s.inventory(), chem);
         &fresh
     };
     if material.total > 0. {
         return material.moments.map(|v| v / material.total);
     }
-    Material::read(&s.replenishment, chem).moments
+    [0.; 3]
 }
 
 /// Explicit intervention/restore boundary. Ordinary stepping uses already refreshed owners.
 pub fn project(w: &mut World) {
     for source in &mut w.sources {
-        source.material = Material::read(&source.inventory, &w.chemistry);
+        source.refresh_material(&w.chemistry);
     }
     project_current(w);
     w.field.attraction_length = w.config.attraction_length;
-    w.field.attraction_strength = w.config.attraction_strength;
     w.field.prepare_attraction();
     w.field
         .illumination
@@ -120,11 +117,7 @@ pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemis
     let sites = &s.footprint;
     let p = profile(s, chem);
     let load = field.medium_load(sites).max(0.);
-    let total: f64 = if s.material.valid {
-        s.material.total
-    } else {
-        s.inventory.iter().sum()
-    };
+    let total = s.amount;
     let projected = total * p[2] / (1. + total / s.interface);
     let self_load = crate::medium_response::self_load(projected, field.spacing.powi(2), sites);
     let other_load = (field.pressure_load(sites) - self_load).max(0.);
@@ -180,7 +173,6 @@ pub fn advance(w: &mut World) {
                 exposure,
                 response,
             },
-            &mut w.environment_rng,
             &mut w.field,
             &mut w.ledger,
         );
@@ -194,10 +186,9 @@ pub fn advance(w: &mut World) {
 pub fn observe(w: &World) -> serde_json::Value {
     let rows: Vec<_> = w.sources.iter().map(|s| {
         let r = response(s, w.tick, &w.config, &w.field, &w.chemistry);
-        let total = s.inventory.iter().sum::<f64>();
-        let rate = if s.remaining > 0. { s.rate.min(total / w.config.dt) } else { 0. };
-        let output: Vec<_> = (0..SPECIES).filter(|&id| s.inventory[id] > 0.)
-            .map(|id| (id, rate * s.inventory[id] / total)).collect();
+        let rate = s.rate.min(s.amount / w.config.dt);
+        let output: Vec<_> = (0..SPECIES).filter(|&id| s.mixture[id] > 0. && rate > 0.)
+            .map(|id| (id, rate * s.mixture[id])).collect();
         serde_json::json!({"velocity":r.velocity,"signal":r.signal,"load":r.load,"outputRate":output})
     }).collect();
     serde_json::json!(rows)

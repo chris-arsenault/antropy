@@ -19,6 +19,31 @@ afterEach(() => {
 });
 const compact = { width: 24, height: 24, founders: 2, sourceCount: 2 };
 
+it("starts the larger default world at mesh 2 and advances with valid accounts", async () => {
+  const world = (await Engine.load(bytes)).create();
+  try {
+    const { config, sources, patchCenters } = world.command<Definition>("definition");
+    expect([config.width, config.height, config.mesh]).toEqual([720, 540, 2]);
+    expect(config).not.toHaveProperty("maxPopulation");
+    expect(config.founders).toBe(48);
+    expect(config.sourceCount).toBe(240);
+    expect(sources).toHaveLength(240);
+    expect(patchCenters).toHaveLength(35);
+    expect(config.landscapeSpread).toBe(18);
+    expect(config.sourceRadius).toBe(3);
+    expect(config.sourceRate).toBe(0.2);
+    world.step(4);
+    const summary = world.command<Summary>("summary");
+    expect(summary.tick).toBe(4);
+    expect(summary.stopReason).toBeNull();
+    validateAccounts(summary);
+    const render = world.render();
+    expect(render.field.buffer).toBe(render.cells.buffer);
+  } finally {
+    world.dispose();
+  }
+});
+
 it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the unchanged package", async () => {
   const session = new Session(await Engine.load(bytes, true));
   expect(() => session.restart(101, { ...compact, weatheringPeriod: 1200 })).toThrow(
@@ -26,7 +51,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(35);
+  expect(definition.version).toBe(40);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -42,7 +67,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v35 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v40 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });

@@ -68,11 +68,11 @@ No extra specialist bonus or enforced zero-sum budget is proposed. More machiner
 matter, maintenance and space. Those costs may still permit a successful generalist. A constructed
 comparison must measure conditional payoffs before claiming that investment alone ensures niches.
 
-An inherited change alters a daughter's machinery specification and future construction targets.
-Birth partitions actual parental stock by slot identity; it does not fill the daughter's changed
-target for free. Changed machinery retains its actual coordinates and response until work above
-the interval reserve funds gradual refitting. Optional lifetime transfer uses the same rule.
-Unchanged stocks and compiled coefficients remain shared and partition normally.
+A daughter's complete mutated chemical configuration applies at birth and stays fixed for life.
+Birth partitions actual parental stock; it does not fill changed construction targets for free.
+Funded growth and retirement change quantities, while activity changes throughput. No refitting
+or living-cell genetic transfer remains. Unchanged compiled coefficients remain shared.
+See [birth-fixed capabilities](installed-machinery.md).
 
 ## Receptors
 

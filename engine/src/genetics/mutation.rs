@@ -269,7 +269,7 @@ mod tests {
         let cell = &mut w.cells[0];
         cell.set_fixture_body(cell.body.map(|q| q * 2.));
         cell.energy = 1.;
-        let installed = cell.installed.clone();
+        let installed = cell.chemistry().clone();
         let stock = cell.body;
         let original = w.genomes[&cell.genome].chromosomes.clone();
         let before = w.held();
@@ -283,7 +283,10 @@ mod tests {
                 child.compiled.as_ref().unwrap().chromosome.chemistry,
                 installed
             );
-            assert_eq!(cell.installed, installed);
+            assert_eq!(
+                cell.chemistry(),
+                &child.compiled.as_ref().unwrap().chromosome.chemistry
+            );
             assert!(
                 child.chromosomes[0]
                     .chemistry

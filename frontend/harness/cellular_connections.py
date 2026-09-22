@@ -62,7 +62,7 @@ def source_sample(frame):
         rows.append({"index": i, "near6": len(tree.query_ball_point(point, 6)),
                      "near12": len(tree.query_ball_point(point, 12)),
                      "rate": sum(output.values()), "seedRate": output.get(0, 0) + output.get(136, 0),
-                     "renewalSeed": s["replenishment"][0] + s["replenishment"][136],
+                     "renewalSeed": s["mixture"][0] + s["mixture"][136],
                      "speed": float(np.linalg.norm(response["velocity"]))})
     return rows
 

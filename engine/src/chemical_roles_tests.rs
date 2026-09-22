@@ -49,21 +49,6 @@ fn roles_count_cells_not_slots_and_color_installed_funded_machinery() {
         crate::presentation::hue_rgb((primary.input as f64 * 0.618033988749895).fract())
     );
     assert_eq!(before, w.snapshot().unwrap());
-    // Inherited targets alone do not replace installed routes.
-    w.genomes
-        .get_mut(&1)
-        .unwrap()
-        .compiled
-        .as_mut()
-        .unwrap()
-        .chromosome
-        .chemistry
-        .enzymes[0]
-        .x = 15.;
-    assert_eq!(
-        chemical_roles::primary(&w.cells[0]).unwrap().input,
-        primary.input
-    );
     let mut body = w.cells[0].body;
     body[11..].fill(0.);
     w.cells[0].set_fixture_body(body);
@@ -77,7 +62,8 @@ fn roles_count_cells_not_slots_and_color_installed_funded_machinery() {
 fn mixed_routes_are_complete_pageable_and_match_the_installed_compiler() {
     let mut w = world();
     for (i, cell) in w.cells.iter_mut().enumerate() {
-        for (j, enzyme) in cell.installed.enzymes.iter_mut().enumerate() {
+        let mut machinery = cell.chemistry().clone();
+        for (j, enzyme) in machinery.enzymes.iter_mut().enumerate() {
             enzyme.x = 2.3 + (i + j) as f64;
             enzyme.y = 6.7;
             enzyme.center_x = 3.6;
@@ -85,7 +71,7 @@ fn mixed_routes_are_complete_pageable_and_match_the_installed_compiler() {
             enzyme.angle = 0.8;
         }
         cell.operators = Some(crate::chemical_operators::Operators::compile(
-            &cell.installed,
+            &machinery,
             &w.config,
             &w.chemistry,
         ));
@@ -94,7 +80,7 @@ fn mixed_routes_are_complete_pageable_and_match_the_installed_compiler() {
     for cell in &w.cells {
         let mut pairs = std::collections::BTreeSet::new();
         for (slot, enzyme) in cell.operators.as_ref().unwrap().enzymes.iter().enumerate() {
-            if !cell.installed.programs[slot]
+            if !cell.chemistry().programs[slot]
                 || cell.body[crate::organism::enzyme_stock(slot)] == 0.
             {
                 continue;

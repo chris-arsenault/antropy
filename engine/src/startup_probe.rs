@@ -33,9 +33,7 @@ pub fn isolated(seed: u64, second: bool, founders: usize) -> Result<World, Strin
         &original.sources[0]
     };
     let mut source = selected.clone();
-    for q in &mut source.inventory {
-        *q /= 1. - original.config.source_priming;
-    }
+    source.amount /= 1. - original.config.source_priming;
     source.habitat.x = 32.;
     source.habitat.y = 32.;
     let mut w = World::new(

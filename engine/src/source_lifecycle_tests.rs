@@ -1,0 +1,153 @@
+use crate::{config::Config, source_medium, world::World};
+
+fn fixture() -> World {
+    let mut w = World::new(
+        27,
+        Config {
+            width: 24.,
+            height: 24.,
+            founders: 0,
+            source_count: 1,
+            source_priming: 0.,
+            source_processing: 0.,
+            source_drift: 0.,
+            source_lifetime: 1.,
+            source_gap: 0.5,
+            source_species: vec![0, 80],
+            dt: 0.25,
+            ..Config::default()
+        },
+    )
+    .unwrap();
+    w.sources[0].rate = 2.;
+    w.sources[0].amount = 0.75;
+    w.sources[0].mixture.fill(0.);
+    w.sources[0].mixture[0] = 0.2;
+    w.sources[0].mixture[80] = 0.8;
+    crate::diagnostics::initialize(&mut w);
+    w
+}
+
+#[test]
+fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
+    let mut w = fixture();
+    let before = w.held();
+    let rng = w.environment_rng.0;
+    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].amount, 0.25);
+    assert_eq!(w.ledger.source_released, 0.5);
+    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].amount, 0.);
+    assert_eq!(w.sources[0].wait, 0.5);
+    assert_eq!(w.ledger.source_released, 0.75);
+    assert!(w.field.source_load.iter().all(|v| *v == 0.));
+    assert!(
+        source_medium::observe(&w)[0]["outputRate"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].amount, 0.);
+    assert_eq!(w.ledger.supplied, 0.);
+    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].amount, 1.5);
+    assert_eq!(w.sources[0].rate, 2.);
+    assert_eq!(w.sources[0].wait, 0.);
+    assert_eq!(w.ledger.supplied, 2.);
+    assert_eq!(w.environment_rng.0, rng);
+    let potential =
+        0.2 * w.chemistry.properties[0].potential + 0.8 * w.chemistry.properties[80].potential;
+    assert!((w.ledger.supplied_energy - 2. * potential).abs() < 1e-12);
+    let after = w.held();
+    assert!((after.0 + w.ledger.numerical_material - before.0 - 2.).abs() < 1e-10);
+    assert!((after.1 + w.ledger.numerical_energy - before.1 - 2. * potential).abs() < 1e-10);
+    w.validate().unwrap();
+}
+
+#[test]
+fn empty_reservoir_has_no_motion_or_projection_in_a_gradient() {
+    let mut w = fixture();
+    w.config.source_drift = 4.;
+    for n in 0..w.field.nx * w.field.ny {
+        w.field
+            .add(n, 15, 1. + (n % w.field.nx) as f64, &w.chemistry);
+    }
+    source_medium::project(&mut w);
+    let occupied = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
+    assert!(occupied.velocity[0].hypot(occupied.velocity[1]) > 1e-8);
+    w.sources[0].amount = 0.;
+    w.sources[0].wait = 10.;
+    source_medium::project(&mut w);
+    let empty = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
+    assert_eq!(empty.velocity, [0.; 2]);
+    assert!(w.field.source_load.iter().all(|q| *q == 0.));
+    let position = [w.sources[0].habitat.x, w.sources[0].habitat.y];
+    source_medium::advance(&mut w);
+    assert_eq!(position, [w.sources[0].habitat.x, w.sources[0].habitat.y]);
+}
+
+#[test]
+fn composition_conversion_matches_the_shared_operator_on_actual_material() {
+    let mut w = fixture();
+    w.config.source_processing = 1.;
+    let operators = crate::weathering::Operators::new(&w.chemistry);
+    let response = source_medium::Response {
+        velocity: [0.; 2],
+        signal: [0.2, -0.1],
+        light: 0.7,
+        load: 0.,
+    };
+    let step = source_medium::Step {
+        tick: 0,
+        config: &w.config,
+        chemistry: &w.chemistry,
+        operators: &operators,
+        exposure: 1.,
+        response,
+    };
+    for amount in [0., 0.01, 2., 1000.] {
+        let mut s = w.sources[0].clone();
+        s.amount = amount;
+        s.rate = 0.;
+        let mut actual: Vec<_> = s.inventory().collect();
+        let expected = operators
+            .inventory_active(
+                &mut actual,
+                crate::reaction_medium::Medium::illuminated(response.signal, response.light),
+                w.config.dt * w.config.weathering_rate,
+                amount * f32::EPSILON as f64,
+                u64::MAX,
+            )
+            .0;
+        let mut ledger = crate::accounting::Ledger::default();
+        s.advance(&step, &mut w.field, &mut ledger);
+        for (a, b) in actual.iter().zip(s.inventory()) {
+            assert!((a - b).abs() < 1e-11);
+        }
+        assert_eq!(s.amount, amount);
+        assert!((s.mixture.iter().sum::<f64>() - 1.).abs() < 1e-12);
+        assert_ne!(s.mixture, w.sources[0].mixture);
+        for (a, b) in expected.into_iter().zip([
+            ledger.source_converted,
+            ledger.source_heat,
+            ledger.source_work,
+        ]) {
+            assert!((a - b).abs() < 1e-11);
+        }
+    }
+}
+
+#[test]
+fn explicit_boundary_override_changes_only_the_next_empty_batch() {
+    let mut w = fixture();
+    w.config.source_zones = Some(vec![vec![0., 1.]]);
+    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].mixture[0], 0.2);
+    source_medium::advance(&mut w);
+    source_medium::advance(&mut w);
+    source_medium::advance(&mut w);
+    assert_eq!(w.sources[0].mixture[0], 0.);
+    assert_eq!(w.sources[0].mixture[80], 1.);
+    assert!((w.ledger.supplied_energy - 2. * w.chemistry.properties[80].potential).abs() < 1e-12);
+}

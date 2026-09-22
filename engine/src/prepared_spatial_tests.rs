@@ -18,16 +18,14 @@ fn graph_matches_reference(cells: &[Cell], c: &Config, cache: &mut movement::geo
     let actual = cache.graph(cells, c);
     for i in 0..cells.len() {
         assert!((actual.field[i] - expected.field[i]).abs() < 1e-12);
-        assert_eq!(actual.neighbors[i].len(), expected.neighbors[i].len());
-        for edge in &expected.neighbors[i] {
-            let other = actual.neighbors[i]
+        assert_eq!(actual.neighbors(i).len(), expected.neighbors(i).len());
+        for edge in expected.neighbors(i) {
+            let other = actual
+                .neighbors(i)
                 .iter()
                 .find(|n| n.donor == edge.donor)
                 .unwrap();
             assert!((edge.weight - other.weight).abs() < 1e-12);
-            for (a, b) in edge.direction.into_iter().zip(other.direction) {
-                assert!((a - b).abs() < 1e-12);
-            }
         }
     }
 }
@@ -81,18 +79,18 @@ fn periodic_contact_entry_and_growth_across_size_classes_are_immediate() {
     cells[0].x = radius;
     cells[1].x = c.width - 4. * radius - c.mesh;
     let mut cache = movement::geometry::Cache::default();
-    assert!(cache.graph(&cells, &c).neighbors[0].is_empty());
+    assert!(cache.graph(&cells, &c).neighbors(0).is_empty());
     cells[1].x = c.width - radius * 0.5;
     graph_matches_reference(&cells, &c, &mut cache);
-    assert_eq!(cache.graph(&cells, &c).neighbors[0].len(), 1);
+    assert_eq!(cache.graph(&cells, &c).neighbors(0).len(), 1);
     cells[1].x = cells[0].x + 4. * radius + c.mesh;
-    assert!(cache.graph(&cells, &c).neighbors[0].is_empty());
+    assert!(cache.graph(&cells, &c).neighbors(0).is_empty());
     let new_radius = 4. * radius + c.mesh;
     let amount = std::f64::consts::PI * (new_radius.powi(2) - radius.powi(2)) * c.inventory_density;
     let previous = cells[0].inventory.value(17);
     cells[0].inventory.set(17, previous + amount);
     graph_matches_reference(&cells, &c, &mut cache);
-    assert_eq!(cache.graph(&cells, &c).neighbors[0].len(), 1);
+    assert_eq!(cache.graph(&cells, &c).neighbors(0).len(), 1);
 }
 
 #[test]
@@ -102,31 +100,30 @@ fn contact_stage_is_frozen_until_next_prepare_and_reductions_follow_dt() {
     let before = cache.graph(&cells, &c).field.clone();
     cells[1].x += c.mesh;
     assert_eq!(cache.graph_prepared(&cells, &c).field, before);
-    assert!(cache.graph(&cells, &c).neighbors[0].is_empty());
+    assert!(cache.graph(&cells, &c).neighbors(0).is_empty());
     cells[1].x = cells[0].x + cells[0].radius(&c);
     cache.prepare_local(&cells, &c);
     for dt in [c.dt, c.dt * 0.5, c.dt * 2.] {
         cache.local.pressure_at(dt);
         let edge = cache.local.contacts.edges[0];
-        let correction =
-            ((edge.extent - edge.length) * 0.5 * (1. - (-dt).exp())).min(dt * 0.5) / dt;
+        let correction = (edge.extent - edge.length) * 0.5 * (1. - (-dt).exp()) / dt;
         assert!((cache.local.pressure.rows[0].shift[0] + correction).abs() < 1e-12);
         assert!((cache.local.pressure.rows[1].shift[0] - correction).abs() < 1e-12);
     }
 }
 
 #[test]
-fn heading_rotates_contact_inputs_without_rotating_world_pressure() {
+fn heading_cannot_change_scalar_contacts_or_world_pressure() {
     let (c, mut cells) = pair();
     let mut cache = movement::geometry::Cache::default();
     let before = cache.graph(&cells, &c).contacts[0];
     let shift = cache.local.pressure.rows[0].shift;
-    let world_direction = cache.graph(&cells, &c).neighbors[0][0].direction;
+    let neighbors = cache.graph(&cells, &c).neighbors(0).to_vec();
     cells[0].heading += 0.25;
     let graph = cache.graph(&cells, &c);
-    assert_ne!(graph.contacts[0], before);
+    assert_eq!(graph.contacts[0], before);
     assert_eq!(graph.contacts[0], Graph::new(&cells, &c).contacts[0]);
-    assert_eq!(graph.neighbors[0][0].direction, world_direction);
+    assert_eq!(graph.neighbors(0), neighbors);
     assert_eq!(cache.local.pressure.rows[0].shift, shift);
 }
 

@@ -2,7 +2,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 56×24×38 Rust controller, with a physiological evaluation clock in checkpoint v35.
+the 56×24×38 Rust controller, with a physiological evaluation clock in checkpoint v40.
 
 <a id="controller-observation-contract"></a>
 
@@ -14,7 +14,7 @@ the 56×24×38 Rust controller, with a physiological evaluation clock in checkpo
 | 16–27 | Twelve installed receptor/transporter/enzyme stocks divided by themselves plus their genetic targets |
 | 28 | Usable energy / actual energy capacity |
 | 29 | Core / genetic newborn core target minus one, clamped to [0,1] |
-| 30–33 | Current frozen-interface front, left, rear and right body contact |
+| 30–33 | Equal shares of scalar circle crowding; these four slots have no directional meaning |
 | 34 | Opaque private task byte / 255 |
 | 35–36 | Motor/storage stock divided by itself plus reference newborn stock |
 | 37 | Internal chemical matter / actual storage capacity |

@@ -23,7 +23,6 @@ pub fn policy(w: &mut World, v: &Value) -> Result<Value, String> {
             "physicalMutationRate",
             "learningRetention",
             "transmission",
-            "transferRate",
             "learning",
             "damageRate",
             "movementImpedance",
@@ -76,8 +75,9 @@ pub fn replace(w: &mut World, v: &Value) -> Result<Value, String> {
             && let Some(g) = r.genotypes.get(&cell.genome)
         {
             cell.genome = g.id;
-            let installed = w.genomes[&cell.machinery_genome].compiled.as_ref().unwrap();
-            sensing::initialize(&mut cell, installed, &w.config, &w.field);
+            let capabilities = g.compiled.as_ref().unwrap();
+            cell.operators = Some(capabilities.operators.clone());
+            sensing::initialize(&mut cell, capabilities, &w.config, &w.field);
             w.ancestry[cell.id as usize - 1].genome = g.id;
         }
         w.cells[i] = cell;
@@ -121,11 +121,10 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
             richness: 1.,
             share: 0.5,
         },
-        remaining: s.duration,
+        amount: s.duration * s.rate,
         wait: 0.,
         rate: s.rate,
-        inventory: vec![0.; 256],
-        replenishment: vec![0.; 256],
+        mixture: vec![0.; 256],
         footprint: vec![],
         kernel: Default::default(),
         material: Default::default(),
@@ -133,8 +132,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
     };
     for &id in &w.config.source_species {
         let q = s.duration * s.rate / w.config.source_species.len() as f64;
-        source.inventory[id] += q;
-        source.replenishment[id] += 1. / w.config.source_species.len() as f64;
+        source.mixture[id] += 1. / w.config.source_species.len() as f64;
         w.ledger.supplied += q;
         w.ledger.supplied_energy += q * w.chemistry.properties[id].potential;
     }

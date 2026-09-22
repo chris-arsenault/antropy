@@ -191,7 +191,6 @@ pub(super) fn physiology_rates(
     }
     let count = work.reactions().count();
     crate::metabolism::repair(&mut probe, c, &w.chemistry, dt);
-    crate::refitting::advance(&mut probe, g, c, &w.chemistry, dt);
     crate::metabolism::grow(&mut probe, g, c, &w.chemistry, dt);
     let stock = cell
         .body
@@ -215,7 +214,7 @@ pub(super) fn physiology_rates(
     let spending = motor
         + cell.basal(c) / dt
         + learning
-        + (probe.flows.repair + probe.flows.refitting + probe.flows.construction) / dt;
+        + (probe.flows.repair + probe.flows.construction) / dt;
     let energy = spending / (cell.energy + c.receptor_k * cell.energy_capacity(c)).max(1e-30);
     let net = std::array::from_fn(|s| (probe.inventory.value(s) - cell.inventory.value(s)) / dt);
     (gross, net, stock.max(damage), energy, count)

@@ -77,7 +77,7 @@ pub fn summary(w: &World) -> Value {
 }
 pub fn environment(w: &World) -> Value {
     let mut species = [0.; 256];
-    for node in w.field.amounts.as_chunks::<256>().0 {
+    for (_, node) in w.field.amounts.rows() {
         for (total, q) in species.iter_mut().zip(node) {
             *total += *q as f64;
         }
@@ -115,28 +115,16 @@ pub fn field_view(w: &World, kind: &str, species: usize) -> Result<Value, String
             .map(|(x, s)| (x + s) as f32)
             .collect(),
         "stress" => w.field.stress.iter().map(|x| *x as f32).collect(),
-        "chemical" => w
-            .field
-            .amounts
-            .as_chunks::<SPECIES>()
-            .0
-            .iter()
+        "chemical" => (0..w.field.nx * w.field.ny)
+            .map(|i| w.field.amounts.row(i))
             .map(|n| n[species] / area as f32)
             .collect(),
-        "material" => w
-            .field
-            .amounts
-            .as_chunks::<SPECIES>()
-            .0
-            .iter()
+        "material" => (0..w.field.nx * w.field.ny)
+            .map(|i| w.field.amounts.row(i))
             .map(|n| n.iter().sum::<f32>() / area as f32)
             .collect(),
-        "potential" => w
-            .field
-            .amounts
-            .as_chunks::<SPECIES>()
-            .0
-            .iter()
+        "potential" => (0..w.field.nx * w.field.ny)
+            .map(|i| w.field.amounts.row(i))
             .map(|n| {
                 (n.iter()
                     .zip(&w.chemistry.properties)
@@ -191,11 +179,6 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     result["fieldInterface"] = json!(interface.map(|r| r.field));
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));
-    if request.get("machinery").and_then(Value::as_u64) != cell.map(|c| c.machinery_revision)
-        || cell.is_none()
-    {
-        result["installedChemistry"] = json!(cell.map(|c| &c.installed));
-    }
     if request.get("genealogy").and_then(Value::as_bool) == Some(true) {
         result["genealogy"] = crate::genealogy::inspect(w, id);
         result["relationships"] = crate::relationships::inspect(w, id);

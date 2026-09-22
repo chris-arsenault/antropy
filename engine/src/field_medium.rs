@@ -5,20 +5,25 @@ use crate::{field::Field, medium_response};
 #[derive(Clone, Debug, Default)]
 pub(crate) struct GradientCache {
     rows: Vec<[[f64; 3]; 2]>,
-    valid: Vec<bool>,
+    valid: Vec<u64>,
+    epoch: u64,
 }
 impl GradientCache {
     pub fn begin(&mut self, field: &Field) {
         self.rows.resize(field.nx * field.ny, [[0.; 3]; 2]);
-        self.valid.resize(self.rows.len(), false);
-        self.valid.fill(false);
+        self.valid.resize(self.rows.len(), 0);
+        self.epoch = self.epoch.wrapping_add(1);
+        if self.epoch == 0 {
+            self.valid.fill(0);
+            self.epoch = 1;
+        }
     }
     pub fn sample(&mut self, field: &Field, sites: &[(usize, f64)]) -> [[f64; 3]; 2] {
         let mut result = [[0.; 3]; 2];
         for &(node, weight) in sites {
-            if !self.valid[node] {
+            if self.valid[node] != self.epoch {
                 self.rows[node] = field.gradient(&[(node, 1.)]);
-                self.valid[node] = true;
+                self.valid[node] = self.epoch;
             }
             for (out, value) in result
                 .iter_mut()

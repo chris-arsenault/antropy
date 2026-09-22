@@ -170,40 +170,6 @@ fn motion_prices_actual_velocity_and_scales_funding_consistently() {
 }
 
 #[test]
-fn unfunded_slot_cannot_delay_paid_refit_or_grant_material() {
-    let w = world();
-    let mut a = w.cells[0].clone();
-    a.body[4] = 0.;
-    a.set_fixture_body(a.body);
-    a.energy = 1.;
-    let mut g = w.genomes[&1].clone();
-    g.chromosomes[0].chemistry.transporters[0].x += 1.;
-    g.compile(&w.config, &w.chemistry);
-    let mut b = a.clone();
-    crate::refitting::advance(
-        &mut a,
-        g.compiled.as_ref().unwrap(),
-        &w.config,
-        &w.chemistry,
-        1.,
-    );
-    g.chromosomes[0].chemistry.receptors[1].x += 10.;
-    g.compile(&w.config, &w.chemistry);
-    let target = g.compiled.as_ref().unwrap();
-    let before = value(&b, &w);
-    let stock = b.body;
-    crate::refitting::advance(&mut b, target, &w.config, &w.chemistry, 1.);
-    assert_eq!(a.installed.transporters[0], b.installed.transporters[0]);
-    assert_eq!(a.flows.refitting, b.flows.refitting);
-    assert_eq!(b.body, stock);
-    assert!((value(&b, &w) + b.flows.refitting - before).abs() < 1e-12);
-    let installed = b.installed.clone();
-    b.energy = 0.;
-    crate::refitting::advance(&mut b, target, &w.config, &w.chemistry, 1.);
-    assert_eq!(b.installed, installed);
-}
-
-#[test]
 fn capacity_fractions_and_retired_absolute_allowances_are_validated() {
     for key in [
         "daughterInventory",

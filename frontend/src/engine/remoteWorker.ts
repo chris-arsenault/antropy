@@ -212,12 +212,11 @@ async function refreshQueries() {
 }
 async function refreshInspection(cell: number, currentGeneration: number) {
   const summary = status!.summary;
-  const key = `${summary.ancestryRecords}/${summary.ledger.deaths}/${summary.ledger.transfers}`;
+  const key = `${summary.ancestryRecords}/${summary.ledger.deaths}`;
   const result = await connection.call<Partial<Inspection>>("inspectSelected", {
     cell,
     genealogy: key !== inspectionRevision,
     genome: inspection?.genotype?.id ?? null,
-    machinery: inspection?.cell?.machineryRevision ?? null,
   });
   if (generation !== currentGeneration || selected !== cell) return;
   inspection = { ...inspection, ...result } as Inspection;

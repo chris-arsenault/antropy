@@ -74,14 +74,12 @@ pub fn environment(w: &World) -> Result<(), String> {
             || !h.richness.is_finite()
             || h.richness < 0.
             || !(0. ..=1.).contains(&h.share)
-            || [s.remaining, s.wait, s.rate]
+            || [s.amount, s.wait, s.rate]
                 .iter()
                 .any(|v| !v.is_finite() || *v < 0.)
-            || s.inventory.len() != 256
-            || s.inventory.iter().any(|q| !q.is_finite() || *q < 0.)
-            || s.replenishment.len() != 256
-            || s.replenishment.iter().any(|q| !q.is_finite() || *q < 0.)
-            || (s.replenishment.iter().sum::<f64>() - 1.).abs() > 1e-10
+            || s.mixture.len() != 256
+            || s.mixture.iter().any(|q| !q.is_finite() || *q < 0.)
+            || (s.mixture.iter().sum::<f64>() - 1.).abs() > 1e-10
         {
             return Err("Invalid source state".into());
         }

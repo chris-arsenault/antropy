@@ -5,8 +5,8 @@ This is an audit of live simulation rules, not authorization to change them.
 Existing uncommitted bound-material analysis is independent of this audit.
 
 Follow-up: the [symmetry plan](plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md) implements and measures the
-v21 corrections. This audit retains the original v20 findings and evidence; source links now
-point to corrected live code. Current rules are in the
+v21 corrections. This audit retains the original v20 findings and evidence; remaining source links now
+point to corrected live code; removed refitting code is recoverable from the audited commit. Current rules are in the
 [composed runtime](design/chemistry/composed-runtime.md).
 
 ## Conclusion
@@ -111,7 +111,7 @@ use an embodied or explicitly isotropic tie rule when correcting motion.
 
 - Recognition uses `K(a,p) = max(0, 1 - ||p-a||²/R²)²`.
 - Enzyme reach attenuates turnover by `1 / (1 + ||d||²/9)`.
-- [refitting.rs](../engine/src/refitting.rs) prices a target move by `|dx| + |dy|`,
+- `engine/src/refitting.rs` (removed in v37) prices a target move by `|dx| + |dy|`,
   and an enzyme edit by the sum of four absolute coordinate changes. The largest funded
   slot distance also limits progress of the whole refit.
 

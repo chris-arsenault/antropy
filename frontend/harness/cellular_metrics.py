@@ -162,7 +162,7 @@ def checkpoint(data):
     half = np.searchsorted(cumulative, mass.sum() / 2) + 1 if mass.sum() else 0
     size = [data["config"]["width"], data["config"]["height"]]
     source_inventory = np.sum([s["inventory"] for s in geo["sources"]], axis=0)
-    renewal = np.mean([s["replenishment"] for s in geo["sources"]], axis=0)
+    renewal = np.mean([s["composition"] for s in geo["sources"]], axis=0)
     free_values = np.array([c["organization"]["freeChemistry"]["amounts"] for c in cells]) if cells else np.zeros((0, 256))
     free = free_values.sum(axis=0)
     bound = np.sum([c["organization"]["boundChemistry"]["amounts"] for c in cells], axis=0) if cells else np.zeros(256)

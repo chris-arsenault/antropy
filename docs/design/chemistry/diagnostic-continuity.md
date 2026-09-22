@@ -42,8 +42,8 @@ complete parentage. Founder roots are distinct even when their genotypes are ide
 
 The expanded panel remains behind bounded reduced queries. Recent and longitudinal samples use
 retained indices plus appends. Full genotype/controller arrays never cross for population statistics.
-Selected inspection distinguishes installed machinery from its inherited target while paid refitting
-is pending. See [installed machinery](installed-machinery.md).
+Selected inspection presents the cell's birth-fixed chemical configuration alongside actual
+funded stock and activity. See [birth-fixed capabilities](installed-machinery.md).
 
 These are descriptive observations. An ancestor comparison still needs controlled body funding,
 private state and exposure; demographic recovery or trait movement alone does not establish adaptation.

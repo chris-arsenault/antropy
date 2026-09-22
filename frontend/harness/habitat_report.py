@@ -32,7 +32,7 @@ def chemical_totals(sample, channel):
 
 def recorded_expenses(flows):
     """Repair includes material-potential dissipation, so this is not a work-bank bill."""
-    return sum(flows[k] for k in ["maintenance", "motors", "learning", "transport", "repair", "refitting"])
+    return sum(flows[k] for k in ["maintenance", "motors", "learning", "transport", "repair"])
 
 
 def regional(sample, traits):
@@ -50,7 +50,7 @@ def regional(sample, traits):
             "meanLocalExposure": sum(c["weathering"][1] for c in members) / n,
             "meanShelter": sum(c["weathering"][2] for c in members) / n,
             "meanTargetMembrane": [sum(traits[c["genome"]]["chemistry"]["membrane"][axis] for c in members) / n for axis in ["x", "y"]],
-            "meanInstalledMembrane": [sum(c["installed"]["membrane"][axis] for c in members) / n for axis in ["x", "y"]],
+            "meanBirthMembrane": [sum(c["chemistry"]["membrane"][axis] for c in members) / n for axis in ["x", "y"]],
         })
     return result
 

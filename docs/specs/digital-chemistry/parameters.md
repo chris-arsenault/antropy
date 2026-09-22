@@ -168,7 +168,7 @@ All keys in this table are owned by `engine/src/config.rs`; consumer paths are r
 | `mesh` | Finite-volume width L; field/numeric/transport | Numerical choice, step 7; does not determine interaction's physical range. |
 | `dt`, `physiology_interval` | Movement and chemistry scheduling intervals t; world | Numerical choices, step 7; no stale energetic fields between events. |
 | `founders` | Initial count; world | Operating fixture: 48, at least two colonies. Retained explicitly, M5/M7. |
-| `max_population`, `max_ancestry_records` | Hard stop limits; world/lifecycle | Operating limits, not death laws; retain explicit failure/export behavior M6/M7. |
+| `max_ancestry_records` | Ancestry record budget; world/lifecycle | Retained operating limit. V40 removes `max_population` and its reproduction stop; population is not separately capped. |
 
 ### Hardcoded coefficients and source review
 

@@ -5,6 +5,19 @@ Current behavior belongs to the [design work order](../design/README.md),
 [decision/evidence record](../design/decisions-and-evidence.md). Plans below preserve execution,
 registrations and failures. Their old future-tense instructions are historical, not work to replay.
 
+## Simulation model simplification
+
+[Model simplification](MODEL-SIMPLIFICATION-PLAN.md), Sulion root
+`10b840c9-7fdf-481d-9bc1-f207086a7518`, tracks birth-fixed chemical capabilities,
+simpler reservoir behavior, and a review of binding/retention rules. M0's child now removes
+refitting and living-cell capability transfer; all three phases are complete and `make ci` passes.
+M1 single-composition reservoirs and M2 one-range binding with ordinary washout are complete
+with passing `make ci`; the root and all three children are closed. M2 removes the broad
+opposing field, gain control and cohesion loss discount. Its bounded mechanism checks and
+native timing comparison do not establish long-run ecology or human motion acceptance.
+The objective is to remove unnecessary
+modeled states and rules. The structural performance plan below remains separate and unfinished.
+
 ## Browser and server execution
 
 [Browser and headless server execution](EXECUTION-MODES-PLAN.md), Sulion root
@@ -18,6 +31,17 @@ The intended public experience is immediate observation of one continuing server
 multiple spectators, through the platform's public ingress and VPN upstream. Shared publication
 avoids repeating common projection work; physical controls remain owner-only.
 It does not supersede the ecological design.
+
+## Current structural performance work
+
+[SCALING-PLAN.md](../../SCALING-PLAN.md) owns the structural execution replacement under
+`e3517c4b-b3df-4786-bcf4-10a488a294d1`. Installed threading does not complete this work.
+Its former dense-layout-first instructions are preserved only in
+[the historical snapshot](../sources/history/2026-09-21-scaling-before-structural-correction.md).
+The [mature performance investigation](MATURE-PERFORMANCE-PLAN.md) is ended; its detailed
+future-tense queues must not be resumed. Read specific negative findings when a design decision
+needs them. The current plan requires explicit structural design and production replacement
+before further acceleration or operating-envelope acceptance.
 
 ## Latest completed cellular execution
 
@@ -58,7 +82,8 @@ into passes. Pre-cleanup [agent instructions](../sources/history/2026-09-20-agen
 
 The [multicore design](../../SCALING-PLAN.md) remains under plan
 `e3517c4b-b3df-4786-bcf4-10a488a294d1`. P0–P2 were implemented and pushed September 21;
-P3 representative operating-envelope acceptance and P4 terrain remain open. The execution-modes
+structural replacement is explicitly pending before P3 representative operating-envelope
+acceptance. P4 terrain remains open. The execution-modes
 proposal supplies the native host and remote ownership design; shared performance targets remain
 in the scaling record.
 

@@ -45,6 +45,21 @@ Numerical formulas and their safeguards are implementer-owned choices, not immut
 merely because a previous plan selected them. See the
 [computational foundation](design/chemistry/computational-foundation.md).
 
+<a id="principles-structural-performance"></a>
+
+### Structural performance work
+
+Design the amount and organization of computation before accelerating an inherited implementation.
+The existing storage, pair enumeration, global passes and clocks have no authority merely because
+they are installed. Select ownership, shared interaction operators, finite computational reach,
+participation resolution and invalidation together. Preserve mathematical relationships, funded
+opportunities and explicit accounts while replacing the necessary connected implementation.
+
+Threading, hot-loop tuning and small patches cannot substitute for a requested structural change.
+The [current scaling work order](../SCALING-PLAN.md) owns its implementation. Old performance plans
+are evidence of prior decisions and failures, not competing instructions. Sparse storage is one
+candidate; it does not preselect which interaction laws or execution structure should survive.
+
 <a id="principles-author-pressures-and-local-carriers"></a>
 
 ## Author pressures and local carriers

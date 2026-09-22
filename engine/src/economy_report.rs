@@ -49,32 +49,23 @@ fn investments(w: &World) -> Vec<Value> {
 }
 fn source_budget(w: &World) -> Value {
     let c = &w.config;
-    let mean_duration_factor = 0.5 + 4. / 3.;
-    let mean_sqrt_duration = 0.5 * 4.5_f64.sqrt() + 0.125 * (8_f64.sqrt()).asinh();
-    let lifetime = c.source_lifetime * mean_duration_factor;
-    let mean_rate = |richness: f64| {
-        c.source_rate * richness * c.source_lifetime * mean_sqrt_duration
-            / (lifetime + c.source_gap)
-    };
-    let release: f64 = w
-        .sources
-        .iter()
-        .map(|s| mean_rate(s.habitat.richness))
-        .sum();
+    let lifetime = c.source_lifetime;
+    let mean_rate = |rate: f64| rate * lifetime / (lifetime + c.source_gap);
+    let release: f64 = w.sources.iter().map(|s| mean_rate(s.rate)).sum();
     let sites: Vec<_> = w
         .sources
         .iter()
         .map(|s| {
             json!({"habitat":s.habitat,
-        "initialReleaseRate":s.rate,"meanReleaseRate":mean_rate(s.habitat.richness),
-        "remainingBatchMaterial":s.inventory.iter().sum::<f64>()})
+        "initialReleaseRate":s.rate,"meanReleaseRate":mean_rate(s.rate),
+        "remainingBatchMaterial":s.amount})
         })
         .collect();
     let mut mean_local = [0.; SPECIES];
     if c.washout > 0. {
         for source in &w.sources {
-            let q = mean_rate(source.habitat.richness) / (c.washout * c.width * c.height);
-            for (mean, share) in mean_local.iter_mut().zip(&source.replenishment) {
+            let q = mean_rate(source.rate) / (c.washout * c.width * c.height);
+            for (mean, share) in mean_local.iter_mut().zip(&source.mixture) {
                 *mean += q * share;
             }
         }
@@ -138,12 +129,12 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
             "sourceLimits terminalConversionWorkCeiling is a zero-medium reference for founder 1, not an upper bound on environmentally driven work",
             "Budget work uses uniform illumination and drive from the stated free-field mixture only; local illumination, reservoir and embodied projections are omitted",
-            "No shared depletion, export, repair, refitting or movement through gradients",
+            "No shared depletion, export, repair or movement through gradients",
             "grossWork uses the best installed conversion per imported species without throughput limits; processingWork applies installed enzyme throughput to the assumed internal mixture",
             "constructionCeiling uses processingSurplus; extra uphill assembly cost and omitted expenses can reduce it further",
             "Closure holds internal inventory fixed and removes a proportional mixture as construction",
             "Renewal average excludes initial priming transient and timestep overshoot",
-            "Uniform budgets freeze the current replenishment distribution and assume bare washout; evolving supply, cohesion and weathering change actual delivery and retention",
+            "Uniform budgets freeze the current replenishment distribution; evolving supply, material redistribution and weathering change actual local delivery",
             "Positive calculated surplus is conditional; actual delivery, controller expression and product occupancy must be measured"]}),
     )
 }

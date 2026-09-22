@@ -76,7 +76,6 @@ export interface Flows {
   transport: number;
   reactionHeat: number;
   construction: number;
-  refitting: number;
   repair: number;
   repaired: number;
   exposure: number;
@@ -126,7 +125,6 @@ export interface Summary {
     mutations: number;
     learnedBirths: number;
     recombinations: number;
-    transfers: number;
     blockedDivisions: number;
     organismTime: number;
     flows: Flows;
@@ -166,9 +164,6 @@ export interface Genotype {
   }[];
 }
 export interface CellState {
-  machineryGenome: number;
-  machineryRevision: number;
-  installed: Machinery;
   id: number;
   parent: number | null;
   lineage: number;
@@ -202,7 +197,6 @@ export interface CellState {
 }
 export interface Inspection {
   fieldInterface: number | null;
-  installedChemistry: Machinery | null;
   genealogy: {
     generation: number;
     family: number;

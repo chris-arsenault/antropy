@@ -24,6 +24,7 @@ pub struct EnzymeOperator {
 }
 #[derive(Clone, Debug)]
 pub struct Operators {
+    configuration: Arc<Machinery>,
     pub receptors: [Arc<Vec<Affinity>>; 4],
     pub transporters: [Arc<Vec<Affinity>>; 4],
     pub enzymes: [Arc<EnzymeOperator>; crate::organism::MAX_ENZYMES],
@@ -103,43 +104,8 @@ fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> Enzy
     }
 }
 impl Operators {
-    /// Completed slots borrow target operators even while other slots remain partially installed.
-    pub fn refit(
-        &mut self,
-        before: &Machinery,
-        after: &Machinery,
-        target: (&Machinery, &Self),
-        c: &Config,
-        chemistry: &Chemistry,
-    ) {
-        let (target, compiled) = target;
-        let mut pending = before.clone();
-        for i in 0..4 {
-            if after.receptors[i] == target.receptors[i]
-                && before.receptors[i] != after.receptors[i]
-            {
-                self.receptors[i] = compiled.receptors[i].clone();
-                pending.receptors[i] = after.receptors[i];
-            }
-            if after.transporters[i] == target.transporters[i]
-                && before.transporters[i] != after.transporters[i]
-            {
-                self.transporters[i] = compiled.transporters[i].clone();
-                pending.transporters[i] = after.transporters[i];
-            }
-        }
-        for i in 0..crate::organism::MAX_ENZYMES {
-            if after.enzymes[i] == target.enzymes[i] && before.enzymes[i] != after.enzymes[i] {
-                self.enzymes[i] = compiled.enzymes[i].clone();
-                pending.enzymes[i] = after.enzymes[i];
-            }
-        }
-        if after.membrane == target.membrane && before.membrane != after.membrane {
-            self.membrane = compiled.membrane.clone();
-            self.profile = compiled.profile;
-            pending.membrane = after.membrane;
-        }
-        self.update(&pending, after, c, chemistry);
+    pub fn chemistry(&self) -> &Machinery {
+        &self.configuration
     }
     pub fn compile(m: &Machinery, c: &Config, chemistry: &Chemistry) -> Self {
         let membrane = Arc::new(chemistry::compile_affinity(
@@ -157,6 +123,7 @@ impl Operators {
                 / total
         });
         Self {
+            configuration: Arc::new(m.clone()),
             receptors: std::array::from_fn(|i| {
                 Arc::new(chemistry::compile_affinity(
                     m.receptors[i].point(),
@@ -180,7 +147,7 @@ impl Operators {
             profile,
         }
     }
-    /// Refit preserves every unaffected allocation, including across inherited target changes.
+    /// Birth compilation shares every unchanged operator with the parent genotype.
     pub fn update(
         &mut self,
         before: &Machinery,
@@ -188,6 +155,7 @@ impl Operators {
         c: &Config,
         chemistry: &Chemistry,
     ) {
+        self.configuration = Arc::new(after.clone());
         for i in 0..4 {
             if before.receptors[i] != after.receptors[i] {
                 self.receptors[i] = Arc::new(chemistry::compile_affinity(

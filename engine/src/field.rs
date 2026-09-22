@@ -11,10 +11,10 @@ pub struct Field {
     pub nx: usize,
     pub ny: usize,
     pub spacing: f64,
-    pub amounts: Vec<f32>,
+    pub amounts: crate::spatial_material::Material,
     pub impedance: Vec<f64>,
     pub stress: Vec<f64>,
-    pub signal: Vec<[f64; 2]>,
+    pub signal: crate::spatial_signal::Signal,
     totals: [f64; 2],
     pub drift: f64,
     #[serde(skip)]
@@ -22,23 +22,19 @@ pub struct Field {
     #[serde(skip)]
     pub attraction_length: f64,
     #[serde(skip)]
-    pub attraction_strength: f64,
-    #[serde(skip)]
     pub(crate) attraction: crate::attraction::Attraction,
-    #[serde(skip)]
-    pub(crate) broad_attraction: crate::attraction::Attraction,
     #[serde(skip)]
     pub illumination: crate::illumination::Illumination,
     #[serde(skip)]
-    next: Vec<f32>,
+    next: crate::spatial_material::Material,
     #[serde(skip)]
     pub(crate) neighbors: Vec<[usize; 4]>,
     #[serde(skip)]
-    pub body_signal: Vec<[f64; 2]>,
+    pub body_signal: crate::spatial_signal::Signal,
     #[serde(skip)]
     pub body_load: Vec<f64>,
     #[serde(skip)]
-    pub source_signal: Vec<[f64; 2]>,
+    pub source_signal: crate::spatial_signal::Signal,
     #[serde(skip)]
     pub source_load: Vec<f64>,
     #[serde(skip)]
@@ -49,6 +45,8 @@ pub struct Field {
     activity: crate::field_activity::Activity,
     #[serde(skip)]
     last_groups: usize,
+    #[serde(skip)]
+    pub(crate) mechanical_frozen: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -75,39 +73,36 @@ impl Field {
             nx,
             ny,
             spacing,
-            amounts: vec![0.; nx * ny * SPECIES],
+            amounts: crate::spatial_material::Material::new(nx * ny),
             impedance: vec![0.; nx * ny],
             stress: vec![0.; nx * ny],
-            signal: vec![[0.; 2]; nx * ny],
+            signal: vec![[0.; 2]; nx * ny].into(),
             totals: [0.; 2],
             drift: 0.25,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
             attraction_length: 0.,
-            attraction_strength: 4.,
             attraction: Default::default(),
-            broad_attraction: Default::default(),
             illumination: Default::default(),
-            next: vec![],
+            next: Default::default(),
             neighbors: vec![],
-            body_signal: vec![],
+            body_signal: Default::default(),
             body_load: vec![],
-            source_signal: vec![],
+            source_signal: Default::default(),
             source_load: vec![],
             source_nodes: vec![],
             source_listed: vec![],
             activity: Default::default(),
             last_groups: 0,
+            mechanical_frozen: false,
         };
         field.rebuild();
         field
     }
     pub fn rebuild(&mut self) {
         self.attraction = Default::default();
-        self.broad_attraction = Default::default();
         self.illumination = Default::default();
         let n = self.nx * self.ny;
-        self.next.resize(n * SPECIES, 0.);
-        self.next.fill(0.);
+        self.next = crate::spatial_material::Material::new(n);
         self.activity.rebuild(&self.amounts);
         // Retain pending cleanup of rounding in fully withdrawn rows across restore.
         for node in 0..n {
@@ -116,9 +111,9 @@ impl Field {
                 self.activity.retain(node);
             }
         }
-        self.body_signal = vec![[0.; 2]; n];
+        self.body_signal = vec![[0.; 2]; n].into();
         self.body_load = vec![0.; n];
-        self.source_signal = vec![[0.; 2]; n];
+        self.source_signal = vec![[0.; 2]; n].into();
         self.source_load = vec![0.; n];
         self.source_nodes.clear();
         self.source_listed = vec![false; n];
@@ -234,11 +229,21 @@ impl Field {
     pub fn has_active_material(&self) -> bool {
         !self.activity.nodes.is_empty()
     }
+    pub fn structural_counts(&self) -> serde_json::Value {
+        serde_json::json!({"materialRows":self.amounts.nodes().len(),
+            "materialAllocatedBytes":self.amounts.allocated_bytes()+self.next.allocated_bytes(),
+            "geographicNodes":self.nx*self.ny,
+            "attractionVisited":self.attraction.visited})
+    }
     pub fn refresh(&mut self, chemistry: &Chemistry) {
+        self.amounts.reclaim();
         self.activity.rebuild(&self.amounts);
         self.totals = [0.; 2];
+        self.impedance.fill(0.);
+        self.stress.fill(0.);
+        self.signal.fill([0.; 2]);
         let rows = crate::chemical_projection::Rows::new(chemistry);
-        for n in 0..self.nx * self.ny {
+        for &n in self.amounts.nodes() {
             let values = crate::chemical_projection::project(
                 &self.amounts[n * SPECIES..(n + 1) * SPECIES],
                 &rows,

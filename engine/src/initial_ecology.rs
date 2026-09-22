@@ -83,11 +83,11 @@ pub fn probe(role: usize, driven: bool) -> Result<World, String> {
         source.habitat.x = 12.;
         source.habitat.y = 12.;
         source.habitat.radius = 3.;
-        source.inventory.fill(0.);
-        source.inventory[0] = 1000.;
-        source.inventory[136] = 1000.;
+        source.mixture.fill(0.);
+        source.mixture[0] = 0.5;
+        source.mixture[136] = 0.5;
+        source.amount = 2000.;
         source.rate = 0.;
-        source.remaining = 1e6;
         source.rebuild(&w.config, &w.field);
     }
     w.field.drift = 0.;

@@ -122,7 +122,7 @@ impl Machinery {
                     || !(-std::f64::consts::PI..std::f64::consts::PI).contains(&e.angle)
             })
         {
-            return Err("Invalid installed machinery".into());
+            return Err("Invalid chemical capabilities".into());
         }
         Ok(())
     }

@@ -20,7 +20,7 @@ Inputs 39–42 are brightness, change, front-minus-back and left-minus-right; in
 built photoreceptor stock relative to the inherited target. Existing input indices stay fixed.
 The current controller has 56 inputs, 24 recurrent units and 38 outputs. At introduction, new founder weights started at
 zero; mutation can connect the new cues to behavior. Sensing does not establish evolved use.
-Photoreception introduced checkpoint v31; current physical semantics require v35.
+Photoreception introduced checkpoint v31; current physical semantics require v36.
 
 ## Verification registration
 
@@ -95,7 +95,7 @@ over longer distances. Tonic and temporal inputs remain available.
 Start a new world with the rebuilt local application. Selecting a cell shows photoreceptor
 readings directly, with all five inputs under **Local inputs and private recurrent state**.
 **Funded body and inherited genes** shows built stock separately from its newborn target.
-The population's developed-body table includes photoreceptor investment. This feature introduced physical v31. Current v35 accepts its own body/controller and habitat
+The population's developed-body table includes photoreceptor investment. This feature introduced physical v31. Current v36 accepts its own body/controller and habitat
 state; older physical versions are rejected rather than migrated or reseeded.
 
 From `frontend`, rerun the registered probes with a new output directory:

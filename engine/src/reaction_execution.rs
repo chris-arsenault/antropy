@@ -92,7 +92,7 @@ impl Executor {
                 * cell.body[crate::organism::enzyme_stock(slot)]
                 * cell.action.activity[slot]
                 * (1. - cell.damage);
-            if capacity == 0. || !cell.installed.programs[slot] {
+            if capacity == 0. || !cell.chemistry().programs[slot] {
                 continue;
             }
             let occupied: f64 = enzyme

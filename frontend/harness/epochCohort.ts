@@ -39,7 +39,6 @@ export function cohortWorld(
     mutationRate: 0,
     physicalMutationRate: 0,
     transmission: "clonal",
-    transferRate: 0,
     learningRetention: 0,
     sourceEpochs: { phaseTicks: 50000, mixtures: [[share, 1 - share]] },
     sourceZones: null,

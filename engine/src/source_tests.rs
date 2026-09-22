@@ -21,17 +21,16 @@ fn config() -> Config {
 }
 
 #[test]
-fn replenishment_keeps_local_history_through_empty_interval_and_restore() {
+fn composition_keeps_local_history_through_empty_interval_and_restore() {
     let mut c = config();
     c.founders = 0;
     c.source_count = 1;
     c.source_drift = 0.;
     c.source_priming = 0.;
     let mut w = World::new(27, c).unwrap();
-    w.sources[0].inventory.fill(0.);
-    w.sources[0].remaining = 0.;
+    w.sources[0].amount = 0.;
     w.sources[0].wait = 10.;
-    let seed = w.sources[0].replenishment.clone();
+    let seed = w.sources[0].mixture.clone();
     for n in 0..w.field.nx * w.field.ny {
         w.field.add(n, 15, 4., &w.chemistry);
     }
@@ -43,24 +42,24 @@ fn replenishment_keeps_local_history_through_empty_interval_and_restore() {
     assert_eq!(held, w.held()); // Boundary composition adds no material or work.
     assert_eq!(w.ledger.supplied, 0.);
     assert!(w.field.source_load.iter().all(|q| *q == 0.));
-    assert_ne!(seed, w.sources[0].replenishment);
+    assert_ne!(seed, w.sources[0].mixture);
     w.sources[0].wait = 0.;
     w.config.source_processing = 0.;
-    let profile = w.sources[0].replenishment.clone();
+    let profile = w.sources[0].mixture.clone();
     let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
     source_medium::advance(&mut w);
     source_medium::advance(&mut restored);
-    assert_eq!(profile, w.sources[0].replenishment);
+    assert_eq!(profile, w.sources[0].mixture);
     assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
     let source = &w.sources[0];
-    let total: f64 = source.inventory.iter().sum();
-    for (q, share) in source.inventory.iter().zip(profile) {
+    let total = source.amount;
+    for (q, share) in source.inventory().zip(profile) {
         assert!((q / total - share).abs() < 1e-12);
     }
     let after = w.held();
     assert!((after.0 - held.0 - w.ledger.supplied).abs() < 1e-5);
     assert!((after.1 - held.1 - w.ledger.supplied_energy).abs() < 1e-5);
-    w.sources[0].replenishment[0] = f64::NAN;
+    w.sources[0].mixture[0] = f64::NAN;
     assert!(World::restore(&w.snapshot().unwrap()).is_err());
 }
 
@@ -76,7 +75,6 @@ fn source_caches_match_owned_material_and_clear_retired_geography() {
         for (a, b) in w.sources.iter().zip(&reference.sources) {
             assert_eq!(a.material.total, b.material.total);
             assert_eq!(a.material.moments, b.material.moments);
-            assert_eq!(a.material.mask, b.material.mask);
         }
     }
     assert!(!w.field.source_nodes.is_empty());
@@ -88,7 +86,7 @@ fn source_caches_match_owned_material_and_clear_retired_geography() {
 }
 
 #[test]
-fn stationary_unreactive_inventory_keeps_its_projection_until_renewal() {
+fn zero_release_retains_inventory_without_lifetime_expiry() {
     let mut c = config();
     c.source_drift = 0.;
     c.source_processing = 0.;
@@ -98,6 +96,7 @@ fn stationary_unreactive_inventory_keeps_its_projection_until_renewal() {
     for source in &mut w.sources {
         source.rate = 0.;
     }
+    let amounts: Vec<_> = w.sources.iter().map(|s| s.amount).collect();
     for _ in 0..40 {
         let mut reference = crate::boundary_tests::restored_state(&w);
         let resumed_tick = w.tick + 1;
@@ -109,7 +108,11 @@ fn stationary_unreactive_inventory_keeps_its_projection_until_renewal() {
         crate::boundary_tests::usable_continuation(&w, resumed_tick);
         crate::boundary_tests::usable_continuation(&reference, resumed_tick);
     }
-    assert!(w.ledger.supplied > 0.);
+    assert_eq!(w.ledger.supplied, 0.);
+    assert_eq!(
+        amounts,
+        w.sources.iter().map(|s| s.amount).collect::<Vec<_>>()
+    );
 }
 
 #[test]
@@ -130,9 +133,7 @@ fn reservoirs_project_bounded_interfaces_without_self_propulsion_or_material_gra
         assert_eq!(before, w.held());
         assert!(w.field.source_load.iter().any(|v| *v > 0.));
     }
-    for q in &mut w.sources[0].inventory {
-        *q *= 1e12;
-    }
+    w.sources[0].amount *= 1e12;
     source_medium::project(&mut w);
     assert!(
         w.field
@@ -206,16 +207,16 @@ fn stored_inventory_changes_without_release_and_source_responses_are_frozen() {
     }
     let mut reversed = World::restore(&w.snapshot().unwrap()).unwrap();
     reversed.sources.reverse();
-    let before = w.sources[0].inventory.clone();
+    let before = w.sources[0].mixture.clone();
     source_medium::advance(&mut w);
     source_medium::advance(&mut reversed);
     assert_eq!(w.ledger.source_released, 0.);
     assert!(w.ledger.source_converted > 0.);
-    assert_ne!(before, w.sources[0].inventory);
+    assert_ne!(before, w.sources[0].mixture);
     for (a, b) in w.sources.iter().zip(reversed.sources.iter().rev()) {
         assert!((a.habitat.x - b.habitat.x).abs() < 1e-12);
         assert!((a.habitat.y - b.habitat.y).abs() < 1e-12);
-        for (x, y) in a.inventory.iter().zip(&b.inventory) {
+        for (x, y) in a.inventory().zip(b.inventory()) {
             assert!((x - y).abs() < 1e-12);
         }
     }

@@ -40,23 +40,6 @@ pub fn remove(g: &mut Genome, slot: usize) {
         g.weights[OUTPUT_BIAS + output] = 0.;
     }
 }
-pub fn copy_from(recipient: &mut Genome, donor: &Genome, slot: usize) {
-    for h in 0..HIDDEN {
-        recipient.weights[h * INPUTS + stock_input(slot)] =
-            donor.weights[h * INPUTS + stock_input(slot)];
-    }
-    for output in [
-        ACTIVITY + slot,
-        ALLOCATION + crate::organism::enzyme_stock(slot),
-    ] {
-        recipient.weights[OUTPUT + output * HIDDEN..OUTPUT + (output + 1) * HIDDEN]
-            .copy_from_slice(
-                &donor.weights[OUTPUT + output * HIDDEN..OUTPUT + (output + 1) * HIDDEN],
-            );
-        recipient.weights[OUTPUT_BIAS + output] = donor.weights[OUTPUT_BIAS + output];
-    }
-}
-
 #[cfg(test)]
 pub(crate) fn permute(g: &Genome, order: [usize; crate::organism::MAX_ENZYMES]) -> Genome {
     let mut result = g.clone();

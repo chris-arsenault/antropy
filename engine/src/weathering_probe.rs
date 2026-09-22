@@ -62,7 +62,7 @@ pub fn run(w: &World) -> Value {
 
 fn totals(field: &Field) -> Vec<f64> {
     let mut species = vec![0.; 256];
-    for row in field.amounts.as_chunks::<256>().0 {
+    for (_, row) in field.amounts.rows() {
         for (total, q) in species.iter_mut().zip(row) {
             *total += *q as f64;
         }

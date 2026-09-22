@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 pub fn overview(w: &World) -> Value {
     let mut amounts = [0_f64; SPECIES];
     let mut peaks = [0_f32; SPECIES];
-    for node in w.field.amounts.as_chunks::<SPECIES>().0 {
+    for (_, node) in w.field.amounts.rows() {
         for (id, q) in node.iter().enumerate() {
             amounts[id] += *q as f64;
             peaks[id] = peaks[id].max(*q);

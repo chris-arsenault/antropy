@@ -64,9 +64,8 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
     });
     let s = a.config.source_species[0];
     a.field.deposit(6., 6., s, 0.001, &a.chemistry);
-    let installed = a.cells[0].installed.clone();
+    let installed = a.cells[0].chemistry().clone();
     for cell in &mut a.cells {
-        cell.installed = installed.clone();
         cell.operators = Some(crate::chemical_operators::Operators::compile(
             &installed,
             &a.config,
@@ -110,44 +109,6 @@ fn shared_uptake_is_funded_conservative_and_order_independent() {
     let heat = a.cells.iter().map(|c| c.flows.transport).sum::<f64>();
     assert!((before.0 - after.0 - a.ledger.numerical_material).abs() < 1e-8);
     assert!((before.1 - after.1 - a.ledger.numerical_energy - heat).abs() < 1e-8);
-}
-
-#[test]
-fn paid_refitting_moves_actual_coordinates_without_replacing_other_slots() {
-    let mut w = fixture(Config::default());
-    let mut g = w.genomes[&1].clone();
-    g.id = 2;
-    g.parent = Some(1);
-    g.chromosomes[0].chemistry.transporters[0].x += 0.12;
-    g.compile(&w.config, &w.chemistry);
-    let target = g.compiled.as_ref().unwrap();
-    let mut cell = w.cells.remove(0);
-    cell.genome = 2;
-    let before = cell.installed.clone();
-    let retained = cell.operators.as_ref().unwrap().enzymes[0].clone();
-    cell.energy = 0.;
-    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 0.2);
-    assert_eq!(cell.installed, before);
-    cell.energy = 1.;
-    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 0.2);
-    assert!(cell.installed.transporters[0].x > before.transporters[0].x);
-    assert!(cell.installed.transporters[0].x < target.chromosome.chemistry.transporters[0].x);
-    assert!(std::sync::Arc::ptr_eq(
-        &retained,
-        &cell.operators.as_ref().unwrap().enzymes[0]
-    ));
-    assert!((cell.energy + cell.flows.refitting - 1.).abs() < 1e-12);
-    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 0.8);
-    assert_eq!(cell.installed, target.chromosome.chemistry);
-    assert!(std::sync::Arc::ptr_eq(
-        &target.operators.transporters[0],
-        &cell.operators.as_ref().unwrap().transporters[0]
-    ));
-    assert!(std::sync::Arc::ptr_eq(
-        &retained,
-        &cell.operators.as_ref().unwrap().enzymes[0]
-    ));
-    assert!((cell.energy + cell.flows.refitting - 1.).abs() < 1e-12);
 }
 
 #[test]
@@ -226,7 +187,7 @@ fn newborn_receptors_do_not_get_a_false_temporal_spike() {
     field.deposit(6., 6., c.source_species[0], 10., &chemistry);
     let mut cell = Cell::new(1, 1, compiled, &c, &chemistry, [6., 6.], 0.);
     sensing::initialize(&mut cell, compiled, &c, &field);
-    sensing::observe(&mut cell, compiled, compiled, &c, &field);
+    sensing::observe(&mut cell, compiled, &c, &field);
     for i in [1, 5, 9, 13] {
         assert_eq!(cell.inputs[i], 0.);
     }
@@ -250,7 +211,6 @@ fn membrane_mutation_is_local_and_not_universal_immunity() {
         a.chemistry.membrane = p;
     }
     g.compile(&w.config, &w.chemistry);
-    cell.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
     cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
     let tolerant = sensing::stress_load(
         &cell,
@@ -266,7 +226,6 @@ fn membrane_mutation_is_local_and_not_universal_immunity() {
         };
     }
     g.compile(&w.config, &w.chemistry);
-    cell.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
     cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
     let sensitive = sensing::stress_load(
         &cell,
@@ -330,50 +289,6 @@ fn incremental_field_reductions_survive_restore_and_reject_corruption() {
     );
     w.field.impedance[0] = 100.;
     assert!(World::restore(&w.snapshot().unwrap()).is_err());
-}
-
-#[test]
-fn optional_contact_transfer_retains_installed_identity_without_material_grants() {
-    let mut w = fixture(Config {
-        transfer_rate: 1e10,
-        ..Config::default()
-    });
-    let mut donor = w.genomes[&1].clone();
-    donor.id = 2;
-    for a in &mut donor.chromosomes {
-        for r in &mut a.chemistry.receptors {
-            r.x = 7.;
-            r.y = 7.;
-        }
-        for r in &mut a.chemistry.transporters {
-            r.x = 7.;
-            r.y = 7.;
-        }
-        for r in &mut a.chemistry.enzymes {
-            r.x = 7.;
-            r.y = 7.;
-        }
-    }
-    donor.compile(&w.config, &w.chemistry);
-    w.genomes.insert(2, donor);
-    w.next_genome = 3;
-    w.cells[1].genome = 2;
-    w.ancestry[1].genome = 2;
-    for (i, c) in w.cells.iter_mut().enumerate() {
-        c.x = 6. + i as f64 * 0.5;
-        c.y = 6.;
-    }
-    let before = w.held();
-    let original = w.genomes[&1].chromosomes.clone();
-    crate::lifecycle::transfer(&mut w);
-    assert!(w.ledger.transfers > 0);
-    assert_eq!(w.genomes[&1].chromosomes, original);
-    assert!(w.cells.iter().any(|c| c.machinery_genome != c.genome));
-    assert!(w.cells.iter().all(|c| c.body[7] > 0.));
-    let after = w.held();
-    assert!((before.0 - after.0 - w.ledger.numerical_material).abs() < 1e-9);
-    assert!((before.1 - after.1 - w.ledger.numerical_energy).abs() < 1e-9);
-    w.validate().unwrap();
 }
 
 #[test]

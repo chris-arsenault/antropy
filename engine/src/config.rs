@@ -26,7 +26,6 @@ pub struct Config {
     pub dt: f64,
     pub physiology_interval: f64,
     pub founders: usize,
-    pub max_population: usize,
     pub max_ancestry_records: usize,
     pub source_count: usize,
     pub landscape_regions: usize,
@@ -34,6 +33,7 @@ pub struct Config {
     pub source_priming: f64,
     pub source_rate: f64,
     pub source_radius: f64,
+    /// Nominal refill amount divided by release rate; not an independent expiry clock.
     pub source_lifetime: f64,
     pub source_gap: f64,
     pub source_drift: f64,
@@ -85,7 +85,6 @@ pub struct Config {
     pub illumination_modulation_period: f64,
     pub pressure_strength: f64,
     pub attraction_length: f64,
-    pub attraction_strength: f64,
     pub growth_rate: f64,
     pub construction_energy: f64,
     pub protected_inventory_fraction: f64,
@@ -95,7 +94,6 @@ pub struct Config {
     pub viscosity: f64,
     pub motor_power_density: f64,
     pub motor_efficiency: f64,
-    pub transfer_rate: f64,
     pub mutation_rate: f64,
     pub mutation_scale: f64,
     pub physical_mutation_rate: f64,
@@ -114,16 +112,15 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             chemistry_seed: 101,
-            width: 320.,
-            height: 240.,
+            width: 720.,
+            height: 540.,
             mesh: 2.,
             dt: 0.2,
             physiology_interval: 0.8,
             founders: 48,
-            max_population: 10000,
             max_ancestry_records: 2000000,
-            source_count: 48,
-            landscape_regions: 7,
+            source_count: 240,
+            landscape_regions: 35,
             landscape_spread: 18.,
             source_priming: 0.1,
             source_rate: 0.2,
@@ -179,7 +176,6 @@ impl Default for Config {
             illumination_modulation_period: 62000.,
             pressure_strength: crate::medium_response::DEFAULT_PRESSURE_STRENGTH,
             attraction_length: 6.,
-            attraction_strength: 4.,
             growth_rate: 0.06,
             construction_energy: 0.5,
             protected_inventory_fraction: 0.125,
@@ -189,7 +185,6 @@ impl Default for Config {
             viscosity: 0.004,
             motor_power_density: 0.2,
             motor_efficiency: 0.5,
-            transfer_rate: 0.,
             mutation_rate: 0.0015,
             mutation_scale: 0.08,
             physical_mutation_rate: 0.1,
@@ -298,8 +293,6 @@ impl Config {
         }
         if self.conversion_efficiency >= 1.
             || self.affinity_radius > 6.
-            || self.founders > self.max_population
-            || self.max_population > 100000
             || self.max_ancestry_records < self.founders
             || self.max_ancestry_records > 5000000
             || self.landscape_regions == 0

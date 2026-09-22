@@ -41,7 +41,7 @@ pub fn mutate(
         for _ in next..count {
             let candidates: Vec<_> = (0..MAX_ENZYMES).filter(|&s| active[s]).collect();
             let slot = candidates[rng.index(candidates.len())];
-            remove(g, cell, slot);
+            remove(g, slot);
             active[slot] = false;
         }
     }
@@ -51,12 +51,11 @@ pub fn mutate(
     }
 }
 
-pub fn remove(g: &mut Genotype, cell: &mut Cell, slot: usize) {
+pub fn remove(g: &mut Genotype, slot: usize) {
     for a in &mut g.chromosomes {
         a.chemistry.programs[slot] = false;
         controller::programs::remove(&mut a.behavior, slot);
     }
-    cell.installed.programs[slot] = false;
 }
 
 pub fn duplicate(g: &mut Genotype, cell: &mut Cell, source: usize, destination: usize) {
@@ -73,10 +72,6 @@ pub fn duplicate(g: &mut Genotype, cell: &mut Cell, source: usize, destination: 
     }
     cell.body[a] *= 0.5;
     cell.body[b] = cell.body[a];
-    cell.installed.enzymes[destination] = cell.installed.enzymes[source];
-    cell.installed.programs[destination] = true;
-    let operators = cell.operators.as_mut().unwrap();
-    operators.enzymes[destination] = operators.enzymes[source].clone();
 }
 
 pub fn desired(g: &Compiled, cell: &Cell) -> Body {
@@ -118,7 +113,6 @@ mod tests {
         for (to, from) in order.into_iter().enumerate() {
             b.body[enzyme_stock(to)] = a.body[enzyme_stock(from)];
         }
-        b.installed = reordered.express().chemistry;
         b.operators = Some(reordered.compiled.as_ref().unwrap().operators.clone());
         crate::sensing::initialize(
             &mut b,
@@ -158,13 +152,14 @@ mod tests {
         let body = cell.body;
         let material = cell.material();
         let energy = cell.energy;
-        remove(&mut g, &mut cell, 0);
+        remove(&mut g, 0);
         g.compile(&w.config, &w.chemistry);
+        cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
         assert_eq!(body, cell.body);
         assert_eq!(material, cell.material());
         assert_eq!(energy, cell.energy);
         assert_eq!(g.compiled.as_ref().unwrap().body[11], 0.);
-        assert!(!cell.installed.programs[0]);
+        assert!(!cell.chemistry().programs[0]);
         cell.action.allocation.fill(0.5);
         cell.action.retirement = 1.;
         crate::organization::remodel(&mut cell, g.compiled.as_ref().unwrap(), &w.config, 1.);
@@ -195,6 +190,7 @@ mod tests {
         );
         duplicate(&mut g, &mut cell, 0, 4);
         g.compile(&w.config, &w.chemistry);
+        cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
         crate::sensing::initialize(&mut cell, g.compiled.as_ref().unwrap(), &w.config, &w.field);
         let after = controller::act(
             &g.express().behavior,

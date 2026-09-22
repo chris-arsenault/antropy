@@ -1,435 +1,334 @@
-# Runtime scaling
+# Structural runtime scaling
 
-September 18, 2026. Optimization execution: Sulion
-`56223ae5-4332-4c46-b3dd-54f21382292b` — completed.
-Implementation resumed September 21: `e3517c4b-b3df-4786-bcf4-10a488a294d1`;
-CLI phases 1–5 map to P0–P4. The shared-memory runtime and parallel field/biology operators
-are installed. Available-core validation and P3 limits are recorded below; 16/32-core acceptance
-remains unmeasured. Ecology and climate design proceed independently in
-[the spatial isolation review](docs/design/spatial-isolation-review.md).
-P4 retains the future scaling assessment of terrain and climate; it does not block their design.
+## September 22 correction: simple circular contacts
 
-## Outcome and constraints
+The prior completion claim is withdrawn. Persistent spatial tiles and meaningful-change
+scheduling were not delivered; compact chemical rows do not fulfill that architecture.
+Current authorization completes contact simplification first. Root S remains open for tiles.
+Execution branch: `4582f8fa-3491-4d9b-ad23-c246c1201071`.
 
-Reduce ordinary simulation cost substantially and prepare a concrete architecture for
-16–32 cores and 10–20 times the current geographic area. Area is a planning assumption;
-10–20 times each linear dimension would require a different memory budget. Future elevation
-and sun/rotation-driven climate must enter shared local fields and transformation work.
-Terrain implementation remains outside the resumed threading work. The original single-thread
-optimization record below is historical; the multicore section governs current execution.
+Replace the sampled contact model with circles. For center distance d and summed radii R,
+penetration is max(0,R-d), and contact strength is penetration/R. One undirected overlap
+serves both cells; soft separation follows the center line with equal opposite contributions.
+At coincident centers there is no invented heading-based direction. Heading does not enter
+contact geometry, pressure, contact sensing or the exposed chemical mixture. Existing four
+contact input slots receive equal shares of scalar crowding; no neural schema expansion.
+Contact chemical readings are isotropic. Existing permeability through damage and paid
+transport remains; transfers debit actual donor inventory. There is no contact sample lattice,
+angular moment, shared-site chemical pool, or near/shared evaluation split.
 
-Preserve the chemical manifold and action algebra, funded local organisms, material/work
-accounts, shared vector equations, spatial resolution and Rust-owned borrowed rendering.
-Numerical approximation, changed trajectories and incompatible checkpoints are permitted.
-Do not tune toward a prescribed population or remove environmental return opportunities.
+1. Replace geometry and all consumers in contact/prepared/interface/exchange modules; delete
+   contact quadrature. Keep existing local circle search and chemical/funding laws.
+2. Check circle boundaries, arbitrary frame/heading invariance, reciprocal separation, donor
+   contention and no self transfer. Compare ordinary World at 1×/20× with the prior sampled
+   implementation: seed101, 10 warm-up plus 100 measured ticks, 60 seconds per case, one worker;
+   repeat concentrated 2,000-cell 20× at four workers. No ecological campaign.
+3. Update current laws, UI meanings and status; run make ci. Existing area-scaling measurements
+   remain historical. Genuine all-overlap populations still have pairwise contact cost; do not
+   retain elaborate sampling to claim a better worst case or hide that limit.
 
-## Original single-thread execution (completed)
+The sampled contact module and its dense-limit example have been deleted. Ordinary World,
+selected-cell inspection, transport and the execution-budget diagnostic use circle contacts.
+Inspector input labels now describe equal crowding shares instead of compass-relative contact.
 
-1. Measure concentration/work distributions and transport bounds on the retained ordinary
-   seed 27 tick 5,000 checkpoint. Reuse the prior measured WASM baseline and capacity fixtures.
-2. Reduce dominant field work. Select a common concentration cutoff from the distribution;
-   keep discarded material in numerical accounts. Derive a positivity bound for transport
-   instead of preserving an unnecessarily small timestep. Consider further shared arithmetic
-   or cadence changes only if the remaining measured cost justifies them.
-3. Verify transport positivity/conservation/periodic symmetry, chemical return opportunities,
-   funded reproduction and complete accounting. Compare ordinary short continuations and
-   saturated capacity, then run `make ci`.
-4. Document multicore ownership, work partition, barriers, memory budgets, deployment
-   prerequisites, acceptance measurements and future milestones.
+Sequential native release comparison, same registered fixtures and no concurrent build load:
 
-## Bounded measurement registration
-
-Question: can eliminating negligible field support and redundant transport passes produce
-substantial whole-world speed without removing chemical access or regenerative opportunity?
-Competing explanations are negligible tails, overly conservative stepping, and unavoidable
-work in significant mixtures. First inspect the saved field without advancing time.
-
-Use the existing optimization runner, four existing fixtures, 10 warmup + 100 measured ticks,
-60 seconds per case, one process at a time, and ordinary census/inspection/render preparation.
-Permit at most four targeted candidate batches; archive each loaded binary. Physical equality
-is not an acceptance criterion. Stop on nonfinite state, failed accounts or the existing
-3 GiB process / 1.5 GiB WASM limits. No GPU execution is included.
-
-After selecting the numerical change, compare archived and current WASM for one 1,000-tick
-continuation from the same tick 5,000 input, each capped at 90 seconds. Read population,
-divisions, material/work residuals, uptake/reaction flows and chemical amounts at intervals.
-This diagnoses a large disruption; it does not prove long-run ecological equivalence.
-Use existing bounded Rust opportunity tests for causal mechanics. Do not extend the horizon
-or sweep seeds to obtain an attractive ecological result.
-
-Run one fresh archived-baseline capacity batch with the updated runner and a final candidate
-batch after CI. The runner no longer allocates restored comparison worlds after each timed
-case; repeating the archived binary under the same harness controls that and host variation.
-This is the fourth and final candidate batch, not an ecological horizon extension.
-
-## Source and consumer map
-
-- `engine/src/field.rs`, `field_medium.rs`, `field_vector.rs`, `field_activity.rs`: transport,
-  shared coefficients, sparse support and material ownership.
-- `engine/src/climate.rs`, `weathering.rs`: local environmental conversion and external work.
-- `engine/src/transport.rs`: local uptake/export with shared donor allocation.
-- `engine/src/world.rs`: phase ordering, lifecycle and snapshot ownership.
-- `frontend/src/engine/worker.ts`, `client.ts`, `canvas.ts`: scalar stepping and borrowed views.
-- `frontend/harness/numerical/optimization.ts`: existing whole-workload measurements.
-- [Data ownership](docs/design/chemistry/data-ownership.md),
-  [principles](docs/principles.md), and
-  [regenerative design](docs/design/chemistry/regenerative-ecosystem.md) govern retained behavior.
-
-## Status
-
-The tick 5,000 field contains 3,158.14 material units and 282,211 occupied four-species groups.
-Cutoff 1e-6 removes 0.29736 units (0.00942%) and leaves 198,561 groups; every geographic node
-still has some significant chemical. Cutoff 1e-5 would remove 2.80943 units (0.08896%) and leave
-136,308 groups. Select 1e-6 first. These are one-time truncation figures, not accumulated loss.
-The shared transport bound is 0.8 at the default interval; raise the substep ceiling from 0.5
-to 0.9, below the positivity limit 1. One pass replaces two without modifying face coefficients.
-
-The first candidate measures 169.68 ticks/s at the saved 5k state versus 87.94 before; saturated
-48/2,000/2,000-growth cases measure 88.21/35.54/21.65. This is not the final build.
-Sparse exchange now indexes only body-touched geographic rows and requested four-chemical
-groups, preserving the shared donor allocation. Candidate 3 measures 166.09 ticks/s at 5k,
-89.09/37.83/22.62 for saturated 48/2,000/2,000-growth.
-
-### Final matched throughput
-
-Ledger 4108–4115, archived original and final CI-built WASM with the same updated harness:
-
-| Workload | Before ticks/s | After ticks/s | Speedup |
-| --- | ---: | ---: | ---: |
-| 48 cells, saturated field | 57.51 | 88.52 | 1.54× |
-| 2,000 cells, saturated field | 23.15 | 37.54 | 1.62× |
-| 2,000 growth, saturated field | 15.34 | 22.57 | 1.47× |
-| Saved ordinary world at tick 5,000 | 88.82 | 167.34 | 1.88× |
-
-These include census, inspection and packed rendering preparation, excluding GPU execution.
-The growing saturated case remains below 30 ticks/s. Ordinary field/source stage time falls
-from 9.61 to 4.57 ms/tick and exchange from 0.675 to 0.373 in separate instrumented replays.
-WASM allocation high-water drops from 242.6 to 163.8 MB for the ordinary 100-tick workload.
-This does not establish a browser RAM ceiling or scaled-world performance.
-
-[Evidence and reproduction](docs/evidence/digital-chemistry/scaling-v27/README.md).
-`make ci` passes 153 Rust tests, 62 Vitest tests, Clippy, ESLint, formatting, TypeScript,
-documentation and Terraform formatting, with 12 pre-existing lint warnings. The first CI
-attempt caught excessive complexity in the added sampling callback; moving observation
-sampling into the existing observation helper corrected it. No server or browser run was
-started, and no commit, push or deployment was performed.
-
-Two bounded tests exposed cutoff consequences: a second-generation dissolved product fell
-below the new resolution, and tiny reservoir batches stopped converting because their
-reaction screen reused the dissolved cutoff. The product-wakeup fixture now uses a valid
-unshielded, larger input above resolution. Finite reservoir inventory uses an owner-relative
-conversion screen (`total * f32::EPSILON`), not concentration times interface area. Owned tiny
-stocks are retained. A candidate with no conversion screen generated extremely small products
-across the chemical space; source deposition cost grew and ordinary throughput regressed
-to 127 ticks/s. This measured failure motivates retaining a scale-relative screen.
-Small-reservoir conversion passes its original opportunity assertion.
-
-### Paired continuation
-
-Ledger 4106–4107, archived original versus candidate 3, each 10 warmup + 1,000 ticks from the same
-tick 5,000 state, sampled every 200 ticks. Archived/current throughput is 80.40/169.30 ticks/s,
-2.106×. Both finish at tick 6,010; this is a continuation rather than a run from zero.
-
-| Quantity over measured interval | Archived | Optimized |
+| Workload | Sampled contacts, 1 worker | Circle contacts, 1 worker |
 | --- | ---: | ---: |
-| Imported material | 906.968 | 908.296 |
-| Cellular reacted material | 781.066 | 773.645 |
-| Environmental converted material | 27.156 | 26.848 |
-| Reservoir converted material | 3.683 | 3.668 |
-| Captured cellular work | 1925.489 | 1922.016 |
-| Divisions | 274 | 278 |
-| End population | 285 | 284 |
-| Numerical material loss | 0.0464 | 4.7811 |
-| Physical washout | 617.910 | 616.813 |
-| End dissolved material | 2975.202 | 2969.769 |
+| 48 founders, original area | 211.4 TPS | 213.5 TPS |
+| 48 founders, 20× area | 129.7 TPS | 135.3 TPS |
+| 2,000 concentrated cells, original area | 34.2 TPS | 51.2 TPS |
+| 2,000 concentrated cells, 20× area | 34.2 TPS | 49.2 TPS |
 
-Current numerical loss is 0.78% of physical washout in this interval. End material/work
-residuals are 2.26e-7/1.41e-6. The leading chemical IDs remain 136, 0, 128, 129, 8; globally present
-chemicals decline from 256 to 254. This is a resolution effect, not targeted chemical removal.
-Population paths diverge, as expected, while substantial uptake, reactions and reproduction
-continue. These checks and bounded opportunity tests support retaining the changes; they do
-not prove long-run equivalence, endurance, sustained recycling or evolved diversity.
+The enlarged concentrated case reaches 95.2 TPS with four workers. Original-area contact
+preparation plus sensing falls from 8.80 to 3.10 ms/tick; exchange falls from 11.65 to
+7.91 ms/tick. Endpoint geometry preparation falls from 6.84 to 0.63 ms. These are changed
+physical rules from matched initial fixtures, not identical trajectories. The dispersed
+2,000-cell fixture measures 55.1 TPS; the earlier sampled measurement was 51.3 TPS and the
+pre-structural baseline was 81.2 TPS. Remaining geographic overhead is not solved by contact
+simplification. Output preparation remains excluded from stepping and scales with output size.
+Raw reports stay ignored under `frontend/harness/artifacts/structural-runtime/` as
+`sampled-*` and `circles-*`; there is no new long-run ecological claim.
+
+All 279 Rust unit tests pass, including rotation-independent circle geometry, heading-independent
+contact readings, periodic search, changing radii, reciprocal separation, damage-triggered
+permeability, simultaneous donor contention and material/work accounts. The former sampled
+dense-limit assertion was removed with that rejected algorithm. The old directional-publication
+test was changed to test overlap changes, because turning no longer changes contact readings.
+Full `make ci` passes, including Rust checks, frontend lint/type checks, both WASM builds,
+78 Vitest tests, experiment-storage and documentation checks, and Terraform formatting.
+Human motion review remains open.
+
+State: contact simplification implemented, measured and CI-validated. Root S remains open
+for tiled execution. No commit, push or deployment in scope.
+
+Updated September 21, 2026 after the user's repeated structural-first corrections.
+Sulion root: `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
+
+## Current work order
+
+Replace the execution structures that make meaningful simulation work unnecessarily expensive.
+Design ownership, interaction representation, spatial reach, numerical participation and update
+scheduling together. The goal remains an evolving, differentiated world at 10–20 times the
+current geographic area, with useful browser and native-server speed.
+
+The existing dense buffers, full-map filters, contact representation and phase schedule are
+implementation choices to challenge. Faster execution of those choices does not satisfy this
+work order. Persistent spatial tiles with local update limits are required. Retaining all
+existing operators inside tiles is insufficient. Address structural costs before tuning loops.
+
+The previous plan is preserved unchanged as
+[historical evidence](docs/sources/history/2026-09-21-scaling-before-structural-correction.md).
+Its dense-layout-first sequence, unchanged-equation restriction and dated experiment instructions
+are superseded. Read specific historical sections when needed to understand a failed approach;
+do not load or execute the entire old work order by default. The ended
+[mature performance investigation](docs/plans/MATURE-PERFORMANCE-PLAN.md) is also historical.
+
+## Requirements and implementation freedom
+
+Preserve the [principles](docs/principles.md), the chemical transformation algebra, explicit
+material/work accounts, funded local organisms, evolvable genomes/RNNs and
+[data ownership](docs/design/chemistry/data-ownership.md). Physical and environmental effects
+must remain conditional opportunities rather than prescribed roles or desired community shapes.
+
+Numerical distance limits, concentration/participation thresholds, temporal resolution and
+shared aggregate interactions are legitimate design choices. Select them from the common
+mathematical model and their ecological consequences. Each must state its affected quantity,
+units, approximation, accounting and how meaningful activity re-enters computation.
+Exact trajectories, old save layouts and replayability are not acceptance requirements.
+Do not weaken chemical symmetry or ownership to avoid engineering the replacement.
+
+Do not rewrite unrelated working systems. Replace the connected owners and consumers needed
+for the selected structural improvement; preserve unaffected mechanisms. One production
+implementation serves browser and native execution. The installed thread pool is available
+to the replacement architecture, not a reason to preserve the old one.
+
+## Structural obligations
+
+Before kernel changes, select a coherent replacement and record:
+
+| Decision | Required substance |
+| --- | --- |
+| Work and ownership | What is stored, what owns writes, and how cost follows meaningful chemical support, interaction neighborhoods and organisms |
+| Spatial influence | Support or justified truncation for each interaction; affected neighborhoods, periodic seams and propagation into previously inactive regions |
+| Magnitude | A shared resolution rule with explicit treatment of omitted effects; accumulating meaningful material must wake computation |
+| Time | What change makes a result stale, what forces a refresh, and how external forcing and slow accumulation are included |
+| Dense communities | How cost behaves when neighborhoods fill; no arbitrary neighbor quota, population reduction or discarded contention to manufacture speed |
+| Integration | Which current algorithms and callers are replaced, including observations, borrowed rendering and explicit exports |
+
+Known production defects include full-map attraction scans/filtering after local changes,
+area-sized field bookkeeping and dense material allocation for empty space. Those are starting
+evidence, not the complete scope. Inspect biological/contact/exchange structures as well; the
+objective includes the populated world, not just cheap empty geography.
+
+A cache counts as structural work when it changes ownership and invalidation so unnecessary
+computation disappears. Adding another cache around the same mandatory global traversal does not.
+An intermediate threading or arithmetic improvement cannot close these obligations.
+
+## Execution and completion
+
+1. **Select the structural replacement.** Use existing measurements and a bounded inspection
+   to identify avoidable work. Compare algorithmic alternatives, select shared bounds and
+   write the owner/dependency model above. This phase ends with an implementable decision,
+   not another list of possible optimizations. Ordinary engineering decisions need no new
+   user approval.
+2. **Replace production geography and interaction execution.** Implement the selected ownership,
+   support and scheduling through ordinary consumers. Remove the replaced production path;
+   do not retain an accelerated legacy path as the default. Include the required neighboring
+   regions and invalidation sources. Numerical-law changes belong to this implementation,
+   with their costs and opportunities checked.
+3. **Complete populated-world integration.** Address the selected contact, exchange and cellular
+   work structures, dense-neighborhood limits, external forcing and observations. Do not stop
+   at an empty-field demonstration or leave a necessary consumer on the old representation.
+4. **Establish the delivered outcome.** Use the existing bounded harness for fixed occupied
+   patches at 1×/10×/20× area and populated/dense cases. Separate adding empty space from adding
+   actual organisms, sources and chemistry. Record whole-step cost, recurring work, memory and
+   observation costs. Check seams, funding, accounts, reactivation and intended opportunities.
+   Run required CI. A failed structural prediction reopens the selected architecture; it is
+   not permission to replace the goal with incremental speedups.
+
+Do not launch a long ecology campaign to validate this engineering change. Use short mechanism
+checks and bounded representative continuations; historical source-free 100-tick fixtures alone
+cannot establish a populated large-world result. Decide case budgets from existing evidence
+before execution. Use available hardware for architectural work; lack of 32-core measurements
+does not justify postponing work elimination.
+
+The minimum operational target remains 30 ticks/second on declared representative workloads.
+A percentage improvement or crossing that floor does not excuse missing structural obligations.
+Do not promise zero cost for additional populated ecology or certify behavior the user has not
+reviewed. No tuning, fan-out benchmark campaign, terrain feature or save-compatibility project
+should displace the current structural work.
 
 ## Multicore design
 
-Implementation resumed September 21 at the user's request. The single-thread investigation
-in `docs/plans/MATURE-PERFORMANCE-PLAN.md` is ended with its throughput target unmet.
-Retain its installed operators and uncommitted source changes. This work implements P0–P2
-and measures P3 on available hardware; P4 terrain remains separate future work.
+The same Rust World already supports a persistent Rayon pool, exclusive writes, joined phases
+and borrowed local rendering. Browser 1/4 and a native 32-thread host are implemented.
+The private HTTP management API is deployed. Public VPN routing remains disabled.
 
-Sulion root: `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
-P0 expansion: `eb487315-d9be-45d0-a55f-ac35e5bf08b3`.
+Historical P0–P2 describe delivered threading components, not completion of structural scaling.
+The Sulion root now carries explicit pending structural implementation before P3 operating
+acceptance. P3 must assess that replacement, not merely remeasure the old dense implementation.
+P4 terrain remains separate future work; the [light ecology design](docs/design/light-ecology.md)
+and other environmental backlogs retain their scope.
 
-### P0 execution
+Earlier measurements remain evidence, not acceptance of this replacement: the default-area
+2,000-cell browser fixture reached 124.36 ticks/s with six workers; the sparse 20×-area fixture
+reached 45.89. A historical mature native fixture reached 18.53/36.98 ticks/s at one/six workers.
+These differ in workload and exclude parts of live observation. The archived plan records their
+conditions and negative findings. Current server deployment does not establish 32-core scaling.
 
-1. Add a shared serial/parallel execution adapter and thread-safe immutable program caches.
-   Keep mutation exclusive to each owner; no locks around entire cells or chemical updates.
-   Validate the inherited untested compact product refactor with the Rust suite.
-2. Factor field destination rows into independent jobs with frozen inputs, local weather
-   scratch and small account reductions. Use contiguous geographic strips within the existing
-   dense layout first; no material rearrangement or per-worker world copies. Preserve sparse
-   activity, seam flux, donor bounds, and the pre-weathering medium boundary.
-3. Verify conservation, positivity, cross-partition interactions and one/multiple-worker
-   execution using the same operators. Benchmark available 1/2/4/6 cores. This six-core host
-   cannot establish 16/32-core acceptance; retain those measurements as outstanding.
+## Context handoff
 
-### P1–P2 execution
+Start future performance work with the primary structural rule in `AGENTS.md`,
+[principles](docs/principles.md), this current work order and the governing mathematical/ownership
+contracts. Read source and targeted historical evidence to answer a named design question.
+Past assistant promises, completed threading phases and old patch queues have no authority to
+narrow the user's structural-first direction.
 
-The build produces a raw serial module and a shared-memory module from the same Rust source.
-The shared loader initializes the pinned Rayon pool before creating a World. Cross-origin
-isolation selects that loader; unsupported environments execute the serial module. The existing
-scalar ABI and borrowed render projections remain the application boundary. Pool startup failure
-must be visible and must not leave a partial World running.
+## Selected replacement and execution record
 
-Cell sensing, control, movement and physiology use disjoint owners. Reactions keep worker-local
-scratch and reduce optional observer accounts after joining. Exchange compiles a transposed
-footprint adjacency so node jobs see all competing requests before allocation. Registry and
-ancestry commits remain coordinator-owned. Detailed experiment trace mode may run physiology
-serially; ordinary live reduced observations must remain parallel.
+Execution subplan: `5fed34e4-5c94-40d9-9fd8-2f9f66ce5172`.
 
-Validate a 1/4-worker bounded shared-kernel comparison with observer accounts, seam interactions,
-save/restore and positive inventories. Browser registration: isolated Chromium on the existing
-port 26000 server; verify pool startup, shared-memory borrowed WebGL uploads, scalar stepping,
-save/restore, restart and failure reporting. Use small constructed worlds and at most 100 measured
-ticks per capacity arm, 60 seconds per arm; no ecological inference or long campaign. Preserve
-artifacts only under ignored `frontend/harness/artifacts/`.
+1. Geographic material is a compact owner of occupied 256-chemical rows, indexed by geographic
+   node. Empty nodes share an immutable zero row. The destination owner contains only the active
+   support plus its four-neighbor halo; zero output rows are reclaimed. Scalar geographic
+   indices remain area-sized, but no recurring chemical traversal visits empty map strips.
+   Material remains continuous in amount and discrete in chemical identity.
+2. Mechanical signals own their support and revisions at writes. Attraction operates on that
+   support and its finite convolution halo, rather than discovering changes with a map scan.
+   The two normalized, signed, three-box kernels retain their existing meaning and periodic
+   symmetry. No environmental wells or global force approximation is introduced.
+3. Concentration resolution remains the common extracellular floor, in material per area.
+   Removed material and potential remain numerical ledger losses. Deposits always allocate and
+   wake their destination; diffusion wakes adjacent destinations. Coefficient preparation uses
+   the shared normalized resolution, with accumulated change measured against its last anchor.
+   Illumination continues to update from its external clock, independently of cell movement.
+4. Contact uses a sparse shared quadrature, with spacing `h = mesh × RESOLUTION`. Each body
+   deposits a radial tent of radius `sqrt(r² + h²/2)` and normalizes its weights in L2.
+   Thus `K = W Wᵀ - diag(W Wᵀ)` is symmetric, nonnegative off the diagonal, and has compact
+   support. The `h²/2` term resolves bodies smaller than a quadrature cell without losing them.
+   This replaces linear pair penetration with overlap of finite body profiles. Sites touched
+   by one body cancel against the diagonal and are removed. For material evaluation only,
+   sites touched by at most eight bodies compile into short neighbor rows; higher-degree
+   sites remain factored. This is an algebraic evaluation choice with the same weights,
+   not a neighbor quota. Explicit entries are bounded by seven per footprint incidence.
+   Pressure always uses site reductions. Cost follows footprint incidence, including when
+   many bodies coincide, rather than requiring a complete dense contact graph.
+   Crowding is `1/(1+K1)`. At each shared site, pressure uses the weighted displacement from
+   its body centroid, normalized by twice the largest contributing radius. Opposite pair
+   contributions cancel; self contributions are removed. The existing duration-based
+   relaxation remains. Exact coincidence has zero passive direction; voluntary motion can
+   break it. Directional receptor moments use the same bounded local displacements.
+   Material uses `Wᵀ` demand scatter and `W` supply gather, subtracting every cell's own
+   contribution. Each individual donor still reserves own export and all foreign demand
+   against its frozen inventory; individuals retain distinct exposure and funded requests.
+   This changes the geometric contact kernel, not chemical transformations or organism roles.
+5. Rendering retains borrowed Rust-owned presentation buffers. Chemical observations iterate
+   owned rows. Explicit exports serialize the new owner; no legacy checkpoint adapter is required.
+6. A base step freezes its mechanical convolution after projecting current bodies. Sources,
+   field transport and movement consume that same force evaluation; they do not repeatedly
+   solve attraction after each other's writes. The next base step sees all committed changes.
+   This is an explicit integration boundary, not a wall-clock delay. Standalone field assays
+   still prepare their own stages. Motion coefficients query dependencies only at actual
+   body footprints and their gradient neighbors. A full-map dependency scan was found during
+   integration and removed; previously visited anchors retain cumulative small changes.
 
-### September 21 implementation evidence
+Validation registration: bounded engineering workloads, seed 101, one native worker first;
+fixed occupied patches and unchanged sources/cells at 1×, 10× and 20× area; a 2,000-cell ordinary
+fixture and a concentrated colony. Ten warm-up ticks and at most 100 measured ticks per case,
+60 seconds per case. Include field support, allocated bytes, contact work and full presentation
+cost separately. Compare before and after on identical initial fixtures, not identical trajectories.
+No population campaigns or seed sweeps. Invariants cover seams, empty-region activation, signed
+mechanical symmetry, material/work closure, donor contention and observer independence.
 
-P3 local admission probe: replace the unrelated 80,000-node limit with a 2 GiB geographic
-reservation at 4096 bytes/node: two material buffers, 1024 bytes/node reserved for scalar,
-index, coefficient and display storage, plus one field snapshot. Cell/genome/ancestry costs
-remain additional and must be reported; this does not guarantee arbitrary population growth.
-Measure 1×/10×/20× area at mesh 2 with 2000 fixed cells, and 48/480/960 cells at constant density,
-one and six workers. Each case is 10 warmup and at most 100 measured ticks/60 seconds, plus
-bounded save/render checks. The constructed load retains its existing initial field and funding;
-it is not a demonstration of carrying capacity. No trajectory matching requirement.
+Additional bounded dense-limit check: two zero-tick fixtures with 512 and 2,048 coincident,
+funded bodies, one worker, one evaluation each. Compare retained exact-pair discovery with
+the installed shared operator, reporting actual pair/incidence counts and preparation time.
+This distinguishes the asymptotic dense limit from the 100-tick colony, which spreads during
+integration. It cannot substitute for whole-step measurements. Final native measurements use
+one/four workers on this six-CPU environment; no 32-core scaling claim is made.
 
-The shared kernel and browser pool are installed, including destination field strips, local
-weather accounts, cell sensing/control/movement/physiology, spatial candidate bins, gathered
-contact pressure, and destination-grouped uptake requests. Small workload crossovers avoid
-pool dispatch. Genotype and inventory caches use synchronized immutable initialization;
-cell updates remain exclusive. Lifecycle/ancestry and reduced observation publication stay
-on the coordinator. The existing material cutoff and chemical laws are unchanged.
+The final area comparison also checks the concentrated 2,000-cell fixture at 20× area,
+with one/four workers and the same 10/100-tick and 60-second limits. This checks whether
+the combined populated and geographic workload still meets the declared floor.
 
-The final default-area browser capacity probe measures 63.07/89.29/113.72/124.36 ticks/s with 1/2/4/6
-workers for the constructed 2,000-cell load. All four shared-memory WebGL uploads return
-no error, and checkpoint restore plus world replacement succeed. This measures stepping;
-rendering/storage checks are outside its timed section. It is not mature-world throughput.
+## Delivered measurements and limitations
 
-At 20× area, the initial six-worker result was only 20.56 ticks/s for 2,000 cells. Parallel
-geographic medium updates and attraction filters, with contiguous transposed column passes,
-raise it to 45.89 ticks/s. These execute the existing equations; no attraction reach,
-chemical cutoff or physical cadence changed. The final geographic build measures:
+Sequential release-mode measurements on September 21, 2026, six available CPUs, no concurrent
+build/test load. Each whole-step case used seed101, ten warm-up and 100 measured ticks. The
+before executable was retained before kernel edits; after uses the ordinary World entry point.
+Sources and initial occupied patches retain their original coordinates as area increases.
+Changing periodic dimensions changes some seam neighborhoods; these are identical initial
+fixtures across before/after, not identical trajectories across map sizes. The independent
+fixed-support invariant test establishes equal recurring support at 1×/10×/20× away from seams.
 
-| Area and initial cells | One worker ticks/s | Six workers ticks/s |
-| --- | ---: | ---: |
-| 20×, 2,000 | 16.71 | 45.89 |
-| 20×, 960 (48 per original area) | 19.48 | 56.95 |
+| Initial workload | Area | Before, 1 worker TPS | After, 1 worker TPS | After, 4 workers TPS |
+| --- | --- | ---: | ---: | ---: |
+| 48 founders, 48 sources | 1× | 292.0 | 214.4 | — |
+| Same original patches | 10× | 44.4 | 138.2 | — |
+| Same original patches | 20× | 20.6 | 129.5 | 134.0 |
+| 2,000 varied cells concentrated in a 4×5 region | 1× | 50.1 | 34.8 | 53.7 |
+| Same concentrated population | 20× | 21.1 | 34.5 | 53.1 |
 
-The preceding 10× build measured 28.17/35.74 ticks/s at 2,000 cells and 41.57/43.40 at
-480 cells before the geographic passes were parallelized. It was not remeasured on the final
-geographic build. All cases use mesh 2, no resource sources, ten warmups and 100 measured ticks.
-The fixture's tiny initial dissolved concentrations are removed by the existing cutoff during
-warmup. These are sparse constructed loads, not saturated fields or evolved 20× ecosystems.
-Observation/render/storage work is outside timing. Raw results remain in ignored
-`frontend/harness/artifacts/multicore-final/`, `multicore-scale/` and
-`multicore-large-geographic/`.
+The existing dispersed 2,000-cell fixture measured 51.3 TPS after, against an earlier 81.2 TPS
+baseline in this session. It is a regression, as are the original-area rows above. Shared
+quadrature pays more preparation overhead in moderate neighborhoods; the change is justified
+by bounded dense interaction work and removal of geographic scaling, not universal speedup.
+No population or neighbor quota was introduced. The changed overlap and pressure law needs
+human motion review; passing accounts and symmetry tests does not certify colony appearance.
 
-The 20×, 2,000-cell six-worker case allocates 1.04 GiB of WASM memory while stepping and
-2.58 GiB at the high-water mark while retaining the original world, snapshot and restored
-world. Direct engine restore, memory growth, borrowed WebGL upload and replacement pass.
-This exposed signed JavaScript interpretations of WASM pointers above 2 GiB; the ABI adapter
-now interprets all exported pointers as unsigned 32-bit offsets.
+Peak resident memory for the first three one-worker cases fell from 88.3/660.4/1304.3 MiB to
+28.8/108.5/186.0 MiB. The concentrated original-area case fell from 246.0 to 220.6 MiB.
+These are process high-water measurements, including construction and final diagnostics;
+the new runner additionally constructs contact probes. At 20×, 3,036 chemical rows were owned
+out of 384,000 geographic nodes. Both material buffers and their indices occupied 11.0 MiB.
+Scalar lookup arrays, presentation buffers and startup allocation still scale with area.
+This is sparse chemical storage, not a claim of zero memory cost for empty geography.
 
-Larger-world admission is a kernel capability, not a completed browser operating envelope.
-These 20× raw snapshots are 414–444 MiB, exceeding the existing browser package limit of
-192 MiB. Ordinary automatic recovery therefore cannot sustain these worlds yet. The limit
-and retention policy were not raised. P3 remains open for a bounded large-world persistence
-design, representative occupied workloads and 16/32-core measurements. Default dimensions
-remain unchanged.
+Full packed Rust overview preparation at 20× fell from 31.7 to 21.1 ms; chemical observation
+fell from 33.3 to 1.0 ms. The table excludes observation and display costs. A full overview
+remains proportional to output area and is not a free per-tick operation. GPU upload, browser
+pacing, network spectators and days-long memory growth are not measured by these native cases.
 
-The actual application passes graphics context loss/recovery, export while paused, IndexedDB
-restore and injected coordinator failure with a visible error and an available runtime report.
-It reaches tick 316 with 55 living cells in this operational check; this is not an ecological
-claim. Unit coverage checks the stalled-worker watchdog and serial capability fallback.
-Direct helper-thread failure injection and long-duration pool endurance remain unmeasured.
+The zero-tick dense-limit check increased coincident bodies from 512 to 2,048: shared sites
+remained 21, footprint incidences increased from 10,752 to 43,008, and no explicit neighbor
+entries were created. Quadrature preparation took 1.36/3.32 ms; full interface preparation,
+including its own geometry, took 3.97/13.82 ms. The retained exact-pair discovery alone created
+130,816/2,096,128 pairs and took 3.34/53.54 ms. Those discovery timings are a lower bound on
+the old full contact pipeline, not a whole-step comparison. This confirms the selected dense
+cost law, while the whole-step table records its moderate-density cost.
 
-Validation: `make ci` passes 275 Rust unit tests, 17 integration tests and 74 Vitest tests,
-Clippy, TypeScript, formatting, documentation/storage policy and Terraform formatting, with
-17 existing ESLint warnings. The initial production build failed because Vite's default IIFE
-worker output cannot split the dynamic loader. ES-module worker output fixes the build; the
-built application then passes stepping, inspection, rendering and manual save in isolated
-Chromium using the existing server with local build interception. This is not a deployment.
+Intermediate approaches retained as negative findings:
 
-The historical 180k checkpoint is evaluated through the existing isolated v33 fixture,
-preserving its old persisted light layout while installing current execution operators.
-One/six native workers measure 18.53/36.98 ticks/s over 100 measured ticks after ten warmups.
-The six-worker mean stage costs are 3.69 ms field/footprints, 5.19 sensing/contacts,
-6.39 local control/motion, 6.19 exchange, 4.55 physiology, and 1.03 lifecycle/upkeep.
-This roughly 2× improvement is below the 16/32-core targets. It excludes active phenotype
-observation, census, rendering and browser overhead. Raw records are local under
-`frontend/harness/artifacts/multicore-second/`.
+- Direct support scattering multiplied finite convolution work by kernel width. Event sorting
+  and per-node intervals also imposed excessive overhead. The installed rolling sums operate
+  on unions of occupied 32-node line blocks with the original kernel weights.
+- A fully shared chemical pool at every contact site regressed the concentrated case to about
+  21 TPS. Private-site cancellation, sparse-neighborhood algebraic compilation and direct
+  recognition reductions removed unnecessary site chemistry without dropping interactions.
+- Sparse material alone left a full-map motion-dependency scan and repeated mechanical solves.
+  Query-owned dependencies and one frozen mechanical stage removed those remaining traversals.
 
-The production isolation policy is prepared locally. The website module in the sibling
-`ahara-tf-patterns` checkout adds `response_headers_policy_id` to every cache behavior;
-Antropy consumes it with COOP/COEP. Upstream publication must precede consumer deployment.
-Neither repository has been committed, pushed or deployed during this work. Terrain/climate
-P4 remains future work. The installed implementation uses 64-node contiguous strips rather
-than changing the dense material layout to square tiles: this gives safe disjoint slices and
-preserves frozen neighbor reads without a layout migration. Compact exchange commit, source
-projection, lifecycle and ancestry publication retain coordinator ownership; parallel demand,
-allocation and cell acceptance precede that commit.
+Raw outputs remain ignored in `frontend/harness/artifacts/structural-runtime/`, principally
+`final-before-*`, `final-after-*`, `final-capacity.json` and `final-contact-limit.json`.
+Reproduce with `structural_capacity AREA ordinary|dense WORKERS OUTPUT`,
+`parallel_capacity WORKERS OUTPUT`, and `contact_quadrature_capacity OUTPUT` release examples.
+Do not promote the raw run logs or checkpoints into the tracked experiment ledger.
 
-### One Rust world, partitioned work
+Validation covers chemical group actions, reciprocal contacts, periodic seams, newly occupied
+destinations, reclaimed material accounting, single-cell self exclusion, individual frozen
+donor caps, paid physiological opportunities and observer independence. Physical checkpoints
+now use v36; v35 restoration is explicitly rejected. The report reader accepts v36 observations.
+`make ci` passed: 280 Rust unit tests, eight server tests, 17 chemical-definition integration
+tests, 78 Vitest tests, serial/shared WASM builds, Clippy, TypeScript, formatting, documentation,
+experiment-storage and Terraform-format checks. ESLint retains 19 existing warnings and the
+shared WASM build retains its compiler warning about unstable atomics support. Earlier CI
+failures exposed stale checkpoint-version assertions and a Python reader whitelist; those
+consumers were corrected and the complete command rerun successfully.
 
-Keep the present owning worker as coordinator and WebGL renderer. Add a persistent pool of
-compute workers executing Rust over one shared WASM memory. Each phase grants exclusive
-write access to disjoint field tiles or organism ranges and read access to frozen inputs.
-Helpers never own another World or call the coordinator's thread-local ABI store. They
-receive bounded job descriptors, not serialized chemical arrays or population frames.
-After a completion barrier, the coordinator can step the next phase or borrow display views.
-Rendering, saving and memory growth cannot race outstanding jobs. Do not overlap rendering
-with writes by quietly introducing a second full world snapshot.
+The structural implementation meets its selected work bounds and declared native stepping
+floor. Root P3 retains live operating acceptance and human motion review; P4 terrain/climate
+remains separate future work. Neither 32-core scaling nor long-horizon ecology is certified.
 
-Use Rust scoped parallel iteration through Rayon, with `wasm-bindgen-rayon` for browser pool
-startup; keep the existing scalar-step and packed-render ABI behind a narrow loader adapter.
-The current raw instantiation in `client.ts` and build script need a deliberate migration,
-not just a Cargo dependency. Preserve a one-thread executor of the same operators for small
-workloads and platforms without shared-memory support. A second simulation implementation
-is unnecessary. Independent random streams may be assigned to worker tasks; they must not
-couple environmental events to genetic sampling. Thread count need not preserve trajectories.
-
-The [adapter documentation](https://docs.rs/wasm-bindgen-rayon/latest/wasm_bindgen_rayon/)
-requires an atomics-enabled standard library, a pinned nightly toolchain and its web loader.
-It supports Vite. Prototype the adapter against our exported memory and ABI before adopting
-the build change. This is the selected approach; a custom allocator/thread runtime would add
-unnecessary maintenance.
-
-### Partition by geography and requested work
-
-Start with 16×16 geographic tiles, independent of the 16×16 chemical manifold. One dense tile
-contains 256 KiB per material buffer, so two buffers occupy 512 KiB. Tile size is provisional:
-compare 8, 16, 32 against cache misses, scheduling cost and load balance. Queue several times
-more jobs than workers; estimate cost from occupied chemical groups, reactive pairs and
-resident cell requests, not tile area alone. A sparse empty region should not occupy a core
-while one rich patch dominates another core's queue.
-
-Field jobs read the old buffer including a one-node neighbor halo and write only their own
-destination rows. Keep reciprocal face coefficients and one shared outgoing bound. Weathering
-uses worker-local 256-value scratch, immutable compiled operators, and local account totals.
-No atomic additions on each chemical. Reduce small job accounts and compact occupancy lists
-after completion; rebuild geographic mixture summaries in disjoint rows. The field currently
-rebuilds summaries after transport, while weathering reads the frozen pre-commit medium;
-preserve this causal boundary deliberately even if a future cadence changes.
-
-| Phase | Parallel work | Required shared boundary |
-| --- | --- | --- |
-| Body/source projection | Bin sparse footprint contributions by destination tile; tile owner sums them | Publish frozen medium before movement/field reads |
-| Transport and conversion | Independent destination rows reading old material/medium | Join before buffer swap and publication of next summaries |
-| Sensing/RNN/motion | Disjoint cells reading frozen field and immutable genomes | Join before rebuilding footprint/contact bins |
-| Uptake/export | Cell requests; destination-node demand/availability; cell acceptance; destination commit | Barriers preserve competition and prohibit same-event export reuptake |
-| Metabolism, repair, refitting | Disjoint cells and local resource accounts | Join before material releases and births |
-| Contacts and lifecycle | Spatial pair bins; each unordered pair once; deferred contributions and birth/death proposals | Coordinator commits IDs, registry changes and ancestry |
-
-CSR adjacency (offsets plus contribution records grouped by destination node) is the reusable
-boundary for footprint projection and uptake/export. A tile owner gathers all requests to its
-nodes, computes one donor fraction, then cells gather accepted amounts. This avoids shared
-floating-point writes and retains fair competition between cells on opposite tile borders.
-Birth/death decisions remain local physical decisions. Their final registry commit is a
-bounded serial phase, not centralized reproductive selection. Large parallel birth batches
-reserve ID ranges and reduce parentage events; do not put one global lock around each birth.
-
-### Memory and bandwidth are scaling gates
-
-Current mesh 2 gives 19,200 geographic nodes and 4,915,200 chemical entries. The two f32 field
-buffers require 39.32 MB. At 10×/20× area they require 393.22/786.43 MB. The old two dense f64
-exchange scratch arrays alone would add 786.43 MB/1.57 GB. The current compact-row exchange
-removes that unconditional geographic allocation; memory follows touched rows and cells.
-Do not allocate a world-sized reduction buffer per thread.
-
-The next layout candidate is tiled chemical-group pages: a tile allocates a four-chemical
-page only when material or an incoming halo requires it. Keep dense geographic scalar fields
-for terrain, external forcing and mixture summaries; those are cheap compared with 256-species
-arrays. Benchmark page occupancy first: many tiny pages and lookups can be slower than dense
-contiguous rows. Retain dense pages within busy tiles, rather than a hash lookup per molecule.
-Use the same iterator/operator interface for full and sparse pages. Rust packs the existing
-display projection once per requested view; JavaScript still borrows it directly.
-
-Measure bytes read/written per active chemical, effective bandwidth, worker imbalance and
-barrier time. More cores cannot remove a memory-bandwidth ceiling. Reuse tile-local property
-rows and summaries, fuse compatible traversals, and avoid whole-world clearing or scans in
-otherwise local stages. The present 80,000-node validation limit must be replaced with a
-measured memory budget before 10×/20× worlds are enabled. WASM32 address space, allocator
-high-water use, genomes, ancestry, snapshots and GPU textures all count; field bytes alone
-are not an operating budget.
-
-### Elevation and climate fit the same substrate
-
-Treat elevation as a scalar surface over the existing periodic XY world, with cached local
-gradients/normals and symmetric face geometry. It is not a third organism coordinate.
-Use the same local transport and work operators with spatial coefficients. A face must
-represent the same material exchange from either side, including seams and slopes.
-
-Sun direction and rotation provide slowly changing external fields. Local surface orientation
-and medium determine received work; transformed material records its external input. Compile
-static terrain quantities once, update moving illumination on a separate bounded clock, and
-interpolate that shared field for local operators. Chemical response continues through the
-existing manifold profiles and funded work rules. Do not create sun-specific cell roles,
-hidden controller coordinates, unrelated weather scripts, or a general fluid solver without
-a demonstrated ecological need. Shadowing and horizontal climate transport remain later
-choices: require a named opportunity and a measured budget before selecting their equations.
-
-### Browser and deployment prerequisites
-
-Shared WASM memory requires cross-origin isolation. Plan COOP `same-origin` and COEP
-`require-corp`, same-origin worker/WASM assets, and an explicit check of `crossOriginIsolated`.
-These requirements follow the [browser contract](https://developer.mozilla.org/en-US/docs/Web/API/Window/crossOriginIsolated).
-The current Vite config has no isolation headers, and the inspected shared website module
-has no response-header-policy input. Add a reusable module option upstream when threading
-implementation is authorized, then consume it here. Do not bypass the platform website
-module or introduce a server. Verify actual response headers and worker startup after deploy;
-Terraform declarations alone do not establish browser isolation.
-
-Document the internal compute pool as an explicit extension of the current single-worker
-ownership contract when implementing it. Preserve its invariants: one Rust physical owner,
-no JavaScript mirror, no field/frame messages to React, synchronous borrowed GPU uploads,
-bounded observations and backpressure. Existing ownership tests stay enabled and gain
-checks that helpers cannot publish observations or write outside their granted partitions.
-
-### Future milestones and acceptance
-
-Threading implementation is authorized. Terrain remains future work. Performance thresholds
-below remain targets until measured on the named hardware and world sizes.
-
-- **P0 — Parallel tile kernel and memory budget.** Factor destination-row work and local
-  accounts into shared serial/parallel kernels; use sparse exchange and measure tile-page
-  occupancy. Native 1/2/4/8/16/32-thread capacity tests use the same kernel. Verify seam flux,
-  positivity, conservation, cross-tile donor competition and environmental return opportunity.
-  Reject a layout that merely lowers occupancy counters while increasing wall time or memory.
-- **P1 — Browser shared-memory execution [depends on P0].** Integrate the pinned Rust pool,
-  loader, headers and coordinator barriers. Test startup failure, worker failure, stop/reset,
-  memory growth, save and renderer borrows without deadlock or partial-state publication.
-  Compare whole browser step/render/observation throughput on actual 16/32-core hardware.
-- **P2 — Parallel biological stages [depends on P1].** Parallelize per-cell control,
-  physiology and CSR exchange; bound lifecycle/ancestry commits and footprint/contact work.
-  Preserve local funding and fair donor allocation. Demonstrate benefit at fixed cell count
-  and at constant density as geographic area grows.
-- **P3 — Larger-world operating envelope [depends on P2].** Measure 1×/10×/20× area at mesh 2,
-  both fixed occupied patches and constant ecological density. Declare population, source
-  density, chemical occupancy, observation cadence, RAM and core count for every result.
-  Targets: at least 8× whole-workload speedup on 16 cores and 12× on 32 for sufficiently large
-  loads, plus at least 30 ticks/s at 20× area under the declared representative density.
-  These are targets, not estimates established by this pass. Keep a small-world serial
-  crossover so threading overhead cannot regress ordinary starts.
-- **P4 — Terrain and external climate budget [depends on P3].** Add the surface/forcing
-  fields through existing operators, with short local opportunity probes and an explicit
-  share of the measured tick budget. Meaningful different local pressures must remain
-  observable without prescribing an evolved community.
-
-For 32 cores, a 5% serial fraction already caps ideal speedup at 12.5×; field-only threading
-cannot meet the target once exchange and physiology dominate. For each milestone, measure
-total tick latency, throughput, worst windows, phase barriers, RAM, and active work. Compare
-against the optimized one-thread implementation, not the slower historical baseline.
-This workspace has a 6-core i5-8500; it cannot establish 16/32-core scaling. Implementation
-must obtain a declared suitable target before making those performance claims.
+Status: all four structural execution phases completed locally. No commit, push or deployment
+was requested for this implementation turn. Root P3/P4 remain open as described above.

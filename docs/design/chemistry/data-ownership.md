@@ -133,10 +133,11 @@ The transport has these enforced properties:
   Founder comparisons, actual body ranges and acquired-learning statistics are Rust reductions;
   they do not transfer genomes or private arrays for population analysis.
 - A selected genome is sent when its identity or availability changes. Genealogy/relationship
-  queries refresh after parentage, death or contact-transfer changes. Paused unchanged inspections
+  queries refresh after parentage or death changes. Paused unchanged inspections
   reuse their prior result. Selection, restart, restore and manual task changes invalidate the
   relevant cache. No diagnostic cache is a physical input or part of the checkpoint.
-  Installed machinery has its own identity revision while paid refitting is pending.
+  Chemical capabilities arrive with the selected immutable birth genotype; there is no second
+  installed-identity revision. Actual body stocks remain in the bounded selected-cell record.
 - Before decoding, browser replies have explicit byte budgets: 16 KiB for ordinary commands,
   256 KiB for one selected inspection, 2 MiB for initialization metadata and 16 MiB for worker-local
   census membership. Before posting an observation, the worker rejects memory buffers, unsupported

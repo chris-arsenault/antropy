@@ -25,9 +25,6 @@ pub struct Cell {
     pub lineage: u64,
     pub generation: u64,
     pub genome: u64,
-    pub machinery_genome: u64,
-    pub installed: crate::genetics::Machinery,
-    pub machinery_revision: u64,
     #[serde(skip)]
     pub operators: Option<crate::chemical_operators::Operators>,
     pub born: u64,
@@ -76,7 +73,6 @@ pub struct Flows {
     pub transport: f64,
     pub reaction_heat: f64,
     pub construction: f64,
-    pub refitting: f64,
     pub repair: f64,
     pub repaired: f64,
     pub exposure: f64,
@@ -107,9 +103,6 @@ impl Cell {
             lineage: id,
             generation: 0,
             genome,
-            machinery_genome: genome,
-            installed: compiled.chromosome.chemistry.clone(),
-            machinery_revision: 0,
             operators: Some(compiled.operators.clone()),
             born: 0,
             x: position[0],
@@ -131,6 +124,10 @@ impl Cell {
             flows: Flows::default(),
             chemical_flows: ChemicalFlows::default(),
         }
+    }
+    /// Derived from the immutable birth genotype, never independently persisted.
+    pub fn chemistry(&self) -> &crate::genetics::Machinery {
+        self.operators.as_ref().unwrap().chemistry()
     }
     pub fn material(&self) -> f64 {
         self.inventory.material()
@@ -167,7 +164,6 @@ impl Cell {
     }
     pub fn validate(&self, c: &Config) -> Result<(), String> {
         crate::controller::validate_state(&self.brain)?;
-        self.installed.validate()?;
         self.inventory.validate()?;
         self.bound_material.validate()?;
         if (self.bound_material.material() - self.mass()).abs() > 1e-10 * (1. + self.mass()) {

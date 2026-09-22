@@ -88,9 +88,9 @@ function WebMeaning({ mode }: { mode: WebMode }) {
       <details>
         <summary>How roles are assigned</summary>
         <p>
-          Strength is built enzyme stock × compiled catalytic coefficient × product weight.
-          Installed machinery determines the routes; inherited targets may still be awaiting paid
-          refitting. These are capabilities, not measured intake, waste export or cross-feeding.
+          Strength is built enzyme stock × compiled catalytic coefficient × product weight. Birth
+          capabilities stay fixed during life. These are capabilities, not measured intake, waste
+          export or cross-feeding.
         </p>
       </details>
     </div>

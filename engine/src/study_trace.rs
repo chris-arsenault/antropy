@@ -109,7 +109,6 @@ impl Study {
             ("maintenance", f.maintenance),
             ("learning", f.learning),
             ("construction", f.construction),
-            ("refitting", f.refitting),
             ("constructed", f.constructed),
             ("repair", f.repair),
             ("damage", f.damage),

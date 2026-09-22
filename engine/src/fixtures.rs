@@ -60,7 +60,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
     }
     let f: Fixture = serde_json::from_value(value.clone()).map_err(|e| e.to_string())?;
     if f.variants.is_empty()
-        || f.variants.len() > w.config.max_population
+        || f.variants.len() > w.cells.len()
         || f.assignments.len() != w.cells.len()
     {
         return Err("Fixture must assign every founder and use bounded variants".into());
@@ -93,10 +93,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
             .ok_or("Unknown founder")?;
         let g = variants.get(a.variant).ok_or("Unknown fixture variant")?;
         c.genome = g.id;
-        c.machinery_genome = g.id;
-        c.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
         c.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
-        c.machinery_revision += 1;
         c.x = a.x;
         c.y = a.y;
         c.heading = a.heading;

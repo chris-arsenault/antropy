@@ -71,9 +71,10 @@ fn source_pairs_attract_when_dilute_and_separate_when_crowded() {
                 source.habitat.y = 12.;
                 source.habitat.radius = 2.;
                 source.rebuild(&w.config, &w.field);
-                source.inventory.fill(0.);
-                source.inventory[0] = 0.6 * ratio * source.interface;
-                source.inventory[136] = 0.4 * ratio * source.interface;
+                source.mixture.fill(0.);
+                source.mixture[0] = 0.6;
+                source.mixture[136] = 0.4;
+                source.amount = ratio * source.interface;
                 source.rate = 0.;
             }
             source_medium::project(&mut w);

@@ -16,7 +16,7 @@ const fields = [
   ["founders", "Starting cells", 2],
   ["sourceCount", "Renewing reservoirs", 0],
   ["sourceRate", "Source release rate", 0],
-  ["sourceLifetime", "Source lifetime", 0.01],
+  ["sourceLifetime", "Reservoir batch duration", 0.01],
   ["sourceGap", "Source renewal gap", 0],
   ["sourceRadius", "Source radius", 0.01],
   ["sourceDrift", "Source response to chemical gradients", 0],
@@ -108,7 +108,8 @@ export function Settings({
         <Policies config={config} select={select} />
         <p>
           Reservoirs contain finite deposits and receive external replenishment after a wait. They
-          drift with the local medium, which can change the chemicals they release.
+          drift while holding material. Local chemistry changes their composition, which persists
+          through empty periods and determines the next refill.
         </p>
         <p>
           Changes take effect on restart. Selfing uses two gametes from one diploid parent. Zero

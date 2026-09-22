@@ -25,8 +25,7 @@ fn fixture() -> World {
         s.rebuild(&w.config, &w.field);
     }
     // One finite source is near depletion; others retain ordinary default batches.
-    w.sources[0].remaining = 40.;
-    let q = w.sources[0].inventory.iter().sum::<f64>();
+    let q = w.sources[0].amount;
     w.sources[0].rate = q / 40.;
     source_medium::project(&mut w);
     w
@@ -99,7 +98,6 @@ fn advance(w: &mut World, scratch: &mut Scratch, candidate: bool) {
                 exposure,
                 response: r,
             },
-            &mut w.environment_rng,
             &mut w.field,
             &mut w.ledger,
         );
@@ -164,8 +162,7 @@ fn sample(w: &World) -> Value {
 fn run(candidate: bool, product: Option<usize>, ticks: u64, renewal: bool) -> Value {
     let mut w = fixture();
     if renewal {
-        w.sources[2].inventory.fill(0.);
-        w.sources[2].remaining = 0.;
+        w.sources[2].amount = 0.;
         w.sources[2].wait = 120.;
         source_medium::project(&mut w);
     }

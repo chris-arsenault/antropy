@@ -74,7 +74,6 @@ function policy(flags: Flags, mode: string) {
       physicalMutationRate: 0,
       learningRetention: 0,
       transmission: "clonal",
-      transferRate: 0,
     });
   if (knockout === "damage") patch.damageRate = 0;
   if (knockout === "movement-impedance") patch.movementImpedance = 0;

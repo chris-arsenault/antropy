@@ -281,6 +281,11 @@ for one owner solely to obtain an outcome is not justified by calling it intenti
 
 ### Mutation, inheritance and funded refitting
 
+September 22 disposition: [birth-fixed capabilities](installed-machinery.md) supersede the
+installed-target and partial-refitting assumptions in this historical section. Mutation and
+chemical transformation algebra remain unchanged; daughter capabilities apply at birth without
+additional stock. Living capabilities do not change during life.
+
 The established shared heavy-tail mutation principle remains. A group-valued operation has
 an intrinsic way to change: compose it with an increment. Left composition and right composition
 generally mean different things; the design must select and explain which is used. Rate and

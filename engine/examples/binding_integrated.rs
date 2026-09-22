@@ -27,10 +27,8 @@ fn neighborhood(length: f64) -> World {
         s.habitat.radius = 3.;
         s.rebuild(&w.config, &w.field);
     }
-    w.sources[0].remaining = 40.;
-    w.sources[0].rate = w.sources[0].inventory.iter().sum::<f64>() / 40.;
-    w.sources[2].inventory.fill(0.);
-    w.sources[2].remaining = 0.;
+    w.sources[0].rate = w.sources[0].amount / 40.;
+    w.sources[2].amount = 0.;
     w.sources[2].wait = 120.;
     source_medium::project(&mut w);
     antropy_engine::diagnostics::initialize(&mut w);
@@ -106,7 +104,7 @@ fn sample(w: &mut World) -> Value {
         .iter()
         .map(|s| {
             json!({"position":[s.habitat.x,s.habitat.y],"stock":s.material.total,
-        "remaining":s.remaining,"wait":s.wait})
+        "amount":s.amount,"wait":s.wait})
         })
         .collect();
     json!({"tick":w.tick,"sources":sources,"responseAtDrift4":response,

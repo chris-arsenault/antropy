@@ -1,6 +1,7 @@
 # Funded bodies, genes and inherited learning
 
-Capabilities depend on material actually installed. Genetic targets cannot grant free machinery.
+Throughput depends on actual funded stock. Birth genes define chemical function; they do not
+grant body material.
 
 <a id="bodies-construction-and-physical-genes"></a>
 
@@ -34,11 +35,11 @@ Growth shares paid assembly across deficits toward neural requests: optional sto
 bound mixture unchanged and paying assembly-price work. Both operations share core handling,
 frozen donors and work reserve; retirement reserves lost storage capacity. Core at `2*g` and
 actual daughter material/work reserves permit division without requiring every optional stock.
-Birth splits actual
-stock and inherits installed identity. Changed slot instructions retain their former function until
-usable energy above the protected reserve pays refitting work on that stock. Refitting conserves
-built material and dissipates work as heat; it grants neither new function nor new biomass for free.
-See [installed machinery](chemistry/installed-machinery.md).
+Birth splits actual stock, bound/free material and usable energy. Each daughter's mutated
+chemical configuration applies immediately and stays fixed throughout its life. Mutation
+creates no stock and may remove access to parental food. Activity and funded quantities remain
+dynamic; there is no refitting or living-cell gene transfer.
+See [birth-fixed capabilities](chemistry/installed-machinery.md).
 
 <a id="bodies-geometry-motion-and-uptake"></a>
 
@@ -95,10 +96,10 @@ requirements while retaining ordinary material, construction and maintenance cos
 | Information | During life | Birth transmission |
 | --- | --- | --- |
 | Behavioral weights and plasticity genes | Immutable inherited genotype | Chromosomes, assimilation, crossover and mutation |
-| Investments and chemical alleles | Optional typed contact transfer creates a new genotype | Current chromosomes, crossover and mutation |
+| Investments and chemical alleles | Immutable birth genotype | Current chromosomes, crossover and mutation |
 | Acquired recurrent traces | Paid bounded local updates | Retained delta enters offspring baseline weights |
 | Hidden state, byte, contacts and receptor baseline | Individual experience | Private state resets; receptors initialize locally |
-| Actual stocks, species mixtures, usable energy and injury | Physiology | Conservative split, retaining installed machinery identity |
+| Actual stocks, species mixtures, usable energy and injury | Physiology | Conservative split; daughter configuration comes from its birth genotype |
 
 <a id="bodies-inheritable-learning"></a>
 

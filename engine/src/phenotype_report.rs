@@ -23,7 +23,7 @@ struct Group {
 impl Group {
     fn add(&mut self, w: &World, cell: &Cell, light: f64) {
         let compiled = w.genomes[&cell.genome].compiled.as_ref().unwrap();
-        let a = traits(&cell.body, cell.installed.membrane.point());
+        let a = traits(&cell.body, cell.chemistry().membrane.point());
         let b = traits(
             &compiled.body,
             compiled.chromosome.chemistry.membrane.point(),

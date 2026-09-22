@@ -44,7 +44,6 @@ function pilotScenario(
         mutationRate: 0,
         physicalMutationRate: 0,
         transmission: "clonal",
-        transferRate: 0,
         learning: "static",
         learningRetention: 0,
       });

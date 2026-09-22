@@ -1,5 +1,11 @@
 # Design history
 
+The [September 21 scaling snapshot](2026-09-21-scaling-before-structural-correction.md)
+preserves the preceding root plan unchanged, including measurements, failed results and its
+superseded dense-layout-first sequence. Relative links describe its original repository-root
+location. The current [structural scaling work order](../../../SCALING-PLAN.md) supersedes its
+implementation instructions. Do not load this snapshot as the default performance context.
+
 The September 15 numerical-core removal preserves the previous
 [root plan](digital-chemistry-plan-before-core-removal.md),
 [M0 expansion](digital-chemistry-m0-before-core-removal.md) and

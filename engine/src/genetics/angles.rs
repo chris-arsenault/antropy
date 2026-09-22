@@ -1,4 +1,4 @@
-//! Periodic parameter geometry shared by inheritance, refitting and observation.
+//! Periodic parameter geometry shared by inheritance and observation.
 use std::f64::consts::{PI, TAU};
 
 pub fn wrap(angle: f64) -> f64 {

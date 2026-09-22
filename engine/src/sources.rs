@@ -18,12 +18,11 @@ pub struct Habitat {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Source {
     pub habitat: Habitat,
-    pub remaining: f64,
+    pub amount: f64,
     pub wait: f64,
     pub rate: f64,
-    pub inventory: Vec<f64>,
-    /// External supply composition, not stored material or a mechanical projection.
-    pub replenishment: Vec<f64>,
+    /// Inventory is amount * mixture; at zero amount this is only the supply condition.
+    pub mixture: Vec<f64>,
     #[serde(skip)]
     pub footprint: Vec<(usize, f64)>,
     #[serde(skip)]
@@ -35,22 +34,19 @@ pub struct Source {
 }
 impl Source {
     pub fn new(habitat: Habitat, tick: u64, c: &Config, rng: &mut Random, field: &Field) -> Self {
-        let duration = 0.5 + 4. * rng.unit().powi(2);
-        let remaining = c.source_lifetime * duration * (0.5 + rng.unit());
-        let rate = c.source_rate * (0.4 + 1.2 * rng.unit()) / duration.sqrt() * habitat.richness;
+        let rate = c.source_rate * habitat.richness;
+        let amount = rate * c.source_lifetime * (0.5 + rng.unit());
         let shares = composition(&habitat, tick, c);
-        let mut replenishment = vec![0.; SPECIES];
+        let mut mixture = vec![0.; SPECIES];
         for (i, &s) in c.source_species.iter().enumerate() {
-            replenishment[s] += shares[i];
+            mixture[s] += shares[i];
         }
-        let inventory = replenishment.iter().map(|q| remaining * rate * q).collect();
         let mut source = Self {
             habitat,
-            remaining,
+            amount,
             wait: 0.,
             rate,
-            inventory,
-            replenishment,
+            mixture,
             footprint: vec![],
             kernel: Default::default(),
             material: Default::default(),
@@ -73,138 +69,113 @@ impl Source {
         chemistry: &Chemistry,
         ledger: &mut Ledger,
     ) {
-        let mut mask = if self.material.valid {
-            self.material.mask
-        } else {
-            u64::MAX
-        };
-        let mut material = crate::source_medium::Material {
-            valid: true,
-            ..Default::default()
-        };
-        while mask != 0 {
-            let start = mask.trailing_zeros() as usize * 4;
-            mask &= mask - 1;
-            for s in start..start + 4 {
-                let released = self.inventory[s] * fraction;
-                self.inventory[s] -= released;
-                material.add(s, self.inventory[s], chemistry);
-                if released <= 0. {
-                    continue;
-                }
-                ledger.source_released += released;
-                for &(node, w) in &self.footprint {
-                    let loss = field.add(node, s, released * w, chemistry);
-                    ledger.rounding(loss, s, chemistry);
-                }
+        let released = self.amount * fraction.clamp(0., 1.);
+        self.amount -= released;
+        ledger.source_released += released;
+        for (s, share) in self.mixture.iter().enumerate() {
+            let q = released * share;
+            if q <= 0. {
+                continue;
+            }
+            for &(node, w) in &self.footprint {
+                let loss = field.add(node, s, q * w, chemistry);
+                ledger.rounding(loss, s, chemistry);
             }
         }
-        self.material = material;
+        self.refresh_material(chemistry);
+    }
+    pub fn inventory(&self) -> impl Iterator<Item = f64> + '_ {
+        self.mixture.iter().map(|share| self.amount * share)
+    }
+    pub fn refresh_material(&mut self, chemistry: &Chemistry) {
+        self.material = crate::source_medium::Material::read(self.inventory(), chemistry);
     }
     pub fn advance(
         &mut self,
         step: &crate::source_medium::Step<'_>,
-        rng: &mut Random,
         field: &mut Field,
         ledger: &mut Ledger,
     ) -> bool {
         let c = step.config;
         let chemistry = step.chemistry;
-        self.evolve_replenishment(step);
+        let conversion = self.convert(step);
+        ledger.source_converted += self.amount * conversion[0];
+        ledger.source_heat += self.amount * conversion[1];
+        ledger.source_work += self.amount * conversion[2];
         let [dx, dy] = step.response.velocity.map(|v| v * c.dt);
-        let mut changed = dx != 0. || dy != 0.;
+        let mut changed = dx != 0. || dy != 0. || (self.amount > 0. && conversion[0] > 0.);
         if dx != 0. || dy != 0. {
             self.habitat.x = (self.habitat.x + dx).rem_euclid(c.width);
             self.habitat.y = (self.habitat.y + dy).rem_euclid(c.height);
             ledger.source_distance += dx.hypot(dy);
             self.rebuild(c, field);
         }
-        if self.remaining <= 0. {
-            self.wait -= c.dt;
-            if self.wait > 0. {
+        if self.amount == 0. {
+            self.wait = (self.wait - c.dt).max(0.);
+            if self.wait > 0. || self.rate == 0. {
                 return changed;
             }
-            self.renew(step.tick, c, rng);
+            self.renew(step.tick, c);
             changed = true;
-            for (s, q) in self.inventory.iter().enumerate() {
+            for (s, q) in self.inventory().enumerate() {
                 ledger.supplied += q;
                 ledger.supplied_energy += q * chemistry.properties[s].potential;
             }
         }
-        if !self.material.valid {
-            self.material = crate::source_medium::Material::read(&self.inventory, chemistry);
-        }
-        let total = self.material.total;
-        let (conversion, mask) = step.operators.inventory_active(
-            &mut self.inventory,
-            crate::reaction_medium::Medium::illuminated(step.response.signal, step.response.light),
-            c.dt * c.weathering_rate * c.source_processing * step.exposure,
-            // Screen conversion against the owner's inventory scale, not geographic area.
-            // Retain tiny owned stocks; skip changes below f32 delivery precision.
-            total * f32::EPSILON as f64,
-            self.material.mask,
-        );
-        self.material.mask = mask;
-        ledger.source_converted += conversion[0];
-        ledger.source_heat += conversion[1];
-        ledger.source_work += conversion[2];
-        if conversion[0] > 0. || (self.rate > 0. && total > 0.) {
+        if self.rate > 0. && self.amount > 0. {
             changed = true;
             self.release(
-                (self.rate * c.dt / total.max(1e-300)).min(1.),
+                (self.rate * c.dt / self.amount).min(1.),
                 field,
                 chemistry,
                 ledger,
             );
-        }
-        self.remaining -= c.dt;
-        if self.remaining <= 1e-12 || total <= self.rate * c.dt {
-            changed |= self.material.total > 0.;
-            self.release(1., field, chemistry, ledger);
-            self.remaining = 0.;
-            self.wait = -(1. - rng.unit()).ln() * c.source_gap;
+            if self.amount == 0. {
+                self.wait = c.source_gap;
+            }
+        } else if changed || !self.material.valid {
+            self.refresh_material(chemistry);
         }
         changed
     }
 
-    fn evolve_replenishment(&mut self, step: &crate::source_medium::Step<'_>) {
+    fn convert(&mut self, step: &crate::source_medium::Step<'_>) -> [f64; 3] {
         let c = step.config;
-        if c.source_epochs.is_some() || c.source_zones.is_some() {
-            return; // Explicit experimental boundary conditions own their supply schedule.
+        let accounts = step
+            .operators
+            .inventory_active(
+                &mut self.mixture,
+                crate::reaction_medium::Medium::illuminated(
+                    step.response.signal,
+                    step.response.light,
+                ),
+                c.dt * c.weathering_rate * c.source_processing * step.exposure,
+                f32::EPSILON as f64,
+                u64::MAX,
+            )
+            .0;
+        if accounts[0] > 0. {
+            let total: f64 = self.mixture.iter().sum();
+            for q in &mut self.mixture {
+                *q /= total;
+            }
         }
-        step.operators.inventory_active(
-            &mut self.replenishment,
-            crate::reaction_medium::Medium::illuminated(step.response.signal, step.response.light),
-            c.dt * c.weathering_rate * c.source_processing * step.exposure,
-            f32::EPSILON as f64,
-            u64::MAX,
-        );
-        // This is a normalized boundary distribution; work/material enter only at renewal.
-        let total: f64 = self.replenishment.iter().sum();
-        for q in &mut self.replenishment {
-            *q /= total;
-        }
+        accounts
     }
 
-    fn renew(&mut self, tick: u64, c: &Config, rng: &mut Random) {
+    fn renew(&mut self, tick: u64, c: &Config) {
         if c.source_epochs.is_some() || c.source_zones.is_some() {
-            self.replenishment.fill(0.);
+            self.mixture.fill(0.);
             for (&s, q) in c
                 .source_species
                 .iter()
                 .zip(composition(&self.habitat, tick, c))
             {
-                self.replenishment[s] += q;
+                self.mixture[s] += q;
             }
         }
-        let duration = 0.5 + 4. * rng.unit().powi(2);
-        self.remaining = c.source_lifetime * duration * (0.5 + rng.unit());
-        self.rate =
-            c.source_rate * (0.4 + 1.2 * rng.unit()) / duration.sqrt() * self.habitat.richness;
+        self.amount = c.source_lifetime * self.rate;
         self.wait = 0.;
-        for (q, share) in self.inventory.iter_mut().zip(&self.replenishment) {
-            *q = self.remaining * self.rate * share;
-        }
         self.material.valid = false;
     }
 }

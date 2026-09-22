@@ -10,7 +10,7 @@ use std::collections::BTreeSet;
 mod base;
 #[path = "world_physiology.rs"]
 mod physiology;
-pub const VERSION: u32 = 35;
+pub const VERSION: u32 = 40;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -189,7 +189,7 @@ impl World {
                 + c.bound_material.projection(&self.chemistry).potential;
         }
         for s in &self.sources {
-            for (q, p) in s.inventory.iter().zip(&self.chemistry.properties) {
+            for (q, p) in s.inventory().zip(&self.chemistry.properties) {
                 matter += q;
                 energy += q * p.potential;
             }
@@ -199,7 +199,7 @@ impl World {
     pub fn step(&mut self) {
         self.advance(None);
     }
-    pub(crate) fn execution_work(&self) -> serde_json::Value {
+    pub fn execution_work(&self) -> serde_json::Value {
         let mut expiry = [0_u64; 6];
         for cell in &self.cells {
             for (total, count) in expiry
@@ -210,6 +210,7 @@ impl World {
             }
         }
         serde_json::json!({
+            "geography":self.field.structural_counts(),
             "controllerExpiry": expiry,
             "reactions": self.reactions.counts(),
             "transport": self.exchange.counts(),
@@ -232,7 +233,6 @@ impl World {
         let mut started = now();
         self.field.pressure_strength = self.config.pressure_strength;
         self.field.attraction_length = self.config.attraction_length;
-        self.field.attraction_strength = self.config.attraction_strength;
         if !self.cells.is_empty() || !self.sources.is_empty() || self.field.has_active_material() {
             self.field.illumination.prepare(
                 self.seed,
@@ -255,6 +255,7 @@ impl World {
         let mut sites = std::mem::take(&mut self.sites);
         self.footprints
             .prepare(&self.cells, &self.config, &mut self.field, &mut sites);
+        self.field.freeze_mechanical_stage();
         crate::source_medium::advance(self);
         if physiology {
             self.climate.prepare(&self.config);
@@ -335,6 +336,7 @@ impl World {
             self.prune_genotypes();
         }
         stages[6] = now() - started;
+        self.field.finish_mechanical_stage();
         started = now();
         if let Some(t) = &mut self.trace {
             t.finish(&self.cells, &self.config, self.tick);
@@ -368,11 +370,7 @@ impl World {
         if self.genomes.len() <= self.cells.len() * 2 + 64 {
             return;
         }
-        let mut retained: BTreeSet<_> = self
-            .cells
-            .iter()
-            .flat_map(|c| [c.genome, c.machinery_genome])
-            .collect();
+        let mut retained: BTreeSet<_> = self.cells.iter().map(|c| c.genome).collect();
         for e in self.events.iter().filter(|e| e.kind == "catalog") {
             retained.extend(e.values.iter().copied());
         }
@@ -406,12 +404,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY35\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY40\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY35\0")
-            .ok_or("Unsupported physical checkpoint; v35 required")?;
+            .strip_prefix(b"ANTROPY40\0")
+            .ok_or("Unsupported physical checkpoint; v40 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
@@ -429,15 +427,7 @@ impl World {
         }
         for cell in &mut world.cells {
             let target = world.genomes[&cell.genome].compiled.as_ref().unwrap();
-            cell.operators = Some(if cell.installed == target.chromosome.chemistry {
-                target.operators.clone()
-            } else {
-                crate::chemical_operators::Operators::compile(
-                    &cell.installed,
-                    &world.config,
-                    &world.chemistry,
-                )
-            });
+            cell.operators = Some(target.operators.clone());
         }
         crate::source_medium::project(&mut world);
         Ok(world)
@@ -450,8 +440,7 @@ impl World {
         self.chemistry.validate()?;
         self.field.validate()?;
         self.field.validate_reductions(&self.chemistry)?;
-        if self.cells.len() > self.config.max_population
-            || self.ancestry.len() > self.config.max_ancestry_records
+        if self.ancestry.len() > self.config.max_ancestry_records
             || self.next_cell != self.ancestry.len() as u64 + 1
             || !self.field_elapsed.is_finite()
             || self.field_elapsed < 0.
@@ -485,7 +474,6 @@ impl World {
                 || cell.id == 0
                 || cell.id >= self.next_cell
                 || !self.genomes.contains_key(&cell.genome)
-                || !self.genomes.contains_key(&cell.machinery_genome)
             {
                 return Err("Invalid living identity".into());
             }

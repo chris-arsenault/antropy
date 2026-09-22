@@ -8,8 +8,6 @@ const discrete = new Set([
   "lineage",
   "generation",
   "genome",
-  "machineryGenome",
-  "machineryRevision",
   "born",
   "ended",
   "task",
@@ -26,7 +24,6 @@ const discrete = new Set([
   "deaths",
   "divisions",
   "disturbanceDeaths",
-  "transfers",
 ]);
 
 function record(value: unknown): value is Record<string, unknown> {

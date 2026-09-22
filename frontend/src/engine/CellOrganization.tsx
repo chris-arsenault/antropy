@@ -7,9 +7,9 @@ const ALLOCATION_COLUMNS = ["Component", "Request"];
 
 export function CellOrganization({ inspection }: { inspection: Inspection }) {
   const cell = inspection.cell;
-  if (!cell) return null;
-  const active = cell.installed.programs.filter(Boolean).length;
-  const records = cell.installed.programs
+  if (!cell || !inspection.expressed) return null;
+  const active = inspection.expressed.chemistry.programs.filter(Boolean).length;
+  const records = inspection.expressed.chemistry.programs
     .map((program, slot) => ({
       program,
       slot,

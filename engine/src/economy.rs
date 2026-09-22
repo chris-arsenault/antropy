@@ -101,7 +101,7 @@ pub fn budget(
     let mixture = crate::metabolism::retained_response(&cell, c, chemistry);
     let mut processing_value = vec![0.; 256];
     for (slot, e) in g.operators.enzymes.iter().enumerate() {
-        if !cell.installed.programs[slot] {
+        if !cell.chemistry().programs[slot] {
             continue;
         }
         let occupancy = e

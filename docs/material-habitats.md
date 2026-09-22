@@ -4,6 +4,18 @@ September 20, 2026. Implemented under [the execution plan](plans/archive/MATERIA
 Physical checkpoints are v32; the chemical definition and observation package retain their
 existing versions. Rust owns the fields and sources; worker rendering still borrows WASM views.
 
+September 22 update: [reservoir simplification](plans/MODEL-SIMPLIFICATION-PLAN.md#m1--single-composition-reservoirs)
+replaces the two-mixture v32-v37 source lifecycle with one composition and an actual amount.
+It retains evolving refill chemistry, removes lifetime expiry and random renewal coupling,
+and stops empty-source motion. The measurements below describe the earlier laws; current
+[composed laws](design/chemistry/composed-runtime.md#mobile-resource-reservoirs) own the replacement.
+
+The same simplification's M2 replaces the two-scale attraction below with `K6*A` and
+removes cohesion-dependent washout. Local signed repulsion, nonlinear crowding, circle
+separation and bounded reservoir signals remain. Binding affects redistribution; external
+washout now removes the same fraction from every deposit. The earlier force curves, retention
+and timings below are historical evidence, not measurements of v39.
+
 ## Changes
 
 All three mechanical consumers—dissolved material, cells and reservoirs—use the same attractive

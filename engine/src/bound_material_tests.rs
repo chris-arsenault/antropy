@@ -50,14 +50,8 @@ fn growth_and_death_return_each_funded_species_with_paid_assembly() {
         let field = w.field.amounts.clone();
         lifecycle::release(&mut w, &cell, Cause::Starvation);
         for s in 0..256 {
-            let released: f64 = w
-                .field
-                .amounts
-                .iter()
-                .zip(&field)
-                .skip(s)
-                .step_by(256)
-                .map(|(a, b)| *a as f64 - *b as f64)
+            let released: f64 = (0..w.field.nx * w.field.ny)
+                .map(|n| w.field.amounts[n * 256 + s] as f64 - field[n * 256 + s] as f64)
                 .sum();
             assert!(
                 (released - cell.inventory.value(s) - cell.bound_material.value(s)).abs() < 1e-6
@@ -163,5 +157,5 @@ fn restore_preserves_mixtures_and_rejects_unfunded_body_and_old_schema() {
     let mut old = saved;
     old[7] = b'1';
     old[8] = b'9';
-    assert!(World::restore(&old).unwrap_err().contains("v35 required"));
+    assert!(World::restore(&old).unwrap_err().contains("v40 required"));
 }

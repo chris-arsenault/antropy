@@ -150,49 +150,6 @@ fn founders_share_a_map_instead_of_a_product_and_export_their_products() {
 }
 
 #[test]
-fn angular_refit_pays_short_arc_and_preserves_unaffected_operators() {
-    let w = diagnostics::nutrition(0.8, 2., false, false);
-    let mut cell = w.cells[0].clone();
-    cell.energy = 1.;
-    cell.installed.enzymes[0].angle = PI - 0.1;
-    cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
-    let unaffected = cell.operators.as_ref().unwrap().enzymes[1].clone();
-    let old = cell.operators.as_ref().unwrap().enzymes[0].clone();
-    let mut g = w.genomes[&1].clone();
-    g.chromosomes[0].chemistry = cell.installed.clone();
-    g.chromosomes[0].chemistry.enzymes[0].angle = -PI + 0.1;
-    g.compile(&w.config, &w.chemistry);
-    let target = g.compiled.as_ref().unwrap();
-    let mut unfunded = cell.clone();
-    unfunded.energy = 0.;
-    crate::refitting::advance(&mut unfunded, target, &w.config, &w.chemistry, 1.);
-    assert_eq!(unfunded.installed, cell.installed);
-    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 1.);
-    let expected = 0.25 * cell.body[11] * w.config.construction_energy;
-    assert!((cell.flows.refitting - expected).abs() < 1e-12);
-    assert!(
-        (angles::difference(PI - 0.1, cell.installed.enzymes[0].angle)
-            - 0.25 / w.config.affinity_radius)
-            .abs()
-            < 1e-12
-    );
-    assert!(!std::sync::Arc::ptr_eq(
-        &old,
-        &cell.operators.as_ref().unwrap().enzymes[0]
-    ));
-    assert!(std::sync::Arc::ptr_eq(
-        &unaffected,
-        &cell.operators.as_ref().unwrap().enzymes[1]
-    ));
-    crate::refitting::advance(&mut cell, target, &w.config, &w.chemistry, 10.);
-    assert_eq!(cell.installed, target.chromosome.chemistry);
-    assert!(std::sync::Arc::ptr_eq(
-        &target.operators.enzymes[0],
-        &cell.operators.as_ref().unwrap().enzymes[0]
-    ));
-}
-
-#[test]
 fn circular_expression_validation_and_continuation_cover_nonzero_angles() {
     assert!((angles::mean(PI - 0.1, -PI + 0.1).abs() - PI).abs() < 1e-12);
     assert_eq!(angles::mean(0., -PI), 0.);
@@ -201,14 +158,8 @@ fn circular_expression_validation_and_continuation_cover_nonzero_angles() {
     g.chromosomes[0].chemistry.enzymes[0].angle = 0.7;
     g.compile(&w.config, &w.chemistry);
     diagnostics::initialize(&mut w);
-    w.cells[0].installed.enzymes[0].angle = 0.2;
-    w.cells[0].operators = Some(Operators::compile(
-        &w.cells[0].installed,
-        &w.config,
-        &w.chemistry,
-    ));
     let mut restored = crate::boundary_tests::restored_state(&w);
-    assert_eq!(restored.cells[0].installed.enzymes[0].angle, 0.2);
+    assert_eq!(restored.cells[0].chemistry().enzymes[0].angle, 0.7);
     let resumed_tick = w.tick + 8;
     for _ in 0..8 {
         w.step();
@@ -220,14 +171,14 @@ fn circular_expression_validation_and_continuation_cover_nonzero_angles() {
         let mut g = w.genomes[&1].clone();
         g.chromosomes[0].chemistry.enzymes[0].angle = angle;
         assert!(g.validate(&w.config).is_err());
-        let mut m = w.cells[0].installed.clone();
+        let mut m = w.cells[0].chemistry().clone();
         m.enzymes[0].angle = angle;
         assert!(m.validate().is_err());
     }
 }
 
 #[test]
-fn diploid_expression_compiles_parameter_mixture_without_installing_it() {
+fn diploid_birth_compilation_does_not_change_parent_capabilities() {
     let w = diagnostics::nutrition(0.8, 2., false, false);
     let mut c = w.config.clone();
     c.ploidy = "diploid".into();
@@ -245,6 +196,6 @@ fn diploid_expression_compiles_parameter_mixture_without_installing_it() {
     for row in &expressed.operators.enzymes[0].conversions {
         assert_eq!(row.products, t.products(row.substrate));
     }
-    // Compiling an inherited target does not mutate any installed cell.
-    assert_ne!(w.cells[0].installed.enzymes[0], e);
+    // Compiling a daughter's genotype does not mutate its parent.
+    assert_ne!(w.cells[0].chemistry().enzymes[0], e);
 }

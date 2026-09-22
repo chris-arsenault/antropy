@@ -159,10 +159,10 @@ impl Colors {
             };
             self.selection = Some((mode, selected, reference));
         }
-        if self.cells.len() > w.config.max_population * 2 {
+        if self.cells.len() > w.cells.len().saturating_mul(2) {
             self.cells.clear();
         }
-        if self.genomes.len() > w.config.max_population * 2 {
+        if self.genomes.len() > w.genomes.len().saturating_mul(2) {
             self.genomes.retain(|id, _| w.genomes.contains_key(id));
         }
     }

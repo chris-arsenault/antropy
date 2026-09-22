@@ -1,8 +1,42 @@
 # Current design and work order
 
-Updated September 21, 2026. Physical v35 uses shared prepared geometry, direct funded
-chemical composition and physiological neural recurrence with owner-published inputs;
-the single-thread investigation ended below its throughput target. Shared-memory execution
+<a id="design-model-simplification"></a>
+
+## Completed model simplification
+
+The [model-simplification plan](../plans/MODEL-SIMPLIFICATION-PLAN.md) tracks unnecessary
+modeled machinery in refitting, reservoir behavior, and binding/retention. M0 removes refitting:
+complete chemical capabilities are fixed at birth, and daughter mutations apply immediately to
+conservatively inherited stock. M0–M2 are complete with passing `make ci`. M1 replaces
+duplicate reservoir mixtures and lifetime expiry with one composition, finite amount, release
+and delayed refill. M2 removes the broad opposing attraction field, its gain control and
+cohesion-based washout discount. One finite attraction range, local repulsion and nonlinear
+crowding remain. Bounded mechanism checks pass; human motion review and long-run ecological
+effects remain unverified. The separate structural execution work below remains unfinished.
+
+<a id="design-structural-priority"></a>
+
+## Unfinished structural execution replacement
+
+The user's repeated direction is to address computational structure before accelerating the
+existing base. [SCALING-PLAN.md](../../SCALING-PLAN.md) is the current performance work order.
+Reconsider ownership, interaction representation, distance bounds, magnitude thresholds and
+update timing together. Preserve the governing mathematical relationships and ecological
+opportunities; do not treat the installed dense arrays, filters or phase schedule as requirements.
+Installed threading is a tool for the replacement. V36 installs compact chemical ownership,
+support-owned finite convolution and footprint-local dependencies. The sampled contact model
+was rejected and replaced with simple circle overlap and permeability. Persistent spatial
+tiles and meaningful-change scheduling remain unfinished; the prior structural closeout was
+withdrawn. Previous optimization sequences are historical evidence only.
+
+<a id="design-installed-runtime"></a>
+
+## Installed runtime
+
+Updated September 22, 2026. Physical v40 uses sparse chemical owners and one finite shared
+circle-overlap law for pressure, isotropic sensing and funded material exchange. Direct chemical
+composition and physiological neural recurrence retain owner-published inputs. The earlier
+single-thread investigation ended below its throughput target. Shared-memory execution
 is now tracked in the [multicore plan](../../SCALING-PLAN.md#multicore-design), with one Rust
 World, a persistent compute pool and the existing coordinator-owned renderer. It uses one scalar illumination field throughout chemistry,
 photoreception and display. It retains v33 cellular organization and exchange, material-supported
@@ -53,9 +87,10 @@ The [connected review](../cellular-180k-connections.md) finds strong collective 
 local work conditions, persistent divergence between northern and southern processing, and
 energy crises despite retained material. It corrects a derived body-signal omission in the
 earlier inspector; recorded flows and ancestry are unaffected.
-The run was stopped at the user's request. Its mature checkpoint measures only 2.43 ticks/s
+The run was stopped at the user's request. Its historical mature checkpoint measured 2.43 ticks/s
 with observation disabled and exceeds the browser save/export limit. Contact search considers
-5.2 million candidates for 38,071 real contacts; correcting that work is the first runtime target.
+5.2 million candidates for 38,071 real contacts in that baseline. Subsequent contact and threading
+changes improved it; this historical diagnosis is not the current work order.
 
 <a id="design-design-owners"></a>
 
@@ -91,8 +126,8 @@ the accepted direction and prior calibration. Chemistry changes require a new mo
 ## Current default and disabled scope
 
 Run starts seed 27, paused at tick zero, with 48 cells of four mutable founder genotypes in two
-separated resource neighborhoods of a 320 × 240 periodic world. Forty-eight mobile renewing reservoirs
-have unequal richness, local mixtures and variable release. Chemistry seed101 and source IDs0/136
+separated resource neighborhoods of a 720 × 540 periodic world. Two hundred forty mobile renewing reservoirs
+have unequal richness, evolving mixtures and fixed per-site release rates. Chemistry seed101 and source IDs0/136
 support the authored circuit0→128→136→8→0, with six cells of each role per colony.
 Finite initial8/128 priming starts delivery; later processing follows ordinary laws. Free and
 bound material retain actual identities through repair and death. No chemical has a privileged
@@ -102,13 +137,20 @@ The controller has 56 inputs, 24 recurrent units and 38 outputs. Twenty bounded 
 four chemical receptors, four transporters and up to eight enzyme programs plus core, motor, storage and
 [photoreception](../photoreception.md). The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v35; the outer observation package remains v11.
-The [material-habitat changes](../material-habitats.md) add shared two-scale attraction,
-reversible retention, locally evolving source renewal and multiscale public chemistry.
+checkpoints use v40; the outer observation package remains v11.
+The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
+mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
+the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping
+resource density comparable instead of stretching seven neighborhoods across the larger map.
+Reproduction has no population-count ceiling; ancestry,
+memory and observation budgets remain separate operating limits. Larger area is not a speed guarantee.
+The [material-habitat changes](../material-habitats.md) introduced shared attraction,
+locally evolving source renewal and multiscale public chemistry. The
+[simplification](../plans/MODEL-SIMPLIFICATION-PLAN.md) now uses one normalized attraction
+range and ordinary washout; the broad opposing field and cohesion discount are removed.
 IDs0/136 are initial landscape choices; ordinary renewal no longer reinstates them.
 Generic stress, compatibility, repair and impedance replace named toxin/defense/
-matrix pathways. Source zones and epochs remain selectable. Disturbance and typed machinery
-transfer are experimental options, disabled by default. Direct cell adhesion remains deferred.
+matrix pathways. Source zones and epochs remain selectable. Disturbance is an experimental option, disabled by default. Living-cell genetic transfer is removed. Direct cell adhesion remains deferred.
 Smooth geographic weathering and chemical shelter are active. The weathering display and
 selected-cell exposure readings describe physical conditions without adding controller inputs.
 
@@ -125,25 +167,23 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
-Keep current simulation semantics while investigating accumulated-session costs. The observed
-8→40 ticks/s reload improvement is not yet explained; forced JavaScript collection did not
-reproduce it. The retention repair expires older saves within the existing byte budget rather
-than pausing merely because the preferred save counts do not fit.
-The separate v33 mature-state slowdown reproduces after restore. The
-[contact-search optimization](../contact-performance.md) raised that matched world from 2.44 to
-8.14 ticks/s. The [continued pass](../bounded-computation.md) reaches 12.77 ticks/s using
-finite-resolution census grouping, occupied-bin contact queries and a shared concentration
-threshold for reaction participation. Trace intracellular material remains stored until it
-accumulates above the threshold. Those are historical single-thread measurements. The resumed
-[multicore implementation](../../SCALING-PLAN.md#multicore-design) now measures the historical
-mature checkpoint at 18.53/36.98 ticks/s with one/six native workers through its isolated legacy
-fixture. Browser capacity and scaled geography are measured separately; mature browser throughput
-and large-world save/export limits remain unresolved.
+The structural replacement remains unfinished; [the scaling work order](../../SCALING-PLAN.md)
+tracks the circle simplification and required tiled execution. The September 21 sampled-contact
+implementation produced the following historical results, superseded for contact behavior. At 20× area,
+the ordinary 48-founder workload improved from 20.6 to 129.5 ticks/s with one native worker.
+The concentrated 2,000-cell case is almost independent of added empty area, but at the original
+area it regressed from 50.1 to 34.8 ticks/s. These are stepping measurements, with full overview
+preparation measured separately. Neither establishes browser motion quality or days-long speed.
+Historical [contact](../contact-performance.md), [bounded-computation](../bounded-computation.md)
+and [multicore evidence](../sources/history/2026-09-21-scaling-before-structural-correction.md)
+record improvements and failures; they do not authorize another incremental optimization pass.
+The reload-related slowdown remains an unresolved [operating observation](../session-runtime-review.md),
+not a reason to displace the structural work with a garbage-collection or persistence investigation.
 
 Future work belongs in the [backlog](../backlog.md): meaningful long-term specialization,
 less dependence on original feedstock, useful public-food returns, operating headroom, terrain
-and climate, and conditional cell interaction research. Multicore's remaining operating envelope
-is tracked in the scaling plan. Source geometry
+and climate, and conditional cell interaction research. The scaling plan owns the delivered
+structural record and its subsequent operating-envelope assessment. Source geometry
 is a revisable initial condition, not a requirement for predetermined wells or colony counts.
 Do not turn these open questions into a mandatory verification campaign.
 

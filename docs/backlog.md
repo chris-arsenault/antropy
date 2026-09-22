@@ -13,11 +13,12 @@ local populations. Implementation phases and acceptance live in that design docu
 
 ## Remaining multicore scaling
 
-The user resumed multicore implementation on September 21.
-[the shared-memory design and P0–P4 milestones](../SCALING-PLAN.md#multicore-design)
-in Sulion plan `e3517c4b-b3df-4786-bcf4-10a488a294d1` records installed P0–P2 execution and
-six-core measurements. P3 retains large-world browser persistence, representative occupied
-workloads and 16/32-core acceptance; P4 terrain remains future work.
+The [structural scaling work order](../SCALING-PLAN.md) is active work, not a deferred
+optimization idea. Sulion plan `e3517c4b-b3df-4786-bcf4-10a488a294d1` retains installed
+P0–P2 threading as evidence and explicitly requires structural replacement before P3
+operating acceptance. The existing implementation is not the fixed base for another acceleration
+pass. P4 terrain remains future work. Large-world persistence limits remain recorded operating
+constraints; compatibility work must not displace the structural implementation.
 Composed local illumination, funded optical sensing and
 material-supported habitats are implemented; they do not depend on multicore execution. Elevation and rotational transport remain later extensions;
 the earlier spatial review retains evidence and its rejected fixed-well proposal.

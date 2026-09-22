@@ -18,10 +18,10 @@ const INPUTS = [
   ...MACHINERY.map((p) => "Built " + p),
   "Usable energy",
   "Growth",
-  "Front contact",
-  "Left contact",
-  "Rear contact",
-  "Right contact",
+  "Crowding share 1",
+  "Crowding share 2",
+  "Crowding share 3",
+  "Crowding share 4",
   "Task byte",
   "Built motor capacity",
   "Built storage capacity",
@@ -62,17 +62,10 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
       {p.cell ? (
         <>
           <CellDetails inspection={p} definition={definition} />
-          {p.installedChemistry &&
-            JSON.stringify(p.installedChemistry) !== JSON.stringify(p.expressed?.chemistry) && (
-              <details>
-                <summary>Installed machinery and inherited target</summary>
-                <p>
-                  Genome {p.cell.genome} supplies inherited instructions. The installed coordinates
-                  below change gradually as the cell pays to refit its funded machinery.
-                </p>
-                <pre>{JSON.stringify(p.installedChemistry, null, 2)}</pre>
-              </details>
-            )}
+          <p>
+            Chemical capabilities are fixed at birth. Activity and funded stock can change;
+            descendants may inherit mutated capabilities.
+          </p>
           {bridge.getSnapshot().status?.execution?.operator !== false && (
             <Task bridge={bridge} id={p.cell.id} error={error} />
           )}
@@ -212,7 +205,7 @@ function Chemistry({
   definition: Definition;
 }) {
   const c = p.cell!,
-    genes = c.installed;
+    genes = p.expressed!.chemistry;
   const slots = [...genes.receptors, ...genes.transporters, ...genes.enzymes];
   const operation = (i: number) => {
     if (i < 4) return `sense · ${(100 * genes.inward[i]).toFixed(0)}% inward`;
@@ -243,7 +236,7 @@ function Chemistry({
         Membrane ({n(genes.membrane.x)}, {n(genes.membrane.y)})
       </p>
       <Table
-        columns={["Slot", "Installed coordinate", "Operation", "Stock"]}
+        columns={["Slot", "Birth coordinate", "Operation", "Stock"]}
         rows={slots.map((g, i) => [
           machineryLabel(i),
           n(g.x) + ", " + n(g.y),

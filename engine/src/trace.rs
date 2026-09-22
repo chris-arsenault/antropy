@@ -20,7 +20,7 @@ pub struct Founder {
 pub fn frame(w: &crate::world::World) -> serde_json::Value {
     let cells:Vec<_>=w.cells.iter().map(|c| {
         let g=w.genomes[&c.genome].compiled.as_ref().unwrap();
-        let mut probe=c.clone();crate::sensing::observe(&mut probe,g,w.genomes[&c.machinery_genome].compiled.as_ref().unwrap(),&w.config,&w.field);
+        let mut probe=c.clone();crate::sensing::observe(&mut probe,g,&w.config,&w.field);
         let sites=w.field.stencil(c.x,c.y);
         let local:Vec<_>=(0..256).map(|s| w.field.sample(s,&sites)).collect();
         let impedance=w.field.medium_load(&sites);
@@ -45,7 +45,7 @@ pub fn habitat(w: &crate::world::World) -> serde_json::Value {
                 .filter(|(_, q)| *q > 0.)
                 .collect();
             serde_json::json!({"id":c.id,"lineage":c.lineage,"genome":c.genome,"born":c.born,
-            "body":c.body,"installed":c.installed,"machineryGenome":c.machinery_genome,
+            "body":c.body,"chemistry":c.chemistry(),
             "weathering":crate::climate::local(w,c.x,c.y),"exports":exports})
         })
         .collect();

@@ -3,6 +3,31 @@
 Antropy is a browser-based 2D artificial-life simulation built as a Vite, React, TypeScript, and
 worker WebGL2 SPA with a Rust/WASM physical kernel and deployed on the Ahara platform.
 
+## Primary performance rule: structural replacement before acceleration
+
+The user has repeatedly rejected accelerating the existing implementation while postponing
+structural changes. Treat that direction as controlling for performance work. Start from the
+simulation's intended opportunities, mathematical relationships and cost model. Existing loops,
+storage layouts, interaction representations and update schedules are not constraints to preserve.
+
+Select and implement the necessary changes to ownership, local interaction representation,
+computational distance, participation thresholds and update timing before tuning arithmetic,
+adding threads or accumulating patches around the old structure. Limits must come from shared
+rules with explicit units, accounting and reactivation; they must not select favored chemicals,
+phenotypes or desired ecological outcomes. Persistent spatial tiles are required; compact
+chemical rows alone do not fulfill that architecture. Tiles also need local update limits.
+
+Preserve the chemical algebra, funded local evolution and data ownership. Exact numerical
+formulas, trajectories, save compatibility and replayability do not make a rejected execution
+structure mandatory. A faster existing path or a completed threading phase cannot stand in for
+the structural result. Necessary fixes within the replacement remain ordinary implementation.
+
+[SCALING-PLAN.md](SCALING-PLAN.md) is the sole current performance work order. Archived
+optimization sequences and past assistant proposals are evidence only; do not load them as
+instructions or resume their patch queues. If a phase requires structural work to achieve the
+goal, keep that work explicit and unfinished until ordinary production consumers use it.
+Do not describe instruction cleanup, a proposal or a benchmark-only prototype as implementation.
+
 ## Primary delivery rule: correctness and impact
 
 Choose and implement the most correct, impactful solution to the user's goal within the
@@ -71,10 +96,10 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v35 uses one
-Rust/WASM World in a worker, with mesh-2 fields on a periodic 320 × 240 XY plane. Seed27 starts
-paused with 48 cells of four mutable founder types across two colonies and 48 finite renewing
-reservoirs. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v40 uses one
+Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
+paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
+reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
 Current physiology has 56 local RNN inputs, 24 recurrent units and 38 outputs, twenty bounded
@@ -85,12 +110,18 @@ activity/construction control, paid retirement and shared field/contact access i
 [joint design](docs/design/cellular-organization-and-exchange.md). Injured cells expose free
 inventory through ordinary paid transport. No role, kin rule or community reward assigns cooperation.
 Genotypes are immutable; private experience transmits only through explicit birth-local
-assimilation. Installed machinery retains its function until paid refitting. Reproduction cannot
-grant newly targeted machinery. No fallback policy, remote parent selector, coordinates, compass,
+assimilation. Complete chemical capabilities are fixed at birth. Daughter mutations apply immediately,
+while actual stock and material split conservatively. Do not restore refitting or parental-function
+buffers. Reproduction grants no additional stock; living-cell gene transfer is removed. No fallback policy, remote parent selector, coordinates, compass,
 lineage label or reproductive score enters the controller.
 
-Shared two-scale material attraction, local repulsion, reversible retention, evolving source
-renewal and multiscale public transformations are implemented. Illumination composes several
+Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
+washout, evolving source renewal and multiscale public transformations are implemented.
+There is no broad opposing attraction field, attraction gain or cohesion-based loss discount.
+Each reservoir has one evolving
+composition and a finite amount, with fixed per-site release and delayed accounted refill.
+There is no independent expiry clock, second supply mixture or empty-source motion.
+Illumination composes several
 slow spatial/temporal axes into shared transformation work; it is not direct energy credited
 to cells. Cells can pay for local optical sensing. See [material habitats](docs/material-habitats.md),
 [photoreception](docs/photoreception.md) and the composed laws for definitions and limits.
@@ -102,14 +133,20 @@ physical state; rendering borrows WASM views in the same worker. Full field/popu
 must never be serialized or copied to React. The [ownership contract](docs/design/chemistry/data-ownership.md)
 and its CI guards remain mandatory.
 
-Source zones/epochs and optional disturbance/typed transfer remain available; disturbance and
-transfer are off by default. Direct adhesion, multiple substrates, unrestricted genome/neural topology,
+Source zones/epochs and optional disturbance remain available; disturbance is off by default. Direct adhesion, multiple substrates, unrestricted genome/neural topology,
 terrain and rotational climate are deferred. The user resumed multicore execution September 21.
 The [scaling plan](SCALING-PLAN.md#multicore-design) records the installed persistent Rayon pool,
 shared WASM memory, disjoint field/cell jobs and small-work serial crossover. The owning worker
 still coordinates the sole World and renders borrowed views after every phase joins. Development
 requires cross-origin isolation; unsupported browsers use the same operators in the serial build.
-P3 large-world persistence and 16/32-core acceptance remain open; default dimensions are unchanged.
+The v36 structural replacement uses compact occupied chemical rows, support-owned finite
+convolution and footprint-local motion dependencies. Contact uses perfect circles: scalar
+penetration, center-line soft separation and permeable material access. No contact sampling
+lattice, angular moments or heading dependence. The sampled contact replacement was rejected.
+Root S remains open for persistent tiles and meaningful-change scheduling; P3 live operating
+acceptance and human motion review remain open. V40 enlarges default area 5.0625-fold while
+preserving aspect ratio and mesh. There is no population-count ceiling; ancestry and memory
+budgets remain independent operating limits.
 
 [Execution modes](docs/execution-modes.md) extends this with explicit browser 1/4 selection and
 one native server World feeding the same UI through bounded display projections. Local rendering
@@ -180,8 +217,7 @@ that a cell senses a cue, acts on it and obtains a benefit that repays its cost.
    decision the result can change before execution. Read existing negative findings first.
 2. Use the shared simulation with handcrafted diagnostic RNN weights and physical genotypes.
    Simple biases and sensor-response connections are feasible; a programmed fallback or oracle
-   is unnecessary. Freeze mutation and specify private learning, inherited-learning and contact
-   gene-transfer settings. Physiological opportunities need a physical response, not an invented
+   is unnecessary. Freeze mutation and specify private learning, inherited-learning settings. Living-cell gene transfer is not supported. Physiological opportunities need a physical response, not an invented
    neural cue.
    Record funded bodies separately from genetic construction targets.
 3. Start with single-cell probes lasting hundreds of ticks. Verify actual local readings, steering,

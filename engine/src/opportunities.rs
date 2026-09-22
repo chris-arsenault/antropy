@@ -39,7 +39,6 @@ fn base_mesh(count: usize, mesh: f64) -> World {
         c.y = 12.;
         c.heading = 0.;
         c.genome = (i + 1) as u64;
-        c.machinery_genome = c.genome;
         w.ancestry[i].genome = c.genome;
         c.inventory.fill(0.);
         c.inventory.set(240, 0.8);

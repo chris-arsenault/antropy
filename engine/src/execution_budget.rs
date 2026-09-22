@@ -118,32 +118,15 @@ fn field_rates(w: &World) -> (Vec<Sample>, Vec<f64>) {
 
 pub fn report(w: &World) -> Value {
     let c = &w.config;
+    let graph = Graph::new(&w.cells, c);
     let geometry = crate::movement::geometry::Contacts::new(&w.cells, c);
-    let graph = Graph::from_geometry(&w.cells, c, &geometry);
-    let mut contact = vec![[0.; 2]; w.cells.len()];
+    let mut pressure = crate::movement::geometry::prepared::pressure::Pressure::default();
+    pressure.prepare(&geometry, c.dt);
+    let contact: Vec<_> = pressure.rows.iter().map(|row| row.shift).collect();
     let mut geometric_neighbors = vec![0; w.cells.len()];
     for edge in &geometry.edges {
         geometric_neighbors[edge.i] += 1;
         geometric_neighbors[edge.j] += 1;
-        let rate =
-            ((edge.extent - edge.length) * 0.5 * (1. - (-c.dt).exp())).min(c.dt * 0.5) / c.dt;
-        let unit = if edge.length > 0. {
-            edge.direction()
-        } else {
-            let a = geometry.bodies[edge.i].heading;
-            let b = geometry.bodies[edge.j].heading;
-            let direction = [b[0] - a[0], b[1] - a[1]];
-            let norm = direction[0].hypot(direction[1]);
-            if norm > 1e-12 {
-                direction.map(|v| v / norm)
-            } else {
-                [0.; 2]
-            }
-        };
-        for k in 0..2 {
-            contact[edge.i][k] -= rate * unit[k];
-            contact[edge.j][k] += rate * unit[k];
-        }
     }
     let (field, local_field) = field_rates(w);
     let mut stages: [Vec<Sample>; 10] = std::array::from_fn(|_| Vec::new());
@@ -163,7 +146,7 @@ pub fn report(w: &World) -> Value {
         }
         let (chemical, bulk) = chemical_rate(cell, c, &net);
         let (gross_chemical, gross_bulk) = chemical_rate(cell, c, &gross);
-        let neighbors = graph.neighbors[i].len();
+        let neighbors = graph.neighbors(i).len();
         let external = row.iter().map(|&(n, _)| local_field[n]).fold(0., f64::max);
         let coupled = movement
             .max(neural)

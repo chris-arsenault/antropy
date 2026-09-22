@@ -79,8 +79,9 @@ physical state of a killed process without a valid checkpoint.
 
 ## Memory and history limits
 
-Defaults stop at 10,000 living cells or two million ancestor records. These are operating limits,
-not biological carrying capacities. Complete ancestry uses 56-byte resident records with compact
+V40 removes the 10,000-living-cell stop and population-limit configuration. The default
+two-million-ancestor-record budget remains an operating limit, not a biological carrying
+capacity. Complete ancestry uses 56-byte resident records with compact
 binary serialization. Full dead non-founder genotype payloads can be pruned independently.
 
 A registered two-million-record synthetic history used 406 MiB WASM high-water memory, down
@@ -96,8 +97,9 @@ the world. Observations retain 240 thinned chart/spatial samples, 81 recent beha
 Old unobserved motion is not reconstructed. Exports preserve retained data but do not reset
 ancestry limits or remove memory costs.
 
-The field allocation is bounded by geometry (default 160 × 120 nodes × 256 float32 amounts).
-There is no sparse-block-count ceiling or quantization setting. Very large state can hit the
+Default geography is now 720 × 540 at mesh 2: 360 × 270 possible chemical nodes. Only occupied
+nodes and their active halo allocate 256-float32 rows; map indices still scale with area.
+There is no sparse-block-count ceiling. Very large state can hit the
 raw checkpoint/storage budget before another configured ceiling. The error remains visible.
 
 ## Human review and completion boundary

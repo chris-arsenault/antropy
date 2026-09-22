@@ -23,7 +23,7 @@ fn funded_physiology_publishes_current_body_damage_and_internal_composition() {
     );
     for slot in 0..crate::organism::MAX_ENZYMES {
         let stock = crate::organism::enzyme_stock(slot);
-        let expected = if cell.installed.programs[slot] {
+        let expected = if cell.chemistry().programs[slot] {
             (cell.body[stock] / (cell.body[stock] + g.body[stock]).max(1e-30)) as f32
         } else {
             0.
@@ -42,7 +42,7 @@ fn funded_physiology_publishes_current_body_damage_and_internal_composition() {
 }
 
 #[test]
-fn base_owner_publishes_energy_and_rotated_contact_before_the_next_physiology() {
+fn base_owner_publishes_energy_and_changed_overlap_before_the_next_physiology() {
     let mut world = crate::diagnostics::nutrition(0.8, 2., false, false);
     let mut other = world.cells[0].clone();
     other.id = world.next_cell;
@@ -56,7 +56,7 @@ fn base_owner_publishes_energy_and_rotated_contact_before_the_next_physiology() 
         .contact_cache
         .graph_prepared(&world.cells, &world.config)
         .contacts[0];
-    world.cells[0].heading += std::f64::consts::FRAC_PI_2;
+    world.cells[0].x += 0.25 * world.cells[0].radius(&world.config);
     world.cells[0].energy *= 0.25;
     world
         .contact_cache

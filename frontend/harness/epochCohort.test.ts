@@ -50,7 +50,6 @@ it("swaps inherited cohorts on common funded bodies and keeps descendant assignm
     first.world.step(10);
     expect(first.world.command<Definition>("definition").config).toMatchObject({
       learningRetention: 0,
-      transferRate: 0,
     });
   } finally {
     first.world.dispose();

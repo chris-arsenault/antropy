@@ -12,7 +12,7 @@ fn yields(w: &World, c: &Cell, drives: &[[f64; 2]]) -> Value {
     let mut inhibited = 0.;
     for (slot, enzyme) in c.operators.as_ref().unwrap().enzymes.iter().enumerate() {
         let stock = c.body[antropy_engine::organism::enzyme_stock(slot)];
-        if !c.installed.programs[slot] || stock == 0. || c.action.activity[slot] == 0. {
+        if !c.chemistry().programs[slot] || stock == 0. || c.action.activity[slot] == 0. {
             continue;
         }
         let occupancy: f64 = enzyme

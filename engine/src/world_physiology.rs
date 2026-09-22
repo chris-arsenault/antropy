@@ -41,7 +41,6 @@ impl Context<'_> {
             signal,
         );
         crate::metabolism::repair(cell, self.config, self.chemistry, self.dt);
-        crate::refitting::advance(cell, g, self.config, self.chemistry, self.dt);
         crate::metabolism::grow(cell, g, self.config, self.chemistry, self.dt);
         let excess = (cell.energy - cell.energy_capacity(self.config)).max(0.);
         cell.energy -= excess;

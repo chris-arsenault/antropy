@@ -1,4 +1,4 @@
-//! One exact contact geometry shared by every consumer of the current physical step.
+//! Circle overlap is shared by pressure, scalar sensing and material exchange.
 use crate::{config::Config, organism::Cell};
 #[path = "prepared_contacts.rs"]
 pub(crate) mod prepared;
@@ -9,7 +9,6 @@ mod search;
 pub struct Body {
     pub position: [f64; 2],
     pub radius: f64,
-    pub heading: [f64; 2],
 }
 #[derive(Clone, Copy, Debug)]
 pub struct Edge {

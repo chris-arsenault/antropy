@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn compact_products_preserve_exact_merged_maps_at_boundaries_and_identity() {
     let w = crate::world::World::new(27, crate::config::Config::default()).unwrap();
-    let mut machinery = w.cells[0].installed.clone();
+    let mut machinery = w.cells[0].chemistry().clone();
     for (angle, x, y) in [
         (0., 0., 0.),
         (0.37, 3.2, 9.6),
@@ -112,7 +112,7 @@ fn check_compiled(
 #[test]
 fn shared_subset_dictionary_preserves_tiny_components_without_expanded_storage() {
     let w = crate::world::World::new(27, crate::config::Config::default()).unwrap();
-    let mut enzyme = w.cells[0].installed.enzymes[0];
+    let mut enzyme = w.cells[0].chemistry().enzymes[0];
     enzyme.angle = 1e-12;
     enzyme.center_x = 3.2;
     enzyme.center_y = 9.6;

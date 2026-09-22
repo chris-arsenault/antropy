@@ -231,10 +231,10 @@ match an unexpressed target. Skipping a motor or enzyme can reduce reproductive 
 also removes its function from the offspring. Whether that succeeds is a physical consequence,
 not a minimum-capability recipe. Other reproduction and ancestry rules remain.
 
-Sensing allocation is itself subject to the existing paid installed-target refitting principle.
-The neural controller can switch activity quickly, but changing its material environment requires
-real transport/conversion and changing its machinery requires real construction/refitting. These
-different timescales are the basis for a possible efficiency-versus-flexibility tradeoff.
+Sensing allocation and chemical capabilities are fixed at birth under the September 22
+[lifetime rule](chemistry/installed-machinery.md). The neural controller can switch activity,
+but changing its material environment requires real transport/conversion and changing stock
+requires funded construction/retirement. Identity changes occur through daughter mutation.
 
 ## 5. Evolvable enzyme repertoires and inherited organization
 
@@ -254,21 +254,21 @@ investment: the minimum gene count is not a requirement for funded enzyme activi
 execution bound selected from complete cost measurements, not a desired number of strategies.
 It bounds the union of genetic templates and carried installed/retired programs. Retirement
 does not hide unbounded old programs outside that limit. Count mutations respect the remaining
-record capacity; ordinary retargeting still uses existing records and paid refitting.
+record capacity; birth-local retargeting uses existing records without granting material.
 
 Duplicating a program divides its construction target and inherited actual stock among identical
 copies. Copy its activity and growth readouts; split incoming neural contributions so their sum
 is unchanged. Recognition, action, body mass and initial chemical flux are unchanged before
 ordinary subsequent mutation. This prevents a duplication from granting double machinery,
 doubling sensory input or changing behavior solely because a list became longer. The copies can
-then diverge through the same ordinary parameter mutation and paid installation laws.
+then diverge through the same ordinary birth-local parameter mutation and funded construction.
 
 Deleting a program removes its genetic target, not its actual material. Its remaining stock is
 retired, ceases receiving activity/construction requests, and continues to occupy volume and incur
 upkeep until decommissioned. Decommission transfers the matching mass from B_i to I_i without
 changing identity, pays assembly-price work per mass, shares the existing core-supported material
 handling rate with construction, and respects storage headroom. No same-event reuse of released
-material or newly freed capacity. Existing paid refitting handles changed surviving programs.
+material or newly freed capacity. Surviving programs use the daughter's mutated parameters immediately at birth.
 Deleting a gene therefore cannot instantly erase a body cost or finance another enzyme.
 
 Only stock above the requested amount T is eligible for decommission, including all

@@ -90,7 +90,7 @@ pub fn observe(w: &World, v: &Value) -> Result<Value, String> {
     let pairs: Vec<(u64, u64)> =
         serde_json::from_value(v.get("origins").cloned().unwrap_or(json!([])))
             .map_err(|e| e.to_string())?;
-    if pairs.len() > w.config.max_population {
+    if pairs.len() > w.ancestry.len() {
         return Err("Too many observer origins".into());
     }
     let known: BTreeMap<_, _> = pairs.into_iter().collect();

@@ -26,7 +26,6 @@ export const frozen = {
   mutationRate: 0,
   physicalMutationRate: 0,
   transmission: "clonal",
-  transferRate: 0,
   learningRetention: 0,
   learning: "static",
 } as const;

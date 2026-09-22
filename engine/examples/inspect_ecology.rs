@@ -38,7 +38,7 @@ fn infer(w: &World, c: &Cell, inputs: &[f32]) -> [f64; 7] {
 fn optical_response(w: &World, c: &Cell) -> Value {
     let mut probe = c.clone();
     let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
-    sensing::observe(&mut probe, g, g, &w.config, &w.field);
+    sensing::observe(&mut probe, g, &w.config, &w.field);
     let normal = infer(w, c, &probe.inputs);
     let mut absent = probe.inputs.clone();
     absent[39..43].fill(0.);
@@ -121,7 +121,7 @@ fn cells(w: &World) -> (Vec<Value>, Value) {
             "generation":c.generation,"born":c.born,"position":[c.x,c.y],"heading":c.heading,
             "body":c.body,"target":g.body,"energyFraction":c.energy/c.energy_capacity(&w.config),
             "damage":c.damage,"inventory":c.inventory.material(),"primary":route,
-            "installed":c.installed,"light":w.field.illumination.sample(&sites),
+            "installed":c.chemistry(),"light":w.field.illumination.sample(&sites),
             "action":actions(c.action),"optical":optical_response(w,&observed),"diet":diet(c),
             "organization":cellular::inspect(w,&observed,&graph,index,&bodies),
             "lastStepFlows":c.flows,"chemicalFlows":c.chemical_flows})
@@ -136,7 +136,7 @@ fn geography(w: &World) -> Value {
     let mut material = Vec::new();
     let mut light = Vec::new();
     let mut active_groups = 0;
-    for (i, row) in w.field.amounts.chunks_exact(256).enumerate() {
+    for (i, row) in w.field.amounts.rows() {
         material.push(row.iter().map(|v| *v as f64).sum::<f64>());
         light.push(w.field.illumination.node(i));
         for (a, b) in species.iter_mut().zip(row) {
@@ -153,8 +153,8 @@ fn geography(w: &World) -> Value {
         .map(|s| {
             json!({
                 "position":[s.habitat.x,s.habitat.y],"radius":s.habitat.radius,
-                "inventory":s.inventory,"replenishment":s.replenishment,
-                "remaining":s.remaining,"wait":s.wait,"rate":s.rate
+                "inventory":s.inventory().collect::<Vec<_>>(),"composition":s.mixture,
+                "amount":s.amount,"wait":s.wait,"rate":s.rate
             })
         })
         .collect();
@@ -177,11 +177,7 @@ fn storage(w: &World, bytes: usize) -> Result<Value, postcard::Error> {
         ("events", size(&w.events)?),
     ];
     let accounted: usize = sections.iter().map(|(_, n)| n).sum();
-    let live: std::collections::BTreeSet<_> = w
-        .cells
-        .iter()
-        .flat_map(|c| [c.genome, c.machinery_genome])
-        .collect();
+    let live: std::collections::BTreeSet<_> = w.cells.iter().map(|c| c.genome).collect();
     let catalog: std::collections::BTreeSet<_> = w
         .events
         .iter()

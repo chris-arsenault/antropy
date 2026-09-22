@@ -16,20 +16,15 @@ fn norm(v: [f64; 2]) -> f64 {
     v[0].hypot(v[1])
 }
 
-fn profile(s: &Source, w: &World) -> [f64; 3] {
+fn profile(s: &Source) -> [f64; 3] {
     if s.material.total > 0. {
         return s.material.moments.map(|v| v / s.material.total);
     }
-    assert!(w.config.source_zones.is_none() && w.config.source_epochs.is_none());
-    assert_eq!(w.config.source_species, [0, 136]);
-    let mut material = source_medium::Material::default();
-    material.add(0, s.habitat.share, &w.chemistry);
-    material.add(136, 1. - s.habitat.share, &w.chemistry);
-    material.moments
+    [0.; 3]
 }
 
 fn terms(w: &World, s: &Source) -> Value {
-    let p = profile(s, w);
+    let p = profile(s);
     let gradient = w.field.gradient(&s.footprint);
     let own = medium_response::self_load(
         s.material.total * p[2] / (1. + s.material.total / s.interface),
@@ -95,7 +90,7 @@ fn snapshot(path: &str) -> Result<Value, Box<dyn std::error::Error>> {
         .enumerate()
         .map(|(id, s)| {
             let mut row = terms(&w, s);
-            let p = profile(s, &w);
+            let p = profile(s);
             let other = row["otherLoad"].as_f64().unwrap();
             let mut parts = serde_json::Map::new();
             let mut sum = [0.; 2];
@@ -131,7 +126,7 @@ fn snapshot(path: &str) -> Result<Value, Box<dyn std::error::Error>> {
             row["position"] = json!([s.habitat.x, s.habitat.y]);
             row["radius"] = json!(s.habitat.radius);
             row["nearest"] = json!(nearest);
-            row["remaining"] = json!(s.remaining);
+            row["amount"] = json!(s.amount);
             row["wait"] = json!(s.wait);
             row
         })
@@ -168,10 +163,12 @@ fn set_pair(w: &mut World, distance: f64, ratio: f64, second: usize, empty: bool
     for (j, s) in w.sources.iter_mut().enumerate() {
         s.habitat.x = 32.3 + distance * j as f64;
         s.rebuild(&w.config, &w.field);
-        s.inventory.fill(0.);
+        s.mixture.fill(0.);
+        s.mixture[0] += 0.6;
+        s.mixture[second] += 0.4;
+        s.amount = 0.;
         if !empty || j == 0 {
-            s.inventory[0] += 0.6 * ratio * s.interface;
-            s.inventory[second] += 0.4 * ratio * s.interface;
+            s.amount = ratio * s.interface;
         }
     }
     source_medium::project(w);
@@ -255,7 +252,8 @@ fn broaden_attraction(w: &mut World, sigma: f64) {
                 temporary[n] += weight * rows[n / nx * nx + x][0];
             }
         }
-        for (n, row) in rows.iter_mut().enumerate() {
+        for n in 0..rows.len() {
+            let row = &mut rows[n];
             row[0] = 0.;
             for (j, &weight) in weights.iter().enumerate() {
                 let y = (n as isize / nx as isize + j as isize - reach).rem_euclid(ny as isize)
@@ -315,11 +313,12 @@ fn cluster_curves() -> Vec<Value> {
                         s.habitat.radius = 3.;
                         s.habitat.share = 0.6;
                         s.rebuild(&w.config, &w.field);
-                        s.inventory.fill(0.);
+                        s.mixture.fill(0.);
+                        s.mixture[0] = 0.6;
+                        s.mixture[if j == 0 { center_species } else { 136 }] += 0.4;
+                        s.amount = 0.;
                         if j > 0 || !empty_center {
-                            s.inventory[0] = 0.6 * s.interface;
-                            s.inventory[if j == 0 { center_species } else { 136 }] +=
-                                0.4 * s.interface;
+                            s.amount = s.interface;
                         }
                     }
                     source_medium::project(&mut w);

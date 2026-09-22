@@ -106,7 +106,7 @@ def geography(points, config, output):
     for axis, tick in zip(axes.flat, [5000, 10000, 20000, 30000, 40000, 50000]):
         p = min(points, key=lambda p: abs(p["tick"] - tick))
         for s in p["sources"]:
-            color = "tab:orange" if s["remaining"] > 0 and s["inventory"] > 0 else "0.75"
+            color = "tab:orange" if s["inventory"] > 0 else "0.75"
             axis.add_patch(plt.Circle((s["x"], s["y"]), s["radius"], fill=False, color=color, alpha=.65))
         cells = p["positions"]
         axis.scatter([c[3] for c in cells], [c[4] for c in cells], c=[c[1] for c in cells],

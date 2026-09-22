@@ -1,7 +1,12 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { type Engine, type EngineWorld } from "../../src/engine/client";
-import { type CellState, type Definition, type Summary } from "../../src/engine/types";
+import {
+  type CellState,
+  type Definition,
+  type Machinery,
+  type Summary,
+} from "../../src/engine/types";
 import { resourceSample, validateAccounts } from "./studyBudget";
 
 interface HabitatCell {
@@ -10,8 +15,7 @@ interface HabitatCell {
   genome: number;
   born: number;
   body: number[];
-  installed: CellState["installed"];
-  machineryGenome: number;
+  chemistry: Machinery;
   weathering: [number, number, number];
   exports: [number, number][];
 }
@@ -32,7 +36,7 @@ function eligible(c: HabitatCell, group: TraceGroup, d: Definition, tick: number
     if (p.impedance >= 2.5 && p.potential <= terminal + 0.05) invested += amount;
   }
   const f = group.ledger.flows;
-  const cost = f.maintenance + f.motors + f.learning + f.transport + f.repair + f.refitting;
+  const cost = f.maintenance + f.motors + f.learning + f.transport + f.repair;
   return invested >= 0.1 && invested >= total * 0.1 && f.captured > cost && f.constructed > 0;
 }
 export function habitatObserver(

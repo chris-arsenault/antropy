@@ -62,20 +62,8 @@ pub fn mask(row: &[f32]) -> u64 {
     bits
 }
 
-pub fn clear(row: &mut [f32], mut mask: u64) {
-    if mask == u64::MAX {
-        row.fill(0.);
-        return;
-    }
-    while mask != 0 {
-        let s = mask.trailing_zeros() as usize * 4;
-        mask &= mask - 1;
-        row[s..s + 4].fill(0.);
-    }
-}
-
 impl Activity {
-    pub fn rebuild(&mut self, amounts: &[f32]) {
+    pub fn rebuild(&mut self, amounts: &crate::spatial_material::Material) {
         let count = amounts.len() / 256;
         self.masks = vec![0; count];
         self.listed = vec![false; count];
@@ -83,7 +71,7 @@ impl Activity {
         self.queued = vec![false; count];
         self.nodes.clear();
         self.work.clear();
-        for (node, row) in amounts.as_chunks::<256>().0.iter().enumerate() {
+        for (node, row) in amounts.rows() {
             self.set(node, mask(row));
         }
     }

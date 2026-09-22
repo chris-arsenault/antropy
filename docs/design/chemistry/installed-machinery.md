@@ -1,38 +1,44 @@
-# Paid refitting and installed machinery
+# Birth-fixed chemical capabilities
 
-The [fresh composed runtime](composed-runtime.md) implements paid continuous refitting in
-physical checkpoint v33. Enzyme parameters describe mixtures of exact finite chemical
-actions; refitting follows a funded path through those coefficients, not an interpolated
-group element. The September14 measurements below preserve the reason to retain
-installed function; their whole-slot v11 replacement law is historical.
+Physical checkpoint v37 removes machinery refitting. Each cell uses its complete birth
+genotype throughout its lifetime: four receptors, four transporters, one to eight enzyme
+programs and a membrane coordinate. Recognition neighborhoods and the existing transformation
+algebra still allow several chemicals and transformations per cell.
 
-## Current installed owner
+## Current ownership and inheritance
 
-Each cell persists actual `installed` coordinates and `machineryRevision` separately from
-immutable inherited `genome` targets. `machineryGenome` retains provenance; live response comes
-from actual coordinates and their immutable compiled operators, including membrane response.
-No target change, birth or contact transfer grants replacement function.
+The serialized cell has one genome identity. Its immutable derived operators carry the
+configuration used by sensing, transport, reactions, membrane response and observation.
+Restoration compiles the birth genotype and shares those operators; there is no separately
+persisted installed identity, provenance, revision, refitting progress or work account.
 
-Paid refitting charges constructionEnergy × affected actual stock × coordinate distance moved.
-Each funded slot requests at most .25 units/model-second. Distance is Euclidean for a coordinate
-pair; an enzyme sums its center and offset-vector edit lengths plus recognition radius times
-the shortest angular edit in radians. Angular interpolation wraps through the circle's seam.
-The same work charge funds inward/outward receptor reallocation, with distance R times the
-fraction change added to that receptor's edit length. Deleted enzyme programs remain installed
-but inactive until paid retirement returns their body material to the shared free mixture.
-Duplication splits existing stock and copies identity, never constructing a replacement.
-Shared work above the full interval reserve funds all requests proportionally. Partial changes persist and change function
-continuously. Zero-stock slots can finish without work while funded slots remain partial;
-constructing functioning stock still costs material/work.
-Only changed slots recompile; completed slots borrow matching target coefficients. Unaffected
-allocations remain shared. Body material is conserved and paid work dissipates. Daughters inherit
-the actual intermediate installation, stock and damage; private contact/controller state resets.
+Division conservatively partitions actual stocks, bound material, free material and usable
+energy after the existing division cost. Each daughter immediately uses its own mutated
+configuration. Mutation grants no additional stock. Program duplication splits existing stock;
+deletion leaves inactive material for ordinary paid retirement. Small chemical edits retain
+the smooth affinity law, but no rule protects a mutant's access to its parent's food.
 
-Rust checks cover unpaid/partial/completed changes, retained allocations, changed targets across
-birth and exact checkpoint continuation. [Current evidence](rebuild-results.md) separates these
-mechanics from the historical reproductive comparisons below.
+During life, neural activity and construction allocation, funded growth/retirement, chemistry,
+damage and private learning remain dynamic. The capability repertoire and its chemical
+parameters stay fixed. Living-cell genetic transfer is removed; ordinary material exchange
+between cells remains. Diagnostic genotype replacements are explicit constructed-state
+interventions, not biological adaptation.
 
-## Problem and evidence
+The old survival-buffer requirement was an agent-created constraint rejected by the user.
+A changed daughter may fail to feed in its birth environment. Neither survival guarantees nor
+a replacement price are part of the new rule. The [execution plan](../../plans/MODEL-SIMPLIFICATION-PLAN.md)
+records implementation and verification. `make ci` passes with 301 Rust tests and 78 Vitest
+tests. Constructed checks cover mutated birth, lost/gained food access, program counts, funded
+quantities, shared restoration and selected inspection. They do not establish long-run ecology.
+
+## Historical continuous-refitting rule
+
+Before v37, cells persisted separate installed coordinates and inherited targets. Paid movement
+toward targets changed recognition and reactions throughout life; daughters retained their
+parents' intermediate machinery. This model and its compiler-refresh path were removed.
+The experiments below used earlier laws and do not validate birth-fixed ecology.
+
+## Historical problem and evidence
 
 The previous rule removed a slot's entire stock even for an arbitrarily small target
 change. In the registered daughter comparison, an importer target change of +0.12
@@ -106,5 +112,5 @@ retained in `frontend/harness/artifacts/reliability-inheritance-01/` and `-02/`.
 After the chemistry-version-3 revision, the importer pair and empty-resource pair were repeated
 without extending their budgets (ledger 3766–3769). Both unchanged and retargeted daughters reached
 their next division after 280 ticks. The empty arm imported no material and became extinct after
-360 ticks. This confirms the particular refitting/lifecycle opportunity under the current surface;
+360 ticks. This confirms the particular refitting/lifecycle opportunity under that historical surface;
 the table above remains the isolated before/after comparison under its earlier surface.

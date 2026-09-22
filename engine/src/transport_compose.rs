@@ -109,11 +109,7 @@ impl Exchange {
         self.exports.resize(cells.len(), [0.; 256]);
         self.masks.resize(cells.len(), 0);
         self.contact
-            .begin(if graph.neighbors.iter().any(|row| !row.is_empty()) {
-                cells.len()
-            } else {
-                0
-            });
+            .begin(if graph.exposed { cells.len() } else { 0 });
         self.contact_support.resize_with(cells.len(), Vec::new);
         let request = |(i, (((imports, exports), mask), support)): RequestRow<'_>| {
             let cell = &cells[i];
@@ -122,7 +118,7 @@ impl Exchange {
             let field_local = crate::numeric::mixture_masked(field, &sites[i], active);
             let local = graph.local_masked(i, cells, c, &field_local, active);
             *mask = requests(cell, c, &local, imports, exports);
-            if !graph.neighbors[i].is_empty() {
+            if graph.exposed {
                 for s in species(*mask) {
                     if imports[s] > 0. && local[s] > 0. {
                         support.push((s, imports[s] / local[s]));

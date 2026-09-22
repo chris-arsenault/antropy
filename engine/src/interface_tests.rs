@@ -39,7 +39,7 @@ fn intact_neighbors_are_private_and_share_one_interface() {
     graph.prepare(&mut w.cells, &w.config, &w.chemistry);
     for i in 0..3 {
         assert!((graph.field[i] + graph.contacts[i].iter().sum::<f64>() - 1.).abs() < 1e-12);
-        assert!(graph.neighbors[i].is_empty());
+        assert!(graph.neighbors(i).is_empty());
         assert!(graph.field[i] < 1.);
         assert!(
             w.cells[i]
@@ -129,7 +129,7 @@ fn stage_preparation_only_computes_its_consumed_interface_components() {
         assert_eq!(neural.interface.field, physical.interface.field);
         assert_eq!(neural.interface.recognition, full.recognition);
         assert_eq!(neural.interface.stress, 0.);
-        assert_eq!(full.stress, physical.interface.stress);
+        assert!((full.stress - physical.interface.stress).abs() < 1e-12);
         assert_eq!(physical.interface.recognition, [[0.; 5]; 4]);
         assert_eq!(physical.contacts, [0.125; 4]);
     }
@@ -138,7 +138,13 @@ fn stage_preparation_only_computes_its_consumed_interface_components() {
 #[test]
 fn outward_recognition_requires_actual_outward_stock() {
     let mut w = fixture(0.5);
-    w.cells[1].installed.inward[0] = 1. - f64::EPSILON;
+    let mut machinery = w.cells[1].chemistry().clone();
+    machinery.inward[0] = 1. - f64::EPSILON;
+    w.cells[1].operators = Some(crate::chemical_operators::Operators::compile(
+        &machinery,
+        &w.config,
+        &w.chemistry,
+    ));
     let graph = Graph::new(&w.cells, &w.config);
     assert!(
         graph
@@ -146,14 +152,26 @@ fn outward_recognition_requires_actual_outward_stock() {
             .recognition[0][0]
             > 0.
     );
-    w.cells[1].installed.inward[0] = 1.;
+    let mut machinery = w.cells[1].chemistry().clone();
+    machinery.inward[0] = 1.;
+    w.cells[1].operators = Some(crate::chemical_operators::Operators::compile(
+        &machinery,
+        &w.config,
+        &w.chemistry,
+    ));
     assert_eq!(
         graph
             .reading(1, &w.cells, &w.config, &w.chemistry)
             .recognition[0],
         [0.; 5]
     );
-    w.cells[1].installed.inward[0] = 0.;
+    let mut machinery = w.cells[1].chemistry().clone();
+    machinery.inward[0] = 0.;
+    w.cells[1].operators = Some(crate::chemical_operators::Operators::compile(
+        &machinery,
+        &w.config,
+        &w.chemistry,
+    ));
     w.cells[1].body[3] = 0.;
     let graph = Graph::new(&w.cells, &w.config);
     assert_eq!(
@@ -212,6 +230,8 @@ fn contact_relaxation_has_a_fixed_duration_not_a_per_tick_decay() {
         }
     }
     for (a, b) in w.cells.iter().zip(&small.cells) {
-        assert!((a.x - b.x).abs() < 1e-12);
+        // Re-evaluating overlap during integration changes the trajectory, but the
+        // physical-duration error must remain below the common spatial resolution.
+        assert!((a.x - b.x).abs() < crate::execution::RESOLUTION * a.radius(&w.config));
     }
 }

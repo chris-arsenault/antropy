@@ -101,7 +101,7 @@ impl Motion {
         row: &Row,
     ) {
         let current = physical(cell, c);
-        let revision = self.medium.revision(row);
+        let revision = self.medium.revision(row, field, c);
         let coefficients = &mut self.coefficients[i];
         let moved = super::distance([cell.x, cell.y], coefficients.position, c)
             > execution::RESOLUTION * c.mesh;

@@ -36,7 +36,8 @@ Reject incompatible schemas explicitly; do not silently reinterpret a user's con
 
 Lower average resource density and stronger spatial variation should leave substantial poor
 habitat between productive occupied regions. A rich local patch may become crowded while the
-world as a whole remains sparse. A population ceiling is a safety limit, not carrying capacity.
+world as a whole remains sparse. V40 removes the population ceiling; ancestry and memory
+budgets remain operating limits, not carrying capacity.
 Do not hide cells, impose population quotas or distribute resources according to desired occupancy.
 
 The first candidate is an irregular arrangement of resource patches, some near other patches and

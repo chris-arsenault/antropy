@@ -36,7 +36,7 @@ rate an upper bound, not a promise of intake by a moving cell.
 For a pure species, increasing concentration cannot exceed 4 pi r D_s / (k I_s)
 when I_s is positive. Potential energy alone therefore cannot identify usable supply.
 The energy budget subtracts maintenance, transport, movement, learning, construction,
-repair and refitting from captured reaction energy. Conversion preserves chemical matter;
+repair from captured reaction energy. Conversion preserves chemical matter;
 construction transfers it into the bound mixture and pays assembly work without harvesting
 reference value. [Checkpoint v20](../../bound-material.md) retains that value and each chemical
 identity through growth, repair, division and death. The seeded terminal pathway used by the
@@ -57,8 +57,17 @@ generalized to a genotype with additional energy-yielding downstream reactions.
 
 Patch material satisfies dM/dt = release - washout - net cell capture + net spatial
 exchange + decomposition. Global diffusion cancels. For recurring independent batches,
-mean supply is expected batch material divided by expected lifetime plus expected gap;
-it is not the unweighted mean of active release rates. Without cells the long-run mean
+mean supply is batch material divided by batch release duration plus the empty gap.
+Since v38 this is `r*T/(T+G)`, where r is the site's fixed release rate, T is sourceLifetime
+and G is sourceGap. Initial batch variation and priming are transient; timestep quantization
+is excluded from this estimate. There is no separate random lifetime or release-rate draw at
+renewal. The report freezes the current composition when predicting chemical delivery.
+With unchanged defaults, mean ongoing supply is 8.93% below the preceding random-batch law,
+and expected initial material is 21.94% lower. These are calculated changes, not a measured
+population response. No compensation multiplier has been added. V39 removes the separate
+cohesion washout discount: the configured fractional sink now applies uniformly. Geographic
+binding still changes local distribution, so a uniform budget does not predict local access.
+Without cells the long-run mean
 external material is mean release / washout. This is an inventory reference, not a local
 concentration or a carrying-capacity estimate. The unimpeded diffusion/washout length
 sqrt(D / washout) provides a spatial scale; concentrated impedance shortens it locally.
@@ -70,6 +79,9 @@ This reference omits consumption and concentration-dependent impedance; it is no
 pointwise bound on the nonlinear field or a prediction of occupied area.
 
 ## Implemented calibration
+
+The measurements in this section predate the v38 reservoir simplification. Their random-batch
+averages are historical; the current command uses the finite-batch calculation above.
 
 Source selection now ranks `(potential - body potential)+ * diffusion /
 ((1 + impedance) * (1 + stress))`. This is a property-based supply policy, not a
@@ -107,7 +119,7 @@ material and at least 0.0024 construction work to the birth body. At concentrati
 the chemical-0 importer raises modeled surplus by 0.00407 energy/second when 0 is present,
 but lowers it by 0.0000458 when only 80 is present. The chemical-80 importer has the
 opposite resource dependence: +0.00258 with 80, -0.0000462 with 0. These compare fully
-funded phenotypes; birth-local expression/refitting and evolved discovery are separate.
+funded phenotypes; birth-local expression and evolved discovery are separate.
 
 ## Registered validation
 

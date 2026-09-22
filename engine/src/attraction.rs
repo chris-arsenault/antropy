@@ -1,216 +1,117 @@
-//! Derived periodic attraction; material and chemical exposure remain local.
-use rayon::prelude::*;
+//! Finite-support mechanical convolution over owned carrier support.
+#[path = "attraction_intervals.rs"]
+mod intervals;
+#[derive(Clone, Debug, Default)]
+struct Support {
+    values: Vec<f64>,
+    nodes: Vec<usize>,
+    listed: Vec<bool>,
+}
+impl Support {
+    fn reset(&mut self, count: usize) {
+        for n in self.nodes.drain(..) {
+            self.values[n] = 0.;
+            self.listed[n] = false;
+        }
+        self.values.resize(count, 0.);
+        self.listed.resize(count, false);
+    }
+    fn add(&mut self, node: usize, value: f64) {
+        if !self.listed[node] {
+            self.listed[node] = true;
+            self.nodes.push(node);
+        }
+        self.values[node] += value;
+    }
+}
 #[derive(Clone, Debug, Default)]
 pub struct Attraction {
     geometry: (usize, usize, f64, f64),
-    kernel: BoxKernel,
-    input: Vec<f64>,
-    temporary: Vec<f64>,
-    transposed: Vec<f64>,
-    column_scratch: Vec<f64>,
+    anchors: [u64; 3],
+    input: Support,
+    temporary: Support,
+    events: intervals::Events,
     pub output: Vec<f64>,
+    output_nodes: Vec<usize>,
     pub revisions: u64,
-}
-
-#[derive(Clone, Copy, Debug, Default)]
-struct BoxKernel {
-    radius: usize,
-    edge: f64,
-    normalization: f64,
-}
-
-impl BoxKernel {
-    fn new(width: f64) -> Self {
-        let radius = (width + 0.5).floor() as usize;
-        Self {
-            radius,
-            edge: width - radius as f64 + 0.5,
-            normalization: 1. / (2. * width),
-        }
-    }
-}
-
-fn next(index: usize, count: usize) -> usize {
-    if index + 1 == count { 0 } else { index + 1 }
-}
-
-fn box_line(
-    out: &mut [f64],
-    input: &[f64],
-    start: usize,
-    stride: usize,
-    count: usize,
-    kernel: BoxKernel,
-) {
-    let radius = kernel.radius;
-    let interior = 2 * radius - 1;
-    let mut remove = (count - (radius - 1) % count) % count;
-    let mut left = (count - radius % count) % count;
-    let mut right = radius % count;
-    // Complete periods contribute their total once, regardless of the reach.
-    let mut sum = if interior >= count {
-        (0..count).map(|j| input[start + j * stride]).sum::<f64>() * (interior / count) as f64
-    } else {
-        0.
-    };
-    for j in 0..interior % count {
-        sum += input[start + (remove + j) % count * stride];
-    }
-    for j in 0..count {
-        let a = input[start + left * stride];
-        let b = input[start + right * stride];
-        out[start + j * stride] = (sum + kernel.edge * (a + b)) * kernel.normalization;
-        sum += b - input[start + remove * stride];
-        remove = next(remove, count);
-        left = next(left, count);
-        right = next(right, count);
-    }
-}
-
-fn box_axis(out: &mut [f64], input: &[f64], nx: usize, ny: usize, kernel: BoxKernel) {
-    if kernel.radius == 0 {
-        out.copy_from_slice(input);
-        return;
-    }
-    if crate::parallel::enabled(nx * ny, 65536) {
-        out.par_chunks_mut(nx)
-            .zip(input.par_chunks(nx))
-            .for_each(|(out, input)| {
-                box_line(out, input, 0, 1, nx, kernel);
-            });
-    } else {
-        for line in 0..ny {
-            box_line(out, input, line * nx, 1, nx, kernel);
-        }
-    }
-}
-
-fn transpose(out: &mut [f64], input: &[f64], nx: usize, ny: usize) {
-    out.par_chunks_mut(ny).enumerate().for_each(|(x, row)| {
-        for (y, value) in row.iter_mut().enumerate() {
-            *value = input[y * nx + x];
-        }
-    });
-}
-
-fn box_columns(out: &mut [f64], input: &[f64], nx: usize, ny: usize, kernel: BoxKernel) {
-    if kernel.radius == 0 {
-        out.copy_from_slice(input);
-        return;
-    }
-    for column in 0..nx {
-        box_line(out, input, column, nx, ny, kernel);
-    }
+    pub visited: usize,
 }
 
 impl Attraction {
-    pub fn prepare(&mut self, geometry: (usize, usize, f64, f64), rows: [&[[f64; 2]]; 3]) {
+    pub fn prepare(
+        &mut self,
+        geometry: (usize, usize, f64, f64),
+        rows: [&crate::spatial_signal::Signal; 3],
+    ) {
         let (nx, ny, spacing, length) = geometry;
+        let revisions = rows.map(|row| row.revision);
+        if self.geometry == geometry && self.anchors == revisions {
+            return;
+        }
+        self.anchors = revisions;
+        self.geometry = geometry;
+        self.revisions += 1;
+        self.visited = 0;
+        for n in self.output_nodes.drain(..) {
+            self.output[n] = 0.;
+        }
+        self.output.resize(nx * ny, 0.);
         if length == 0. {
             return;
         }
-        let mut changed = self.geometry != geometry;
-        if changed {
-            self.geometry = geometry;
-            // Integrate the uniform interval [-length, length] over grid cells.
-            // Three passes have continuum variance length² on each axis.
-            self.kernel = BoxKernel::new(length / spacing);
-            self.input.resize(nx * ny, 0.);
-            self.temporary.resize(nx * ny, 0.);
-            self.output.resize(nx * ny, 0.);
+        self.input.reset(nx * ny);
+        for row in rows {
+            for &n in &row.nodes {
+                self.input.add(n, row[n][0]);
+            }
         }
-        let update = |(n, value): (usize, &mut f64)| {
-            let next = rows[0][n][0] + rows[1][n][0] + rows[2][n][0];
-            let changed = *value != next;
-            *value = next;
-            (changed, next != 0.)
-        };
-        let merge = |a: (bool, bool), b: (bool, bool)| (a.0 || b.0, a.1 || b.1);
-        let state = if crate::parallel::enabled(nx * ny, 65536) {
-            self.input
-                .par_iter_mut()
-                .enumerate()
-                .map(update)
-                .reduce(|| (false, false), merge)
-        } else {
-            self.input
-                .iter_mut()
-                .enumerate()
-                .map(update)
-                .fold((false, false), merge)
-        };
-        changed |= state.0;
-        if !changed {
-            return;
+        for direction in [0, 0, 0, 1, 1, 1] {
+            self.visited += self.input.nodes.len();
+            self.events.axis(
+                &mut self.temporary,
+                &self.input,
+                [nx, ny],
+                length / spacing,
+                direction,
+            );
+            std::mem::swap(&mut self.input, &mut self.temporary);
         }
-        self.revisions += 1;
-        self.output.fill(0.);
-        if !state.1 {
-            return;
-        }
-        box_axis(&mut self.temporary, &self.input, nx, ny, self.kernel);
-        box_axis(&mut self.output, &self.temporary, nx, ny, self.kernel);
-        box_axis(&mut self.temporary, &self.output, nx, ny, self.kernel);
-        if crate::parallel::enabled(nx * ny, 65536) {
-            self.transposed.resize(nx * ny, 0.);
-            self.column_scratch.resize(nx * ny, 0.);
-            transpose(&mut self.transposed, &self.temporary, nx, ny);
-            box_axis(
-                &mut self.column_scratch,
-                &self.transposed,
-                ny,
-                nx,
-                self.kernel,
-            );
-            box_axis(
-                &mut self.transposed,
-                &self.column_scratch,
-                ny,
-                nx,
-                self.kernel,
-            );
-            box_axis(
-                &mut self.column_scratch,
-                &self.transposed,
-                ny,
-                nx,
-                self.kernel,
-            );
-            transpose(&mut self.output, &self.column_scratch, ny, nx);
-        } else {
-            box_columns(&mut self.output, &self.temporary, nx, ny, self.kernel);
-            box_columns(&mut self.temporary, &self.output, nx, ny, self.kernel);
-            box_columns(&mut self.output, &self.temporary, nx, ny, self.kernel);
+        for &n in &self.input.nodes {
+            self.output[n] = self.input.values[n];
+            self.output_nodes.push(n);
         }
     }
 }
 
 impl crate::field::Field {
-    /// Compare actual combined input, including public diagnostic/intervention writes.
+    /// Every carrier write records support and a revision, including explicit interventions.
     pub fn prepare_attraction(&mut self) {
+        if self.mechanical_frozen {
+            return;
+        }
+        self.signal.compact();
+        self.source_signal.compact();
+        self.body_signal.compact();
+        let rows = [&self.signal, &self.source_signal, &self.body_signal];
         self.attraction.prepare(
             (self.nx, self.ny, self.spacing, self.attraction_length),
-            [&self.signal, &self.source_signal, &self.body_signal],
+            rows,
         );
-        self.broad_attraction.prepare(
-            (self.nx, self.ny, self.spacing, 2. * self.attraction_length),
-            [&self.signal, &self.source_signal, &self.body_signal],
-        );
+    }
+    pub(crate) fn freeze_mechanical_stage(&mut self) {
+        self.mechanical_frozen = false;
+        self.prepare_attraction();
+        self.mechanical_frozen = true;
+    }
+    pub(crate) fn finish_mechanical_stage(&mut self) {
+        self.mechanical_frozen = false;
     }
 
     pub(crate) fn attractive(&self, n: usize) -> f64 {
         if self.attraction_length == 0. {
             self.medium_signal(n)[0]
         } else {
-            self.attraction_strength * (self.attraction.output[n] - self.broad_attraction.output[n])
+            self.attraction.output[n]
         }
-    }
-
-    /// Material-supported cohesion; removing the supporting medium restores bare loss.
-    pub(crate) fn retention(&self, n: usize, scale: f64) -> f64 {
-        let [a, b] = self.medium_signal(n);
-        let load = self.impedance[n] + self.source_load[n] + self.body_load[n];
-        let cohesion = (a * self.attractive(n) - b * b).max(0.) / (1. + load.max(0.));
-        crate::field::mobility(cohesion, scale)
     }
 }

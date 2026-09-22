@@ -101,7 +101,6 @@ mod population_diagnostics;
 mod presentation;
 pub mod random;
 pub mod reaction_medium;
-mod refitting;
 mod relationships;
 pub mod render;
 pub mod render_window;
@@ -109,13 +108,19 @@ pub mod render_window;
 mod runtime_tests;
 pub mod sensing;
 pub mod source_footprint;
+#[cfg(test)]
+mod source_lifecycle_tests;
 pub mod source_medium;
 mod source_probe;
 #[cfg(test)]
 mod source_tests;
 pub mod sources;
+mod spatial_material;
+mod spatial_signal;
 mod startup_probe;
 mod storage_diagnostics;
+#[cfg(test)]
+mod structural_tests;
 mod study_commands;
 mod study_trace;
 #[cfg(test)]
@@ -130,3 +135,8 @@ mod weathering_budget;
 mod weathering_probe;
 pub mod world;
 mod world_validation;
+
+#[cfg(test)]
+mod binding_tests;
+#[cfg(test)]
+mod birth_capabilities_tests;

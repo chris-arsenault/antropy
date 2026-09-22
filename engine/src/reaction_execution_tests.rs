@@ -328,10 +328,11 @@ fn detached_interaction_definition_updates_external_work_coefficients() {
 fn mixed_self_products_from_multiple_enzymes_match_committed_material_and_work() {
     let world = crate::initial_ecology::probe(0, true).unwrap();
     let mut cell = funded(&world);
-    cell.installed.programs.fill(false);
+    let mut machinery = cell.chemistry().clone();
+    machinery.programs.fill(false);
     for slot in 0..3 {
-        cell.installed.programs[slot] = true;
-        cell.installed.enzymes[slot] = crate::genetics::Enzyme {
+        machinery.programs[slot] = true;
+        machinery.enzymes[slot] = crate::genetics::Enzyme {
             x: 7.,
             y: 7.,
             center_x: 7. + slot as f64 * 0.1,
@@ -341,7 +342,7 @@ fn mixed_self_products_from_multiple_enzymes_match_committed_material_and_work()
         cell.body[crate::organism::enzyme_stock(slot)] = 0.2;
     }
     cell.operators = Some(crate::chemical_operators::Operators::compile(
-        &cell.installed,
+        &machinery,
         &world.config,
         &world.chemistry,
     ));

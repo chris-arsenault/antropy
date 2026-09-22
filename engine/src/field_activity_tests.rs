@@ -34,7 +34,7 @@ fn truncation_is_accounted_and_empty_nodes_can_reactivate_without_stale_buffer_m
     assert_eq!(field.work_counts(), [0, 0, 0]);
     field.add(0, 213, 2., &chemistry);
     field.advance(&chemistry, 0.8, 0., 0.);
-    assert!(field.amounts.chunks_exact(256).all(|r| r[17] == 0.));
+    assert!(field.amounts.rows().all(|(_, r)| r[17] == 0.));
     assert!(field.work_counts()[0] > 0);
     field.validate_reductions(&chemistry).unwrap();
 }
@@ -104,7 +104,7 @@ fn source_and_row_commit_wake_previously_empty_chemical_groups() {
 fn default_transport_uses_one_pass_with_positive_conservative_extreme_medium() {
     let chemistry = Chemistry::new(101).unwrap();
     let mut field = Field::new(16., 16., 2.);
-    for (i, q) in field.amounts.iter_mut().enumerate() {
+    for (i, q) in field.amounts.dense_values_mut().enumerate() {
         *q = 0.01 + (i % 23) as f32 * 0.002;
     }
     field.refresh(&chemistry);

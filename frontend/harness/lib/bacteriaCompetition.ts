@@ -33,7 +33,6 @@ export async function compareCheckpoint(
           mutationRate: 0,
           physicalMutationRate: 0,
           transmission: "clonal",
-          transferRate: 0,
           learningRetention: 0,
         });
         try {

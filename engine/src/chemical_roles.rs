@@ -42,7 +42,7 @@ pub fn strongest(conversions: &Conversions) -> Option<Route> {
 pub fn primary(cell: &Cell) -> Option<Route> {
     let mut best = None;
     for (slot, enzyme) in cell.operators.as_ref()?.enzymes.iter().enumerate() {
-        if !cell.installed.programs[slot] {
+        if !cell.chemistry().programs[slot] {
             continue;
         }
         if let Some(mut route) = enzyme.primary {
@@ -111,7 +111,7 @@ fn cell_routes(w: &World) -> (Vec<Row>, usize) {
         };
         for (slot, enzyme) in operators.enzymes.iter().enumerate() {
             let stock = cell.body[crate::organism::enzyme_stock(slot)];
-            if !cell.installed.programs[slot] {
+            if !cell.chemistry().programs[slot] {
                 continue;
             }
             if stock <= 0. {
@@ -229,9 +229,9 @@ pub fn overview(w: &World, query: &Query) -> Value {
 pub fn source_species(w: &World) -> Vec<usize> {
     let mut sources = [false; 256];
     for source in &w.sources {
-        if source.remaining > 0. {
-            for (s, q) in source.inventory.iter().enumerate() {
-                sources[s] |= *q > 0.;
+        if source.amount > 0. {
+            for (s, q) in source.inventory().enumerate() {
+                sources[s] |= q > 0.;
             }
         }
     }

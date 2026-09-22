@@ -12,20 +12,20 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 
 | Quantity | Current value |
 | --- | --- |
-| World / timestep / founders | 320 × 240 periodic XY / 0.2 model seconds / 48 in two colonies |
+| World / timestep / founders | 720 × 540 periodic XY / 0.2 model seconds / 48 in two colonies |
 | Controller | 44 inputs, 24 recurrent units, nine outputs |
 | Machinery | Four receptor, four transporter, four unary-enzyme slots; sixteen funded stocks including a photoreceptor |
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
 | Compact affinity support / minimum susceptibility | R=3 coordinate units / 0.05 |
-| Renewing reservoirs | 48 initially around seven unequal regions, spread 18; rate scale 0.2, radius 3, lifetime scale 600 s, mean renewal wait2,400 s; indefinite external replenishment |
+| Renewing reservoirs | 240 initially around 35 unequal regions, spread 18; fixed per-site rate scale 0.2, radius 3, batch duration 600 s, empty wait 2,400 s; accounted external replenishment |
 | Reservoir drift / medium processing | 4 / 0.25; shared material forces move finite owners; shared funded transformations process inventory and evolving renewal mixtures |
 | Source bootstrap | Initial IDs0/136; finite8/128 priming; four mutable founder types process0→128→136→8→0 |
-| Extracellular washout | Base0.001 per second, reduced by shared local cohesion; base half-life693 model seconds |
+| Extracellular washout | Uniform 0.001 per second; half-life 693 model seconds; no cohesion discount |
 | Field mesh / physiology interval | 2 world units / 0.8 model seconds; active four-species groups, accounted concentration floor1e-6 |
 | Weathering rate / local response | 0.025 × positive interaction difference with the bounded medium profile; existing diffusion impedance attenuates exposure; no weather clock |
 | Founder homeostasis | Input-centered membrane, local food response, mild product export; ordinary mutable alleles |
-| Attraction length / amplitude | 6 / 4; opposing second scale12; shared local repulsion remains |
+| Attraction length | 6; one normalized kernel with no separate gain or opposing broad field; local repulsion and nonlinear crowding remain |
 | Illumination contrast / periods | 0.8 / 6,000,18,000,62,000 model seconds (30k/90k/310k ticks) |
 | Movement / diffusion impedance coefficients | 0.5 / 1 |
 | Viscosity | 0.004; no thermal-energy state or temperature solver |
@@ -43,8 +43,8 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Physical mutation probability / scale | 0.1 / 0.12; includes fixed-slot chemical alleles |
 | Death | Bound and free mixtures retain actual chemical identities; no privileged waste ID |
 | Horizontal transfer / disturbance | Rate zero / absent by default |
-| UI pacing / population ceiling | Requested 30 ticks/s / pause at 10,000 cells |
-| Field nodes / ancestry ceiling | 19,200 default; maximum 80,000 / 2,000,000 organism records |
+| UI pacing / population ceiling | Requested 30 ticks/s / no population-count ceiling |
+| Field nodes / ancestry ceiling | 97,200 default; maximum 524,288 under geographic memory reservation / 2,000,000 organism records |
 | Recovery retention | Up to six automatic and two manual saves, expiring older points to fit; 256 MiB compressed total, 192 MiB individual raw |
 
 Potential is stored in chemical matter and generic biomass; usable energy is a separate stock.

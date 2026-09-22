@@ -55,7 +55,7 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
     let nodes = sample_rows(cell, c, field);
     std::array::from_fn(|slot| {
         let stock = if slot == 4 { PHOTO_STOCK } else { 3 + slot };
-        if cell.body[stock] == 0. || (slot < 4 && cell.installed.inward[slot] == 1.) {
+        if cell.body[stock] == 0. || (slot < 4 && cell.chemistry().inward[slot] == 1.) {
             return [0.; 3];
         }
         let mut readings = [0.; 5];
@@ -84,7 +84,7 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
                 * if slot == 4 {
                     1.
                 } else {
-                    1. - cell.installed.inward[slot]
+                    1. - cell.chemistry().inward[slot]
                 },
             cell.body[0],
             if slot == 4 { 1. } else { c.receptor_k },
@@ -98,9 +98,9 @@ pub fn initialize(cell: &mut Cell, g: &Compiled, c: &Config, field: &Field) {
     cell.receptors = std::array::from_fn(|i| values[i][0]);
     cell.photoreceptor = values[4][0];
     cell.inward_receptors = inward(cell, c);
-    observe(cell, g, g, c, field);
+    observe(cell, g, c, field);
 }
-pub fn observe(cell: &mut Cell, g: &Compiled, _installed: &Compiled, c: &Config, field: &Field) {
+pub fn observe(cell: &mut Cell, g: &Compiled, c: &Config, field: &Field) {
     observe_environment(cell, c, field);
     observe_body(cell, g, c);
 }
@@ -166,7 +166,7 @@ fn observe_stocks(cell: &mut Cell, g: &Compiled, c: &Config) {
     for slot in 0..crate::organism::MAX_ENZYMES {
         let i = crate::organism::enzyme_stock(slot);
         cell.inputs[crate::controller::programs::stock_input(slot)] =
-            if cell.installed.programs[slot] {
+            if cell.chemistry().programs[slot] {
                 stock(cell.body[i], g.body[i])
             } else {
                 0.
@@ -180,7 +180,7 @@ fn observe_stocks(cell: &mut Cell, g: &Compiled, c: &Config) {
     cell.inputs[LIGHT_INPUT + 4] = stock(cell.body[PHOTO_STOCK], g.body[PHOTO_STOCK]);
 }
 
-/// Energy, current contact orientation and the private byte advance on the base clock.
+/// Energy, scalar crowding shares and the private byte advance on the base clock.
 pub fn observe_base(cell: &mut Cell, c: &Config) {
     cell.inputs[28] = (cell.energy / cell.energy_capacity(c).max(1e-30)).clamp(0., 1.) as f32;
     for i in 0..4 {
@@ -201,7 +201,7 @@ pub fn adapt(cell: &mut Cell, c: &Config, dt: f64) {
 fn inward(cell: &Cell, c: &Config) -> [f64; 4] {
     let volume = cell.volume(c).max(1e-30);
     std::array::from_fn(|slot| {
-        let stock = cell.body[3 + slot] * cell.installed.inward[slot];
+        let stock = cell.body[3 + slot] * cell.chemistry().inward[slot];
         if stock == 0. {
             return 0.;
         }

@@ -65,7 +65,7 @@ pub fn mixture_masked(
                 let s = mask.trailing_zeros() as usize * 4;
                 mask &= mask - 1;
                 let previous = v128_load(result.as_ptr().add(s).cast());
-                let q = v128_load(amounts.as_ptr().add(node * 256 + s).cast());
+                let q = v128_load(amounts.row(node).as_ptr().add(s).cast());
                 v128_store(
                     result.as_mut_ptr().add(s).cast(),
                     f32x4_add(previous, f32x4_mul(q, gain)),

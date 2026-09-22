@@ -2,7 +2,7 @@ use crate::{
     chemical_operators::Operators,
     chemistry::Chemistry,
     config::Config,
-    genetics::{Enzyme, Machinery, Target},
+    genetics::{Enzyme, Machinery},
 };
 use crate::{diagnostics, movement};
 
@@ -126,35 +126,6 @@ fn weathering_has_one_rate_per_distinct_destination() {
 }
 
 #[test]
-fn paid_refit_uses_equal_work_for_rotated_equal_edits() {
-    let w = diagnostics::nutrition(0.8, 2., false, false);
-    let outcomes = [0_f64, 0.31, std::f64::consts::FRAC_PI_4].map(|angle| {
-        let mut cell = w.cells[0].clone();
-        cell.energy = 1.;
-        cell.installed.receptors[0] = Target { x: 5., y: 5. };
-        cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
-        let mut g = w.genomes[&1].clone();
-        g.chromosomes[0].chemistry = cell.installed.clone();
-        g.chromosomes[0].chemistry.receptors[0] = Target {
-            x: 5. + angle.cos(),
-            y: 5. + angle.sin(),
-        };
-        g.compile(&w.config, &w.chemistry);
-        crate::refitting::advance(
-            &mut cell,
-            g.compiled.as_ref().unwrap(),
-            &w.config,
-            &w.chemistry,
-            5.,
-        );
-        assert_eq!(cell.installed, g.chromosomes[0].chemistry);
-        cell.flows.refitting
-    });
-    assert!(outcomes[0] > 0.);
-    assert!(outcomes.iter().all(|v| (v - outcomes[0]).abs() < 1e-12));
-}
-
-#[test]
 fn uphill_requests_cannot_veto_downhill_or_spend_same_event_work() {
     let mut w = diagnostics::nutrition(0.8, 2., false, false);
     w.config.enzyme_turnover = 1e6;
@@ -214,41 +185,4 @@ fn uphill_requests_cannot_veto_downhill_or_spend_same_event_work() {
                 .all(|(x, y)| (x - y).abs() < 1e-12)
         );
     }
-}
-
-#[test]
-fn refit_slots_share_work_without_a_farthest_target_veto() {
-    let w = diagnostics::nutrition(0.8, 2., false, false);
-    let mut g = w.genomes[&1].clone();
-    g.chromosomes[0].chemistry.receptors[0].x += 0.1;
-    g.chromosomes[0].chemistry.receptors[1].x += 5.;
-    g.compile(&w.config, &w.chemistry);
-    let target = g.compiled.as_ref().unwrap();
-    let mut a = w.cells[0].clone();
-    a.energy = 1.;
-    crate::refitting::advance(&mut a, target, &w.config, &w.chemistry, 1.);
-    assert_eq!(
-        a.installed.receptors[0],
-        target.chromosome.chemistry.receptors[0]
-    );
-    assert!(
-        (a.installed.receptors[1].x - w.cells[0].installed.receptors[1].x - 0.25).abs() < 1e-12
-    );
-    assert!(std::sync::Arc::ptr_eq(
-        &a.operators.as_ref().unwrap().receptors[0],
-        &target.operators.receptors[0]
-    ));
-    let mut b = w.cells[0].clone();
-    let reserve = crate::accounting::interval_reserve(&b, &b.body, &w.config);
-    b.energy = reserve + a.flows.refitting * 0.5;
-    let before = b.energy;
-    crate::refitting::advance(&mut b, target, &w.config, &w.chemistry, 1.);
-    assert!((b.energy - reserve).abs() < 1e-12);
-    assert!((b.flows.refitting - (before - b.energy)).abs() < 1e-12);
-    assert!(
-        (b.installed.receptors[0].x - w.cells[0].installed.receptors[0].x - 0.05).abs() < 1e-12
-    );
-    assert!(
-        (b.installed.receptors[1].x - w.cells[0].installed.receptors[1].x - 0.125).abs() < 1e-12
-    );
 }

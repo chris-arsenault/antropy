@@ -61,22 +61,20 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
     w.next_cell += 1;
     cell.parent = Some(parent.id);
     cell.genome = genome;
+    let compiled = w.genomes[&genome].compiled.as_ref().unwrap();
+    cell.operators = Some(compiled.operators.clone());
     cell.born = w.tick;
     cell.generation += 1;
     cell.brain = controller::State::default();
     cell.action = controller::Action::default();
     cell.contacts = [0.; 4];
+    cell.interface = Default::default();
     cell.flows = Default::default();
     cell.chemical_flows = Default::default();
     let radius = cell.radius(&w.config);
     cell.x = (cell.x + sign * radius * parent.heading.cos()).rem_euclid(w.config.width);
     cell.y = (cell.y + sign * radius * parent.heading.sin()).rem_euclid(w.config.height);
-    crate::sensing::initialize(
-        &mut cell,
-        w.genomes[&genome].compiled.as_ref().unwrap(),
-        &w.config,
-        &w.field,
-    );
+    crate::sensing::initialize(&mut cell, compiled, &w.config, &w.field);
     w.ancestry.push(Ancestor {
         id: cell.id,
         parent: parent.id,
@@ -108,8 +106,6 @@ fn division_cost(
 }
 pub fn reproduce(w: &mut World) {
     let mut parents = std::mem::take(&mut w.cells);
-    let original = parents.len();
-    let mut divisions = 0;
     parents.retain_mut(|cell| {
         let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
         let Some(division) = division_cost(cell, &g.body, &w.config) else {
@@ -117,17 +113,8 @@ pub fn reproduce(w: &mut World) {
         };
         let fission = w.config.reproduction == "fission";
         let records = if fission { 2 } else { 1 };
-        if original + divisions >= w.config.max_population
-            || w.ancestry.len() + records > w.config.max_ancestry_records
-        {
-            w.stop_reason = Some(
-                if w.ancestry.len() + records > w.config.max_ancestry_records {
-                    "ancestry-limit"
-                } else {
-                    "population-limit"
-                }
-                .into(),
-            );
+        if w.ancestry.len() + records > w.config.max_ancestry_records {
+            w.stop_reason = Some("ancestry-limit".into());
             return true;
         }
         let paid = cell.pay(division);
@@ -139,7 +126,6 @@ pub fn reproduce(w: &mut World) {
             o.division(cell, paid);
         }
         w.ledger.divisions += 1;
-        divisions += 1;
         if let Some(t) = &mut w.trace {
             t.life(cell, "division", w.tick);
         }
@@ -165,75 +151,6 @@ pub fn reproduce(w: &mut World) {
     parents.append(&mut w.cells);
     w.cells = parents;
     w.cells.sort_unstable_by_key(|c| c.id);
-}
-pub fn transfer(w: &mut World) {
-    if w.config.transfer_rate <= 0. {
-        return;
-    }
-    let contacts = crate::movement::pairs(&w.cells, &w.config);
-    let targets: Vec<_> = w.cells.iter().map(|c| c.genome).collect();
-    for (i, j) in contacts {
-        if w.genetic_rng.unit() >= 1. - (-w.config.transfer_rate * w.config.dt).exp() {
-            continue;
-        }
-        let (recipient, donor) = if w.genetic_rng.unit() < 0.5 {
-            (i, j)
-        } else {
-            (j, i)
-        };
-        let mut g = w.genomes[&targets[recipient]].clone();
-        let donor_cell = w.cells[donor].id;
-        let donor = &w.genomes[&targets[donor]];
-        let slot = w.genetic_rng.index(9 + crate::organism::MAX_ENZYMES);
-        for (a, b) in g.chromosomes.iter_mut().zip(&donor.chromosomes) {
-            match slot {
-                0..=3 => {
-                    a.chemistry.receptors[slot] = b.chemistry.receptors[slot];
-                    a.chemistry.inward[slot] = b.chemistry.inward[slot];
-                }
-                4..=7 => a.chemistry.transporters[slot - 4] = b.chemistry.transporters[slot - 4],
-                s if s < 8 + crate::organism::MAX_ENZYMES => {
-                    let slot = s - 8;
-                    if !b.chemistry.programs[slot]
-                        && a.chemistry.programs.iter().filter(|v| **v).count() <= 1
-                    {
-                        continue;
-                    }
-                    a.chemistry.enzymes[slot] = b.chemistry.enzymes[slot];
-                    a.chemistry.programs[slot] = b.chemistry.programs[slot];
-                    a.physical[crate::organism::enzyme_stock(slot)] =
-                        b.physical[crate::organism::enzyme_stock(slot)];
-                    controller::programs::copy_from(&mut a.behavior, &b.behavior, slot);
-                }
-                _ => a.chemistry.membrane = b.chemistry.membrane,
-            }
-        }
-        if g.chromosomes == w.genomes[&targets[recipient]].chromosomes {
-            continue;
-        }
-        g.parent = Some(g.id);
-        g.id = w.next_genome;
-        g.born = w.tick;
-        g.mutated = false;
-        g.learned = 0.;
-        g.compile(&w.config, &w.chemistry);
-        w.next_genome += 1;
-        let cell = &mut w.cells[recipient];
-        cell.genome = g.id;
-        w.ancestry[cell.id as usize - 1].genome = g.id;
-        w.genomes.insert(g.id, g);
-        w.ledger.transfers += 1;
-        w.event(
-            "transfer",
-            w.cells[recipient].id,
-            vec![
-                donor_cell,
-                targets[recipient],
-                w.cells[recipient].genome,
-                slot as u64,
-            ],
-        );
-    }
 }
 pub fn disturb(w: &mut World) {
     let Some(d) = w.config.disturbance.clone() else {
@@ -304,7 +221,6 @@ pub fn advance(w: &mut World) {
     });
     w.cells = cells;
     disturb(w);
-    transfer(w);
     reproduce(w);
     if w.cells.is_empty() && !w.ancestry.is_empty() {
         w.stop_reason = Some("extinction".into());

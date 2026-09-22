@@ -62,10 +62,12 @@ fn inward_sensing_requires_stock_and_allocation_and_tracks_free_material() {
     let cell = &mut w.cells[0];
     cell.inventory.fill(0.);
     cell.inventory.set(w.config.source_species[0], 0.1);
-    sensing::observe(cell, g, g, &w.config, &w.field);
+    sensing::observe(cell, g, &w.config, &w.field);
     assert_eq!(cell.inputs[44], 0.);
-    cell.installed.inward[0] = 1.;
-    sensing::observe(cell, g, g, &w.config, &w.field);
+    let mut machinery = cell.chemistry().clone();
+    machinery.inward[0] = 1.;
+    cell.operators = Some(Operators::compile(&machinery, &w.config, &w.chemistry));
+    sensing::observe(cell, g, &w.config, &w.field);
     assert!(cell.inputs[44] > 0. && cell.inputs[45] > 0.);
     assert_eq!(cell.inputs[0], 0.);
     let controller = controller::diagnostic([0.; 9], Some((44, 0, 2.)));
@@ -78,7 +80,7 @@ fn inward_sensing_requires_stock_and_allocation_and_tracks_free_material() {
     );
     assert!(action.swim > 0.);
     cell.body[3] = 0.;
-    sensing::observe(cell, g, g, &w.config, &w.field);
+    sensing::observe(cell, g, &w.config, &w.field);
     assert_eq!(cell.inputs[44], 0.);
 }
 
@@ -130,11 +132,14 @@ fn inactive_and_retired_programs_cannot_convert_and_extra_programs_can() {
     crate::genetics::repertoire::duplicate(&mut g, &mut cell, 0, 4);
     cell.action.activity.fill(0.);
     cell.action.activity[4] = 1.;
-    cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
+    g.compile(&w.config, &w.chemistry);
+    cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
     metabolism::react(&mut cell, &w.config, &w.chemistry, 0.1);
     assert!(cell.flows.reacted > 0.);
     cell.flows = Default::default();
-    cell.installed.programs[4] = false;
+    crate::genetics::repertoire::remove(&mut g, 4);
+    g.compile(&w.config, &w.chemistry);
+    cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
     metabolism::react(&mut cell, &w.config, &w.chemistry, 0.1);
     assert_eq!(cell.flows.reacted, 0.);
 }

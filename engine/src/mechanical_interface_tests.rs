@@ -18,7 +18,7 @@ fn intact_cells_keep_mechanical_occlusion_and_activate_material_without_motion()
     let (c, mut cells) = pair();
     let mut cache = crate::movement::geometry::Cache::default();
     let graph = cache.graph(&cells, &c);
-    assert!(graph.neighbors.iter().all(|row| row.is_empty()));
+    assert!(!graph.exposed);
     let field = graph.field.clone();
     let contacts = graph.contacts.clone();
     for (field, contacts) in field.iter().zip(&contacts) {
@@ -28,50 +28,48 @@ fn intact_cells_keep_mechanical_occlusion_and_activate_material_without_motion()
     let preparations = cache.local.counts()["passes"].clone();
     cells[1].damage = 0.5;
     let graph = cache.graph_prepared(&cells, &c);
-    assert_eq!(graph.neighbors[0].len(), 1);
-    assert!(graph.neighbors[1].is_empty());
+    assert_eq!(graph.neighbors(0).len(), 1);
+    assert!(graph.neighbors(1).is_empty());
     assert_eq!(graph.field, field);
     assert_eq!(graph.contacts, contacts);
     assert_eq!(cache.local.counts()["passes"], preparations);
     cells[1].damage = 0.;
-    assert!(cache.graph_prepared(&cells, &c).neighbors[0].is_empty());
+    assert!(cache.graph_prepared(&cells, &c).neighbors(0).is_empty());
     cells[1].damage = 0.5;
     cells[1].inventory.fill(0.);
-    assert!(cache.graph_prepared(&cells, &c).neighbors[0].is_empty());
+    assert!(cache.graph_prepared(&cells, &c).neighbors(0).is_empty());
     cells[1].inventory.set(17, 1e-10);
-    assert_eq!(cache.graph_prepared(&cells, &c).neighbors[0].len(), 1);
+    assert_eq!(cache.graph_prepared(&cells, &c).neighbors(0).len(), 1);
     assert_eq!(cache.local.counts()["passes"], preparations);
 }
 
 #[test]
-fn angular_partition_is_nonnegative_normalized_and_rotation_equivariant() {
-    use crate::movement::geometry::prepared::pressure::directions;
-    for angle in [0., 0.4, 1.2, 2.8] {
-        let (sin, cos) = f64::sin_cos(angle);
-        let rotated = directions([cos, sin], [cos, sin]);
-        assert!((rotated[0] - 0.5).abs() < 1e-12);
-        assert!((rotated[1] - 0.25).abs() < 1e-12);
-        assert!(rotated.iter().all(|v| *v >= -1e-15));
-        assert!((rotated.iter().sum::<f64>() - 1.).abs() < 1e-12);
-        assert_eq!(directions([0.; 2], [cos, sin]), [0.25; 4]);
-    }
+fn heading_does_not_change_contact_sensing_stress_or_material_access() {
     let (c, mut cells) = pair();
-    let before = Graph::new(&cells, &c).contacts[0];
-    cells[0].heading = std::f64::consts::FRAC_PI_2;
-    let after = Graph::new(&cells, &c).contacts[0];
-    assert!((before[0] - after[3]).abs() < 1e-12);
-    assert!((before.iter().sum::<f64>() - after.iter().sum::<f64>()).abs() < 1e-12);
-    cells[1].x = cells[0].x;
-    let graph = Graph::new(&cells, &c);
-    for row in &graph.contacts {
-        for value in row {
-            assert!((*value - 0.125).abs() < 1e-12);
-        }
+    let chemistry = Chemistry::new(c.chemistry_seed).unwrap();
+    cells[1].damage = 0.5;
+    cells[1].inventory.set(17, 0.3);
+    let baseline = Graph::new(&cells, &c);
+    let reading = baseline.reading(0, &cells, &c, &chemistry);
+    assert!(reading.recognition.iter().any(|row| row[0] > 0.));
+    for row in reading.recognition {
+        assert!(row.iter().all(|v| *v == row[0]));
+    }
+    for angle in [0., 0.4, 1.2, 2.8] {
+        cells[0].heading = angle;
+        cells[1].heading = -angle;
+        let graph = Graph::new(&cells, &c);
+        assert_eq!(graph.contacts, baseline.contacts);
+        assert_eq!(graph.reading(0, &cells, &c, &chemistry), reading);
+        assert_eq!(
+            graph.local(0, &cells, &c, &[0.; 256]),
+            baseline.local(0, &cells, &c, &[0.; 256])
+        );
     }
 }
 
 #[test]
-fn coincident_heading_change_refreshes_both_reciprocal_forces() {
+fn coincidence_has_no_invented_direction_and_heading_cannot_create_passive_work() {
     let (c, mut cells) = pair();
     cells[1].x = cells[0].x;
     let mut cache = crate::movement::geometry::Cache::default();
@@ -79,7 +77,7 @@ fn coincident_heading_change_refreshes_both_reciprocal_forces() {
     let before = cache.local.pressure.rows[0].shift;
     cells[0].heading += 0.3;
     cache.graph(&cells, &c);
-    assert_ne!(cache.local.pressure.rows[0].shift, before);
+    assert_eq!(cache.local.pressure.rows[0].shift, before);
     for k in 0..2 {
         assert!(
             (cache.local.pressure.rows[0].shift[k] + cache.local.pressure.rows[1].shift[k]).abs()

@@ -112,10 +112,7 @@ const ACCOUNTS: [string, (a: Activity) => number][] = [
   ["Movement", (a) => a.flows.motors],
   ["Transport", (a) => a.flows.transport],
   ["Reaction heat", (a) => a.flows.reactionHeat],
-  [
-    "Construction / refitting / division",
-    (a) => a.flows.construction + a.flows.refitting + a.division,
-  ],
+  ["Construction / division", (a) => a.flows.construction + a.division],
   ["Repair / learning", (a) => a.flows.repair + a.flows.learning],
   ["Overflow", (a) => a.overflow],
 ];

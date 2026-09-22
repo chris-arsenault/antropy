@@ -110,7 +110,7 @@ fn manual_interventions_survive_recent_event_rollover_and_restore() {
     assert_eq!(before, w.snapshot().unwrap());
 }
 #[test]
-fn counterfactual_retools_paid_machinery_and_resets_both_memories() {
+fn explicit_counterfactual_replaces_capabilities_without_granting_stock() {
     let mut w = world();
     for c in &mut w.cells {
         c.brain.traces.fill(0.5);
@@ -124,7 +124,11 @@ fn counterfactual_retools_paid_machinery_and_resets_both_memories() {
     )
     .unwrap();
     assert_eq!(w.cells[0].body[7], w.cells[1].body[7]);
-    assert_ne!(w.cells[0].machinery_genome, w.cells[0].genome);
+    assert_eq!(w.cells[0].chemistry().transporters[0].x, 10.);
+    assert_eq!(
+        w.cells[0].chemistry(),
+        &w.genomes[&w.cells[0].genome].express().chemistry
+    );
     assert!(w.cells[1].body[7] > 0.);
     assert!(
         w.cells

@@ -23,7 +23,7 @@ fn requests<'a>(
         let rate =
             c.physiology_interval * c.enzyme_turnover * cell.body[11 + i] * (1. - cell.damage)
                 / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30);
-        let installed = cell.installed.enzymes[i];
+        let installed = cell.chemistry().enzymes[i];
         let attenuation =
             1. / (1. + (installed.center_x.powi(2) + installed.center_y.powi(2)) / 9.);
         for e in &enzyme.conversions {
@@ -103,7 +103,7 @@ fn compare(cells: &[Cell], c: &Config, chemistry: &Chemistry) -> Value {
     let mut production_error = 0_f64;
     let mut recognizing186 = 0;
     for cell in cells {
-        let op = Operators::compile(&cell.installed, c, chemistry);
+        let op = Operators::compile(&cell.chemistry(), c, chemistry);
         recognizing186 += usize::from(op.enzymes.iter().enumerate().any(|(i, e)| {
             cell.body[11 + i] > 0.
                 && e.conversions

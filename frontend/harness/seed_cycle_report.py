@@ -87,7 +87,7 @@ def summarize(sample, previous, genotypes, config):
     counts = Counter(c["genome"] for c in cells)
     source_ids = config["sourceSpecies"]
     sources = env["sources"]
-    active = [s for s in sources if s["remaining"] > 0 and sum(s["inventory"]) > 0]
+    active = [s for s in sources if s["amount"] > 0]
     distances = [min((distance(c, s, config) for s in active), default=None) for c in cells]
     near = sum(any(distance(c, s, config) <= s["habitat"]["radius"] * 3 for s in active) for c in cells)
     flows = {channel: chemical(sample, channel) for channel in ["imported", "exported", "consumed", "produced"]}
@@ -117,7 +117,7 @@ def summarize(sample, previous, genotypes, config):
         "meanEnergyFraction": mean([c["energy"] / c["energyCapacity"] for c in cells]),
         "meanDamage": mean([c["damage"] for c in cells]),
         "meanShelter": mean([h["weathering"][2] for h in habitats]),
-        "activeSources": len(active), "sourceInventory": sum(sum(s["inventory"]) for s in sources),
+        "activeSources": len(active), "sourceInventory": sum(s["amount"] for s in sources),
         "releaseRate": sum(q for r in env["sourceResponse"] for _, q in r["outputRate"]),
         "nearestActiveSourceMedian": float(np.median([d for d in distances if d is not None])) if active and cells else None,
         "cellsWithinThreeSourceRadii": near, "fieldSpecies": env["extracellular"]["species"],
@@ -131,8 +131,8 @@ def summarize(sample, previous, genotypes, config):
                          "ledger": g["ledger"], "chemical": g["chemical"]} for g in sample["groups"]],
         "positions": [[c["id"], c["lineage"], c["genome"], c["x"], c["y"]] for c in cells],
         "sources": [{"x": s["habitat"]["x"], "y": s["habitat"]["y"], "radius": s["habitat"]["radius"],
-                     "remaining": s["remaining"], "wait": s["wait"], "rate": s["rate"],
-                     "inventory": sum(s["inventory"])} for s in sources],
+                     "wait": s["wait"], "rate": s["rate"],
+                     "inventory": s["amount"]} for s in sources],
         "reactions": {f'{e["species"]}>{e["product"]}': 0. for g in sample["groups"] for e in g["reactions"]},
         "inspections": inspections, "resources": sample["resources"],
     }

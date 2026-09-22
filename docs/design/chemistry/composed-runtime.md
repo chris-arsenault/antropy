@@ -1,6 +1,6 @@
 # Composed artificial chemistry runtime
 
-Updated September 21, 2026. This contract governs the fresh implementation under
+Updated September 22, 2026. This contract governs the fresh implementation under
 [the canonical math plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
@@ -35,8 +35,24 @@ the visible composed pattern and periods remain unchanged. [Light ecology](../li
 records the correction and the future shelter/emission design.
 V35 introduces shared prepared geometry, direct chemical composition and a physiological
 neural clock. The first private chemical-epoch implementation was rejected on measured cost.
-The [mature execution plan](../../plans/MATURE-PERFORMANCE-PLAN.md) tracks integration and
-measured cost; the previous performance results do not establish its throughput.
+The ended [mature execution investigation](../../plans/MATURE-PERFORMANCE-PLAN.md) records
+integration and measured cost. [Structural scaling](../../../SCALING-PLAN.md) owns current
+performance work; the installed numerical execution choices are not preservation requirements.
+V36 replaces dense geographic material buffers and global work discovery with compact row
+owners, finite-support mechanical filtering and footprint-local dependency reads. Its initial
+sampled contact replacement was rejected on September 22 for unnecessary complexity and
+ordinary-workload cost. The current contact implementation is scalar circle overlap, with
+no orientation dependence. The scaling plan preserves the rejected measurements and tracks
+the contact correction separately from the still-unfinished tiled execution architecture.
+V39 simplifies binding to one normalized attraction range and ordinary fractional washout.
+It removes the broad opposing convolution, attraction gain and cohesion loss discount.
+The [model simplification record](../../plans/MODEL-SIMPLIFICATION-PLAN.md) explains the retained
+local repulsion, nonlinear crowding, circle separation and finite reservoir-interface signals.
+V40 removes the population ceiling and its configuration. The default world expands from
+320 × 240 to 720 × 540 at the same resolution. The initial area-only expansion was corrected:
+35 regions and 240 reservoirs now preserve approximately the former landscape density, with
+unchanged local spread, reservoir radius/richness laws, release rates and 48 founders in two colonies.
+The ancestry budget and runtime memory limits remain; no population threshold blocks funded division.
 
 ## Meaning and owners
 
@@ -47,10 +63,11 @@ Geography is a separate periodic XY plane. U prices material conversions; D cont
 spread; I impedes motion; S creates compatible or incompatible exposure. Two shared
 signed profiles supply geographic transport signals. They store no usable work.
 
-Rust owns the dense f32 geographic mixture, f64 intracellular mixtures, twenty bounded funded
+Rust owns compact occupied f32 geographic rows, f64 intracellular mixtures, twenty bounded funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v35 persists actual installed
-coordinates independently of inherited instructions and rejects earlier physical bytes.
+The same worker renders borrowed WASM views. Checkpoint v40 persists one birth genome identity per cell
+and one reservoir composition plus amount; it rejects earlier physical bytes.
+Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
 
 Chemical definition v5 retains the persisted cosine coefficients and property ranges.
@@ -64,12 +81,30 @@ universal energy ordering. No organism outcome selects a landscape.
 
 ## Geographic composition
 
-The default grid is h=2 on 320×240 geography: 19,200 nodes and 4,915,200 material
-values. The initial h4 selection was rejected after visual and performance review.
+The default grid is h=2 on 720×540 geography: 97,200 possible nodes. Each occupied node
+owns 256 chemical values; empty space has an immutable zero row and a four-byte row index.
+Current and destination owners contain only occupied support and its four-neighbor halo.
+Zero output rows are reclaimed using the same support masks that computed them. Presentation
+still samples this physical mesh; sparse storage does not coarsen chemistry or rendering.
+The initial h4 selection was rejected after visual and performance review.
 dt=.2 model seconds and physiology=.8 remain explicit. Sources advance every
 tick. Diffusion/drift integrate the full accumulated interval at physiology boundaries;
 movement and maintenance run every tick. The schedule remainder is checkpointed.
 Resolution comparisons use matched physical fixtures and time.
+
+Carrier writes record support and revisions. One normalized three-box attraction kernel
+visits occupied line blocks and its finite halo, including periodic seams. Its continuum
+support is three attraction lengths per axis, with integrated grid-cell endpoints. A base step projects bodies and freezes
+one mechanical convolution for source motion, field redistribution and cell motion; the next
+step sees their committed changes. A standalone field step prepares its own coefficients.
+This replaces sequential repeated attraction solves with an explicit shared force stage.
+Motion dependencies are sampled only at body footprints and the adjacent gradient nodes;
+their retained anchors still accumulate small changes. Illumination updates from external time.
+
+The extracellular concentration floor remains 1e-4 material per geographic area. Deposits
+always wake their destinations and diffusion wakes adjacent rows. Removed tails and floating
+rounding remain explicit material/potential ledger entries. Chemical census reductions visit
+occupied rows; full-map display and explicit field export still cost the requested output size.
 
 ### Prepared execution and physical time
 
@@ -154,15 +189,13 @@ and field-access normalization but contribute no material-donor rows. Current ex
 checks activate damaged, nonempty donors immediately; healing removes their material
 incidence. This exact-zero distinction introduces no additional threshold.
 
-The mechanical reduction owns total overlap and its first angular moment. For relative
-unit direction u and cell-local receptor direction d, the four directional weights are
-`(1+d dot u)/4`. They are nonnegative and sum to one. This broadens the previous
-positive-hemisphere response while retaining front/back and left/right contrast. Coincident
-centers contribute one quarter to each direction. Turning projects the held world-space
-moment into the new body frame in constant work; it does not rescan touching neighbors.
-Reciprocal separation forces retain their previous law. One pre-motion geometric stage
-serves sensing, movement and exchange in each base tick. New overlaps resolve at the next
-base tick; exposure and frozen donor budgets use current material at the transfer boundary.
+The mechanical reduction owns scalar circle overlap and reciprocal center-line separation.
+Heading has no contact role. The four existing contact input slots receive equal shares of
+scalar crowding. Contact chemistry contributes the same scalar concentration to each receptor
+sample, so contact alone creates no directional chemical contrast. Geographic sensing retains
+its own local directional samples. One pre-motion circle stage serves sensing, movement and
+exchange in each base tick. New overlaps resolve at the next base tick; exposure and frozen
+donor budgets use current material at the transfer boundary.
 
 Intracellular inventories hold direct species quantities and owned material/property
 reductions. Accepted sparse reaction rows update quantities directly. Proportional
@@ -198,21 +231,22 @@ differences. The third is the pressure difference `deltaP=χ*(L_left+L_right)*de
 where `P(L)=χL²/2`, χ=.003, and L includes field, reservoir-interface and embodied impedance.
 For a species, directional drift contracts its two signed profiles and positive impedance
 with `deltaA, -deltaB, -deltaP`. The first profile attracts and the second repels;
-In v32, the attractive field is `A*=g*(K_ell*A-K_(2ell)*A)`, with default ell=6 and g=4.
-Both kernels are normalized periodic separable compact filters. The September21 execution
+In v39, the attractive field is `A*=K_ell*A`, with default ell=6 and no separate gain.
+K is a normalized periodic separable compact filter. The September21 execution
 pass replaces truncated Gaussians with three integrated uniform-box convolutions per axis.
 For a=ell/h, integrate the interval[-a,a] over centered unit grid cells to obtain each box
 weight; weights sum to one and are even. Three boxes have continuum per-axis variance ell²;
 the discrete variance follows the actual integrated weights. Fractional endpoints and complete
-period wraps preserve normalization on small worlds. Rolling sums give a fixed six passes
-per scale independent of reach. Nearby compatible material attracts; broad subtraction limits
-coalescence. Matching variance does not make the new force curve identical to the Gaussian.
+period wraps preserve normalization on small worlds. Rolling sums give six passes independent
+of reach. Compatible material attracts within finite support; local repulsion and crowding
+oppose concentration. There is no broader opposing field selecting a cluster spacing.
+Matching variance does not make this force curve identical to the historical Gaussian.
 Repulsion B and load L remain local. The same law applies to source motion, passive cell
 motion and dissolved transport; chemical sensing, release footprints and work remain raw.
 The full-resolution derived cache compares actual input before recomputing, skips exact
-zero support, and reuses its rolling-filter scratch. It refreshes
-before source response, each existing transport substep and cell motion when those consumers
-run. No additional transport steps, physical state copies or worker messages are introduced.
+zero support, and reuses its rolling-filter scratch. Ordinary World freezes the shared force
+stage once per base tick; a standalone field advance prepares its own stage.
+No additional transport steps, physical state copies or worker messages are introduced.
 The identity limit length0 evaluates the local row directly. Configuration limits reach to
 half the shorter world dimension; derived buffers are rebuilt after checkpoint restore.
 
@@ -226,9 +260,9 @@ do not execute the stencil or property reductions. After a substep, concentratio
 `1e-4` are rounded to zero. This local numerical floor applies equally to every species;
 it does not delete a species by its global abundance. Material and reference-value losses
 enter the signed numerical error accounts. The September18
-[scaling pass](../../../SCALING-PLAN.md) raises the preceding1e-9 floor after inspecting
+[scaling pass](../../sources/history/2026-09-21-scaling-before-structural-correction.md) raised the preceding1e-9 floor after inspecting
 material and occupied-group distributions and comparing ordinary continuations.
-The [mature performance pass](../../plans/MATURE-PERFORMANCE-PLAN.md) evaluates the current
+The ended [mature performance pass](../../plans/MATURE-PERFORMANCE-PLAN.md) evaluated the current
 1e-4 resolution from measured reaction support and explicit truncation accounts.
 Intracellular stocks retain their material. Reactions now use the same 1e-4 concentration
 resolution: a substrate participates only above `amount > volume * resolution`. Below it,
@@ -241,10 +275,10 @@ The destination-row stencil gathers incoming material and retains donor remainde
 Substeps bound total outgoing fractions by .9, retaining a positive donor coefficient;
 the default worst-case bound of .8 therefore needs one pass. f32 rounding has explicit signed material
 and reference-value accounts. Exponential washout removes material and its reference
-value as a boundary loss. Its rate is divided by `1+diffusionImpedance*C`, where
-`C=max(A*A*-B²,0)/(1+L)` uses the current shared medium. Cohesive deposits lose matter more
-slowly; removal or chemical change of their support reverses retention. The loss remains
-finite and positive. Actual local loss and rounding are accounted separately.
+value as a boundary loss: `q_after=q_before*exp(-washout*dt)`. Its fractional rate is uniform,
+independent of composition, concentration and body support. Spatial binding can resist
+dispersion while its supporting material exists; it supplies no separate washout protection.
+Actual local loss and rounding are accounted separately.
 No passive spatial change can increase usable work.
 
 Uptake/export scratch contains only nodes touched by current body footprints. Four-species
@@ -254,15 +288,26 @@ same-event exports cannot fund imports. Inactive rows do not allocate256-species
 
 ### Mobile resource reservoirs
 
-Forty-eight externally renewing reservoirs start in uneven neighborhoods. Independent renewals
+Two hundred forty externally renewing reservoirs start around 35 uneven neighborhoods. Locally phased renewals
 continue to import accounted material and reference value. Defaults are sourceDrift4,
 sourceProcessing0.25 and sourceGap2400; sourceProcessing multiplies the common weathering rate.
 The world remains open. Environmental transformations now have an explicit external work
 account modulated by the composed local illumination field.
 
-Reservoir conversion screens changes below `totalInventory * f32::EPSILON`, relative to the
-finite owner. It retains unprocessed tiny stocks. Applying the dissolved concentration floor
-times interface area here would prevent small reservoirs from processing useful fractions.
+Each reservoir owns one normalized composition p, material amount Q, release rate r and an
+empty-interval countdown. Actual inventory is Q*p. The shared public operator transforms p once
+per source update; multiply its converted amount, heat and external work by Q for the physical
+accounts. At Q=0, p remains an evolving external supply condition with zero physical work or
+material. The operator screens changes below f32::EPSILON in p, equivalent to
+`Q * f32::EPSILON` for the finite inventory. It retains unprocessed tiny shares. Applying the
+dissolved concentration floor times interface area would prevent useful small-owner conversions.
+
+Release min(Q,r*dt) in composition p. Actual depletion starts a fixed sourceGap delay, then a
+refill imports Q=r*sourceLifetime and its full potential. There is no lifetime countdown or
+forced dump. sourceLifetime denotes nominal batch duration at rate r. Initialization sets
+r=sourceRate*habitat.richness and Q=r*sourceLifetime*(0.5+U), with one uniform initial draw U.
+This staggers depletion without ongoing random lifetime/rate coupling or random waits. Rates
+remain fixed after creation. A zero release rate neither empties a deposit nor creates supply.
 
 Reservoir inventory projects through the same chemical interaction and impedance properties as
 field material. Its interface area is mesh area divided by the sum of squared footprint weights.
@@ -270,13 +315,12 @@ Exposed material is Q/(1+Q/interfaceArea), bounded by that area. This is a finit
 not a transfer of ownership: cells cannot consume held reservoir inventory. The same footprint
 deposits the signal, samples the medium and releases material. Passive velocity uses the common
 body response, including embodied and reservoir signals; an isolated source cannot propel itself.
-Empty sources retain their evolving replenishment distribution's response and can continue
-drifting, but project no mechanical material. This normalized distribution is an external
-boundary condition, not a hidden stock. It evolves through the same environmental operator
-during active and empty periods, and is persisted through checkpoints. Replenishment uses
-that history instead of resetting to the initial seed species. Its entire material and
-potential enter the supply accounts when a batch arrives. Explicit experimental source zones
-or epochs can prescribe distributions; no runtime rule privileges chemical 0.
+Empty sources neither drift nor project mechanical material. Their composition continues
+evolving in the local medium, preserving supply history without a second mixture. Renewal uses
+that composition instead of resetting to the initial seed species. Explicit experimental source
+zones or epochs can replace the composition at an empty refill, never overwrite held material.
+No runtime rule privileges chemical 0. Earlier v32-v37 renewal and motion measurements used
+two mixtures and randomized batches; they do not establish the behavior of this simpler law.
 
 For finite owners, gather the shared features and their centered gradients through the same W.
 Their unbounded response is `a*grad(A)-b*grad(B)-χ*i*Lother*grad(L)` at that footprint scale, with
@@ -371,14 +415,12 @@ Bodies sample centered differences through W. The shared antisymmetric differenc
 identical deposition/sampling cancel an isolated body's own response. Paid propulsion
 uses actual motor stock, damage, drag from body extent, viscosity and impedance. Passive
 response uses `drift × mobility × f / (1 + hypot(fx,fy))`, shared with reservoirs.
-Local overlap correction supplies body-relative contacts;
+Local circle penetration supplies scalar crowding and center-line soft separation;
 neither movement nor contact resolution credits usable work.
-At exact coincidence, the normalized difference of heading vectors supplies the separation
-direction. Swapping bodies reverses it and rotating both headings rotates it. Identical headings
-give zero correction: no distinguished axis exists. This degenerate tie cannot be continuous
-with every possible approach direction. Ordinary noncoincident contact geometry is unchanged.
+At exact coincidence there is no passive separation direction. Heading never enters contact
+geometry. The circular contact law below defines the reciprocal correction and permeability.
 In v19, requested motor work is `power × (swim² + .25 × turn²) × dt`; paid velocity scales
-by `sqrt(paid/requested)`. The same work-rate function prices growth/refit reserves and budgets.
+by `sqrt(paid/requested)`. The same work-rate function prices growth reserves and budgets.
 
 ## Local recognition and paid operators
 
@@ -415,8 +457,9 @@ recognized by runtime physics. Reservoirs renew0/136 with source0 shares0.55–0
 8/128 priming uses the existing priming fraction and is included in initial accounts; those
 products have no new replenishment rule. This arrangement establishes an opportunity, not
 permanent coexistence. The earlier two-feedstock founder remains an explicit diagnostic template.
-Targets and installed coordinates have separate owners. Immutable compiled arrays are
-shared; refitting refreshes only affected slots. Birth inherits actual installation.
+The birth genotype owns chemical capabilities. Immutable compiled arrays are shared; daughter
+compilation retains unchanged operators. Birth splits actual quantities and immediately applies
+mutated capabilities. No parental-function buffer or within-life refitting remains.
 
 Five receptor sample rows are composed before projecting local chemical rows. Each funded
 receptor supplies tonic, temporal, body-forward and body-left readings. Stock-dependent
@@ -523,36 +566,26 @@ Construction and retirement use frozen free/bound mixtures, one handling/work bu
 storage headroom after any storage retirement. Both pay assembly-price work. Returned material
 or newly created capacity cannot fund the same event.
 Growth protects work for the proposed larger body's upkeep, current motor effort and learning
-through a complete physiology interval plus one movement tick. Refitting uses the same reserve
-for the current body. This prevents optional construction from consuming the next interval's upkeep.
+through a complete physiology interval plus one movement tick. This prevents optional construction from consuming the next interval's upkeep.
 
 Maintenance charges actual stock and damage. Repair exchanges equal proportional amounts of
 free and bound material, frozen before the exchange. Material demand and work costs scale with
 total installed mass times the repaired damage fraction. Available free material, bound mass and
 work limit repair; returned material cannot fund the same exchange. Death releases both mixtures
 unchanged. Checkpoint v20 persists and validates bound material; see [the correction](../../bound-material.md).
-Paid refitting
-moves installed coordinates toward inherited coordinates on affected actual stock.
-Each funded slot requests at most .25 distance units per model second. Distance is Euclidean
-for recognition/transport/membrane coordinates; enzymes sum recognition-center and reflection-center
-edit lengths plus R times the shortest angular edit in radians. Work is constructionEnergy × stock × requested distance, allocated proportionally
-from available surplus. One distant target cannot delay another slot except through shared work.
-This prices continuous changes to installed parameters, so distinct edit paths with equivalent
-end-product maps may cost differently. It is separate from per-conversion kinetics.
-Empty slots can finish freely without creating stock. Completed slots borrow target compiled
-arrays immediately, even while others remain partial. Unpaid funded target changes leave installed
-response intact. Excess usable work dissipates.
+Chemical parameters and the enzyme repertoire remain fixed throughout life. Activity and funded
+stock can change through ordinary control and construction. Excess usable work dissipates.
 
 Local division requires funded double core, actual-capacity inventory/work reserves and division cost. Optional
 machinery is partitioned as actually built, including zero stock. Fission
 ends the parent and creates two daughters; budding retains a reduced parent and one
 daughter. Stocks and inventories split, damage fraction persists, private memory resets,
 and inherited targets can mutate or receive paid birth-local assimilation. Supported
-haploid/diploid and clonal/selfing policies remain. Optional contact transfer copies a
-whole typed genetic unit and grants no installed replacement stock. It defaults off.
+haploid/diploid and clonal/selfing policies remain. The daughter's complete mutated configuration
+applies at birth without granting stock. Living-cell genetic transfer is removed.
 Newborn contact readings reset with private memory; receptor baselines initialize locally.
 Extinction stops visibly without reseeding. Unused genetic payloads can be pruned while retaining
-living target/installed origins, diagnostic catalogs, founder roots and every compact ancestor record.
+living birth genotypes, diagnostic catalogs, founder roots and every compact ancestor record.
 
 All chemical point coordinates use the common heavy-tail vector mutation with scale
 `R × physicalMutationScale`; orientation uses the corresponding arc length divided by R.
@@ -570,54 +603,55 @@ This changes rates, not per-conversion work. Activity, actual stock, damage, sub
 product occupancy still bound flux. Zero stock/activity and retired programs skip rows.
 
 Receptor stock splits by a paid installed inward fraction. Four additional tonic/change pairs
-sense recognized free internal concentration. Outward chemical readings, uptake and stress
-share the actual overlap relation: `Cij=max(0,1-distance/(ri+rj))`, `beta=1/(1+sum C)` and
-`Wij=beta*Cij`. Accessible concentration is `beta*field+sum_j Wij*damage_j*I_j/area_j`.
-Intact cells expose no private inventory. Export throughput is multiplied by beta and releases
-only to the field. All imports share one recipient work/headroom budget. Cell donors reserve
-own export and every neighbor withdrawal together, against frozen inventory, then commit.
-Imports cannot finance same-stage exports. Transport pays only accepted receiver/own-export work.
-Separate contact-received/lost flows distinguish paid uptake from involuntary donor loss.
+sense recognized free internal concentration. The corrected v36 contact law uses perfect
+circles with permeable boundaries. For periodic center displacement u, distance d=|u| and
+summed funded radii R, define penetration p=max(0,R-d) and overlap strength K=p/R.
+Only d<R is a contact; touching and separated circles contribute zero. K is a symmetric
+scalar independent of heading and any sampling mesh. This uses penetration depth, not
+a sampled interface or an intersection-area integration.
 
-Pair overlap correction uses `min(overlap*(1-exp(-dt))/2, dt/2)` per endpoint. This replaces
-the earlier per-tick quarter-overlap rule with a one-model-second decay and retains the speed
-bound. It introduces no wider contact radius or compression injury. Dense many-body geometry
-still requires visual review; isolated pair decay is invariant to timestep subdivision below
-the speed cap.
+For each overlapping pair, the separation velocities are opposite:
+`v_i = -(1-exp(-dt))*p*u/(2*dt*d)`, `v_j=-v_i`.
+At d=0 the pair has no passive direction. There is no heading-dependent tie-breaker, angular
+partition or artificial world-axis impulse. Overlap is allowed; this is soft separation,
+not a rigid-body constraint solver. Repeated two-body relaxation follows physical elapsed
+time. Bodies are circles even while neural motor effort changes swimming heading.
 
-Overlap discovery rebuilds compact diameter-class bins from current positions and radii
-once per base step. Small classes project into larger classes' bins; each occupied-bin
-stencil is visited once, with periodic duplicate bins excluded. Axis and squared-distance
-rejection precede exact overlap geometry. True contacts stream into reciprocal pressure
-and compact incident-edge rows. There is no search margin, persistent pair map, dormant
-candidate relation or temporal geometric certificate. Birth, death, movement and radius
-changes enter the next shared pre-motion traversal directly.
+The accessible field fraction is `beta_i=1/(1+sum_j K_ij)`.
+Scalar crowding is `1-beta_i`; the four existing controller contact slots each receive one
+quarter. All contact receptor samples receive the same chemical mixture. Exposed concentration
+is `beta_i*(field_i + sum_j K_ij*damage_j*I_j/volume_j)`. Existing damage controls donor
+permeability; intact cells expose no private inventory, but retain their ordinary paid
+field import/export. Export throughput is multiplied by beta. Receptors, transporters and
+membranes retain their installed chemical recognition. No contact-specific chemical identity
+or behavior is imposed.
 
-The same frozen true-contact relation supplies movement correction, contact sensing and
-field-access normalization for that step. Material access traverses incident edges of
-currently exposed donors only, retaining current damage and inventories at the transfer
-boundary. Intact cells still exert pressure. Diagnostic counts explicitly report passes,
-candidate checks and true contacts. The earlier persistent topology regressed the mature
-workload; its measurements and supersession remain in the execution plan.
+Receivers request material using that local mixture and their actual work and storage
+headroom. Requests traverse exposed overlapping neighbors once and accumulate demand per
+donor/species. Each donor reserves its frozen inventory against all foreign requests plus
+its own export. A single proportional acceptance factor caps that total; accepted amounts
+are debited from donors and credited to receivers. Incoming material cannot finance that
+event's withdrawals. No contact site chemistry, self-subtraction pass, sampled footprint,
+or near/shared operator split remains. Contact received/lost flows still distinguish paid
+uptake from involuntary donor loss.
 
-Body quadrature uses inline sixteen-entry rows and a reused World row buffer. This changes
-search cost, not the contact law. Adjacent occupied-bin lists are now looked up once per
-bin pair, rather than per cell; physical edges no longer require a global sort. Interface
-preparation shares each donor's stress reduction across recipients, and donor allocation
-visits the receiver's requested chemical support. Field and contact gathering intersect
-funded inward transporter support before constructing local mixtures. Contact transfers
-factor into receiver-intensity transpose accumulation, one frozen donor allocation and
-accepted forward gathering, without receiver/donor/species transaction storage. Own exports
-and foreign uptake reserve against the same donor. Exchange prepares stress/access without
-unused receptor observations; exact zero outward receptor stock skips its recognition.
-Geometric incidence occupies one contiguous edge-index buffer with owner offsets;
-material consumers reuse receiver rows containing only exposed donors. Exchange request,
-donor and node scratch clears only groups touched by the preceding pass; current support
-controls allocation and commitment. Body/perimeter receptor sampling uses at most 32 inline
-nodes. Geographic carrier revisions expire held mobility/passive-force coefficients when
-local material, body, reservoir or attraction changes exceed the shared resolution. Motion
-still advances and pays actual requested motor work every base step. When preparation is
-needed, each referenced gradient is evaluated once and shared by participating footprints.
+The existing periodic diameter-class search enumerates real circle contacts. One stage's
+geometry is reused by pressure, sensing and material exchange; material preparation filters
+to damaged nonempty donors. The search and pressure have no trigonometric rotation work.
+Cost follows bodies, candidate checks and actual overlaps. A population in which every circle
+overlaps every other still has quadratic pair count; this simple law does not claim the
+discarded sampled operator's dense-limit scaling. Persistent spatial tiles and meaningful-change
+scheduling remain open in the scaling plan.
+
+Body-to-geography sampling remains separate from contact geometry. Funded transport and
+outward receptors restrict gathering to installed chemical support. Stress reuses each
+donor's scalar reduction. Selected-cell inspection reads the same circle law.
+
+Geographic carrier dependencies are queried at occupied body footprints and their immediate
+gradient neighbors. Shared normalized resolution expires held mobility/passive coefficients;
+unvisited space performs no discovery pass. Anchors retain cumulative small changes. Motion
+still advances and pays actual requested work every base step, and each referenced gradient
+is evaluated at most once within that frozen movement pass.
 
 Intracellular inventories own cached potential, stress and interaction sums. Actual material
 changes update these sums; proportional transfers and repair exchange their proportional
@@ -635,9 +669,9 @@ does not influence controllers or physical contacts.
 
 Census trait, effort, body, family and evolution summaries share one query-local population
 traversal and genotype lookup per cell. These temporary scalar columns do not copy physical
-frames to the UI or add work to the physical steps. Selected-cell inspection reduces only
-that receiver's current boundary rather than constructing all population contacts. Both
-queries remain read-only and retain the same useful distribution and chemical summaries.
+frames to the UI or add work to the physical steps. Selected-cell inspection uses the same
+circle-overlap and exposed-donor arithmetic as physical sensing. Both queries remain read-only
+and retain the same useful distribution and chemical summaries.
 
 One to eight genetic enzyme programs and retired stock share eight stable records. The first
 four enzyme stocks retain indices11–14; photo remains15; extra enzyme stocks use16–19.

@@ -40,7 +40,12 @@ fn partitioned_world_preserves_funding_observations_and_checkpoint_boundaries() 
     assert!((a.0 - b.0).abs() < 1e-7);
     assert!((a.1 - b.1).abs() < 1e-7);
     assert_eq!(serial.ledger.divisions, parallel.ledger.divisions);
-    for (a, b) in serial.field.amounts.iter().zip(&parallel.field.amounts) {
+    for (a, b) in serial
+        .field
+        .amounts
+        .iter()
+        .zip(parallel.field.amounts.iter())
+    {
         assert!((*a as f64 - *b as f64).abs() < 1e-6);
     }
     let a = &serial.observer.as_ref().unwrap().current;
@@ -65,10 +70,11 @@ fn shared_owners_are_thread_safe_without_mutable_aliases() {
 #[test]
 fn parallel_geographic_filters_preserve_periodic_axes_and_input_invalidation() {
     let (nx, ny) = (384, 192);
-    let mut carrier: Vec<_> = (0..nx * ny)
+    let mut carrier: crate::spatial_signal::Signal = (0..nx * ny)
         .map(|i| [((i * 37 % 997) as f64 * 0.17).sin(), 0.])
-        .collect();
-    let empty = vec![[0.; 2]; nx * ny];
+        .collect::<Vec<_>>()
+        .into();
+    let empty = vec![[0.; 2]; nx * ny].into();
     let mut serial = crate::attraction::Attraction::default();
     let mut parallel = serial.clone();
     for phase in 0..3 {

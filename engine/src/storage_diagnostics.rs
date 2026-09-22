@@ -67,14 +67,15 @@ pub fn field(w: &mut World, kind: &str) -> Result<Value, String> {
         }
     }
     if kind == "widespread" {
-        for node in w.field.amounts.as_chunks_mut::<256>().0 {
+        for n in 0..w.field.nx * w.field.ny {
+            let node = w.field.amounts.row_mut(n);
             for s in (0..256).step_by(16) {
                 node[s] = 0.001;
             }
         }
     }
     if kind == "dense" {
-        for (i, q) in w.field.amounts.iter_mut().enumerate() {
+        for (i, q) in w.field.amounts.dense_values_mut().enumerate() {
             *q = (0.001 * (1. + 0.2 * ((i % 997) as f64).sin())) as f32;
         }
     }

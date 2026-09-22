@@ -1,5 +1,9 @@
 # Mature-world execution at 120 ticks per second
 
+Historical investigation record. Its future-tense implementation queues are superseded by
+[the structural scaling work order](../../SCALING-PLAN.md). Read targeted findings when needed;
+do not resume this document's patch sequence or treat its selected representations as constraints.
+
 Investigation ended September 21 by user decision. The 120 ticks/s target was not met.
 Retain installed changes and evidence; further execution follows `SCALING-PLAN.md`.
 The final compact product ownership change awaits validation in that implementation.

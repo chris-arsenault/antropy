@@ -7,7 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 
-ENERGY = ("maintenance", "motors", "learning", "transport", "reactionHeat", "construction", "repair", "refitting")
+ENERGY = ("maintenance", "motors", "learning", "transport", "reactionHeat", "construction", "repair")
 
 
 def read(path):

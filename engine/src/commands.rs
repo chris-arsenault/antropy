@@ -260,8 +260,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         "scheduledSource" => crate::study_commands::source(w, v),
         "retireSources" => {
             // Ordinary advancement releases the final inventory before retirement.
-            w.sources
-                .retain(|s| s.remaining > 0. || s.inventory.iter().any(|q| *q > 0.));
+            w.sources.retain(|s| s.amount > 0.);
             crate::source_medium::project(w);
             Ok(json!({}))
         }
@@ -344,10 +343,7 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             g.validate(&w.config)?;
             g.compile(&w.config, &w.chemistry);
             cell.genome = g.id;
-            cell.machinery_genome = g.id;
-            cell.installed = g.compiled.as_ref().unwrap().chromosome.chemistry.clone();
             cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
-            cell.machinery_revision += 1;
             genotype = Some(g);
         }
         if let Some(value) = v.get("inventory") {
@@ -434,7 +430,6 @@ fn load_program_fixture(
     dense: bool,
 ) -> Result<(), String> {
     if w.tick != 0
-        || population > w.config.max_population
         || population > w.config.max_ancestry_records
         || !(1..=crate::organism::MAX_ENZYMES).contains(&programs)
     {
@@ -518,7 +513,7 @@ fn load_program_fixture(
         w.next_cell += 1;
         w.next_genome += 1;
     }
-    for (i, q) in w.field.amounts.iter_mut().enumerate() {
+    for (i, q) in w.field.amounts.dense_values_mut().enumerate() {
         *q = (1e-5 * (1. + 0.2 * ((i % 997) as f64).sin())) as f32;
     }
     w.field.refresh(&w.chemistry);

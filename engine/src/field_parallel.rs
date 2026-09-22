@@ -17,7 +17,7 @@ struct Pass<'a> {
     dt: f64,
     step_dt: f64,
     final_step: bool,
-    washout: f64,
+    decay: f64,
     impedance: f64,
     maximum_impedance: f64,
     floor: f32,
@@ -46,10 +46,14 @@ impl Pass<'_> {
             },
         );
         let mut lost = [0.; 2];
-        if self.final_step && self.washout > 0. {
-            let decay = (-self.washout * self.dt * f.retention(n, self.impedance)).exp();
-            (mask, lost) =
-                crate::chemical_projection::decay(next, self.projection, mask, decay, self.floor);
+        if self.final_step && self.decay < 1. {
+            (mask, lost) = crate::chemical_projection::decay(
+                next,
+                self.projection,
+                mask,
+                self.decay,
+                self.floor,
+            );
         }
         if self.final_step
             && let Some(weather) = weather
@@ -89,7 +93,8 @@ impl Field {
     ) -> [f64; 6] {
         // Taking the destination owner makes disjoint writes expressible without unsafe aliases.
         let mut next = std::mem::take(&mut self.next);
-        let mut results = vec![RowResult::default(); self.nx * self.ny];
+        next.prepare(&self.activity.work);
+        let mut results = vec![RowResult::default(); self.activity.work.len()];
         let pass = Pass {
             field: self,
             rows,
@@ -97,19 +102,14 @@ impl Field {
             dt,
             step_dt: dt / steps as f64,
             final_step: step + 1 == steps,
-            washout,
+            decay: (-washout * dt).exp(),
             impedance,
             maximum_impedance,
             floor,
         };
         let process = |(chunk, (dest, output)): (usize, (&mut [f32], &mut [RowResult]))| {
             let first = chunk * STRIP;
-            let end = first + output.len();
-            let range = self.activity.work.partition_point(|&n| n < first)
-                ..self.activity.work.partition_point(|&n| n < end);
-            if range.is_empty() {
-                return [0.; 6];
-            }
+            let nodes = &self.activity.work[first..first + output.len()];
             let mut weather = climate.cloned();
             if let Some(w) = &mut weather {
                 w.heat = 0.;
@@ -118,8 +118,7 @@ impl Field {
                 w.prevented = 0.;
             }
             let mut account = [0.; 6];
-            for &n in &self.activity.work[range] {
-                let offset = n - first;
+            for (offset, &n) in nodes.iter().enumerate() {
                 let (result, loss) = pass.row(
                     n,
                     &mut dest[offset * SPECIES..(offset + 1) * SPECIES],
@@ -141,34 +140,26 @@ impl Field {
             a
         };
         let account = if crate::parallel::enabled(self.activity.work.len(), 256) {
-            next.par_chunks_mut(STRIP * SPECIES)
+            next.values_mut()
+                .par_chunks_mut(STRIP * SPECIES)
                 .zip(results.par_chunks_mut(STRIP))
                 .enumerate()
                 .map(process)
                 .reduce(|| [0.; 6], add)
         } else {
-            next.chunks_mut(STRIP * SPECIES)
+            next.values_mut()
+                .chunks_mut(STRIP * SPECIES)
                 .zip(results.chunks_mut(STRIP))
                 .enumerate()
                 .map(process)
                 .fold([0.; 6], add)
         };
         std::mem::swap(&mut self.amounts, &mut next);
-        let candidates = &self.activity.candidates;
-        let clear =
-            |(n, row): (usize, &mut [f32])| crate::field_activity::clear(row, candidates[n]);
-        if crate::parallel::enabled(self.activity.work.len(), 256) {
-            next.par_chunks_mut(SPECIES).enumerate().for_each(clear);
-        } else {
-            for &n in &self.activity.work {
-                clear((n, &mut next[n * SPECIES..(n + 1) * SPECIES]));
-            }
-        }
+        next.clear();
         self.next = next;
         self.totals = [0.; 2];
-        for i in 0..self.activity.work.len() {
+        for (i, result) in results.iter().enumerate() {
             let n = self.activity.work[i];
-            let result = &results[n];
             self.last_groups += self.activity.candidates[n].count_ones() as usize;
             self.activity.set(n, result.mask);
             let v = result.projection;
@@ -179,6 +170,7 @@ impl Field {
             self.stress[n] = v[3] / area;
             self.signal[n] = [v[4] / area, v[5] / area];
         }
+        self.amounts.retain(|n| self.activity.masks[n] != 0);
         account
     }
 }

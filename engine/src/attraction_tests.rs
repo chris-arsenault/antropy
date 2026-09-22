@@ -29,8 +29,11 @@ fn direct_three_box(input: &[f64], nx: usize, ny: usize, width: f64) -> Vec<f64>
 fn compact_filter_matches_integrated_boxes_at_fractional_and_wrapped_reaches() {
     for (nx, ny) in [(1, 1), (1, 3), (4, 2), (13, 9)] {
         for width in [0.01, 0.49, 0.5, 0.51, 1., 1.5, 2.75, 13.25] {
-            let signal: Vec<_> = (0..nx * ny).map(|n| [(n as f64 * 0.7).cos(), 0.]).collect();
-            let zeros = vec![[0.; 2]; signal.len()];
+            let signal: crate::spatial_signal::Signal = (0..nx * ny)
+                .map(|n| [(n as f64 * 0.7).cos(), 0.])
+                .collect::<Vec<_>>()
+                .into();
+            let zeros = vec![[0.; 2]; signal.len()].into();
             let input: Vec<_> = signal.iter().map(|q| q[0]).collect();
             let mut filter = crate::attraction::Attraction::default();
             filter.prepare((nx, ny, 2., width * 2.), [&signal, &zeros, &zeros]);
@@ -49,9 +52,9 @@ fn compact_filter_matches_integrated_boxes_at_fractional_and_wrapped_reaches() {
 
 #[test]
 fn compact_impulse_has_normalized_positive_support_and_discrete_variance() {
-    let mut signal = vec![[0.; 2]; 65];
+    let mut signal: crate::spatial_signal::Signal = vec![[0.; 2]; 65].into();
     signal[32][0] = 1.;
-    let zeros = vec![[0.; 2]; 65];
+    let zeros = vec![[0.; 2]; 65].into();
     let mut filter = crate::attraction::Attraction::default();
     filter.prepare((65, 1, 2., 6.), [&signal, &zeros, &zeros]);
     assert!((filter.output.iter().sum::<f64>() - 1.).abs() < 1e-12);
@@ -93,7 +96,7 @@ fn shared_filter_preserves_signed_sums_constants_and_skips_unchanged_inputs() {
     f.signal.fill([0.1, 0.]);
     f.prepare_attraction();
     assert!(f.attraction.output.iter().all(|q| (q - 0.2).abs() < 1e-12));
-    assert!((0..f.signal.len()).all(|n| f.attractive(n).abs() < 1e-12));
+    assert!((0..f.signal.len()).all(|n| (f.attractive(n) - 0.2).abs() < 1e-12));
     f.signal.fill([0.; 2]);
     f.body_signal.fill([0.; 2]);
     f.source_signal.fill([0.; 2]);
@@ -163,9 +166,10 @@ fn binding_changes_from_repulsion_to_restoring_response_without_anchors() {
             s.habitat.y = 63.1;
             s.habitat.radius = 3.;
             s.rebuild(&w.config, &w.field);
-            s.inventory.fill(0.);
-            s.inventory[0] = 0.6 * s.interface;
-            s.inventory[136] = 0.4 * s.interface;
+            s.mixture.fill(0.);
+            s.mixture[0] = 0.6;
+            s.mixture[136] = 0.4;
+            s.amount = s.interface;
         }
         source_medium::project(&mut w);
         let v: Vec<_> = w
@@ -173,17 +177,17 @@ fn binding_changes_from_repulsion_to_restoring_response_without_anchors() {
             .iter()
             .map(|s| source_medium::response(s, 0, &w.config, &w.field, &w.chemistry).velocity[0])
             .collect();
-        assert_eq!(
-            v[0] > 0.,
-            distance > 4. && distance < 40.,
-            "distance={distance}, v={v:?}"
-        );
+        if distance == 40. {
+            assert!(v[0].abs() < 1e-12, "No force beyond finite support: {v:?}");
+        } else {
+            assert_eq!(v[0] > 0., distance > 4., "distance={distance}, v={v:?}");
+        }
         assert!((v[0] + v[1]).abs() < 1e-10, "distance={distance}, v={v:?}");
     }
 }
 
 #[test]
-fn cohesion_retains_material_reversibly_and_accounts_actual_loss() {
+fn ordinary_washout_has_no_cohesion_discount_and_accounts_actual_loss() {
     let mut chemistry = Chemistry::new(101).unwrap();
     // Isolate the shared mechanical law from diffusion and chemical response.
     for p in &mut chemistry.properties {
@@ -200,21 +204,13 @@ fn cohesion_retains_material_reversibly_and_accounts_actual_loss() {
         }
     }
     compact.prepare_attraction();
-    let center = 16 * 32 + 16;
-    assert!(compact.retention(center, 1.) < 0.1);
     let before = compact.totals(&chemistry);
     let balance = compact.advance(&chemistry, 0.8, 0.001, 1.);
     let after = compact.totals(&chemistry);
-    assert!(balance.matter > 0. && balance.matter < before.0 * 0.0004);
+    let expected = before.0 * (1. - (-0.0008_f64).exp());
+    assert!((balance.matter - expected).abs() < 1e-9);
     assert!((before.0 - after.0 - balance.matter - balance.roundoff_matter).abs() < 1e-10);
     assert!((before.1 - after.1 - balance.energy - balance.roundoff_energy).abs() < 1e-10);
-    compact.amounts.fill(0.);
-    compact.refresh(&chemistry);
-    compact.prepare_attraction();
-    assert_eq!(compact.retention(center, 1.), 1.);
-    compact.signal.fill([1., 0.]);
-    compact.prepare_attraction();
-    assert!((compact.retention(center, 1.) - 1.).abs() < 1e-12);
 }
 
 #[test]

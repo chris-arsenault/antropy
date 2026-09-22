@@ -10,22 +10,11 @@ fn main() {
     let mut requests = [0.; 4];
     let mut amounts = [0.; 4];
     let mut subnormal = 0;
-    let mut partial_refits = 0;
     for cell in &w.cells {
         let c = &w.config;
         let volume = cell.volume(c);
         let operators = cell.operators.as_ref().unwrap();
         let mixture = metabolism::retained_response(cell, c, &w.chemistry);
-        if cell.installed
-            != w.genomes[&cell.genome]
-                .compiled
-                .as_ref()
-                .unwrap()
-                .chromosome
-                .chemistry
-        {
-            partial_refits += 1;
-        }
         for q in cell.inventory.iter() {
             subnormal += usize::from(q.is_subnormal());
             for (i, floor) in floors.iter().enumerate() {
@@ -40,7 +29,7 @@ fn main() {
                 * cell.body[organism::enzyme_stock(slot)]
                 * cell.action.activity[slot]
                 * (1. - cell.damage);
-            if capacity == 0. || !cell.installed.programs[slot] {
+            if capacity == 0. || !cell.chemistry().programs[slot] {
                 continue;
             }
             let occupancy: f64 = enzyme
@@ -66,8 +55,7 @@ fn main() {
     }
     let result = json!({"tick":w.tick,"population":w.cells.len(),"floors":floors,
         "activeReactionEdges":edges,"unfundedRequestedMaterial":requests,
-        "retainedFreeMaterial":amounts,"subnormalInventoryEntries":subnormal,
-        "partiallyRefittedCells":partial_refits});
+        "retainedFreeMaterial":amounts,"subnormalInventoryEntries":subnormal});
     std::fs::write(&args[2], serde_json::to_vec_pretty(&result).unwrap()).unwrap();
     println!("{result}");
 }

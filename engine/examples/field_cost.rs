@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut groups = 0;
         let mut nodes = 0;
         let mut values = 0;
-        for row in field.amounts.chunks_exact(256) {
+        for (_, row) in field.amounts.rows() {
             let mut used = false;
             for group in row.chunks_exact(4) {
                 groups += usize::from(group.iter().any(|&q| q as f64 >= floor));

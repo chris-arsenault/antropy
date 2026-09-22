@@ -12,7 +12,6 @@ export const CHEMICAL_OPTIONS = {
   physiologyInterval: "physiology-interval",
   viscosity: "viscosity",
   damageRate: "damage-rate",
-  transferRate: "transfer-rate",
   sourceLifetime: "source-lifetime",
   sourceGap: "source-gap",
   sourceRadius: "source-radius",

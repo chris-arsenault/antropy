@@ -25,14 +25,15 @@ fn circuit_private_returns_close_against_external_input() {
         cell.inventory.fill(0.);
         cell.inventory.set(s, 1.);
         let from = chemistry::coordinate(s);
-        cell.installed.enzymes = [Enzyme {
+        let mut machinery = cell.chemistry().clone();
+        machinery.enzymes = [Enzyme {
             x: from[0],
             y: from[1],
             center_x: if i % 2 == 0 { 4. } else { 0. },
             center_y: if i % 2 == 1 { 4. } else { 0. },
             angle: 0.,
         }; crate::organism::MAX_ENZYMES];
-        cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
+        cell.operators = Some(Operators::compile(&machinery, &w.config, &w.chemistry));
         let initial = cell.clone();
         metabolism::react_observed(&mut cell, &w.config, &w.chemistry, 1e6, true, signal);
         assert!((cell.inventory.value(t) - 1.).abs() < 1e-12);
@@ -139,10 +140,13 @@ fn default_starts_with_four_funded_mutable_roles_in_each_colony() {
                 let input = crate::initial_ecology::CIRCUIT[role as usize];
                 let output = crate::initial_ecology::CIRCUIT[(role as usize + 1) % 4];
                 assert!((cell.mass() - cell.bound_material.material()).abs() < 1e-12);
-                assert_eq!(cell.installed, w.genomes[&cell.genome].express().chemistry);
+                assert_eq!(
+                    cell.chemistry(),
+                    &w.genomes[&cell.genome].express().chemistry
+                );
                 assert!(cell.inventory.value(input) > 0. && cell.inventory.value(output) > 0.);
                 for (slot, enzyme) in cell.operators.as_ref().unwrap().enzymes.iter().enumerate() {
-                    if !cell.installed.programs[slot] {
+                    if !cell.chemistry().programs[slot] {
                         assert!(enzyme.conversions.is_empty());
                         continue;
                     }

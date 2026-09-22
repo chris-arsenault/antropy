@@ -65,53 +65,39 @@ fn heterogeneous_overlaps_match_all_pairs_across_seams_and_small_grids() {
 }
 
 #[test]
-fn interface_weights_and_world_directions_share_reciprocal_geometry() {
+fn scalar_interfaces_follow_exact_circle_penetration() {
     let (c, mut cells) = fixture();
     for cell in &mut cells {
         cell.damage = 0.5;
         cell.inventory.set(17, 0.01);
     }
-    cells[0].x = cells[1].x;
-    cells[0].y = cells[1].y;
-    cells[7].x = (cells[15].x + c.width * 0.5).rem_euclid(c.width);
-    cells[7].y = cells[15].y;
     let graph = Graph::new(&cells, &c);
-    for (i, a) in cells.iter().enumerate() {
-        let mut normalization = 1.;
-        let mut expected = vec![];
-        for (j, b) in cells.iter().enumerate().filter(|(j, _)| *j != i) {
-            let mut x = movement::delta(b.x - a.x, c.width);
-            let mut y = movement::delta(b.y - a.y, c.height);
-            // One canonical edge fixes the otherwise ambiguous antipodal direction.
-            if i > j && x == -c.width * 0.5 {
-                x = -x;
-            }
-            if i > j && y == -c.height * 0.5 {
-                y = -y;
-            }
-            let length = x.hypot(y);
-            let weight = (1. - length / (a.radius(&c) + b.radius(&c))).max(0.);
-            if weight == 0. {
-                continue;
-            }
-            normalization += weight;
-            let direction = if length == 0. {
-                [0.; 2]
-            } else {
-                [x / length, y / length]
-            };
-            expected.push((j, weight, direction));
-        }
-        assert!((graph.field[i] - 1. / normalization).abs() < 1e-12);
-        assert_eq!(graph.neighbors[i].len(), expected.len());
-        let mut neighbors: Vec<_> = graph.neighbors[i].iter().collect();
-        neighbors.sort_unstable_by_key(|n| n.donor);
-        for (actual, (j, weight, direction)) in neighbors.into_iter().zip(expected) {
-            assert_eq!(actual.donor, j);
-            assert!((actual.weight - weight / normalization).abs() < 1e-12);
-            for (a, b) in actual.direction.iter().zip(direction) {
-                assert!((a - b).abs() < 1e-12);
-            }
+    for (i, cell) in cells.iter().enumerate() {
+        let sum: f64 = cells
+            .iter()
+            .enumerate()
+            .filter(|(j, _)| *j != i)
+            .map(|(_, other)| {
+                let extent = cell.radius(&c) + other.radius(&c);
+                let distance = movement::distance([cell.x, cell.y], [other.x, other.y], &c);
+                (1. - distance / extent).max(0.)
+            })
+            .sum();
+        assert!((graph.field[i] - 1. / (1. + sum)).abs() < 1e-12);
+        assert!(
+            graph.contacts[i]
+                .iter()
+                .all(|value| (*value - sum / (1. + sum) / 4.).abs() < 1e-12)
+        );
+        for n in graph.neighbors(i) {
+            let reverse = graph
+                .neighbors(n.donor)
+                .iter()
+                .find(|n| n.donor == i)
+                .unwrap();
+            assert!(
+                (n.weight / graph.field[i] - reverse.weight / graph.field[n.donor]).abs() < 1e-12
+            );
         }
     }
 }
@@ -185,7 +171,8 @@ fn direct_stage_matches_all_pairs_after_motion_growth_topology_and_configuration
         assert_eq!(cached_found(&mut cache, &cells, &c), reference(&cells, &c));
         let geometry = cache.prepare(&cells, &c);
         for (body, cell) in geometry.bodies.iter().zip(&cells) {
-            assert_eq!(body.heading, [cell.heading.cos(), cell.heading.sin()]);
+            assert_eq!(body.position, [cell.x, cell.y]);
+            assert_eq!(body.radius, cell.radius(&c));
         }
     }
 }

@@ -26,7 +26,7 @@ fn world() -> World {
 fn observe(w: &mut World) -> [f32; 4] {
     let c = &mut w.cells[0];
     let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
-    sensing::observe(c, g, g, &w.config, &w.field);
+    sensing::observe(c, g, &w.config, &w.field);
     c.inputs[LIGHT_INPUT..LIGHT_INPUT + 4].try_into().unwrap()
 }
 

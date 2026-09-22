@@ -90,13 +90,13 @@ fn motion() -> Value {
     let a = axis[0].hypot(axis[1]);
     let b = diagonal[0].hypot(diagonal[1]);
     json!({"axisSpeed":a,"diagonalSpeed":b,"diagonalRelativeLoss":1.-b/a,
-        "refitDistanceForUnitEuclideanChange":{"axis":1.,"diagonal":d.hypot(d)},
-        "refitNote":"Euclidean distances; funded refits are covered by runtime unit tests"})
+        "coordinateDistanceForUnitEuclideanChange":{"axis":1.,"diagonal":d.hypot(d)},
+        "distanceNote":"Euclidean chemical geometry; birth-fixed capabilities have no refitting charge"})
 }
 
 fn reflected_costs() -> Value {
     let w = diagnostics::nutrition(0.8, 2., false, false);
-    let mut machinery = w.cells[0].installed.clone();
+    let mut machinery = w.cells[0].chemistry().clone();
     let rows: Vec<_> = [3., -1.]
         .into_iter()
         .map(|dx| {

@@ -12,7 +12,7 @@ fn effective_programs(c: &Cell) -> Option<f64> {
     let mut kernels = Vec::new();
     for (slot, op) in operators.enzymes.iter().enumerate() {
         let stock = c.body[antropy_engine::organism::enzyme_stock(slot)];
-        if stock <= 1e-6 || !c.installed.programs[slot] {
+        if stock <= 1e-6 || !c.chemistry().programs[slot] {
             continue;
         }
         let mut kernel = BTreeMap::<usize, f64>::new();
@@ -68,13 +68,13 @@ fn infer(w: &World, c: &Cell, inputs: &[f32]) -> controller::Action {
 fn regulation(w: &World, cell: &Cell) -> Value {
     let mut c = cell.clone();
     let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
-    sensing::observe(&mut c, g, g, &w.config, &w.field);
+    sensing::observe(&mut c, g, &w.config, &w.field);
     let normal = infer(w, &c, &c.inputs);
     let mut inward_absent = c.inputs.clone();
     inward_absent[controller::INWARD_INPUT..controller::INWARD_INPUT + 8].fill(0.);
     let mut inward_shift = c.inputs.clone();
     for slot in 0..4 {
-        let stock = c.body[3 + slot] * c.installed.inward[slot];
+        let stock = c.body[3 + slot] * c.chemistry().inward[slot];
         let gain = stock / (stock + w.config.receptor_ratio * c.body[0]).max(1e-30);
         let input = controller::INWARD_INPUT + 2 * slot;
         inward_shift[input] = (inward_shift[input] as f64 + 0.05 * gain).min(gain) as f32;
@@ -91,14 +91,15 @@ pub fn inspect(w: &World, c: &Cell, graph: &Graph, index: usize, bodies: &[[f64;
     let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
     let rates: Vec<_> = c.operators.as_ref().unwrap().enzymes.iter().enumerate().map(|(slot, op)| {
         let stock = c.body[antropy_engine::organism::enzyme_stock(slot)];
-        let rows: Vec<_> = op.conversions.iter().filter(|e| c.inventory.value(e.substrate) > 0. && stock > 0. && c.installed.programs[slot]).collect();
+        let rows: Vec<_> = op.conversions.iter().filter(|e| c.inventory.value(e.substrate) > 0. && stock > 0. && c.chemistry().programs[slot]).collect();
         let weights: f64 = rows.iter().map(|e| e.catalytic * c.inventory.value(e.substrate)).sum();
         let modifiers: Vec<_> = rows.iter().map(|e| metabolism::response(e.work_coefficient,mixture)).collect();
         let mean = rows.iter().zip(&modifiers).map(|(e,m)| e.catalytic * c.inventory.value(e.substrate) * m).sum::<f64>() / weights.max(1e-30);
         json!({"slot":slot,"rowsWithSubstrate":rows.len(),"weightedMean":if weights > 0. {Some(mean)} else {None},
             "minimum":modifiers.iter().copied().reduce(f64::min),"maximum":modifiers.iter().copied().reduce(f64::max)})
     }).collect();
-    let neighbors: Vec<_> = graph.neighbors[index]
+    let neighbors: Vec<_> = graph
+        .neighbors(index)
         .iter()
         .map(|n| {
             json!({

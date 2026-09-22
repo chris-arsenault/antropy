@@ -9,9 +9,11 @@ physical opportunities and operating limits; no evolved community is supplied.
 
 ## Substrate and embodied state
 
-One periodic 320 × 240 XY plane contains continuous circular organisms and a mesh-2 chemical
+One periodic 720 × 540 XY plane contains continuous circular organisms and a mesh-2 chemical
 field. Neither axis is height. Sampling, motion, contact, offspring placement and rendering
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
+Funded reproduction has no population-count ceiling. The ancestry budget and runtime memory
+limits remain independent operating limits; they do not kill cells or select parents.
 
 A cell owns position, heading, twenty actual material-stock records, a 256-element float64 intracellular chemical
 mixture, usable energy, injury, four outward/four inward chemical and one optical adaptive receptor baselines, contact state, private brain
@@ -38,8 +40,8 @@ attenuates conversion. Paid exports can change both product selection and exposu
 remain available to neighbors and subject to transport, washout, weathering and uptake.
 Controllers receive the resulting chemistry through their ordinary local sensors.
 
-Forty-eight reservoirs start in seven unequal abiotic neighborhoods. Local chemical gradients
-move them with impedance-dependent drag, including during renewal waits. Richness and radii
+Two hundred forty reservoirs start around 35 unequal abiotic neighborhoods. Local chemical gradients
+move occupied reservoirs with impedance-dependent drag; empty sites do not move. Richness and radii
 persist; renewal uses the current location and a persisted mixture that changes with local processing. Independent renewals
 continue indefinitely, importing accounted matter and potential. Release is an internal transfer
 from an inventory processed through the shared chemical operator. Accounted external work can
@@ -82,15 +84,15 @@ and paid learning time advance every base step. The phase order is:
 3. Pay affordable swimming/turning and resolve movement/contact.
 4. On physiology boundaries resolve funded import/export from shared supply, storage and usable work.
 5. On those boundaries apply membrane-dependent external/internal injury, unary reactions,
-   repair, paid refitting, generic construction and work overflow.
-6. Pay maintenance every movement tick; resolve death, optional disturbance/contact transfer
+   repair, generic construction and work overflow.
+6. Pay maintenance every movement tick; resolve death, optional disturbance
    and funded reproduction. Daughters initialize from local observations and first advance
    their private controller on the next base step.
 
 Transport cannot use prospective export to create import headroom; released material becomes
 available in the next transport phase. Enzymes see one starting intracellular inventory, so products
 cannot cascade by enzyme iteration order. Uphill reactions use already held energy or explicitly accepted external transformation work. Downhill
-overflow becomes heat. Growth/refitting protect upkeep and current motor/learning work through
+overflow becomes heat. Growth protects upkeep and current motor/learning work through
 the next physiology interval. Motor and transport effort otherwise compete for available work.
 
 Matter and energy close separately across fields, sources, cells, generic bodies, washout and
@@ -112,8 +114,9 @@ Fission requires twice the inherited core target, actual daughter inventory/ener
 placement in the periodic plane. Daughters separate along the parent's heading and subsequently
 participate in ordinary local overlap resolution. Fission splits stocks, each chemical and
 post-cost energy equally; budding uses the same split while retaining the experienced parent.
-Changed inherited machinery retains its installed function until paid refitting is affordable.
-Birth splits installed stock and identity rather than granting new machinery. Damage fraction
+Each daughter immediately uses its mutated chemical capabilities and retains that configuration
+throughout life. Birth splits actual stock without granting new material. There is no refitting
+or living-cell gene transfer. Damage fraction
 persists. Starvation or unit injury releases inventory and bound material unchanged and dissipates
 remaining usable energy. No killer receives a direct grant. [Bound material](../bound-material.md)
 records the shared transfer rules and their work accounts.

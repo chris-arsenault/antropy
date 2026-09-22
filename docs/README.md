@@ -93,11 +93,15 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Accounting and consistency](design/chemistry/computational-foundation.md#consistency-belongs-to-the-designed-system)
 - [Acceptance before integration](design/chemistry/computational-foundation.md#acceptance-before-integration)
 - [Computable artificial rules](principles.md#principles-computable-rules)
+- [Structural performance work](principles.md#principles-structural-performance)
 
 ## Current design and work order
 
 - [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
+- [Immediate model simplification](design/README.md#design-model-simplification)
+- [Unfinished structural execution](design/README.md#design-structural-priority)
+- [Installed runtime](design/README.md#design-installed-runtime)
 - [Design owners](design/README.md#design-design-owners)
 - [Current default and disabled scope](design/README.md#design-current-default-and-disabled-scope)
 - [Next decisions](design/README.md#design-next-decisions)

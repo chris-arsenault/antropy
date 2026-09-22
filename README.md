@@ -45,8 +45,8 @@ pnpm run build
 
 Run `make ci` from the repository root before committing.
 
-Press **Run** to begin at tick zero: 48 bacteria in two separated starting colonies in a 320 × 240 world,
-48 mobile renewing reservoirs with local chemical mixtures and mutation enabled. Four mutable founder types seed a chemical circuit in each colony. The UI requests
+Press **Run** to begin at tick zero: 48 bacteria in two separated starting colonies in a 720 × 540 world,
+240 mobile renewing reservoirs across 35 regions, with local chemical mixtures and mutation enabled. Four mutable founder types seed a chemical circuit in each colony. The UI requests
 30 ticks/s, with a maximum-speed option; actual throughput depends on workload. Layers show material, chemical potential,
 stress, impedance, chemical weathering or one selected chemical. Drag to pan, wheel to zoom and select a cell to inspect
 its machinery, mixtures, sensors, recurrent state and private byte. The full-screen viewport has a dock for observation/control windows.

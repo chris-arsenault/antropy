@@ -139,10 +139,7 @@ fn climate_restore_continues_at_each_physiology_phase_and_source_rng_is_independ
         crate::boundary_tests::usable_continuation(&w, resumed_tick);
         crate::boundary_tests::usable_continuation(&restored, resumed_tick);
         for (a, b) in w.sources.iter().zip(&control.sources) {
-            assert_eq!((a.remaining, a.wait, a.rate), (b.remaining, b.wait, b.rate));
-            assert!(
-                (a.inventory.iter().sum::<f64>() - b.inventory.iter().sum::<f64>()).abs() < 1e-10
-            );
+            assert_eq!((a.amount, a.wait, a.rate), (b.amount, b.wait, b.rate));
         }
     }
     assert!(w.ledger.weathering_heat + w.ledger.weathering_work > 0.);

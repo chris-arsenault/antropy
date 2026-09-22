@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut first = Vec::with_capacity(f.nx * f.ny);
     let mut drive = Vec::with_capacity(f.nx * f.ny);
     let mut potential = Vec::with_capacity(f.nx * f.ny);
-    for (n, row) in f.amounts.chunks_exact(256).enumerate() {
+    for (n, row) in f.amounts.rows() {
         let x = (n % f.nx) as f64 * f.spacing + f.spacing / 2.;
         let y = (n / f.nx) as f64 * f.spacing + f.spacing / 2.;
         let bin = (y / bin_width) as usize * bx + (x / bin_width) as usize;

@@ -135,12 +135,13 @@ fn processing_is_continuous_across_product_and_recognition_boundaries() {
                 let mut cell = world.cells[0].clone();
                 cell.inventory.fill(0.1);
                 cell.energy = 10.;
-                for e in &mut cell.installed.enzymes {
+                let mut machinery = cell.chemistry().clone();
+                for e in &mut machinery.enzymes {
                     e.x = x + delta;
                     e.center_x = 7.5 + offset + delta;
                 }
                 cell.operators = Some(Operators::compile(
-                    &cell.installed,
+                    &machinery,
                     &world.config,
                     &world.chemistry,
                 ));
@@ -176,12 +177,13 @@ fn an_idle_offset_and_a_tiny_offset_have_continuous_work_cost() {
         let mut cell = world.cells[0].clone();
         cell.inventory.fill(0.1);
         cell.energy = 10.;
-        for e in &mut cell.installed.enzymes {
+        let mut machinery = cell.chemistry().clone();
+        for e in &mut machinery.enzymes {
             e.center_x = offset;
             e.center_y = 0.;
         }
         cell.operators = Some(Operators::compile(
-            &cell.installed,
+            &machinery,
             &world.config,
             &world.chemistry,
         ));

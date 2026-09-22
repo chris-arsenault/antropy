@@ -94,13 +94,9 @@ pub(super) struct Search {
 impl Search {
     pub fn update(&mut self, cells: &[Cell], c: &Config, contacts: &mut Contacts) {
         contacts.bodies.clear();
-        contacts.bodies.extend(cells.iter().map(|cell| {
-            let (sin, cos) = cell.heading.sin_cos();
-            Body {
-                position: [cell.x.rem_euclid(c.width), cell.y.rem_euclid(c.height)],
-                radius: cell.radius(c),
-                heading: [cos, sin],
-            }
+        contacts.bodies.extend(cells.iter().map(|cell| Body {
+            position: [cell.x.rem_euclid(c.width), cell.y.rem_euclid(c.height)],
+            radius: cell.radius(c),
         }));
         self.prepare(&contacts.bodies, c);
         contacts.edges.clear();

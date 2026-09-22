@@ -71,7 +71,7 @@ impl Buffers {
             if !window.contains(w, s.habitat.x, s.habitat.y, s.habitat.radius) {
                 continue;
             }
-            let active = s.remaining > 0. && s.inventory.iter().any(|q| *q > 0.);
+            let active = s.amount > 0.;
             let h = &s.habitat;
             self.markers.extend([
                 h.x as f32,
@@ -274,7 +274,7 @@ mod tests {
                 < 1e-6
         );
         for site in &mut w.sources {
-            site.remaining = 0.;
+            site.amount = 0.;
         }
         buffers.prepare(&w, 5, 0, 6, false, 0).unwrap();
         assert_eq!(buffers.markers.len(), w.sources.len() * STRIDE);

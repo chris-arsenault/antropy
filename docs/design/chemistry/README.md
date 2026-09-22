@@ -54,7 +54,7 @@ substrate. They are not species categories or separate action systems.
 | [Mobile sources](mobile-source-results.md) | Medium-dependent motion and release, bounded cost and short calibration |
 | [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
 | [Reliability evidence](reliability-results.md) | Historical browser failures/limits and their repairs; [current session investigation](../../session-runtime-review.md) adds mature-state costs |
-| [Installed machinery](installed-machinery.md) | Inherited targets, retained function, paid refitting and historical findings |
+| [Birth-fixed capabilities](installed-machinery.md) | Lifetime chemical configuration, conservative birth and historical refitting findings |
 | [Diagnostic continuity](diagnostic-continuity.md) | Genealogy, inherited/body comparisons and bounded recent/longitudinal observations |
 | [Migration and retirement](numerical-migration.md) | Current commands, reports, retained semantics and removed implementations |
 | [Historical performance and fidelity](performance.md) | Previous TypeScript quantization choices and evidence |

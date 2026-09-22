@@ -1,4 +1,73 @@
 use crate::{config::Config, world::World};
+
+#[test]
+fn funded_division_crosses_ten_thousand_cells_without_a_population_stop() {
+    for reproduction in ["fission", "budding"] {
+        let mut w = World::new(
+            27,
+            Config {
+                width: 24.,
+                height: 24.,
+                founders: 10_000,
+                source_count: 0,
+                mutation_rate: 0.,
+                physical_mutation_rate: 0.,
+                learning: "static".into(),
+                reproduction: reproduction.into(),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let target = w.genomes[&w.cells[0].genome]
+            .compiled
+            .as_ref()
+            .unwrap()
+            .body;
+        w.cells[0].set_fixture_body(target.map(|q| 2. * q));
+        w.cells[0].energy = 1.;
+        let before = w.held();
+        crate::lifecycle::reproduce(&mut w);
+        assert_eq!(w.cells.len(), 10_001);
+        assert_eq!(w.stop_reason, None);
+        assert_eq!(w.ledger.divisions, 1);
+        let after = w.held();
+        assert!((before.0 - after.0).abs() < 1e-7);
+        assert!((before.1 - after.1 - w.ledger.division_heat).abs() < 1e-7);
+        w.validate().unwrap();
+
+        // Removing a population ceiling does not remove the independent ancestry budget.
+        w.config.max_ancestry_records = w.ancestry.len();
+        let target = w.genomes[&w.cells[0].genome]
+            .compiled
+            .as_ref()
+            .unwrap()
+            .body;
+        w.cells[0].set_fixture_body(target.map(|q| 2. * q));
+        let (material, energy, _) =
+            crate::accounting::division_requirements(&w.cells[0], &w.config);
+        w.cells[0].inventory.fill(0.);
+        w.cells[0].inventory.set(0, material);
+        w.cells[0].energy = energy;
+        crate::lifecycle::reproduce(&mut w);
+        assert_eq!(w.cells.len(), 10_001);
+        assert_eq!(w.stop_reason.as_deref(), Some("ancestry-limit"));
+    }
+}
+
+#[test]
+fn population_is_not_a_configuration_ceiling() {
+    Config {
+        founders: 100_001,
+        ..Config::default()
+    }
+    .validate()
+    .unwrap();
+    let mut config = serde_json::to_value(Config::default()).unwrap();
+    assert!(config.get("maxPopulation").is_none());
+    config["maxPopulation"] = serde_json::json!(10_000);
+    assert!(serde_json::from_value::<Config>(config).is_err());
+}
+
 fn world() -> World {
     World::new(
         101,
@@ -18,7 +87,7 @@ fn world() -> World {
 #[test]
 fn composed_field_preserves_every_species_and_accounts_its_numeric_error() {
     let mut w = world();
-    for (i, q) in w.field.amounts.iter_mut().enumerate() {
+    for (i, q) in w.field.amounts.dense_values_mut().enumerate() {
         *q = (0.01 + (i % 197) as f32 * 0.0001) * (1. + (i % 11) as f32);
     }
     w.field.refresh(&w.chemistry);
@@ -62,7 +131,7 @@ fn an_isolated_body_has_no_self_propulsion_but_a_foreign_profile_moves_it() {
     assert_eq!(w.cells[0].energy, energy);
 }
 #[test]
-fn birth_splits_installed_material_without_expressing_the_new_target() {
+fn birth_splits_actual_stock_and_uses_the_birth_genotype() {
     let mut w = world();
     let mut g = w.genomes[&1].clone();
     g.id = 2;
@@ -74,24 +143,19 @@ fn birth_splits_installed_material_without_expressing_the_new_target() {
     w.next_genome = 3;
     let cell = &mut w.cells[0];
     cell.genome = 2;
-    cell.installed.enzymes[0].angle = 0.37;
-    cell.operators = Some(crate::chemical_operators::Operators::compile(
-        &cell.installed,
-        &w.config,
-        &w.chemistry,
-    ));
+    cell.operators = Some(w.genomes[&2].compiled.as_ref().unwrap().operators.clone());
     let inherited_operator = cell.operators.as_ref().unwrap().enzymes[0].clone();
     cell.set_fixture_body(cell.body.map(|q| q * 2.));
     cell.energy = 1.;
     cell.contacts = [1.; 4];
     w.ancestry[0].genome = 2;
-    let installed = cell.installed.clone();
+    let installed = cell.chemistry().clone();
     let stock = cell.body;
     let initial = w.held();
     crate::lifecycle::reproduce(&mut w);
     assert_eq!(w.cells.len(), 2);
     for cell in &w.cells {
-        assert_eq!(cell.installed, installed);
+        assert_eq!(cell.chemistry(), &installed);
         assert!(std::sync::Arc::ptr_eq(
             &inherited_operator,
             &cell.operators.as_ref().unwrap().enzymes[0],
@@ -176,7 +240,7 @@ fn growth_keeps_funded_upkeep_until_the_next_metabolic_update() {
 }
 
 #[test]
-fn pruning_keeps_live_installations_catalogs_and_complete_parent_records() {
+fn pruning_keeps_live_genotypes_catalogs_and_complete_parent_records() {
     let mut w = world();
     for id in 2..80 {
         let mut g = w.genomes[&1].clone();
@@ -186,7 +250,6 @@ fn pruning_keeps_live_installations_catalogs_and_complete_parent_records() {
     }
     w.next_genome = 80;
     w.cells[0].genome = 2;
-    w.cells[0].machinery_genome = 3;
     w.ancestry[0].genome = 2;
     w.event("catalog", 0, vec![4]);
     // Keep an ended ancestor whose full genotype is no longer needed by any live owner.
@@ -203,7 +266,7 @@ fn pruning_keeps_live_installations_catalogs_and_complete_parent_records() {
     w.step();
     let mut retained: Vec<_> = w.genomes.keys().copied().collect();
     retained.sort_unstable();
-    assert_eq!(retained, vec![1, 2, 3, 4]);
+    assert_eq!(retained, vec![1, 2, 4]);
     assert_eq!(w.ancestry[1].genome, 5);
     assert_eq!(w.ancestry[1].parent, 1);
     let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();

@@ -88,6 +88,15 @@ chemically differentiated colonies and broad nonseed uptake. Net material flow a
 renewal still depend strongly on initial feedstocks. It is promising continuing observation,
 not proof of an autonomous or indefinitely diverse ecosystem.
 
+V39 [binding simplification](../plans/MODEL-SIMPLIFICATION-PLAN.md#m2--one-range-binding-and-ordinary-loss)
+removes the broad opposing field and cohesion washout discount. One normalized attraction
+range remains with local chemical repulsion and nonlinear crowding. The extra range selected
+deposit spacing, while the discount separately rewarded cohesive deposits with longer life;
+neither is required for composition-sensitive binding. Short production checks preserve
+attraction, crowded separation, chemical sensitivity and cellular influence. They do not
+establish that the earlier diffuse-world failure is resolved. Coalescence and faster loss of
+dense deposits remain possible outcomes for human review; no compensating tuning was applied.
+
 ## Illumination and observation
 
 V29's additive fast sweep failed the user's visual/design intent: X dominated while Y barely

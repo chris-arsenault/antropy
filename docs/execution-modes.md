@@ -3,7 +3,8 @@
 The same Biotropy UI can run a local world using one or four compute threads, or observe a
 native World running independently on a server. Execution selection starts a new local world
 or attaches to the server's current world; it does not transfer a simulation or its saves.
-The implementation preserves v35 physical laws and the existing renderer.
+Both modes use the same v40 physical kernel and the existing renderer. The
+[structural scaling record](../SCALING-PLAN.md) separates stepping, observation and display costs.
 
 ## Browser
 

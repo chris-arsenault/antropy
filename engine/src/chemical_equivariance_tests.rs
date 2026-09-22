@@ -33,7 +33,13 @@ fn frame(q: u8, mirror: bool) -> Action {
     })
 }
 
-fn transformed_cell(cell: &Cell, chemistry: &Chemistry, q: u8, mirror: bool) -> (Cell, Chemistry) {
+fn transformed_cell(
+    cell: &Cell,
+    c: &crate::config::Config,
+    chemistry: &Chemistry,
+    q: u8,
+    mirror: bool,
+) -> (Cell, Chemistry) {
     let u = frame(q, mirror);
     let mut cell = cell.clone();
     let original = cell.inventory.clone();
@@ -44,10 +50,9 @@ fn transformed_cell(cell: &Cell, chemistry: &Chemistry, q: u8, mirror: bool) -> 
         cell.bound_material.set(u.apply(s), original_bound.value(s));
         transformed.properties[u.apply(s)] = chemistry.properties[s].clone();
     }
-    cell.installed.enzymes = cell
-        .installed
-        .enzymes
-        .map(|e| transform_enzyme(e, q, mirror));
+    let mut machinery = cell.chemistry().clone();
+    machinery.enzymes = machinery.enzymes.map(|e| transform_enzyme(e, q, mirror));
+    cell.operators = Some(Operators::compile(&machinery, c, &transformed));
     (cell, transformed)
 }
 
@@ -58,18 +63,15 @@ fn ordinary_funded_reactions_commute_with_all_square_frames() {
         let mut initial = w.cells[0].clone();
         initial.energy = energy;
         initial.inventory = (0..256).map(|s| 0.001 * (1 + s % 17) as f64).collect();
-        initial.installed.enzymes = std::array::from_fn(|i| Enzyme {
+        let mut machinery = initial.chemistry().clone();
+        machinery.enzymes = std::array::from_fn(|i| Enzyme {
             x: [0.2, 7.5, 14.7, 8.][i % 4],
             y: [0.3, 4.2, 15., 9.][i % 4],
             center_x: [8.3, 4.1, 2.2, 1.][i % 4],
             center_y: [10., 7., 2.3, 3.][i % 4],
             angle: [0.4, -0.9, 2.1, 0.][i % 4],
         });
-        initial.operators = Some(Operators::compile(
-            &initial.installed,
-            &w.config,
-            &w.chemistry,
-        ));
+        initial.operators = Some(Operators::compile(&machinery, &w.config, &w.chemistry));
         let mut expected = initial.clone();
         for _ in 0..8 {
             crate::metabolism::react(&mut expected, &w.config, &w.chemistry, 0.2);
@@ -77,9 +79,8 @@ fn ordinary_funded_reactions_commute_with_all_square_frames() {
         assert!(expected.flows.reacted > 0.);
         for q in 0..4 {
             for mirror in [false, true] {
-                let (mut actual, chemistry) = transformed_cell(&initial, &w.chemistry, q, mirror);
-                actual.operators =
-                    Some(Operators::compile(&actual.installed, &w.config, &chemistry));
+                let (mut actual, chemistry) =
+                    transformed_cell(&initial, &w.config, &w.chemistry, q, mirror);
                 for _ in 0..8 {
                     crate::metabolism::react(&mut actual, &w.config, &chemistry, 0.2);
                 }
@@ -107,7 +108,8 @@ fn installed_round_trip_restores_material_without_creating_usable_work() {
         let mut cell = w.cells[0].clone();
         cell.inventory = (0..256).map(|s| f64::from(s == source)).collect();
         cell.energy = 100.;
-        cell.installed.enzymes = std::array::from_fn(|i| {
+        let mut machinery = cell.chemistry().clone();
+        machinery.enzymes = std::array::from_fn(|i| {
             let (from, to) = if i < 2 {
                 (source, product)
             } else {
@@ -115,7 +117,7 @@ fn installed_round_trip_restores_material_without_creating_usable_work() {
             };
             Enzyme::between(chemistry::coordinate(from), chemistry::coordinate(to))
         });
-        cell.operators = Some(Operators::compile(&cell.installed, &w.config, &w.chemistry));
+        cell.operators = Some(Operators::compile(&machinery, &w.config, &w.chemistry));
         let heat = cell.flows.reaction_heat;
         // Both directions are already installed and funded. A large diagnostic interval
         // exercises donor/work limiting; it is not a production clock change.
