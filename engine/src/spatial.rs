@@ -56,6 +56,22 @@ impl Geometry {
         (0..SITES).filter_map(move |i| self.node(region, i).map(|n| (i, n)))
     }
 }
+/// Disjoint mutable references to `items` at strictly ascending `indices`, in O(indices).
+/// Lets region jobs over a dense plane visit only the regions they own.
+pub fn select_mut<'a, T>(items: &'a mut [T], indices: &[usize]) -> Vec<(usize, &'a mut T)> {
+    let mut selected = Vec::with_capacity(indices.len());
+    let mut rest = items;
+    let mut offset = 0;
+    for &i in indices {
+        let (_, tail) = std::mem::take(&mut rest).split_at_mut(i - offset);
+        let (item, tail) = tail.split_first_mut().expect("index within plane");
+        selected.push((i, item));
+        rest = tail;
+        offset = i + 1;
+    }
+    selected
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct Work {
     listed: Vec<bool>,

@@ -32,7 +32,8 @@ fn main() {
             }
             ticks += 1;
         }
-        let elapsed = start.elapsed().as_secs_f64();        world.validate().unwrap();
+        let elapsed = start.elapsed().as_secs_f64();
+        world.validate().unwrap();
         let mut render = antropy_engine::render::Buffers::default();
         let publication_start = Instant::now();
         render.prepare(&world,5,0,0,true,0).unwrap();

@@ -58,17 +58,25 @@ impl Motion {
             .copied()
             .eq(cells.iter().map(|cell| cell.id))
         {
-            let mut previous: HashMap<_, _> = self
-                .ids
-                .iter()
-                .copied()
-                .zip(std::mem::take(&mut self.coefficients))
-                .collect();
-            self.ids.clear();
-            for cell in cells {
-                self.ids.push(cell.id);
-                self.coefficients
-                    .push(previous.remove(&cell.id).unwrap_or_default());
+            let ordered = self.ids.is_sorted() && cells.is_sorted_by_key(|cell| cell.id);
+            let previous = std::mem::take(&mut self.coefficients);
+            let ids = std::mem::take(&mut self.ids);
+            if ordered {
+                // Ascending ids merge in one pass: births append and deaths only remove.
+                let mut old = ids.into_iter().zip(previous).peekable();
+                for cell in cells {
+                    while old.next_if(|(id, _)| *id < cell.id).is_some() {}
+                    let kept = old.next_if(|(id, _)| *id == cell.id).map(|(_, c)| c);
+                    self.ids.push(cell.id);
+                    self.coefficients.push(kept.unwrap_or_default());
+                }
+            } else {
+                let mut previous: HashMap<_, _> = ids.into_iter().zip(previous).collect();
+                for cell in cells {
+                    self.ids.push(cell.id);
+                    self.coefficients
+                        .push(previous.remove(&cell.id).unwrap_or_default());
+                }
             }
         }
         self.medium.prepare(field, c);

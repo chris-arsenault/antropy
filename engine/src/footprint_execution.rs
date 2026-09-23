@@ -1,4 +1,6 @@
 //! Prepared W and incremental W-transpose body projection share one geographic epoch.
+//! Each cell decides its own footprint update in parallel; the carrier owner applies all
+//! resulting contribution changes with one job per region.
 use super::{Row, sites};
 use crate::{config::Config, execution, field::Field, organism::Cell};
 use std::collections::HashMap;
@@ -11,6 +13,11 @@ struct Owner {
     mass: f64,
     profile: [f64; 3],
 }
+impl Owner {
+    fn carried(&self, area: f64) -> [f64; 3] {
+        self.profile.map(|p| self.mass * p / area)
+    }
+}
 
 #[derive(Clone, Debug, Default)]
 pub struct Projection {
@@ -19,6 +26,17 @@ pub struct Projection {
     pub preparations: u64,
     pub reuses: u64,
     pub material_updates: u64,
+}
+
+/// A cell's previous contribution when its footprint or carried profile changed.
+/// Held once per cell for one tick; boxing the row would allocate per moved cell.
+#[allow(clippy::large_enum_variant)]
+#[derive(Clone, Debug, Default)]
+enum Update {
+    #[default]
+    Unchanged,
+    Moved(Row, [f64; 3]),
+    Material([f64; 3]),
 }
 
 impl Projection {
@@ -36,6 +54,8 @@ impl Projection {
             rows.clear();
             self.configuration = Some(configuration);
         }
+        let area = field.spacing.powi(2);
+        let mut removed = Vec::new();
         if self.owners.len() != cells.len()
             || self
                 .owners
@@ -43,42 +63,66 @@ impl Projection {
                 .zip(cells)
                 .any(|(owner, cell)| owner.id != cell.id)
         {
-            self.align(cells, field, rows);
+            self.align(cells, rows, &mut removed, area);
         }
-        for ((owner, row), cell) in self.owners.iter_mut().zip(rows).zip(cells) {
-            let profile = cell.operators.as_ref().unwrap().profile;
-            let radius = cell.radius(c);
-            let mass = cell.mass();
-            let geometric = row.is_empty() || expired(owner, cell, radius, c, field.spacing);
-            if !geometric {
-                if mass != owner.mass || profile != owner.profile {
-                    update_material(field, owner, row, mass, profile);
-                    self.material_updates += 1;
+        let mut updates = vec![Update::Unchanged; cells.len()];
+        let geography: &Field = field;
+        let mut jobs: Vec<_> = self
+            .owners
+            .iter_mut()
+            .zip(rows.iter_mut())
+            .zip(cells)
+            .zip(updates.iter_mut())
+            .collect();
+        let cost = crate::parallel::cost::CELL_PREPARE;
+        crate::parallel::for_each(&mut jobs, cost, |_, (((owner, row), cell), update)| {
+            **update = refresh(owner, row, cell, c, geography, area);
+        });
+        drop(jobs);
+        let mut changes: Vec<_> = removed
+            .iter()
+            .map(|(row, carried)| crate::spatial_carriers::Change {
+                kind: 0,
+                old: (row.as_slice(), *carried),
+                new: (&[], [0.; 3]),
+            })
+            .collect();
+        for ((update, row), owner) in updates.iter().zip(rows.iter()).zip(&self.owners) {
+            let old = match update {
+                Update::Unchanged => {
+                    self.reuses += 1;
+                    continue;
                 }
-                self.reuses += 1;
-                continue;
-            }
-            deposit(field, owner, row, -1.);
-            *owner = Owner {
-                id: cell.id,
-                position: [cell.x, cell.y],
-                radius,
-                mass,
-                profile,
+                Update::Material(carried) => {
+                    self.reuses += 1;
+                    self.material_updates += 1;
+                    (row.as_slice(), *carried)
+                }
+                Update::Moved(previous, carried) => {
+                    self.preparations += 1;
+                    (previous.as_slice(), *carried)
+                }
             };
-            let revision = row.revision + 1;
-            *row = sites(cell, c, field);
-            row.revision = revision;
-            deposit(field, owner, row, 1.);
-            self.preparations += 1;
+            changes.push(crate::spatial_carriers::Change {
+                kind: 0,
+                old,
+                new: (row.as_slice(), owner.carried(area)),
+            });
         }
+        field.apply_carriers(&changes);
     }
 
-    fn align(&mut self, cells: &[Cell], field: &mut Field, rows: &mut Vec<Row>) {
+    fn align(
+        &mut self,
+        cells: &[Cell],
+        rows: &mut Vec<Row>,
+        removed: &mut Vec<(Row, [f64; 3])>,
+        area: f64,
+    ) {
         if self.owners.windows(2).all(|p| p[0].id < p[1].id)
             && cells.windows(2).all(|p| p[0].id < p[1].id)
         {
-            self.align_ordered(cells, field, rows);
+            self.align_ordered(cells, rows, removed, area);
             return;
         }
         let mut previous: HashMap<_, _> = self
@@ -102,12 +146,21 @@ impl Projection {
             self.owners.push(owner);
             rows.push(row);
         }
-        for (_, (owner, row)) in previous {
-            deposit(field, &owner, &row, -1.);
-        }
+        let mut gone: Vec<_> = previous.into_values().collect();
+        gone.sort_unstable_by_key(|(owner, _)| owner.id);
+        removed.extend(
+            gone.into_iter()
+                .map(|(owner, row)| (row, owner.carried(area))),
+        );
     }
 
-    fn align_ordered(&mut self, cells: &[Cell], field: &mut Field, rows: &mut Vec<Row>) {
+    fn align_ordered(
+        &mut self,
+        cells: &[Cell],
+        rows: &mut Vec<Row>,
+        removed: &mut Vec<(Row, [f64; 3])>,
+        area: f64,
+    ) {
         let owners = std::mem::take(&mut self.owners);
         let previous_rows = std::mem::take(rows);
         self.owners.reserve(cells.len());
@@ -116,7 +169,7 @@ impl Projection {
         for cell in cells {
             while previous.peek().is_some_and(|(owner, _)| owner.id < cell.id) {
                 let (owner, row) = previous.next().unwrap();
-                deposit(field, &owner, &row, -1.);
+                removed.push((row, owner.carried(area)));
             }
             let existing = previous
                 .peek()
@@ -135,10 +188,43 @@ impl Projection {
             self.owners.push(owner);
             rows.push(row);
         }
-        for (owner, row) in previous {
-            deposit(field, &owner, &row, -1.);
-        }
+        removed.extend(previous.map(|(owner, row)| (row, owner.carried(area))));
     }
+}
+
+/// One cell's footprint decision; reads only the frozen field.
+fn refresh(
+    owner: &mut Owner,
+    row: &mut Row,
+    cell: &Cell,
+    c: &Config,
+    field: &Field,
+    area: f64,
+) -> Update {
+    let profile = cell.operators.as_ref().unwrap().profile;
+    let radius = cell.radius(c);
+    let mass = cell.mass();
+    let previous = owner.carried(area);
+    let geometric = row.is_empty() || expired(owner, cell, radius, c, field.spacing);
+    if !geometric {
+        if mass == owner.mass && profile == owner.profile {
+            return Update::Unchanged;
+        }
+        owner.mass = mass;
+        owner.profile = profile;
+        return Update::Material(previous);
+    }
+    let old = std::mem::take(row);
+    *owner = Owner {
+        id: cell.id,
+        position: [cell.x, cell.y],
+        radius,
+        mass,
+        profile,
+    };
+    *row = sites(cell, c, field);
+    row.revision = old.revision + 1;
+    Update::Moved(old, previous)
 }
 
 fn expired(owner: &Owner, cell: &Cell, radius: f64, c: &Config, spacing: f64) -> bool {
@@ -148,28 +234,6 @@ fn expired(owner: &Owner, cell: &Cell, radius: f64, c: &Config, spacing: f64) ->
         - (radius - owner.radius).abs() * 0.5;
     margin < 0.
         || crate::movement::distance_squared(owner.position, [cell.x, cell.y], c) > margin * margin
-}
-
-fn update_material(field: &mut Field, owner: &mut Owner, row: &Row, mass: f64, profile: [f64; 3]) {
-    field.carrier(
-        0,
-        owner.id,
-        row,
-        profile.map(|p| mass * p / field.spacing.powi(2)),
-    );
-    owner.mass = mass;
-    owner.profile = profile;
-}
-
-fn deposit(field: &mut Field, owner: &Owner, row: &Row, sign: f64) {
-    let profile = if sign < 0. {
-        [0.; 3]
-    } else {
-        owner
-            .profile
-            .map(|p| owner.mass * p / field.spacing.powi(2))
-    };
-    field.carrier(0, owner.id, row, profile);
 }
 
 #[cfg(test)]

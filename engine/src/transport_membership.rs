@@ -1,4 +1,5 @@
-//! Persistent transpose of local delivery; changing a footprint edits only its donor rows.
+//! Transpose of local delivery, rebuilt in parallel each exchange: every donor node owns a
+//! contiguous list of its receivers, ordered by receiver index.
 use super::*;
 impl Exchange {
     pub(super) fn prepare_nodes(
@@ -6,80 +7,58 @@ impl Exchange {
         geometry: crate::spatial::Geometry,
         sites: &[crate::footprint::Row],
     ) {
-        for (slot, (_, mask)) in self.nodes.iter_mut().enumerate() {
-            clear(&mut self.demand[slot * 256..(slot + 1) * 256], *mask);
-            clear(&mut self.changes[slot * 256..(slot + 1) * 256], *mask);
-            *mask = 0;
-        }
+        // Donor rows need no clearing here: projection zeroes each node's current groups
+        // before accumulating, and every reader stays within those groups.
         if self.slots.geometry != geometry {
             self.slots = crate::spatial_slots::Slots::new(geometry);
-            self.nodes.clear();
-            self.delivery.clear();
-            self.delivery_links.clear();
-            self.previous_sites.clear();
+        } else {
+            let slots = &self.slots;
+            self.nodes
+                .par_iter()
+                .for_each(|&(node, _)| slots.set(node, usize::MAX));
         }
-        self.delivery_links
-            .resize_with(sites.len().max(self.previous_sites.len()), Vec::new);
-        for i in 0..sites.len().max(self.previous_sites.len()) {
-            let next = sites.get(i).map_or(&[][..], |row| row.as_slice());
-            let old = self
-                .previous_sites
-                .get(i)
-                .map_or(&[][..], |row| row.as_slice());
-            if next == old {
-                continue;
-            }
-            for link in (0..self.delivery_links[i].len()).rev() {
-                let (n, position) = self.delivery_links[i][link];
-                if let Some(&(_, weight)) = next.iter().find(|&&(node, w)| node == n && w > 0.) {
-                    self.delivery[self.slots[n]][position].1 = weight;
-                } else {
-                    self.remove_delivery(i, link);
-                }
-            }
-            for &(n, weight) in next {
-                if weight == 0. || self.delivery_links[i].iter().any(|&(node, _)| node == n) {
-                    continue;
-                }
-                if self.slots[n] == usize::MAX {
-                    self.slots.set(n, self.nodes.len());
-                    self.nodes.push((n, 0));
-                    self.delivery.push(Vec::new());
-                }
-                let delivery = &mut self.delivery[self.slots[n]];
-                self.delivery_links[i].push((n, delivery.len()));
-                delivery.push((i, weight));
-            }
-        }
-        self.delivery_links.truncate(sites.len());
-        self.previous_sites
-            .resize_with(sites.len(), crate::footprint::Row::default);
-        self.previous_sites.clone_from_slice(sites);
-        for i in (0..self.nodes.len()).rev() {
-            if !self.delivery[i].is_empty() {
-                continue;
-            }
-            let (node, _) = self.nodes.swap_remove(i);
-            self.delivery.swap_remove(i);
-            self.slots.set(node, usize::MAX);
-            if i < self.nodes.len() {
-                self.slots.set(self.nodes[i].0, i);
-            }
-        }
+        let receivers = |(i, row): (usize, &crate::footprint::Row)| {
+            row.iter()
+                .filter(|&&(_, w)| w != 0.)
+                .map(move |&(n, w)| (n, i, w))
+                .collect::<Vec<_>>()
+        };
+        let mut links: Vec<(usize, usize, f64)> =
+            match crate::parallel::grain(sites.len(), crate::parallel::cost::CELL_MARK) {
+                Some(grain) => sites
+                    .par_iter()
+                    .enumerate()
+                    .with_min_len(grain)
+                    .flat_map_iter(receivers)
+                    .collect(),
+                None => sites.iter().enumerate().flat_map(receivers).collect(),
+            };
+        links.par_sort_unstable_by_key(|&(n, i, _)| (n, i));
+        self.offsets.clear();
+        self.offsets.par_extend(
+            (0..links.len())
+                .into_par_iter()
+                .filter(|&k| k == 0 || links[k - 1].0 != links[k].0),
+        );
+        self.nodes.clear();
+        self.nodes
+            .par_extend(self.offsets.par_iter().map(|&k| (links[k].0, 0)));
+        self.offsets.push(links.len());
+        self.delivery.clear();
+        self.delivery
+            .par_extend(links.par_iter().map(|&(_, i, w)| (i, w)));
+        let slots = &self.slots;
+        self.nodes
+            .par_iter()
+            .enumerate()
+            .for_each(|(slot, &(node, _))| slots.set(node, slot));
         let needed = self.nodes.len() * 256;
         self.demand.resize(needed, 0.);
         self.changes.resize(needed, 0.);
     }
-    fn remove_delivery(&mut self, cell: usize, link: usize) {
-        let (node, position) = self.delivery_links[cell].swap_remove(link);
-        let delivery = &mut self.delivery[self.slots[node]];
-        delivery.swap_remove(position);
-        if let Some(&(moved, _)) = delivery.get(position) {
-            let reverse = self.delivery_links[moved]
-                .iter_mut()
-                .find(|entry| entry.0 == node)
-                .unwrap();
-            reverse.1 = position;
-        }
+    /// Receivers of one donor slot.
+    #[cfg(test)]
+    pub(super) fn receivers(&self, slot: usize) -> &[(usize, f64)] {
+        &self.delivery[self.offsets[slot]..self.offsets[slot + 1]]
     }
 }

@@ -7,15 +7,20 @@ type ProjectionRow<'a> = (
 
 impl Exchange {
     pub(super) fn project_requests(&mut self) {
+        let (delivery, offsets) = (&self.delivery, &self.offsets);
+        let (masks, imports, exports) = (&self.masks, &self.imports, &self.exports);
         let project = |(slot, ((demand, changes), node)): ProjectionRow<'_>| {
-            for &(cell, weight) in &self.delivery[slot] {
-                let mask = self.masks[cell];
-                node.1 |= mask;
+            let receivers = &delivery[offsets[slot]..offsets[slot + 1]];
+            node.1 = receivers.iter().fold(0, |m, &(cell, _)| m | masks[cell]);
+            clear(demand, node.1);
+            clear(changes, node.1);
+            for &(cell, weight) in receivers {
+                let mask = masks[cell];
                 crate::exchange_vector::deposit(
                     demand,
                     changes,
-                    &self.imports[cell],
-                    &self.exports[cell],
+                    &imports[cell],
+                    &exports[cell],
                     weight,
                     mask,
                 );

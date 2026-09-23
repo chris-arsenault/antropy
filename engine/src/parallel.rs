@@ -16,6 +16,8 @@ pub mod cost {
     pub const CELL_READ: usize = 400;
     /// One cell's interval chemistry.
     pub const CELL_PHYSIOLOGY: usize = 1_300;
+    /// Marking one cell's footprint nodes.
+    pub const CELL_MARK: usize = 80;
     /// One cell's coefficient preparation from shared dependencies.
     pub const CELL_PREPARE: usize = 500;
     /// One reservoir's response, conversion and motion.
@@ -32,6 +34,10 @@ pub mod cost {
     pub const FILTER_REGION: usize = 1_500;
     /// One region of footprint dependency and gradient evaluation.
     pub const DEPENDENCY_REGION: usize = 3_000;
+    /// Expanding one carrier owner's change into site deposits.
+    pub const CARRIER_OWNER: usize = 300;
+    /// Applying one carrier site deposit.
+    pub const CARRIER_DEPOSIT: usize = 20;
     /// One occupied contact-search bin.
     pub const CONTACT_BIN: usize = 2_000;
 }

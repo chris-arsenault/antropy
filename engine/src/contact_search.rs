@@ -42,27 +42,44 @@ impl Search {
             self.configuration = Some((c.width, c.height, capacity));
         }
         contacts.bodies.clear();
-        for level in self.levels.values_mut() {
-            level.members.begin(level.geometry);
-            level.radius = 0.;
-        }
-        for (i, cell) in cells.iter().enumerate() {
-            let body = Body {
+        contacts
+            .bodies
+            .par_extend(cells.par_iter().map(|cell| Body {
                 position: [cell.x.rem_euclid(c.width), cell.y.rem_euclid(c.height)],
                 radius: cell.radius(c),
-            };
-            let class = (2. * body.radius).log2().ceil() as i32;
-            let level = self.levels.entry(class).or_insert_with(|| {
-                let mut level = Level::new(class, c, capacity);
-                level.members.begin(level.geometry);
-                level
-            });
-            level.members.update(cell.id, i, level.node(body.position));
-            level.radius = level.radius.max(body.radius);
-            contacts.bodies.push(body);
+            }));
+        let class_of = |body: &Body| (2. * body.radius).log2().ceil() as i32;
+        let mut classes: Vec<i32> = contacts.bodies.par_iter().map(class_of).collect();
+        classes.par_sort_unstable();
+        classes.dedup();
+        self.levels
+            .retain(|class, _| classes.binary_search(class).is_ok());
+        for &class in &classes {
+            self.levels
+                .entry(class)
+                .or_insert_with(|| Level::new(class, c, capacity));
         }
-        for level in self.levels.values_mut() {
-            level.members.finish();
+        // Each body joins the bin of its diameter class; bins are rebuilt from sorted entries.
+        let levels = &self.levels;
+        let mut entries: Vec<(i32, usize, usize)> = contacts
+            .bodies
+            .par_iter()
+            .enumerate()
+            .map(|(i, body)| {
+                let class = class_of(body);
+                (class, levels[&class].node(body.position), i)
+            })
+            .collect();
+        entries.par_sort_unstable();
+        let bodies = &contacts.bodies;
+        for (&class, level) in self.levels.iter_mut() {
+            let start = entries.partition_point(|e| e.0 < class);
+            let end = entries.partition_point(|e| e.0 <= class);
+            let slice = &entries[start..end];
+            level.radius = slice.iter().map(|e| bodies[e.2].radius).fold(0., f64::max);
+            level
+                .members
+                .rebuild(level.geometry, slice.len(), |k| (slice[k].1, slice[k].2));
         }
         self.levels.retain(|_, level| level.radius > 0.);
         self.jobs.clear();

@@ -93,16 +93,17 @@ pub fn project(w: &mut World) {
 
 fn project_current(w: &mut World) {
     let area = w.field.spacing.powi(2);
-    for (id, source) in w.sources.iter().enumerate() {
-        let total = source.material.total;
-        let scale = 1. / (1. + total / source.interface) / area;
-        w.field.carrier(
-            1,
-            id as u64,
-            &source.footprint,
-            source.material.moments.map(|v| scale * v),
-        );
-    }
+    let current = w
+        .sources
+        .iter()
+        .map(|source| {
+            let total = source.material.total;
+            let scale = 1. / (1. + total / source.interface) / area;
+            let profile = source.material.moments.map(|v| scale * v);
+            (source.footprint.clone(), profile)
+        })
+        .collect();
+    w.field.project_sources(current);
 }
 
 pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemistry) -> Response {

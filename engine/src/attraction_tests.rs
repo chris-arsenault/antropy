@@ -29,14 +29,9 @@ fn direct_three_box(input: &[f64], nx: usize, ny: usize, width: f64) -> Vec<f64>
 fn compact_filter_matches_integrated_boxes_at_fractional_and_wrapped_reaches() {
     for (nx, ny) in [(1, 1), (1, 3), (4, 2), (13, 9)] {
         for width in [0.01, 0.49, 0.5, 0.51, 1., 1.5, 2.75, 13.25] {
-            let signal: crate::spatial_signal::Signal = (0..nx * ny)
-                .map(|n| [(n as f64 * 0.7).cos(), 0.])
-                .collect::<Vec<_>>()
-                .into();
-            let zeros = vec![[0.; 2]; signal.len()].into();
-            let input: Vec<_> = signal.iter().map(|q| q[0]).collect();
+            let input: Vec<_> = (0..nx * ny).map(|n| (n as f64 * 0.7).cos()).collect();
             let mut filter = crate::attraction::Attraction::default();
-            filter.prepare((nx, ny, 2., width * 2.), [&signal, &zeros, &zeros]);
+            filter.prepare((nx, ny, 2., width * 2.), &input);
             let expected = direct_three_box(&input, nx, ny, width);
             for (actual, expected) in filter.output.iter().zip(expected) {
                 assert!(
@@ -52,11 +47,10 @@ fn compact_filter_matches_integrated_boxes_at_fractional_and_wrapped_reaches() {
 
 #[test]
 fn compact_impulse_has_normalized_positive_support_and_discrete_variance() {
-    let mut signal: crate::spatial_signal::Signal = vec![[0.; 2]; 65].into();
-    signal[32][0] = 1.;
-    let zeros = vec![[0.; 2]; 65].into();
+    let mut signal = vec![0.; 65];
+    signal[32] = 1.;
     let mut filter = crate::attraction::Attraction::default();
-    filter.prepare((65, 1, 2., 6.), [&signal, &zeros, &zeros]);
+    filter.prepare((65, 1, 2., 6.), &signal);
     assert!((filter.output.iter().sum::<f64>() - 1.).abs() < 1e-12);
     for (n, q) in filter.output.iter().enumerate() {
         assert!(*q >= -1e-15);
@@ -85,11 +79,11 @@ fn shared_filter_preserves_signed_sums_constants_and_skips_unchanged_inputs() {
         f.test_body_signal()[n][0] = 0.2 + (n as f64 * 0.17).sin();
         f.test_source_signal()[n][0] = -0.1;
     }
-    let raw = f.body_signal().clone();
+    let raw: Vec<_> = f.body_signal().iter().copied().collect();
     f.prepare_attraction();
     let expected: f64 = (0..nodes).map(|n| f.medium_signal(n)[0]).sum();
     assert!((f.attraction.output.iter().sum::<f64>() - expected).abs() < 1e-11);
-    assert_eq!(&raw, f.body_signal());
+    assert!(raw.iter().eq(f.body_signal().iter()));
     let revision = f.attraction.revisions;
     f.prepare_attraction();
     assert_eq!(revision, f.attraction.revisions);

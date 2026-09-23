@@ -76,9 +76,10 @@ impl Pass<'_> {
             && let Some(weather) = weather
         {
             let area = f.spacing * f.spacing;
+            let carried = f.carriers.site(n);
             let signal = [
-                previous[4] / area + f.body_signal[n][0] + f.source_signal[n][0],
-                previous[5] / area + f.body_signal[n][1] + f.source_signal[n][1],
+                previous[4] / area + carried.signal[0][0] + carried.signal[1][0],
+                previous[5] / area + carried.signal[0][1] + carried.signal[1][1],
             ];
             mask = weather.convert_lit(
                 next,
@@ -142,6 +143,7 @@ impl Field {
         let process =
             |entry: &mut crate::spatial_regions::Entry<crate::spatial_material::Region>| {
                 let dest = &mut entry.value;
+                dest.clear();
                 let mut weather = climate.cloned();
                 if let Some(w) = &mut weather {
                     w.heat = 0.;

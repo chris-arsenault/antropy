@@ -1,6 +1,5 @@
 //! Disjoint cell chemistry; observers reduce only accepted flows after the join.
 use super::*;
-use rayon::prelude::*;
 
 #[derive(Clone, Debug, Default)]
 pub(super) struct Job {

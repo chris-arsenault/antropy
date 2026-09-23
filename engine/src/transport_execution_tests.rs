@@ -25,17 +25,19 @@ fn scratch_follows_touched_nodes_and_reuses_slots_without_stale_demands() {
         &[crate::footprint::Row::from_slice(&[(3, 1.)])],
     );
     assert_eq!(exchange.nodes, [(3, 0)]);
-    assert_eq!(exchange.slots[17], usize::MAX);
-    assert_eq!(exchange.slots[19000], usize::MAX);
-    assert_eq!(exchange.slots[3], 0);
+    assert_eq!(exchange.slots.get(17), usize::MAX);
+    assert_eq!(exchange.slots.get(19000), usize::MAX);
+    assert_eq!(exchange.slots.get(3), 0);
     assert_eq!(exchange.demand.len(), 256);
-    assert!(
-        exchange
-            .demand
-            .iter()
-            .chain(&exchange.changes)
-            .all(|q| *q == 0.)
-    );
+    // Projection initializes exactly the groups its receivers request; stale lanes are
+    // outside every reader's mask.
+    exchange.masks = vec![1 << 2];
+    exchange.imports = vec![[0.; 256]];
+    exchange.exports = vec![[0.; 256]];
+    exchange.project_requests();
+    assert_eq!(exchange.nodes, [(3, 1 << 2)]);
+    assert!(exchange.demand[8..12].iter().all(|q| *q == 0.));
+    assert!(exchange.changes[8..12].iter().all(|q| *q == 0.));
     exchange.prepare_nodes(crate::spatial::Geometry::new(2, 1), &[]);
     assert!(exchange.nodes.is_empty() && exchange.demand.is_empty());
     assert!(exchange.slots.is_empty());
@@ -156,7 +158,7 @@ fn persistent_delivery_updates_weights_and_removes_crowded_owners() {
         }
         exchange.prepare_nodes(geometry, &sites);
         for &(node, _) in &exchange.nodes {
-            let mut actual = exchange.delivery[exchange.slots[node]].clone();
+            let mut actual = exchange.receivers(exchange.slots.get(node)).to_vec();
             actual.sort_by_key(|entry| entry.0);
             let expected: Vec<_> = sites
                 .iter()
@@ -169,10 +171,7 @@ fn persistent_delivery_updates_weights_and_removes_crowded_owners() {
                 .collect();
             assert_eq!(actual, expected);
         }
-        assert_eq!(
-            exchange.delivery.iter().map(Vec::len).sum::<usize>(),
-            sites.len() * 2
-        );
+        assert_eq!(exchange.delivery.len(), sites.len() * 2);
     }
     assert!(exchange.nodes.is_empty());
 }

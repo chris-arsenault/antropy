@@ -61,25 +61,23 @@ fn delayed_local_filter_commutes_with_grid_translations_and_reflections() {
 }
 
 #[test]
-fn membership_is_reused_and_handles_reordering_removal_and_crossing() {
+fn membership_rebuild_handles_reordering_removal_and_crossing() {
     let mut members = crate::spatial_members::Members::default();
     let g = crate::spatial::Geometry::new(19, 11);
-    members.begin(g);
-    members.update(12, 0, 0);
-    members.update(17, 1, 208);
-    members.finish();
-    assert_eq!(members.changes, 2);
-    members.begin(g);
-    members.update(12, 1, 0);
-    members.update(17, 0, 208);
-    members.finish();
-    assert_eq!(members.changes, 2);
+    let rebuild = |members: &mut crate::spatial_members::Members, entries: &[(usize, usize)]| {
+        members.rebuild(g, entries.len(), |k| entries[k]);
+    };
+    rebuild(&mut members, &[(0, 0), (208, 1)]);
+    assert_eq!(members.at(0).collect::<Vec<_>>(), [0]);
+    assert_eq!(members.at(208).collect::<Vec<_>>(), [1]);
+    rebuild(&mut members, &[(0, 1), (208, 0)]);
     assert_eq!(members.at(0).collect::<Vec<_>>(), [1]);
-    members.begin(g);
-    members.update(12, 0, 208);
-    members.finish();
-    assert_eq!(members.at(208).collect::<Vec<_>>(), [0]);
+    rebuild(&mut members, &[(208, 0), (208, 3)]);
+    assert_eq!(members.at(208).collect::<Vec<_>>(), [0, 3]);
     assert_eq!(members.at(0).count(), 0);
+    assert_eq!(members.occupied().collect::<Vec<_>>(), [208]);
+    rebuild(&mut members, &[]);
+    assert_eq!(members.at(208).count(), 0);
 }
 
 #[test]

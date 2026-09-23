@@ -25,9 +25,9 @@ pub struct Exchange {
     imports: Vec<[f64; 256]>,
     exports: Vec<[f64; 256]>,
     contact_support: Vec<Vec<(usize, f64)>>,
-    delivery: Vec<Vec<(usize, f64)>>,
-    delivery_links: Vec<Vec<(usize, usize)>>,
-    previous_sites: Vec<crate::footprint::Row>,
+    /// Receivers of every donor node, contiguous per node; `offsets` has one extra entry.
+    delivery: Vec<(usize, f64)>,
+    offsets: Vec<usize>,
     contact: crate::contact_exchange::Allocation,
     preparations: u64,
     pub profile: bool,

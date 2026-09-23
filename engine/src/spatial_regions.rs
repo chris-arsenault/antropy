@@ -42,17 +42,9 @@ impl<T> Regions<T> {
         }
         self.get_mut(id).unwrap()
     }
-    pub fn clear(&mut self) {
-        for entry in self.entries.drain(..) {
-            self.slots[entry.id] = 0;
-        }
-    }
     /// Position of an owned region in `entries`.
     pub fn slot(&self, id: usize) -> usize {
         self.slots[id] as usize - 1
-    }
-    pub fn remove(&mut self, id: usize) {
-        self.take(id);
     }
     pub fn take(&mut self, id: usize) -> Option<T> {
         let slot = self.slots[id];
@@ -79,40 +71,6 @@ impl<T> Regions<T> {
             if i < self.entries.len() {
                 self.slots[self.entries[i].id] = (i + 1) as u32;
             }
-        }
-    }
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct Plane {
-    geometry: super::spatial::Geometry,
-    regions: Regions<[f64; super::spatial::SITES]>,
-}
-impl Plane {
-    pub fn new(geometry: super::spatial::Geometry) -> Self {
-        Self {
-            geometry,
-            regions: Regions::new(geometry.count()),
-        }
-    }
-    pub fn region(&self, region: usize) -> Option<&[f64; super::spatial::SITES]> {
-        self.regions.get(region)
-    }
-    pub fn get(&self, node: usize) -> f64 {
-        let (r, s) = self.geometry.address(node);
-        self.regions.get(r).map_or(0., |v| v[s])
-    }
-    #[inline]
-    pub fn get_xy(&self, x: usize, y: usize) -> f64 {
-        let r = y / super::spatial::SIDE * self.geometry.columns() + x / super::spatial::SIDE;
-        let s = y % super::spatial::SIDE * super::spatial::SIDE + x % super::spatial::SIDE;
-        self.regions.get(r).map_or(0., |values| values[s])
-    }
-    pub fn set_region(&mut self, region: usize, values: [f64; super::spatial::SITES]) {
-        if values.iter().any(|&q| q != 0.) {
-            *self.regions.own(region, || [0.; super::spatial::SITES]) = values;
-        } else {
-            self.regions.remove(region);
         }
     }
 }

@@ -9,6 +9,10 @@ pub struct Allocation {
     pub received: Vec<[f64; 256]>,
     pub withdrawn: Vec<[f64; 256]>,
 }
+type Donor<'a> = (
+    ((&'a mut [f64; 256], &'a mut [f64; 256]), &'a mut u64),
+    &'a mut [f64; 256],
+);
 pub(crate) fn species(mask: u64) -> impl Iterator<Item = usize> {
     crate::field_activity::GroupLanes::<1>::new(mask)
 }
@@ -18,10 +22,27 @@ pub(crate) fn clear(row: &mut [f64], mask: u64) {
     }
 }
 impl Allocation {
+    /// Clears only the groups each row wrote last time, one job per cell.
     pub fn begin(&mut self, count: usize) {
+        let (donors, receivers) = (&self.donor_masks, &self.receiver_masks);
+        let mut rows: Vec<_> = self
+            .demand
+            .iter_mut()
+            .zip(self.withdrawn.iter_mut())
+            .zip(self.received.iter_mut())
+            .collect();
+        crate::parallel::for_each(
+            &mut rows,
+            crate::parallel::cost::ROW_CLEAR,
+            |i, ((demand, withdrawn), received)| {
+                clear(&mut demand[..], donors[i]);
+                clear(&mut withdrawn[..], donors[i]);
+                clear(&mut received[..], receivers[i]);
+            },
+        );
+        drop(rows);
         for rows in [&mut self.demand, &mut self.received, &mut self.withdrawn] {
             rows.resize(count, [0.; 256]);
-            rows.fill([0.; 256]);
         }
         self.donor_masks.resize(count, 0);
         self.donor_masks.fill(0);
@@ -73,31 +94,46 @@ impl Allocation {
         if self.demand.is_empty() {
             return;
         }
-        for (i, cell) in cells.iter().enumerate() {
-            for s in species(masks[i] | self.donor_masks[i]) {
-                let stock = cell.inventory.value(s);
-                let foreign = self.demand[i][s] * stock;
-                let total = foreign + exports[i][s];
+        let cost = crate::parallel::cost::CELL_READ;
+        // Each donor caps its own stock against all requests; rows are cell-owned.
+        let mut donors: Vec<_> = self
+            .demand
+            .iter_mut()
+            .zip(self.withdrawn.iter_mut())
+            .zip(self.donor_masks.iter_mut())
+            .zip(exports.iter_mut())
+            .collect();
+        let cap = |i: usize, (((demand, withdrawn), donor), export): &mut Donor<'_>| {
+            // The export groups are written too; recording them keeps `begin` exact.
+            **donor |= masks[i];
+            for s in species(**donor) {
+                let stock = cells[i].inventory.value(s);
+                let foreign = demand[s] * stock;
+                let total = foreign + export[s];
                 let fraction = if total > 0. {
                     (stock / total).min(1.)
                 } else {
                     0.
                 };
-                self.demand[i][s] = stock * fraction;
-                self.withdrawn[i][s] = foreign * fraction;
-                exports[i][s] *= fraction;
+                demand[s] = stock * fraction;
+                withdrawn[s] = foreign * fraction;
+                export[s] *= fraction;
             }
-        }
-        for i in 0..cells.len() {
-            for s in species(self.receiver_masks[i]) {
+        };
+        crate::parallel::for_each(&mut donors, cost, cap);
+        drop(donors);
+        let (demand, receivers) = (&self.demand, &self.receiver_masks);
+        let mut received: Vec<_> = self.received.iter_mut().collect();
+        crate::parallel::for_each(&mut received, cost, |i, row| {
+            for s in species(receivers[i]) {
                 let supply: f64 = graph
                     .neighbors(i)
                     .iter()
-                    .map(|n| n.weight * graph.exposure[n.donor] * self.demand[n.donor][s])
+                    .map(|n| n.weight * graph.exposure[n.donor] * demand[n.donor][s])
                     .sum();
-                self.received[i][s] *= supply;
+                row[s] *= supply;
             }
-        }
+        });
     }
 }
 #[cfg(test)]

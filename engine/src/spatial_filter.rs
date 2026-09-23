@@ -1,29 +1,30 @@
 //! Three composed boxes along one axis, evaluated only in owned destination regions.
-use crate::{
-    spatial::{Geometry, SIDE, SITES},
-    spatial_regions::Plane,
-};
+use crate::spatial::{Geometry, SIDE, SITES};
 
 /// Lines up to this length stay on the stack; longer reaches use a heap buffer.
 const INLINE: usize = 128;
 
+/// Reads a dense region-major plane at node coordinates.
+#[inline]
+fn at(input: &[[f64; SITES]], columns: usize, x: usize, y: usize) -> f64 {
+    input[y / SIDE * columns + x / SIDE][y % SIDE * SIDE + x % SIDE]
+}
+
 /// Each destination line gathers its finite input once and applies the three boxes in
 /// sequence, so intermediate box results never become region-granular planes or halos.
 pub fn region(
-    input: &Plane,
+    input: &[[f64; SITES]],
     geometry: Geometry,
     id: usize,
     width: f64,
     axis: usize,
 ) -> [f64; SITES] {
-    let mut result = [0.; SITES];
     let radius = (width + 0.5).floor() as usize;
     if radius == 0 {
-        for (s, n) in geometry.sites(id) {
-            result[s] = input.get(n);
-        }
-        return result;
+        return input[id];
     }
+    let mut result = [0.; SITES];
+    let columns = geometry.columns();
     let origin = [
         id % geometry.columns() * SIDE,
         id / geometry.columns() * SIDE,
@@ -50,9 +51,9 @@ pub fn region(
         let mut p = start;
         for value in line.iter_mut() {
             *value = if axis == 0 {
-                input.get_xy(p, fixed)
+                at(input, columns, p, fixed)
             } else {
-                input.get_xy(fixed, p)
+                at(input, columns, fixed, p)
             };
             p = if p + 1 == count { 0 } else { p + 1 };
         }

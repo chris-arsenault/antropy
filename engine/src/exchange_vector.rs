@@ -53,7 +53,8 @@ pub fn gather(
         if weight == 0. {
             continue;
         }
-        let row = &ratios[slots[node] * 256..(slots[node] + 1) * 256];
+        let slot = slots.get(node);
+        let row = &ratios[slot * 256..(slot + 1) * 256];
         let weight = v::splat(weight);
         for s in crate::field_activity::pairs(mask) {
             let amount = v::add(v::load(&result[s..]), v::mul(weight, v::load(&row[s..])));
@@ -87,7 +88,7 @@ mod tests {
         deposit(&mut demand, &mut changes, &imports, &exports, 1., mask);
         deposit(&mut demand, &mut changes, &imports, &[0.; 256], 1., mask);
         donors(&mut demand, &mut changes, &material, mask);
-        let mut slots = crate::spatial_slots::Slots::new(crate::spatial::Geometry::new(1, 1));
+        let slots = crate::spatial_slots::Slots::new(crate::spatial::Geometry::new(1, 1));
         slots.set(0, 0);
         let received = gather(&demand, &[(0, 1.)], &slots, &imports, mask);
         assert_eq!(received[3], 0.5);

@@ -120,7 +120,6 @@ mod spatial_filter;
 mod spatial_material;
 mod spatial_members;
 mod spatial_regions;
-mod spatial_signal;
 mod spatial_slots;
 #[cfg(test)]
 mod spatial_tests;

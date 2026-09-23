@@ -101,10 +101,7 @@ impl Exchange {
         graph: &crate::interfaces::Graph,
     ) {
         self.prepare_nodes(crate::spatial::Geometry::new(field.nx, field.ny), sites);
-        for (i, &mask) in self.masks.iter().enumerate() {
-            clear(&mut self.imports[i], mask);
-            clear(&mut self.exports[i], mask);
-        }
+        // Each row keeps its previous mask until its own job clears those groups.
         self.imports.resize(cells.len(), [0.; 256]);
         self.exports.resize(cells.len(), [0.; 256]);
         self.masks.resize(cells.len(), 0);
@@ -113,6 +110,8 @@ impl Exchange {
         self.contact_support.resize_with(cells.len(), Vec::new);
         let request = |(i, (((imports, exports), mask), support)): RequestRow<'_>| {
             let cell = &cells[i];
+            clear(imports, *mask);
+            clear(exports, *mask);
             support.clear();
             let active = import_support(cell, c);
             let field_local = crate::numeric::mixture_masked(field, &sites[i], active);

@@ -1,29 +1,84 @@
 //! Region-local finite convolution; input anchors bound accumulated approximation.
-use crate::{
-    spatial::{Geometry, SITES, Work},
-    spatial_regions::Plane,
-};
+//! Input anchors, the x pass and the output are dense region-major planes, so every
+//! pending region job reads committed neighbors and writes only its own slot.
+use crate::spatial::{Geometry, SITES, Work};
 use rayon::prelude::*;
+
+pub(crate) type Plane = Vec<[f64; SITES]>;
+
+/// Filtered attraction, indexed by node.
+#[derive(Clone, Debug, Default)]
+pub struct Output {
+    geometry: Geometry,
+    values: Plane,
+}
+impl Output {
+    pub fn len(&self) -> usize {
+        self.geometry.nx * self.geometry.ny
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    pub fn iter(&self) -> impl Iterator<Item = &f64> {
+        (0..self.len()).map(move |n| &self[n])
+    }
+}
+impl std::ops::Index<usize> for Output {
+    type Output = f64;
+    fn index(&self, n: usize) -> &f64 {
+        let (r, s) = self.geometry.address(n);
+        &self.values[r][s]
+    }
+}
+impl<'a> IntoIterator for &'a Output {
+    type Item = &'a f64;
+    type IntoIter = Box<dyn Iterator<Item = &'a f64> + 'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        Box::new(self.iter())
+    }
+}
+impl IntoIterator for Output {
+    type Item = f64;
+    type IntoIter = std::vec::IntoIter<f64>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter().copied().collect::<Vec<_>>().into_iter()
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct Attraction {
     geometry: (usize, usize, f64, f64),
     input: Plane,
-    /// The three-box x pass and the three-box y pass; each halo spans three box radii.
-    stages: [Plane; 2],
-    pub output: Vec<f64>,
+    /// The three-box x pass; the three-box y pass writes `output`.
+    stage: Plane,
+    pub output: Output,
     pub revisions: u64,
     pub visited: usize,
     pub dirty_regions: usize,
     pending: Work,
-    spare: Work,
 }
+
+/// Runs `job` on the listed region slots of `plane` in parallel and returns (region, result)
+/// in ascending region order. Only listed regions are visited.
+fn each_listed<R: Send>(
+    plane: &mut Plane,
+    regions: &[usize],
+    job: impl Fn(usize, &mut [f64; SITES]) -> R + Sync,
+) -> Vec<(usize, R)> {
+    let mut sorted = regions.to_vec();
+    sorted.sort_unstable();
+    let mut slots = crate::spatial::select_mut(plane, &sorted);
+    let run = |(r, values): &mut (usize, &mut [f64; SITES])| (*r, job(*r, values));
+    let cost = crate::parallel::cost::FILTER_REGION;
+    match crate::parallel::grain(sorted.len(), cost) {
+        Some(grain) => slots.par_iter_mut().with_min_len(grain).map(run).collect(),
+        None => slots.iter_mut().map(run).collect(),
+    }
+}
+
 impl Attraction {
     #[cfg(test)]
-    pub fn prepare(
-        &mut self,
-        geometry: (usize, usize, f64, f64),
-        rows: [&crate::spatial_signal::Signal; 3],
-    ) {
+    pub fn prepare(&mut self, geometry: (usize, usize, f64, f64), input: &[f64]) {
         let g = Geometry::new(geometry.0, geometry.1);
         let mut work = Work::default();
         work.reset(g.count());
@@ -32,7 +87,7 @@ impl Attraction {
         }
         let input = |r: usize, values: &mut [f64; SITES]| {
             for (s, n) in g.sites(r) {
-                values[s] = rows.iter().map(|row| row[n][0]).sum();
+                values[s] = input[n];
             }
         };
         self.update(geometry, input, work, false);
@@ -49,9 +104,12 @@ impl Attraction {
         let reset = self.geometry != geometry;
         if reset {
             self.geometry = geometry;
-            self.input = Plane::new(g);
-            self.stages = std::array::from_fn(|_| Plane::new(g));
-            self.output = vec![0.; g.nx * g.ny];
+            self.input = vec![[0.; SITES]; g.count()];
+            self.stage = vec![[0.; SITES]; g.count()];
+            self.output = Output {
+                geometry: g,
+                values: vec![[0.; SITES]; g.count()],
+            };
             pending.reset(g.count());
             for r in 0..g.count() {
                 pending.insert(r);
@@ -63,17 +121,13 @@ impl Attraction {
             self.pending = pending;
             return;
         }
-        let mut changed = std::mem::take(&mut self.spare);
-        changed.reset(g.count());
-        let anchors = &self.input;
-        let check = |&r: &usize| {
+        // Each pending region compares its current input with its own anchors in place.
+        let check = |r: usize, anchors: &mut [f64; SITES]| {
             let mut current = [0.; SITES];
-            input(r, &mut current);
-            let previous = anchors.region(r).copied().unwrap_or([0.; SITES]);
-            let mut values = previous;
             let mut different = false;
+            input(r, &mut current);
             for (s, _) in g.sites(r) {
-                let (current, previous) = (current[s], previous[s]);
+                let (current, previous) = (current[s], anchors[s]);
                 let significant = if approximate && !reset {
                     crate::execution::changed(
                         current,
@@ -85,76 +139,49 @@ impl Attraction {
                     current != previous
                 };
                 if significant {
-                    values[s] = current;
+                    anchors[s] = current;
                     different = true;
                 }
             }
-            different.then_some((r, values))
+            different
         };
-        let cost = crate::parallel::cost::FILTER_REGION;
-        let updates: Vec<_> =
-            if let Some(grain) = crate::parallel::grain(pending.regions.len(), cost) {
-                pending
-                    .regions
-                    .par_iter()
-                    .with_min_len(grain)
-                    .filter_map(check)
-                    .collect()
-            } else {
-                pending.regions.iter().filter_map(check).collect()
-            };
-        for (r, values) in updates {
-            self.input.set_region(r, values);
-            changed.insert(r);
+        let dirty = each_listed(&mut self.input, &pending.regions, check);
+        let mut changed = Work::default();
+        changed.reset(g.count());
+        for (r, dirty) in dirty {
+            if dirty {
+                changed.insert(r);
+            }
         }
         self.dirty_regions = changed.regions.len();
         if changed.regions.is_empty() {
             self.pending = pending;
-            self.spare = changed;
             return;
         }
         self.revisions += 1;
         let width = geometry.3 / geometry.2;
         let radius = (width + 0.5).floor() as usize;
-        for (stage, axis) in [0, 1].into_iter().enumerate() {
+        for axis in [0, 1] {
             pending.reset(g.count());
             for &r in &changed.regions {
                 pending.halo(g, r, 3 * radius, axis);
             }
-            let input = if stage == 0 {
-                &self.input
-            } else {
-                &self.stages[stage - 1]
-            };
-            let calculate = |&r: &usize| crate::spatial_filter::region(input, g, r, width, axis);
-            let results: Vec<_> =
-                if let Some(grain) = crate::parallel::grain(pending.regions.len(), cost) {
-                    pending
-                        .regions
-                        .par_iter()
-                        .with_min_len(grain)
-                        .map(calculate)
-                        .collect()
-                } else {
-                    pending.regions.iter().map(calculate).collect()
-                };
             self.visited += pending
                 .regions
                 .iter()
                 .map(|&r| g.sites(r).count())
                 .sum::<usize>();
-            for (&r, values) in pending.regions.iter().zip(results) {
-                if stage == 1 {
-                    for (s, n) in g.sites(r) {
-                        self.output[n] = values[s];
-                    }
-                }
-                self.stages[stage].set_region(r, values);
-            }
+            let (source, target) = if axis == 0 {
+                (&self.input, &mut self.stage)
+            } else {
+                (&self.stage, &mut self.output.values)
+            };
+            each_listed(target, &pending.regions, |r, values| {
+                *values = crate::spatial_filter::region(source, g, r, width, axis);
+            });
             std::mem::swap(&mut pending, &mut changed);
         }
         self.pending = pending;
-        self.spare = changed;
     }
 }
 
@@ -166,28 +193,30 @@ impl crate::field::Field {
         }
         #[cfg(not(target_arch = "wasm32"))]
         let started = self.profile.then(std::time::Instant::now);
-        self.source_signal.compact();
-        self.body_signal.compact();
         let geometry = Geometry::new(self.nx, self.ny);
         let mut changes = std::mem::take(&mut self.attraction.pending);
         changes.reset(geometry.count());
-        for &r in &self.signal_changes.regions {
+        for &r in self
+            .signal_changes
+            .regions
+            .iter()
+            .chain(&self.carriers.changed.regions)
+        {
             changes.insert(r);
         }
         self.signal_changes.reset(geometry.count());
-        self.source_signal.drain_changes(geometry, &mut changes);
-        self.body_signal.drain_changes(geometry, &mut changes);
-        let exact = self.material_exact || self.source_signal.exact || self.body_signal.exact;
+        self.carriers.changed.reset(geometry.count());
+        let exact = self.material_exact || self.carriers.exact;
         self.material_exact = false;
-        self.source_signal.exact = false;
-        self.body_signal.exact = false;
+        self.carriers.exact = false;
         let area = self.spacing * self.spacing;
-        let (amounts, source, body) = (&self.amounts, &self.source_signal, &self.body_signal);
+        let (amounts, carriers) = (&self.amounts, &self.carriers);
         let input = |r: usize, values: &mut [f64; SITES]| {
             let material = amounts.regions.get(r);
-            for (s, n) in geometry.sites(r) {
+            let carried = carriers.region(r);
+            for (s, _) in geometry.sites(r) {
                 let own = material.map_or(0., |m| m.projection[s][4] / area);
-                values[s] = own + source[n][0] + body[n][0];
+                values[s] = own + carried[s].signal[1][0] + carried[s].signal[0][0];
             }
         };
         self.attraction.update(

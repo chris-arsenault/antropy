@@ -70,18 +70,16 @@ fn shared_owners_are_thread_safe_without_mutable_aliases() {
 #[test]
 fn parallel_geographic_filters_preserve_periodic_axes_and_input_invalidation() {
     let (nx, ny) = (384, 192);
-    let mut carrier: crate::spatial_signal::Signal = (0..nx * ny)
-        .map(|i| [((i * 37 % 997) as f64 * 0.17).sin(), 0.])
-        .collect::<Vec<_>>()
-        .into();
-    let empty = vec![[0.; 2]; nx * ny].into();
+    let mut carrier: Vec<_> = (0..nx * ny)
+        .map(|i| ((i * 37 % 997) as f64 * 0.17).sin())
+        .collect();
     let mut serial = crate::attraction::Attraction::default();
     let mut parallel = serial.clone();
     for phase in 0..3 {
-        carrier[phase * 1000][0] += 0.2;
+        carrier[phase * 1000] += 0.2;
         for (workers, filter) in [(1, &mut serial), (4, &mut parallel)] {
             pool(workers).install(|| {
-                filter.prepare((nx, ny, 2., 11.7), [&carrier, &empty, &empty]);
+                filter.prepare((nx, ny, 2., 11.7), &carrier);
             });
         }
         assert_eq!(serial.revisions, parallel.revisions);

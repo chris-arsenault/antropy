@@ -21,17 +21,19 @@ pub(crate) type Features = [f64; 4];
 
 impl Field {
     pub(crate) fn mechanical_load(&self, n: usize) -> f64 {
-        self.impedance_at(n) + self.source_load[n] + self.body_load[n]
+        let carried = self.carriers.site(n);
+        self.impedance_at(n) + carried.load[1] + carried.load[0]
     }
 
     /// Features of node `n` given its already-read material projection.
     pub(crate) fn features(&self, n: usize, p: &crate::spatial_material::Projection) -> Features {
         let area = self.spacing * self.spacing;
-        let impedance = p[2] / area + self.source_load[n];
+        let carried = self.carriers.site(n);
+        let impedance = p[2] / area + carried.load[1];
         [
             self.attractive(n),
-            p[5] / area + self.body_signal[n][1] + self.source_signal[n][1],
-            impedance + self.body_load[n],
+            p[5] / area + carried.signal[0][1] + carried.signal[1][1],
+            impedance + carried.load[0],
             impedance,
         ]
     }

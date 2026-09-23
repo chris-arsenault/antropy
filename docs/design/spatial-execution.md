@@ -33,10 +33,11 @@ reservoir release commit through the same region-parallel batch. Missing regions
 without allocation. Each allocated chemical region contains contiguous 256-species rows; this deliberately
 retains the existing vector arithmetic. Region padding has a memory cost.
 
-One carrier contribution owner replaces source and body contributions. It remembers the old
-footprint and profile, applies only the actual difference, and removes old support when an owner
-moves or disappears. Reference counts distinguish an emptied node from a node still shared by
-other contributors. Reservoir interface saturation and cellular mass projection keep their
+One carrier owner holds source and body contributions in a region-major plane. Owners submit
+their previous and current footprint and profile; changes expand into per-site deposits in
+parallel and are applied by one job per touched region. Shared nodes of a moved owner receive
+one net change. Reference counts distinguish an emptied node from a node still shared by other
+contributors. Reservoir interface saturation and cellular mass projection keep their
 different physical formulas; ownership and invalidation use the same implementation.
 
 ## Local operators and physical time
@@ -70,20 +71,18 @@ in parallel, and then prepares each cell's coefficients in parallel without muta
 
 ## Contacts, delivery and consumers
 
-Contact search retains persistent center membership at diameter-class resolution. A large body
-does not widen every small-body search. Each class uses the common periodic regional index;
-stable cell IDs own membership, while current array indices are contiguous query payloads.
-Crossings, size-class changes and population changes update membership. Neighborhood discovery
-runs once per occupied bin, and each same-class bin pair is visited once. Current class radii
+Contact search bins centers at diameter-class resolution. A large body does not widen every
+small-body search. Bins are rebuilt in parallel each step from sorted (bin, body) pairs into a
+flat table with a dense node lookup. Neighborhood discovery runs once per occupied bin, and
+each same-class bin pair is visited once. Current class radii
 bound the search; each candidate still uses exact circle overlap. All-overlapping populations
 still have quadratic pair cost.
 
-Transport retains the transpose of cell footprints: each geographic donor owns its current
-list of receiver contributions. Changing one footprint edits its old/new donor rows. Material
+Transport uses the transpose of cell footprints: each geographic donor owns a contiguous list of
+its receivers, rebuilt in parallel each exchange from sorted (node, receiver) pairs. Material
 requests still read current concentrations and work budgets every exchange, and all receivers
 compete for the same donor before commitment. No regional boundary creates an additional supply.
-Reverse positions allow direct weight updates and swap removal; changing a contribution never
-scans the whole crowded donor list. Sensing, exposure and exchange contractions borrow each
+Each donor's projection job initializes exactly the chemical groups its receivers request. Sensing, exposure and exchange contractions borrow each
 regional chemical row before their coefficient loops, keeping geographic lookup outside chemical
 arithmetic.
 

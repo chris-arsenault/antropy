@@ -35,7 +35,7 @@ impl Region {
         &mut self.values[site * WIDTH..(site + 1) * WIDTH]
     }
     /// Clears only previously written chemical groups.
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         for site in 0..SITES {
             for s in GroupLanes::<1>::new(self.masks[site]) {
                 self.values[site * WIDTH + s] = 0.;
@@ -302,29 +302,54 @@ impl Material {
         rows: &Rows,
     ) -> Batch {
         let mut batch = Batch::default();
+        let geometry = self.geometry;
+        let region_of =
+            |&(node, mask): &(usize, u64)| (mask != 0).then(|| geometry.address(node).0);
+        // Writes into unallocated regions are rare: allocate only for real changes, in order.
+        let missing: Vec<usize> = entries
+            .par_iter()
+            .enumerate()
+            .filter_map(|(i, e)| {
+                region_of(e)
+                    .filter(|&r| self.regions.get(r).is_none())
+                    .map(|_| i)
+            })
+            .collect();
+        let mut discarded = Vec::new();
         let mut requested = [0.; WIDTH];
-        let mut order = Vec::with_capacity(entries.len());
-        for (i, &(node, mask)) in entries.iter().enumerate() {
-            if mask == 0 {
+        for i in missing {
+            let (node, mask) = entries[i];
+            let r = geometry.address(node).0;
+            if self.regions.get(r).is_some() {
                 continue;
             }
-            let (r, _) = self.geometry.address(node);
-            if self.regions.get(r).is_none() {
-                fill(i, &mut requested);
-                if !changes(&ZERO, &requested, mask) {
-                    let loss = discard(&mut requested, mask, rows);
-                    batch.loss[0] += loss[0];
-                    batch.loss[1] += loss[1];
-                    continue;
-                }
+            fill(i, &mut requested);
+            if changes(&ZERO, &requested, mask) {
                 for s in pairs(mask) {
                     requested[s..s + 2].fill(0.);
                 }
                 self.own(r);
+            } else {
+                let loss = discard(&mut requested, mask, rows);
+                batch.loss[0] += loss[0];
+                batch.loss[1] += loss[1];
+                discarded.push(i);
             }
-            order.push((self.regions.slot(r), i));
         }
-        order.sort_unstable();
+        let regions = &self.regions;
+        let mut order: Vec<(usize, usize)> = entries
+            .par_iter()
+            .enumerate()
+            .filter_map(|(i, e)| {
+                let r = region_of(e)?;
+                regions.get(r)?;
+                discarded
+                    .binary_search(&i)
+                    .is_err()
+                    .then(|| (regions.slot(r), i))
+            })
+            .collect();
+        order.par_sort_unstable();
         let mut groups = vec![(0_u32, 0_u32); self.regions.entries.len()];
         let mut start = 0;
         while start < order.len() {
@@ -333,7 +358,6 @@ impl Material {
             groups[slot] = (start as u32, end as u32);
             start = end;
         }
-        let geometry = self.geometry;
         let job = |(slot, entry): (usize, &mut crate::spatial_regions::Entry<Region>)| {
             let (start, end) = groups[slot];
             let mut result = (Batch::default(), false);
@@ -384,12 +408,11 @@ impl Material {
                 .map(job)
                 .fold(Batch::default(), merge)
         };
-        let touched: Vec<_> = order.iter().map(|&(slot, _)| slot).collect();
-        let emptied: Vec<_> = touched
-            .into_iter()
-            .map(|slot| &self.regions.entries[slot].value)
-            .filter(|r| r.is_empty())
-            .map(|r| r.id)
+        let emptied: Vec<_> = groups
+            .iter()
+            .zip(&self.regions.entries)
+            .filter(|((start, end), entry)| start != end && entry.value.is_empty())
+            .map(|(_, entry)| entry.id)
             .collect();
         for r in emptied {
             self.release(r);
@@ -464,9 +487,7 @@ impl Material {
         for r in unwanted {
             self.release(r);
         }
-        for entry in &mut self.regions.entries {
-            entry.value.clear();
-        }
+        // Retained destinations are cleared by their own region job (`Region::clear`).
         for &r in &wanted.regions {
             self.own(r);
         }

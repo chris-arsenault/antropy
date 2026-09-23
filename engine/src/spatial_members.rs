@@ -1,118 +1,85 @@
-//! Persistent local membership: motion changes a bin only when an owner crosses it.
-use crate::{
-    spatial::{Geometry, SITES},
-    spatial_regions::Regions,
-};
-use std::collections::HashMap;
-#[derive(Clone, Debug)]
-struct Member {
-    id: u64,
-    node: usize,
-    position: usize,
-    epoch: u64,
-}
-#[derive(Clone, Debug, Default)]
-struct Bin {
-    slots: Vec<usize>,
-    indices: Vec<usize>,
-}
-#[derive(Clone, Debug, Default)]
+//! Bin membership rebuilt in parallel from sorted (node, index) entries; a dense node table
+//! gives each occupied bin's contiguous list of indices.
+use crate::spatial::Geometry;
+use rayon::prelude::*;
+use std::sync::atomic::{AtomicU32, Ordering};
+
+#[derive(Debug, Default)]
 pub struct Members {
     geometry: Geometry,
-    bins: Regions<[Bin; SITES]>,
-    members: Vec<Option<Member>>,
-    ids: HashMap<u64, usize>,
-    free: Vec<usize>,
-    epoch: u64,
-    pub changes: u64,
+    /// Node -> occupied bin, or `u32::MAX`; reset only for previously occupied bins.
+    lookup: Vec<AtomicU32>,
+    nodes: Vec<usize>,
+    offsets: Vec<usize>,
+    indices: Vec<usize>,
+}
+impl Clone for Members {
+    fn clone(&self) -> Self {
+        Self {
+            geometry: self.geometry,
+            lookup: self
+                .lookup
+                .iter()
+                .map(|v| AtomicU32::new(v.load(Ordering::Relaxed)))
+                .collect(),
+            nodes: self.nodes.clone(),
+            offsets: self.offsets.clone(),
+            indices: self.indices.clone(),
+        }
+    }
 }
 impl Members {
-    pub fn begin(&mut self, geometry: Geometry) {
-        if geometry != self.geometry {
-            *self = Self {
-                geometry,
-                bins: Regions::new(geometry.count()),
-                ..Self::default()
-            };
-        }
-        self.epoch += 1;
-    }
-    pub fn update(&mut self, id: u64, index: usize, node: usize) {
-        let slot = if let Some(&slot) = self.ids.get(&id) {
-            slot
+    /// `entry(k)` gives the k-th (node, index) pair; pairs must be sorted by node.
+    pub fn rebuild(
+        &mut self,
+        geometry: Geometry,
+        len: usize,
+        entry: impl Fn(usize) -> (usize, usize) + Sync,
+    ) {
+        if geometry != self.geometry || self.lookup.is_empty() {
+            self.geometry = geometry;
+            self.lookup = (0..geometry.nx * geometry.ny)
+                .map(|_| AtomicU32::new(u32::MAX))
+                .collect();
         } else {
-            let slot = self.free.pop().unwrap_or_else(|| {
-                self.members.push(None);
-                self.members.len() - 1
-            });
-            self.ids.insert(id, slot);
-            slot
-        };
-        if let Some(member) = &mut self.members[slot] {
-            member.epoch = self.epoch;
-            if member.node == node {
-                let (r, s) = self.geometry.address(node);
-                self.bins.get_mut(r).unwrap()[s].indices[member.position] = index;
-                return;
-            }
-            self.detach(slot);
+            let lookup = &self.lookup;
+            self.nodes
+                .par_iter()
+                .for_each(|&n| lookup[n].store(u32::MAX, Ordering::Relaxed));
         }
-        let (r, s) = self.geometry.address(node);
-        let bins = self.bins.own(r, || std::array::from_fn(|_| Bin::default()));
-        let position = bins[s].slots.len();
-        bins[s].slots.push(slot);
-        bins[s].indices.push(index);
-        self.members[slot] = Some(Member {
-            id,
-            node,
-            position,
-            epoch: self.epoch,
-        });
-        self.changes += 1;
-    }
-    fn detach(&mut self, slot: usize) {
-        let old = self.members[slot].take().unwrap();
-        let (r, s) = self.geometry.address(old.node);
-        let bins = self.bins.get_mut(r).unwrap();
-        bins[s].slots.swap_remove(old.position);
-        bins[s].indices.swap_remove(old.position);
-        if old.position < bins[s].slots.len() {
-            self.members[bins[s].slots[old.position]]
-                .as_mut()
-                .unwrap()
-                .position = old.position;
-        }
-        if bins.iter().all(|bin| bin.indices.is_empty()) {
-            self.bins.remove(r);
-        }
-    }
-    pub fn finish(&mut self) {
-        for slot in 0..self.members.len() {
-            if let Some(old) = &self.members[slot]
-                && old.epoch != self.epoch
-            {
-                self.ids.remove(&old.id);
-                self.detach(slot);
-                self.free.push(slot);
-                self.changes += 1;
-            }
-        }
+        self.offsets.clear();
+        self.offsets.par_extend(
+            (0..len)
+                .into_par_iter()
+                .filter(|&k| k == 0 || entry(k - 1).0 != entry(k).0),
+        );
+        self.nodes.clear();
+        self.nodes
+            .par_extend(self.offsets.par_iter().map(|&k| entry(k).0));
+        self.offsets.push(len);
+        self.indices.clear();
+        self.indices
+            .par_extend((0..len).into_par_iter().map(|k| entry(k).1));
+        let lookup = &self.lookup;
+        self.nodes
+            .par_iter()
+            .enumerate()
+            .for_each(|(bin, &n)| lookup[n].store(bin as u32, Ordering::Relaxed));
     }
     #[cfg(test)]
     pub fn at(&self, node: usize) -> impl Iterator<Item = usize> + '_ {
         self.indices(node).iter().copied()
     }
     pub fn indices(&self, node: usize) -> &[usize] {
-        let (r, s) = self.geometry.address(node);
-        self.bins
-            .get(r)
-            .map_or(&[], |bins| bins[s].indices.as_slice())
+        match self.lookup.get(node).map(|v| v.load(Ordering::Relaxed)) {
+            Some(bin) if bin != u32::MAX => {
+                let bin = bin as usize;
+                &self.indices[self.offsets[bin]..self.offsets[bin + 1]]
+            }
+            _ => &[],
+        }
     }
     pub fn occupied(&self) -> impl Iterator<Item = usize> + '_ {
-        self.bins.entries.iter().flat_map(|entry| {
-            self.geometry
-                .sites(entry.id)
-                .filter_map(|(s, n)| (!entry.value[s].indices.is_empty()).then_some(n))
-        })
+        self.nodes.iter().copied()
     }
 }

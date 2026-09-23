@@ -41,32 +41,32 @@ impl super::Field {
         }
         Ok(())
     }
-    pub fn body_signal(&self) -> &crate::spatial_signal::Signal {
-        &self.body_signal
+    pub fn body_signal(&self) -> crate::spatial_carriers::SignalView<'_> {
+        self.carriers.signal(0)
     }
     #[cfg(test)]
-    pub(crate) fn test_body_signal(&mut self) -> &mut crate::spatial_signal::Signal {
-        &mut self.body_signal
+    pub(crate) fn test_body_signal(&mut self) -> crate::spatial_carriers::TrackedSignal<'_> {
+        crate::spatial_carriers::TrackedSignal(&mut self.carriers, 0)
     }
-    pub fn body_load(&self) -> &[f64] {
-        &self.body_load
-    }
-    #[cfg(test)]
-    pub(crate) fn test_body_load(&mut self) -> &mut [f64] {
-        &mut self.body_load
-    }
-    pub fn source_signal(&self) -> &crate::spatial_signal::Signal {
-        &self.source_signal
+    pub fn body_load(&self) -> crate::spatial_carriers::LoadView<'_> {
+        self.carriers.load(0)
     }
     #[cfg(test)]
-    pub(crate) fn test_source_signal(&mut self) -> &mut crate::spatial_signal::Signal {
-        &mut self.source_signal
+    pub(crate) fn test_body_load(&mut self) -> crate::spatial_carriers::TrackedLoad<'_> {
+        crate::spatial_carriers::TrackedLoad(&mut self.carriers, 0)
     }
-    pub fn source_load(&self) -> &[f64] {
-        &self.source_load
+    pub fn source_signal(&self) -> crate::spatial_carriers::SignalView<'_> {
+        self.carriers.signal(1)
     }
     #[cfg(test)]
-    pub(crate) fn test_source_load(&mut self) -> &mut [f64] {
-        &mut self.source_load
+    pub(crate) fn test_source_signal(&mut self) -> crate::spatial_carriers::TrackedSignal<'_> {
+        crate::spatial_carriers::TrackedSignal(&mut self.carriers, 1)
+    }
+    pub fn source_load(&self) -> crate::spatial_carriers::LoadView<'_> {
+        self.carriers.load(1)
+    }
+    #[cfg(test)]
+    pub(crate) fn test_source_load(&mut self) -> crate::spatial_carriers::TrackedLoad<'_> {
+        crate::spatial_carriers::TrackedLoad(&mut self.carriers, 1)
     }
 }

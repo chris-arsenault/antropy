@@ -4,6 +4,7 @@ use crate::{
     accounting::Ledger, chemistry::Chemistry, config::Config, field::Field,
     genetics::GenotypeStore, organism::Cell, random::Random, sources::Source,
 };
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 #[path = "world_base.rs"]
@@ -287,15 +288,17 @@ impl World {
         stages[3] = now() - started;
         started = now();
         if physiology {
+            let field = &self.field;
             let signals: Vec<_> = sites
-                .iter()
+                .par_iter()
+                .with_min_len(crate::parallel::TASK_NS / crate::parallel::cost::CELL_MARK)
                 .map(|row| {
                     let signal = crate::weathering::signal(std::array::from_fn(|k| {
                         row.iter()
-                            .map(|&(n, a)| a * self.field.medium_signal(n)[k])
+                            .map(|&(n, a)| a * field.medium_signal(n)[k])
                             .sum()
                     }));
-                    crate::illumination::drive(signal, self.field.illumination.sample(row))
+                    crate::illumination::drive(signal, field.illumination.sample(row))
                 })
                 .collect();
             self.footprints

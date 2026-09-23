@@ -141,7 +141,8 @@ still coordinates the sole World and renders borrowed views after every phase jo
 requires cross-origin isolation; unsupported browsers use the same operators in the serial build.
 The [regional execution owner](docs/design/spatial-execution.md) uses persistent 8×8 material
 regions, private commits, shared carrier lifetimes and locally invalidated finite convolution.
-Contact and delivery membership persist; chemical contractions borrow rows outside arithmetic.
+Contact bins and delivery membership are rebuilt in parallel; region jobs own every commit.
+Chemical contractions borrow rows outside arithmetic.
 Contact uses perfect circles: scalar
 penetration, center-line soft separation and permeable material access. No contact sampling
 lattice, angular moments or heading dependence. The sampled contact replacement was rejected.

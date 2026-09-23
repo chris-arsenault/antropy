@@ -63,15 +63,19 @@ pub fn sites(cell: &Cell, config: &Config, field: &Field) -> Row {
 pub fn deposit_profiles(cells: &[Cell], config: &Config, field: &mut Field, sites: &[Row]) {
     field.reset_carriers(0);
     let area = field.spacing * field.spacing;
-    for (cell, row) in cells.iter().zip(sites) {
-        let profile = cell
-            .operators
-            .as_ref()
-            .unwrap()
-            .profile
-            .map(|p| p * cell.mass() / area);
-        field.carrier(0, cell.id, row, profile);
-    }
+    let changes: Vec<_> = cells
+        .iter()
+        .zip(sites)
+        .map(|(cell, row)| {
+            let profile = cell.operators.as_ref().unwrap().profile;
+            crate::spatial_carriers::Change {
+                kind: 0,
+                old: (&[], [0.; 3]),
+                new: (row.as_slice(), profile.map(|p| p * cell.mass() / area)),
+            }
+        })
+        .collect();
+    field.apply_carriers(&changes);
     let _ = config;
 }
 

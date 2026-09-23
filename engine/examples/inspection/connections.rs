@@ -58,11 +58,8 @@ fn cell(w: &World, c: &Cell, bodies: &[[f64; 2]]) -> Value {
     let material: Vec<_> = (0..w.field.nx * w.field.ny)
         .map(|n| w.field.material_signal(n))
         .collect();
-    let components = [
-        material.as_slice(),
-        w.field.source_signal().as_slice(),
-        bodies,
-    ];
+    let sources: Vec<_> = w.field.source_signal().iter().copied().collect();
+    let components = [material.as_slice(), sources.as_slice(), bodies];
     let signals: [[f64; 2]; 3] = components
         .map(|values| std::array::from_fn(|k| sites.iter().map(|&(n, a)| a * values[n][k]).sum()));
     let total = std::array::from_fn(|k| signals.iter().map(|s| s[k]).sum());

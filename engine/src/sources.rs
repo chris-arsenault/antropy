@@ -72,6 +72,8 @@ impl Source {
         self.kernel.prepare(self.habitat.radius, field);
         self.kernel
             .translate(self.habitat.x, self.habitat.y, field, &mut self.footprint);
+        // Node order lets carrier updates merge old and new footprints without re-sorting.
+        self.footprint.sort_unstable_by_key(|&(n, _)| n);
         self.interface =
             field.spacing.powi(2) / self.footprint.iter().map(|(_, a)| a * a).sum::<f64>();
     }

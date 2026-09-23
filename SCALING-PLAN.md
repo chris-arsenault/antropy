@@ -270,6 +270,50 @@ The production host has two 18-core sockets with hyperthreading. `compose.yaml` 
 container to one socket's physical cores with 16 compute threads, so workers share one memory
 node and never share a core with the serial owner. A 32-core measurement remains open.
 
+### Live-world serial removal
+
+The measurements above used the light tick-15000 checkpoint. A checkpoint exported from the
+private server (tick 409,584, 2,739 cells, biomass 30,151; ignored under
+`frontend/harness/artifacts/live-20260923/`) is the representative workload. On it, timers
+around every stage attributed roughly 14 ms per tick to serial code: per-cell carrier deposits
+through a hash map, serial footprint-dependency marking, serial delivery-link edits and 16 MB of
+per-interval row clearing in exchange, serial contact membership, and serial attraction commits.
+
+- Body and reservoir carriers share one region-major plane. Owners compute their changes in
+  parallel; deposits are sorted by region and applied by one job per touched region. A moved
+  owner applies one net change on nodes both footprints share.
+- Footprint dependencies are marked in dense per-region atomic masks; each region job derives
+  footprint neighbors from those masks. No pass visits unmarked geography.
+- The exchange delivery transpose and contact-search bins are rebuilt in parallel from sorted
+  (node, owner) pairs into flat tables with dense node lookups. Donor rows are cleared by the
+  projection job for exactly the groups its receivers request.
+- Attraction input, x-pass and output are dense region-major planes. Pending regions are
+  visited through disjoint references; the input check and both passes write their own slots.
+- Field destination clearing, exchange request clearing, contact allocation, per-cell signals
+  and basal maintenance run in their owners' parallel jobs.
+
+Dense lookup tables and planes cost a few megabytes at the default area. Peak process memory on
+the live checkpoint stays about 550 MiB for every version, dominated by the loaded world.
+
+Live checkpoint, ten warm-up and 100 measured ticks, median TPS:
+
+| Build | 1 worker | 4 workers | 6 workers |
+| --- | ---: | ---: | ---: |
+| `b224525`, currently deployed | 15.6 | 21.4 | 21.9 |
+| `6209b8b`, region-owned commits | 18.8 | 41.3 | 46.5 |
+| This change | 20.1 | 54.4 | 63.7–64.8 |
+
+Accounts and population match across builds. The fitted model on this six-core desktop gives
+41.1 ms of parallel and 8.8 ms of residual time per single-worker tick. That residual includes
+the lower all-core clock, memory bandwidth in exchange rows and uneven region sizes, not only
+serial code; the explicitly serial sections left are each below about 0.3 ms. The model predicts
+about 72, 82 and 88 TPS at 8, 12 and 16 workers on this CPU, still rising at 16. The server
+therefore keeps 16 pinned workers; slower Xeon cores will lower every figure.
+
+The 48-founder fixture runs 560/495/509 TPS at 1×/10×/20× on one worker against 605/544/564
+before this change: sorting and region bookkeeping cost about 0.2 ms per tick when there is
+little work. The light checkpoint reaches 159 TPS with six workers.
+
 M0–M3 are complete locally. `make ci` passes: 320 Rust tests, 79 frontend tests, serial/threaded
 WASM builds, ownership/storage guards, type/lint/format checks, docs and Terraform formatting.
 The registered server publication benchmark remains ignored by the ordinary suite; the cold

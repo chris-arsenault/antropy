@@ -31,10 +31,7 @@ pub struct Field {
     pub illumination: crate::illumination::Illumination,
     next: crate::spatial_material::Material,
     pub(crate) neighbors: Vec<[usize; 4]>,
-    body_signal: crate::spatial_signal::Signal,
-    body_load: Vec<f64>,
-    source_signal: crate::spatial_signal::Signal,
-    source_load: Vec<f64>,
+    /// Body (kind 0) and reservoir (kind 1) signal and load in one region-major plane.
     pub(crate) carriers: crate::spatial_carriers::Carriers,
     /// Regions whose material signal projection changed since attraction last read them.
     signal_changes: crate::spatial::Work,
@@ -97,10 +94,6 @@ impl Field {
             illumination: Default::default(),
             next: Default::default(),
             neighbors: vec![],
-            body_signal: Default::default(),
-            body_load: vec![],
-            source_signal: Default::default(),
-            source_load: vec![],
             carriers: Default::default(),
             signal_changes: Default::default(),
             material_exact: true,
@@ -124,10 +117,6 @@ impl Field {
         self.signal_changes = Default::default();
         self.signal_changes.reset(geometry.count());
         self.material_exact = true;
-        self.body_signal = vec![[0.; 2]; n].into();
-        self.body_load = vec![0.; n];
-        self.source_signal = vec![[0.; 2]; n].into();
-        self.source_load = vec![0.; n];
         self.carriers = crate::spatial_carriers::Carriers::new(geometry);
         self.neighbors = (0..n)
             .map(|i| [(1, 0), (-1, 0), (0, 1), (0, -1)].map(|(x, y)| geometry.offset(i, x, y)))
@@ -176,12 +165,13 @@ impl Field {
     pub fn medium_load(&self, sites: &[(usize, f64)]) -> f64 {
         sites
             .iter()
-            .map(|&(n, w)| w * (self.impedance_at(n) + self.source_load[n]))
+            .map(|&(n, w)| w * (self.impedance_at(n) + self.carriers.site(n).load[1]))
             .sum()
     }
     pub fn medium_signal(&self, n: usize) -> [f64; 2] {
         let material = self.material_signal(n);
-        std::array::from_fn(|k| material[k] + self.body_signal[n][k] + self.source_signal[n][k])
+        let carrier = self.carriers.site(n);
+        std::array::from_fn(|k| material[k] + carrier.signal[0][k] + carrier.signal[1][k])
     }
     pub fn sample(&self, species: usize, sites: &[(usize, f64)]) -> f64 {
         sites
