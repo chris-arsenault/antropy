@@ -11,7 +11,7 @@ use std::collections::BTreeSet;
 mod base;
 #[path = "world_physiology.rs"]
 mod physiology;
-pub const VERSION: u32 = 40;
+pub const VERSION: u32 = 41;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -408,12 +408,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY40\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY41\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY40\0")
-            .ok_or("Unsupported physical checkpoint; v40 required")?;
+            .strip_prefix(b"ANTROPY41\0")
+            .ok_or("Unsupported physical checkpoint; v41 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {

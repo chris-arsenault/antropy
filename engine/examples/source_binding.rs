@@ -26,30 +26,23 @@ fn profile(s: &Source) -> [f64; 3] {
 fn terms(w: &World, s: &Source) -> Value {
     let p = profile(s);
     let gradient = w.field.gradient(&s.footprint);
-    let own = medium_response::self_load(
-        s.material.total * p[2] / (1. + s.material.total / s.interface),
-        w.field.spacing.powi(2),
-        &s.footprint,
-    );
-    let other = (w.field.pressure_load(&s.footprint) - own).max(0.);
+    // Since v41 reservoirs carry no crowding pressure: the chemical force is the signed terms.
     let signed = gradient.map(|g| p[0] * g[0] - p[1] * g[1]);
-    let pressure = gradient.map(|g| -p[2] * w.config.pressure_strength * other * g[2]);
-    let force = medium_response::force(p, gradient, w.config.pressure_strength * other);
+    let force = medium_response::force(p, gradient, 0.);
     let load = w.field.medium_load(&s.footprint);
     let velocity = movement::passive(
         p,
         gradient,
-        w.config.pressure_strength * other,
+        0.,
         antropy_engine::field::mobility(load, w.config.movement_impedance),
         w.config.source_drift,
     );
     let ordinary = source_medium::response(s, w.tick, &w.config, &w.field, &w.chemistry);
     for k in 0..2 {
         assert!((velocity[k] - ordinary.velocity[k]).abs() < 1e-12);
-        assert!((force[k] - signed[k] - pressure[k]).abs() < 1e-12);
+        assert!((force[k] - signed[k]).abs() < 1e-12);
     }
-    json!({"profile":p,"gradient":gradient,"selfLoad":own,"otherLoad":other,
-        "signed":signed,"pressure":pressure,"force":force,"velocity":velocity,
+    json!({"profile":p,"gradient":gradient,"signed":signed,"force":force,"velocity":velocity,
         "load":load,"inventory":s.material.total,"interface":s.interface})
 }
 

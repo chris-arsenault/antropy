@@ -138,7 +138,8 @@ impl Source {
             conversion: conversion.map(|v| self.amount * v),
             ..Outcome::default()
         };
-        let [dx, dy] = step.response.velocity.map(|v| v * c.dt);
+        let r = &step.response;
+        let [dx, dy] = [0, 1].map(|k| (r.velocity[k] + r.shift[k]) * c.dt);
         outcome.changed = dx != 0. || dy != 0. || (self.amount > 0. && conversion[0] > 0.);
         if dx != 0. || dy != 0. {
             self.habitat.x = (self.habitat.x + dx).rem_euclid(c.width);

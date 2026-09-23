@@ -9,7 +9,7 @@ LEGACY_TRAITS = ["membraneX", "membraneY", "importX", "importY", "motor", "core"
 
 def read_manifest(directory):
     manifest = json.loads((directory / "manifest.json").read_text())
-    if manifest.get("checkpointVersion") not in (10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40):
+    if manifest.get("checkpointVersion") not in (10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41):
         raise ValueError(f"Unsupported physical checkpoint schema: {directory}")
     return manifest
 

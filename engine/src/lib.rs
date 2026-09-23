@@ -7,6 +7,9 @@ mod parallel_tests;
 #[cfg(all(target_arch = "wasm32", feature = "threads"))]
 pub use wasm_bindgen_rayon::init_thread_pool;
 pub mod accounting;
+pub mod adhesion;
+#[cfg(test)]
+mod adhesion_tests;
 pub mod ancestry;
 pub(crate) use field::attraction;
 #[cfg(test)]
@@ -103,6 +106,9 @@ pub mod reaction_medium;
 mod relationships;
 pub mod render;
 pub mod render_window;
+pub mod reservoir_coupling;
+#[cfg(test)]
+mod reservoir_coupling_tests;
 #[cfg(test)]
 mod runtime_tests;
 pub mod sensing;

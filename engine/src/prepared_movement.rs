@@ -18,7 +18,7 @@ pub(crate) struct Motion {
     ids: Vec<u64>,
     coefficients: Vec<Coefficients>,
     medium: medium::Medium,
-    configuration: Option<[f64; 9]>,
+    configuration: Option<[f64; 8]>,
     pub preparations: u64,
     pub contact_preparations: u64,
 }
@@ -43,7 +43,6 @@ impl Motion {
             c.viscosity,
             c.motor_power_density,
             c.motor_efficiency,
-            c.pressure_strength,
             c.movement_impedance,
             field.drift,
         ];
@@ -81,10 +80,24 @@ impl Motion {
         }
         self.medium.prepare(field, c);
     }
-    pub fn advance(&mut self, cells: &mut [Cell], c: &Config, field: &Field, sites: &[Row]) {
+    /// Pays and turns every cell, blends intended motion across adhesive contacts, then moves.
+    pub fn advance(
+        &mut self,
+        cells: &mut [Cell],
+        c: &Config,
+        field: &Field,
+        sites: &[Row],
+        contacts: &super::geometry::Contacts,
+    ) {
         self.prepare_all(cells, c, field, sites);
-        for (i, cell) in cells.iter_mut().enumerate() {
-            self.advance_prepared(i, cell, c);
+        let mut displacements: Vec<_> = cells
+            .iter_mut()
+            .enumerate()
+            .map(|(i, cell)| self.displacement(i, cell, c))
+            .collect();
+        crate::adhesion::blend(&mut displacements, cells, contacts, c.adhesion);
+        for (cell, d) in cells.iter_mut().zip(displacements) {
+            apply(cell, d, c);
         }
     }
     /// Refreshes shared footprint dependencies by region, then each cell's coefficients.
@@ -136,8 +149,9 @@ impl Motion {
         }
         false
     }
-    pub(crate) fn advance_prepared(&self, i: usize, cell: &mut Cell, c: &Config) {
-        Self::advance_cell(&self.coefficients[i], cell, c);
+    /// Pays motor work and turns the cell; returns its intended displacement for this step.
+    pub(crate) fn displacement(&self, i: usize, cell: &mut Cell, c: &Config) -> [f64; 2] {
+        Self::intend(&self.coefficients[i], cell, c)
     }
     fn prepare_cell(
         coefficients: &mut Coefficients,
@@ -150,18 +164,12 @@ impl Motion {
         let mobility = super::mobility(field.medium_load(row), c.movement_impedance);
         coefficients.speed = super::motor_limits(cell, c, mobility).0;
         let profile = cell.operators.as_ref().unwrap().profile;
-        let self_load =
-            crate::medium_response::self_load(cell.mass() * profile[2], field.spacing.powi(2), row);
-        coefficients.passive = super::passive(
-            profile,
-            gradient,
-            c.pressure_strength * (field.pressure_load(row) - self_load).max(0.),
-            mobility,
-            field.drift,
-        );
+        // Cells couple to chemical attraction and repulsion only; circle contact supplies
+        // their exclusion, and medium crowding pressure is a dissolved-material law.
+        coefficients.passive = super::passive(profile, gradient, 0., mobility, field.drift);
         coefficients.position = [cell.x, cell.y];
     }
-    fn advance_cell(coefficients: &Coefficients, cell: &mut Cell, c: &Config) {
+    fn intend(coefficients: &Coefficients, cell: &mut Cell, c: &Config) -> [f64; 2] {
         let cost = super::motor_work_rate(
             &cell.body,
             cell.damage,
@@ -178,11 +186,10 @@ impl Motion {
             .rem_euclid(std::f64::consts::TAU);
         let swimming = speed * cell.action.swim * fraction;
         let (sin, cos) = cell.heading.sin_cos();
-        let dx = (swimming * cos + coefficients.passive[0]) * c.dt;
-        let dy = (swimming * sin + coefficients.passive[1]) * c.dt;
-        cell.x = (cell.x + dx).rem_euclid(c.width);
-        cell.y = (cell.y + dy).rem_euclid(c.height);
-        cell.flows.distance += dx.hypot(dy);
+        [
+            (swimming * cos + coefficients.passive[0]) * c.dt,
+            (swimming * sin + coefficients.passive[1]) * c.dt,
+        ]
     }
     pub fn contacts(
         &mut self,
@@ -206,4 +213,11 @@ impl Motion {
         cell.x = (cell.x + row.shift[0] * c.dt).rem_euclid(c.width);
         cell.y = (cell.y + row.shift[1] * c.dt).rem_euclid(c.height);
     }
+}
+
+/// Moves a cell by its blended displacement; the travelled distance is what actually moved.
+pub(crate) fn apply(cell: &mut Cell, d: [f64; 2], c: &Config) {
+    cell.x = (cell.x + d[0]).rem_euclid(c.width);
+    cell.y = (cell.y + d[1]).rem_euclid(c.height);
+    cell.flows.distance += d[0].hypot(d[1]);
 }

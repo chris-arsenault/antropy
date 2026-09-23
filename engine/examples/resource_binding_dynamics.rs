@@ -90,6 +90,7 @@ fn advance(w: &mut World, scratch: &mut Scratch, candidate: bool) {
                 &w.field,
                 &w.chemistry,
                 scratch.gradient(&w.field, &s.footprint),
+                Default::default(),
             )
             .velocity;
         }

@@ -157,5 +157,5 @@ fn restore_preserves_mixtures_and_rejects_unfunded_body_and_old_schema() {
     let mut old = saved;
     old[7] = b'1';
     old[8] = b'9';
-    assert!(World::restore(&old).unwrap_err().contains("v40 required"));
+    assert!(World::restore(&old).unwrap_err().contains("v41 required"));
 }

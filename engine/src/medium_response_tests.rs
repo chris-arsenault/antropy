@@ -50,7 +50,7 @@ fn embodied_pressure_has_no_self_propulsion_at_off_grid_or_periodic_positions() 
 }
 
 #[test]
-fn source_pairs_attract_when_dilute_and_separate_when_crowded() {
+fn source_pairs_respond_without_crowding_and_hold_at_contact() {
     for offset in [0., 12.] {
         for ratio in [0.01, 100.] {
             let c = Config {
@@ -85,7 +85,9 @@ fn source_pairs_attract_when_dilute_and_separate_when_crowded() {
                 .map(|s| source_medium::response(s, 0, &w.config, &w.field, &w.chemistry).velocity)
                 .collect();
             assert!((responses[0][0] + responses[1][0]).abs() < 1e-12);
-            assert_eq!(responses[0][0] > 0., ratio < 1.);
+            // Reservoirs carry no crowding pressure: a deep inventory does not reverse the
+            // chemical response, whose sign comes from the shared profile alone.
+            assert!(responses[0][0] > 0., "ratio={ratio} {responses:?}");
             for _ in 0..300 {
                 source_medium::advance(&mut w);
                 w.tick += 1;
@@ -96,7 +98,8 @@ fn source_pairs_attract_when_dilute_and_separate_when_crowded() {
                 &w.config,
             );
             println!("pair ratio={ratio} offset={offset}: 4 -> {distance}");
-            assert_eq!(distance > 4., ratio > 1.);
+            // Circle exclusion holds the touching pair near contact (radius 2 each).
+            assert!((3.5..=4.5).contains(&distance), "distance={distance}");
             assert_eq!(before, w.held());
         }
     }

@@ -18,6 +18,13 @@ native timing comparison do not establish long-run ecology or human motion accep
 The objective is to remove unnecessary
 modeled states and rules. The structural performance plan below remains separate and unfinished.
 
+## Class-specific material coupling
+
+[Material coupling](MATERIAL-COUPLING-PLAN.md) replaces V39's single attraction/pressure
+balance with explicit per-class coupling: reservoirs gain short-range cohesion, long-range
+like-charge repulsion and exclusion; cells gain compatibility adhesion; dissolved material is
+unchanged. The design is approved; implementation has not started.
+
 ## Browser and server execution
 
 [Browser and headless server execution](EXECUTION-MODES-PLAN.md), Sulion root

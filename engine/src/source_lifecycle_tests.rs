@@ -119,6 +119,7 @@ fn composition_conversion_matches_the_shared_operator_on_actual_material() {
     let operators = crate::weathering::Operators::new(&w.chemistry);
     let response = source_medium::Response {
         velocity: [0.; 2],
+        shift: [0.; 2],
         signal: [0.2, -0.1],
         light: 0.7,
         load: 0.,

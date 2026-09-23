@@ -14,6 +14,16 @@ cohesion-based washout discount. One finite attraction range, local repulsion an
 crowding remain. Bounded mechanism checks pass; human motion review and long-run ecological
 effects remain unverified. The separate structural execution work is recorded below.
 
+<a id="design-material-coupling"></a>
+
+## Next: class-specific material coupling
+
+The v40 server world showed reservoir regions dispersing to a random layout and cells spreading
+toward an even distribution. The [material coupling plan](../plans/MATERIAL-COUPLING-PLAN.md)
+keeps the shared chemical response but couples dissolved material, reservoirs and cells to it
+separately, restoring reservoir cluster tension and adding cell adhesion. It is the current
+simulation work item; micro-terrain and climate follow it.
+
 <a id="design-structural-priority"></a>
 
 ## Regional structural execution

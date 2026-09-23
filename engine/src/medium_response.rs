@@ -2,7 +2,9 @@
 use crate::chemistry::Properties;
 pub const DEFAULT_PRESSURE_STRENGTH: f64 = 0.003;
 
-/// Exact sampled self-load from the same normalized deposition footprint.
+/// Exact sampled self-load from the same normalized deposition footprint. No finite owner
+/// feels crowding pressure since v41; tests keep it as a projection-consistency identity.
+#[cfg(test)]
 pub fn self_load(projected: f64, area: f64, sites: &[(usize, f64)]) -> f64 {
     projected / area * sites.iter().map(|(_, w)| w * w).sum::<f64>()
 }

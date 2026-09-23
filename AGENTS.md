@@ -96,7 +96,7 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v40 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v41 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
@@ -118,9 +118,14 @@ lineage label or reproductive score enters the controller.
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
 washout, evolving source renewal and multiscale public transformations are implemented.
 There is no broad opposing attraction field, attraction gain or cohesion-based loss discount.
+V41 couples each class separately to the shared chemical response: crowding pressure acts
+only on dissolved material; reservoirs add long-range like-charge repulsion and circle
+exclusion (finite clusters, no stored anchors); cells add compatibility-weighted contact
+adhesion that credits no work ([material coupling](docs/plans/MATERIAL-COUPLING-PLAN.md)).
 Each reservoir has one evolving
 composition and a finite amount, with fixed per-site release and delayed accounted refill.
-There is no independent expiry clock, second supply mixture or empty-source motion.
+There is no independent expiry clock or second supply mixture; empty reservoirs carry no
+charge and move only by exclusion.
 Illumination composes several
 slow spatial/temporal axes into shared transformation work; it is not direct energy credited
 to cells. Cells can pay for local optical sensing. See [material habitats](docs/material-habitats.md),

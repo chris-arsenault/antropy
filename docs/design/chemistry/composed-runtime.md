@@ -53,6 +53,10 @@ V40 removes the population ceiling and its configuration. The default world expa
 35 regions and 240 reservoirs now preserve approximately the former landscape density, with
 unchanged local spread, reservoir radius/richness laws, release rates and 48 founders in two colonies.
 The ancestry budget and runtime memory limits remain; no population threshold blocks funded division.
+V41 couples each material class to the shared chemical response separately
+([material coupling plan](../../plans/MATERIAL-COUPLING-PLAN.md)). Dissolved material keeps
+crowding pressure. Reservoirs drop it and gain long-range like-charge repulsion plus circle
+exclusion; cells drop it and gain compatibility-weighted contact adhesion.
 
 ## Meaning and owners
 
@@ -65,7 +69,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns compact occupied f32 geographic rows, f64 intracellular mixtures, twenty bounded funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v40 persists one birth genome identity per cell
+The same worker renders borrowed WASM views. Checkpoint v41 persists one birth genome identity per cell
 and one reservoir composition plus amount; it rejects earlier physical bytes.
 Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
@@ -294,8 +298,9 @@ same-event exports cannot fund imports. Inactive rows do not allocate256-species
 ### Mobile resource reservoirs
 
 Two hundred forty externally renewing reservoirs start around 35 uneven neighborhoods. Independently timed renewals
-continue to import accounted material and reference value. Defaults are sourceDrift4,
-sourceProcessing0.25 and sourceGap2400; sourceProcessing multiplies the common weathering rate.
+continue to import accounted material and reference value. Defaults are sourceDrift1
+(reservoir mobility), reservoirRepulsion20, reservoirRange30, sourceProcessing0.25 and
+sourceGap2400; sourceProcessing multiplies the common weathering rate.
 The world remains open. Environmental transformations now have an explicit external work
 account modulated by the composed local illumination field.
 
@@ -324,9 +329,22 @@ Reservoir inventory projects through the same chemical interaction and impedance
 field material. Its interface area is mesh area divided by the sum of squared footprint weights.
 Exposed material is Q/(1+Q/interfaceArea), bounded by that area. This is a finite interface signal,
 not a transfer of ownership: cells cannot consume held reservoir inventory. The same footprint
-deposits the signal, samples the medium and releases material. Passive velocity uses the common
-body response, including embodied and reservoir signals; an isolated source cannot propel itself.
-Empty sources neither drift nor project mechanical material. Their composition continues
+deposits the signal, samples the medium and releases material. Passive velocity uses the
+shared chemical response (attraction and signed repulsion, including embodied and reservoir
+signals) without crowding pressure; an isolated source cannot propel itself. Empty sources
+carry no charge, neither drift chemically nor project mechanical material, but still exclude.
+
+Reservoir clusters hold a dual tension without stored anchors. Like attraction properties
+cohere at the ℓ range, while like signed-repulsion properties repel locally, so a matched pair
+settles near 11–12 units. Each nonempty reservoir also carries an exposed charge
+`q=Q_b/(1+Q/interfaceArea)`, its inventory's signed-repulsion moment saturated like its
+projection. The force on reservoir i adds `γ·b_i·Σ_j q_j·K_L(r_ij)·r_ij/L²`, a Gaussian of range
+L cut at 3L and summed over a periodic neighbour grid. Like signs push apart and opposite
+signs attract, as with charge. Cohesion grows with near neighbours and repulsion with the whole
+group, so clusters reach a finite size and spacing. This coupling enters before the saturating
+bound. Overlapping reservoir circles separate at the cell contact rate, outside the bound.
+Constructed fixtures with default mixtures find matched pairs holding and 30 randomly placed
+reservoirs settling into 12–13 groups of at most 4–5, independent of initial placement. Their composition continues
 evolving in the local medium, preserving supply history without a second mixture. Renewal uses
 that composition instead of resetting to the initial seed species. Explicit experimental source
 zones or epochs can replace the composition at an empty refill, never overwrite held material.
@@ -334,8 +352,10 @@ No runtime rule privileges chemical 0. Earlier v32-v37 renewal and motion measur
 two mixtures and randomized batches; they do not establish the behavior of this simpler law.
 
 For finite owners, gather the shared features and their centered gradients through the same W.
-Their unbounded response is `a*grad(A)-b*grad(B)-χ*i*Lother*grad(L)` at that footprint scale, with
-a,b,i the inventory or installed-membrane property means. Apply the existing mobility and
+The shared response is `a*grad(A)-b*grad(B)-χ*i*Lother*grad(L)` at that footprint scale, with
+a,b,i the inventory or installed-membrane property means. Since V41 the pressure term applies
+to dissolved material and to the diagnostics below; reservoir and cell motion use only the
+attraction and repulsion terms, with their own exclusion laws. Apply the existing mobility and
 rotation-invariant velocity bound afterward. This pressure vanishes in a uniform medium;
 at low load chemical attraction remains, while at high load the positive impedance channel
 opposes concentration. `Lother=max(0,L-(S/meshArea)*sum(W²))` subtracts the owner's actual
@@ -428,6 +448,15 @@ uses actual motor stock, damage, drag from body extent, viscosity and impedance.
 response uses `drift × mobility × f / (1 + hypot(fx,fy))`, shared with reservoirs.
 Local circle penetration supplies scalar crowding and center-line soft separation;
 neither movement nor contact resolution credits usable work.
+
+Contact adhesion blends each cell's intended displacement (paid swimming plus passive
+response) with those of cells it overlaps, before the displacement is applied. Four Jacobi
+passes replace d_i by `(d_i+Σ w_ij d_j)/(1+Σ w_ij)` with `w_ij=adhesion·c_ij` and
+`c_ij=clamp(a_i a_j−b_i b_j,0,1)` from installed membrane profiles, the same product rule as
+the shared response. Relative motion inside a compatible group decays while the group can still
+move together; incompatible neighbours slide freely. Each update is a convex combination, so
+no cell moves farther than paid and passive motion allow, and no work is credited. The default
+adhesion is 4. A 20-cell lattice fixture at c=0.35 reduces interior relative motion 50-fold.
 At exact coincidence there is no passive separation direction. Heading never enters contact
 geometry. The circular contact law below defines the reciprocal correction and permeability.
 In v19, requested motor work is `power × (swim² + .25 × turn²) × dt`; paid velocity scales

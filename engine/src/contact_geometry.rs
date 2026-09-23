@@ -5,6 +5,12 @@ pub(crate) mod prepared;
 #[path = "contact_search.rs"]
 mod search;
 
+/// Soft separation speed per unit penetration for each of two overlapping circles:
+/// together they remove the fraction 1 - e^-dt of the overlap in one step.
+pub fn separation_rate(dt: f64) -> f64 {
+    0.5 * (1. - (-dt).exp()) / dt
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Body {
     pub position: [f64; 2],

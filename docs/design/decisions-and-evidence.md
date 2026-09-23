@@ -97,6 +97,29 @@ attraction, crowded separation, chemical sensitivity and cellular influence. The
 establish that the earlier diffuse-world failure is resolved. Coalescence and faster loss of
 dense deposits remain possible outcomes for human review; no compensating tuning was applied.
 
+### Class-specific material coupling
+
+September 23, 2026 evidence from the continuing v40 server world (seed27): reservoir mean
+nearest-neighbour distance rose 13.9 → 16.6 → 19.8 → 20.2 units at ticks 98k/217k/412k/725k,
+against about 20.1 for a random layout; Morisita on 40-unit quadrats fell 2.76 → 1.35. Every
+reservoir moved each interval (median 9–16 units), with mean cosine +0.23 to +0.31 toward
+moving away from nearby reservoirs and −0.16 to −0.29 relative to nearby cells. Reservoirs
+were pushed apart by crowding pressure from neighbours' released material and cell bodies,
+amplified by `sourceDrift = 4` against 0.25 for cells, once V39 removed the attraction gain.
+Cell structure dissolved in parallel: dense-core share fell from 19% to zero and empty
+32-unit quadrats approached the random expectation. Median actual swim speed (0.42 units/s)
+exceeds the 0.25 passive attraction cap, and nothing holds contacting cells together.
+
+Direction selected with the user: keep one chemical feature field and gradient response, but
+couple each class to it explicitly. Dissolved material keeps crowding pressure. Reservoirs
+lose it and gain the dual tension the regional design intended: short-range cohesion through
+attraction, longer-range pairwise repulsion between like signed-repulsion charges, and circle
+exclusion, giving finite cluster size and spacing without stored anchors. Cells lose medium
+crowding and gain compatibility-weighted contact adhesion so interior cells of a compatible
+group can become immobile. Rejected: retuning χ alone (patch across all classes), reservoir
+anchors (persistent initial-condition attributes), and orbital/inertial motion. Execution is in
+the [material coupling plan](../plans/MATERIAL-COUPLING-PLAN.md).
+
 ## Illumination and observation
 
 V29's additive fast sweep failed the user's visual/design intent: X dominated while Y barely

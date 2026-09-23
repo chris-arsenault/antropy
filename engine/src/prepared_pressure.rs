@@ -22,7 +22,7 @@ impl Pressure {
         self.dt = dt;
         self.rows.resize(contacts.bodies.len(), Row::default());
         self.rows.fill(Row::default());
-        let relaxation = 0.5 * (1. - (-dt).exp()) / dt;
+        let relaxation = super::super::separation_rate(dt);
         for edge in &contacts.edges {
             let weight = edge.weight();
             self.rows[edge.i].weight += weight;

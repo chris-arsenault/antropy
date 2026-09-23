@@ -36,7 +36,12 @@ pub struct Config {
     /// Nominal refill amount divided by release rate; not an independent expiry clock.
     pub source_lifetime: f64,
     pub source_gap: f64,
+    /// Reservoir passive mobility (the reservoir class's own drift scale).
     pub source_drift: f64,
+    /// Long-range like-charge repulsion strength between reservoirs, relative to cohesion.
+    pub reservoir_repulsion: f64,
+    /// Gaussian range of reservoir charge repulsion; the sum is cut at three ranges.
+    pub reservoir_range: f64,
     pub source_processing: f64,
     pub source_species: Vec<usize>,
     pub source_epochs: Option<SourceSchedule>,
@@ -92,6 +97,8 @@ pub struct Config {
     pub daughter_inventory_fraction: f64,
     pub daughter_energy_fraction: f64,
     pub viscosity: f64,
+    /// Contact adhesion: weight per unit membrane compatibility when blending contact motion.
+    pub adhesion: f64,
     pub motor_power_density: f64,
     pub motor_efficiency: f64,
     pub mutation_rate: f64,
@@ -127,7 +134,9 @@ impl Default for Config {
             source_radius: 3.,
             source_lifetime: 600.,
             source_gap: 2400.,
-            source_drift: 4.,
+            source_drift: 1.,
+            reservoir_repulsion: 20.,
+            reservoir_range: 30.,
             source_processing: 0.25,
             source_species: vec![0, 136],
             source_epochs: None,
@@ -183,6 +192,7 @@ impl Default for Config {
             daughter_inventory_fraction: 0.1875,
             daughter_energy_fraction: 0.125,
             viscosity: 0.004,
+            adhesion: 4.,
             motor_power_density: 0.2,
             motor_efficiency: 0.5,
             mutation_rate: 0.0015,
@@ -264,6 +274,7 @@ impl Config {
             || self.physiology_interval > 2.
             || self.mesh < 0.5
             || self.attraction_length > self.width.min(self.height) / 2.
+            || self.reservoir_range <= 0.
             || [
                 self.illumination_fast_period,
                 self.illumination_slow_period,

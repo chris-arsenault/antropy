@@ -100,6 +100,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
 - [Immediate model simplification](design/README.md#design-model-simplification)
+- [Next: class-specific material coupling](design/README.md#design-material-coupling)
 - [Unfinished structural execution](design/README.md#design-structural-priority)
 - [Installed runtime](design/README.md#design-installed-runtime)
 - [Design owners](design/README.md#design-design-owners)

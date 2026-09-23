@@ -3,6 +3,7 @@ use crate::{
     chemistry::{Chemistry, SPECIES},
     config::Config,
     field::Field,
+    reservoir_coupling::Coupling,
     sources::Source,
     world::World,
 };
@@ -11,6 +12,8 @@ use serde::Serialize;
 #[derive(Clone, Copy, Debug, Serialize)]
 pub struct Response {
     pub velocity: [f64; 2],
+    /// Circle separation from overlapping reservoirs, applied unbounded like cell contact.
+    pub shift: [f64; 2],
     pub signal: [f64; 2],
     pub light: f64,
     pub load: f64,
@@ -106,34 +109,44 @@ fn project_current(w: &mut World) {
     w.field.project_sources(current);
 }
 
+/// Single-reservoir response without reservoir-to-reservoir coupling (isolated probes).
 pub fn response(s: &Source, _tick: u64, c: &Config, field: &Field, chem: &Chemistry) -> Response {
-    response_with_gradient(s, c, field, chem, field.gradient(&s.footprint))
+    coupled_response(s, c, field, chem, Coupling::default())
+}
+
+pub fn coupled_response(
+    s: &Source,
+    c: &Config,
+    field: &Field,
+    chem: &Chemistry,
+    coupling: Coupling,
+) -> Response {
+    response_with_gradient(s, c, field, chem, field.gradient(&s.footprint), coupling)
 }
 
 /// Pure response evaluation also supports controlled gradient probes without mutating carriers.
+/// Reservoirs couple to the shared chemical features through attraction and repulsion only;
+/// crowding pressure is a dissolved-material law and is not applied to reservoirs.
 pub fn response_with_gradient(
     s: &Source,
     c: &Config,
     field: &Field,
     chem: &Chemistry,
     gradient: [[f64; 3]; 2],
+    coupling: Coupling,
 ) -> Response {
     let sites = &s.footprint;
     let p = profile(s, chem);
     let load = field.medium_load(sites).max(0.);
-    let total = s.amount;
-    let projected = total * p[2] / (1. + total / s.interface);
-    let self_load = crate::medium_response::self_load(projected, field.spacing.powi(2), sites);
-    let other_load = (field.pressure_load(sites) - self_load).max(0.);
+    let chemical = crate::medium_response::force(p, gradient, 0.);
     Response {
         light: field.illumination.sample(sites),
-        velocity: crate::movement::passive(
-            p,
-            gradient,
-            c.pressure_strength * other_load,
+        velocity: crate::movement::bounded(
+            [0, 1].map(|k| chemical[k] + coupling.force[k]),
             crate::field::mobility(load, c.movement_impedance),
             c.source_drift,
         ),
+        shift: coupling.shift,
         signal: crate::weathering::signal(std::array::from_fn(|k| {
             sites
                 .iter()
@@ -159,11 +172,17 @@ pub fn advance_scheduled(w: &mut World, release: bool) {
     let (field, config, chemistry) = (&w.field, &w.config, &w.chemistry);
     let operators = w.climate.operators.as_ref().unwrap();
     let tick = w.tick;
+    let couplings = crate::reservoir_coupling::prepare(&w.sources, config, chemistry);
     let mut outcomes = vec![crate::sources::Outcome::default(); w.sources.len()];
-    let mut jobs: Vec<_> = w.sources.iter_mut().zip(outcomes.iter_mut()).collect();
+    let mut jobs: Vec<_> = w
+        .sources
+        .iter_mut()
+        .zip(outcomes.iter_mut())
+        .zip(&couplings)
+        .collect();
     let cost = crate::parallel::cost::RESERVOIR;
-    crate::parallel::for_each(&mut jobs, cost, |_, (source, outcome)| {
-        let r = response(source, tick, config, field, chemistry);
+    crate::parallel::for_each(&mut jobs, cost, |_, ((source, outcome), coupling)| {
+        let r = coupled_response(source, config, field, chemistry, **coupling);
         let exposure = crate::weathering::exposure(
             1.,
             r.load,
@@ -206,8 +225,9 @@ pub fn advance_scheduled(w: &mut World, release: bool) {
 
 /// Current release composition; chemical processing occurs in inventory, not during release.
 pub fn observe(w: &World) -> serde_json::Value {
-    let rows: Vec<_> = w.sources.iter().map(|s| {
-        let r = response(s, w.tick, &w.config, &w.field, &w.chemistry);
+    let couplings = crate::reservoir_coupling::prepare(&w.sources, &w.config, &w.chemistry);
+    let rows: Vec<_> = w.sources.iter().zip(couplings).map(|(s, coupling)| {
+        let r = coupled_response(s, &w.config, &w.field, &w.chemistry, coupling);
         let rate = s.rate.min(s.amount / w.config.dt);
         let output: Vec<_> = (0..SPECIES).filter(|&id| s.mixture[id] > 0. && rate > 0.)
             .map(|id| (id, rate * s.mixture[id])).collect();

@@ -14,19 +14,36 @@ impl World {
         self.contact_cache
             .motion
             .prepare_all(&self.cells, &self.config, &self.field, sites);
-        let pressure = self.contact_cache.local.pressure_at(self.config.dt);
+        let dt = self.config.dt;
+        self.contact_cache.local.pressure_at(dt);
+        let local = &self.contact_cache.local;
+        let pressure = &local.pressure.rows;
         let motion = &self.contact_cache.motion;
         let genomes = &self.genomes;
         let config = &self.config;
+        let mut displacements = vec![[0.; 2]; self.cells.len()];
+        let mut jobs: Vec<_> = self.cells.iter_mut().zip(&mut displacements).collect();
         let cost = crate::parallel::cost::CELL_STEP;
-        crate::parallel::for_each(&mut self.cells, cost, |i, cell| {
+        crate::parallel::for_each(&mut jobs, cost, |i, (cell, d)| {
             cell.flows = Default::default();
             cell.contacts = pressure[i].contacts();
             let g = genomes[&cell.genome].compiled.as_ref().unwrap();
             control(cell, g, config);
-            motion.advance_prepared(i, cell, config);
-            cell.x = (cell.x + pressure[i].shift[0] * config.dt).rem_euclid(config.width);
-            cell.y = (cell.y + pressure[i].shift[1] * config.dt).rem_euclid(config.height);
+            **d = motion.displacement(i, cell, config);
+        });
+        drop(jobs);
+        crate::adhesion::blend(
+            &mut displacements,
+            &self.cells,
+            &local.contacts,
+            config.adhesion,
+        );
+        let mut jobs: Vec<_> = self.cells.iter_mut().zip(&displacements).collect();
+        let cost = crate::parallel::cost::CELL_READ;
+        crate::parallel::for_each(&mut jobs, cost, |i, (cell, d)| {
+            crate::movement::prepared::apply(cell, **d, config);
+            cell.x = (cell.x + pressure[i].shift[0] * dt).rem_euclid(config.width);
+            cell.y = (cell.y + pressure[i].shift[1] * dt).rem_euclid(config.height);
         });
         self.contact_cache.motion.contact_preparations += self.cells.len() as u64;
         if !physiology {

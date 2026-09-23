@@ -53,7 +53,14 @@ pub fn passive(
     mobility: f64,
     drift: f64,
 ) -> [f64; 2] {
-    let force = crate::medium_response::force(profile, gradient, load);
+    bounded(
+        crate::medium_response::force(profile, gradient, load),
+        mobility,
+        drift,
+    )
+}
+/// Saturating passive response shared by every class: speed stays below drift × mobility.
+pub fn bounded(force: [f64; 2], mobility: f64, drift: f64) -> [f64; 2] {
     let bound = drift * mobility / (1. + force[0].hypot(force[1]));
     force.map(|f| bound * f)
 }
@@ -78,7 +85,9 @@ pub fn advance_prepared(
     sites: &[crate::footprint::Row],
     cache: &mut geometry::Cache,
 ) {
-    cache.motion.advance(cells, c, field, sites);
+    cache
+        .motion
+        .advance(cells, c, field, sites, &cache.local.contacts);
     cache.motion.contacts(cells, c, &mut cache.local);
 }
 pub struct Spatial {

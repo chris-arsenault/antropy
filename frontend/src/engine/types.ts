@@ -21,6 +21,9 @@ export interface EngineConfig extends Record<string, unknown> {
   sourceLifetime: number;
   sourceGap: number;
   sourceDrift: number;
+  reservoirRepulsion: number;
+  reservoirRange: number;
+  adhesion: number;
   attractionLength: number;
   sourceProcessing: number;
   sourceRadius: number;

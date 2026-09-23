@@ -86,15 +86,7 @@ pub(super) fn motion_rate(
     };
     let radius = cell.radius(c).max(0.01);
     let profile = cell.operators.as_ref().unwrap().profile;
-    let self_load =
-        crate::medium_response::self_load(cell.mass() * profile[2], field.spacing.powi(2), row);
-    let passive = crate::movement::passive(
-        profile,
-        field.gradient(row),
-        c.pressure_strength * (field.pressure_load(row) - self_load).max(0.),
-        mobility,
-        field.drift,
-    );
+    let passive = crate::movement::passive(profile, field.gradient(row), 0., mobility, field.drift);
     let turning = cell.action.turn * speed * fraction / (2. * radius);
     let heading = cell.heading + turning * c.dt;
     let swimming = speed * cell.action.swim * fraction;

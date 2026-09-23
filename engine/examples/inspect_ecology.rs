@@ -122,6 +122,7 @@ fn cells(w: &World) -> (Vec<Value>, Value) {
             "body":c.body,"target":g.body,"energyFraction":c.energy/c.energy_capacity(&w.config),
             "damage":c.damage,"inventory":c.inventory.material(),"primary":route,
             "installed":c.chemistry(),"light":w.field.illumination.sample(&sites),
+            "membrane":c.operators.as_ref().map(|o| o.profile),
             "action":actions(c.action),"optical":optical_response(w,&observed),"diet":diet(c),
             "organization":cellular::inspect(w,&observed,&graph,index,&bodies),
             "lastStepFlows":c.flows,"chemicalFlows":c.chemical_flows})
