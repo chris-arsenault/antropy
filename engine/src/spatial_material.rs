@@ -153,7 +153,7 @@ impl TryFrom<Stored> for Material {
         }
         let mut m = Self::new(s.count);
         let mut seen = std::collections::HashSet::new();
-        for (&n, row) in s.nodes.iter().zip(s.values.chunks_exact(WIDTH)) {
+        for (&n, row) in s.nodes.iter().zip(s.values.as_chunks::<WIDTH>().0) {
             if n >= s.count || !seen.insert(n) {
                 return Err("Invalid sparse material owner".into());
             }
