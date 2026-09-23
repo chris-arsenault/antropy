@@ -134,6 +134,7 @@ no VPN client. Each layer is scoped:
 | ALB listener rules 250–251 | this repo, `alb-api-truenas` | Host `server.biotropy.ahara.io`; only `GET /stream` and `GET`/`HEAD /health` forward. Every other path, including `/api`, the bundled UI and `/execution.json`, gets the listener's default 404 |
 | nginx upstream | `ahara-infra` `reverse_proxy_routes` (`auth = "internal"`) | That hostname only, to `192.168.66.3:8095`, with WebSocket upgrade and unbuffered streaming |
 | Tunnel ingress | `ahara-vpn` `tunnel_service_ports` | TCP 8095 from AWS private subnets; no other new port |
+| Home gateway | `ahara-vpn` `aws-proxy-to-truenas-http` flow | TCP 8095 from the AWS proxy subnets to TrueNAS only, Suricata-inspected like the other proxied services |
 | Application | `biotropy-server` | WebSocket `Origin` must be same-origin or `https://biotropy.ahara.io`; spectators are read-only; operator controls need the token message; 32 concurrent viewers |
 
 The operator HTTP API stays LAN-only because no public rule forwards `/api`. The public static
