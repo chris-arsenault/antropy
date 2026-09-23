@@ -4,14 +4,22 @@ mod display;
 mod management;
 #[cfg(not(target_arch = "wasm32"))]
 mod management_owner;
+#[cfg(not(target_arch = "wasm32"))]
+mod management_store;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod management_tests;
 #[cfg(not(target_arch = "wasm32"))]
 mod observations;
 #[cfg(not(target_arch = "wasm32"))]
+mod persistence;
+#[cfg(not(target_arch = "wasm32"))]
 mod runtime;
 #[cfg(not(target_arch = "wasm32"))]
 mod socket;
+#[cfg(not(target_arch = "wasm32"))]
+mod store;
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod store_tests;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests;
 
@@ -36,7 +44,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("BIOTROPY_THREADS must be 1..32".into());
     }
     let config = serde_json::from_str(&read("BIOTROPY_CONFIG", "{}"))?;
-    let host = runtime::start(read("BIOTROPY_SEED", "27").parse()?, config, threads)?;
+    let persistence = match std::env::var("BIOTROPY_STATE_DIR")
+        .ok()
+        .filter(|s| !s.is_empty())
+    {
+        Some(dir) => {
+            let budget: u64 = read("BIOTROPY_STATE_BYTES", "4294967296").parse()?;
+            let seconds: u64 = read("BIOTROPY_AUTOSAVE_SECONDS", "1800").parse()?;
+            let store = store::Store::open(dir, budget).map_err(|e| format!("{e:?}"))?;
+            Some(persistence::Persistence {
+                store: std::sync::Arc::new(store),
+                interval: (seconds > 0).then(|| std::time::Duration::from_secs(seconds)),
+            })
+        }
+        None => None,
+    };
+    let host = runtime::start(
+        read("BIOTROPY_SEED", "27").parse()?,
+        config,
+        threads,
+        persistence,
+    )?;
+    tokio::spawn(shutdown(host.clone()));
     let token = std::env::var("BIOTROPY_OPERATOR_TOKEN")
         .ok()
         .filter(|s| !s.is_empty());
@@ -79,10 +108,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     eprintln!(
         "Biotropy listening on {address}; {threads} compute threads; public routing is external configuration"
     );
-    axum::serve(listener, app)
-        .with_graceful_shutdown(async {
-            let _ = tokio::signal::ctrl_c().await;
-        })
-        .await?;
+    axum::serve(listener, app).await?;
     Ok(())
+}
+
+/// SIGTERM (container stop) or Ctrl-C saves the current world when storage is configured,
+/// then exits without waiting for long-lived spectator sockets.
+#[cfg(not(target_arch = "wasm32"))]
+async fn shutdown(host: runtime::Host) {
+    use tokio::signal::unix::{SignalKind, signal};
+    let Ok(mut terminate) = signal(SignalKind::terminate()) else {
+        return;
+    };
+    tokio::select! {
+        _ = terminate.recv() => {}
+        _ = tokio::signal::ctrl_c() => {}
+    }
+    if host.persistence.is_some() {
+        match host.save(None, store::Reason::Automatic, true).await {
+            Ok(meta) => eprintln!("Saved {} before shutdown", meta.id),
+            Err(e) => eprintln!("Shutdown save failed: {e:?}"),
+        }
+    }
+    std::process::exit(0);
 }

@@ -12,13 +12,22 @@ services:
     pids_limit: 256
     ports:
       - "8095:8095"
+    # The server saves the world here on stop, every 30 minutes and on operator request,
+    # and resumes the newest same-format checkpoint at launch.
+    volumes:
+      - biotropy-state:/data
+    # Capture plus fast gzip of a ~160 MB checkpoint needs longer than Docker's 10 s default.
+    stop_grace_period: 120s
     environment:
+      BIOTROPY_STATE_DIR: "/data"
+      BIOTROPY_STATE_BYTES: "4294967296"
+      BIOTROPY_AUTOSAVE_SECONDS: "1800"
       BIOTROPY_THREADS: "16"
       BIOTROPY_BIND: "0.0.0.0:8095"
       BIOTROPY_SEED: "27"
       BIOTROPY_OPERATOR_TOKEN: "${BIOTROPY_OPERATOR_TOKEN:-}"
-      # No public ingress or VPN route is enabled by this stack.
-      BIOTROPY_ORIGINS: "${BIOTROPY_ORIGINS:-}"
+      # Public spectators reach /stream through server.biotropy.ahara.io from the static site.
+      BIOTROPY_ORIGINS: "https://biotropy.ahara.io"
     read_only: true
     security_opt:
       - no-new-privileges:true
@@ -35,3 +44,6 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+
+volumes:
+  biotropy-state:

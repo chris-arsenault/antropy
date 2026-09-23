@@ -10,9 +10,15 @@ use serde_json::{Value, json};
 use std::sync::Arc;
 use tower::ServiceExt;
 
-const TOKEN: &str = "test-operator-credential-32-characters";
+pub const TOKEN: &str = "test-operator-credential-32-characters";
 
 async fn fixture(token: Option<&str>) -> (Router, runtime::Host) {
+    stored_fixture(token, None).await
+}
+pub async fn stored_fixture(
+    token: Option<&str>,
+    persistence: Option<super::persistence::Persistence>,
+) -> (Router, runtime::Host) {
     let config = Config {
         width: 24.,
         height: 24.,
@@ -20,7 +26,7 @@ async fn fixture(token: Option<&str>) -> (Router, runtime::Host) {
         source_count: 2,
         ..Default::default()
     };
-    let host = runtime::start(27, config, 1).unwrap();
+    let host = runtime::start(27, config, 1, persistence).unwrap();
     host.command(1, "running", json!({"value":false}))
         .await
         .unwrap();
@@ -55,7 +61,7 @@ async fn request(app: &Router, path: &str, body: Option<Value>, token: Option<&s
         .await
         .unwrap()
 }
-async fn json_body(response: Response) -> Value {
+pub async fn json_body(response: Response) -> Value {
     serde_json::from_slice(&to_bytes(response.into_body(), 1024 * 1024).await.unwrap()).unwrap()
 }
 async fn control(app: &Router, generation: u64, op: &str, payload: Value) -> Response {

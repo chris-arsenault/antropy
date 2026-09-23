@@ -1,7 +1,10 @@
 # Browser and headless server execution modes
 
 September 21, 2026. **Implementation and private TrueNAS/Komodo deployment authorized.**
-Public VPN routing and the public site's server default remain disabled until requested.
+September 23: the user requested the public spectator route and volume-backed server
+persistence. [Execution modes](../execution-modes.md#public-route) and
+[server persistence](../execution-modes.md#server-persistence) record the implementation; the
+earlier exclusions of public routing and server saves below are superseded.
 Sulion root: `14e9bf4a-fc5f-4c8c-ba92-6dd961848f57`.
 
 ## Scope correction

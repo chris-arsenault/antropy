@@ -1,7 +1,7 @@
 //! Authenticated HTTP management, independent of display subscriptions.
 use super::{
     management_owner::{Control, Error, Operation, Reply},
-    socket,
+    management_store, socket,
 };
 use axum::{
     Json, Router,
@@ -10,7 +10,7 @@ use axum::{
     http::{StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::{get, post},
+    routing::{delete, get, post},
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -31,6 +31,12 @@ pub fn routes(state: socket::State) -> Router<socket::State> {
         .route("/status", get(status))
         .route("/control", post(control))
         .route("/checkpoint", get(checkpoint))
+        .route(
+            "/checkpoints",
+            get(management_store::list).post(management_store::save),
+        )
+        .route("/checkpoints/{id}", delete(management_store::delete))
+        .route("/checkpoints/{id}/load", post(management_store::load))
         .fallback(|| async { StatusCode::NOT_FOUND })
         .layer(DefaultBodyLimit::max(16 * 1024))
         .layer(middleware::from_fn_with_state(state, authorize))
@@ -93,6 +99,7 @@ async fn checkpoint(
 fn response(reply: Reply) -> Result<Response, Error> {
     match reply {
         Reply::Json(value) => Ok(Json(value).into_response()),
+        Reply::Captured { .. } => Err(Error::Unavailable),
         Reply::Checkpoint {
             bytes,
             generation,
@@ -149,6 +156,12 @@ impl IntoResponse for Error {
                 "Command timed out; outcome unknown. Inspect status before retrying".into(),
             ),
             Self::Export(message) => (StatusCode::INSUFFICIENT_STORAGE, message),
+            Self::NotFound => (StatusCode::NOT_FOUND, "Stored checkpoint not found".into()),
+            Self::Storage(message) => (StatusCode::INTERNAL_SERVER_ERROR, message),
+            Self::Disabled => (
+                StatusCode::NOT_IMPLEMENTED,
+                "Checkpoint storage is not configured (BIOTROPY_STATE_DIR)".into(),
+            ),
         };
         (status, Json(json!({"error":message}))).into_response()
     }

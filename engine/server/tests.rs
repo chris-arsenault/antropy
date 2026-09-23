@@ -86,7 +86,7 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
     use futures_util::{SinkExt, StreamExt};
     use std::{sync::Arc, time::Duration};
     use tokio_tungstenite::{connect_async, tungstenite::Message};
-    let host = super::runtime::start(27, fixture().world.config, 1).unwrap();
+    let host = super::runtime::start(27, fixture().world.config, 1, None).unwrap();
     host.command(1, "speed", json!({"value":30})).await.unwrap();
     let state = super::socket::State {
         host: host.clone(),

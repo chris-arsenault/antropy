@@ -1,6 +1,8 @@
 use super::{
     display::{ViewKey, encode},
     observations::Observations,
+    persistence::Persistence,
+    store::{Capture, Reason},
 };
 use antropy_engine::{commands, config::Config, render::Buffers, world::World};
 use axum::body::Bytes;
@@ -57,6 +59,9 @@ impl Request {
 pub struct Host {
     pub commands: mpsc::Sender<Request>,
     pub exports: Arc<Semaphore>,
+    /// One stored save (automatic, operator or shutdown) compresses and writes at a time.
+    pub saves: Arc<Semaphore>,
+    pub persistence: Option<Persistence>,
     pub publications: watch::Receiver<Arc<Publication>>,
     pub views: Arc<Mutex<BTreeMap<u64, ViewKey>>>,
 }
@@ -96,7 +101,10 @@ pub struct Runtime {
 }
 impl Runtime {
     pub fn new(seed: u64, config: Config, threads: usize) -> Result<Self, String> {
-        let mut world = World::new(seed, config)?;
+        Self::from_world(World::new(seed, config)?, threads)
+    }
+    /// New and restored worlds share one runtime shape; the observer is not checkpointed.
+    pub fn from_world(mut world: World, threads: usize) -> Result<Self, String> {
         commands::execute(
             &mut world,
             &json!({"op":"phenotype","action":"configure",
@@ -140,10 +148,7 @@ impl Runtime {
                 let seed = payload["seed"].as_u64().ok_or("Invalid seed")?;
                 let config =
                     serde_json::from_value(payload["config"].clone()).map_err(|e| e.to_string())?;
-                let mut next = Self::new(seed, config, self.threads)?;
-                next.generation = self.generation + 1;
-                next.sequence = self.sequence;
-                *self = next;
+                self.replace(World::new(seed, config)?)?;
             }
             "phenotype" => return self.phenotype(payload),
             "task" => {
@@ -154,6 +159,27 @@ impl Runtime {
             _ => return Err("Operation is not available on the server".into()),
         }
         Ok(Value::Null)
+    }
+    /// Replaces the world as restart does, keeping publication order and thread count.
+    pub fn replace(&mut self, world: World) -> Result<(), String> {
+        let mut next = Self::from_world(world, self.threads)?;
+        next.generation = self.generation + 1;
+        next.sequence = self.sequence;
+        *self = next;
+        Ok(())
+    }
+    pub fn capture(&self, reason: Reason) -> Result<Capture, String> {
+        Ok(Capture {
+            raw: super::management_owner::checkpoint(
+                &self.world,
+                super::management_owner::MAX_CHECKPOINT_BYTES,
+            )?,
+            reason,
+            seed: self.world.seed,
+            tick: self.world.tick,
+            generation: self.generation,
+            population: self.world.cells.len(),
+        })
     }
     fn phenotype(&mut self, mut p: Value) -> Result<Value, String> {
         match p["action"].as_str() {
@@ -245,12 +271,23 @@ impl Runtime {
         })
     }
 }
-pub fn start(seed: u64, config: Config, threads: usize) -> Result<Host, String> {
+pub fn start(
+    seed: u64,
+    config: Config,
+    threads: usize,
+    persistence: Option<Persistence>,
+) -> Result<Host, String> {
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(threads)
         .build()
         .map_err(|e| e.to_string())?;
-    let mut runtime = pool.install(|| Runtime::new(seed, config, threads))?;
+    let mut runtime =
+        pool.install(|| super::persistence::initial(persistence.as_ref(), seed, config, threads))?;
+    let saves = Arc::new(Semaphore::new(1));
+    let owner_saves = saves.clone();
+    let mut autosave = persistence
+        .clone()
+        .map(|p| super::persistence::Autosave::new(p, &runtime));
     let initial = runtime.publish(vec![], 0.)?;
     let (sender, publications) = watch::channel(Arc::new(initial));
     let (commands, mut receiver) = mpsc::channel::<Request>(32);
@@ -272,6 +309,7 @@ pub fn start(seed: u64, config: Config, threads: usize) -> Result<Host, String> 
                 if runtime.world.stop_reason.is_some() { runtime.running = false; }
                 next_step = runtime.speed.map_or(now, |s| now + Duration::from_secs_f64(1. / s));
             } else { std::thread::sleep(Duration::from_millis(2)); }
+            if let Some(a) = autosave.as_mut() { a.poll(&runtime, &owner_saves); }
             if published.elapsed() >= PUBLICATION_PERIOD {
                 let sample_at = Instant::now();
                 let keys = demand.lock().unwrap().values().copied().collect::<Vec<_>>();
@@ -295,6 +333,8 @@ pub fn start(seed: u64, config: Config, threads: usize) -> Result<Host, String> 
     Ok(Host {
         commands,
         exports: Arc::new(Semaphore::new(1)),
+        saves,
+        persistence,
         publications,
         views,
     })

@@ -1,5 +1,8 @@
 //! HTTP work joins the same bounded queue and tick boundary as socket commands.
-use super::runtime::{Host, Runtime};
+use super::{
+    runtime::{Host, Runtime},
+    store::{Capture, Reason},
+};
 use antropy_engine::world::{VERSION, World};
 use axum::body::Bytes;
 use serde::Deserialize;
@@ -24,9 +27,24 @@ pub enum Operation {
         generation: u64,
         permit: OwnedSemaphorePermit,
     },
+    /// Capture for the volume store; `None` skips the generation check (shutdown).
+    Save {
+        generation: Option<u64>,
+        reason: Reason,
+        permit: OwnedSemaphorePermit,
+    },
+    /// Replace the world with stored, already decompressed checkpoint bytes.
+    Load {
+        generation: u64,
+        raw: Vec<u8>,
+    },
 }
 pub enum Reply {
     Json(Value),
+    Captured {
+        capture: Capture,
+        permit: OwnedSemaphorePermit,
+    },
     Checkpoint {
         bytes: Bytes,
         generation: u64,
@@ -42,6 +60,9 @@ pub enum Error {
     Unavailable,
     Timeout,
     Export(String),
+    NotFound,
+    Storage(String),
+    Disabled,
 }
 pub struct Request {
     operation: Operation,
@@ -78,7 +99,10 @@ fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
     let generation = match &operation {
         Operation::Status => return Ok(Reply::Json(status(r))),
         Operation::Control(c) => c.generation,
-        Operation::Checkpoint { generation, .. } => *generation,
+        Operation::Checkpoint { generation, .. } | Operation::Load { generation, .. } => {
+            *generation
+        }
+        Operation::Save { generation, .. } => generation.unwrap_or(r.generation),
     };
     if generation != r.generation {
         return Err(Error::Conflict);
@@ -102,6 +126,15 @@ fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
             tick: r.world.tick,
             permit,
         }),
+        Operation::Save { reason, permit, .. } => Ok(Reply::Captured {
+            capture: r.capture(reason).map_err(Error::Export)?,
+            permit,
+        }),
+        Operation::Load { raw, .. } => {
+            let world = World::restore(&raw).map_err(Error::Invalid)?;
+            r.replace(world).map_err(Error::Invalid)?;
+            Ok(Reply::Json(json!({"status":status(r)})))
+        }
         Operation::Status => unreachable!(),
     }
 }

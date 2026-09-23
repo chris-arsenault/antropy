@@ -23,8 +23,9 @@ private UI opens directly onto the continuing world.
 
 `engine/server/` implements `biotropy-server` in the existing Rust crate. One owner thread
 coordinates World and a persistent Rayon pool. Two Tokio I/O workers handle HTTP and sockets.
-Requests apply between complete physical ticks. Closing a client does not pause World. A native
-process restart creates a fresh seed; this feature adds no server save infrastructure.
+Requests apply between complete physical ticks. Closing a client does not pause World. With
+`BIOTROPY_STATE_DIR` set, the server keeps its world across restarts; without it, a restart
+creates a fresh seed.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
@@ -35,6 +36,31 @@ process restart creates a fresh seed; this feature adds no server save infrastru
 | `BIOTROPY_STATIC_DIR` | `/app/public` | Built version of the same frontend |
 | `BIOTROPY_ORIGINS` | empty | Comma-separated additional browser origins; same-origin is accepted |
 | `BIOTROPY_OPERATOR_TOKEN` | unset | Operator credential; unset disables owner authentication |
+| `BIOTROPY_STATE_DIR` | unset | Checkpoint directory; unset disables server persistence |
+| `BIOTROPY_STATE_BYTES` | `4294967296` | Compressed byte budget for automatic checkpoints |
+| `BIOTROPY_AUTOSAVE_SECONDS` | `1800` | Automatic save period; `0` keeps only shutdown and operator saves |
+
+## Server persistence
+
+The server stores ordinary v40 physical checkpoints, gzip-compressed, with a JSON sidecar
+recording reason, format version, seed, tick, generation, population, creation time and sizes.
+This mirrors browser recovery. It keeps the newest checkpoint, every manual checkpoint (at most
+eight), and the six newest automatic checkpoints within the byte budget. Older automatic ones
+expire. Manual checkpoints leave only by operator deletion; a ninth manual save is refused.
+
+Automatic saves run every `BIOTROPY_AUTOSAVE_SECONDS` while the world changes, and once more on
+SIGTERM or Ctrl-C. The shutdown save waits up to 90 seconds behind an in-progress save, then the
+process exits without draining spectator sockets. The owner thread only serializes the world;
+compression and disk writes run on another thread while ticks continue. One save writes at a
+time. A write goes to a temporary file, is synced and renamed, then its sidecar is written the
+same way. Launch removes temporary files and data without a sidecar.
+
+At launch the server restores the newest checkpoint whose recorded format equals the running
+binary's physical version and that decodes and validates. It logs and skips failures, and
+starts the configured seed when none qualifies. Checkpoints from another format are never
+migrated or deleted at launch; they remain listed as incompatible until expired or deleted.
+The phenotype observer is not part of a checkpoint and is reconfigured as for a new world.
+[Server management](server-management.md) documents the operator save/list/load/delete API.
 
 `/health` returns the current generation, publication sequence, tick/population, throughput,
 viewer count and projection count. It contains no private cellular state. `/stream` is the
@@ -80,7 +106,10 @@ the private host's first socket (CPUs 0–17, NUMA node 0, hyperthread siblings 
 16 compute threads, and sets an 8 GiB memory ceiling, bounded logs and a health check. Pinned
 threads keep world memory on one node. Measured scaling flattens well before 16 workers; see
 the [scaling plan](../SCALING-PLAN.md).
-The same container serves the UI and WebSocket at the private host's port 8095.
+The same container serves the UI and WebSocket at the private host's port 8095. The
+`biotropy-state` named volume at `/data` holds server checkpoints across redeploys; the image
+creates `/data` for the unprivileged user so a new volume inherits writable ownership. A
+120-second stop grace period covers the shutdown save.
 
 Deployment runs exclusively through GitHub Actions on pushes to `main`. The project's workflow
 inherits the managed `OIDC_ROLE` and `STATE_BUCKET` secrets and grants package publishing to
@@ -94,10 +123,29 @@ These are CI permissions; terminal AWS access is neither needed nor an approved 
 There is no local deployment command or manual workflow trigger. Inspect the pipeline result
 and the private service before claiming successful deployment or live 32-core performance.
 
-Public route activation is deliberately excluded from this delivery: no API hostname, ALB
-listener, nginx upstream, VPN rule or public frontend default is enabled. A later authorized
-cutover connects the existing public ingress to the private listener and supplies the public
-frontend's default server endpoint. Visitors will not need VPN clients.
+## Public route
+
+Public spectators reach the server at `server.biotropy.ahara.io` through the shared ALB, the
+`ahara-infra` nginx reverse proxy and the WireGuard tunnel to TrueNAS port 8095. Visitors need
+no VPN client. Each layer is scoped:
+
+| Layer | Owner | Scope |
+| --- | --- | --- |
+| ALB listener rules 250–251 | this repo, `alb-api-truenas` | Host `server.biotropy.ahara.io`; only `GET /stream` and `GET`/`HEAD /health` forward. Every other path, including `/api`, the bundled UI and `/execution.json`, gets the listener's default 404 |
+| nginx upstream | `ahara-infra` `reverse_proxy_routes` (`auth = "internal"`) | That hostname only, to `192.168.66.3:8095`, with WebSocket upgrade and unbuffered streaming |
+| Tunnel ingress | `ahara-vpn` `tunnel_service_ports` | TCP 8095 from AWS private subnets; no other new port |
+| Application | `biotropy-server` | WebSocket `Origin` must be same-origin or `https://biotropy.ahara.io`; spectators are read-only; operator controls need the token message; 32 concurrent viewers |
+
+The operator HTTP API stays LAN-only because no public rule forwards `/api`. The public static
+site publishes `execution.json` with `mode: server` and `wss://server.biotropy.ahara.io/stream`, so
+visitors attach to the shared world by default; `?execution=browser1` or `browser4` still starts a
+local world. The certificate, DNS records and listener rules are created by this repo's
+Terraform. The route entry, the `alb-api-truenas` bundle and the tunnel port must deploy through
+`ahara-infra` and `ahara-vpn` first.
+
+Platform rule 8 in `ahara/INTEGRATION.md` reserves TrueNAS for owner-only workloads. The user
+authorized this public spectator route on 2026-09-23 while intending to revisit the routing
+pattern separately.
 
 The [execution plan](plans/EXECUTION-MODES-PLAN.md) tracks implementation evidence and remaining
 deployment work. The [ownership contract](design/chemistry/data-ownership.md) defines both

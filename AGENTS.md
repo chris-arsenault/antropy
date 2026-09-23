@@ -155,8 +155,12 @@ budgets remain independent operating limits.
 one native server World feeding the same UI through bounded display projections. Local rendering
 still borrows WASM views. Remote packets remain in the renderer worker; physical/private state
 stays native. Multiple spectators share publication work and cannot change physical or run-level
-cohort controls without operator authentication. Private TrueNAS/Komodo deployment is authorized;
-public VPN routing and the hosted server default must remain disabled until explicitly requested.
+cohort controls without operator authentication. Operator API calls run through `with-cred --`,
+which supplies the token as `BIOTROPY_TOKEN` ([server management](docs/server-management.md)).
+Private TrueNAS/Komodo deployment and the public spectator route `server.biotropy.ahara.io`
+(only `/stream` and `/health`; `/api` stays LAN-only) are authorized. The public site defaults
+to the server world. The server keeps same-format checkpoints on its Docker volume, restores the
+newest at launch and never migrates older formats ([execution modes](docs/execution-modes.md)).
 Do not add save migration or a second physical economy to this feature.
 
 Deploy only through the shared GitHub Actions CI/CD pipeline. Push authorized changes to
@@ -311,8 +315,9 @@ expensive ecological panels merely for formatting or documentation changes.
   lines, and functions to 75 lines.
 - Run `make ci` before handoff after changing files. Start a development server only when the user
   explicitly asks.
-- Persistence is client-side through IndexedDB and file export. Do not add a backend, database,
-  ALB, or authentication without an explicit decision.
+- Browser persistence is client-side through IndexedDB and file export. The native server's
+  volume checkpoints and its public route are the only server-side exceptions. Do not add a
+  database, another backend or listener, or new authentication without an explicit decision.
 - Follow the Ahara platform contract: shared Terraform state and the `ahara-tf-patterns` website
   module; no project-specific bucket or load balancer.
 
