@@ -206,24 +206,81 @@ fn storage(w: &World, bytes: usize) -> Result<Value, postcard::Error> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args().skip(1).collect();
+    let motion = args.len() == 4 && args[2] == "--motion";
     if args.len() != 2
+        && !motion
         && !(args.len() == 3
             && matches!(
                 args[2].as_str(),
-                "--ancestry" | "--storage" | "--connections"
+                "--ancestry" | "--storage" | "--connections" | "--light" | "--chemistry"
             ))
     {
         return Err(
-            "Expected checkpoint, new output JSON path and optional --ancestry, --storage or --connections".into(),
+            "Expected checkpoint, new output JSON path and optional --ancestry, --storage, --connections, --light, --chemistry or --motion TICKS".into(),
         );
     }
     let raw = fs::read(&args[0])?;
     let w = World::restore(&raw)?;
     let before = w.snapshot()?;
-    let result = if args.get(2).is_some_and(|arg| arg == "--storage") {
+    let result = if motion {
+        // Steps an independent restored copy; the inspected world itself is never advanced.
+        let ticks: u64 = args[3].parse()?;
+        let mut copy = World::restore(&raw)?;
+        let start: BTreeMap<u64, [f64; 3]> = copy
+            .cells
+            .iter()
+            .map(|c| (c.id, [c.x, c.y, c.radius(&copy.config)]))
+            .collect();
+        for _ in 0..ticks {
+            copy.step();
+        }
+        let cells: Vec<_> = copy
+            .cells
+            .iter()
+            .filter_map(|c| {
+                let s = start.get(&c.id)?;
+                Some(json!({"id":c.id,"radius":s[2],"start":[s[0],s[1]],"end":[c.x,c.y]}))
+            })
+            .collect();
+        json!({"tick":w.tick,"ticks":ticks,"width":w.config.width,"height":w.config.height,
+            "cells":cells})
+    } else if args.get(2).is_some_and(|arg| arg == "--storage") {
         storage(&w, raw.len())?
     } else if args.get(2).is_some_and(|arg| arg == "--connections") {
         connections::inspect(&w)
+    } else if args.get(2).is_some_and(|arg| arg == "--chemistry") {
+        // Every page of the UI's chemical web in each mode, plus the standing overview.
+        let mut copy = World::restore(&raw)?;
+        let mut modes = serde_json::Map::new();
+        for mode in ["supported", "primary", "environment", "measured"] {
+            let mut rows = Vec::new();
+            let mut offset = 0;
+            loop {
+                let page = antropy_engine::commands::execute(
+                    &mut copy,
+                    &json!({"op":"chemicalWeb","mode":mode,"focus":null,"offset":offset}),
+                )?;
+                let got = page["rows"].as_array().cloned().unwrap_or_default();
+                let pairs = page["pairs"].as_u64().unwrap_or(0) as usize;
+                rows.extend(got.iter().cloned());
+                offset += got.len();
+                if got.is_empty() || offset >= pairs {
+                    break;
+                }
+            }
+            modes.insert(mode.into(), json!(rows));
+        }
+        let overview =
+            antropy_engine::commands::execute(&mut copy, &json!({"op":"chemicalOverview"}))?;
+        json!({"tick":w.tick,"modes":modes,"overview":overview,
+            "sources":antropy_engine::chemical_roles::source_species(&w),
+            "seedSpecies":w.config.source_species})
+    } else if args.get(2).is_some_and(|arg| arg == "--light") {
+        // Current illumination at every node, including nodes without material.
+        let light: Vec<f64> = (0..w.field.nx * w.field.ny)
+            .map(|n| w.field.illumination.node(n))
+            .collect();
+        json!({"tick":w.tick,"nx":w.field.nx,"ny":w.field.ny,"spacing":w.field.spacing,"light":light})
     } else if args.len() == 3 {
         json!({"tick":w.tick,"ancestry":w.ancestry})
     } else {
