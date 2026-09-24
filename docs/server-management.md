@@ -28,7 +28,8 @@ with-cred -- python3 -c 'import os, urllib.request; r = urllib.request.Request("
 
 | Method and path | Result |
 | --- | --- |
-| `GET /api/status` | Current generation, tick, seed, effective config, population, running state, speed, thread count and stop reason |
+| `GET /api/status` | Current generation, tick, seed, effective config, population, running state, speed, thread count, stop reason and, with storage, `persistence.lastSave` (the most recent save attempt: reason, tick, `ok`, record or error) |
+| `GET /api/diagnostics` | Restart evidence from the state volume: this boot with the previous process's last heartbeat and any panic record, live memory, current heartbeat and recent boots |
 | `POST /api/control` | Apply a control and return `{status, value}` from the same tick boundary |
 | `GET /api/checkpoint?generation=N` | Download an uncompressed physical checkpoint as `application/octet-stream` |
 | `GET /api/checkpoints` | List stored checkpoints, newest first, with `compatible`, byte use, budget, limits and autosave period |
@@ -71,6 +72,23 @@ checkpoint analysis tooling. It is not a browser recovery envelope and contains 
 history or transient observer caches. There is no HTTP upload endpoint; restore uses checkpoints
 already in the server's store.
 
+## Restart diagnostics
+
+With storage configured, the server keeps `diagnostics/` on the state volume. The World owner
+writes `heartbeat.json` every minute with generation, tick, population, running state, the last
+save outcome, and memory: process resident and peak bytes, plus container usage, limit and
+out-of-memory kill count from cgroup v2 when present. A panic hook writes `panic.json` with the
+message, thread, memory and backtrace before the release build aborts. Each boot appends a record
+to `boots.jsonl` (the last 50 are kept) carrying the previous process's final heartbeat and panic
+record, then clears the panic record.
+
+Read a restart from `/api/diagnostics` without container logs:
+- A panic record means a crash.
+- Memory near the container limit, or a raised out-of-memory kill count, points to a kill.
+- A recent heartbeat with neither indicates an external stop or restart.
+
+A clean stop also saves first, so its newest checkpoint appears in the store.
+
 ## Stored checkpoints
 
 With `BIOTROPY_STATE_DIR` configured, the server keeps compressed checkpoints on its volume,
@@ -99,7 +117,9 @@ Pause first if an exact stopped tick is needed. Response headers `X-Biotropy-Gen
 `X-Biotropy-Tick`, and the download filename, identify the captured state.
 
 Only one export can be queued, encoded or held by HTTP I/O at once. Its serialization buffer is
-capped at 256 MiB; an oversized export fails explicitly. Response bytes share that allocation;
+capped at 2 GiB; an oversized export fails explicitly. The same raw cap bounds stored saves and
+loads. A 12.8k-cell world measured 588 MB raw, about 45 KB per cell, mostly genotypes and cells.
+The earlier 256 MiB cap made every save of that world fail. Response bytes share that allocation;
 there is no World clone, JSON/base64 conversion, server disk write or retained snapshot history.
 The export slot is released when its last buffer reference is dropped, including disconnects.
 

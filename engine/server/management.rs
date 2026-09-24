@@ -31,6 +31,7 @@ pub fn routes(state: socket::State) -> Router<socket::State> {
         .route("/status", get(status))
         .route("/control", post(control))
         .route("/checkpoint", get(checkpoint))
+        .route("/diagnostics", get(diagnostics))
         .route(
             "/checkpoints",
             get(management_store::list).post(management_store::save),
@@ -63,7 +64,26 @@ async fn authorize(State(state): State<socket::State>, request: Request, next: N
     response
 }
 async fn status(State(state): State<socket::State>) -> Result<Response, Error> {
-    response(state.host.manage(Operation::Status).await?)
+    let Reply::Json(mut value) = state.host.manage(Operation::Status).await? else {
+        return Err(Error::Unavailable);
+    };
+    if let Some(p) = &state.host.persistence {
+        value["persistence"] = json!({"lastSave":p.last(),
+            "autosaveSeconds":p.interval.map(|d| d.as_secs())});
+    }
+    Ok(Json(value).into_response())
+}
+/// Boot history with the previous process's last heartbeat and any panic, live memory and
+/// the current heartbeat. Answered off the World owner so it works while stepping stalls.
+async fn diagnostics(State(state): State<socket::State>) -> Result<Response, Error> {
+    let report = state
+        .host
+        .persistence
+        .as_ref()
+        .and_then(|p| p.diagnostics.as_ref())
+        .map(|d| d.report())
+        .ok_or(Error::Disabled)?;
+    Ok(Json(report).into_response())
 }
 async fn control(
     State(state): State<socket::State>,

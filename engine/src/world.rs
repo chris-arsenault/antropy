@@ -374,6 +374,11 @@ impl World {
         if self.genomes.len() <= self.cells.len() * 2 + 64 {
             return;
         }
+        self.compact_genotypes();
+    }
+    /// Drops genotypes no live cell, founder or catalog entry references, unconditionally;
+    /// the amortized prune above applies the same rule once the backlog doubles.
+    pub fn compact_genotypes(&mut self) {
         let mut retained: BTreeSet<_> = self.cells.iter().map(|c| c.genome).collect();
         for e in self.events.iter().filter(|e| e.kind == "catalog") {
             retained.extend(e.values.iter().copied());

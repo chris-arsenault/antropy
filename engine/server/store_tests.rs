@@ -146,29 +146,60 @@ fn launch_restore_skips_other_formats_and_corrupt_data_and_cleans_partials() {
 fn autosave_writes_changed_worlds_only_and_off_the_owner_thread() {
     use super::{persistence::Autosave, runtime::Runtime};
     let dir = Dir::new("autosave");
-    let persistence = Persistence {
-        store: Arc::new(Store::open(&dir.0, u64::MAX).unwrap()),
-        interval: Some(std::time::Duration::ZERO),
-    };
+    let persistence = Persistence::new(
+        Arc::new(Store::open(&dir.0, u64::MAX).unwrap()),
+        Some(std::time::Duration::ZERO),
+    );
     let saves = Arc::new(tokio::sync::Semaphore::new(1));
     let mut runtime = Runtime::from_world(world(), 1).unwrap();
     let mut autosave = Autosave::new(persistence.clone(), &runtime);
-    autosave.poll(&runtime, &saves);
+    autosave.poll(&mut runtime, &saves);
     assert_eq!(
         saves.available_permits(),
         1,
         "an unchanged world is not saved"
     );
+    assert!(persistence.last().is_null());
     runtime.world.step();
-    autosave.poll(&runtime, &saves);
+    autosave.poll(&mut runtime, &saves);
     while saves.available_permits() == 0 {
         std::thread::sleep(std::time::Duration::from_millis(5));
     }
     let listed = persistence.store.list().unwrap();
     assert_eq!(listed.len(), 1);
     assert_eq!((listed[0].reason, listed[0].tick), (Reason::Automatic, 1));
-    autosave.poll(&runtime, &saves);
+    let last = persistence.last();
+    assert_eq!(
+        (last["ok"].clone(), last["tick"].clone()),
+        (json!(true), json!(1))
+    );
+    assert_eq!(last["checkpoint"]["id"], json!(listed[0].id));
+    autosave.poll(&mut runtime, &saves);
     assert_eq!(saves.available_permits(), 1);
+}
+
+#[test]
+fn each_boot_records_the_previous_heartbeat_and_panic() {
+    use super::diagnostics::Diagnostics;
+    let dir = Dir::new("diagnostics");
+    let first = Diagnostics::open(&dir.0).unwrap();
+    assert!(first.report()["boot"]["previousHeartbeat"].is_null());
+    first.heartbeat(json!({"tick":41,"population":7}));
+    // A panic record left by the previous process is reported once, then cleared.
+    std::fs::write(
+        dir.0.join("diagnostics/panic.json"),
+        json!({"message":"boom"}).to_string(),
+    )
+    .unwrap();
+    let second = Diagnostics::open(&dir.0).unwrap();
+    let report = second.report();
+    assert_eq!(report["boot"]["previousHeartbeat"]["progress"]["tick"], 41);
+    assert_eq!(report["boot"]["previousPanic"]["message"], "boom");
+    assert_eq!(report["recentBoots"].as_array().unwrap().len(), 2);
+    assert!(!dir.0.join("diagnostics/panic.json").exists());
+    let third = Diagnostics::open(&dir.0).unwrap();
+    assert!(third.report()["boot"]["previousPanic"].is_null());
+    assert!(report["memory"].is_object());
 }
 
 async fn call(app: &Router, method: &str, path: &str, body: Option<Value>) -> Response {
@@ -187,10 +218,7 @@ async fn call(app: &Router, method: &str, path: &str, body: Option<Value>) -> Re
 #[tokio::test]
 async fn operator_saves_lists_loads_and_deletes_stored_worlds() {
     let dir = Dir::new("http");
-    let persistence = Persistence {
-        store: Arc::new(Store::open(&dir.0, u64::MAX).unwrap()),
-        interval: None,
-    };
+    let persistence = Persistence::new(Arc::new(Store::open(&dir.0, u64::MAX).unwrap()), None);
     let (app, host) = stored_fixture(Some(TOKEN), Some(persistence.clone())).await;
     let saved = call(
         &app,
@@ -202,6 +230,16 @@ async fn operator_saves_lists_loads_and_deletes_stored_worlds() {
     assert_eq!(saved.status(), StatusCode::CREATED);
     let saved = json_body(saved).await;
     assert_eq!(saved["reason"], "manual");
+    let status = json_body(call(&app, "GET", "/api/status", None).await).await;
+    let last = &status["persistence"]["lastSave"];
+    assert_eq!(
+        (last["ok"].clone(), last["reason"].clone()),
+        (json!(true), json!("manual"))
+    );
+    assert_eq!(last["checkpoint"]["id"], saved["id"]);
+    // Diagnostics need the volume boot record, which this fixture does not open.
+    let diagnostics = call(&app, "GET", "/api/diagnostics", None).await;
+    assert_eq!(diagnostics.status(), StatusCode::NOT_IMPLEMENTED);
     let id = saved["id"].as_str().unwrap().to_string();
     host.command(1, "step", json!({})).await.unwrap();
     let listed = json_body(call(&app, "GET", "/api/checkpoints", None).await).await;

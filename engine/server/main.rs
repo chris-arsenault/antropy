@@ -1,4 +1,6 @@
 #[cfg(not(target_arch = "wasm32"))]
+mod diagnostics;
+#[cfg(not(target_arch = "wasm32"))]
 mod display;
 #[cfg(not(target_arch = "wasm32"))]
 mod management;
@@ -51,11 +53,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(dir) => {
             let budget: u64 = read("BIOTROPY_STATE_BYTES", "4294967296").parse()?;
             let seconds: u64 = read("BIOTROPY_AUTOSAVE_SECONDS", "1800").parse()?;
-            let store = store::Store::open(dir, budget).map_err(|e| format!("{e:?}"))?;
-            Some(persistence::Persistence {
-                store: std::sync::Arc::new(store),
-                interval: (seconds > 0).then(|| std::time::Duration::from_secs(seconds)),
-            })
+            let diagnostics = diagnostics::Diagnostics::start(std::path::Path::new(&dir))?;
+            let store = store::Store::open(&dir, budget).map_err(|e| format!("{e:?}"))?;
+            let mut persistence = persistence::Persistence::new(
+                std::sync::Arc::new(store),
+                (seconds > 0).then(|| std::time::Duration::from_secs(seconds)),
+            );
+            persistence.diagnostics = Some(diagnostics);
+            Some(persistence)
         }
         None => None,
     };

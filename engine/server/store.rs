@@ -168,7 +168,7 @@ impl Store {
         }
         Ok(())
     }
-    /// Decompresses one checkpoint within the ordinary 256 MiB physical checkpoint cap.
+    /// Decompresses one checkpoint within the server's raw physical checkpoint cap.
     pub fn read(&self, id: &str) -> Result<(Meta, Vec<u8>), StoreError> {
         let meta = self.find(id)?;
         let mut raw = Vec::new();
@@ -177,7 +177,7 @@ impl Store {
             .read_to_end(&mut raw)?;
         if raw.len() > MAX_CHECKPOINT_BYTES {
             return Err(StoreError::Io(
-                "Stored checkpoint exceeds the 256 MiB cap".into(),
+                "Stored checkpoint exceeds the raw checkpoint cap".into(),
             ));
         }
         Ok((meta, raw))

@@ -10,7 +10,10 @@ use serde_json::{Value, json};
 use std::{io::Write, time::Duration};
 use tokio::sync::{OwnedSemaphorePermit, oneshot};
 
-pub const MAX_CHECKPOINT_BYTES: usize = 256 * 1024 * 1024;
+/// Raw physical checkpoint cap for server saves, loads and exports. Worlds reach about 45 KB
+/// per cell (588 MB at 12.8k cells); 2 GiB fits the 8 GiB container beside a live world.
+/// Browser recovery keeps its own smaller limits.
+pub const MAX_CHECKPOINT_BYTES: usize = 2 * 1024 * 1024 * 1024;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

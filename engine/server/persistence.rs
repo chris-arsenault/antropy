@@ -4,9 +4,10 @@ use super::{
     store::{Reason, Store},
 };
 use antropy_engine::config::Config;
+use serde_json::{Value, json};
 use std::{
-    sync::Arc,
-    time::{Duration, Instant},
+    sync::{Arc, Mutex},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::Semaphore;
 
@@ -15,6 +16,38 @@ pub struct Persistence {
     pub store: Arc<Store>,
     /// Period between automatic saves; `None` keeps only shutdown and operator saves.
     pub interval: Option<Duration>,
+    /// Most recent save attempt of any kind, so failures are visible without logs.
+    pub last: Arc<Mutex<Value>>,
+    /// Restart evidence on the same volume; absent in tests that only exercise the store.
+    pub diagnostics: Option<Arc<super::diagnostics::Diagnostics>>,
+}
+impl Persistence {
+    pub fn new(store: Arc<Store>, interval: Option<Duration>) -> Self {
+        Self {
+            store,
+            interval,
+            last: Arc::new(Mutex::new(Value::Null)),
+            diagnostics: None,
+        }
+    }
+    /// Records one save attempt: `Ok` carries the stored record, `Err` the failure.
+    pub fn record(&self, reason: Reason, tick: u64, result: Result<Value, String>) {
+        let at = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_or(0, |d| d.as_millis() as u64);
+        let entry = match result {
+            Ok(checkpoint) => json!({"at":at,"reason":reason,"tick":tick,"ok":true,
+                "checkpoint":checkpoint}),
+            Err(error) => json!({"at":at,"reason":reason,"tick":tick,"ok":false,"error":error}),
+        };
+        if entry["ok"] == false {
+            eprintln!("Save failed: {entry}");
+        }
+        *self.last.lock().unwrap() = entry;
+    }
+    pub fn last(&self) -> Value {
+        self.last.lock().unwrap().clone()
+    }
 }
 
 /// Restores the newest compatible stored world, otherwise starts the configured seed.
@@ -37,6 +70,7 @@ pub fn initial(
 pub struct Autosave {
     persistence: Persistence,
     last: Instant,
+    beat: Option<Instant>,
     saved: Option<(u64, u64)>,
 }
 impl Autosave {
@@ -44,12 +78,26 @@ impl Autosave {
         Self {
             persistence,
             last: Instant::now(),
+            beat: None,
             saved: Some((runtime.generation, runtime.world.tick)),
         }
     }
     /// Captures on the owner thread when due; compression and disk writes run on their own
     /// thread holding the single save slot. An unchanged paused world is not saved again.
-    pub fn poll(&mut self, runtime: &Runtime, saves: &Arc<Semaphore>) {
+    /// The diagnostic heartbeat runs on its own minute timer, independent of saving.
+    pub fn poll(&mut self, runtime: &mut Runtime, saves: &Arc<Semaphore>) {
+        if let Some(d) = &self.persistence.diagnostics
+            && self
+                .beat
+                .is_none_or(|t| t.elapsed().as_secs() >= super::diagnostics::HEARTBEAT_SECONDS)
+        {
+            self.beat = Some(Instant::now());
+            d.heartbeat(
+                json!({"generation":runtime.generation,"tick":runtime.world.tick,
+                "population":runtime.world.cells.len(),"running":runtime.running,
+                "lastSave":self.persistence.last()}),
+            );
+        }
         let Some(interval) = self.persistence.interval else {
             return;
         };
@@ -65,18 +113,22 @@ impl Autosave {
             return;
         };
         self.last = Instant::now();
+        let tick = runtime.world.tick;
         match runtime.capture(Reason::Automatic) {
             Ok(capture) => {
                 self.saved = Some(state);
-                let store = self.persistence.store.clone();
+                let persistence = self.persistence.clone();
                 std::thread::spawn(move || {
-                    if let Err(e) = store.write(capture) {
-                        eprintln!("Automatic save failed: {e:?}");
-                    }
+                    let result = persistence.store.write(capture);
+                    persistence.record(
+                        Reason::Automatic,
+                        tick,
+                        result.map(|m| json!(m)).map_err(|e| format!("{e:?}")),
+                    );
                     drop(permit);
                 });
             }
-            Err(e) => eprintln!("Automatic capture failed: {e}"),
+            Err(e) => self.persistence.record(Reason::Automatic, tick, Err(e)),
         }
     }
 }

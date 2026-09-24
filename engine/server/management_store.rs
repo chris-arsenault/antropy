@@ -54,7 +54,29 @@ impl Host {
     }
     /// Capture on the owner, then compress and write while the world keeps stepping.
     /// `wait` queues behind an in-progress save (shutdown); otherwise a busy slot is 503.
+    /// Captured outcomes, successful or failed, are recorded for `/api/status`.
     pub async fn save(
+        &self,
+        generation: Option<u64>,
+        reason: Reason,
+        wait: bool,
+    ) -> Result<Meta, Error> {
+        let result = self.save_once(generation, reason, wait).await;
+        if let Some(p) = &self.persistence
+            && !matches!(result, Err(Error::Busy | Error::Conflict | Error::Disabled))
+        {
+            let tick = self.publications.borrow().status["summary"]["tick"]
+                .as_u64()
+                .unwrap_or(0);
+            let outcome = match &result {
+                Ok(meta) => Ok(json!(meta)),
+                Err(e) => Err(format!("{e:?}")),
+            };
+            p.record(reason, result.as_ref().map_or(tick, |m| m.tick), outcome);
+        }
+        result
+    }
+    async fn save_once(
         &self,
         generation: Option<u64>,
         reason: Reason,

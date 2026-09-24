@@ -52,7 +52,10 @@ Automatic saves run every `BIOTROPY_AUTOSAVE_SECONDS` while the world changes, a
 SIGTERM or Ctrl-C. The shutdown save waits up to 90 seconds behind an in-progress save, then the
 process exits without draining spectator sockets. The owner thread only serializes the world;
 compression and disk writes run on another thread while ticks continue. One save writes at a
-time. A write goes to a temporary file, is synced and renamed, then its sidecar is written the
+time. Before encoding, the owner drops genotypes no live cell, founder or catalog entry
+references. This is the existing retention rule, applied at save time instead of waiting for
+the backlog to double. The last save attempt is reported in `/api/status`. Restart diagnostics
+live on the same volume ([server management](server-management.md#restart-diagnostics)). A write goes to a temporary file, is synced and renamed, then its sidecar is written the
 same way. Launch removes temporary files and data without a sidecar.
 
 At launch the server restores the newest checkpoint whose recorded format equals the running

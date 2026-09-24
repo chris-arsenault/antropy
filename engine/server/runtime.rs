@@ -168,7 +168,10 @@ impl Runtime {
         *self = next;
         Ok(())
     }
-    pub fn capture(&self, reason: Reason) -> Result<Capture, String> {
+    /// Compacts unreferenced genotypes (the existing retention rule, applied now rather than
+    /// when the backlog doubles), then encodes the ordinary physical checkpoint.
+    pub fn capture(&mut self, reason: Reason) -> Result<Capture, String> {
+        self.world.compact_genotypes();
         Ok(Capture {
             raw: super::management_owner::checkpoint(
                 &self.world,
@@ -309,7 +312,7 @@ pub fn start(
                 if runtime.world.stop_reason.is_some() { runtime.running = false; }
                 next_step = runtime.speed.map_or(now, |s| now + Duration::from_secs_f64(1. / s));
             } else { std::thread::sleep(Duration::from_millis(2)); }
-            if let Some(a) = autosave.as_mut() { a.poll(&runtime, &owner_saves); }
+            if let Some(a) = autosave.as_mut() { a.poll(&mut runtime, &owner_saves); }
             if published.elapsed() >= PUBLICATION_PERIOD {
                 let sample_at = Instant::now();
                 let keys = demand.lock().unwrap().values().copied().collect::<Vec<_>>();
