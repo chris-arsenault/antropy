@@ -36,6 +36,9 @@ pub struct Material {
     pub valid: bool,
     pub total: f64,
     pub moments: [f64; 3],
+    /// Property means of the persistent composition, defined whether or not the reservoir
+    /// holds inventory. The deposit's exposed surface carries this profile.
+    pub composition: [f64; 3],
 }
 
 impl Material {
@@ -65,18 +68,25 @@ impl Material {
     }
 }
 
-fn profile(s: &Source, chem: &Chemistry) -> [f64; 3] {
-    let fresh;
-    let material = if s.material.valid {
-        &s.material
-    } else {
-        fresh = Material::read(s.inventory(), chem);
-        &fresh
-    };
-    if material.total > 0. {
-        return material.moments.map(|v| v / material.total);
+/// Composition property means: the exposed profile of the deposit, full or empty.
+pub fn composition(mixture: &[f64], chem: &Chemistry) -> [f64; 3] {
+    let mut result = Material::default();
+    for (s, &q) in mixture.iter().enumerate() {
+        result.add(s, q, chem);
     }
-    [0.; 3]
+    if result.total > 0. {
+        result.moments.map(|v| v / result.total)
+    } else {
+        [0.; 3]
+    }
+}
+
+fn profile(s: &Source, chem: &Chemistry) -> [f64; 3] {
+    if s.material.valid {
+        s.material.composition
+    } else {
+        composition(&s.mixture, chem)
+    }
 }
 
 /// Explicit intervention/restore boundary. Ordinary stepping uses already refreshed owners.
@@ -100,9 +110,10 @@ fn project_current(w: &mut World) {
         .sources
         .iter()
         .map(|source| {
-            let total = source.material.total;
-            let scale = 1. / (1. + total / source.interface) / area;
-            let profile = source.material.moments.map(|v| scale * v);
+            // The deposit exposes its full interface, the saturation limit of Q/(1+Q/I),
+            // whatever its current fill: an emptied reservoir remains a coherent structure.
+            let scale = source.interface / area;
+            let profile = source.material.composition.map(|v| scale * v);
             (source.footprint.clone(), profile)
         })
         .collect();

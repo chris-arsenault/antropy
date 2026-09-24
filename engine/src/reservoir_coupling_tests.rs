@@ -58,13 +58,18 @@ fn like_charges_repel_opposite_charges_attract_reciprocally_within_finite_range(
 }
 
 #[test]
-fn empty_reservoirs_carry_no_charge_but_still_exclude_overlap() {
+fn empty_reservoirs_keep_their_charge_and_exclude_overlap() {
     let mut w = world(&[[78., 80.], [82., 80.]], &[MATCHED], config());
+    let full = reservoir_coupling::prepare(&w.sources, &w.config, &w.chemistry);
     w.sources[1].amount = 0.;
     w.sources[1].refresh_material(&w.chemistry);
     let k = reservoir_coupling::prepare(&w.sources, &w.config, &w.chemistry);
-    assert_eq!(k[0].force, [0.; 2]);
-    assert_eq!(k[1].force, [0.; 2]);
+    // Charge follows composition and interface, so emptying one deposit changes nothing.
+    assert_eq!(k, full);
+    assert!(
+        k[0].force[0] < 0. && k[1].force[0] > 0.,
+        "like charges repel: {k:?}"
+    );
     // Overlap of 2 units: each owner separates at the shared contact rate.
     let rate = crate::movement::geometry::separation_rate(w.config.dt);
     assert!((k[0].shift[0] + 2. * rate).abs() < 1e-12, "{k:?}");

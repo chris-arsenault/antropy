@@ -133,7 +133,7 @@ fn self_load_uses_actual_interface_and_retains_foreign_background() {
     assert!((own - bodies).abs() < 1e-12);
     source_medium::project(&mut w);
     let source = &w.sources[0];
-    let projected = source.material.moments[2] / (1. + source.material.total / source.interface);
+    let projected = source.material.composition[2] * source.interface;
     let own = medium_response::self_load(projected, w.config.mesh.powi(2), &source.footprint);
     let deposited: f64 = source
         .footprint

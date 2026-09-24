@@ -1,7 +1,7 @@
 //! Reservoir-to-reservoir coupling: long-range signed-repulsion charge and circle exclusion.
 //! Short-range cohesion is the shared attraction response; this adds the opposing tension
 //! that gives reservoir clusters a finite size and spacing. No position is remembered.
-use crate::{chemistry::Chemistry, config::Config, source_medium::Material, sources::Source};
+use crate::{chemistry::Chemistry, config::Config, sources::Source};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Coupling {
@@ -14,33 +14,23 @@ pub struct Coupling {
 struct Owner {
     position: [f64; 2],
     radius: f64,
-    /// Mean signed-repulsion property of the inventory (0 when empty).
+    /// Signed-repulsion property mean of the persistent composition.
     mean: f64,
-    /// Exposed charge: interface-saturated inventory times its signed-repulsion property.
+    /// Exposed charge: full interface exposure times that property, full or empty.
     charge: f64,
 }
 
 fn owner(s: &Source, chemistry: &Chemistry) -> Owner {
-    let fresh;
-    let material = if s.material.valid {
-        &s.material
+    let composition = if s.material.valid {
+        s.material.composition
     } else {
-        fresh = Material::read(s.inventory(), chemistry);
-        &fresh
-    };
-    let (mean, charge) = if material.total > 0. {
-        (
-            material.moments[1] / material.total,
-            material.moments[1] / (1. + material.total / s.interface.max(f64::MIN_POSITIVE)),
-        )
-    } else {
-        (0., 0.)
+        crate::source_medium::composition(&s.mixture, chemistry)
     };
     Owner {
         position: [s.habitat.x, s.habitat.y],
         radius: s.habitat.radius,
-        mean,
-        charge,
+        mean: composition[1],
+        charge: composition[1] * s.interface,
     }
 }
 

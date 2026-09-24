@@ -39,7 +39,8 @@ fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
     assert_eq!(w.sources[0].amount, 0.);
     assert!(w.sources[0].wait.is_finite() && w.sources[0].wait >= 0.);
     assert_eq!(w.ledger.source_released, 0.75);
-    assert!(w.field.source_load().iter().all(|v| *v == 0.));
+    // The emptied deposit still exposes its composition; it holds no releasable material.
+    assert!(w.field.source_load().iter().any(|v| *v > 0.));
     assert!(
         source_medium::observe(&w)[0]["outputRate"]
             .as_array()
@@ -91,7 +92,7 @@ fn simultaneous_exhaustion_schedules_independent_renewals_each_cycle() {
 }
 
 #[test]
-fn empty_reservoir_has_no_motion_or_projection_in_a_gradient() {
+fn empty_reservoir_keeps_its_structural_projection_and_response() {
     let mut w = fixture();
     w.config.source_drift = 4.;
     for n in 0..w.field.nx * w.field.ny {
@@ -100,16 +101,18 @@ fn empty_reservoir_has_no_motion_or_projection_in_a_gradient() {
     }
     source_medium::project(&mut w);
     let occupied = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
+    let load: Vec<f64> = w.field.source_load().iter().copied().collect();
     assert!(occupied.velocity[0].hypot(occupied.velocity[1]) > 1e-8);
     w.sources[0].amount = 0.;
     w.sources[0].wait = 10.;
     source_medium::project(&mut w);
+    // Exposure follows composition and interface, not fill: emptying changes neither.
     let empty = source_medium::response(&w.sources[0], 0, &w.config, &w.field, &w.chemistry);
-    assert_eq!(empty.velocity, [0.; 2]);
-    assert!(w.field.source_load().iter().all(|q| *q == 0.));
+    assert_eq!(empty.velocity, occupied.velocity);
+    assert!(w.field.source_load().iter().copied().eq(load));
     let position = [w.sources[0].habitat.x, w.sources[0].habitat.y];
     source_medium::advance(&mut w);
-    assert_eq!(position, [w.sources[0].habitat.x, w.sources[0].habitat.y]);
+    assert_ne!(position, [w.sources[0].habitat.x, w.sources[0].habitat.y]);
 }
 
 #[test]

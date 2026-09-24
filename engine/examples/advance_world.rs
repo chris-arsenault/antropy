@@ -1,5 +1,6 @@
 //! Steps a default world and writes physical checkpoints at a fixed interval.
-//! Usage: advance_world SEED TICKS INTERVAL OUTPUT_DIR THREADS
+//! Usage: advance_world SEED TICKS INTERVAL OUTPUT_DIR THREADS [CHECKPOINT]
+//! With CHECKPOINT the run resumes that world (SEED is ignored) up to absolute tick TICKS.
 use antropy_engine::{config::Config, world::World};
 use std::{path::Path, time::Instant};
 
@@ -15,7 +16,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .num_threads(threads)
         .build()?;
     pool.install(|| -> Result<(), String> {
-        let mut w = World::new(seed, Config::default())?;
+        let mut w = match args.get(5) {
+            Some(path) => World::restore(&std::fs::read(path).map_err(|e| e.to_string())?)?,
+            None => World::new(seed, Config::default())?,
+        };
         let start = Instant::now();
         while w.tick < ticks {
             w.step();

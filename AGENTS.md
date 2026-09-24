@@ -124,8 +124,9 @@ exclusion (finite clusters, no stored anchors); cells add compatibility-weighted
 adhesion that credits no work ([material coupling](docs/plans/MATERIAL-COUPLING-PLAN.md)).
 Each reservoir has one evolving
 composition and a finite amount, with fixed per-site release and delayed accounted refill.
-There is no independent expiry clock or second supply mixture; empty reservoirs carry no
-charge and move only by exclusion.
+There is no independent expiry clock or second supply mixture. Reservoirs expose their
+persistent composition at full interface whether full or empty, so emptied reservoirs keep
+cohering; they supply nothing.
 Illumination composes several
 slow spatial/temporal axes into shared transformation work; it is not direct energy credited
 to cells. Cells can pay for local optical sensing. See [material habitats](docs/material-habitats.md),

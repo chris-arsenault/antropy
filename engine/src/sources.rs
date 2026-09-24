@@ -102,6 +102,7 @@ impl Source {
     }
     pub fn refresh_material(&mut self, chemistry: &Chemistry) {
         self.material = crate::source_medium::Material::read(self.inventory(), chemistry);
+        self.material.composition = crate::source_medium::composition(&self.mixture, chemistry);
     }
     /// Serial composition of the two phases; World runs `advance_local` across reservoirs.
     pub fn advance(

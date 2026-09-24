@@ -66,7 +66,61 @@ fn groups(w: &World) -> Vec<usize> {
     v
 }
 
+/// Full default landscape without cells: real release, renewal and composition change.
+fn landscape(c: &Config, steps: usize) {
+    let mut w = World::new(
+        27,
+        Config {
+            founders: 0,
+            ..c.clone()
+        },
+    )
+    .unwrap();
+    let report = |w: &World| {
+        let n = w.sources.len();
+        let nearest: f64 = (0..n)
+            .map(|i| {
+                (0..n)
+                    .filter(|&j| j != i)
+                    .map(|j| distance(w, i, j))
+                    .fold(f64::MAX, f64::min)
+            })
+            .sum::<f64>()
+            / n as f64;
+        let random = 0.5 / (n as f64 / (w.config.width * w.config.height)).sqrt();
+        let g = groups(w);
+        let active = w.sources.iter().filter(|s| s.amount > 0.).count();
+        println!(
+            "tick {}: mean nearest {nearest:.2} (random {random:.2}) groups {} largest {:?} singletons {} active {active}",
+            w.tick,
+            g.len(),
+            &g[..g.len().min(6)],
+            g.iter().filter(|&&s| s == 1).count()
+        );
+    };
+    report(&w);
+    for step in 1..=steps {
+        w.step();
+        if step % (steps / 6).max(1) == 0 {
+            report(&w);
+        }
+    }
+}
+
 fn main() {
+    if std::env::var("LANDSCAPE").is_ok() {
+        let args: Vec<f64> = std::env::args()
+            .skip(1)
+            .map(|a| a.parse().unwrap())
+            .collect();
+        let c = Config {
+            reservoir_repulsion: args[0],
+            reservoir_range: args[1],
+            source_drift: args[2],
+            ..Config::default()
+        };
+        return landscape(&c, args[3] as usize);
+    }
     let args: Vec<f64> = std::env::args()
         .skip(1)
         .map(|a| a.parse().unwrap())

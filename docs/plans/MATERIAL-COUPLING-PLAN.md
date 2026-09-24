@@ -65,7 +65,8 @@ interface saturation, and no release:
 - **Pair spacing.** The shared response alone gives a matched pair local like-b repulsion
   below about 11 units and ℓ-range cohesion from 12 to 20. The pair settles at 11.6–12.1 units.
 - **Repulsion strength.** At γ ≤ 3 a group of 30 settles into one lattice. At γ ≥ 100 it scatters.
-- **Selected defaults.** γ = 20, L = 30 (units: model length) and `drift_r` = 1. After 64k
+- **Selected defaults.** γ = 20 (lowered to 5 with the later structural exposure revision; see
+  composed runtime), L = 30 (units: model length) and `drift_r` = 1. After 64k
   steps, 30 reservoirs placed at random in a 60-unit box form 12, 13 and 12 groups (15-unit
   linkage) for seeds 1–3, with largest groups of 5, 5 and 4 and 4–6 singletons. The size
   distribution does not depend on initial placement.

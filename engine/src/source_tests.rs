@@ -41,7 +41,8 @@ fn composition_keeps_local_history_through_empty_interval_and_restore() {
     }
     assert_eq!(held, w.held()); // Boundary composition adds no material or work.
     assert_eq!(w.ledger.supplied, 0.);
-    assert!(w.field.source_load().iter().all(|q| *q == 0.));
+    // The empty deposit projects its structural profile but supplies nothing.
+    assert!(w.field.source_load().iter().any(|q| *q > 0.));
     assert_ne!(seed, w.sources[0].mixture);
     w.sources[0].wait = 0.;
     w.config.source_processing = 0.;

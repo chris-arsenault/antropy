@@ -299,7 +299,7 @@ same-event exports cannot fund imports. Inactive rows do not allocate256-species
 
 Two hundred forty externally renewing reservoirs start around 35 uneven neighborhoods. Independently timed renewals
 continue to import accounted material and reference value. Defaults are sourceDrift1
-(reservoir mobility), reservoirRepulsion20, reservoirRange30, sourceProcessing0.25 and
+(reservoir mobility), reservoirRepulsion5, reservoirRange30, sourceProcessing0.25 and
 sourceGap2400; sourceProcessing multiplies the common weathering rate.
 The world remains open. Environmental transformations now have an explicit external work
 account modulated by the composed local illumination field.
@@ -327,24 +327,32 @@ minimum outage after startup depletion and caused extinction; that timing choice
 
 Reservoir inventory projects through the same chemical interaction and impedance properties as
 field material. Its interface area is mesh area divided by the sum of squared footprint weights.
-Exposed material is Q/(1+Q/interfaceArea), bounded by that area. This is a finite interface signal,
-not a transfer of ownership: cells cannot consume held reservoir inventory. The same footprint
-deposits the signal, samples the medium and releases material. Passive velocity uses the
-shared chemical response (attraction and signed repulsion, including embodied and reservoir
-signals) without crowding pressure; an isolated source cannot propel itself. Empty sources
-carry no charge, neither drift chemically nor project mechanical material, but still exclude.
+Since the structural exposure revision, a reservoir exposes its full interface area, the
+saturation limit of Q/(1+Q/interfaceArea), with the property means of its persistent
+composition, whether it is full or empty. This is a finite interface signal, not a transfer of
+ownership: cells cannot consume held reservoir inventory. The same footprint deposits the
+signal, samples the medium and releases material. Passive velocity uses the shared chemical
+response (attraction and signed repulsion, including embodied and reservoir signals) without
+crowding pressure; an isolated source cannot propel itself. An emptied reservoir keeps its
+projection, response and charge, so it keeps cohering with its group; it supplies nothing.
+Its projection also adds to the local medium signal that engages environmental work.
 
 Reservoir clusters hold a dual tension without stored anchors. Like attraction properties
 cohere at the ℓ range, while like signed-repulsion properties repel locally, so a matched pair
-settles near 11–12 units. Each nonempty reservoir also carries an exposed charge
-`q=Q_b/(1+Q/interfaceArea)`, its inventory's signed-repulsion moment saturated like its
-projection. The force on reservoir i adds `γ·b_i·Σ_j q_j·K_L(r_ij)·r_ij/L²`, a Gaussian of range
+settles near 11–12 units. Each reservoir also carries an exposed charge `q=b·interfaceArea`,
+its composition's signed-repulsion mean at full exposure. The force on reservoir i adds `γ·b_i·Σ_j q_j·K_L(r_ij)·r_ij/L²`, a Gaussian of range
 L cut at 3L and summed over a periodic neighbour grid. Like signs push apart and opposite
 signs attract, as with charge. Cohesion grows with near neighbours and repulsion with the whole
 group, so clusters reach a finite size and spacing. This coupling enters before the saturating
 bound. Overlapping reservoir circles separate at the cell contact rate, outside the bound.
-Constructed fixtures with default mixtures find matched pairs holding and 30 randomly placed
-reservoirs settling into 12–13 groups of at most 4–5, independent of initial placement. Their composition continues
+With inventory-based exposure, constructed fixtures found matched pairs holding and 30 randomly
+placed reservoirs settling into 12–13 groups of at most 4–5, independent of initial placement.
+The live v41 server world with cells nonetheless dispersed its reservoirs to nearly random by
+tick 698k, while a cell-free default landscape stayed intact. Full-fill exposure lets empty
+reservoirs pull their groups together. With exposure doubled and applied to every reservoir,
+γ falls from 20 to 5; the cell-free landscape then keeps 33 groups with largest 19 over 150k
+ticks. With cells at 60k ticks, that run held 5,799 cells (1,112 before), 92% in dense cores and
+0.1% isolated; its longer-run behaviour is observed on the server. Their composition continues
 evolving in the local medium, preserving supply history without a second mixture. Renewal uses
 that composition instead of resetting to the initial seed species. Explicit experimental source
 zones or epochs can replace the composition at an empty refill, never overwrite held material.
