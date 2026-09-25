@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { Engine } from "./client";
 import { Session } from "./session";
 import { type Message, type Request } from "./protocol";
+import { chemicalLayers, initialChemicalDisplay } from "./chemicalDisplay";
 
 const transport = vi.hoisted(() => ({
   receive: (_data: string | ArrayBuffer) => {},
@@ -80,4 +81,31 @@ it("publishes remote status through the existing budget and keeps binary frames 
   expect(JSON.stringify(sent)).not.toContain('cells":{');
   expect(sent.every((m) => !("buffer" in m))).toBe(true);
   session.world.dispose();
+});
+
+it("requests fresh remote projections when switching terrain, film and emitted light", async () => {
+  const worker = {
+    postMessage: vi.fn(),
+    onmessage: null as ((e: MessageEvent<Request>) => void) | null,
+  };
+  vi.stubGlobal("self", worker);
+  await import("./remoteWorker");
+  worker.onmessage!({
+    data: { id: 1, op: "initialize", payload: { endpoint: "ws://localhost/stream", canvas: {} } },
+  } as MessageEvent<Request>);
+  for (const [index, base] of (["terrain", "cover", "emission", "potential"] as const).entries()) {
+    const layers = chemicalLayers({ ...initialChemicalDisplay, base });
+    worker.onmessage!({
+      data: {
+        id: index + 2,
+        op: "view",
+        payload: { species: 0, color: 3, layers },
+      },
+    } as MessageEvent<Request>);
+    await vi.waitFor(() => expect(transport.call).toHaveBeenCalledTimes(index + 1));
+    expect(transport.call).toHaveBeenLastCalledWith(
+      "view",
+      expect.objectContaining({ layers, revision: index + 1 })
+    );
+  }
 });

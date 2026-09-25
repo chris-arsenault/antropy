@@ -13,6 +13,8 @@ fn enable(w: &mut World) {
 #[test]
 fn actual_flows_reconcile_without_changing_physical_continuation() {
     let mut w = crate::initial_ecology::probe(2, true).unwrap();
+    // Observation invariants need a living fixture through the full reporting interval.
+    std::sync::Arc::make_mut(&mut w.shade).transmission.fill(1.);
     let mut control = w.clone();
     enable(&mut w);
     let before = w.ledger.clone();

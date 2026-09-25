@@ -1,7 +1,10 @@
 //! Canonical geographic shade. Generation never reads organisms or reservoir placement.
-use crate::{config::Config, random::Random};
+use crate::config::Config;
 use serde::{Deserialize, Serialize};
-use std::{f64::consts::TAU, sync::Arc};
+use std::sync::Arc;
+
+#[path = "terrain_noise.rs"]
+mod noise;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Shade {
@@ -12,24 +15,12 @@ pub struct Shade {
 
 impl Shade {
     pub fn generate(seed: u64, c: &Config, nx: usize, ny: usize) -> Arc<Self> {
-        let mut rng = Random::new(seed ^ 0x73686164655f7879);
-        let phases: [[f64; 2]; 3] = std::array::from_fn(|_| [rng.unit() * TAU, rng.unit() * TAU]);
+        let generator = noise::Generator::new(seed, [c.width, c.height], c.shade_scale, c.mesh);
         let transmission = (0..nx * ny)
             .map(|node| {
                 let x = (node % nx) as f64 + 0.5;
                 let y = (node / nx) as f64 + 0.5;
-                let signal: f64 = phases
-                    .iter()
-                    .enumerate()
-                    .map(|(level, phase)| {
-                        let scale = c.shade_scale * (1_u32 << level) as f64;
-                        let kx = (c.width / scale).round().max(1.);
-                        let ky = (c.height / scale).round().max(1.);
-                        (TAU * kx * x / nx as f64 + phase[0]).cos()
-                            * (TAU * ky * y / ny as f64 + phase[1]).cos()
-                            / 3.
-                    })
-                    .sum();
+                let signal = generator.sample([x * c.width / nx as f64, y * c.height / ny as f64]);
                 1. - c.shade_strength * (0.5 + 0.5 * signal).powi(2)
             })
             .collect();
@@ -101,6 +92,7 @@ mod tests {
         assert!((crate::illumination::at(&world, 24., 24.) - 0.1).abs() < 1e-12);
         assert_eq!(before, world.snapshot().unwrap());
         let restored = crate::world::World::restore(&before).unwrap();
+        assert_eq!(restored.shade.transmission, world.shade.transmission);
         assert_eq!(restored.shade.ceiling, world.shade.ceiling);
         assert!((restored.field.illumination.node(0) - 0.1).abs() < 1e-12);
     }

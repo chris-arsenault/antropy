@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Irregular terrain shade
+
+- Replace the repeating cosine grids with seeded multiscale noise and smooth coordinate
+  warping at world creation. Retain canonical saved maps and existing optical physics.
+- Correct remote terrain, film and emission selection so changing layers requests the
+  corresponding server projection.
+
 ## 2026-09-25 — Terrain shade and organism-built light ecology
 
 - Add permanent geographic shade, funded overhead material cover and paid local emission

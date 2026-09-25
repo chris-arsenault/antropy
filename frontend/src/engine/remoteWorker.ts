@@ -158,7 +158,13 @@ async function sendView() {
 function setView(p: Record<string, unknown>) {
   view = p as unknown as ViewOptions;
   drawDirty = true;
-  const key = JSON.stringify([view.species, view.color, view.layers[6], selected, viewport()]);
+  const key = JSON.stringify([
+    view.species,
+    view.color,
+    [view.layers[6], view.layers[8], view.layers[9], view.layers[10]],
+    selected,
+    viewport(),
+  ]);
   if (key !== viewKey) {
     viewKey = key;
     revision++;

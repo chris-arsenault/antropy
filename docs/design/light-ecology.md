@@ -21,13 +21,58 @@ not whether colonies meet a prescribed size or movement target.
 
 ## Selected extension: physical owners and shared optical funding
 
-Terrain generation now uses three equally weighted products of periodic cosines at
-32, 64 and 128 world-unit target wavelengths, rounded to integral cycles on each axis.
-Independent seeded phases make the map permanent. With the bounded mean signal f,
-transmission is `1 - shade_strength * (0.5 + 0.5*f)^2`; default strength is 0.8.
-The square concentrates strong shade into patches without renormalizing solar income.
-Canonical transmissions and optional per-node ceilings are checkpointed. All physical
-and observer samplers apply them before interpolation. There is no terrain material account.
+Terrain generation runs once when a world is created. The initial three-cosine generator
+produced visible overlapping grids and was rejected in visual review. Its replacement uses
+periodic, independently hashed two-dimensional value noise with quintic interpolation.
+Successive octaves halve both lattice spacing and amplitude. Two independent broad noise
+fields displace sampling coordinates, bending the contours into irregular regions. The
+warp and every octave wrap over the whole world; no smaller repeated terrain tile is used.
+
+The largest lattice spacing is `min(4*shade_scale, min(width,height)/2)`. Unwarped detail
+stops before its next spacing would be below four mesh intervals. At the default scale 32
+and mesh 2, the detail spacings are approximately 128, 64, 32, 16 and 8 world units. Integer
+lattice dimensions approximate those spacings on each axis. The coordinate displacement is
+at most half the largest spacing per axis; up to three broad octaves use the same noise rule.
+Small worlds retain at least two lattice sites per axis. These are generator choices, not
+new runtime ecological controls. The existing scale and shade-strength settings remain.
+
+The amplitude-weighted signal f stays in [-1,1]. Transmission remains
+`1 - shade_strength * (0.5 + 0.5*f)^2`, with default strength 0.8. There is no histogram or
+mean-light normalization. This produces coherent variation in shelter size and boundaries;
+it does not assign habitats to cells or guarantee that shade is beneficial.
+
+The generation-only algorithm is explicitly exempt from the runtime's shared chemical-math
+and per-tick cost constraints. All temporary noise owners are discarded after generation.
+Canonical transmissions and optional per-node ceilings are checkpointed; every physical
+and observer sampler consumes those same values before interpolation. Restore retains even
+an older hand-edited or generated map exactly, without invoking the new generator. The v42
+data shape and physics are unchanged, so this requires neither a schema bump nor migration.
+There is no terrain material account, elevation field or wet/dry operator in this extension.
+
+The design borrows decreasing independent octaves and coordinate warping from the peer
+`the-canonry-game` repository at `0f62584c`: `PhysicalNoise.cs` and `CoastalDetailLayer.cs`
+under `src/Engine.WorldGen/PhysicalGeneration/`. Its free octave rotations do not preserve
+Antropy's rectangular torus, so periodic lattice hashing supplies the boundary here. Its
+tectonics, erosion, hydrology, climate and layer-dependency framework are not required for
+an imposed overhead transmission map. Boot cost and static maps can be inspected with
+`cargo run --release --manifest-path engine/Cargo.toml --example terrain_preview -- OUTPUT.json`;
+the output path must be new and generated data belongs under ignored harness artifacts.
+
+The September 25 static check exported default 720×540 maps for seeds 27 and 101 and a
+1080×810 map for seed 27, all at mesh 2. Native release generation took 57–59 ms for the
+default maps and 126 ms for the larger map on the development host; these are individual
+samples, not browser timings. Visual inspection found irregular connected patches and
+smaller boundary detail without the previous repeated grid. The tiled preview showed no
+boundary discontinuity. Seed 27 and 101 default mean transmissions were 0.774 and 0.816:
+generation does not equalize solar income across seeds. Tests cover periodic values and
+slopes, seed variation, optical bounds and exact saved-map restoration. No cells or ticks
+were used, and these checks make no claim about evolved use of shelter. The initially
+planned 1440×1080 check was rejected by the existing geography memory admission limit;
+the larger check was reduced without changing mesh resolution or that limit.
+The first full test run exposed a terrain-dependent fixture: the single role-2 cell in
+two continuation/observation tests became extinct at tick 40. Those tests now set uniform
+terrain transmission explicitly while retaining their original tick horizons and accounting
+assertions. The shared assay fixture and production survival rules were not changed.
 
 The objective is local environmental agency and conditional returns: permanent refuges,
 organism-built cover, emission, and ordinary neural responses. The sun remains the current

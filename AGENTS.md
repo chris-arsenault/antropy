@@ -73,6 +73,11 @@ The [decision record](docs/design/decisions-and-evidence.md) preserves rejected 
 negative evidence; the [hypothesis log](docs/hypothesis-log.md) owns unresolved explanations.
 Plans record execution, not additional governing equations.
 
+Terrain generation is a one-time world-creation operation. The user explicitly exempts its
+algorithm from the shared runtime mathematical framework and permits more expensive startup
+calculations. Generate and persist the canonical map, discard temporary generation state,
+and let runtime consumers sample it; this exception does not change physical work/material accounts.
+
 ## Read first
 
 | Topic                  | Link                                                                             |

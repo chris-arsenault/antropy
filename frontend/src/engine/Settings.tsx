@@ -27,7 +27,7 @@ const fields = [
   ["sourceProcessing", "Stored-resource weathering multiplier", 0],
   ["illuminationContrast", "Illumination contrast (0–1)", 0],
   ["shadeStrength", "Permanent shade strength (0–1)", 0],
-  ["shadeScale", "Terrain shade wavelength (world units)", 0.01],
+  ["shadeScale", "Terrain shade scale (world units)", 0.01],
   ["opticalColumn", "Film mass / area for optical depth 1", 0.00001],
   ["opticalReach", "Emission spread (world units)", 0.01],
   ["opticalPowerDensity", "Work / area / time for 1× emitted light", 0.00001],

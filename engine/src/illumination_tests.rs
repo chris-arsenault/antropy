@@ -172,6 +172,8 @@ fn public_photochemistry_stops_in_darkness_and_scales_affordable_rates() {
 #[test]
 fn ordinary_world_uses_light_and_restores_without_observer_state() {
     let mut w = crate::initial_ecology::probe(2, true).unwrap();
+    // Isolate changing illumination from the generated terrain's effect on survival.
+    std::sync::Arc::make_mut(&mut w.shade).transmission.fill(1.);
     let mut reference = w.clone();
     reference.config.illumination_contrast = 0.;
     w.config.illumination_contrast = 0.8;
@@ -179,6 +181,7 @@ fn ordinary_world_uses_light_and_restores_without_observer_state() {
         w.step();
         reference.step();
     }
+    assert!(w.stop_reason.is_none(), "{:?}", w.stop_reason);
     assert!((w.ledger.flows.external_work - reference.ledger.flows.external_work).abs() > 1e-5);
     let summary = crate::observation::summary(&w);
     assert!(summary["energyResidual"].as_f64().unwrap().abs() < 1e-6);
