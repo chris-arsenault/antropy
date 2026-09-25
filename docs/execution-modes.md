@@ -106,7 +106,9 @@ provide credentials through their normal environment. Do not paste keys into com
 shared workflow compiles the binary and frontend, then the root Dockerfile packages those
 artifacts into one GHCR image. `compose.yaml` pins the container to the 18 physical cores of
 the private host's first socket (CPUs 0–17, NUMA node 0, hyperthread siblings excluded), runs
-16 compute threads, and sets an 8 GiB memory ceiling, bounded logs and a health check. Pinned
+16 compute threads, and sets a 16 GiB memory ceiling, bounded logs and a health check. The
+earlier 8 GiB ceiling killed a 65k-cell world during a save (8.2 GB peak): a save holds a full
+raw checkpoint beside the live world. Pinned
 threads keep world memory on one node. Measured scaling flattens well before 16 workers; see
 the [scaling plan](../SCALING-PLAN.md).
 The same container serves the UI and WebSocket at the private host's port 8095. The

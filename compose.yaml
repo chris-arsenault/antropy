@@ -8,7 +8,9 @@ services:
     # before this width; see SCALING-PLAN.md.
     cpuset: "0-17"
     cpus: 18
-    mem_limit: 8g
+    # A 41.5k-cell world held 4.6 GB and peaked at 8.2 GB while saving a ~2 GB raw
+    # checkpoint, which the 8 GiB limit killed. Saves hold a full raw copy on top of the world.
+    mem_limit: 16g
     pids_limit: 256
     ports:
       - "8095:8095"
