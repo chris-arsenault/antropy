@@ -194,15 +194,24 @@ impl Source {
 
     fn convert(&mut self, step: &crate::source_medium::Step<'_>) -> [f64; 3] {
         let c = step.config;
-        let accounts = step
-            .operators
+        self.convert_medium(
+            step.operators,
+            crate::reaction_medium::Medium::illuminated(step.response.signal, step.response.light),
+            step.chemical_dt * c.weathering_rate * c.source_processing * step.exposure,
+        )
+    }
+
+    pub(crate) fn convert_medium(
+        &mut self,
+        operators: &crate::weathering::Operators,
+        medium: crate::reaction_medium::Medium,
+        elapsed: f64,
+    ) -> [f64; 3] {
+        let accounts = operators
             .inventory_active(
                 &mut self.mixture,
-                crate::reaction_medium::Medium::illuminated(
-                    step.response.signal,
-                    step.response.light,
-                ),
-                c.dt * c.weathering_rate * c.source_processing * step.exposure,
+                medium,
+                elapsed,
                 f32::EPSILON as f64,
                 u64::MAX,
             )

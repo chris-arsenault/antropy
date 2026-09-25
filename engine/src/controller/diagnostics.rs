@@ -1,16 +1,21 @@
 //! Fixture authoring stays behind the controller boundary; inference remains ordinary act().
 use super::*;
 
-pub fn authored(
-    logits: [f32; OUTPUTS],
-    response: Option<(usize, usize, f32)>,
-) -> Result<Genome, String> {
+pub fn authored(logits: Vec<f32>, response: Option<(usize, usize, f32)>) -> Result<Genome, String> {
     if response.is_some_and(|(i, o, gain)| {
-        i >= INPUTS || o >= OUTPUTS || !gain.is_finite() || gain.abs() > 16.
+        i >= INPUTS || o >= TOTAL_OUTPUTS || !gain.is_finite() || gain.abs() > 16.
     }) {
         return Err("Invalid diagnostic response".into());
     }
-    let g = diagnostic(logits, response);
+    if ![OUTPUTS, TOTAL_OUTPUTS].contains(&logits.len()) {
+        return Err("Diagnostic logits must cover the base or complete output vector".into());
+    }
+    let mut g = diagnostic([0.; OUTPUTS], None);
+    g.weights[OUTPUT_BIAS..OUTPUT_BIAS + logits.len()].copy_from_slice(&logits);
+    if let Some((input, output, gain)) = response {
+        g.weights[input] = 1.;
+        g.weights[OUTPUT + output * HIDDEN] = gain;
+    }
     validate(&g)?;
     Ok(g)
 }

@@ -116,7 +116,7 @@ fn forcing_transforms_with_frames_and_invalid_periods_fail() {
 }
 
 #[test]
-fn illuminated_abiotic_work_closes_without_scaling_affordable_rates() {
+fn public_photochemistry_stops_in_darkness_and_scales_affordable_rates() {
     let c = Config::default();
     let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
     let op = crate::weathering::Operators::new(&chemistry);
@@ -131,11 +131,10 @@ fn illuminated_abiotic_work_closes_without_scaling_affordable_rates() {
             let delta = chemistry.properties[s].potential
                 - chemistry.properties[op.destination[s][j]].potential;
             assert_eq!(w0, 0.);
-            if delta < 0. {
-                assert_eq!(r0, 0.);
-            }
-            if r0 > 0. {
-                assert_eq!(r0, r1);
+            assert_eq!(r0, 0.);
+            if delta >= 0. {
+                let unit = op.local(s, j, signal).0;
+                assert!((r1 - 1.8 * unit).abs() < 1e-12);
             }
             if r1 > 0. {
                 assert!((delta + work - heat).abs() < 1e-12);
@@ -147,7 +146,7 @@ fn illuminated_abiotic_work_closes_without_scaling_affordable_rates() {
     assert!(admitted > 0);
     let mut climate = crate::climate::Climate::new(&c, &chemistry);
     climate.prepare(&c);
-    // Keep this rate-equivalence fixture above the shared donor-activity resolution.
+    // Field and reservoir consumers must apply the same light-dependent operator.
     let mut field = vec![0.04f32; 256];
     let mut reservoir: Vec<_> = field.iter().map(|q| *q as f64).collect();
     let account = op

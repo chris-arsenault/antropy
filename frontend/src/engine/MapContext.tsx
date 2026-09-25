@@ -5,7 +5,7 @@ const cues = [
   [
     "illumination",
     "Light",
-    "Sunlight leaves map colors intact; translucent night shadow dims fields, cells and sources.",
+    "Received light includes terrain shade, constructed cover and emission. Shadow dims the map; warm glows mark paid emitters.",
   ],
   ["impedance", "Resistance", "Hatching strengthens with movement resistance. Toggle hatching."],
   ["stress", "Stress", "Dots strengthen with local stress exposure. Toggle dots."],

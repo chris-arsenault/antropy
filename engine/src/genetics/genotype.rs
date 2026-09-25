@@ -55,6 +55,7 @@ impl Genotype {
             c.enzyme_ratio,
             c.enzyme_ratio,
         ];
+        let ratios: Vec<_> = ratios.into_iter().chain([c.transporter_ratio; 2]).collect();
         let core = c.birth_mass * (chromosome.physical[0] as f64).exp();
         let mut body = std::array::from_fn(|i| {
             if i == 0 {

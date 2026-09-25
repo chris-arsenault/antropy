@@ -10,4 +10,6 @@ export const BODY_PARTS = [
   ...Array.from({ length: 12 }, (_, i) => machineryLabel(i)),
   "Photoreceptor",
   ...Array.from({ length: 4 }, (_, i) => `Enzyme ${i + 4}`),
+  "Cover builder",
+  "Light emitter",
 ];

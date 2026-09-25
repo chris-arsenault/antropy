@@ -28,6 +28,7 @@ pub struct Step<'a> {
     pub response: Response,
     /// True at the medium interval, when accrued reservoir release is committed.
     pub release: bool,
+    pub chemical_dt: f64,
 }
 
 /// Derived inventory reduction; rebuilt from owned material after every mutation and restore.
@@ -170,10 +171,14 @@ pub fn response_with_gradient(
 
 /// Standalone assays treat every call as a medium interval.
 pub fn advance(w: &mut World) {
-    advance_scheduled(w, true);
+    advance_interval(w, true, w.config.dt);
 }
 
 pub fn advance_scheduled(w: &mut World, release: bool) {
+    advance_interval(w, release, 0.);
+}
+
+fn advance_interval(w: &mut World, release: bool, chemical_dt: f64) {
     if !w.sources.is_empty() {
         w.field.prepare_attraction();
     }
@@ -208,6 +213,7 @@ pub fn advance_scheduled(w: &mut World, release: bool) {
             exposure,
             response: r,
             release,
+            chemical_dt,
         };
         **outcome = source.advance_local(&step, field);
     });
@@ -232,6 +238,32 @@ pub fn advance_scheduled(w: &mut World, release: bool) {
     if changed {
         project_current(w);
     }
+}
+
+pub fn photochemistry(w: &mut World, dt: f64, light: &[(Response, crate::optics::Exposure)]) {
+    let operators = w.climate.operators.as_ref().unwrap();
+    for (source, &(r, exposure)) in w.sources.iter_mut().zip(light) {
+        let shelter = crate::weathering::exposure(
+            1.,
+            r.load,
+            w.config.habitat_feedback,
+            w.config.diffusion_impedance,
+        );
+        let account = source.convert_medium(
+            operators,
+            crate::reaction_medium::Medium::funded(r.signal, exposure),
+            dt * w.config.weathering_rate * w.config.source_processing * shelter,
+        );
+        let [converted, heat, work] = account.map(|v| source.amount * v);
+        let paid = work * exposure.paid_fraction();
+        w.ledger.source_converted += converted;
+        w.ledger.source_heat += heat;
+        w.ledger.source_work += work - paid;
+        w.ledger.optical_captured += paid;
+        w.ledger.optical_heat -= paid;
+        source.refresh_material(&w.chemistry);
+    }
+    project_current(w);
 }
 
 /// Current release composition; chemical processing occurs in inventory, not during release.

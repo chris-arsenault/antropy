@@ -34,7 +34,7 @@ impl ViewKey {
             .ok_or("Invalid cell color")? as u32;
         let layers = p["layers"]
             .as_array()
-            .filter(|v| v.len() == 8 && v.iter().all(Value::is_boolean))
+            .filter(|v| v.len() == 11 && v.iter().all(Value::is_boolean))
             .ok_or("Invalid layers")?;
         let selected = if (11..=13).contains(&color) {
             p["selected"].as_u64().unwrap_or(0)
@@ -56,7 +56,10 @@ impl ViewKey {
             color,
             selected,
             viewport,
-            kind: if layers[6] == true { 6 } else { 5 },
+            kind: [6, 8, 9, 10]
+                .iter()
+                .position(|&i| layers[i] == true)
+                .map_or(5, |i| 6 + i as u32),
         })
     }
     pub fn window(&self, w: &World) -> Window {
@@ -119,4 +122,18 @@ pub fn encode(b: &Buffers, sequence: u64, generation: u64, tick: u64, extent: [f
         out.extend(v.to_le_bytes());
     }
     Bytes::from(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn optical_selections_use_the_same_packed_projection() {
+        for (index, kind) in [(6, 6), (8, 7), (9, 8), (10, 9)] {
+            let mut layers = [false; 11];
+            layers[index] = true;
+            let request = serde_json::json!({"species":0,"color":3,"layers":layers});
+            assert_eq!(ViewKey::parse(&request).unwrap().kind, kind);
+        }
+    }
 }

@@ -2,7 +2,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 56×24×38 Rust controller, with a physiological evaluation clock in checkpoint v40.
+the 58×24×42 Rust controller, with a physiological evaluation clock in checkpoint v42.
 
 <a id="controller-observation-contract"></a>
 
@@ -23,6 +23,7 @@ the 56×24×38 Rust controller, with a physiological evaluation clock in checkpo
 | 43 | Photoreceptor stock divided by itself plus genetic target |
 | 44–51 | Four funded inward receptors, each level and temporal change |
 | 52–55 | Enzyme records 4–7 stock relative to their genetic targets |
+| 56–57 | Funded cover-builder and emitter stock relative to genetic targets |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
 Actual receptor stock supplies gain. Level is C/(C+K), with K=0.1; directional differences use
@@ -46,8 +47,10 @@ or reproductive score. Machinery inputs distinguish installed capacity from gene
 | 4 | Nonnegative logit commits the candidate |
 | 5–8 | Half of one plus signed saturation: independent transporter direction/effort |
 | 9–16 | Positive saturation: activity of each enzyme program |
-| 17–36 | Positive saturation: requested construction allocation for each stock record |
-| 37 | Positive saturation: shared retirement effort |
+| 17–38 | Positive saturation: requested construction allocation for each stock record |
+| 39 | Positive saturation: shared retirement effort |
+| 40 | Signed saturation: deposit/recover overhead material with funded builder stock |
+| 41 | Positive saturation: paid light emission with funded emitter stock |
 
 A transporter's allele selects its chemical target. Neural output selects direction and effort:
 0 exports fully, 0.5 holds, and 1 imports fully. Actual transport requires machinery, available species, storage, conductance and
@@ -60,9 +63,9 @@ The task byte has no task semantics in physics; manual writes are recorded diagn
 
 ## Topology and founder
 
-The network has 56 inputs, 24 recurrent saturating units and 38 output logits: 1,344 input weights,
-576 recurrent weights, 24 hidden biases, 912 output weights and 38 output biases, totaling
-2,894 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
+The network has 58 inputs, 24 recurrent saturating units and 42 output logits: 1,392 input weights,
+576 recurrent weights, 24 hidden biases, 1,008 output weights and 42 output biases, totaling
+3,042 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
 belong to program records; inactive records have no funded function. Neutral duplication copies
 activity/construction readouts and divides incoming stock contributions. Deletion removes the
 program's ports but leaves its physical stock until paid retirement.

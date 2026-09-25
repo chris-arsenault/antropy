@@ -14,7 +14,6 @@ unsafe fn sum(v: std::arch::wasm32::v128) -> f32 {
 pub(super) fn project(weights: &[f32], input: &[f32], bias: &[f32], output: &mut [f32]) {
     debug_assert_eq!(weights.len(), output.len() * input.len());
     debug_assert_eq!(bias.len(), output.len());
-    debug_assert_eq!(input.len() % 4, 0);
     let width = input.len();
     #[cfg(target_arch = "wasm32")]
     let first = unsafe {
@@ -22,7 +21,8 @@ pub(super) fn project(weights: &[f32], input: &[f32], bias: &[f32], output: &mut
         let mut first = 0;
         while first + 4 <= output.len() {
             let mut accumulators = [f32x4_splat(0.); 4];
-            for j in (0..width).step_by(4) {
+            let aligned = width / 4 * 4;
+            for j in (0..aligned).step_by(4) {
                 let x = v128_load(input.as_ptr().add(j).cast());
                 for (row, accumulator) in accumulators.iter_mut().enumerate() {
                     let w = v128_load(weights.as_ptr().add((first + row) * width + j).cast());
@@ -30,7 +30,11 @@ pub(super) fn project(weights: &[f32], input: &[f32], bias: &[f32], output: &mut
                 }
             }
             for (row, accumulator) in accumulators.into_iter().enumerate() {
-                output[first + row] = sum(accumulator) + bias[first + row];
+                let mut value = sum(accumulator);
+                for j in aligned..width {
+                    value += weights[(first + row) * width + j] * input[j];
+                }
+                output[first + row] = value + bias[first + row];
             }
             first += 4;
         }

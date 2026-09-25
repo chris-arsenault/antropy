@@ -50,6 +50,12 @@ export function CellOrganization({ inspection }: { inspection: Inspection }) {
           rows={BODY_PARTS.map((part, i) => [part, n(cell.action.allocation[i])])}
         />
       </details>
+      <p>
+        Cover effort {n(cell.action.cover)} (positive deposits, negative recovers). This tick:
+        deposited {n(cell.flows.coverDeposited)}, recovered {n(cell.flows.coverRecovered)} material.
+        Emission effort {n(cell.action.emission)}; paid {n(cell.flows.emission)} work, recovered
+        optical work {n(cell.flows.recycledWork)}. Zero between physiology updates.
+      </p>
     </details>
   );
 }

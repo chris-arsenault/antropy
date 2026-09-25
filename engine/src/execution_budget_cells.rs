@@ -7,6 +7,8 @@ fn action_change(a: controller::Action, b: controller::Action) -> f64 {
         (a.turn - b.turn) / 2.,
         a.repair - b.repair,
         a.retirement - b.retirement,
+        (a.cover - b.cover) / 2.,
+        a.emission - b.emission,
     ]
     .into_iter()
     .chain(a.transport.into_iter().zip(b.transport).map(|(a, b)| a - b))
@@ -159,7 +161,7 @@ pub(super) fn chemical_rate(cell: &Cell, c: &Config, gross: &[f64; 256]) -> (f64
 pub(super) fn physiology_rates(
     cell: &Cell,
     w: &World,
-    row: &[(usize, f64)],
+    (signal, exposure): ([f64; 2], crate::optics::Exposure),
     executor: &mut crate::metabolism::Executor,
 ) -> ([f64; 256], [f64; 256], f64, f64, usize) {
     let c = &w.config;
@@ -167,12 +169,12 @@ pub(super) fn physiology_rates(
     let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
     let mut probe = cell.clone();
     probe.flows = Default::default();
-    let signal = crate::weathering::signal(std::array::from_fn(|k| {
-        row.iter()
-            .map(|&(n, a)| a * w.field.medium_signal(n)[k])
-            .sum()
-    }));
-    let signal = crate::illumination::drive(signal, w.field.illumination.sample(row));
+    let emission = c.motor_power_density
+        * probe.body[crate::organism::EMITTER_STOCK]
+        * (1. - probe.damage)
+        * probe.action.emission;
+    probe.pay(dt * emission);
+    let signal = crate::illumination::drive(signal, exposure.drive());
     let load = crate::sensing::stress_load(&probe, g, c, &w.field, &w.chemistry);
     probe.damage = (probe.damage + dt * c.damage_rate * load / (c.stress_k + load)).min(1.);
     let work = executor.react(&mut probe, c, &w.chemistry, dt, true, signal);
@@ -204,6 +206,7 @@ pub(super) fn physiology_rates(
         0.
     };
     let spending = motor
+        + emission
         + cell.basal(c) / dt
         + learning
         + (probe.flows.repair + probe.flows.construction) / dt;

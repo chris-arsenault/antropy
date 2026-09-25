@@ -85,6 +85,11 @@ pub struct Config {
     pub conversion_efficiency: f64,
     pub environmental_work: f64,
     pub illumination_contrast: f64,
+    pub shade_strength: f64,
+    pub shade_scale: f64,
+    pub optical_column: f64,
+    pub optical_reach: f64,
+    pub optical_power_density: f64,
     pub illumination_fast_period: f64,
     pub illumination_slow_period: f64,
     pub illumination_modulation_period: f64,
@@ -180,6 +185,11 @@ impl Default for Config {
             conversion_efficiency: 0.8,
             environmental_work: crate::transformation_work::DEFAULT_STRENGTH,
             illumination_contrast: 0.8,
+            shade_strength: 0.8,
+            shade_scale: 32.,
+            optical_column: 0.1,
+            optical_reach: 2.,
+            optical_power_density: 0.01,
             illumination_fast_period: 6000.,
             illumination_slow_period: 18000.,
             illumination_modulation_period: 62000.,
@@ -245,6 +255,10 @@ impl Config {
             ("constructionEnergy", self.construction_energy),
             ("sourceLifetime", self.source_lifetime),
             ("illuminationFastPeriod", self.illumination_fast_period),
+            ("shadeScale", self.shade_scale),
+            ("opticalColumn", self.optical_column),
+            ("opticalReach", self.optical_reach),
+            ("opticalPowerDensity", self.optical_power_density),
             ("illuminationSlowPeriod", self.illumination_slow_period),
             (
                 "illuminationModulationPeriod",
@@ -265,6 +279,9 @@ impl Config {
                 > crate::memory_budget::MAX_FIELD_NODES as f64
         {
             return Err("Invalid chemical mesh; dimensions must be integral multiples and fit the 2 GiB geographic memory reservation".into());
+        }
+        if self.shade_scale < 2. * self.mesh || self.optical_reach < self.mesh / 2. {
+            return Err("Optical scales must resolve on the configured mesh".into());
         }
         if self.dt > 1.
             || self.weathering_rate > 1.
@@ -288,6 +305,7 @@ impl Config {
         for x in [
             self.source_priming,
             self.illumination_contrast,
+            self.shade_strength,
             self.susceptibility_floor,
             self.conversion_efficiency,
             self.protected_inventory_fraction,

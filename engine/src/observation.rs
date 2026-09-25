@@ -73,7 +73,7 @@ pub fn summary(w: &World) -> Value {
         total_mass += c.mass();
         generation = generation.max(c.generation);
     }
-    json!({"tick":w.tick,"modelSeconds":w.tick as f64*w.config.dt,"population":w.cells.len(),"lineages":lineages.len(),"genomes":genomes.len(),"generation":generation,"cellEnergy":total_energy,"biomass":total_mass,"heldMaterial":matter,"heldEnergy":energy,"materialResidual":l.initial_material+l.supplied-matter-l.washed_out-l.numerical_material,"energyResidual":l.initial_energy+l.supplied_energy+l.weathering_work+l.source_work+l.flows.external_work-energy-l.washout_energy-l.numerical_energy-l.heat(),"ledger":l,"ancestryRecords":w.ancestry.len(),"stopReason":w.stop_reason})
+    json!({"tick":w.tick,"modelSeconds":w.tick as f64*w.config.dt,"population":w.cells.len(),"lineages":lineages.len(),"genomes":genomes.len(),"generation":generation,"cellEnergy":total_energy,"biomass":total_mass,"coverMaterial":w.cover.totals(&w.chemistry).0,"heldMaterial":matter,"heldEnergy":energy,"materialResidual":l.initial_material+l.supplied-matter-l.washed_out-l.numerical_material,"energyResidual":l.initial_energy+l.supplied_energy+l.weathering_work+l.source_work+l.flows.external_work-energy-l.washout_energy-l.numerical_energy-l.heat(),"ledger":l,"ancestryRecords":w.ancestry.len(),"stopReason":w.stop_reason})
 }
 pub fn environment(w: &World) -> Value {
     let mut species = [0.; 256];
@@ -183,6 +183,13 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     result["fieldInterface"] = json!(interface.map(|r| r.field));
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));
+    result["optics"] = json!(cell.map(|c| crate::illumination::inspect(w, c)));
+    result["coverLocal"] = json!(cell.map(|c| {
+        let sites = w.cover.stencil(c.x, c.y);
+        (0..256)
+            .map(|s| w.cover.sample(s, &sites))
+            .collect::<Vec<_>>()
+    }));
     if request.get("genealogy").and_then(Value::as_bool) == Some(true) {
         result["genealogy"] = crate::genealogy::inspect(w, id);
         result["relationships"] = crate::relationships::inspect(w, id);

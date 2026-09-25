@@ -95,7 +95,7 @@ async function checkMapSelection(container: HTMLElement) {
   expect(container.textContent).toContain("Browse retained spatial samples");
   expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
   expect(control<HTMLSelectElement>(container, "Environment").value).toBe("potential");
-  expect(control<HTMLInputElement>(container, "Sunlight and shadow").checked).toBe(false);
+  expect(control<HTMLInputElement>(container, "Light and shadow").checked).toBe(false);
   expect(control<HTMLInputElement>(container, "Movement resistance").checked).toBe(true);
   await act(async () => control<HTMLInputElement>(container, "Stress exposure").click());
   await act(async () => control<HTMLInputElement>(container, "Population regions").click());

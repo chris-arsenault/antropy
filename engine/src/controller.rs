@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 
 pub const LIGHT_INPUT: usize = 39;
 pub const INWARD_INPUT: usize = 44;
-pub const INPUTS: usize = 52 + crate::organism::MAX_ENZYMES - 4;
+pub const BUILDER_INPUT: usize = 56;
+pub const EMITTER_INPUT: usize = 57;
+pub const INPUTS: usize = 58;
 pub const BASE_INPUTS: u64 = (1 << 28) | (0b11111 << 30);
 pub const ENVIRONMENT_INPUTS: u64 = ((1 << 16) - 1) | (0b1111 << LIGHT_INPUT);
 pub const PHYSIOLOGY_INPUTS: u64 = ((1_u64 << INPUTS) - 1) & !(BASE_INPUTS | ENVIRONMENT_INPUTS);
@@ -25,7 +27,9 @@ pub const OUTPUTS: usize = 9;
 pub const ACTIVITY: usize = OUTPUTS;
 pub const ALLOCATION: usize = ACTIVITY + crate::organism::MAX_ENZYMES;
 pub const RETIREMENT: usize = ALLOCATION + crate::organism::STOCKS;
-pub const TOTAL_OUTPUTS: usize = RETIREMENT + 1;
+pub const COVER: usize = RETIREMENT + 1;
+pub const EMISSION: usize = RETIREMENT + 2;
+pub const TOTAL_OUTPUTS: usize = RETIREMENT + 3;
 pub const RECURRENT: usize = INPUTS * HIDDEN;
 const BIAS: usize = RECURRENT + HIDDEN * HIDDEN;
 const OUTPUT: usize = BIAS + HIDDEN;
@@ -64,6 +68,8 @@ pub struct Action {
     pub activity: [f64; crate::organism::MAX_ENZYMES],
     pub allocation: [f64; crate::organism::STOCKS],
     pub retirement: f64,
+    pub cover: f64,
+    pub emission: f64,
 }
 impl Default for Action {
     fn default() -> Self {
@@ -75,6 +81,8 @@ impl Default for Action {
             activity: [1.; crate::organism::MAX_ENZYMES],
             allocation: [1.; crate::organism::STOCKS],
             retirement: 0.,
+            cover: 0.,
+            emission: 0.,
         }
     }
 }
@@ -165,6 +173,8 @@ fn decode(logits: &[f32], state: &mut State) -> Action {
         activity: std::array::from_fn(|s| squash(logits[ACTIVITY + s]).max(0.) as f64),
         allocation: std::array::from_fn(|s| squash(logits[ALLOCATION + s]).max(0.) as f64),
         retirement: squash(logits[RETIREMENT]).max(0.) as f64,
+        cover: squash(logits[COVER]) as f64,
+        emission: squash(logits[EMISSION]).max(0.) as f64,
     }
 }
 pub fn assimilate(allele: &Genome, expressed: &Genome, state: &State, retention: f64) -> Genome {

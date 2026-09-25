@@ -2,6 +2,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { type Request, type Message } from "./protocol";
 import { type ViewOptions } from "./renderer";
+import { chemicalLayers, initialChemicalDisplay } from "./chemicalDisplay";
 
 const graphics = vi.hoisted(() => ({ draw: vi.fn(), dispose: vi.fn() }));
 vi.mock("./renderer", () => ({
@@ -73,7 +74,7 @@ it("retries the latest paused view and manual step after GPU backpressure withou
     species: 0,
     color: 6,
     selected: -1,
-    layers: [true, false, false, false, false, false, false, false],
+    layers: chemicalLayers({ ...initialChemicalDisplay, base: "cover" }),
     regions: true,
     sources: true,
     exposure: 4,

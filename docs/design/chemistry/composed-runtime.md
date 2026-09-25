@@ -1,6 +1,6 @@
 # Composed artificial chemistry runtime
 
-Updated September 22, 2026. This contract governs the fresh implementation under
+Updated September 25, 2026. This contract governs the fresh implementation under
 [the canonical math plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
@@ -67,9 +67,9 @@ Geography is a separate periodic XY plane. U prices material conversions; D cont
 spread; I impedes motion; S creates compatible or incompatible exposure. Two shared
 signed profiles supply geographic transport signals. They store no usable work.
 
-Rust owns compact occupied f32 geographic rows, f64 intracellular mixtures, twenty bounded funded
+Rust owns compact occupied f32 geographic rows, f64 intracellular mixtures, twenty-two bounded funded
 body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v41 persists one birth genome identity per cell
+The same worker renders borrowed WASM views. Checkpoint v42 persists one birth genome identity per cell
 and one reservoir composition plus amount; it rejects earlier physical bytes.
 Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
@@ -417,7 +417,7 @@ For each edge, external work per accepted material is `w=ε*max(0,a dot B)`, wit
 `Δu+w>=0`; unaffordable engagement is zeroed before donor allocation. Among eligible branches,
 reference-value differences do not rank rates. Diffusion controls spread only.
 Exposure uses the existing impedance mobility 1/(1+diffusionImpedance×load). For branch hazards
-r=weatheringRate×elapsed×exposure×engagement, allocate r/(1+sum(r)). All branches reserve against
+r=weatheringRate×elapsed×exposure×L_incident×engagement, allocate r/(1+sum(r)). All branches reserve against
 the original donor; products cannot cascade during that update. Field and reservoir material
 use the same compiled operator; sourceProcessing multiplies reservoir exposure. Accepted amount q
 records `q*w` external input and `q*(Δu+w)` heat, never usable cell work. Favorably oriented
@@ -428,9 +428,9 @@ drive can continue indefinitely; it is not stored energy in the vector field or 
 Cells must still import and process the products with funded machinery. No geographic
 oscillator or weatheringPeriod setting remains.
 
-Conversion runs in the final active field pass. Zero rate, neutral medium and inert species/pairs
+V42 conversion follows transport and optical reservation in a region-owned chemical pass. Zero rate, neutral medium and inert species/pairs
 skip reaction arithmetic. Sum engagement is bounded by 2|B|_1; skip a source donor or a complete
-pair of field lanes when each q×min(1,2×|B|_1×weatheringRate×elapsed×exposure)≤f. A small field
+pair of field lanes when each q×min(1,2×|B|_1×weatheringRate×elapsed×exposure×L_incident)≤f. A small field
 lane can accompany an active partner. Here f is the concentration floor times mesh area for
 field material, or interface area for reservoir material. Skipped donors retain their material.
 Final extracellular products face the same floor and numerical accounts. Only surviving groups
@@ -514,7 +514,7 @@ receptor supplies tonic, temporal, body-forward and body-left readings. Stock-de
 gain vanishes with absent stock. A separately funded photoreceptor samples mean local
 illumination through those same rows and supplies the same four cues; its investment uses
 the existing receptor reference mass and upkeep. See [photoreception](../../photoreception.md).
-The 56-input, 24-recurrent-unit, 38-output private RNN
+The 58-input, 24-recurrent-unit, 42-output private RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
 
@@ -549,8 +549,8 @@ some reserved work unused when material is scarce; it does not iterate or select
 
 Compile each row's weighted potential drop Δu and weighted profile difference
 `a=(sum_t P(t)*p0(t)-p0(s), -(sum_t P(t)*p1(t)-p1(s)))/4`.
-Once per physiology stage sample B at frozen pre-movement footprints, after field/source advance
-and before exchange. V34 samples scalar illumination L over that same footprint,
+V42 samples B at frozen post-movement footprints, after field/source transport and material
+exchange. It samples scalar illumination L over that same footprint,
 forms `B_light=L*B`, and computes `w=ε*max(0,a dot B_light)` once for occupied rows. Use
 the same yield for funding and commit. With `d=Δu+w`, usable work is .8d when d is positive
 and d/.8 when negative, less .05 per unit that actually changes chemical identity. Accepted
@@ -576,23 +576,25 @@ L has geographic mean1 and lies in[.2,1.8]. Rectification and occupied
 reaction support mean accepted external work need not retain its old mean.
 
 Cells and reservoirs use normalized footprint samples; dissolved material uses its node.
-All three use the existing reaction coefficient and accepted-amount work accounts. Abiotic
-kinetics continue to contract the unilluminated B; light affects work and uphill affordability.
-Possible-route bounds use1+c, not current darkness. No free work enters a cell bank and
+All owners use the existing reaction coefficient and accepted-amount work accounts. V42 public
+kinetics multiply engagement by incident light, so public conversion stops in darkness.
+Intracellular enzyme kinetics remain unchanged. Possible routes describe chemical reachability
+under sufficient drive, not current light or proof that finite paid work is available. No free work enters a cell bank and
 time and coordinates never enter its controller. Since v31, separately funded photoreception
 provides local optical level/change/contrasts without granting work or automatic steering. Local cellular chemistry
 continues to change B, coupling ecological work back into transformation returns.
 
 The evaluator rotates separable axis tables once per needed tick, with O(nx+ny) storage
-and O(1) per queried node. It performs no extra chemical pass or diffusion step and does
-not wake empty chemical support. Seed, tick and four config scalars determine continuation;
-derived tables are not saved. Presentation prepares its own current-time cache so that
+and O(1) solar evaluation per queried node, plus sparse optical-map lookup. V42 adds one
+sparse overhead material owner and a separate region-owned public conversion pass after
+transport. Canonical terrain, film material and held emitted rates are saved; separable
+solar tables and film optical depths are rebuilt. Presentation prepares its own current-time cache so that
 inspection cannot change the solver's frozen stage. The optional illumination map and overlay
 reuse the existing eight-float borrowed WebGL field path. The default base remains energy
 per material, with usable-energy cell colors. The default map-context pass adds translucent
 night shadow, fine resistance hatching and stress dots, each independently switchable
 from the persistent key or Map settings. Detailed standalone layers remain available.
-Packed channel2 carries scalar illumination and channel3 is reserved zero; normalized resistance/stress
+Packed channel2 carries total received light and channel3 carries film opacity; normalized resistance/stress
 remain in channels5/6. No texture expansion, full-field message or physical change is needed.
 Sun/shadow shading uses L, with a smooth visual transition
 from0.8 to1.2 around the uniform1× reference. The renderer draws the ordinary map on a constant
@@ -603,6 +605,41 @@ or texture uploads. Dedicated illumination maps retain their standalone light-va
 This is a display mapping; apparent darkness does not remove physical work.
 
 ## Bodies, inheritance and accounts
+
+V42 installs [terrain shade and organism-built light ecology](../light-ecology.md#selected-extension-physical-owners-and-shared-optical-funding).
+The selected-extension section owns the full optical derivation and parameter units.
+Canonical terrain transmission and optional ceilings act on overhead sunlight before
+interpolation. Sparse film material has optical depth `tau=mass/(mesh²*opticalColumn)`;
+the plane receives `exp(-tau)` and film receives the column mean `(1-exp(-tau))/tau`.
+Film uses ordinary chemical identity, transport, conversion, washout and numerical accounts.
+Builder stock bounds paid deposit/recovery at the shared construction throughput and price.
+
+Emitter effort pays `dt*motorPowerDensity*stock*(1-damage)*effort` once per physiology
+interval. Conversion efficiency and two equal optical paths partition lateral delivery below
+cover and upward interception by cover; all other work is booked as optical loss. Lateral
+delivery uses the normalized local Gaussian kernel. A frozen material-weighted allocation
+shares each node's work among dissolved material, cell inventories and reservoirs. The
+chemical-table bound `G=environmentalWork*max_k(range(profile_k))/4` gives each recipient
+`fundedEmission=min(incidentEmission,allocatedWork/(G*material))`. Reactions use sunlight
+plus funded emission for work, while public kinetics and sensing use total incident light.
+Captured emission is internal recycled work, never another external input. Held rates and
+last paid emitter powers persist for sensing/display; they cannot be spent again.
+
+The 0.8-second physiology boundary follows transport, motion and paid material exchange.
+Emission and all recipient allocations precede field/film, reservoir and private conversion.
+No product or recaptured work funds the same interval's emission. Cover stocks and emitter
+stocks use ordinary investment loci, allocation, maintenance, retirement and inheritance.
+Inputs 56–57 report their funded stock; outputs 40–41 request signed cover transfer and
+nonnegative emission. Allocation now spans 22 stocks and retirement is output 39.
+Reference founders fund 0.04 material in each added stock, with zero initial optical effort.
+
+Geographic admission reserves 8192 bytes/node for the two material owners within the existing
+2 GiB reservation (262,144 nodes). Default 720×540 at mesh 2 fits; larger rejected requests
+must choose their geometry explicitly. No automatic resolution reduction occurs. Empty film
+uses sparse rows. This reservation excludes population/ancestry and is not a measured RSS.
+Physical format v42 rejects v41 without migration; deployment needs an explicit new-world
+cutover if the continuing server still holds v41. Constructed checks and their negative
+payback findings are in [light ecology results](../../light-ecology-results.md).
 
 All internal species can fund biomass, selected proportionally. Assembly pays .5 work per
 unit and transfers the consumed mixture into bound material without changing chemical identity.

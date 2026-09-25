@@ -50,10 +50,30 @@ impl Climate {
     pub fn convert_lit(
         &mut self,
         row: &mut [f32],
-        mut mask: u64,
+        mask: u64,
         medium: ([f64; 2], f64),
         dt: f64,
         light: f64,
+    ) -> u64 {
+        self.convert_funded(
+            row,
+            mask,
+            medium,
+            dt,
+            crate::optics::Exposure {
+                solar: light,
+                ..Default::default()
+            },
+        )
+    }
+
+    pub fn convert_funded(
+        &mut self,
+        row: &mut [f32],
+        mut mask: u64,
+        medium: ([f64; 2], f64),
+        dt: f64,
+        light: crate::optics::Exposure,
     ) -> u64 {
         if self.rate == 0. || mask == 0 {
             return mask;
@@ -69,9 +89,11 @@ impl Climate {
         if elapsed[0] == 0. || weathering::strength(signal) == 0. {
             return active;
         }
-        let minimum =
-            weathering::minimum_donor(self.floor, elapsed[0] * weathering::strength(signal));
-        let medium = crate::reaction_medium::Medium::illuminated(signal, light);
+        let minimum = weathering::minimum_donor(
+            self.floor,
+            elapsed[0] * weathering::strength(signal) * light.light(),
+        );
+        let medium = crate::reaction_medium::Medium::funded(signal, light);
         while mask != 0 {
             let start = mask.trailing_zeros() as usize * 4;
             mask &= mask - 1;
@@ -231,7 +253,7 @@ pub fn local(w: &crate::world::World, x: f64, y: f64) -> [f64; 3] {
     );
     [
         ambient,
-        effective,
+        effective * crate::illumination::at(w, x, y),
         if ambient > 0. {
             1. - effective / ambient
         } else {

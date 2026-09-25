@@ -14,15 +14,25 @@ cohesion-based washout discount. One finite attraction range, local repulsion an
 crowding remain. Bounded mechanism checks pass; human motion review and long-run ecological
 effects remain unverified. The separate structural execution work is recorded below.
 
+<a id="design-light-ecology"></a>
+
+## Current delivery: terrain shade and organism-built light ecology
+
+The [light ecology plan](../plans/LIGHT-ECOLOGY-PLAN.md) implements static geographic shade,
+funded overhead cover, paid emission and common public photochemistry in physical v42.
+Sunlight remains overhead and non-depleting. The [results](../light-ecology-results.md) separate
+physical/controller opportunities from failed or unproven ecological returns. Final operating
+and human review gates remain explicit; the continuing v41 server is not silently migrated.
+
 <a id="design-material-coupling"></a>
 
-## Next: class-specific material coupling
+## Class-specific material coupling baseline
 
 The v40 server world showed reservoir regions dispersing to a random layout and cells spreading
 toward an even distribution. The [material coupling plan](../plans/MATERIAL-COUPLING-PLAN.md)
 keeps the shared chemical response but couples dissolved material, reservoirs and cells to it
-separately, restoring reservoir cluster tension and adding cell adhesion. It is the current
-simulation work item; micro-terrain and climate follow it.
+separately, restoring reservoir cluster tension and adding cell adhesion. Its v41 implementation
+underpins the light extension; its recorded observation limits remain valid.
 
 <a id="design-structural-priority"></a>
 

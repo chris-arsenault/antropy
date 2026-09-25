@@ -9,7 +9,7 @@ fn close(actual: f32, expected: f32) {
 
 #[test]
 fn batched_projection_handles_hidden_and_output_dimensions_with_biases() {
-    for (rows, columns) in [(24, 56), (38, 24)] {
+    for (rows, columns) in [(24, 56), (24, 58), (42, 24)] {
         let weights: Vec<_> = (0..rows * columns)
             .map(|i| (i % 17) as f32 / 17. - 0.5)
             .collect();

@@ -196,7 +196,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             Ok(json!(id))
         }
         "diagnosticController" => {
-            let logits: [f32; 9] = serde_json::from_value(
+            let logits: Vec<f32> = serde_json::from_value(
                 v.get("logits")
                     .cloned()
                     .ok_or("Missing diagnostic logits")?,
@@ -273,6 +273,9 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
                 programs,
                 v.get("dense").and_then(Value::as_bool).unwrap_or(false),
             )?;
+            if v.get("optical").and_then(Value::as_bool) == Some(true) {
+                crate::diagnostics::optical_load(w);
+            }
             if v.get("growth").and_then(Value::as_bool) == Some(true) {
                 for (i, cell) in w.cells.iter_mut().enumerate() {
                     cell.set_fixture_body(

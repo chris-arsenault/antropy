@@ -111,6 +111,7 @@ fn advance(w: &mut World, scratch: &mut Scratch, candidate: bool) {
                 exposure,
                 response: r,
                 release: true,
+                chemical_dt: w.config.dt,
             },
             &mut w.environment_rng,
             &mut w.field,

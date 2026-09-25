@@ -75,8 +75,15 @@
 .field-ramp.weathering {
   background: linear-gradient(90deg, #091f3b, #b8661f);
 }
-.field-ramp.illumination {
+.field-ramp.illumination,
+.field-ramp.terrain {
   background: linear-gradient(90deg, #020304 15%, #77766a 50%, #b8b39e 85%);
+}
+.field-ramp.cover {
+  background: linear-gradient(90deg, #020304, #33ccb3);
+}
+.field-ramp.emission {
+  background: linear-gradient(90deg, #020304, #ffcc4d);
 }
 .map-context {
   display: flex;

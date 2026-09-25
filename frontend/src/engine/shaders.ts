@@ -66,8 +66,10 @@ void main() {
   light=mix(light,mix(vec3(0.035,0.12,0.23),vec3(0.72,0.4,0.12),clamp(detail.w,0.0,1.0)),weatheringLayer);
   light=mix(light,vec3(0.83,0.64,0.93),selectedLayer*(1.0-exp(-exposure*max(0.0,detail.x))));
   if(illuminationMode>0) {
-    float drive=amount.z;
-    light=solarGround(daylight(drive));
+    light=solarGround(daylight(amount.x));
+    if(illuminationMode==2) light=solarGround(clamp(amount.x,0.0,1.0));
+    if(illuminationMode==3) light=mix(vec3(0.008,0.01,0.016),vec3(0.2,0.8,0.7),clamp(amount.x,0.0,1.0));
+    if(illuminationMode==4) light=mix(vec3(0.008,0.01,0.016),vec3(1.0,0.8,0.3),presence);
   }
   // Screen-space patterns keep hazards distinguishable at every zoom.
   float band=1.0-smoothstep(0.025,0.075,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/12.0)-0.5));
@@ -126,6 +128,10 @@ void main() {
   if(any(lessThan(worldPoint,vec2(0.0))) || any(greaterThanEqual(worldPoint,worldSize))) discard;
   if(d>1.0) discard;
   if(halo>1.5) {
+    if(details.x>1.5) {
+      color=vec4(shade.rgb,shade.a*0.5*(1.0-smoothstep(0.0,1.0,d)));
+      return;
+    }
     float stroke;
     if(details.x<0.5) {
       if(showSources<0.5) discard;

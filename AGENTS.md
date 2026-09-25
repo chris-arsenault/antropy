@@ -96,13 +96,13 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v41 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v42 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
-Current physiology has 56 local RNN inputs, 24 recurrent units and 38 outputs, twenty bounded
+Current physiology has 58 local RNN inputs, 24 recurrent units and 42 outputs, twenty-two bounded
 stock records, four receptors/transporters, one to eight enzyme programs, membrane compatibility
 and paid photoreception. Cells retain one internal mixture; internal compartments were rejected.
 Retained composition modulates rates without changing per-conversion work. Funded inward sensing,
@@ -129,7 +129,12 @@ persistent composition at full interface whether full or empty, so emptied reser
 cohering; they supply nothing.
 Illumination composes several
 slow spatial/temporal axes into shared transformation work; it is not direct energy credited
-to cells. Cells can pay for local optical sensing. See [material habitats](docs/material-habitats.md),
+to cells. V42 adds permanent geographic shade, a sparse overhead material film and paid local
+emission. Funded builder and emitter stocks use ordinary allocation and inheritance. Public
+conversion is photochemical; private enzyme kinetics remain unchanged. Finite emitted work
+is allocated once across recipients and accounted separately from external solar work.
+See [light ecology](docs/design/light-ecology.md) and its [checks](docs/light-ecology-results.md).
+Cells can pay for local optical sensing. See [material habitats](docs/material-habitats.md),
 [photoreception](docs/photoreception.md) and the composed laws for definitions and limits.
 
 Default observation is a full-screen viewport, usable-energy cell colors, energy-per-material
@@ -140,7 +145,8 @@ must never be serialized or copied to React. The [ownership contract](docs/desig
 and its CI guards remain mandatory.
 
 Source zones/epochs and optional disturbance remain available; disturbance is off by default. Direct adhesion, multiple substrates, unrestricted genome/neural topology,
-terrain and rotational climate are deferred. The user resumed multicore execution September 21.
+terrain elevation/conductance and rotational climate are deferred. Permanent terrain shade is
+installed. The user resumed multicore execution September 21.
 The [scaling plan](SCALING-PLAN.md#multicore-design) records the installed persistent Rayon pool,
 shared WASM memory, disjoint field/cell jobs and small-work serial crossover. The owning worker
 still coordinates the sole World and renders borrowed views after every phase joins. Development
@@ -300,7 +306,7 @@ expensive ecological panels merely for formatting or documentation changes.
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive fifty-six local chemical,
+- Author physical pressures and local carriers. Controllers receive fifty-eight local chemical,
   light, body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries

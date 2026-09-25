@@ -37,6 +37,8 @@ const INPUTS = [
     `Inward receptor ${i} change`,
   ]).flat(),
   ...Array.from({ length: 4 }, (_, i) => `Built enzyme ${i + 4}`),
+  "Built cover builder",
+  "Built light emitter",
 ];
 interface Props {
   bridge: Bridge;
@@ -149,6 +151,14 @@ function CellDetails({
       <Chemistry inspection={p} definition={definition} />
       <CellOrganization inspection={p} />
       <Photoreception cell={c} />
+      {p.optics && (
+        <p>
+          Sunlight {n(p.optics.solar)}× · emitted light {n(p.optics.emitted)}×. Terrain transmission{" "}
+          {n(100 * p.optics.terrainTransmission)}% · film transmission{" "}
+          {n(100 * p.optics.coverTransmission)}%. Paid emitter power {n(p.optics.paidPower)} work /
+          time at the last optical update.
+        </p>
+      )}
       {p.illumination !== null && (
         <p>
           Local illumination: {n(p.illumination)}×. External work accepted this tick{" "}
@@ -157,7 +167,7 @@ function CellDetails({
       )}
       {p.weathering && (
         <p>
-          Chemical weathering: medium activity {n(p.weathering[0])} · exposed activity{" "}
+          Chemical weathering: medium activity {n(p.weathering[0])} · photochemical activity{" "}
           {n(p.weathering[1])} · attenuation {(100 * p.weathering[2]).toFixed(1)}%. Conversion also
           depends on the chemical present.
         </p>
@@ -227,8 +237,8 @@ function Chemistry({
     );
   };
   const species = c.inventory.amounts
-    .map((inside, s) => ({ inside, s, outside: p.local![s] }))
-    .filter((v) => v.inside + v.outside > 0);
+    .map((inside, s) => ({ inside, s, outside: p.local![s], cover: p.coverLocal?.[s] ?? 0 }))
+    .filter((v) => v.inside + v.outside + v.cover > 0);
   return (
     <div>
       <h3>Chemistry</h3>
@@ -248,11 +258,12 @@ function Chemistry({
       <details>
         <summary>Local and internal mixtures · {species.length} species</summary>
         <Table
-          columns={["ID", "Inside · amount", "Outside · concentration", "U / D / I / S"]}
+          columns={["ID", "Inside · amount", "Dissolved / area", "Film / area", "U / D / I / S"]}
           rows={species.map((v) => [
             v.s,
             n(v.inside),
             n(v.outside),
+            n(v.cover),
             (["potential", "diffusion", "impedance", "stress"] as const)
               .map((key) => n(definition.chemistry.properties[v.s][key]))
               .join(" / "),

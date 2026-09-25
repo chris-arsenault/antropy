@@ -8,6 +8,17 @@ pub(super) fn seed_requests(weights: &mut [f32]) {
     weights[OUTPUT_BIAS + ACTIVITY..OUTPUT_BIAS + RETIREMENT].fill(3.);
     weights[OUTPUT_BIAS + RETIREMENT] = 0.;
 }
+
+/// Handcrafted diagnostics still run ordinary neural inference and paid physical actions.
+pub fn optical(g: &mut Genome, cover: f32, emission: f32, response: Option<(usize, usize, f32)>) {
+    g.weights[OUTPUT_BIAS + COVER] = cover;
+    g.weights[OUTPUT_BIAS + EMISSION] = emission;
+    if let Some((input, output, gain)) = response {
+        assert!(input < INPUTS && output < TOTAL_OUTPUTS);
+        g.weights[input] = 1.;
+        g.weights[OUTPUT + output * HIDDEN] = gain;
+    }
+}
 pub fn duplicate(g: &mut Genome, source: usize, destination: usize) {
     let (from, to) = (stock_input(source), stock_input(destination));
     for h in 0..HIDDEN {

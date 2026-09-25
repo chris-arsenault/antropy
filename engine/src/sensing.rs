@@ -181,6 +181,14 @@ fn observe_stocks(cell: &mut Cell, g: &Compiled, c: &Config) {
     cell.inputs[37] = (cell.material() / cell.capacity(c).max(1e-30)).clamp(0., 1.) as f32;
     cell.inputs[38] = cell.damage as f32;
     cell.inputs[LIGHT_INPUT + 4] = stock(cell.body[PHOTO_STOCK], g.body[PHOTO_STOCK]);
+    cell.inputs[crate::controller::BUILDER_INPUT] = stock(
+        cell.body[crate::organism::BUILDER_STOCK],
+        g.body[crate::organism::BUILDER_STOCK],
+    );
+    cell.inputs[crate::controller::EMITTER_INPUT] = stock(
+        cell.body[crate::organism::EMITTER_STOCK],
+        g.body[crate::organism::EMITTER_STOCK],
+    );
 }
 
 /// Energy, scalar crowding shares and the private byte advance on the base clock.

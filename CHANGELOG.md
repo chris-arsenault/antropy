@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-25 — Terrain shade and organism-built light ecology
+
+- Add permanent geographic shade, funded overhead material cover and paid local emission
+  in physical format v42. Sunlight remains external; emitted work has one shared finite account.
+- Make public conversion light-dependent while retaining intracellular enzyme kinetics.
+  Extend ordinary funded bodies and local controllers to 22 stocks, 58 inputs and 42 outputs.
+- Add terrain, film, received-light and emission maps, paid emitter markers and local costs
+  through the existing renderer and bounded observations. Same-format restore retains optical state.
+- Preserve negative constructed results: baseline isolated deposits fall below the material
+  cutoff, and no whole-cell shelter or lamp payback was established. V41 saves are not migrated.
+
 ## 2026-09-20 — Material habitats, local light and observation
 
 - Integrate shared two-scale attraction, reversible material retention, evolving reservoir

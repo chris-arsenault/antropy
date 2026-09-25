@@ -13,6 +13,11 @@ export interface EngineConfig extends Record<string, unknown> {
   illuminationFastPeriod: number;
   illuminationSlowPeriod: number;
   illuminationModulationPeriod: number;
+  shadeStrength: number;
+  shadeScale: number;
+  opticalColumn: number;
+  opticalReach: number;
+  opticalPowerDensity: number;
   habitatFeedback: boolean;
   founders: number;
   chemistrySeed: number;
@@ -64,6 +69,10 @@ export interface Definition {
   patchCenters: [number, number][];
 }
 export interface Flows {
+  emission: number;
+  recycledWork: number;
+  coverDeposited: number;
+  coverRecovered: number;
   imported: number;
   exported: number;
   reacted: number;
@@ -96,6 +105,7 @@ export interface Summary {
   biomass: number;
   heldMaterial: number;
   heldEnergy: number;
+  coverMaterial: number;
   materialResidual: number;
   energyResidual: number;
   ancestryRecords: number;
@@ -117,6 +127,8 @@ export interface Summary {
     deathHeat: number;
     overflowHeat: number;
     weatheringHeat: number;
+    opticalHeat: number;
+    opticalCaptured: number;
     weatheringWork: number;
     weatheredMaterial: number;
     shelteredConversion: number;
@@ -194,6 +206,8 @@ export interface CellState {
     activity: number[];
     allocation: number[];
     retirement: number;
+    cover: number;
+    emission: number;
   };
   flows: Flows;
   chemicalFlows: { imported: number[]; exported: number[]; consumed: number[]; produced: number[] };
@@ -225,8 +239,16 @@ export interface Inspection {
   mobility: number | null;
   weathering: [number, number, number] | null;
   illumination: number | null;
+  optics: {
+    solar: number;
+    emitted: number;
+    terrainTransmission: number;
+    coverTransmission: number;
+    paidPower: number;
+  } | null;
   expressed: Genotype["chromosomes"][number] | null;
   local: number[] | null;
+  coverLocal: number[] | null;
   relationships: {
     kin: number;
     population: number;

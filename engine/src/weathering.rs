@@ -133,7 +133,7 @@ impl Operators {
         let heat = self.heat[j][s] - self.work[j][s] + supplied;
         (
             if heat >= 0. {
-                g * self.kinetic[j][s]
+                medium.light * g * self.kinetic[j][s]
             } else {
                 0.
             },
@@ -180,7 +180,10 @@ impl Operators {
         );
         (
             lanes::mul(
-                lanes::mul(g, lanes::load(&self.kinetic[j][s..])),
+                lanes::mul(
+                    lanes::mul(g, lanes::load(&self.kinetic[j][s..])),
+                    lanes::splat(medium.light),
+                ),
                 lanes::nonnegative(available),
             ),
             lanes::positive(available),
@@ -209,7 +212,7 @@ impl Operators {
         if exposure_time == 0. || mask == 0 || strength(signal) == 0. {
             return ([0.; 3], active);
         }
-        let minimum = minimum_donor(floor, exposure_time * strength(signal));
+        let minimum = minimum_donor(floor, exposure_time * strength(signal) * medium.light);
         let mut delta = [0.; SPECIES];
         let mut account = [0.; 3];
         while mask != 0 {

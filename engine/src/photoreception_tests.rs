@@ -14,6 +14,7 @@ fn world() -> World {
             height: 24.,
             founders: 1,
             source_count: 0,
+            shade_strength: 0.,
             mutation_rate: 0.,
             physical_mutation_rate: 0.,
             learning: "static".into(),
@@ -172,4 +173,39 @@ fn photoreception_survives_checkpoint_and_rejects_nonfinite_memory() {
     assert!(b.cells[0].photoreceptor.is_finite());
     b.cells[0].photoreceptor = f64::NAN;
     assert!(b.validate().is_err());
+}
+
+#[test]
+fn the_same_funded_light_reading_can_gate_activity_and_dark_emission() {
+    let mut w = world();
+    w.config.illumination_contrast = 0.;
+    w.field
+        .illumination
+        .prepare(w.seed, 0, &w.config, w.field.nx, w.field.ny);
+    let mut logits = vec![0.; controller::TOTAL_OUTPUTS];
+    let activity = controller::diagnostics::authored(
+        logits.clone(),
+        Some((LIGHT_INPUT, controller::ACTIVITY, 8.)),
+    )
+    .unwrap();
+    logits[controller::EMISSION] = 1.;
+    let nocturnal =
+        controller::diagnostics::authored(logits, Some((LIGHT_INPUT, controller::EMISSION, -8.)))
+            .unwrap();
+    let mut values = Vec::new();
+    for transmission in [0., 1.] {
+        std::sync::Arc::make_mut(&mut w.shade)
+            .transmission
+            .fill(transmission);
+        w.field.illumination.shade = w.shade.clone();
+        observe(&mut w);
+        let input = &w.cells[0].inputs;
+        let a = controller::act(&activity, input, &mut Default::default(), &w.config, false);
+        let b = controller::act(&nocturnal, input, &mut Default::default(), &w.config, false);
+        values.push((a.activity[0], b.emission));
+    }
+    assert_eq!(values[0].0, 0.);
+    assert!(values[1].0 > 0.9);
+    assert!(values[0].1 > 0.7);
+    assert_eq!(values[1].1, 0.);
 }

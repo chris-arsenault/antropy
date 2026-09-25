@@ -10,8 +10,10 @@ mod chemical_flow_counter;
 use chemical_flow_counter::Counter;
 
 pub const MAX_ENZYMES: usize = 8;
-pub const STOCKS: usize = 12 + MAX_ENZYMES;
+pub const STOCKS: usize = 14 + MAX_ENZYMES;
 pub const PHOTO_STOCK: usize = 15;
+pub const BUILDER_STOCK: usize = 20;
+pub const EMITTER_STOCK: usize = 21;
 pub const fn enzyme_stock(slot: usize) -> usize {
     if slot < 4 { 11 + slot } else { 12 + slot }
 }
@@ -65,6 +67,10 @@ pub struct Flows {
     pub external_work: f64,
     pub constructed: f64,
     pub retired: f64,
+    pub cover_deposited: f64,
+    pub cover_recovered: f64,
+    pub emission: f64,
+    pub recycled_work: f64,
     pub contact_imported: f64,
     pub contact_lost: f64,
     pub maintenance: f64,
@@ -225,9 +231,11 @@ impl Cell {
                 .chain(&self.action.activity)
                 .chain(&self.action.allocation)
                 .chain([&self.action.retirement])
+                .chain([&self.action.emission])
                 .chain([&self.action.swim, &self.action.repair])
                 .any(|x| !(0. ..=1.).contains(x))
             || !(-1. ..=1.).contains(&self.action.turn)
+            || !(-1. ..=1.).contains(&self.action.cover)
         {
             return Err("Invalid controller state".into());
         }

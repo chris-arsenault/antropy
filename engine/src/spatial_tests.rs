@@ -182,7 +182,7 @@ fn reciprocal_addressing_matches_division_for_every_width() {
     for nx in (1..=1024).chain([1439, 3600, 7200, limit / 4]) {
         let g = crate::spatial::Geometry::new(nx, 4);
         let columns = nx.div_ceil(SIDE);
-        let nodes = (0..4 * nx).chain((0..64).map(|k| limit - 1 - k * 7919));
+        let nodes = (0..4 * nx).chain((0..64).map(|k| limit - 1 - (k * 7919) % limit));
         for node in nodes {
             let (x, y) = (node % nx, node / nx);
             let expected = (y / SIDE * columns + x / SIDE, y % SIDE * SIDE + x % SIDE);

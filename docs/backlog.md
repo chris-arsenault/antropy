@@ -51,18 +51,14 @@ The shared-memory runtime is installed separately; it does not establish these e
 
 ## Light ecology: shelter, emission and conditional activity
 
-The [light ecology design](design/light-ecology.md) preserves the September 21 direction:
-day/night activity, hiding from illumination and paid local emitters that cells can respond to.
-V34 implements only the scalar illumination correction. Current paid receptors can influence
-activity, but nocturnal benefit is unestablished; material does not yet cast optical shade.
-
-Design finite optical-work ownership, shared material attenuation and funded emission together.
-The present throughput-based external drive cannot accept paid emitted light without allowing
-multiple recipients to reclaim the same work. Resolve power per area, opacity, loss/escape,
-emission machinery and bounded transport cost before implementation. Preserve the existing
-chemical work law and controller boundary. Dense colonies remain valid; finite capture and
-screening should supply conditional opportunities for other organizations without colony caps,
-assigned roles or forced motion. Dormancy remains a separate conditional physiology question.
+The [light ecology design](design/light-ecology.md) is implemented locally in physical v42:
+permanent geographic shade, funded overhead material cover and finite paid emission share
+ordinary sensing and photochemical accounts. Sunlight remains non-depleting. The
+[delivery plan](plans/LIGHT-ECOLOGY-PLAN.md) tracks validation and publication; the
+[constructed checks](light-ecology-results.md) establish sensory agency and physical effects,
+but no positive whole-cell shelter or lamp return. Default isolated builders lose small deposits
+to the existing numerical cutoff; larger funded investment can accumulate film. Ecological
+payoff, nocturnal endurance and evolved differentiation remain open. Dormancy is separate.
 
 <a id="backlog-plan-carryover"></a>
 

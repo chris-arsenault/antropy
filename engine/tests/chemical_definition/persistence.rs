@@ -18,7 +18,7 @@ fn world() -> World {
 #[test]
 fn current_definition_roundtrips_and_continues_for_seventeen_ticks() {
     let mut a = world();
-    assert_eq!(a.version, 41);
+    assert_eq!(a.version, 42);
     execute(
         &mut a,
         &json!({"op":"intervene", "deposit":{"x":13,"y":13,"species":138,"amount":2}}),
@@ -27,7 +27,7 @@ fn current_definition_roundtrips_and_continues_for_seventeen_ticks() {
     assert!(a.cells.iter().any(|c| c.inventory.material() > 0.));
     assert!(a.field.totals(&a.chemistry).0 > 0.);
     let before = a.snapshot().unwrap();
-    assert!(before.starts_with(b"ANTROPY41\0"));
+    assert!(before.starts_with(b"ANTROPY42\0"));
     let mut b = World::restore(&before).unwrap();
     assert_eq!(b.snapshot().unwrap(), before);
     assert_eq!(b.chemistry.version, 5);
@@ -73,7 +73,7 @@ fn old_versions_and_tampered_profiles_are_rejected() {
         World::restore(&old)
             .err()
             .expect("v30 must be rejected")
-            .contains("v41 required")
+            .contains("v42 required")
     );
     w.chemistry.properties[0].interaction[0] += 0.01;
     assert!(

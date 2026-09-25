@@ -11,7 +11,10 @@ use std::collections::BTreeSet;
 mod base;
 #[path = "world_physiology.rs"]
 mod physiology;
-pub const VERSION: u32 = 41;
+#[cfg(test)]
+#[path = "world_restore_tests.rs"]
+mod restore_tests;
+pub const VERSION: u32 = 42;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -31,6 +34,9 @@ pub struct World {
     pub genetic_rng: Random,
     pub chemistry: Chemistry,
     pub field: Field,
+    pub shade: std::sync::Arc<crate::terrain::Shade>,
+    pub cover: Field,
+    pub incident: crate::optics::Incident,
     pub cells: Vec<Cell>,
     pub sources: Vec<Source>,
     pub patch_centers: Vec<[f64; 2]>,
@@ -71,6 +77,8 @@ impl World {
         let mut rng = Random::new(seed);
         let mut environment_rng = Random::new(seed ^ 0x656e765f726e67);
         let mut field = Field::new(config.width, config.height, config.mesh);
+        let shade = crate::terrain::Shade::generate(seed, &config, field.nx, field.ny);
+        field.illumination.shade = shade.clone();
         field.pressure_strength = config.pressure_strength;
         field
             .illumination
@@ -144,6 +152,7 @@ impl World {
         let next_cell = cells.len() as u64 + 1;
         let climate = crate::climate::Climate::new(&config, &chemistry);
         let next_genome = genomes.len() as u64 + 1;
+        let cover = Field::new(config.width, config.height, config.mesh);
         let mut world = Self {
             version: VERSION,
             seed,
@@ -154,6 +163,9 @@ impl World {
             genetic_rng: Random::new(seed ^ 0x67656e655f726e67),
             chemistry,
             field,
+            shade,
+            cover,
+            incident: Default::default(),
             cells,
             sources,
             patch_centers,
@@ -183,6 +195,9 @@ impl World {
     }
     pub fn held(&self) -> (f64, f64) {
         let (mut matter, mut energy) = self.field.totals(&self.chemistry);
+        let covered = self.cover.totals(&self.chemistry);
+        matter += covered.0;
+        energy += covered.1;
         for c in &self.cells {
             matter += c.mass() + c.material();
             energy += c.energy;
@@ -212,6 +227,9 @@ impl World {
         }
         serde_json::json!({
             "geography":self.field.structural_counts(),
+            "cover":self.cover.structural_counts(),
+            "optics":{"lateralNodes":self.incident.lateral.len(),
+                "upwardNodes":self.incident.upward.len(),"emitters":self.incident.emitters.len()},
             "controllerExpiry": expiry,
             "reactions": self.reactions.counts(),
             "transport": self.exchange.counts(),
@@ -233,8 +251,13 @@ impl World {
         let now = || clock.map_or(0., |f| f());
         let mut started = now();
         self.field.pressure_strength = self.config.pressure_strength;
+        self.field.illumination.shade = self.shade.clone();
         self.field.attraction_length = self.config.attraction_length;
-        if !self.cells.is_empty() || !self.sources.is_empty() || self.field.has_active_material() {
+        if !self.cells.is_empty()
+            || !self.sources.is_empty()
+            || self.field.has_active_material()
+            || self.cover.has_active_material()
+        {
             self.field.illumination.prepare(
                 self.seed,
                 self.tick,
@@ -259,13 +282,14 @@ impl World {
         self.field.freeze_mechanical_stage();
         crate::source_medium::advance_scheduled(self, physiology);
         if physiology {
+            crate::cover::advance(self);
             self.climate.prepare(&self.config);
             let balance = self.field.advance_weathered(
                 &self.chemistry,
                 self.field_elapsed,
                 self.config.washout,
                 self.config.diffusion_impedance,
-                Some(&mut self.climate),
+                None,
             );
             self.ledger.washed_out += balance.matter;
             self.ledger.washout_energy += balance.energy;
@@ -288,19 +312,6 @@ impl World {
         stages[3] = now() - started;
         started = now();
         if physiology {
-            let field = &self.field;
-            let signals: Vec<_> = sites
-                .par_iter()
-                .with_min_len(crate::parallel::TASK_NS / crate::parallel::cost::CELL_MARK)
-                .map(|row| {
-                    let signal = crate::weathering::signal(std::array::from_fn(|k| {
-                        row.iter()
-                            .map(|&(n, a)| a * field.medium_signal(n)[k])
-                            .sum()
-                    }));
-                    crate::illumination::drive(signal, field.illumination.sample(row))
-                })
-                .collect();
             self.footprints
                 .prepare(&self.cells, &self.config, &mut self.field, &mut sites);
             let mut interval_config = self.config.clone();
@@ -321,7 +332,12 @@ impl World {
             stages[4] = now() - started;
             stages[8] = self.exchange.preparation_ms;
             started = now();
+            crate::cover::exchange(self, &sites, self.field_elapsed);
+            let signals = crate::optics::prepare(self, &sites, self.field_elapsed);
             self.physiology(self.field_elapsed, &signals);
+            let captured: f64 = self.cells.iter().map(|c| c.flows.recycled_work).sum();
+            self.ledger.optical_captured += captured;
+            self.ledger.optical_heat -= captured;
             self.field_elapsed = 0.;
         }
         self.sites = sites;
@@ -413,12 +429,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY41\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY42\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY41\0")
-            .ok_or("Unsupported physical checkpoint; v41 required")?;
+            .strip_prefix(b"ANTROPY42\0")
+            .ok_or("Unsupported physical checkpoint; v42 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
@@ -428,8 +444,19 @@ impl World {
         world.chemistry.validate()?;
         world.field.validate()?;
         world.field.refresh_features(&world.chemistry);
+        world.cover.validate()?;
+        world.cover.refresh_features(&world.chemistry);
         world.validate()?;
         world.field.pressure_strength = world.config.pressure_strength;
+        world.field.illumination.shade = world.shade.clone();
+        world.field.illumination.prepare(
+            world.seed,
+            world.tick,
+            &world.config,
+            world.field.nx,
+            world.field.ny,
+        );
+        crate::cover::refresh(&mut world);
         world.climate = crate::climate::Climate::new(&world.config, &world.chemistry);
         for s in &mut world.sources {
             s.rebuild(&world.config, &world.field);
@@ -458,6 +485,15 @@ impl World {
         self.chemistry.validate()?;
         self.field.validate()?;
         self.field.validate_reductions(&self.chemistry)?;
+        self.shade.validate(self.field.nx * self.field.ny)?;
+        self.incident.validate(self.field.nx * self.field.ny)?;
+        self.cover.validate()?;
+        self.cover.validate_reductions(&self.chemistry)?;
+        if (self.cover.nx, self.cover.ny, self.cover.spacing)
+            != (self.field.nx, self.field.ny, self.field.spacing)
+        {
+            return Err("Cover and world dimensions disagree".into());
+        }
         if self.ancestry.len() > self.config.max_ancestry_records
             || self.next_cell != self.ancestry.len() as u64 + 1
             || !self.field_elapsed.is_finite()

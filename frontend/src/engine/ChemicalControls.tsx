@@ -19,7 +19,10 @@ export function ChemicalControls({
           <option value="potential">Energy per material</option>
           <option value="chemical">Chemical #{value.species}</option>
           <option value="weathering">Chemical weathering</option>
-          <option value="illumination">Illumination: sunlight</option>
+          <option value="illumination">Received light</option>
+          <option value="terrain">Terrain transmission</option>
+          <option value="cover">Constructed cover</option>
+          <option value="emission">Received emission</option>
           <option value="none">No background field</option>
         </select>
       </label>
@@ -29,7 +32,7 @@ export function ChemicalControls({
           checked={value.illumination}
           onChange={(e) => change({ ...value, illumination: e.target.checked })}
         />
-        Sunlight and shadow
+        Light and shadow
       </label>
       <label>
         <input
@@ -72,10 +75,19 @@ function baseLegend(value: ChemicalDisplay) {
       : `${name}: faint → distinct, 0 → dense. Half field opacity at ${half} material / area.`;
   if (value.base === "weathering")
     legend =
-      "Blue → amber: low → high local chemical interaction, attenuated by medium resistance. Actual conversion depends on the chemicals present.";
+      "Blue → amber: low → high public chemical activity, including received light and medium resistance. Actual conversion depends on the chemicals present.";
   if (value.base === "illumination")
     legend =
-      "Dark shadow → ivory sunlight: local light below → above the uniform 1× level. The soft transition spans 0.8–1.2×. Shadow means reduced illumination; the default minimum is 0.2×.";
+      "Dark → ivory: total received light below → above 1×. Terrain and constructed cover attenuate sunlight; paid emission adds local light. Warm glows identify actual paid emitters.";
+  if (value.base === "terrain")
+    legend =
+      "Dark → ivory: permanent terrain transmission, 0–100%. Independent of the solar cycle and constructed cover.";
+  if (value.base === "cover")
+    legend =
+      "Dark → turquoise: constructed film opacity, 0–100%. This material also spreads, reacts and washes out.";
+  if (value.base === "emission")
+    legend =
+      "Dark → amber: received paid emission. Trace visibility controls contrast; brightness is not a reserve of spendable work.";
   return legend;
 }
 
@@ -102,9 +114,9 @@ export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
       )}
       {value.illumination && value.base !== "illumination" && (
         <p>
-          Sunlight leaves map colors intact. Translucent night shadow dims fields, cells and sources
-          together, with a soft boundary around the mean 1× illumination. Detail remains visible in
-          shadow. Cells sense the same illumination shown here.
+          Translucent shadow dims fields, cells and sources together, with a soft boundary around
+          the mean 1× illumination. Detail remains visible in shadow. Cells sense the same
+          illumination shown here.
         </p>
       )}
     </div>

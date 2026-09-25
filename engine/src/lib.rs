@@ -45,6 +45,9 @@ pub mod contact_exchange;
 pub mod controller;
 #[cfg(test)]
 mod coupling_tests;
+pub mod cover;
+#[cfg(test)]
+mod cover_tests;
 pub mod diagnostics;
 pub mod economy;
 mod economy_report;
@@ -87,6 +90,9 @@ pub mod movement;
 mod numeric;
 pub mod observation;
 pub mod opportunities;
+pub mod optics;
+#[cfg(test)]
+mod optics_tests;
 pub mod organism;
 pub mod organization;
 #[cfg(test)]
@@ -137,6 +143,7 @@ mod study_commands;
 mod study_trace;
 #[cfg(test)]
 mod symmetry_tests;
+pub mod terrain;
 mod trace;
 pub mod transformation_work;
 #[cfg(test)]

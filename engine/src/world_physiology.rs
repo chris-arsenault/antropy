@@ -19,7 +19,7 @@ impl Context<'_> {
     fn advance<'a>(
         &self,
         cell: &mut Cell,
-        signal: [f64; 2],
+        (signal, exposure): ([f64; 2], crate::optics::Exposure),
         executor: &'a mut crate::metabolism::Executor,
         observer: Option<(&mut crate::phenotype_activity::Interval, u8)>,
         record: bool,
@@ -30,6 +30,7 @@ impl Context<'_> {
         cell.damage = (cell.damage + damage).min(1.);
         cell.flows.exposure += load * self.dt;
         cell.flows.damage += damage;
+        let before = cell.flows.external_work;
         let work = executor.react_interval(
             cell,
             self.config,
@@ -37,8 +38,11 @@ impl Context<'_> {
             self.dt,
             record,
             observer,
-            signal,
+            crate::illumination::drive(signal, exposure.drive()),
         );
+        let paid = (cell.flows.external_work - before) * exposure.paid_fraction();
+        cell.flows.external_work -= paid;
+        cell.flows.recycled_work += paid;
         crate::metabolism::repair(cell, self.config, self.chemistry, self.dt);
         crate::metabolism::grow(cell, g, self.config, self.chemistry, self.dt);
         let excess = (cell.energy - cell.energy_capacity(self.config)).max(0.);
@@ -49,7 +53,7 @@ impl Context<'_> {
 }
 
 impl World {
-    pub(super) fn physiology(&mut self, dt: f64, signals: &[[f64; 2]]) {
+    pub(super) fn physiology(&mut self, dt: f64, signals: &[([f64; 2], crate::optics::Exposure)]) {
         let context = Context {
             config: &self.config,
             chemistry: &self.chemistry,

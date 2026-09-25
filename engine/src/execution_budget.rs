@@ -131,6 +131,12 @@ pub fn report(w: &World) -> Value {
     let (field, local_field) = field_rates(w);
     let mut stages: [Vec<Sample>; 10] = std::array::from_fn(|_| Vec::new());
     let mut executor = crate::metabolism::Executor::default();
+    let footprints: Vec<_> = w
+        .cells
+        .iter()
+        .map(|cell| crate::footprint::sites(cell, c, &w.field))
+        .collect();
+    let exposures = crate::optics::observed_cell_exposures(w, &footprints);
     for (i, cell) in w.cells.iter().enumerate() {
         let row = crate::footprint::sites(cell, c, &w.field);
         let movement = motion_rate(cell, c, &w.field, &row, contact[i]);
@@ -139,7 +145,7 @@ pub fn report(w: &World) -> Value {
         let local = graph.local(i, &w.cells, c, &mixture);
         let (mut gross, mut net, support) = transport_rates(cell, c, &local, graph.field[i]);
         let (reaction, reaction_net, stock, spending, reaction_edges) =
-            physiology_rates(cell, w, &row, &mut executor);
+            physiology_rates(cell, w, exposures[i], &mut executor);
         for s in 0..256 {
             gross[s] += reaction[s];
             net[s] += reaction_net[s];

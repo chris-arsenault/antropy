@@ -18,7 +18,7 @@ direction oracle, temporal clock, harvesting process or response policy is intro
 
 Inputs 39–42 are brightness, change, front-minus-back and left-minus-right; input 43 is
 built photoreceptor stock relative to the inherited target. Existing input indices stay fixed.
-The current controller has 56 inputs, 24 recurrent units and 38 outputs. At introduction, new founder weights started at
+The current v42 controller has 58 inputs, 24 recurrent units and 42 outputs. At introduction, new founder weights started at
 zero; mutation can connect the new cues to behavior. Sensing does not establish evolved use.
 Photoreception introduced checkpoint v31; current physical semantics require v36.
 

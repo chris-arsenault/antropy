@@ -135,6 +135,7 @@ fn composition_conversion_matches_the_shared_operator_on_actual_material() {
         exposure: 1.,
         response,
         release: true,
+        chemical_dt: w.config.dt,
     };
     for amount in [0., 0.01, 2., 1000.] {
         let mut s = w.sources[0].clone();

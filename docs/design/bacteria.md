@@ -15,7 +15,7 @@ use the same periodic geometry. There is no map oracle, compass or alternate sub
 Funded reproduction has no population-count ceiling. The ancestry budget and runtime memory
 limits remain independent operating limits; they do not kill cells or select parents.
 
-A cell owns position, heading, twenty actual material-stock records, a 256-element float64 intracellular chemical
+A cell owns position, heading, twenty-two actual material-stock records, a 256-element float64 intracellular chemical
 mixture, usable energy, injury, four outward/four inward chemical and one optical adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
 drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile

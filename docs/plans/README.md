@@ -5,6 +5,17 @@ Current behavior belongs to the [design work order](../design/README.md),
 [decision/evidence record](../design/decisions-and-evidence.md). Plans below preserve execution,
 registrations and failures. Their old future-tense instructions are historical, not work to replay.
 
+## Terrain shade and organism-built light ecology
+
+[Light ecology](LIGHT-ECOLOGY-PLAN.md), Sulion root
+`ad5eb2f9-36a9-4447-b18a-6cc910c7cb46`, delivers permanent geographic shade, funded
+overhead material cover, paid local emission and shared photochemistry in v42. M0–M5 are
+complete; integrated validation, human review and publication remain in M6. The September 25
+request authorizes implementation, commit and push; a destructive live-world cutover still
+requires a decision. Constructed probes establish mechanisms, not profitable strategies. Sunlight
+remains overhead and non-depleting, superseding the earlier future finite-sun proposal.
+This does not replace the remaining terrain or structural-performance work orders.
+
 ## Simulation model simplification
 
 [Model simplification](MODEL-SIMPLIFICATION-PLAN.md), Sulion root

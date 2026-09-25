@@ -10,6 +10,8 @@ mod exchange;
 pub(crate) mod medium;
 #[path = "field_parallel.rs"]
 mod parallel;
+#[path = "field_photochemistry.rs"]
+mod photochemistry;
 #[path = "field_read.rs"]
 mod read;
 #[path = "field_stored.rs"]

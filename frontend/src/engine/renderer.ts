@@ -42,7 +42,7 @@ function shader(gl: WebGL2RenderingContext, type: number, source: string) {
   return value;
 }
 function illuminationMode(layers: boolean[]) {
-  return layers[6] ? 1 : 0;
+  return [6, 8, 9, 10].findIndex((i) => layers[i]) + 1;
 }
 function program(gl: WebGL2RenderingContext, vertex: string, fragment: string) {
   const p = gl.createProgram()!;
@@ -95,7 +95,7 @@ export class Renderer {
     if (!this.ready()) return null;
     refreshField = this.refreshPending;
     this.refreshPending = false;
-    const kind = illuminationMode(options.layers) > 0 ? 6 : 5;
+    const kind = 5 + illuminationMode(options.layers);
     refreshField ||= kind !== this.fieldKind;
     this.fieldKind = kind;
     if (this.canvas.width !== options.width) this.canvas.width = options.width;

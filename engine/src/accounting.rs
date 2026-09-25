@@ -50,6 +50,8 @@ pub struct Ledger {
     pub death_heat: f64,
     pub division_heat: f64,
     pub overflow_heat: f64,
+    pub optical_heat: f64,
+    pub optical_captured: f64,
     pub weathering_heat: f64,
     pub weathering_work: f64,
     pub weathered_material: f64,
@@ -82,6 +84,7 @@ impl Ledger {
             + self.death_heat
             + self.division_heat
             + self.overflow_heat
+            + self.optical_heat
             + self.weathering_heat
             + self.source_heat
     }
@@ -95,6 +98,10 @@ impl Ledger {
             external_work,
             constructed,
             retired,
+            cover_deposited,
+            cover_recovered,
+            emission,
+            recycled_work,
             contact_imported,
             contact_lost,
             maintenance,

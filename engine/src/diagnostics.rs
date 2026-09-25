@@ -67,6 +67,27 @@ pub fn initialize(w: &mut World) {
     w.ledger.initial_energy = energy;
 }
 
+/// Registered operating stress: full film support and ordinary paid optical actions.
+pub fn optical_load(w: &mut World) {
+    let column = (w.config.mesh.powi(2) * w.config.optical_column) as f32;
+    w.cover.replace_material(&w.chemistry, |i| {
+        if i % 256 == (i / 256) % 256 {
+            column
+        } else {
+            0.
+        }
+    });
+    for g in w.genomes.values_mut() {
+        for chromosome in &mut g.chromosomes {
+            controller::programs::optical(&mut chromosome.behavior, 3., 3., None);
+        }
+        g.compile(&w.config, &w.chemistry);
+    }
+    crate::cover::refresh(w);
+    initialize(w);
+    w.event("optical-load-fixture", 0, vec![]);
+}
+
 pub fn retarget(g: &mut crate::genetics::Genotype, slot: usize, from: usize, to: usize) {
     let a = Target::species(from);
     let b = Target::species(to);

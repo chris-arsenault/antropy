@@ -167,7 +167,9 @@ fn environmental_routes(w: &World) -> Vec<Row> {
     let mut rows = Vec::new();
     for input in 0..256 {
         for j in 0..crate::weathering::BRANCHES {
-            if !operators.possible(input, j, 1. + w.config.illumination_contrast) {
+            // Potential routes are not limited to the solar ceiling: paid local emitters
+            // may exceed it. Actual accepted flow remains independently measured/funded.
+            if !operators.possible(input, j, f64::INFINITY) {
                 continue;
             }
             rows.push(Row {

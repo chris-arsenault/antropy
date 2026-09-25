@@ -3,18 +3,20 @@
 // scalar/neighbor/activity/motion scratch and projections (1024 reserved), one cold
 // snapshot (1024). Sparse material allocates rows only at occupied support and its
 // halo. This worst-case admission limit is independent of worker count; it is not a
-// promise about population/ancestry growth or current resident bytes.
-pub const FIELD_BYTES_PER_NODE: usize = 4096;
+// promise about population/ancestry growth or current resident bytes. V42 reserves
+// this amount separately for dissolved material and overhead film, including their
+// scalar optical maps. Sparse empty film does not allocate dense chemical rows.
+pub const FIELD_BYTES_PER_NODE: usize = 8192;
 pub const FIELD_RESERVATION_BYTES: usize = 2 * 1024 * 1024 * 1024;
 pub const MAX_FIELD_NODES: usize = FIELD_RESERVATION_BYTES / FIELD_BYTES_PER_NODE;
 
 #[cfg(test)]
 mod tests {
     #[test]
-    fn twenty_times_area_fits_geographic_reservation_and_larger_meshes_fail() {
+    fn two_material_owners_fit_default_and_reject_oversized_geography() {
         let mut c = crate::config::Config {
-            width: 1600.,
-            height: 960.,
+            width: 1024.,
+            height: 1024.,
             ..Default::default()
         };
         c.validate().unwrap();

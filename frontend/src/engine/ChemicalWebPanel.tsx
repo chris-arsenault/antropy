@@ -67,8 +67,8 @@ function WebMeaning({ mode }: { mode: WebMode }) {
     return (
       <p className="web-meaning">
         Accepted cellular conversions, ranked by material transformed per model second. Uptake and
-        export show accepted transporter flow. These measurements alone do not establish
-        cross-feeding.
+        export show accepted material exchange, including cover recovery/deposition. These
+        measurements alone do not establish cross-feeding.
       </p>
     );
   if (mode === "environment")

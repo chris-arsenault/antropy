@@ -3,7 +3,7 @@
 The same Biotropy UI can run a local world using one or four compute threads, or observe a
 native World running independently on a server. Execution selection starts a new local world
 or attaches to the server's current world; it does not transfer a simulation or its saves.
-Both modes use the same v41 physical kernel and the existing renderer. The
+Both modes use the same v42 physical kernel and the existing renderer. The
 [structural scaling record](../SCALING-PLAN.md) separates stepping, observation and display costs.
 
 ## Browser
@@ -42,7 +42,7 @@ creates a fresh seed.
 
 ## Server persistence
 
-The server stores ordinary physical checkpoints (currently v41), gzip-compressed, with a JSON sidecar
+The server stores ordinary physical checkpoints (currently v42), gzip-compressed, with a JSON sidecar
 recording reason, format version, seed, tick, generation, population, creation time and sizes.
 This mirrors browser recovery. It keeps the newest checkpoint, every manual checkpoint (at most
 eight), and the six newest automatic checkpoints within the byte budget. Older automatic ones
