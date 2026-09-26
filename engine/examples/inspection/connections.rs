@@ -1,5 +1,5 @@
 //! Frozen-state contractions for the interrupted study; never advances World.
-use antropy_engine::{illumination, metabolism, organism::Cell, weathering, world::World};
+use antropy_engine::{illumination, metabolism, organism::Cell, world::World};
 use serde_json::{Value, json};
 
 fn yields(w: &World, c: &Cell, drives: &[[f64; 2]]) -> Value {
@@ -69,13 +69,14 @@ fn cell(w: &World, c: &Cell, bodies: &[[f64; 2]]) -> Value {
     let no_self =
         std::array::from_fn(|k| total[k] - own_weight * c.operators.as_ref().unwrap().profile[k]);
     let light = w.field.illumination.sample(&sites);
-    let drive = illumination::drive(weathering::signal(total), light);
+    let signal = |external| metabolism::light_environment(c, &w.config, &w.chemistry, external);
+    let drive = illumination::drive(signal(total), light);
     let drives = [
         drive,
-        illumination::drive(weathering::signal(no_body), light),
-        illumination::drive(weathering::signal(total), 1.),
+        illumination::drive(signal(no_body), light),
+        illumination::drive(signal(total), 1.),
         [0.; 2],
-        illumination::drive(weathering::signal(no_self), light),
+        illumination::drive(signal(no_self), light),
     ];
     json!({"id":c.id,"signals":signals,"membraneProfile":c.operators.as_ref().unwrap().profile,
         "light":light,"drive":drive,"yields":yields(w,c,&drives)})

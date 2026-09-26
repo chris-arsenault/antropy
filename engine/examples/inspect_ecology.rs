@@ -2,10 +2,14 @@
 use antropy_engine::{controller, footprint, organism::Cell, sensing, world::World};
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, fs, io::Write, path::Path};
+#[path = "inspection/bottleneck.rs"]
+mod bottleneck;
 #[path = "inspection/cellular.rs"]
 mod cellular;
 #[path = "inspection/connections.rs"]
 mod connections;
+#[path = "inspection/public_floor.rs"]
+mod public_floor;
 
 fn actions(a: controller::Action) -> [f64; 7] {
     [
@@ -213,15 +217,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         && !(args.len() == 3
             && matches!(
                 args[2].as_str(),
-                "--ancestry" | "--storage" | "--connections" | "--light" | "--chemistry"
+                "--ancestry"
+                    | "--storage"
+                    | "--connections"
+                    | "--light"
+                    | "--chemistry"
+                    | "--bottleneck"
+                    | "--public-floor"
             ))
     {
         return Err(
-            "Expected checkpoint, new output JSON path and optional --ancestry, --storage, --connections, --light, --chemistry or --motion TICKS".into(),
+            "Expected checkpoint, new output JSON path and optional --ancestry, --storage, --connections, --light, --chemistry, --bottleneck, --public-floor or --motion TICKS".into(),
         );
     }
     let raw = fs::read(&args[0])?;
-    let w = World::restore(&raw)?;
+    let mut w = World::restore(&raw)?;
     let before = w.snapshot()?;
     let result = if motion {
         // Steps an independent restored copy; the inspected world itself is never advanced.
@@ -245,6 +255,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .collect();
         json!({"tick":w.tick,"ticks":ticks,"width":w.config.width,"height":w.config.height,
             "cells":cells})
+    } else if args.get(2).is_some_and(|arg| arg == "--public-floor") {
+        public_floor::inspect(&w)
+    } else if args.get(2).is_some_and(|arg| arg == "--bottleneck") {
+        bottleneck::inspect(&mut w)
     } else if args.get(2).is_some_and(|arg| arg == "--storage") {
         storage(&w, raw.len())?
     } else if args.get(2).is_some_and(|arg| arg == "--connections") {

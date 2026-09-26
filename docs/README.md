@@ -17,11 +17,15 @@ them. See the [storage policy](evidence/README.md).
 | Need | Document |
 | --- | --- |
 | Crowding pressure, passive metabolic products and light-supported growth away from reservoirs | [Ecological incentives and measurements](plans/ECOLOGICAL-INCENTIVES-PLAN.md) |
+| Earlier clustering, transplant and movement experiments | [Placement](cluster-placement-study.md), [bottleneck investigation and scope correction](cluster-bottleneck-study.md), [food-access comparison](movement-opportunity-study.md) — historical measurements before ecological incentives |
 | Browser 1/4, shared native server and private Komodo deployment | [Execution modes](execution-modes.md) |
 | Current decisions, failed approaches and plan disposition | [Decision record](design/decisions-and-evidence.md), [plan archive](plans/README.md) |
 | Mature checkpoint differentiation and reload-related slowdown | [83,980-tick review](material-habitats-review.md), [runtime investigation](session-runtime-review.md) |
 | Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |
 | Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
+| Deferred paid byte communication, coarse relative hearing and natural observation | [Directional cell utterances](design/cell-utterances.md) — design specification, not implemented |
+| Static geography, proposed slope resistance and optical cover | [Persistent geography](design/persistent-geography.md) — shade implemented; elevation and conductance deferred |
+| Deferred local supply fluctuations, reservoir clocks and movement opportunities | [Local resource seasons](design/local-resource-seasons.md) — proposal and open budget/calibration questions; [movement evidence](movement-opportunity-study.md) |
 | 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
 | Scalar illumination, day/night opportunities and future shelter/emission | [Light ecology](design/light-ecology.md); earlier [illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k findings](evidence/digital-chemistry/illumination-design-143249/README.md) retain their original versions |
 | Joint design for intracellular organization, specialization and cell interactions | [Cellular organization and exchange](design/cellular-organization-and-exchange.md) — implemented v33 laws |
@@ -208,6 +212,9 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Deferred multicore scaling](backlog.md#backlog-multicore-scaling)
 - [Deferred cell interaction research](backlog.md#backlog-cell-interactions)
 - [Light ecology: shelter, emission and conditional activity](backlog.md#backlog-light-ecology)
+- [Persistent geography: elevation, terrain and shade](backlog.md#backlog-persistent-geography)
+- [Local resource seasons: shared reservoir timing](backlog.md#backlog-local-resource-seasons)
+- [Directional cell communication: mouths and ears](backlog.md#backlog-cell-utterances)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

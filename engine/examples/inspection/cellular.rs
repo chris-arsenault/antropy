@@ -46,14 +46,15 @@ fn effective_programs(c: &Cell) -> Option<f64> {
 
 fn external_drive(w: &World, c: &Cell, bodies: &[[f64; 2]]) -> [f64; 2] {
     let sites = antropy_engine::footprint::sites(c, &w.config, &w.field);
-    let signal = antropy_engine::weathering::signal(std::array::from_fn(|k| {
+    let external = std::array::from_fn(|k| {
         sites
             .iter()
             .map(|&(n, a)| {
                 a * (w.field.material_signal(n)[k] + w.field.source_signal()[n][k] + bodies[n][k])
             })
             .sum()
-    }));
+    });
+    let signal = metabolism::light_environment(c, &w.config, &w.chemistry, external);
     antropy_engine::illumination::drive(signal, w.field.illumination.sample(&sites))
 }
 

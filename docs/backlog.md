@@ -60,6 +60,64 @@ but no positive whole-cell shelter or lamp return. Default isolated builders los
 to the existing numerical cutoff; larger funded investment can accumulate film. Ecological
 payoff, nocturnal endurance and evolved differentiation remain open. Dormancy is separate.
 
+<a id="backlog-persistent-geography"></a>
+
+## Persistent geography: elevation, terrain and shade
+
+Added September 24 at the user's request as a candidate for later prioritization, not the next
+work item. [Persistent geography](design/persistent-geography.md) develops static seeded macro
+regions and finer relief: directional uphill resistance, a shared wet/dry substrate conductance
+for transport and public processing, and permanent light attenuation with optional peak clipping.
+The existing XY world, chemical algebra, funded bodies and material-created habitats remain.
+
+The candidate seeks conditional survival differences beyond initial reservoir placement.
+It does not revive the rejected source-basin anchoring remedy or prescribe a community.
+Resolve conductance semantics, slope/contact accounting, shade payoff, local sensory access
+and generation scales before implementation. Tectonics and catastrophic topology changes
+remain later extensions. The design complements finite optical ownership and paid emission;
+it implements neither and changes no active work order.
+
+<a id="backlog-local-resource-seasons"></a>
+
+## Local resource seasons: shared reservoir timing
+
+Backlogged September 26 at the user's request; deferred and unimplemented.
+[Local resource seasons](design/local-resource-seasons.md) proposes a smooth, irregular
+environmental supply clock shared by nearby reservoirs. It scales both release and
+refill waiting, with weakly fluctuating feeding grounds and strongly fluctuating patches
+whose reachable edges could reward movement. Chemical conversion and sunlight are unchanged.
+
+The [movement study](movement-opportunity-study.md) establishes a constructed food-access
+benefit, not validation of this renewal law. The proposal retains the stationary supply
+budget derivation, moving-source budget uncertainty, travel/period calibration, persistence
+and bounded checks. It does not change the current work order or authorize a campaign.
+
+<a id="backlog-cell-utterances"></a>
+
+## Directional cell communication: mouths and ears
+
+Added September 24 as a candidate for a future design comparison, not the next work item.
+[Directional cell utterances](design/cell-utterances.md) specifies paid byte broadcasts through
+funded mouths and ears: finite periodic reach, no distance falloff inside the disk, no material
+deposit or usable-work delivery, and a brief input to the ordinary RNN. Ears report coarse
+listener-relative bearing in 16 sectors (22.5 degrees), with no distance or absolute compass input.
+Reach follows mouth capacity and paid work; ears pay construction and maintenance without a
+per-event charge.
+
+The spec covers a signed-bit alphabet, bounded message/direction moments for simultaneous
+speakers, once-only impulse reception across the physiological clock, shared mutation and
+conservative stock inheritance. It is unimplemented. Range/work calibration, shared action
+funding and explicit founder settings belong to delivery. The user's direction is to implement
+when selected, then observe natural behavior and use that baseline to guide corrections.
+Speaker return and evolutionary uptake are post-implementation questions, not admission or
+release gates. Cheap eavesdropping, silence and interference remain possible outcomes.
+
+Consider this alongside optical emission, terrain/climate and existing interaction questions.
+It does not replace their requirements or change the current work order. Earlier low chemical
+secretion did not demonstrate communication or establish why it failed. Budgets, bounded mechanics
+checks and operating measurements establish delivery; profitable signaling and evolved conventions
+are not prerequisites. Later causal probes should answer questions raised by actual observation.
+
 <a id="backlog-plan-carryover"></a>
 
 ## Requirements migrated from earlier plans
@@ -71,7 +129,7 @@ training campaigns are retired without claiming success. Surviving work has thes
 | Requirement | Owner and condition |
 | --- | --- |
 | Movement, food lifetime and body/controller coordination | Spatial design phases 1–3. Compare useful displacement, local sensing, travel expenses, food access and funded reproduction; earlier failed motor contests do not justify resuming their conditional invasion/discovery campaigns. |
-| Uneven renewal and temporary resource opportunities | Spatial landscape design. Consider local variability, including the earlier boom/bust proposal, only when it creates a useful opportunity. No required synchronized global schedule. |
+| Uneven renewal and temporary resource opportunities | Spatial landscape design; [local resource seasons](design/local-resource-seasons.md) is the deferred shared-clock candidate. Consider local variability only when it creates a useful opportunity. No required synchronized global schedule. |
 | Distinguish inherited benefit from drift or initial advantage | Conditional diagnostic after a live observation or configuration question warrants it. Record candidate choice, inherited target versus actual body, matched ancestor/descendant or reversion controls, initial denominators and uncertainty. No standing multi-seed evolution certification. |
 | Heritability, mutation load and effective population | Optional instruments if they answer a concrete question. Define estimands for clonal reproduction, overlapping generations and the sampling interval before presenting them; do not copy ant-colony estimates or equate genome count with useful diversity. |
 | Observable demographics, ancestry and trait change | Spatial design phases 4–6. Preserve births, deaths, lineage shares and inherited/body distinctions alongside spatial founding, movement, mergers and losses. Follow descendants even when a viewing group changes. |

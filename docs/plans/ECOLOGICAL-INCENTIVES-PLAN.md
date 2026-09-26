@@ -34,7 +34,7 @@ The ordinary quick runner owns checkpoints, traces and the local experiment ledg
 Earlier movement probes show that paid movement can help reach finite food. Earlier
 overfilled reconstructed mature fixtures do not establish isolated-cell dependence on colonies.
 The finite-food transplant extinctions do not identify the remedy. Local resource seasons
-remain deferred; they change timing rather than the
+remain [deferred](../design/local-resource-seasons.md); they change timing rather than the
 incentive to leave a profitable site. Chemical numerical-floor investigation stays excluded.
 
 ## Governing changes

@@ -143,6 +143,7 @@ changes improved it; this historical diagnosis is not the current work order.
 | [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
 | [Composed runtime](chemistry/composed-runtime.md) | Current shared operators, illumination, material habitat laws and execution bounds |
 | [Light ecology](light-ecology.md) | Scalar correction, day/night opportunities and future shared shelter/emission accounting |
+| [Directional cell utterances](cell-utterances.md) | Deferred specification for paid bytes, coarse listener-relative bearing, funded inheritance and natural observation after implementation; no prior payoff or evolution gate |
 | [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
 | [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
 | [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
