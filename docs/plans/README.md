@@ -5,6 +5,13 @@ Current behavior belongs to the [design work order](../design/README.md),
 [decision/evidence record](../design/decisions-and-evidence.md). Plans below preserve execution,
 registrations and failures. Their old future-tense instructions are historical, not work to replay.
 
+## Ecological incentives
+
+[Crowding, waste and independent light metabolism](ECOLOGICAL-INCENTIVES-PLAN.md), Sulion
+`fce0b678-3b92-4234-8ea6-96a66aa76408`, implements the three requested physical opportunities
+and records bounded measurements. The same document owns execution details, failures and
+verification limits. No prescribed community, live reset or publication is part of this request.
+
 ## Terrain shade and organism-built light ecology
 
 [Light ecology](LIGHT-ECOLOGY-PLAN.md), Sulion root

@@ -170,11 +170,13 @@ fn cell_exposures(
         .iter()
         .zip(sites)
         .map(|(cell, row)| {
-            let signal = crate::weathering::signal(std::array::from_fn(|k| {
+            let external = std::array::from_fn(|k| {
                 row.iter()
                     .map(|&(n, a)| a * w.field.medium_signal(n)[k])
-                    .sum()
-            }));
+                    .sum::<f64>()
+            });
+            let signal =
+                crate::metabolism::light_environment(cell, &w.config, &w.chemistry, external);
             let light = Exposure::reserve(
                 row.iter()
                     .map(|&(n, a)| a * w.field.illumination.solar(n))

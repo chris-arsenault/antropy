@@ -8,7 +8,11 @@ mod search;
 /// Soft separation speed per unit penetration for each of two overlapping circles:
 /// together they remove the fraction 1 - e^-dt of the overlap in one step.
 pub fn separation_rate(dt: f64) -> f64 {
-    0.5 * (1. - (-dt).exp()) / dt
+    if dt > 0. {
+        -0.5 * (-dt).exp_m1() / dt
+    } else {
+        0.5
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default)]

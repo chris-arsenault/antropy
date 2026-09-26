@@ -106,7 +106,10 @@ fn contact_stage_is_frozen_until_next_prepare_and_reductions_follow_dt() {
     for dt in [c.dt, c.dt * 0.5, c.dt * 2.] {
         cache.local.pressure_at(dt);
         let edge = cache.local.contacts.edges[0];
-        let correction = (edge.extent - edge.length) * 0.5 * (1. - (-dt).exp()) / dt;
+        let crowding = 2. * edge.weight();
+        let relaxed = 1. - (-dt).exp();
+        let correction = (edge.extent - edge.length) * 0.5 * relaxed * (1. + crowding)
+            / (dt * (1. + crowding * relaxed));
         assert!((cache.local.pressure.rows[0].shift[0] + correction).abs() < 1e-12);
         assert!((cache.local.pressure.rows[1].shift[0] - correction).abs() < 1e-12);
     }

@@ -16,6 +16,7 @@ them. See the [storage policy](evidence/README.md).
 
 | Need | Document |
 | --- | --- |
+| Crowding pressure, passive metabolic products and light-supported growth away from reservoirs | [Ecological incentives and measurements](plans/ECOLOGICAL-INCENTIVES-PLAN.md) |
 | Browser 1/4, shared native server and private Komodo deployment | [Execution modes](execution-modes.md) |
 | Current decisions, failed approaches and plan disposition | [Decision record](design/decisions-and-evidence.md), [plan archive](plans/README.md) |
 | Mature checkpoint differentiation and reload-related slowdown | [83,980-tick review](material-habitats-review.md), [runtime investigation](session-runtime-review.md) |
@@ -99,6 +100,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
+- [Crowding, waste and independent light metabolism](design/README.md#design-ecological-incentives)
 - [Immediate model simplification](design/README.md#design-model-simplification)
 - [Terrain shade and organism-built light ecology](design/README.md#design-light-ecology)
 - [Class-specific material coupling baseline](design/README.md#design-material-coupling)

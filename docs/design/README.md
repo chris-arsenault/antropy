@@ -1,5 +1,17 @@
 # Current design and work order
 
+<a id="design-ecological-incentives"></a>
+
+## Ecological incentives — September 26
+
+The [ecological incentives plan](../plans/ECOLOGICAL-INCENTIVES-PLAN.md) implements
+compression-driven separation, passive membrane exchange and private light-supported
+metabolism. Short probes show mobile growth in dilute material and receptor-driven reduction
+of harmful exposure. Avoidance also sacrifices nutrient income; no evolved dispersal outcome
+is claimed. Current equations belong to the [composed laws](chemistry/composed-runtime.md).
+Local resource seasons remain deferred. The continuing live world has not been changed by
+this local implementation; publication and human motion review remain separate.
+
 <a id="design-model-simplification"></a>
 
 ## Completed model simplification

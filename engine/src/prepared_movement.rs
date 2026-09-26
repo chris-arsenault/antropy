@@ -210,8 +210,7 @@ impl Motion {
     ) {
         self.contact_preparations += 1;
         cell.contacts = row.contacts();
-        cell.x = (cell.x + row.shift[0] * c.dt).rem_euclid(c.width);
-        cell.y = (cell.y + row.shift[1] * c.dt).rem_euclid(c.height);
+        apply(cell, row.shift.map(|v| v * c.dt), c);
     }
 }
 

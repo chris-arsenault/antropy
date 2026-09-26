@@ -158,6 +158,33 @@ pub(super) fn chemical_rate(cell: &Cell, c: &Config, gross: &[f64; 256]) -> (f64
     (maximum, bulk)
 }
 
+pub(super) fn passive_rates(
+    cell: &Cell,
+    w: &World,
+    row: &crate::footprint::Row,
+    field_access: f64,
+) -> ([f64; 256], [f64; 256], usize) {
+    let mut probe = cell.clone();
+    probe.interface.field = field_access;
+    let mut incoming = [0.; 256];
+    let mut outgoing = [0.; 256];
+    let mask = crate::transport::passive::requests(
+        &probe,
+        &w.config,
+        &w.field,
+        &w.chemistry,
+        row,
+        &mut incoming,
+        &mut outgoing,
+    );
+    let dt = w.config.dt.max(1e-30);
+    (
+        std::array::from_fn(|s| (incoming[s] + outgoing[s]) / dt),
+        std::array::from_fn(|s| (incoming[s] - outgoing[s]) / dt),
+        mask.count_ones() as usize * 4,
+    )
+}
+
 pub(super) fn physiology_rates(
     cell: &Cell,
     w: &World,

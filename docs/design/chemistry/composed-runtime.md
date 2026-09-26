@@ -58,6 +58,11 @@ V41 couples each material class to the shared chemical response separately
 crowding pressure. Reservoirs drop it and gain long-range like-charge repulsion plus circle
 exclusion; cells drop it and gain compatibility-weighted contact adhesion.
 
+September26 adds [ecological incentives](../../plans/ECOLOGICAL-INCENTIVES-PLAN.md):
+private retained chemistry contributes to light-supported work, ordinary membranes allow
+passive concentration exchange, and compression strengthens circle separation. These changes
+retain the v42 durable shape; restored worlds use the current laws without migration.
+
 ## Meaning and owners
 
 This is an artificial material and work system. It has no temperature, entropy,
@@ -525,6 +530,21 @@ the shared occupancy denominator. Internal concentration uses actual body/invent
 volume. Pre-transfer inventory determines export donors and import headroom; available
 work bounds all requests before any transfer. Exports cannot supply same-stage imports.
 
+Before paid transport, passive membrane diffusion uses the same footprint and donor allocator.
+For species s, `sigma_s=1-(1-susceptibilityFloor)*membraneAffinity_s`, volume V, radius r,
+field access beta and concentration difference `dc=C_out-I_s/V`, let
+`a=dt*V*beta*D_s*sigma_s/r²` and `b=sum_n footprintWeight_n²/mesh²`.
+Request `q=a*dc/(1+a*(1/V+b))`: positive imports, negative exports. This finite-bath
+relaxation approaches equilibrium without overshooting for an isolated exchange. Shared
+field donor fractions and frozen storage headroom limit competition; no pump work is charged.
+Actual species identities and reference potential move unchanged. Passive imports/exports
+join existing measured chemical flows; `transport` reports only active pump expense.
+Chemical support follows occupied field groups plus private inventory, using the same reused
+scratch and regional commit. No private contact donor is consumed by passive diffusion.
+Passive-stage exports may feed the subsequent active stage, never their own stage's imports.
+Crowding slows both leakage and entry, so protecting against outside exposure also impedes
+clearance of internal products. Existing internal stress, repair and paid receptors remain.
+
 W-transposed demand allocates each geographic donor once. Accepted imports use W and the
 same donor fraction. A complete chemical row is then committed once per affected node,
 including exports. This avoids repeated material/reduction updates for overlapping cells.
@@ -549,8 +569,13 @@ some reserved work unused when material is scarce; it does not iterate or select
 
 Compile each row's weighted potential drop Δu and weighted profile difference
 `a=(sum_t P(t)*p0(t)-p0(s), -(sum_t P(t)*p1(t)-p1(s)))/4`.
-V42 samples B at frozen post-movement footprints, after field/source transport and material
-exchange. It samples scalar illumination L over that same footprint,
+V42 samples the raw public material signal M at frozen post-movement footprints after
+field/source transport and material exchange. Private chemistry adds
+`M_int=sum_s((I_s+B_s)*p_s)/volume` and normalizes their sum as
+`B=(M+M_int)/(1+abs(M0+M_int0)+abs(M1+M_int1))`.
+Thus funded private enzymes can capture light in their own chemical environment even in
+dilute surroundings. This concentration projection owns no additional material. Public
+chemistry retains its ordinary public signal. Scalar illumination L uses that same footprint,
 forms `B_light=L*B`, and computes `w=ε*max(0,a dot B_light)` once for occupied rows. Use
 the same yield for funding and commit. With `d=Δu+w`, usable work is .8d when d is positive
 and d/.8 when negative, less .05 per unit that actually changes chemical identity. Accepted
@@ -695,8 +720,15 @@ Only d<R is a contact; touching and separated circles contribute zero. K is a sy
 scalar independent of heading and any sampling mesh. This uses penetration depth, not
 a sampled interface or an intersection-area integration.
 
-For each overlapping pair, the separation velocities are opposite:
-`v_i = -(1-exp(-dt))*p*u/(2*dt*d)`, `v_j=-v_i`.
+For each overlapping pair, define crowding `W_i=sum_j K_ij`, contact degree `n_i`,
+`C=W_i+W_j`, `z=max(n_i,n_j)` and `h=1-exp(-dt*z)`. Separation velocities are opposite:
+`v_i=-p*h*(1+C)*u/(2*dt*z*(1+C*h)*d)`, `v_j=-v_i`.
+This exactly integrates an isolated pair's `dK/dt=-K*(1+2K)`. Across a contact graph,
+each cell's summed displacement coefficients stay below one half; arbitrary compression
+cannot create an unbounded step. More compression raises stiffness in the small-step limit.
+Ordinary material uptake and growth increase radius and push neighbors outward, with no
+newborn force or reservoir-specific boundary. Compression follows adhesive motion blending
+and contributes to measured travel distance.
 At d=0 the pair has no passive direction. There is no heading-dependent tie-breaker, angular
 partition or artificial world-axis impulse. Overlap is allowed; this is soft separation,
 not a rigid-body constraint solver. Repeated two-body relaxation follows physical elapsed
@@ -706,8 +738,8 @@ The accessible field fraction is `beta_i=1/(1+sum_j K_ij)`.
 Scalar crowding is `1-beta_i`; the four existing controller contact slots each receive one
 quarter. All contact receptor samples receive the same chemical mixture. Exposed concentration
 is `beta_i*(field_i + sum_j K_ij*damage_j*I_j/volume_j)`. Existing damage controls donor
-permeability; intact cells expose no private inventory, but retain their ordinary paid
-field import/export. Export throughput is multiplied by beta. Receptors, transporters and
+permeability to direct contact uptake; intact cells exchange through passive diffusion and paid
+field import/export. Active export throughput is multiplied by beta. Receptors, transporters and
 membranes retain their installed chemical recognition. No contact-specific chemical identity
 or behavior is imposed.
 

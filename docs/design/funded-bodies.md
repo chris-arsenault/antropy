@@ -22,7 +22,12 @@ Each chromosome has twenty-two bounded float32 investment records plus chemical 
 | 20 | Cover builder, paid transfer to/from overhead film | 0.04 |
 | 21 | Light emitter, paid optical power | 0.04 |
 
-A membrane coordinate controls chemical compatibility. One to eight enzyme programs occupy
+A membrane coordinate controls chemical compatibility, protection and passive solute retention.
+The existing susceptibility law scales bidirectional diffusion; unmatched products escape
+more readily, while the same pathway can lose useful material. Paid pumps remain independently
+controlled. Free and bound chemistry provides the private light-reaction environment, and
+actual funded enzymes bound accepted work; no photosynthesis flag grants energy.
+One to eight enzyme programs occupy
 a bounded arena shared with retired installed stock. Four programs start present. Duplication
 splits actual stock and target, copying controls and splitting sensory contributions; deletion
 leaves stock retired and maintained until paid decommission. Core target is reference core × exp(g0). Other stocks use

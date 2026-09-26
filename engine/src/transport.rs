@@ -12,11 +12,14 @@ use rayon::prelude::*;
 mod compose;
 #[path = "transport_membership.rs"]
 mod membership;
+#[path = "transport_passive.rs"]
+pub(crate) mod passive;
 #[path = "transport_projection.rs"]
 mod projection;
 
 #[derive(Clone, Debug, Default)]
 pub struct Exchange {
+    passive: bool,
     demand: Vec<f64>,
     changes: Vec<f64>,
     nodes: Vec<(usize, u64)>,
@@ -63,6 +66,24 @@ fn import_support(cell: &Cell, c: &Config) -> u64 {
 }
 
 impl Exchange {
+    /// Reuse the ordinary field donor solve without pump work or private contact donors.
+    pub(crate) fn diffuse_prepared(
+        &mut self,
+        cells: &mut [Cell],
+        c: &Config,
+        field: &mut Field,
+        chemistry: &Chemistry,
+        sites: &[crate::footprint::Row],
+        stage: (
+            &mut crate::movement::geometry::Cache,
+            &mut Ledger,
+            Option<&mut crate::phenotype::Observer>,
+        ),
+    ) {
+        self.passive = true;
+        self.advance_prepared(cells, c, field, chemistry, sites, stage);
+        self.passive = false;
+    }
     pub fn counts(&self) -> serde_json::Value {
         serde_json::json!({"owners":self.imports.len(),"preparations":self.preparations,
             "execution":"directComposition","fieldDonors":self.nodes.len(),
@@ -132,7 +153,7 @@ impl Exchange {
         };
         let graph = cache.graph_prepared(cells, c);
         graph.prepare_exchange(cells, c, chemistry);
-        self.prepare_requests(cells, c, field, sites, graph);
+        self.prepare_requests(cells, c, field, chemistry, sites, graph);
         self.preparation_ms = if self.profile {
             crate::abi::clock() - started
         } else {
@@ -177,6 +198,7 @@ impl Exchange {
         let demand = &self.demand;
         let slots = &self.slots;
         let masks = &self.masks;
+        let passive = self.passive;
         let cost = crate::parallel::cost::CELL_READ;
         crate::parallel::for_each(&mut self.imports, cost, |i, imports| {
             *imports = crate::exchange_vector::gather(demand, &sites[i], slots, imports, masks[i]);
@@ -204,7 +226,9 @@ impl Exchange {
             }
             cell.flows.imported += incoming;
             cell.flows.exported += outgoing;
-            cell.flows.transport += cell.pay((incoming + outgoing) * c.transport_energy);
+            if !passive {
+                cell.flows.transport += cell.pay((incoming + outgoing) * c.transport_energy);
+            }
         });
         if let Some(o) = observer {
             for (i, cell) in cells.iter().enumerate() {
@@ -226,6 +250,9 @@ mod flux_tests;
 #[cfg(test)]
 #[path = "transport_notification_tests.rs"]
 mod notification_tests;
+#[cfg(test)]
+#[path = "transport_passive_tests.rs"]
+mod passive_tests;
 #[cfg(test)]
 #[path = "transport_execution_tests.rs"]
 mod tests;

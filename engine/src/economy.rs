@@ -54,13 +54,13 @@ pub fn budget(
     inventory: f64,
     swim: f64,
 ) -> Budget {
-    let signal = crate::weathering::signal(std::array::from_fn(|k| {
+    let external = std::array::from_fn(|k| {
         local
             .iter()
             .zip(&chemistry.properties)
             .map(|(q, p)| q * p.interaction[k])
             .sum()
-    }));
+    });
     let mut cell = Cell::new(0, 0, g, c, chemistry, [0., 0.], 0.);
     cell.set_fixture_body(cell.body.map(|v| v * scale));
     cell.inventory.fill(inventory / 256.);
@@ -74,15 +74,9 @@ pub fn budget(
                     / (c.receptor_k + total);
         }
     }
-    let gross_work = imports
-        .iter()
-        .enumerate()
-        .map(|(s, q)| q * local_work_ceiling(g, s, c, signal))
-        .sum::<f64>();
     let maintenance = maintenance_rate(&cell.body, 0., c);
     let transport = imports.iter().sum::<f64>() * c.transport_energy;
     let motor = crate::movement::motor_work_rate(&cell.body, 0., swim, 0., c);
-    let surplus = gross_work - maintenance - transport - motor;
     // Conditional internal mixture: the imported proportions, with no accumulated products.
     // Product feedback in a live cell can lower this bound further.
     let total_import = imports.iter().sum::<f64>();
@@ -98,6 +92,13 @@ pub fn budget(
         .collect();
     let mut processing_capacity = vec![0.; 256];
     cell.inventory = inside.clone().into();
+    let signal = crate::metabolism::light_environment(&cell, c, chemistry, external);
+    let gross_work = imports
+        .iter()
+        .enumerate()
+        .map(|(s, q)| q * local_work_ceiling(g, s, c, signal))
+        .sum::<f64>();
+    let surplus = gross_work - maintenance - transport - motor;
     let mixture = crate::metabolism::retained_response(&cell, c, chemistry);
     let mut processing_value = vec![0.; 256];
     for (slot, e) in g.operators.enzymes.iter().enumerate() {

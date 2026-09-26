@@ -144,11 +144,13 @@ pub fn report(w: &World) -> Value {
         let mixture = crate::numeric::mixture_masked(&w.field, &row, u64::MAX);
         let local = graph.local(i, &w.cells, c, &mixture);
         let (mut gross, mut net, support) = transport_rates(cell, c, &local, graph.field[i]);
+        let (passive_gross, passive_net, passive_support) =
+            cells::passive_rates(cell, w, &row, graph.field[i]);
         let (reaction, reaction_net, stock, spending, reaction_edges) =
             physiology_rates(cell, w, exposures[i], &mut executor);
         for s in 0..256 {
-            gross[s] += reaction[s];
-            net[s] += reaction_net[s];
+            gross[s] += reaction[s] + passive_gross[s];
+            net[s] += reaction_net[s] + passive_net[s];
         }
         let (chemical, bulk) = chemical_rate(cell, c, &net);
         let (gross_chemical, gross_bulk) = chemical_rate(cell, c, &gross);
@@ -160,7 +162,8 @@ pub fn report(w: &World) -> Value {
             .max(stock)
             .max(spending)
             .max(external);
-        let exchange_work = (1 + support * (row.len() + neighbors + 1)) as f64;
+        let exchange_work =
+            (1 + support * (row.len() + neighbors + 1) + passive_support * (row.len() + 1)) as f64;
         let reaction_work = (1 + reaction_edges * 3 + crate::organism::STOCKS) as f64;
         stages[0].push(Sample::new(
             movement.max(stock).max(neural).max(external),
@@ -208,7 +211,7 @@ pub fn report(w: &World) -> Value {
         "limits":["Stored derived medium, interface and sensor inputs at this World tick; call after ordinary warmup",
             "Four ordinary fixed-input neural evaluations on cloned private state; not a future bound or equilibrium proof",
             "Ordinary funded reaction/repair/refit/growth probe on one cloned cell for config.dt; no live mutation",
-            "Transport proposals include current geometry and work funding but omit donor contention and storage clipping",
+            "Active transport proposals include geometry and work funding but omit donor contention and storage clipping; passive proposals use ordinary membrane relaxation and headroom, without donor contention",
             "Net chemical change combines signed transport proposals with cloned-probe inventory change; gross reaction plus transport throughput is reported separately and does not set coupled rates",
             "Chemical normalization is q+concentrationFloor*volume; bulk normalization is material+receptorK*volume",
             "Motion combines signed current-geometry contact shifts with swimming and passive drift; ordinary contact normalization affects sensor readings only",

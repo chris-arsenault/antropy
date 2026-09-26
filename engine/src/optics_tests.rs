@@ -140,3 +140,36 @@ fn optical_reservation_caps_work_without_capping_the_observed_signal() {
     assert_eq!(empty.drive(), 0.);
     assert_eq!(empty.light(), 10.);
 }
+
+#[test]
+fn isolated_private_material_drives_light_but_cannot_replace_light_or_enzymes() {
+    let mut w = crate::diagnostics::nutrition(0.8, 2., false, false);
+    let sites = vec![crate::footprint::sites(&w.cells[0], &w.config, &w.field)];
+    let (signal, _) = crate::optics::observed_cell_exposures(&w, &sites)[0];
+    assert!(crate::weathering::strength(signal) > 0.);
+    assert!(crate::weathering::strength(signal) < 1.);
+    let mut other_sensitivity = w.config.clone();
+    other_sensitivity.receptor_k *= 10.;
+    let environment = |c: &Config| {
+        crate::metabolism::light_environment(&w.cells[0], c, &w.chemistry, [0.3, -0.1])
+    };
+    assert_eq!(environment(&w.config), environment(&other_sensitivity));
+    let before = w.cells[0].material();
+    crate::metabolism::react_observed(
+        &mut w.cells[0],
+        &w.config,
+        &w.chemistry,
+        0.8,
+        true,
+        crate::illumination::drive(signal, 0.),
+    );
+    assert_eq!(w.cells[0].flows.external_work, 0.);
+    assert!((w.cells[0].material() - before).abs() < 1e-12);
+    for slot in 0..crate::organism::MAX_ENZYMES {
+        w.cells[0].body[crate::organism::enzyme_stock(slot)] = 0.;
+    }
+    let before = (w.cells[0].material(), w.cells[0].energy);
+    crate::metabolism::react_observed(&mut w.cells[0], &w.config, &w.chemistry, 0.8, true, signal);
+    assert_eq!((w.cells[0].material(), w.cells[0].energy), before);
+    assert_eq!(w.cells[0].flows.external_work, 0.);
+}

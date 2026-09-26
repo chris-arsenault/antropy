@@ -97,6 +97,7 @@ impl Exchange {
         cells: &[Cell],
         c: &Config,
         field: &Field,
+        chemistry: &Chemistry,
         sites: &[crate::footprint::Row],
         graph: &crate::interfaces::Graph,
     ) {
@@ -105,19 +106,26 @@ impl Exchange {
         self.imports.resize(cells.len(), [0.; 256]);
         self.exports.resize(cells.len(), [0.; 256]);
         self.masks.resize(cells.len(), 0);
-        self.contact
-            .begin(if graph.exposed { cells.len() } else { 0 });
+        let exposed = graph.exposed && !self.passive;
+        self.contact.begin(if exposed { cells.len() } else { 0 });
         self.contact_support.resize_with(cells.len(), Vec::new);
+        let passive = self.passive;
         let request = |(i, (((imports, exports), mask), support)): RequestRow<'_>| {
             let cell = &cells[i];
             clear(imports, *mask);
             clear(exports, *mask);
             support.clear();
+            if passive {
+                *mask = super::passive::requests(
+                    cell, c, field, chemistry, &sites[i], imports, exports,
+                );
+                return;
+            }
             let active = import_support(cell, c);
             let field_local = crate::numeric::mixture_masked(field, &sites[i], active);
             let local = graph.local_masked(i, cells, c, &field_local, active);
             *mask = requests(cell, c, &local, imports, exports);
-            if graph.exposed {
+            if exposed {
                 for s in species(*mask) {
                     if imports[s] > 0. && local[s] > 0. {
                         support.push((s, imports[s] / local[s]));
@@ -148,11 +156,13 @@ impl Exchange {
                 .enumerate()
                 .for_each(request);
         }
-        for (i, support) in self.contact_support.iter().enumerate() {
-            self.contact.request_intensity(i, graph, support);
+        if !passive {
+            for (i, support) in self.contact_support.iter().enumerate() {
+                self.contact.request_intensity(i, graph, support);
+            }
+            self.contact
+                .allocate(cells, &mut self.exports, graph, &self.masks);
         }
-        self.contact
-            .allocate(cells, &mut self.exports, graph, &self.masks);
         self.project_requests();
         self.preparations += cells.len() as u64;
     }

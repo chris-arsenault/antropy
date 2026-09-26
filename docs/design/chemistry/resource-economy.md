@@ -1,5 +1,13 @@
 # Resource economy: model, calibration and checks
 
+September26 current-tool note: the zero-tick active-pump budget now uses the same private
+free/bound light environment as ordinary cellular reactions. It remains an active-pump
+estimate at unit illumination and explicitly excludes passive membrane loss/gain, repair,
+competition and travel through gradients. It cannot predict independent-cell persistence.
+The [ecological incentives plan](../../plans/ECOLOGICAL-INCENTIVES-PLAN.md) records measured
+private cycling, passive loss and mobile growth in dilute material. Current governing equations
+remain in [composed runtime](composed-runtime.md); the historical calibration below is unchanged.
+
 Scope after the September 15 design clarification: the equations and measurements below describe
 the previous runtime. The [computational foundation](computational-foundation.md) governs new
 transport, processing and work rules. Preserve this budget-first method, assumptions and negative

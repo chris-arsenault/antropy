@@ -19,8 +19,9 @@ A cell owns position, heading, twenty-two actual material-stock records, a 256-e
 mixture, usable energy, injury, four outward/four inward chemical and one optical adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
 drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile
-response share local impedance-dependent mobility. A bounded local pair correction resolves
-overlaps approximately. There is no temperature, Brownian rule or fluid solver.
+response share local impedance-dependent mobility. Bounded nonlinear circle separation
+strengthens with compression, allowing growth to push neighbors outward. There is no
+temperature, Brownian rule or fluid solver.
 
 <a id="world-fields-and-finite-deposits"></a>
 
@@ -82,18 +83,26 @@ and paid learning time advance every base step. The phase order is:
    local physiological boundary, settle private learning and evaluate the RNN once using
    the signed average cues.
 3. Pay affordable swimming/turning and resolve movement/contact.
-4. On physiology boundaries resolve funded import/export from shared supply, storage and usable work.
+4. On physiology boundaries resolve passive membrane concentration exchange, then funded
+   import/export from shared supply, storage and usable work.
 5. On those boundaries apply membrane-dependent external/internal injury, unary reactions,
    repair, generic construction and work overflow.
 6. Pay maintenance every movement tick; resolve death, optional disturbance
    and funded reproduction. Daughters initialize from local observations and first advance
    their private controller on the next base step.
 
-Transport cannot use prospective export to create import headroom; released material becomes
-available in the next transport phase. Enzymes see one starting intracellular inventory, so products
+Each exchange stage cannot use its prospective export to create import headroom; passive
+release is available to the subsequent paid stage. Enzymes see one starting intracellular inventory, so products
 cannot cascade by enzyme iteration order. Uphill reactions use already held energy or explicitly accepted external transformation work. Downhill
 overflow becomes heat. Growth protects upkeep and current motor/learning work through
 the next physiology interval. Motor and transport effort otherwise compete for available work.
+
+Private free and bound chemistry supplies a local environment for light-supported reactions,
+without requiring concentrated surrounding material. Ordinary enzymes harvest accounted work;
+photoreceptors only sense. Passive membranes release products and lose useful solutes according
+to the same diffusivity/compatibility law. Survival still requires material retention or uptake,
+and growth requires additional matter. See the [equations](chemistry/composed-runtime.md) and
+[bounded measurements](../plans/ECOLOGICAL-INCENTIVES-PLAN.md).
 
 Matter and energy close separately across fields, sources, cells, generic bodies, washout and
 dissipation. There is no automatic scalar-reserve catabolism, direct prey yield, reserve sharing

@@ -89,6 +89,20 @@ pub fn retained_response(cell: &Cell, c: &Config, chemistry: &Chemistry) -> [f64
         c.receptor_k * cell.volume(c) + cell.material() + cell.bound_material.material();
     std::array::from_fn(|k| (free[k] + bound[k]) / denominator.max(1e-30))
 }
+/// Private chemical concentration joins the external response without owning more material.
+pub fn light_environment(
+    cell: &Cell,
+    c: &Config,
+    chemistry: &Chemistry,
+    external: [f64; 2],
+) -> [f64; 2] {
+    let free = cell.inventory.projection(chemistry).interaction;
+    let bound = cell.bound_material.projection(chemistry).interaction;
+    let reference = cell.volume(c).max(1e-30);
+    crate::weathering::signal(std::array::from_fn(|k| {
+        external[k] + (free[k] + bound[k]) / reference
+    }))
+}
 pub fn response(coefficient: [f64; 2], mixture: [f64; 2]) -> f64 {
     let z = 4. * (coefficient[0] * mixture[0] + coefficient[1] * mixture[1]);
     1. + z / (1. + z.abs())

@@ -317,6 +317,19 @@ impl World {
             let mut interval_config = self.config.clone();
             interval_config.dt = self.field_elapsed;
             self.exchange.profile = clock.is_some();
+            self.exchange.diffuse_prepared(
+                &mut self.cells,
+                &interval_config,
+                &mut self.field,
+                &self.chemistry,
+                &sites,
+                (
+                    &mut self.contact_cache,
+                    &mut self.ledger,
+                    self.observer.as_deref_mut().filter(|o| o.active()),
+                ),
+            );
+            let diffusion_ms = self.exchange.preparation_ms;
             self.exchange.advance_prepared(
                 &mut self.cells,
                 &interval_config,
@@ -330,7 +343,7 @@ impl World {
                 ),
             );
             stages[4] = now() - started;
-            stages[8] = self.exchange.preparation_ms;
+            stages[8] = diffusion_ms + self.exchange.preparation_ms;
             started = now();
             crate::cover::exchange(self, &sites, self.field_elapsed);
             let signals = crate::optics::prepare(self, &sites, self.field_elapsed);
