@@ -391,11 +391,14 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
         }
         let compiled = w.genomes[&cell.genome].compiled.as_ref().unwrap();
         sensing::initialize(&mut cell, compiled, &w.config, &w.field);
-        w.ancestry[id as usize - 1].genome = cell.genome;
+        crate::ancestry::get_mut(&mut w.ancestry, id)
+            .unwrap()
+            .genome = cell.genome;
         w.cells[index] = cell;
         if v.get("kill").and_then(Value::as_bool) == Some(true) {
             let cell = w.cells.remove(index);
             w.release_cell(&cell, crate::ancestry::Cause::ConstructedDeath);
+            crate::ancestry::compact(w);
         }
     }
     if let Some((s, x, y, q)) = deposit {
@@ -431,10 +434,7 @@ fn load_program_fixture(
     programs: usize,
     dense: bool,
 ) -> Result<(), String> {
-    if w.tick != 0
-        || population > w.config.max_ancestry_records
-        || !(1..=crate::organism::MAX_ENZYMES).contains(&programs)
-    {
+    if w.tick != 0 || !(1..=crate::organism::MAX_ENZYMES).contains(&programs) {
         return Err("Load fixture requires tick zero and valid capacity".into());
     }
     w.cells.clear();

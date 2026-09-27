@@ -78,7 +78,9 @@ pub fn replace(w: &mut World, v: &Value) -> Result<Value, String> {
             let capabilities = g.compiled.as_ref().unwrap();
             cell.operators = Some(capabilities.operators.clone());
             sensing::initialize(&mut cell, capabilities, &w.config, &w.field);
-            w.ancestry[cell.id as usize - 1].genome = g.id;
+            crate::ancestry::get_mut(&mut w.ancestry, cell.id)
+                .unwrap()
+                .genome = g.id;
         }
         w.cells[i] = cell;
     }
@@ -157,29 +159,32 @@ pub fn sample(w: &World) -> Value {
         "chemical_energy":e["extracellular"]["potential"],"energy_residual":s["energyResidual"],"material_residual":s["materialResidual"]}]})
 }
 pub fn branches(w: &World, lineage: u64) -> Value {
-    let mut ancestors = Vec::<(u8, u64)>::with_capacity(w.ancestry.len());
+    let mut ancestors = BTreeMap::<u64, (u8, u64)>::new();
     for a in &w.ancestry {
         let (depth, branch) = if let Some(p) = a.parent() {
-            ancestors[p as usize - 1]
+            let Some(&value) = ancestors.get(&p) else {
+                return json!({"unavailable":"Requested branch history has expired"});
+            };
+            value
         } else {
             (0, a.id)
         };
-        ancestors.push(if a.parent == 0 {
-            (0, a.id)
-        } else if depth < 3 {
-            (depth + 1, a.id)
-        } else {
-            (3, branch)
-        });
+        ancestors.insert(
+            a.id,
+            if a.parent == 0 {
+                (0, a.id)
+            } else if depth < 3 {
+                (depth + 1, a.id)
+            } else {
+                (3, branch)
+            },
+        );
     }
     let mut groups = BTreeMap::<u64, Vec<&crate::organism::Cell>>::new();
     let mut count = 0;
     for c in &w.cells {
         if lineage == 0 || c.lineage == lineage {
-            groups
-                .entry(ancestors[c.id as usize - 1].1)
-                .or_default()
-                .push(c);
+            groups.entry(ancestors[&c.id].1).or_default().push(c);
             count += 1;
         }
     }

@@ -17,12 +17,19 @@ export class SelectedObservation {
     if (id === null) return null;
     if (this.value?.tick === summary.tick && !this.dirty) return this.value;
     const l = summary.ledger;
-    const revision = `${summary.ancestryRecords}/${l.deaths}`;
-    const patch = world.command<Partial<Inspection>>("inspectSelected", {
-      cell: id,
-      genealogy: revision !== this.revision,
-      genome: this.value?.genotype?.id ?? null,
-    });
+    const revision = `${l.births}/${l.deaths}`;
+    let patch: Partial<Inspection>;
+    try {
+      patch = world.command<Partial<Inspection>>("inspectSelected", {
+        cell: id,
+        genealogy: revision !== this.revision,
+        genome: this.value?.genotype?.id ?? null,
+      });
+    } catch (error) {
+      if (!String(error).includes("history is unknown or has expired")) throw error;
+      this.value = null;
+      return null;
+    }
     this.value = { ...this.value, ...patch } as Inspection;
     this.revision = revision;
     this.dirty = false;

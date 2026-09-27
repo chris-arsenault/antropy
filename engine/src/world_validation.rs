@@ -3,9 +3,14 @@ use crate::{ancestry::Cause, world::World};
 use std::collections::BTreeSet;
 
 pub fn history(w: &World, living: &BTreeSet<u64>) -> Result<(), String> {
-    let mut depths = Vec::<u32>::with_capacity(w.ancestry.len());
-    for (i, a) in w.ancestry.iter().enumerate() {
-        if a.id != i as u64 + 1
+    if w.ancestry.windows(2).any(|pair| pair[0].id >= pair[1].id) {
+        return Err("Invalid ancestry ordering".into());
+    }
+    let mut depths = Vec::<Option<u64>>::with_capacity(w.ancestry.len());
+    for a in &w.ancestry {
+        if a.id == 0
+            || a.lineage == 0
+            || a.lineage > a.id
             || a.parent >= a.id
             || a.born > w.tick
             || a.ended().is_some_and(|t| t < a.born || t > w.tick)
@@ -17,22 +22,27 @@ pub fn history(w: &World, living: &BTreeSet<u64>) -> Result<(), String> {
             return Err("Invalid ancestry record".into());
         }
         let depth = if let Some(parent) = a.parent() {
-            let p = &w.ancestry[parent as usize - 1];
-            if a.lineage != p.lineage || a.born < p.born {
-                return Err("Inconsistent parentage".into());
+            if let Some(index) = crate::ancestry::index(&w.ancestry, parent) {
+                let p = &w.ancestry[index];
+                if a.lineage != p.lineage || a.born < p.born {
+                    return Err("Inconsistent parentage".into());
+                }
+                depths[index].map(|d| d + 1)
+            } else {
+                None
             }
-            depths[parent as usize - 1] + 1
         } else {
             if a.lineage != a.id {
                 return Err("Invalid founder lineage".into());
             }
-            0
+            Some(0)
         };
         depths.push(depth);
     }
     for c in &w.cells {
-        let a = &w.ancestry[c.id as usize - 1];
-        if c.born != a.born || c.generation != depths[c.id as usize - 1] as u64 {
+        let index = crate::ancestry::index(&w.ancestry, c.id).ok_or("Missing living history")?;
+        let a = &w.ancestry[index];
+        if c.born != a.born || depths[index].is_some_and(|d| c.generation != d) {
             return Err("Body and ancestry disagree on age or generation".into());
         }
     }

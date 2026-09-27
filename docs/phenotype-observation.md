@@ -21,13 +21,15 @@ alter inherited traits or supply controller inputs.
 - **Highlight selected group** adds outlines and dims other cells while preserving the selected
   cell-color and field mappings. Clear the highlight from the map without reopening the window.
 - **Pin selected descendants** captures the complete selected group at that tick. Its descendants
-  remain members through mutation, refitting and migration. An extinct cohort stays visible with
+  remain members through mutation and migration. An extinct cohort stays visible with
   zero living descendants. Remove a pin explicitly before replacing it.
 
 The history chart tracks descendant count or a trait distribution. Pin samples use the existing
 240-point chart history and thinning; they do not introduce a separate growing log. Save/export
 retains pin identity, its original member IDs and those compact history samples. Restore rebuilds
-membership from existing parentage. Recent activity starts fresh at restore, with its coverage
+membership from retained parentage. If required history has expired, restore drops the pin with
+a notice and preserves the physical world. Live pin membership propagates through births without
+requiring the original root record. Recent activity starts fresh at restore, with its coverage
 shown explicitly. Packages without optional pin/history data restore those observations empty when their physical
 version is supported. This does not bypass physical checkpoint-version rejection.
 

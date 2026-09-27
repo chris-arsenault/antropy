@@ -75,7 +75,8 @@ Observation packets exclude unrequested genomes, inventories and neural arrays. 
 explicit. Checkpoints include physical state, chemistry definition, source schedules, RNGs,
 private learning, genotype identity and ancestry. Reject incompatible schemas. Compact ancestry records and bounded caches keep historical strings and dead genotype payloads
 out of ordinary physical work. Full snapshots and ancestry queries still scale with retained history. Storage
-failure pauses visibly while preserving the live world and last good save.
+failure warns while stepping continues, preserving the live world and last good save. Historical
+records retain living cells plus bounded ended history; expiration never blocks reproduction.
 
 The September 14 clarification requires eliminating render-array copies across the WASM and
 worker boundaries. Keep WebGL2 in the world-owning worker through `OffscreenCanvas`. Its typed

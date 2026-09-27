@@ -460,6 +460,13 @@ impl World {
         world.cover.validate()?;
         world.cover.refresh_features(&world.chemistry);
         world.validate()?;
+        crate::ancestry::compact(&mut world);
+        if matches!(
+            world.stop_reason.as_deref(),
+            Some("ancestry-limit" | "extinction")
+        ) {
+            world.stop_reason = None;
+        }
         world.field.pressure_strength = world.config.pressure_strength;
         world.field.illumination.shade = world.shade.clone();
         world.field.illumination.prepare(
@@ -507,8 +514,13 @@ impl World {
         {
             return Err("Cover and world dimensions disagree".into());
         }
-        if self.ancestry.len() > self.config.max_ancestry_records
-            || self.next_cell != self.ancestry.len() as u64 + 1
+        if self.ancestry.len()
+            > self
+                .config
+                .max_ancestry_records
+                .saturating_add(self.cells.len())
+            || self.next_cell == 0
+            || self.ancestry.last().is_some_and(|a| a.id >= self.next_cell)
             || !self.field_elapsed.is_finite()
             || self.field_elapsed < 0.
             || self.field_elapsed >= self.config.physiology_interval
@@ -544,7 +556,8 @@ impl World {
             {
                 return Err("Invalid living identity".into());
             }
-            let a = &self.ancestry[cell.id as usize - 1];
+            let a = crate::ancestry::get(&self.ancestry, cell.id)
+                .ok_or("Missing living history record")?;
             if a.parent() != cell.parent || a.lineage != cell.lineage || a.genome != cell.genome {
                 return Err("Body and ancestry disagree".into());
             }

@@ -165,8 +165,8 @@ penetration, center-line soft separation and permeable material access. No conta
 lattice, angular moments or heading dependence. The sampled contact replacement was rejected.
 The scaling plan records structural acceptance and remaining area-dependent memory/output costs.
 P3 live operating acceptance and human motion review remain open. V40 enlarges default area 5.0625-fold while
-preserving aspect ratio and mesh. There is no population-count ceiling; ancestry and memory
-budgets remain independent operating limits.
+preserving aspect ratio and mesh. There is no population-count or ancestry-triggered stop.
+History retains living records plus bounded recent ended records; gaps are explicit.
 
 [Execution modes](docs/execution-modes.md) extends this with explicit browser 1/4 selection and
 one native server World feeding the same UI through bounded display projections. Local rendering
@@ -190,9 +190,14 @@ Use the credential-broker-backed `gh` CLI to inspect CI runs and logs. Never use
 GitHub app. A denied credential remains a boundary until the user enables that same path.
 
 Recovery retains up to six automatic and two manual compressed IndexedDB saves within 256 MiB,
-expiring older points to fit. A raw checkpoint is capped at 192 MiB. Compact complete parentage
-defaults to two million records; bounded chart/spatial history is distinct from ancestry.
-Actual storage/memory failures pause visibly. [Continuing observation](docs/continuing-observation.md)
+expiring older points to fit. A raw checkpoint is capped at 192 MiB. Retained ended parentage
+defaults to two million records, in addition to every living record. Old ended records expire
+without inhibiting births or stepping; empty worlds keep environmental time. Bounded chart/spatial
+history is distinct from ancestry. Recovery-save failures warn and preserve the last good save
+while simulation continues. Fatal execution failures remain visible.
+Assess diversity through current capabilities, funded bodies and expressed behavior, never founder
+lineage counts or exact genotype counts. Genealogy is an optional historical diagnostic.
+[Continuing observation](docs/continuing-observation.md)
 records measured limits; uninterrupted days/weeks operation is not certified.
 
 Implementers own numerical methods, resolution, sparse thresholds and tuning within the stated

@@ -177,8 +177,11 @@ The default area is 5.0625 times the previous 320 × 240 world, with the same as
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping
 resource density comparable instead of stretching seven neighborhoods across the larger map.
-Reproduction has no population-count ceiling; ancestry,
-memory and observation budgets remain separate operating limits. Larger area is not a speed guarantee.
+Reproduction has no population-count or historical-record ceiling. History retains living cells
+and bounded recent ended records; old parentage expires without pausing. Recoverable save failures
+warn while stepping continues. Current bodies, capabilities and behavior describe diversity;
+founder lineage and sequence counts do not. See [continuation](../continuing-observation.md).
+Memory and observation budgets remain finite. Larger area is not a speed guarantee.
 The [material-habitat changes](../material-habitats.md) introduced shared attraction,
 locally evolving source renewal and multiscale public chemistry. The
 [simplification](../plans/MODEL-SIMPLIFICATION-PLAN.md) now uses one normalized attraction

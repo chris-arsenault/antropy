@@ -16,9 +16,21 @@ export class PhenotypeObservation {
   private configured = "";
   private cached: PhenotypeReport | null = null;
   pin: SavedPin | null = null;
+  recoveryNotice: string | null = null;
 
   restore(world: EngineWorld, pin: SavedPin | null) {
-    if (pin) world.command("phenotype", { action: "restorePin", pin });
+    this.recoveryNotice = null;
+    if (pin) {
+      try {
+        world.command("phenotype", { action: "restorePin", pin });
+      } catch (error) {
+        if (!String(error).includes("expired")) throw error;
+        this.recoveryNotice =
+          "Saved cohort history expired; physical world restored without the pin";
+        this.pin = null;
+        return;
+      }
+    }
     this.pin = pin;
   }
 

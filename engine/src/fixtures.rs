@@ -113,7 +113,9 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
     w.next_genome += ids.len() as u64;
     w.cells = cells;
     for c in &w.cells {
-        w.ancestry[c.id as usize - 1].genome = c.genome;
+        crate::ancestry::get_mut(&mut w.ancestry, c.id)
+            .unwrap()
+            .genome = c.genome;
     }
     w.ledger.flows.constructed += built;
     w.ledger.flows.construction += heat;

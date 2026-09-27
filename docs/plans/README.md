@@ -7,6 +7,12 @@ registrations and failures. Their old future-tense instructions are historical, 
 
 ## Ecological incentives
 
+[Continuous worlds and current phenotype](CONTINUOUS-WORLD-PLAN.md), Sulion
+`84480ab8-e1c0-493f-a846-3b83abc11a94`, removes ancestry-triggered stopping through bounded
+ended-history retention and makes recoverable save failures non-pausing. It promotes current
+capabilities, funded bodies and expressed behavior over founder labels. Live delivery is tracked
+in that document; the existing world must continue without a reset.
+
 [Crowding, waste and independent light metabolism](ECOLOGICAL-INCENTIVES-PLAN.md), Sulion
 `fce0b678-3b92-4234-8ea6-96a66aa76408`, implements the three requested physical opportunities
 and records bounded measurements. The same document owns execution details, failures and

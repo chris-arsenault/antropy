@@ -24,7 +24,10 @@ fn heat(f: f64) -> [f32; 3] {
 pub fn family(w: &World, c: &Cell) -> u64 {
     let mut id = c.id;
     for _ in 0..c.generation % 4 {
-        if let Some(p) = w.ancestry[id as usize - 1].parent() {
+        if let Some(p) = crate::ancestry::get(&w.ancestry, id)
+            .and_then(|a| a.parent())
+            .filter(|p| crate::ancestry::get(&w.ancestry, *p).is_some())
+        {
             id = p;
         }
     }
@@ -33,7 +36,7 @@ pub fn family(w: &World, c: &Cell) -> u64 {
 pub fn ancestor_path(w: &World, mut id: u64) -> BTreeMap<u64, u64> {
     let mut path = BTreeMap::new();
     let mut depth = 0;
-    while let Some(a) = id.checked_sub(1).and_then(|i| w.ancestry.get(i as usize)) {
+    while let Some(a) = crate::ancestry::get(&w.ancestry, id) {
         path.insert(id, depth);
         depth += 1;
         let Some(p) = a.parent() else {
@@ -44,8 +47,8 @@ pub fn ancestor_path(w: &World, mut id: u64) -> BTreeMap<u64, u64> {
     path
 }
 pub fn links(w: &World, reference: u64, id: u64, path: &BTreeMap<u64, u64>) -> Option<(u64, u64)> {
-    let a = w.ancestry.get(reference.checked_sub(1)? as usize)?;
-    let b = w.ancestry.get(id.checked_sub(1)? as usize)?;
+    let a = crate::ancestry::get(&w.ancestry, reference)?;
+    let b = crate::ancestry::get(&w.ancestry, id)?;
     if a.lineage != b.lineage {
         return None;
     }
@@ -55,7 +58,7 @@ pub fn links(w: &World, reference: u64, id: u64, path: &BTreeMap<u64, u64>) -> O
         if let Some(n) = path.get(&cursor) {
             return Some((cursor, steps + n));
         }
-        cursor = w.ancestry.get(cursor as usize - 1)?.parent()?;
+        cursor = crate::ancestry::get(&w.ancestry, cursor)?.parent()?;
         steps += 1;
     }
 }
@@ -144,9 +147,7 @@ fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32
 }
 impl Colors {
     pub fn prepare(&mut self, w: &World, mode: u32, selected: u64) {
-        let reference = selected
-            .checked_sub(1)
-            .and_then(|i| w.ancestry.get(i as usize))
+        let reference = crate::ancestry::get(&w.ancestry, selected)
             .map(|a| a.genome)
             .filter(|id| w.genomes.contains_key(id));
         if self.selection != Some((mode, selected, reference)) {
@@ -187,9 +188,7 @@ impl Colors {
                     .unwrap_or([0.3, 0.35, 0.4])
             }),
             _ => *self.genomes.entry(c.genome).or_insert_with(|| {
-                let reference = selected
-                    .checked_sub(1)
-                    .and_then(|i| w.ancestry.get(i as usize))
+                let reference = crate::ancestry::get(&w.ancestry, selected)
                     .and_then(|a| w.genomes.get(&a.genome))
                     .and_then(|g| g.compiled.as_ref());
                 genotype_color(

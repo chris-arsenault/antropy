@@ -9,13 +9,20 @@ remain evidence about their particular bodies, controllers and environments.
 
 ## Independent views
 
+Current diversity means differences in capabilities, funded bodies and expressed behavior,
+regardless of parentage. The population panel leads with stock distributions and recent efforts;
+the phenotype panel compares actual machinery, inherited targets and measured activity. A shared
+founder can support different functions, and separate pedigrees can converge on the same function.
+Sequence identity and ancestry remain optional diagnostics, not counts of ecological types.
+
 The map defaults to usable cell energy over field energy per material. Recent families are a
 selectable map view and population-share chart. For the initial observation
 scale, a family is an ancestry branch rooted at generation 0, 4, 8, and so on. Membership follows
 parent links to the most recent such root. IDs are the root organism IDs, deterministic across
 imports and unrelated to mutations, abundance or analysis sampling. Four generations is a viewing
-convention, not a species boundary. Older groups can continue through younger families; disappearance
-from a group is not automatically extinction of its descendants. Founder ancestry remains available.
+convention, not a species boundary. If a needed parent has expired, the path stops at the oldest
+retained record. Older groups can continue through younger families; disappearance from a group
+is not automatically extinction of its descendants. Founder labels remain optional diagnostics.
 
 The Lineage window shows recent family and founder share charts, current counts, percentage-point changes
 and clickable identities. Family rows show parent family, root birth tick and generation; inherited
@@ -28,11 +35,12 @@ has zero recorded members only when retained counts sum to the entire population
 share is unknown: chart paths break and changes are unavailable. A zero denominator is also
 unavailable. Neither an omitted group nor a four-generation family rollover is reported as extinction.
 
-Selected-cell genealogy shows its family origin, founder, ancestor path, children, siblings and
-living descendants. It remains available after death or division. The inspector sends the nearest
+Selected-cell genealogy shows its retained family origin, ancestor path, children, siblings and
+living descendants while the records remain available. The inspector sends the nearest
 12 ancestor records and up to 24 entries per relative list, with full counts; follow an earlier
-ancestor or enter any recorded cell ID to navigate the retained tree. These display limits do not
-remove parentage from checkpoints. Genetic comparisons explicitly distinguish a pruned genome
+ancestor or enter a retained cell ID to navigate the tree. Separately, the history budget expires
+old ended records. Missing paths and incomplete relationship counts are labeled; expired selected
+cells clear from inspection. Genetic comparisons explicitly distinguish a pruned genome
 from zero genetic distance.
 
 Selecting an organism permits separate genealogical and genetic comparisons. Genealogical distance
@@ -93,9 +101,10 @@ or accumulate history. See the [implementation and verification record](../plans
 An observer projection owns grouping, distance caches and view history. It does not alter worlds,
 genomes, random streams, actions, survival or reproduction. No family label enters a sensor or grants
 cooperation. Current v11 browser packages preserve observer history separately from physical state.
-Ancestry stays complete in compact numeric records; family queries can follow dead organisms. Genetic-distance
-comparisons show unavailable when the selected dead organism's genotype was pruned. Existing zoom,
-field layers, founder reporting and inspection remain available.
+History retains every living record and bounded ended records. Family queries can follow dead
+organisms only while those records remain. Genetic-distance comparisons show unavailable when
+the selected dead organism's genotype was pruned. Existing zoom, field layers and inspection
+remain available. Neither historical coverage nor founder reporting constrains physical runtime.
 
 Bounded tests cover shared ancestry, family continuity across birth and restore, independent genetic
 distances, sampling denominators and unchanged simulation state. A projection of the existing export

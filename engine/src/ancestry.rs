@@ -3,6 +3,37 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub const ALIVE: u64 = u64::MAX;
 
+#[cfg(test)]
+#[path = "ancestry_retention_tests.rs"]
+mod retention_tests;
+
+pub fn index(records: &[Ancestor], id: u64) -> Option<usize> {
+    records.binary_search_by_key(&id, |a| a.id).ok()
+}
+pub fn get(records: &[Ancestor], id: u64) -> Option<&Ancestor> {
+    index(records, id).map(|i| &records[i])
+}
+pub fn get_mut(records: &mut [Ancestor], id: u64) -> Option<&mut Ancestor> {
+    index(records, id).map(|i| &mut records[i])
+}
+
+/// Historical records never cap the living population or change physical identities.
+pub fn compact(w: &mut crate::world::World) {
+    let budget = w.config.max_ancestry_records;
+    if w.ancestry.len() <= budget.saturating_add(w.cells.len()) {
+        return;
+    }
+    let mut ended = w.ancestry.iter().filter(|a| a.ended != ALIVE).count();
+    w.ancestry.retain(|a| {
+        if a.ended != ALIVE && ended > budget / 2 {
+            ended -= 1;
+            false
+        } else {
+            true
+        }
+    });
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Ancestor {

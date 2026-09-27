@@ -88,7 +88,7 @@ retained. Unsupported OffscreenCanvas/WebGL2 reports an error rather than silent
 
 Physical checkpoints use versioned v32 binary state. They retain the manifold,
 all fields/inventories/stocks, genotypes, private memory, RNGs, source state, accounting,
-integration clock, complete parentage, interventions and stop reason. No old schema is inferred.
+integration clock, retained parentage, interventions and stop reason. No old schema is inferred.
 Living/founder genomes remain; some dead non-founder sequences can be pruned while their
 ancestry records remain. Unavailable genetic comparisons are labeled.
 Installed machinery identity is distinct from inherited instructions and remains reachable during
@@ -103,8 +103,9 @@ sequence, founder-relative and learning comparisons are bounded Rust reductions.
 
 IndexedDB retains up to six automatic and two manual packages within256MiB, expiring older
 points to fit and always prioritizing the newest valid save. A raw physical checkpoint
-is limited to 192 MiB. Saving runs in the worker; failed writes pause without replacing the last
-good save. Restores are explicit and paused. The older database stores are untouched.
+is limited to 192 MiB. Saving runs in the worker; failed writes warn while execution continues
+without replacing the last good save. Restores are explicit and paused. The older database stores
+are untouched. Ended history expires at its budget without inhibiting births; living records remain.
 Cold operations serialize before allocating snapshots. A GPU fence bounds unfinished frames;
 presentation requests and simulation tasks have separate bounded scheduling. An eight-run local
 health record can be exported even when the worker is unavailable.

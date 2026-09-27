@@ -196,14 +196,6 @@ export function StatsPanel({ status, definition }: { status: LiveStatus; definit
           <dt>Usable cell energy</dt>
           <dd>{s.cellEnergy.toFixed(2)}</dd>
         </div>
-        <div>
-          <dt>Living genotypes</dt>
-          <dd>{s.genomes.toLocaleString()}</dd>
-        </div>
-        <div>
-          <dt>Highest generation</dt>
-          <dd>{s.generation.toLocaleString()}</dd>
-        </div>
       </dl>
       <EvolutionPanel status={status} />
       <Membranes status={status} />

@@ -163,22 +163,28 @@ pub fn restore_pin(w: &World, mut pin: Pin) -> Result<Pin, String> {
     {
         return Err("Invalid pinned cohort".into());
     }
-    if pin.roots.iter().any(|&id| {
-        id == 0
-            || id as usize > w.ancestry.len()
-            || w.ancestry[id as usize - 1].born > pin.started
-            || w.ancestry[id as usize - 1].ended <= pin.started
-    }) {
-        return Err("Pinned roots were not alive at the pin tick".into());
+    for &id in &pin.roots {
+        let a = crate::ancestry::get(&w.ancestry, id).ok_or("Pinned cohort history has expired")?;
+        if a.born > pin.started || a.ended <= pin.started {
+            return Err("Pinned roots were not alive at the pin tick".into());
+        }
     }
-    let mut inherited = vec![false; w.ancestry.len() + 1];
+    let mut inherited = BTreeSet::new();
     for a in &w.ancestry {
-        inherited[a.id as usize] = pin.roots.contains(&a.id) || inherited[a.parent as usize];
+        if a.born > pin.started
+            && a.parent != 0
+            && crate::ancestry::get(&w.ancestry, a.parent).is_none()
+        {
+            return Err("Pinned cohort parent history has expired".into());
+        }
+        if pin.roots.contains(&a.id) || inherited.contains(&a.parent) {
+            inherited.insert(a.id);
+        }
     }
     pin.live = w
         .cells
         .iter()
-        .filter(|c| inherited[c.id as usize])
+        .filter(|c| inherited.contains(&c.id))
         .map(|c| c.id)
         .collect();
     Ok(pin)

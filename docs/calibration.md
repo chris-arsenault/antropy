@@ -44,7 +44,7 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Death | Bound and free mixtures retain actual chemical identities; no privileged waste ID |
 | Horizontal transfer / disturbance | Rate zero / absent by default |
 | UI pacing / population ceiling | Requested 30 ticks/s / no population-count ceiling |
-| Field nodes / ancestry ceiling | 97,200 default; maximum 524,288 under geographic memory reservation / 2,000,000 organism records |
+| Field nodes / ended-history budget | 97,200 default; maximum 524,288 under geographic memory reservation / 2,000,000 ended records plus all living records; expiration does not pause |
 | Recovery retention | Up to six automatic and two manual saves, expiring older points to fit; 256 MiB compressed total, 192 MiB individual raw |
 
 Potential is stored in chemical matter and generic biomass; usable energy is a separate stock.

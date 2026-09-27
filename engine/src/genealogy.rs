@@ -1,4 +1,4 @@
-//! Bounded presentation records derived from complete parentage, never physical inputs.
+//! Bounded presentation records from retained parentage, never physical inputs.
 use crate::{ancestry::Ancestor, world::World};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
@@ -6,9 +6,9 @@ use std::collections::BTreeMap;
 fn parent_family(w: &World, id: u64) -> Option<u64> {
     let mut cursor = id;
     for _ in 0..4 {
-        cursor = w.ancestry[cursor as usize - 1].parent()?;
+        cursor = crate::ancestry::get(&w.ancestry, cursor)?.parent()?;
     }
-    Some(cursor)
+    crate::ancestry::get(&w.ancestry, cursor).map(|a| a.id)
 }
 
 pub(crate) type Profiles = BTreeMap<u64, (usize, u64, [f64; 3])>;
@@ -45,7 +45,7 @@ pub(crate) fn profiles_from(w: &World, groups: Profiles) -> Value {
             .into_iter()
             .take(64)
             .map(|(id, (count, generation, sums))| {
-                json!({"id":id,"parent":parent_family(w,id),"born":w.ancestry[id as usize-1].born,
+                json!({"id":id,"parent":parent_family(w,id),"born":crate::ancestry::get(&w.ancestry,id).map(|a|a.born),
             "generation":generation,"count":count,"motor":sums[0]/count as f64,
             "membrane":[sums[1]/count as f64,sums[2]/count as f64]})
             })
@@ -54,14 +54,20 @@ pub(crate) fn profiles_from(w: &World, groups: Profiles) -> Value {
 }
 
 pub fn inspect(w: &World, id: u64) -> Value {
-    let reference = &w.ancestry[id as usize - 1];
+    let Some(reference) = crate::ancestry::get(&w.ancestry, id) else {
+        return Value::Null;
+    };
     let mut cursor = Some(id);
     let mut path = Vec::<&Ancestor>::new();
     let mut generation = 0usize;
     let mut family = id;
+    let mut complete = true;
     // Count the complete path but transmit only its nearest twelve records.
     while let Some(current) = cursor {
-        let a = &w.ancestry[current as usize - 1];
+        let Some(a) = crate::ancestry::get(&w.ancestry, current) else {
+            complete = false;
+            break;
+        };
         if path.len() < 12 {
             path.push(a);
         }
@@ -69,28 +75,39 @@ pub fn inspect(w: &World, id: u64) -> Value {
         cursor = a.parent();
     }
     generation -= 1;
+    if let Some(cell) = w.cells.iter().find(|c| c.id == id) {
+        generation = cell.generation as usize;
+    } else if !complete {
+        return Value::Null;
+    }
     for _ in 0..generation % 4 {
-        family = w.ancestry[family as usize - 1].parent().unwrap();
+        let Some(parent) = crate::ancestry::get(&w.ancestry, family)
+            .and_then(|a| a.parent())
+            .filter(|p| crate::ancestry::get(&w.ancestry, *p).is_some())
+        else {
+            break;
+        };
+        family = parent;
     }
     let (child_count, children) = bounded(w.ancestry.iter().filter(|a| a.parent() == Some(id)));
     let (sibling_count, siblings) = bounded(w.ancestry.iter().filter(|a| {
         reference.parent().is_some() && a.id != id && a.parent() == reference.parent()
     }));
-    let mut below = vec![false; w.ancestry.len()];
-    below[id as usize - 1] = true;
+    let mut below = std::collections::BTreeSet::from([id]);
     for a in &w.ancestry {
-        if let Some(parent) = a.parent() {
-            below[a.id as usize - 1] |= below[parent as usize - 1];
+        if below.contains(&a.parent) {
+            below.insert(a.id);
         }
     }
     let (descendant_count, descendants) = bounded(
         w.cells
             .iter()
-            .filter(|c| c.id != id && below[c.id as usize - 1])
-            .map(|c| &w.ancestry[c.id as usize - 1]),
+            .filter(|c| c.id != id && below.contains(&c.id))
+            .filter_map(|c| crate::ancestry::get(&w.ancestry, c.id)),
     );
     json!({"generation":generation,"family":family,"parentFamily":parent_family(w,family),
-        "familyBorn":w.ancestry[family as usize - 1].born,"familyGeneration":generation-generation%4,
+        "familyBorn":crate::ancestry::get(&w.ancestry,family).map(|a|a.born),"familyGeneration":generation-generation%4,
+        "complete":complete && w.ancestry.len() as u64 + 1 == w.next_cell,
         "path":path,"hiddenAncestors":(generation+1).saturating_sub(path.len()),
         "children":children,"childCount":child_count,
         "siblings":siblings,"siblingCount":sibling_count,

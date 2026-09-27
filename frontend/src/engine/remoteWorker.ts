@@ -211,14 +211,18 @@ async function refreshQueries() {
     if (query) await refreshWeb(query, currentGeneration);
     publish();
   } catch (e) {
-    if (connected) send({ kind: "fault", value: String(e) });
+    if (String(e).includes("history is unknown or has expired")) {
+      selected = null;
+      inspection = null;
+      publish();
+    } else if (connected) send({ kind: "fault", value: String(e) });
   } finally {
     queryPending = false;
   }
 }
 async function refreshInspection(cell: number, currentGeneration: number) {
   const summary = status!.summary;
-  const key = `${summary.ancestryRecords}/${summary.ledger.deaths}`;
+  const key = `${summary.ledger.births}/${summary.ledger.deaths}`;
   const result = await connection.call<Partial<Inspection>>("inspectSelected", {
     cell,
     genealogy: key !== inspectionRevision,

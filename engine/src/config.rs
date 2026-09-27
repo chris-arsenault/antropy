@@ -322,7 +322,7 @@ impl Config {
         }
         if self.conversion_efficiency >= 1.
             || self.affinity_radius > 6.
-            || self.max_ancestry_records < self.founders
+            || self.max_ancestry_records == 0
             || self.max_ancestry_records > 5000000
             || self.landscape_regions == 0
             || self.landscape_regions > 10000

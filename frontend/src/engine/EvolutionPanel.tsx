@@ -14,10 +14,10 @@ const EFFORTS = [
 const number = (value: number | null) => (value === null ? "—" : value.toFixed(4));
 
 export function EvolutionPanel({ status }: { status: LiveStatus }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
-    <details onToggle={(e) => setOpen(e.currentTarget.open)}>
-      <summary>Inherited change, developed bodies and recent behavior</summary>
+    <details open onToggle={(e) => setOpen(e.currentTarget.open)}>
+      <summary>Current bodies and recent behavior</summary>
       {open && <EvolutionDetails status={status} />}
     </details>
   );
@@ -29,25 +29,13 @@ function EvolutionDetails({ status }: { status: LiveStatus }) {
   return (
     <>
       <p>
-        {e.distinctSequences} distinct living inherited sequences. Registered genotype IDs can
-        represent identical sequences. Chromosome order and both physical and controller genes
-        count.
-      </p>
-      <p>
-        Controller distance from the original founder, RMS over inherited parameters: median{" "}
-        {number(e.controllerDistance.median)}, middle 80% {number(e.controllerDistance.p10)}–
-        {number(e.controllerDistance.p90)}.
-      </p>
-      <p>
-        Acquired recurrent-weight change: median {number(e.acquiredChange.median)}, middle 80%{" "}
-        {number(e.acquiredChange.p10)}–{number(e.acquiredChange.p90)}. Private changes are distinct
-        from inherited genes; magnitude does not establish usefulness.
+        Compare what living cells have built and what they do. Shared ancestry does not imply shared
+        function; different ancestry does not imply different function.
       </p>
       <table>
         <thead>
           <tr>
             <th>Stock</th>
-            <th>Mean target / founder</th>
             <th>Actual material · p10 / median / p90</th>
           </tr>
         </thead>
@@ -56,18 +44,15 @@ function EvolutionDetails({ status }: { status: LiveStatus }) {
             <tr key={i}>
               <td>{BODY_PARTS[i]}</td>
               <td>
-                {e.targetPercentFounder[i] === null
-                  ? "—"
-                  : `${e.targetPercentFounder[i]!.toFixed(1)}%`}
-              </td>
-              <td>
                 {number(body.p10)} / {number(body.median)} / {number(body.p90)}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p>One vote per living cell. A zero founder target has no percentage denominator.</p>
+      <p>One vote per living cell. The middle 80% describes variation in funded material.</p>
+      <RecentBehavior status={status} />
+      <PhenotypeHistory status={status} />
       <p>
         {e.epoch
           ? `Source schedule phase ${e.epoch.phase + 1}; next phase at tick ${e.epoch.nextTick}. New sources use mixture ${e.epoch.mixture.map((q) => q.toFixed(2)).join(", ")}. Existing finite sources retain their contents.`
@@ -84,8 +69,18 @@ function EvolutionDetails({ status }: { status: LiveStatus }) {
           ))}
         </ul>
       </details>
-      <RecentBehavior status={status} />
-      <PhenotypeHistory status={status} />
+      <details>
+        <summary>Genetic and private-learning diagnostics</summary>
+        <p>
+          {e.distinctSequences} distinct inherited sequences among living cells. Sequence counts do
+          not count functional types.
+        </p>
+        <p>
+          Acquired recurrent-weight change: median {number(e.acquiredChange.median)}, middle 80%{" "}
+          {number(e.acquiredChange.p10)}–{number(e.acquiredChange.p90)}. Magnitude does not
+          establish usefulness.
+        </p>
+      </details>
     </>
   );
 }

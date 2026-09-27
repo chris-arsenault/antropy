@@ -18,17 +18,19 @@ export function CellGenealogy({ inspection: p, bridge, error }: Props) {
     (id: number) => bridge.call("inspect", { cell: id }).catch(error),
     [bridge, error]
   );
+  if (!g) return <p>Earlier genealogy has expired from retained history.</p>;
   return (
     <div>
       <h3>Family and genealogy</h3>
       <p>
         Generation {g.generation} ·{" "}
         <button onClick={() => select(g.family)}>Family F{g.family}</button>
-        {" · "}
-        <button onClick={() => select(p.ancestor.lineage)}>Founder {p.ancestor.lineage}</button>
       </p>
+      {!g.complete && (
+        <p>History is incomplete. Relationship counts cover retained records only.</p>
+      )}
       <p>
-        Family root born at tick {g.familyBorn.toLocaleString()}, generation {g.familyGeneration}.
+        Retained family root born at tick {g.familyBorn.toLocaleString()}.
         {g.parentFamily !== null && (
           <>
             {" "}
@@ -47,7 +49,7 @@ export function CellGenealogy({ inspection: p, bridge, error }: Props) {
         {g.hiddenAncestors > 0 && (
           <p>
             {g.hiddenAncestors.toLocaleString()} earlier ancestors omitted here. Select the earliest
-            shown cell to walk farther back; the complete parentage remains saved.
+            shown cell to explore the retained path. Older history may have expired.
           </p>
         )}
         <ol className="genealogy-tree">
@@ -71,8 +73,8 @@ export function CellGenealogy({ inspection: p, bridge, error }: Props) {
         select={select}
       />
       <p>
-        Family membership covers four generations; founder ancestry follows the complete recorded
-        chain.
+        Families follow up to four retained generations. These relationships do not measure
+        functional similarity or ecological diversity.
       </p>
     </div>
   );

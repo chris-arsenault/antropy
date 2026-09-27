@@ -155,10 +155,8 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         .iter()
         .position(|c| c.id == id)
         .map(|i| crate::interfaces::selected(i, &w.cells, &w.config, &w.chemistry));
-    let ancestor = w
-        .ancestry
-        .get(id.checked_sub(1).ok_or("Invalid organism id")? as usize)
-        .ok_or("Unknown organism")?;
+    let ancestor = crate::ancestry::get(&w.ancestry, id)
+        .ok_or("Organism history is unknown or has expired")?;
     let genome = w.genomes.get(&ancestor.genome);
     let impedance = cell.map(|c| w.field.medium_load(&w.field.stencil(c.x, c.y)));
     let local: Option<Vec<f64>> = cell.map(|c| {

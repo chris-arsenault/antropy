@@ -21,7 +21,7 @@ pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
     if matches!(cause, Cause::Disturbance) {
         w.ledger.disturbance_deaths += 1;
     }
-    let a = &mut w.ancestry[cell.id as usize - 1];
+    let a = crate::ancestry::get_mut(&mut w.ancestry, cell.id).unwrap();
     a.ended = w.tick;
     a.cause = cause;
     if let Some(t) = &mut w.trace {
@@ -112,11 +112,6 @@ pub fn reproduce(w: &mut World) {
             return true;
         };
         let fission = w.config.reproduction == "fission";
-        let records = if fission { 2 } else { 1 };
-        if w.ancestry.len() + records > w.config.max_ancestry_records {
-            w.stop_reason = Some("ancestry-limit".into());
-            return true;
-        }
         let paid = cell.pay(division);
         if let Some(study) = w.trace.as_mut().and_then(|t| t.study.as_mut()) {
             study.flow(cell, "division", None, None, paid);
@@ -132,7 +127,7 @@ pub fn reproduce(w: &mut World) {
         let a = child(w, cell, 1.);
         if fission {
             let b = child(w, cell, -1.);
-            let record = &mut w.ancestry[cell.id as usize - 1];
+            let record = crate::ancestry::get_mut(&mut w.ancestry, cell.id).unwrap();
             record.ended = w.tick;
             record.cause = Cause::Division;
             if let Some(o) = &mut w.observer {
@@ -151,6 +146,7 @@ pub fn reproduce(w: &mut World) {
     parents.append(&mut w.cells);
     w.cells = parents;
     w.cells.sort_unstable_by_key(|c| c.id);
+    crate::ancestry::compact(w);
 }
 pub fn disturb(w: &mut World) {
     let Some(d) = w.config.disturbance.clone() else {
@@ -222,7 +218,4 @@ pub fn advance(w: &mut World) {
     w.cells = cells;
     disturb(w);
     reproduce(w);
-    if w.cells.is_empty() && !w.ancestry.is_empty() {
-        w.stop_reason = Some("extinction".into());
-    }
 }

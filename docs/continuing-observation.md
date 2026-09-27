@@ -64,8 +64,8 @@ within 256 MiB. The September20 repair removes the former requirement that all p
 counts fit before expiry: that requirement paused the3,774-cell run when five roughly53MiB
 packages exceeded the budget. Four such packages fit. The newest save always takes priority; older manual saves have priority over older
 automatic saves, and only points fitting the remaining byte budget are retained. Each raw physical
-checkpoint is limited to 192 MiB. Failed saves pause the
-simulation and preserve the last good save and live world. Explicit restore starts paused.
+checkpoint is limited to 192 MiB. Failed saves report a recovery warning while the simulation
+continues; the last good save and live world remain intact. Explicit browser restore starts paused.
 
 V32 physical bytes contain chemistry, sources, bodies, installed machinery identity, neural state, inherited genomes, parentage,
 random streams, integration clock, ledgers and interventions. Gzip packages separately include
@@ -80,9 +80,19 @@ physical state of a killed process without a valid checkpoint.
 ## Memory and history limits
 
 V40 removes the 10,000-living-cell stop and population-limit configuration. The default
-two-million-ancestor-record budget remains an operating limit, not a biological carrying
-capacity. Complete ancestry uses 56-byte resident records with compact
-binary serialization. Full dead non-founder genotype payloads can be pruned independently.
+two-million-record budget now limits retained ended records, never reproduction or stepping.
+All living records remain. When ended history exceeds its budget, the oldest ended records
+are removed until half the budget remains. IDs are stable and lookup allows gaps; memory scales
+with living cells plus retained history, not lifetime births. Each resident record uses at most
+56 bytes with compact binary serialization. Full dead non-founder genotype payloads are pruned
+independently. The v42 physical shape is unchanged; restore clears obsolete ancestry-limit and
+extinction stops. An empty world keeps environmental time without automatically reseeding.
+
+The [continuous-world delivery](plans/CONTINUOUS-WORLD-PLAN.md) covers repeated expiration,
+unchanged physical continuation and gap-aware observers. Earlier ancestors, relationships and
+cohort roots can expire. Reports label missing coverage; an expired saved cohort is dropped with
+a notice while its physical world still restores. Current capabilities, bodies and behavior
+describe functional diversity independently of founder identities.
 
 A registered two-million-record synthetic history used 406 MiB WASM high-water memory, down
 from 906 MiB before removing string allocation and redundant snapshot copies. The raw physical
@@ -94,8 +104,7 @@ Physical state contains the most recent 512 ordinary events plus up to 4,096 exp
 interventions. Exhausting the intervention budget rejects another manual edit before it changes
 the world. Observations retain 240 thinned chart/spatial samples, 81 recent behavior samples and
 2,048 recent spatial events.
-Old unobserved motion is not reconstructed. Exports preserve retained data but do not reset
-ancestry limits or remove memory costs.
+Old unobserved motion is not reconstructed. Exports preserve retained data and its gaps.
 
 Default geography is now 720 × 540 at mesh 2: 360 × 270 possible chemical nodes. Only occupied
 nodes and their active halo allocate 256-float32 rows; map indices still scale with area.

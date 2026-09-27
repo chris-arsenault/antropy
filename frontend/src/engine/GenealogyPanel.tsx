@@ -32,7 +32,7 @@ export function GenealogyPanel(props: Props) {
   return (
     <div className="genealogy-panel">
       <p className="panel-intro">
-        Follow a branch through its parents, children and living descendants.
+        Optional parentage diagnostics. Use Population and Phenotypes to compare current function.
       </p>
       <div className="lineage-guide">
         <p>
@@ -43,8 +43,8 @@ export function GenealogyPanel(props: Props) {
           <strong>Recent families</strong> group four generations under a more recent root cell.
         </p>
         <p>
-          Select a group to inspect its root, then choose a child or living descendant to follow it.
-          These groups describe parentage, not a shared diet or phenotype.
+          Older records expire so history cannot stop the world. Group roots and relationships may
+          no longer be available. These groups do not measure ecological diversity.
         </p>
       </div>
       <FindAncestor bridge={props.bridge} error={props.error} onInspect={props.onInspect} />
@@ -81,7 +81,7 @@ function GroupPanel({ status, bridge, error, onInspect, kind }: Props & { kind: 
   const select = (id: number) => bridge.call("inspect", { cell: id }).then(onInspect).catch(error);
   const title = kind === "families" ? "Recent families" : "Founder ancestry";
   return (
-    <details open className="lineage-panel">
+    <details open={kind === "families"} className="lineage-panel">
       <summary>
         {title} · {status.population[kind].total} living groups
       </summary>
@@ -170,8 +170,7 @@ function GroupRow({
         </button>
         {origin && (
           <small>
-            {origin.parent === null ? "founder family" : `from F${origin.parent}`} · gen{" "}
-            {origin.generation}
+            {origin.parent === null ? "earlier family unavailable" : `from F${origin.parent}`}
           </small>
         )}
         {origin && <small>born tick {origin.born.toLocaleString()}</small>}

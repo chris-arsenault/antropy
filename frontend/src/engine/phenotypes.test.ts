@@ -8,8 +8,53 @@ import { validateObservation } from "./observationValidation";
 import { applyObservation, observationDelta } from "./observationDelta";
 import { checkObservationBudget } from "./observationBudget";
 import { expectSavedPhysicalState } from "../../harness/lib/physicalAssertions";
+import { SelectedObservation } from "./selectedObservation";
+import { type Inspection, type Summary } from "./types";
 
 const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
+
+it("restores the physical world when cohort history expires and clears expired inspection", async () => {
+  const session = new Session(await Engine.load(bytes));
+  session.restart(27, {
+    width: 24,
+    height: 24,
+    founders: 1,
+    sourceCount: 0,
+    maxAncestryRecords: 2,
+    mutationRate: 0,
+    physicalMutationRate: 0,
+    learning: "static",
+  });
+  session.setPhenotype({ action: "panel", enabled: true });
+  session.setPhenotype({ action: "pin" });
+  const selected = new SelectedObservation();
+  const summary = () => session.world.command<Summary>("summary");
+  expect(selected.read(session.world, summary(), 1)).not.toBeNull();
+  for (const ids of [[1], [2, 3]]) {
+    for (const cell of ids) {
+      const body = session.world.command<Inspection>("inspect", { cell }).blueprint!;
+      session.world.command("intervene", {
+        cell,
+        body: body.map((q) => q * 2.1),
+        energy: 1,
+        inventory: Array.from({ length: 256 }, (_, s) => (s === 0 ? 0.8 : 0)),
+      });
+    }
+    session.world.step(4);
+  }
+  expect(summary().ledger.births).toBeGreaterThan(3);
+  expect(selected.read(session.world, summary(), 1)).toBeNull();
+  const before = session.world.snapshot();
+  const checkpoint = await session.export();
+  await session.restore(checkpoint);
+  expect(session.world.snapshot()).toEqual(before);
+  expect(session.observation.pin).toBeNull();
+  expect(session.recovery).toContain("history expired");
+  session.setRunning(true);
+  session.step();
+  expect(session.running).toBe(true);
+  session.world.dispose();
+});
 async function fixture(founders = 4) {
   const session = new Session(await Engine.load(bytes, true));
   session.restart(27, { width: 24, height: 24, founders, sourceCount: 4 });

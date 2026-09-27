@@ -16,6 +16,7 @@ them. See the [storage policy](evidence/README.md).
 
 | Need | Document |
 | --- | --- |
+| Continuous runtime, expiring parentage and current functional diversity | [Continuous-world delivery](plans/CONTINUOUS-WORLD-PLAN.md), [continuation contract](continuing-observation.md) |
 | Crowding pressure, passive metabolic products and light-supported growth away from reservoirs | [Ecological incentives and measurements](plans/ECOLOGICAL-INCENTIVES-PLAN.md) |
 | Earlier clustering, transplant and movement experiments | [Placement](cluster-placement-study.md), [bottleneck investigation and scope correction](cluster-bottleneck-study.md), [food-access comparison](movement-opportunity-study.md) — historical measurements before ecological incentives |
 | Browser 1/4, shared native server and private Komodo deployment | [Execution modes](execution-modes.md) |

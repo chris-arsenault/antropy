@@ -65,7 +65,7 @@ it("reuses genealogy and chromosomes until a relevant change, with full display 
     ended = observer.read(world, summary(), 1)!;
   expect(ended.cell).toBeNull();
   expect(ended.genealogy).not.toBe(first.genealogy);
-  expect(ended.genealogy.descendantCount).toBe(2);
+  expect(ended.genealogy?.descendantCount).toBe(2);
   expect(ended).toEqual(world.command<Inspection>("inspect", { cell: 1 }));
   const child = observer.read(world, summary(), 2)!;
   expect(child).toEqual(world.command<Inspection>("inspect", { cell: 2 }));

@@ -2,7 +2,7 @@
 use crate::{controller, presentation, world::World};
 use serde_json::{Value, json};
 pub fn inspect(w: &World, id: u64) -> Value {
-    let Some(reference) = id.checked_sub(1).and_then(|i| w.ancestry.get(i as usize)) else {
+    let Some(reference) = crate::ancestry::get(&w.ancestry, id) else {
         return Value::Null;
     };
     let kin = w
@@ -10,15 +10,14 @@ pub fn inspect(w: &World, id: u64) -> Value {
         .iter()
         .filter(|c| c.lineage == reference.lineage)
         .count();
-    let mut distances = vec![];
+    let mut distances = std::collections::BTreeMap::<u64, u32>::new();
     if kin > 0 && (kin > 1 || !w.cells.iter().any(|c| c.id == id)) {
-        distances = vec![u32::MAX; w.ancestry.len()];
         let mut cursor = id;
         let mut depth = 0;
-        loop {
-            distances[cursor as usize - 1] = depth;
+        while let Some(a) = crate::ancestry::get(&w.ancestry, cursor) {
+            distances.insert(cursor, depth);
             depth += 1;
-            if let Some(parent) = w.ancestry[cursor as usize - 1].parent() {
+            if let Some(parent) = a.parent() {
                 cursor = parent;
             } else {
                 break;
@@ -28,10 +27,10 @@ pub fn inspect(w: &World, id: u64) -> Value {
         // selected cell's ancestor chain once, rather than walking it per cell.
         for a in &w.ancestry {
             if a.lineage == reference.lineage
-                && distances[a.id as usize - 1] == u32::MAX
-                && let Some(p) = a.parent()
+                && !distances.contains_key(&a.id)
+                && let Some(d) = distances.get(&a.parent).copied()
             {
-                distances[a.id as usize - 1] = distances[p as usize - 1].saturating_add(1);
+                distances.insert(a.id, d.saturating_add(1));
             }
         }
     }
@@ -42,10 +41,7 @@ pub fn inspect(w: &World, id: u64) -> Value {
             let links = if c.id == id {
                 0
             } else {
-                distances
-                    .get(c.id as usize - 1)
-                    .copied()
-                    .unwrap_or(u32::MAX)
+                distances.get(&c.id).copied().unwrap_or(u32::MAX)
             };
             (links, c)
         })

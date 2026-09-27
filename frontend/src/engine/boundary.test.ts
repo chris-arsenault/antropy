@@ -164,7 +164,7 @@ it("retains six automatic and two manual saves and works without randomUUID", as
   expect(await (await loadRecovery()).text()).toBe("11");
 });
 
-it("pauses on failed recovery and preserves the last successful physical checkpoint", async () => {
+it("keeps running on failed recovery and preserves the last successful physical checkpoint", async () => {
   const session = new Session(await Engine.load(bytes));
   session.restart(101, compact);
   session.world.step(1);
@@ -176,8 +176,8 @@ it("pauses on failed recovery and preserves the last successful physical checkpo
     throw new Error("quota unavailable");
   });
   await expect(session.save("automatic")).rejects.toThrow("quota unavailable");
-  expect(session.running).toBe(false);
-  expect(session.recovery).toContain("Paused: recovery failed");
+  expect(session.running).toBe(true);
+  expect(session.recovery).toContain("Recovery failed; simulation continues");
   expect((await decodePackage(await loadRecovery())).snapshot).toEqual(first);
   session.world.dispose();
 });

@@ -215,6 +215,7 @@ export interface CellState {
 export interface Inspection {
   fieldInterface: number | null;
   genealogy: {
+    complete: boolean;
     generation: number;
     family: number;
     parentFamily: number | null;
@@ -228,7 +229,7 @@ export interface Inspection {
     siblingCount: number;
     descendants: Ancestor[];
     descendantCount: number;
-  };
+  } | null;
   tick: number;
   cell: CellState | null;
   ancestor: Ancestor;

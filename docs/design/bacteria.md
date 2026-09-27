@@ -130,8 +130,9 @@ persists. Starvation or unit injury releases inventory and bound material unchan
 remaining usable energy. No killer receives a direct grant. [Bound material](../bound-material.md)
 records the shared transfer rules and their work accounts.
 
-There is no age timer, remote parent selection, fitness culling or automatic reseeding. Extinction
-stops the run. Population and ancestry safety limits pause with retained state.
+There is no age timer, remote parent selection, fitness culling or automatic reseeding. An empty
+world keeps advancing its environment. Population and historical-record counts never pause the
+run; old ended parentage expires while every living record remains available.
 
 <a id="world-determinism-and-persistence"></a>
 
@@ -146,13 +147,13 @@ bitwise identity is not promised.
 Checkpoint v33 stores complete chemistry, free and bound mixtures, actual stocks, bounded enzyme programs, inward allocation and installed coordinates/orientation/revision, chemical/behavioral genes,
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
-Unused non-founder genotype payloads may be pruned; complete organism parentage retains their IDs
+Unused non-founder genotype payloads may be pruned; retained organism parentage keeps their IDs
 as provenance, and unavailable genetic comparisons must be labeled.
 
 Browser observation is a separately versioned projection. IndexedDB retains up to six automatic and
 two manual gzip recovery points within 256 MiB, expiring older points to fit; a raw checkpoint is limited to 192 MiB.
-Automatic saves occur every 30 wall seconds and on pause. Failed writes pause execution and
-preserve the last committed recovery. Visibility/exit saves are best effort; restoration is
+Automatic saves occur every 30 wall seconds and on pause. Failed writes report a warning while
+execution continues, preserving the last committed recovery. Visibility/exit saves are best effort; restoration is
 explicit and starts paused. UUID generation supports browsers without `crypto.randomUUID`.
 See [continuation limits](../continuing-observation.md) and the
 [current accumulated-state measurements](../session-runtime-review.md). Days/weeks browser endurance remains unverified.

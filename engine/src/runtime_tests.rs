@@ -35,7 +35,7 @@ fn funded_division_crosses_ten_thousand_cells_without_a_population_stop() {
         assert!((before.1 - after.1 - w.ledger.division_heat).abs() < 1e-7);
         w.validate().unwrap();
 
-        // Removing a population ceiling does not remove the independent ancestry budget.
+        // Historical retention cannot inhibit another physically funded division.
         w.config.max_ancestry_records = w.ancestry.len();
         let target = w.genomes[&w.cells[0].genome]
             .compiled
@@ -49,8 +49,8 @@ fn funded_division_crosses_ten_thousand_cells_without_a_population_stop() {
         w.cells[0].inventory.set(0, material);
         w.cells[0].energy = energy;
         crate::lifecycle::reproduce(&mut w);
-        assert_eq!(w.cells.len(), 10_001);
-        assert_eq!(w.stop_reason.as_deref(), Some("ancestry-limit"));
+        assert_eq!(w.cells.len(), 10_002);
+        assert_eq!(w.stop_reason, None);
     }
 }
 
@@ -174,17 +174,19 @@ fn birth_splits_actual_stock_and_uses_the_birth_genotype() {
 }
 
 #[test]
-fn extinction_stops_without_reseeding_and_survives_restore() {
+fn extinction_keeps_environment_running_without_reseeding_and_survives_restore() {
     let mut w = world();
     w.cells[0].energy = 0.;
     w.cells[0].inventory.fill(0.);
     w.step();
     assert!(w.cells.is_empty());
-    assert_eq!(w.stop_reason.as_deref(), Some("extinction"));
+    assert_eq!(w.stop_reason, None);
     let bytes = w.snapshot().unwrap();
     let mut restored = World::restore(&bytes).unwrap();
     restored.step();
-    assert_eq!(restored.snapshot().unwrap(), bytes);
+    assert_eq!(restored.tick, w.tick + 1);
+    assert!(restored.cells.is_empty());
+    assert_eq!(restored.stop_reason, None);
 }
 #[test]
 fn production_work_and_material_close_with_sources_bodies_and_boundary_losses() {

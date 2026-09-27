@@ -191,6 +191,7 @@ export class Session {
       population =
         observation.spatial.tick < 0 ? observe(next, observation.spatial) : currentPopulation(next);
       phenotypes.restore(next, observation.pin ?? null);
+      observation.pin = phenotypes.pin;
       phenotypes.configure(next, observation.spatial, this.chemicalWeb.measuring);
     } catch (error) {
       next.dispose();
@@ -205,7 +206,7 @@ export class Session {
     this.phenotypes = phenotypes;
     this.lastSaved = -1;
     this.error = null;
-    this.recovery = "Restored or new population; paused";
+    this.recovery = phenotypes.recoveryNotice ?? "Restored or new population; paused";
     this.setRunning(false);
     this.measuredTicks = 0;
     this.measurementAt = performance.now();
@@ -277,8 +278,7 @@ export class Session {
       return await operation();
     } catch (error) {
       if (this.observation.runId === runId) {
-        this.setRunning(false);
-        this.recovery = `Paused: recovery failed. ${String(error)}`;
+        this.recovery = `Recovery failed; simulation continues. ${String(error)}`;
       }
       throw error;
     }

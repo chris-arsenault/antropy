@@ -11,7 +11,7 @@ fn origin(w: &World, mut id: u64, known: &BTreeMap<u64, u64>) -> Option<u64> {
         if let Some(&region) = known.get(&id) {
             return Some(region);
         }
-        id = w.ancestry.get(id.checked_sub(1)? as usize)?.parent()?;
+        id = crate::ancestry::get(&w.ancestry, id)?.parent()?;
     }
 }
 fn region(w: &World, indices: &[usize], origins: &BTreeMap<u64, u64>) -> Value {
@@ -90,7 +90,7 @@ pub fn observe(w: &World, v: &Value) -> Result<Value, String> {
     let pairs: Vec<(u64, u64)> =
         serde_json::from_value(v.get("origins").cloned().unwrap_or(json!([])))
             .map_err(|e| e.to_string())?;
-    if pairs.len() > w.ancestry.len() {
+    if pairs.len() as u64 >= w.next_cell {
         return Err("Too many observer origins".into());
     }
     let known: BTreeMap<_, _> = pairs.into_iter().collect();

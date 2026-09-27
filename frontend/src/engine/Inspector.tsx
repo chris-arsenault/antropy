@@ -88,7 +88,8 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
       )}
       <details>
         <summary>
-          Family and ancestry · {p.genealogy.descendantCount.toLocaleString()} living descendants
+          Family and ancestry · {p.genealogy?.descendantCount.toLocaleString() ?? "unknown"}{" "}
+          recorded living descendants
         </summary>
         <CellGenealogy inspection={p} bridge={bridge} error={error} />
         <Relationships inspection={p} bridge={bridge} error={error} />
@@ -115,7 +116,7 @@ function Relationships({ inspection: p, bridge, error }: Omit<Props, "definition
           >
             {row.cell} / F{row.family}
           </button>,
-          row.links ?? "unrelated",
+          row.links ?? "not established in retained history",
           row.physical === null ? "genome not retained" : n(row.physical),
           row.controller === null ? "genome not retained" : n(row.controller),
         ])}

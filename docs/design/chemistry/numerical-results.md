@@ -155,9 +155,9 @@ history and default world restore byte-for-byte and continue identically for thr
 steps under both archived and current engines. The compatibility check ran alongside
 the second storage panel, so its timings are not an isolated speed comparison.
 
-This is storage and continuation evidence, not a days-long ecological run. The
-configured ancestry limit still pauses the simulation when reached; no history is
-silently discarded.
+This is storage and continuation evidence, not a days-long ecological run. That version paused
+at its configured ancestry limit. September 27 replaces that stop with explicit bounded retention;
+see [current continuation](../../continuing-observation.md).
 
 Ledger 3675 repeats all seven cases after strict body/history validation and durable intervention
 retention were added. Every case still preserves exact physical and observational continuation.
