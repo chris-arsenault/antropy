@@ -18,15 +18,21 @@ fn main() {
             antropy_engine::commands::load_fixture(&mut w, 2000).unwrap();
             w
         };
+        let observed = args.get(4).is_some_and(|arg| arg == "observer");
+        if observed {
+            let mut observer = antropy_engine::phenotype::Observer::new(world.tick);
+            observer.enabled = true;
+            world.observer = Some(Box::new(observer));
+        }
         for _ in 0..10 {
             world.step();
         }
         let start = Instant::now();
         world.field.profile = true;
-        let mut phases = [0.; 9];
+        let mut phases = [0.; 12];
         let mut ticks = 0;
         while ticks < 100 && start.elapsed().as_secs_f64() < 60. {
-            let measured = world.step_measured(|| start.elapsed().as_secs_f64() * 1000.);
+            let measured = world.step_profiled(|| start.elapsed().as_secs_f64() * 1000.);
             for (sum, value) in phases.iter_mut().zip(measured) {
                 *sum += value;
             }
@@ -40,16 +46,22 @@ fn main() {
         let render_ms = publication_start.elapsed().as_secs_f64()*1000.;
         let publication_start = Instant::now();
         let _ = antropy_engine::census::observe(&world, &serde_json::json!({})).unwrap();
+        let census_ms = publication_start.elapsed().as_secs_f64()*1000.;
+        let environment_start = Instant::now();
         let _ = antropy_engine::observation::environment(&world);
+        let environment_ms = environment_start.elapsed().as_secs_f64()*1000.;
         let observation_ms = publication_start.elapsed().as_secs_f64()*1000.;
         serde_json::json!({"workers": workers, "ticks": ticks, "seconds": elapsed,
             "ticksPerSecond": ticks as f64 / elapsed, "phaseMs": phases.map(|v| v / ticks as f64),
             "summary": antropy_engine::observation::summary(&world),
             "fieldProfileMs":world.field.profile_ms.map(|v| v/ticks as f64),
             "structural":world.field.structural_counts(),
+            "execution":world.execution_work(),
             "publication":{"renderMs":render_ms,"observationMs":observation_ms,
+                "censusMs":census_ms,"environmentMs":environment_ms,
                 "displayBytes":4*(render.field.len()+render.cells.len()+render.markers.len())},
-            "exclusions": ["network encoding", "inspection", "GPU upload", "active phenotype observation"],
+            "observerEnabled": observed,
+            "exclusions": ["network encoding", "inspection", "GPU upload"],
             "publicationTiming":"one separate cold full-map projection and census after measured stepping"})
     });
     std::fs::write(output, serde_json::to_vec_pretty(&result).unwrap()).unwrap();

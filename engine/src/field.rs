@@ -175,6 +175,16 @@ impl Field {
         let carrier = self.carriers.site(n);
         std::array::from_fn(|k| material[k] + carrier.signal[0][k] + carrier.signal[1][k])
     }
+    pub fn signal_sample(&self, sites: &[(usize, f64)]) -> [f64; 2] {
+        let mut signal = [0.; 2];
+        for &(n, weight) in sites {
+            let local = self.medium_signal(n);
+            for k in 0..2 {
+                signal[k] += weight * local[k];
+            }
+        }
+        signal
+    }
     pub fn sample(&self, species: usize, sites: &[(usize, f64)]) -> f64 {
         sites
             .iter()

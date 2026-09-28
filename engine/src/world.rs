@@ -241,10 +241,15 @@ impl World {
         })
     }
     pub fn step_measured(&mut self, clock: impl Fn() -> f64) -> [f64; 9] {
+        let stages = self.advance(Some(&clock));
+        std::array::from_fn(|i| stages[i])
+    }
+    /// Full phase timings; entries 9..12 subdivide phase 5 into cover, optics and cells.
+    pub fn step_profiled(&mut self, clock: impl Fn() -> f64) -> [f64; 12] {
         self.advance(Some(&clock))
     }
-    fn advance(&mut self, clock: Option<&dyn Fn() -> f64>) -> [f64; 9] {
-        let mut stages = [0.; 9];
+    fn advance(&mut self, clock: Option<&dyn Fn() -> f64>) -> [f64; 12] {
+        let mut stages = [0.; 12];
         if self.stop_reason.is_some() {
             return stages;
         }
@@ -346,8 +351,13 @@ impl World {
             stages[8] = diffusion_ms + self.exchange.preparation_ms;
             started = now();
             crate::cover::exchange(self, &sites, self.field_elapsed);
+            let covered = now();
             let signals = crate::optics::prepare(self, &sites, self.field_elapsed);
+            let lit = now();
             self.physiology(self.field_elapsed, &signals);
+            stages[9] = covered - started;
+            stages[10] = lit - covered;
+            stages[11] = now() - lit;
             let captured: f64 = self.cells.iter().map(|c| c.flows.recycled_work).sum();
             self.ledger.optical_captured += captured;
             self.ledger.optical_heat -= captured;

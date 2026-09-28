@@ -31,6 +31,8 @@ pub struct Exchange {
     /// Receivers of every donor node, contiguous per node; `offsets` has one extra entry.
     delivery: Vec<(usize, f64)>,
     offsets: Vec<usize>,
+    /// Exact geometry dependency shared by passive and active solves of the same interval.
+    sites: Vec<crate::footprint::Row>,
     contact: crate::contact_exchange::Allocation,
     preparations: u64,
     pub profile: bool,
@@ -232,13 +234,13 @@ impl Exchange {
         });
         if let Some(o) = observer {
             for (i, cell) in cells.iter().enumerate() {
-                for s in species(self.masks[i] | self.contact.mask(i)) {
+                o.transfers(cell.id, self.masks[i] | self.contact.mask(i), |s| {
                     let incoming =
                         self.imports[i][s] + self.contact.received.get(i).map_or(0., |row| row[s]);
                     let outgoing =
                         self.exports[i][s] + self.contact.withdrawn.get(i).map_or(0., |row| row[s]);
-                    o.transfer(cell.id, s, incoming, outgoing);
-                }
+                    (incoming, outgoing)
+                });
             }
         }
     }

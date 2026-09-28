@@ -7,6 +7,7 @@ use crate::{
     sources::Source,
     world::World,
 };
+use rayon::prelude::*;
 use serde::Serialize;
 
 #[derive(Clone, Copy, Debug, Serialize)]
@@ -159,12 +160,7 @@ pub fn response_with_gradient(
             c.source_drift,
         ),
         shift: coupling.shift,
-        signal: crate::weathering::signal(std::array::from_fn(|k| {
-            sites
-                .iter()
-                .map(|&(n, a)| a * field.medium_signal(n)[k])
-                .sum()
-        })),
+        signal: crate::weathering::signal(field.signal_sample(sites)),
         load,
     }
 }
@@ -240,28 +236,46 @@ fn advance_interval(w: &mut World, release: bool, chemical_dt: f64) {
     }
 }
 
-pub fn photochemistry(w: &mut World, dt: f64, light: &[(Response, crate::optics::Exposure)]) {
+pub fn photochemistry(w: &mut World, dt: f64, light: &[([f64; 2], f64, crate::optics::Exposure)]) {
     let operators = w.climate.operators.as_ref().unwrap();
-    for (source, &(r, exposure)) in w.sources.iter_mut().zip(light) {
+    let config = &w.config;
+    let chemistry = &w.chemistry;
+    let convert = |(i, source): (usize, &mut Source)| {
+        let (signal, load, exposure) = light[i];
         let shelter = crate::weathering::exposure(
             1.,
-            r.load,
-            w.config.habitat_feedback,
-            w.config.diffusion_impedance,
+            load,
+            config.habitat_feedback,
+            config.diffusion_impedance,
         );
         let account = source.convert_medium(
             operators,
-            crate::reaction_medium::Medium::funded(r.signal, exposure),
-            dt * w.config.weathering_rate * w.config.source_processing * shelter,
+            crate::reaction_medium::Medium::funded(signal, exposure),
+            dt * config.weathering_rate * config.source_processing * shelter,
         );
         let [converted, heat, work] = account.map(|v| source.amount * v);
         let paid = work * exposure.paid_fraction();
+        source.refresh_material(chemistry);
+        [converted, heat, work, paid]
+    };
+    let accounts: Vec<_> =
+        match crate::parallel::grain(w.sources.len(), crate::parallel::cost::RESERVOIR) {
+            Some(grain) => w
+                .sources
+                .par_iter_mut()
+                .enumerate()
+                .with_min_len(grain)
+                .map(convert)
+                .collect(),
+            None => w.sources.iter_mut().enumerate().map(convert).collect(),
+        };
+    // Reservoir jobs mutate only their own mixtures; accounts and carriers commit in order.
+    for [converted, heat, work, paid] in accounts {
         w.ledger.source_converted += converted;
         w.ledger.source_heat += heat;
         w.ledger.source_work += work - paid;
         w.ledger.optical_captured += paid;
         w.ledger.optical_heat -= paid;
-        source.refresh_material(&w.chemistry);
     }
     project_current(w);
 }

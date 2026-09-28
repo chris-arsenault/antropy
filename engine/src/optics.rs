@@ -2,6 +2,8 @@
 use crate::{config::Config, footprint::Row, world::World};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, sync::Arc};
+#[path = "optical_accumulator.rs"]
+mod accumulator;
 
 pub type Plane = BTreeMap<usize, f64>;
 
@@ -11,6 +13,10 @@ pub struct Incident {
     pub upward: Arc<Plane>,
     /// Last paid interval power, for bounded emitter markers and selected-cell inspection.
     pub emitters: BTreeMap<u64, f64>,
+    #[serde(skip)]
+    deposits: [accumulator::Accumulator; 2],
+    #[serde(skip)]
+    kernel: crate::source_footprint::Kernel,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -87,9 +93,11 @@ pub fn work_bound(w: &World) -> f64 {
 
 fn radiate(w: &mut World, sites: &[Row], dt: f64) -> (Plane, Plane) {
     w.incident.emitters.clear();
-    let mut lateral = Plane::new();
-    let mut upward = Plane::new();
-    let mut kernel = crate::source_footprint::Kernel::default();
+    let geometry = crate::spatial::Geometry::new(w.field.nx, w.field.ny);
+    let [lateral, upward] = &mut w.incident.deposits;
+    lateral.reset(geometry);
+    upward.reset(geometry);
+    let kernel = &mut w.incident.kernel;
     let mut spread = Vec::new();
     for (cell, footprint) in w.cells.iter_mut().zip(sites) {
         let requested = dt
@@ -113,14 +121,14 @@ fn radiate(w: &mut World, sites: &[Row], dt: f64) -> (Plane, Plane) {
         kernel.prepare(w.config.optical_reach, &w.field);
         kernel.translate(cell.x, cell.y, &w.field, &mut spread);
         for &(n, weight) in &spread {
-            *lateral.entry(n).or_default() += half * weight;
+            lateral.add(n, half * weight);
         }
         for &(n, weight) in footprint {
             let tau = w.field.illumination.cover.get(&n).copied().unwrap_or(0.);
-            *upward.entry(n).or_default() += half * weight * -(-tau).exp_m1();
+            upward.add(n, half * weight * -(-tau).exp_m1());
         }
     }
-    (lateral, upward)
+    (lateral.plane(), upward.plane())
 }
 
 fn mixture_mass(w: &World, sites: &[Row], light: &Plane) -> Plane {
@@ -129,9 +137,10 @@ fn mixture_mass(w: &World, sites: &[Row], light: &Plane) -> Plane {
         .map(|&n| (n, w.field.amounts().site(n).2[0]))
         .collect();
     for (cell, row) in w.cells.iter().zip(sites) {
+        let material = cell.material();
         for &(n, a) in row {
             if let Some(q) = mass.get_mut(&n) {
-                *q += a * cell.material();
+                *q += a * material;
             }
         }
     }
@@ -166,15 +175,13 @@ fn cell_exposures(
     per_material: &Plane,
     bound: f64,
 ) -> Vec<([f64; 2], Exposure)> {
-    w.cells
-        .iter()
-        .zip(sites)
-        .map(|(cell, row)| {
-            let external = std::array::from_fn(|k| {
-                row.iter()
-                    .map(|&(n, a)| a * w.field.medium_signal(n)[k])
-                    .sum::<f64>()
-            });
+    let mut exposures = vec![([0.; 2], Exposure::default()); w.cells.len()];
+    crate::parallel::for_each(
+        &mut exposures,
+        crate::parallel::cost::CELL_READ,
+        |i, out| {
+            let (cell, row) = (&w.cells[i], &sites[i]);
+            let external = w.field.signal_sample(row);
             let signal =
                 crate::metabolism::light_environment(cell, &w.config, &w.chemistry, external);
             let light = Exposure::reserve(
@@ -185,9 +192,10 @@ fn cell_exposures(
                 cell.material() * sample(row, per_material),
                 bound * cell.material(),
             );
-            (signal, light)
-        })
-        .collect()
+            *out = (signal, light);
+        },
+    );
+    exposures
 }
 
 /// Conditional snapshot estimate only. The next physical boundary pays and reserves again.
@@ -222,11 +230,8 @@ pub fn prepare(w: &mut World, sites: &[Row], dt: f64) -> Vec<([f64; 2], Exposure
         .iter()
         .map(|(&n, &e)| (n, if mass[&n] > 0. { e / mass[&n] } else { 0. }))
         .collect();
-    w.incident = Incident {
-        lateral: rate(&lateral, &w.config, dt),
-        upward: rate(&upward, &w.config, dt),
-        emitters: std::mem::take(&mut w.incident.emitters),
-    };
+    w.incident.lateral = rate(&lateral, &w.config, dt);
+    w.incident.upward = rate(&upward, &w.config, dt);
     bind(w);
     let bound = work_bound(w);
     let cells = cell_exposures(w, sites, &per_material, bound);
@@ -235,7 +240,8 @@ pub fn prepare(w: &mut World, sites: &[Row], dt: f64) -> Vec<([f64; 2], Exposure
         .iter()
         .map(|s| {
             (
-                crate::source_medium::response(s, w.tick, &w.config, &w.field, &w.chemistry),
+                crate::weathering::signal(w.field.signal_sample(&s.footprint)),
+                w.field.medium_load(&s.footprint).max(0.),
                 Exposure::reserve(
                     s.footprint
                         .iter()
@@ -257,33 +263,9 @@ fn public(w: &mut World, dt: f64, bound: f64, per_material: &Plane, upward: &Pla
     w.climate.prepare(&w.config);
     let fields = [(&mut w.field, false), (&mut w.cover, true)];
     for (field, film) in fields {
-        let incident = if film {
-            &w.incident.upward
-        } else {
-            &w.incident.lateral
-        };
-        let budget: BTreeMap<_, _> = field
-            .amounts()
-            .occupied()
-            .map(|(n, _, p)| {
-                let q = p[0];
-                let allocation = if film {
-                    upward.get(&n).copied().unwrap_or(0.)
-                } else {
-                    q * per_material.get(&n).copied().unwrap_or(0.)
-                };
-                (
-                    n,
-                    Exposure::reserve(
-                        field.illumination.solar(n),
-                        incident.get(&n).copied().unwrap_or(0.),
-                        allocation,
-                        bound * q,
-                    ),
-                )
-            })
-            .collect();
-        let (balance, paid) = field.photochemistry(&w.chemistry, &w.climate, dt, &budget);
+        let allocation = if film { upward } else { per_material };
+        let (balance, paid) =
+            field.photochemistry(&w.chemistry, &w.climate, dt, allocation, !film, bound);
         w.ledger.numerical_material += balance.roundoff_matter;
         w.ledger.numerical_energy += balance.roundoff_energy;
         w.ledger.weathering_work += balance.weathering_work;

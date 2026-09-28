@@ -58,6 +58,9 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
                 * cell.body[BUILDER_STOCK]
                 * (1. - cell.damage)
                 * cell.action.cover.abs();
+            if handling == 0. {
+                return 0.;
+            }
             let reserve = crate::accounting::interval_reserve(cell, &cell.body, c);
             let affordable = (cell.energy - reserve).max(0.) / c.growth_energy;
             let material = if cell.action.cover >= 0. {
@@ -76,37 +79,49 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
             }
         }
     }
-    let mut changes = BTreeMap::<usize, [f64; 256]>::new();
+    let mut changes = BTreeMap::<usize, (u64, [f64; 256])>::new();
     for (i, cell) in w.cells.iter_mut().enumerate() {
         if requests[i] == 0. {
             continue;
         }
         let mut moved = [0.; 256];
         let depositing = cell.action.cover >= 0.;
+        let material = cell.material().max(1e-30);
         for &(n, weight) in &sites[i] {
             if weight == 0. {
                 continue;
             }
-            let change = changes.entry(n).or_insert([0.; 256]);
             let mass = w.cover.amounts().site(n).2[0];
+            if !depositing && mass == 0. {
+                continue;
+            }
+            let (mask, change) = changes.entry(n).or_insert((0, [0.; 256]));
             let fraction = if depositing {
-                requests[i] * weight / cell.material().max(1e-30)
+                requests[i] * weight / material
             } else {
                 requests[i] * weight / demand[&n].max(mass).max(1e-30)
             };
+            let donor = w.cover.amounts().row(n);
             for s in 0..256 {
                 let q = if depositing {
                     cell.inventory.value(s)
                 } else {
-                    -(w.cover.amounts().row(n)[s] as f64)
+                    -(donor[s] as f64)
                 };
                 let amount = fraction * q;
+                if amount != 0. {
+                    *mask |= 1 << (s / 4);
+                }
                 change[s] += amount;
                 moved[s] += amount;
             }
         }
         let amount = moved.iter().sum::<f64>();
+        if amount == 0. {
+            continue;
+        }
         cell.inventory.apply(&moved.map(|q| -q));
+        let mut mask = 0;
         for (s, &q) in moved.iter().enumerate() {
             if q == 0. {
                 continue;
@@ -114,16 +129,17 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
             let (incoming, outgoing) = ((-q).max(0.), q.max(0.));
             cell.chemical_flows.imported.add(s, incoming);
             cell.chemical_flows.exported.add(s, outgoing);
-            if let Some(observer) = w.observer.as_mut().filter(|o| o.active()) {
-                observer.transfer(cell.id, s, incoming, outgoing);
-            }
+            mask |= 1 << (s / 4);
+        }
+        if let Some(observer) = w.observer.as_mut().filter(|o| o.active()) {
+            observer.transfers(cell.id, mask, |s| ((-moved[s]).max(0.), moved[s].max(0.)));
         }
         cell.flows.cover_work += cell.pay(amount.abs() * c.growth_energy);
         cell.flows.cover_deposited += amount.max(0.);
         cell.flows.cover_recovered += (-amount).max(0.);
     }
-    let nodes: Vec<_> = changes.keys().map(|&n| (n, u64::MAX)).collect();
-    let mut deltas: Vec<_> = changes.into_values().flatten().collect();
+    let nodes: Vec<_> = changes.iter().map(|(&n, &(mask, _))| (n, mask)).collect();
+    let mut deltas: Vec<_> = changes.into_values().flat_map(|(_, row)| row).collect();
     let loss = w.cover.apply_rows(&mut deltas, &nodes, &w.chemistry);
     w.ledger.numerical_material += loss[0];
     w.ledger.numerical_energy += loss[1];

@@ -1,7 +1,6 @@
 //! Conversion follows geographic transport so optical reservations use the actual donors.
 use super::*;
 use rayon::prelude::*;
-use std::collections::BTreeMap;
 
 impl Field {
     pub fn photochemistry(
@@ -9,12 +8,15 @@ impl Field {
         chemistry: &Chemistry,
         climate: &crate::climate::Climate,
         dt: f64,
-        budget: &BTreeMap<usize, crate::optics::Exposure>,
+        allocation: &crate::optics::Plane,
+        per_material: bool,
+        bound: f64,
     ) -> (FieldBalance, f64) {
         let rows = self.projection_rows(chemistry);
         let geometry = self.amounts.geometry();
         let area = self.area();
         let carriers = &self.carriers;
+        let illumination = &self.illumination;
         let process =
             |entry: &mut crate::spatial_regions::Entry<crate::spatial_material::Region>| {
                 let region = &mut entry.value;
@@ -33,7 +35,15 @@ impl Field {
                         p[4 + k] / area + carried.signal[0][k] + carried.signal[1][k]
                     });
                     let load = p[2] / area + carried.load[1];
-                    let exposure = budget[&n];
+                    // The region owns its unchanged donor row until this conversion commits.
+                    let work = allocation.get(&n).copied().unwrap_or(0.)
+                        * if per_material { p[0] } else { 1. };
+                    let exposure = crate::optics::Exposure::reserve(
+                        illumination.solar(n),
+                        illumination.emission.get(&n).copied().unwrap_or(0.),
+                        work,
+                        bound * p[0],
+                    );
                     let before = weather.work;
                     let next = weather.convert_funded(
                         region.row_mut(site),

@@ -247,3 +247,34 @@ fn compact_reactions_match_expanded_reports_and_preserve_membership_and_windows(
         0
     );
 }
+
+#[test]
+fn batched_transfers_keep_interval_membership_and_sparse_species() {
+    let mut w = crate::initial_ecology::probe(0, true).unwrap();
+    enable(&mut w);
+    let id = w.cells[0].id;
+    let o = w.observer.as_mut().unwrap();
+    o.selection = Selection::Region { id: 1 };
+    o.region.insert(id);
+    o.begin(&w.cells);
+    o.region.clear();
+    let flows = |s: usize| ((s + 1) as f64 / 100., s as f64 / 200.);
+    o.transfers(id, (1 << 3) | (1 << 63), flows);
+    o.begin(&w.cells);
+    o.transfers(id, 1 << 3, flows);
+    for s in 0..256 {
+        let selected = (12..16).contains(&s) || s >= 252;
+        let total = u8::from(selected) + u8::from((12..16).contains(&s));
+        for (group, scale) in [total, u8::from(selected), 0].into_iter().enumerate() {
+            let (incoming, outgoing) = flows(s);
+            assert_eq!(
+                o.current.groups[group].imports[s],
+                f64::from(scale) * incoming
+            );
+            assert_eq!(
+                o.current.groups[group].exports[s],
+                f64::from(scale) * outgoing
+            );
+        }
+    }
+}

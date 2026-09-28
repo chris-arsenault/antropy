@@ -7,6 +7,9 @@ mod grouping;
 #[path = "census_reduction.rs"]
 mod reduction;
 fn origin(w: &World, mut id: u64, known: &BTreeMap<u64, u64>) -> Option<u64> {
+    if known.is_empty() {
+        return None;
+    }
     loop {
         if let Some(&region) = known.get(&id) {
             return Some(region);

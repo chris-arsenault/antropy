@@ -1,5 +1,95 @@
 # Structural runtime scaling
 
+## September 28 continuing-world performance pass
+
+Execution: `afb1d346-8749-45ba-8f69-49566bab6195`. The user requested repeated
+performance improvements until no straightforward, useful reductions remained. This pass
+extends the installed regional owner; it does not change physical parameters, numerical
+resolution, chemical identities, donor contention or controller decisions. The continuing
+v44 checkpoint remains usable without migration or a world reset.
+
+### Measurement boundary
+
+Restore the live tick-41820 checkpoint (2,040 cells) into the ordinary native World, enable
+the server's phenotype observer, warm up ten ticks and measure 100 ticks with a 60-second
+wall cap. Compare retained baseline and candidate binaries sequentially without concurrent
+builds or tests. Repeat acceptance on tick 64192 (3,893 cells) and with one worker. Validate
+each final world. These are bounded execution comparisons with checkpoint learning and
+mutation settings retained, not ecological trials or deployed throughput certification.
+
+The existing `parallel_capacity` example now accepts `observer` after the checkpoint path.
+It reports complete stepping, cover/optical/cell subdivisions, execution counts and separate
+cold render/census/environment timings. Publication remains outside the stepping timer;
+network encoding, GPU upload and interactive inspection remain excluded. Registration,
+retained binaries and raw output are local under
+`frontend/harness/artifacts/performance-pass-20260928/`.
+
+### Production changes
+
+- Field regions calculate optical reservations from their committed donor rows as they
+  convert. The serial whole-field allocation map is gone; shared light allocation and
+  material/work bounds are unchanged.
+- Emitted-light deposits use the existing regional index with reusable region storage.
+  Empty regions are reclaimed each interval and the reach kernel survives between intervals.
+  Held light samples retain their current serialization and read interface.
+- Cell optical readings borrow each local signal once and execute in independent cell jobs.
+  Reservoir optical readings calculate the required signal/load without unused motion
+  gradients. Reservoir chemical jobs own their mixtures and merge accounts in source order.
+- Cover recovery skips empty donors. Cover commitment declares only chemical groups with
+  actual requested changes; donor rows and cell material are read once per relevant scope.
+  Frozen donor contention still prevents a new deposit funding recovery in the same interval.
+- Transfer observers resolve interval membership once per cell and reduce accepted chemical
+  rows. Both field/contact exchange and cover keep all actual incoming/outgoing amounts.
+- Passive and active exchange share a delivery map while their exact footprint dependencies
+  match. Geometry, footprint weights, population order and membership changes rebuild it;
+  donor amounts and chemical requests are still read anew for each solve.
+- A census with no previous colony identifiers immediately reports no matched origins.
+  Environment species totals visit present chemical groups instead of every chemical in
+  every occupied row. Observation remains read-only.
+
+### Acceptance and remaining costs
+
+Seven candidate rounds preceded fresh baseline/candidate comparisons. All use the same
+native host, restored starting state and observation setting described above:
+
+| Starting cells | Workers | Baseline TPS | Updated TPS | Throughput change |
+| --- | ---: | ---: | ---: | ---: |
+| 2,040 | 4 | 35.03 | 44.49 | +27.0% |
+| 3,893 | 4 | 24.47 | 30.31 | +23.8% |
+| 2,040 | 1 | 18.01 | 20.40 | +13.2% |
+
+At 2,040 cells/four workers, complete stepping falls from 28.54 to 22.48 ms. The combined
+cover/optical/cell-physiology phase falls from 9.96 to 5.37 ms and exchange from 7.46 to
+5.80 ms. Remaining cover, optics and cell physiology cost 0.80, 3.26 and 1.30 ms respectively;
+these are subdivisions, not additional work. The source/field stage remains about 5.75 ms.
+At 3,893 cells, exchange is 9.80 ms and the source/field stage 5.98 ms. These are now the
+largest individual phases. The one-worker workload still misses the 30 TPS target.
+
+Cold census plus environment publication falls from 80.8 to 36.6 ms at the smaller
+checkpoint and 217.2 to 55.9 ms at the larger one. These are cold-query reductions; previous
+measurements already established that retained colony identifiers make recurring census
+cheaper. Full-map rendering remains approximately 15–17 ms with identical display lengths.
+Do not add cold publication time to every tick or claim the entire reduction recurs each frame.
+
+Final summaries, including every reported physical account and population, match baseline
+exactly in all three acceptance pairs. Every restored continuation validates. Timing noise
+remains: the last exploratory run was 41.95 TPS, followed by 44.49 in the fresh matched pair;
+individual small changes are not assigned independent speedup claims.
+
+The remaining reviewed costs are useful donor allocation/commit, material transport and
+conversion, neural evaluation, and observer reductions over live state. The redundant map
+construction, absent-donor work, repeated membership lookups and dense observer scan found
+in this pass are removed. Further material gains would require another scheduling/data-layout
+change with explicit numerical and ownership analysis; increasing thresholds, reducing
+resolution, disabling observation or altering ecology was not used to manufacture speed.
+This is a local performance result. Deployment and live operating acceptance remain separate.
+
+Validation: `make ci` passes 372 Rust tests and 82 frontend tests, serial/threaded WASM
+builds, Clippy, type/lint/format checks, ownership/storage guards, docs and Terraform format.
+The existing 19 frontend warnings and WASM atomics warning remain. One registered server
+publication benchmark remains ignored by the ordinary suite; this pass measures publication
+separately through the native example. No deployment or live-world intervention was made.
+
 ## September 22 systemic spatial ownership execution
 
 Execution: `5fd3d7d0-9fd9-422b-95c6-ce1dace47ab3`, under root S. This section is the

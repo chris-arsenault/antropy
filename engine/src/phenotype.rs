@@ -89,6 +89,17 @@ impl Observer {
             g.exports[species] += outgoing;
         });
     }
+    /// Resolve interval membership once for a donor solve, then reduce its chemical rows.
+    pub(crate) fn transfers(&mut self, id: u64, species: u64, flow: impl Fn(usize) -> (f64, f64)) {
+        let mask = self.masks.get(&id).copied().unwrap_or(1);
+        self.current.each(mask, |g| {
+            for s in crate::contact_exchange::species(species) {
+                let (incoming, outgoing) = flow(s);
+                g.imports[s] += incoming;
+                g.exports[s] += outgoing;
+            }
+        });
+    }
     pub fn reactions(&mut self, cell: &Cell, work: &crate::metabolism::Work) {
         let mask = self.masks.get(&cell.id).copied().unwrap_or(1);
         self.current.accepted(mask, work);

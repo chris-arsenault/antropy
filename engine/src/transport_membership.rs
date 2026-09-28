@@ -1,4 +1,4 @@
-//! Transpose of local delivery, rebuilt in parallel each exchange: every donor node owns a
+//! Transpose of local delivery, rebuilt when footprints change: every donor node owns a
 //! contiguous list of its receivers, ordered by receiver index.
 use super::*;
 impl Exchange {
@@ -7,6 +7,18 @@ impl Exchange {
         geometry: crate::spatial::Geometry,
         sites: &[crate::footprint::Row],
     ) {
+        if self.slots.geometry == geometry
+            && self.sites.len() == sites.len()
+            && self
+                .sites
+                .iter()
+                .zip(sites)
+                .all(|(a, b)| a.as_slice() == b.as_slice())
+        {
+            return;
+        }
+        self.sites.resize_with(sites.len(), Default::default);
+        self.sites.clone_from_slice(sites);
         // Donor rows need no clearing here: projection zeroes each node's current groups
         // before accumulating, and every reader stays within those groups.
         if self.slots.geometry != geometry {

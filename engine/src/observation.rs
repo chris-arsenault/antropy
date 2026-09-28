@@ -77,9 +77,10 @@ pub fn summary(w: &World) -> Value {
 }
 pub fn environment(w: &World) -> Value {
     let mut species = [0.; 256];
-    for (_, node) in w.field.amounts().rows() {
-        for (total, q) in species.iter_mut().zip(node) {
-            *total += *q as f64;
+    for (n, mask, _) in w.field.amounts().occupied() {
+        let row = w.field.amounts().row(n);
+        for s in crate::field_activity::GroupLanes::<1>::new(mask) {
+            species[s] += row[s] as f64;
         }
     }
     let amount = species.iter().sum::<f64>();
@@ -98,6 +99,42 @@ pub fn environment(w: &World) -> Value {
         half_speed -= usize::from(slow(loads[n]));
     }
     json!({"tick":w.tick,"extracellular":{"amount":amount,"potential":potential,"species":species.to_vec()},"halfSpeedArea":half_speed as f64*w.field.spacing.powi(2),"sources":w.sources,"sourceResponse":crate::source_medium::observe(w),"environmentRng":w.environment_rng})
+}
+
+#[cfg(test)]
+#[test]
+fn sparse_environment_report_matches_complete_material_and_keeps_physical_state() {
+    let mut w = World::new(
+        27,
+        crate::config::Config {
+            width: 18.,
+            height: 18.,
+            founders: 2,
+            source_count: 2,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    for (n, s, amount) in [(0, 0, 2.), (17, 7, 3.), (80, 255, 4.)] {
+        w.field.add(n, s, amount, &w.chemistry);
+    }
+    let before = w.snapshot().unwrap();
+    let mut expected = [0.; 256];
+    for (_, row) in w.field.amounts().rows() {
+        for (sum, &q) in expected.iter_mut().zip(row) {
+            *sum += q as f64;
+        }
+    }
+    let report = environment(&w);
+    assert_eq!(report["extracellular"]["species"], json!(expected.to_vec()));
+    let expected_slow = (0..w.field.nx * w.field.ny)
+        .filter(|&n| {
+            w.config.movement_impedance * (w.field.impedance_at(n) + w.field.source_load()[n]) >= 1.
+        })
+        .count() as f64
+        * w.field.spacing.powi(2);
+    assert_eq!(report["halfSpeedArea"], json!(expected_slow));
+    assert_eq!(w.snapshot().unwrap(), before);
 }
 pub fn frame(w: &World) -> Value {
     let cells: Vec<_> = w.cells.iter().map(|c| cell_view(c, w)).collect();
