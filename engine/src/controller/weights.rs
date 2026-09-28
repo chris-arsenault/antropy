@@ -76,8 +76,22 @@ impl WeightStore {
         self.0.program.get_or_init(|| Program {
             input: Projection::compile(&self[..RECURRENT], INPUTS),
             output: Projection::compile(&self[OUTPUT..OUTPUT_BIAS], HIDDEN),
+            input_strength: std::array::from_fn(|i| {
+                strength(&self[i * INPUTS..(i + 1) * INPUTS]) + self[BIAS + i].abs()
+            }),
+            recurrent_strength: std::array::from_fn(|i| {
+                strength(&self[RECURRENT + i * HIDDEN..RECURRENT + (i + 1) * HIDDEN])
+            }),
+            output_strength: std::array::from_fn(|i| {
+                strength(&self[OUTPUT + i * HIDDEN..OUTPUT + (i + 1) * HIDDEN])
+                    + self[OUTPUT_BIAS + i].abs()
+            }),
         })
     }
+}
+
+fn strength(row: &[f32]) -> f32 {
+    row.iter().map(|w| w.abs()).sum()
 }
 
 #[derive(Debug)]
@@ -141,6 +155,9 @@ impl Projection {
 pub(super) struct Program {
     pub input: Projection,
     pub output: Projection,
+    pub input_strength: [f32; HIDDEN],
+    pub recurrent_strength: [f32; HIDDEN],
+    pub output_strength: [f32; TOTAL_OUTPUTS],
 }
 
 #[cfg(test)]

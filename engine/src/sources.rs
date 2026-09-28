@@ -6,6 +6,9 @@ use crate::{
     random::Random,
 };
 use serde::{Deserialize, Serialize};
+#[cfg(test)]
+#[path = "source_landscape_tests.rs"]
+mod landscape_tests;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Habitat {
@@ -276,7 +279,9 @@ pub fn landscape(c: &Config, rng: &mut Random) -> (Vec<[f64; 2]>, Vec<Habitat>) 
                 .unwrap_or(0);
             let center = centers[if i < 3 { 0 } else { region }];
             let angle = rng.unit() * std::f64::consts::TAU;
-            let reach = c.landscape_spread * rng.unit().sqrt();
+            let u = rng.unit();
+            // A single-scale radial tail retains dense centers and permits outlying deposits.
+            let reach = c.landscape_spread * (u / (1. - u)).sqrt();
             let mut x = (center[0] + angle.cos() * reach).rem_euclid(c.width);
             if let Some(zones) = &c.source_zones {
                 x = ((i % zones.len()) as f64 + x / c.width) * c.width / zones.len() as f64;

@@ -1,5 +1,16 @@
 # Current design and work order
 
+<a id="design-dispersal-opportunities"></a>
+
+## Dispersal geography and neural response — September 28
+
+Physical v44 adds a sparse tail to regional reservoir placement and a shared incoming-weight
+budget to every neural row, including effective learned recurrence. It preserves source
+counts, supply rates and refill timing. The [delivery plan](../plans/DISPERSAL-OPPORTUNITIES-PLAN.md)
+records bounded before/after checks and their limits; the [live evidence](../evidence/dispersal-v43/README.md)
+motivates the changes. These local changes do not deploy or reset the continuing server.
+Older physical checkpoints are rejected without migration.
+
 <a id="design-genetic-physiology"></a>
 
 ## Genetic physiology — September 28

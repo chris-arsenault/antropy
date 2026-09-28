@@ -28,11 +28,15 @@ fn clones_share_values_and_lazy_program_then_detach_before_any_edit() {
         child.weights.program()
     ));
     let original = parent.weights[0];
+    let original_strength = parent.weights.program().input_strength[0];
     child.weights[0] = 0.;
     assert!(!Arc::ptr_eq(&parent.weights.0, &child.weights.0));
     assert_eq!(parent.weights[0], original);
     assert!(child.weights.0.program.get().is_none());
-    child.weights.program();
+    assert!(
+        (child.weights.program().input_strength[0] - (original_strength - original.abs())).abs()
+            < 1e-6
+    );
     child.weights[..INPUTS].fill(0.25);
     assert!(child.weights.0.program.get().is_none());
     let owner = Arc::as_ptr(&parent.weights.0);

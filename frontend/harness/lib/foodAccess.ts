@@ -47,13 +47,13 @@ export function foodAccess(
           const angle = (2 * Math.PI * i) / 16;
           return {
             cell: i + 1,
-            variant: probe ? Number(probe === "slow") : (i + Number(swap)) % 2,
+            variant: probe ? 0 : (i + Number(swap)) % 2,
             x: 16 + distance * Math.cos(angle),
             y: 16 + distance * Math.sin(angle),
             heading: angle + Math.PI + Math.PI / 4,
           };
         });
-        install(world, variants, assignments);
+        install(world, probe ? variants.filter((v) => v.label === probe) : variants, assignments);
         return world;
       } catch (error) {
         world.dispose();

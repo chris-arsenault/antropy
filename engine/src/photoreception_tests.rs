@@ -190,12 +190,14 @@ fn the_same_funded_light_reading_can_gate_activity_and_dark_emission() {
     let mut logits = vec![0.; controller::TOTAL_OUTPUTS];
     let activity = controller::diagnostics::authored(
         logits.clone(),
-        Some((LIGHT_INPUT, controller::ACTIVITY, 8.)),
+        Some((LIGHT_INPUT, controller::ACTIVITY, 3.)),
     )
     .unwrap();
-    logits[controller::EMISSION] = 1.;
+    // Place the dark-emission threshold inside the funded light sensor's range.
+    // Large weights share a row budget and no longer imply a saturated response.
+    logits[controller::EMISSION] = 0.5;
     let nocturnal =
-        controller::diagnostics::authored(logits, Some((LIGHT_INPUT, controller::EMISSION, -8.)))
+        controller::diagnostics::authored(logits, Some((LIGHT_INPUT, controller::EMISSION, -3.)))
             .unwrap();
     let mut values = Vec::new();
     for transmission in [0., 1.] {
@@ -210,7 +212,7 @@ fn the_same_funded_light_reading_can_gate_activity_and_dark_emission() {
         values.push((a.activity[0], b.emission));
     }
     assert_eq!(values[0].0, 0.);
-    assert!(values[1].0 > 0.9);
-    assert!(values[0].1 > 0.7);
+    assert!(values[1].0 > 0.5);
+    assert!(values[0].1 > 0.3);
     assert_eq!(values[1].1, 0.);
 }

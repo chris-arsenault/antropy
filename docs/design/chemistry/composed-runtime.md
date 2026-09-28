@@ -61,13 +61,22 @@ exclusion; cells drop it and gain compatibility-weighted contact adhesion.
 September26 adds [ecological incentives](../../plans/ECOLOGICAL-INCENTIVES-PLAN.md):
 private retained chemistry contributes to light-supported work, ordinary membranes allow
 passive concentration exchange, and compression strengthens circle separation. These changes
-retained the v42 durable shape at delivery; v43 now rejects those earlier checkpoints.
+retained the v42 durable shape at delivery; v43 subsequently rejected those earlier checkpoints.
 
 V43 removes machinery development. Genetic proportions directly determine physiology at
 current biomass; automatic growth and conservative division replace separate capability
 inventories. Construction/retirement control and per-category maintenance charges are removed.
 The [physiology contract](../funded-bodies.md) owns these equations and the
 [execution plan](../../plans/GENETIC-PHYSIOLOGY-PLAN.md) records verification.
+
+V44 extends reservoir placement beyond regional disks and bounds total incoming neural
+strength. The [dispersal plan](../../plans/DISPERSAL-OPPORTUNITIES-PLAN.md) records separate
+geometry and behavior checks. Reservoir timing and material budgets are unchanged.
+At boot the existing weighted centers and spread L generate uniform angle and radius
+`L*sqrt(u/(1-u))`, with u uniform on [0,1), followed by periodic wrapping. On the unwrapped
+plane the radial median is L and the 90th percentile is 3L. The former disk cutoff is
+removed; source count, size, richness, composition and random draw counts are retained.
+There are no stored center anchors or runtime relocation rules.
 
 ## Meaning and owners
 
@@ -80,7 +89,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns compact occupied f32 geographic rows, f64 free and biomass mixtures, twenty-two derived
 body capacities, usable work, damage, private controllers and bounded compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v43 persists one birth genome identity per cell
+The same worker renders borrowed WASM views. Checkpoint v44 persists one birth genome identity per cell
 and one reservoir composition plus amount; it rejects earlier physical bytes.
 Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
@@ -529,6 +538,16 @@ The 58-input, 24-recurrent-unit, 19-output private RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
 
+Each neural row uses the same incoming-strength budget. For its augmented coefficient
+vector a and bounded inputs x (including constant one for bias), preactivation is
+`(a dot x)/max(1,sum(abs(a))/3)`. The triangle inequality bounds its magnitude by three,
+the existing activation's saturation boundary. Hidden rows combine sensory coefficients,
+bias and the effective recurrence `W+abs(alpha)*H` before applying that denominator.
+Output rows use the same operation. Immutable sensory, static recurrence and output norms
+are cached with the shared weight owner; learned recurrence is reduced on the ordinary
+physiological evaluation clock. Norms are derived, not additional serialized neural state.
+Mutation, private learning, assimilation, action funding and input ownership are unchanged.
+
 Transport action storage is [0,1]: zero exports, .5 holds and one imports. Effort is the
 absolute signed distance from .5. Installed stock × turnover × effort gives finite
 capacity, divided between recognized species by their weighted local concentration and
@@ -667,7 +686,7 @@ Geographic admission reserves 8192 bytes/node for the two material owners within
 2 GiB reservation (262,144 nodes). Default 720×540 at mesh 2 fits; larger rejected requests
 must choose their geometry explicitly. No automatic resolution reduction occurs. Empty film
 uses sparse rows. This reservation excludes population/ancestry and is not a measured RSS.
-Physical format v43 rejects earlier worlds without migration; deployment needs an explicit
+Physical format v44 rejects earlier worlds without migration; deployment needs an explicit
 new-world cutover if the continuing server holds an earlier format. Constructed checks and their negative
 payback findings are in [light ecology results](../../light-ecology-results.md).
 

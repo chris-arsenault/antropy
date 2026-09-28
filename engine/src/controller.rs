@@ -19,6 +19,8 @@ pub use prepared::{
 };
 pub use weights::WeightStore;
 pub mod diagnostics;
+#[cfg(test)]
+mod drive_tests;
 pub mod programs;
 #[cfg(test)]
 mod symmetry_tests;
@@ -33,11 +35,17 @@ const BIAS: usize = RECURRENT + HIDDEN * HIDDEN;
 const OUTPUT: usize = BIAS + HIDDEN;
 const OUTPUT_BIAS: usize = OUTPUT + TOTAL_OUTPUTS * HIDDEN;
 pub const PARAMETERS: usize = OUTPUT_BIAS + TOTAL_OUTPUTS;
+const DRIVE_LIMIT: f32 = 3.;
+
+/// One incoming-strength budget for bounded sensory, hidden and constant-bias inputs.
+fn bounded_drive(value: f32, strength: f32) -> f32 {
+    value * (DRIVE_LIMIT / strength.max(DRIVE_LIMIT))
+}
 
 /// Monotone odd C1 saturation. Its derivative inside [-3,3] is
 /// 9*(x*x-9)^2/(27+9*x*x)^2; no expensive transcendental is needed per neuron.
 pub fn squash(x: f32) -> f32 {
-    let x = x.clamp(-3., 3.);
+    let x = x.clamp(-DRIVE_LIMIT, DRIVE_LIMIT);
     let xx = x * x;
     (x * (27. + xx) / (27. + 9. * xx)).clamp(-1., 1.)
 }

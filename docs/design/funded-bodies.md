@@ -4,6 +4,11 @@ Physical checkpoint v43 removes machinery construction and retirement. Birth gen
 specify physiology; biomass and damage scale capacity, and actions consume usable work.
 There are no separately accumulated motor, receptor, transporter or enzyme inventories.
 
+Physical v44 retains these physiology rules and bounds aggregate neural drive, including
+learned recurrence, through the shared row budget in the
+[composed runtime](chemistry/composed-runtime.md). Reservoir placement also gains outlying
+deposits; source replenishment timing is unchanged.
+
 <a id="bodies-construction-and-physical-genes"></a>
 
 ## Physiology and physical genes
@@ -165,6 +170,6 @@ arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
 chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v43 preserves alleles and biomass and
+No score selects parents or filters mutants. Checkpoint v44 preserves alleles and biomass and
 reconstructs derived physiology; earlier checkpoints are rejected without migration.
 Unavailable pruned genotype payloads remain labeled provenance.

@@ -144,7 +144,7 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v43 stores complete chemistry, free and bound mixtures, bounded enzyme programs,
+Checkpoint v44 stores complete chemistry, free and bound mixtures, bounded enzyme programs,
 inward allocation, birth chemical/physical/behavioral genes and
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.

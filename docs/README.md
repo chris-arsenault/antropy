@@ -105,6 +105,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
+- [Dispersal geography and bounded neural drive](design/README.md#design-dispersal-opportunities)
 - [Genetic physiology without machinery construction](design/README.md#design-genetic-physiology)
 - [Crowding, waste and independent light metabolism](design/README.md#design-ecological-incentives)
 - [Immediate model simplification](design/README.md#design-model-simplification)

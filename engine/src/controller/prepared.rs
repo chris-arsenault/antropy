@@ -188,7 +188,18 @@ fn evaluate(g: &Genome, inputs: &[f32], state: &mut State) {
     for (i, value) in next.iter_mut().enumerate() {
         let row = &g.weights[RECURRENT + i * HIDDEN..RECURRENT + (i + 1) * HIDDEN];
         let trace = &state.traces[i * HIDDEN..(i + 1) * HIDDEN];
-        *value = squash(*value + arithmetic::recurrent(row, trace, &state.hidden, alpha));
+        let strength = if alpha == 0. {
+            program.recurrent_strength[i]
+        } else {
+            row.iter()
+                .zip(trace)
+                .map(|(w, h)| (w + alpha * h).abs())
+                .sum()
+        };
+        *value = squash(bounded_drive(
+            *value + arithmetic::recurrent(row, trace, &state.hidden, alpha),
+            program.input_strength[i] + strength,
+        ));
     }
     let mut logits = [0.; TOTAL_OUTPUTS];
     program.output.apply(
@@ -197,6 +208,9 @@ fn evaluate(g: &Genome, inputs: &[f32], state: &mut State) {
         &g.weights[OUTPUT_BIAS..],
         &mut logits,
     );
+    for (value, strength) in logits.iter_mut().zip(program.output_strength) {
+        *value = bounded_drive(*value, strength);
+    }
     epoch.flow.prepare(g, &next, modulation);
     epoch.hidden.copy_from_slice(&state.hidden);
     epoch.elapsed = 0.;

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — Dispersal opportunities
+
+- Extend regional reservoir placement with a sparse radial tail while retaining the same
+  source counts, sizes and supply budgets. Keep dense patches and ordinary reservoir motion.
+- Bound total neural input strength, including bias and effective learned recurrence,
+  using one shared row rule and immutable cached norms.
+- Advance physical checkpoints to v44 without migration. Correct single-cell food-access
+  probes to install only their selected diagnostic variant.
+
 ## Unreleased — Genetic physiology
 
 - Express inherited physiology directly at current biomass. Remove machinery construction,

@@ -12,6 +12,19 @@ beforeAll(async () => {
   engine = await loadEngine();
 });
 
+it("installs either single-cell probe with only its selected variant", () => {
+  for (const probe of ["fast", "slow"] as const) {
+    const world = foodAccess("persistent").create(engine, 701, false, probe);
+    try {
+      expect(world.command<{ cells: CellState[] }>("frame").cells).toHaveLength(1);
+      world.step();
+      expect(world.command<Summary>("summary").tick).toBe(1);
+    } finally {
+      world.dispose();
+    }
+  }
+});
+
 it("swaps assignments with equal positions, funded packets and finite food", () => {
   const scenario = foodAccess("brief"),
     a = scenario.create(engine, 701, false),
