@@ -1,4 +1,4 @@
-"""Read-only reductions for v33 cellular organization; classifications are descriptive."""
+"""Read-only reductions for genetic physiology; classifications are descriptive."""
 import collections
 
 import numpy as np
@@ -12,7 +12,7 @@ TINY_INVENTORY = 1e-12  # Reporting threshold only; no physical state is changed
 
 def actions(a):
     return np.array([a["swim"], a["turn"], a["repair"], *a["transport"],
-                     *a["activity"], *a["allocation"], a["retirement"]])
+                     *a["activity"], a["cover"], a["emission"]])
 
 
 def distribution(values):
@@ -32,11 +32,8 @@ def organization(cells):
     inward = np.array([c["installed"]["inward"] for c in cells])
     controls = [c["organization"]["control"] for c in cells]
     activity = np.array([a["activity"] for a in controls])
-    allocation = np.array([a["allocation"] for a in controls])
     funded = (body[:, ENZYME_STOCKS] > 1e-6) & installed
-    retirement = np.array([a["retirement"] for a in controls])
     relative = body[:, ENZYME_STOCKS] / body[:, 0, None]
-    mass = body.sum(axis=1)
     sensitivities = {}
     for kind in ["inwardAbsent", "inwardShifted", "lightAbsent"]:
         differences, relevant = [], []
@@ -47,14 +44,14 @@ def organization(cells):
                             + [v > 1e-6 for v in c["body"][7:11]]
                             + [c["body"][s] > 1e-6 and active for s, active in
                                zip(ENZYME_STOCKS, c["installed"]["programs"])]
-                            + [v > 1e-6 for v in c["target"]] + [True])
+                            + [c["body"][20] > 1e-6, c["body"][21] > 1e-6])
             differences.append(delta)
             relevant.append(delta * mask)
         delta, relevant = np.array(differences), np.array(relevant)
         sensitivities[kind] = {
             "allRequestsOver01": int(np.sum(delta.max(axis=1) > .01)),
-            "fundedOrConstructibleOver01": int(np.sum(relevant.max(axis=1) > .01)),
-            "fundedOrConstructibleOver001": int(np.sum(relevant.max(axis=1) > .001)),
+            "availableActionsOver01": int(np.sum(relevant.max(axis=1) > .01)),
+            "availableActionsOver001": int(np.sum(relevant.max(axis=1) > .001)),
             "meanAbsoluteByAction": relevant.mean(axis=0).tolist(),
             "magnitude": quantiles(relevant.max(axis=1)),
         }
@@ -68,9 +65,6 @@ def organization(cells):
         "effectiveInstalledPrograms": quantiles([c["organization"]["effectiveInstalledPrograms"]
             for c in cells if c["organization"].get("effectiveInstalledPrograms") is not None]),
         "enzymePerCore": quantiles(relative.sum(axis=1)),
-        "retiredMass": float((body[:, ENZYME_STOCKS] * ~installed).sum()),
-        "retiredMassFraction": float((body[:, ENZYME_STOCKS] * ~installed).sum() / mass.sum()),
-        "retirementEffort": quantiles(retirement), "retirementOver01": int(np.sum(retirement > .01)),
         "inwardAllocatedOver01": int(np.sum(np.any(inward > .01, axis=1))),
         "fundedInwardOver01": int(np.sum(np.any(inward * body[:, 3:7] > .01 * body[:, 0, None], axis=1))),
         "inwardAllocationMaximum": quantiles(inward.max(axis=1)),
@@ -78,7 +72,6 @@ def organization(cells):
         "cellsWithSuppressedFundedEnzyme": int(np.sum(np.any((activity < .5) & funded, axis=1))),
         "cellsWithSelectiveActivity": int(np.sum([len(a) > 1 and np.ptp(a) > .25 for a in
                                                    [row[mask] for row, mask in zip(activity, funded)]])),
-        "constructionRequestsByStock": [quantiles(allocation[:, s]) for s in range(20)],
         "contacts": {"cells": int(np.sum(np.array(contacts) > 0)), "edges": int(sum(contacts) / 2),
                      "neighbors": quantiles(contacts),
                      "fieldInterface": quantiles([c["organization"]["fieldInterface"] for c in cells])},

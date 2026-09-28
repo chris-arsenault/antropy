@@ -20,7 +20,7 @@ pub struct Budget {
     pub processing_capacity: Vec<f64>,
     pub processing_work: f64,
     pub processing_surplus: f64,
-    pub construction_ceiling: f64,
+    pub growth_ceiling: f64,
 }
 /// Import-only ceiling from installed conversions, before throughput/occupancy limits.
 pub fn conversion_work_ceiling(g: &Compiled, species: usize) -> f64 {
@@ -143,7 +143,7 @@ pub fn budget(
         processing_capacity,
         processing_work,
         processing_surplus,
-        construction_ceiling: (processing_surplus / c.construction_energy)
+        growth_ceiling: (processing_surplus / c.growth_energy)
             .max(0.)
             .min(imports.iter().sum()),
         imports,

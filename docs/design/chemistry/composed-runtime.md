@@ -1,6 +1,6 @@
 # Composed artificial chemistry runtime
 
-Updated September 25, 2026. This contract governs the fresh implementation under
+Updated September 28, 2026. This contract governs the fresh implementation under
 [the canonical math plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
@@ -61,7 +61,13 @@ exclusion; cells drop it and gain compatibility-weighted contact adhesion.
 September26 adds [ecological incentives](../../plans/ECOLOGICAL-INCENTIVES-PLAN.md):
 private retained chemistry contributes to light-supported work, ordinary membranes allow
 passive concentration exchange, and compression strengthens circle separation. These changes
-retain the v42 durable shape; restored worlds use the current laws without migration.
+retained the v42 durable shape at delivery; v43 now rejects those earlier checkpoints.
+
+V43 removes machinery development. Genetic proportions directly determine physiology at
+current biomass; automatic growth and conservative division replace separate capability
+inventories. Construction/retirement control and per-category maintenance charges are removed.
+The [physiology contract](../funded-bodies.md) owns these equations and the
+[execution plan](../../plans/GENETIC-PHYSIOLOGY-PLAN.md) records verification.
 
 ## Meaning and owners
 
@@ -72,9 +78,9 @@ Geography is a separate periodic XY plane. U prices material conversions; D cont
 spread; I impedes motion; S creates compatible or incompatible exposure. Two shared
 signed profiles supply geographic transport signals. They store no usable work.
 
-Rust owns compact occupied f32 geographic rows, f64 intracellular mixtures, twenty-two bounded funded
-body stocks, usable work, damage, private controllers and complete compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v42 persists one birth genome identity per cell
+Rust owns compact occupied f32 geographic rows, f64 free and biomass mixtures, twenty-two derived
+body capacities, usable work, damage, private controllers and bounded compact ancestry.
+The same worker renders borrowed WASM views. Checkpoint v43 persists one birth genome identity per cell
 and one reservoir composition plus amount; it rejects earlier physical bytes.
 Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
@@ -515,11 +521,11 @@ compilation retains unchanged operators. Birth splits actual quantities and imme
 mutated capabilities. No parental-function buffer or within-life refitting remains.
 
 Five receptor sample rows are composed before projecting local chemical rows. Each funded
-receptor supplies tonic, temporal, body-forward and body-left readings. Stock-dependent
-gain vanishes with absent stock. A separately funded photoreceptor samples mean local
-illumination through those same rows and supplies the same four cues; its investment uses
-the existing receptor reference mass and upkeep. See [photoreception](../../photoreception.md).
-The 58-input, 24-recurrent-unit, 42-output private RNN
+receptor supplies tonic, temporal, body-forward and body-left readings. Capacity-dependent
+gain vanishes with absent genetic capacity. A photoreceptor samples mean local
+illumination through those same rows and supplies the same four cues; its genetic reference
+uses the existing receptor mass scale. See [photoreception](../../photoreception.md).
+The 58-input, 24-recurrent-unit, 19-output private RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
 
@@ -637,7 +643,7 @@ Canonical terrain transmission and optional ceilings act on overhead sunlight be
 interpolation. Sparse film material has optical depth `tau=mass/(mesh²*opticalColumn)`;
 the plane receives `exp(-tau)` and film receives the column mean `(1-exp(-tau))/tau`.
 Film uses ordinary chemical identity, transport, conversion, washout and numerical accounts.
-Builder stock bounds paid deposit/recovery at the shared construction throughput and price.
+Builder capacity bounds paid deposit/recovery at the shared growth throughput and work price.
 
 Emitter effort pays `dt*motorPowerDensity*stock*(1-damage)*effort` once per physiology
 interval. Conversion efficiency and two equal optical paths partition lateral delivery below
@@ -652,50 +658,49 @@ last paid emitter powers persist for sensing/display; they cannot be spent again
 
 The 0.8-second physiology boundary follows transport, motion and paid material exchange.
 Emission and all recipient allocations precede field/film, reservoir and private conversion.
-No product or recaptured work funds the same interval's emission. Cover stocks and emitter
-stocks use ordinary investment loci, allocation, maintenance, retirement and inheritance.
-Inputs 56–57 report their funded stock; outputs 40–41 request signed cover transfer and
-nonnegative emission. Allocation now spans 22 stocks and retirement is output 39.
-Reference founders fund 0.04 material in each added stock, with zero initial optical effort.
+No product or recaptured work funds the same interval's emission. Cover-builder and emitter
+capacities follow ordinary genetic proportions at current biomass. Inputs 56–57 report their
+capacity relative to the newborn reference; outputs 17–18 request signed cover transfer and
+nonnegative emission. Each has reference capacity 0.04, with zero initial optical effort.
 
 Geographic admission reserves 8192 bytes/node for the two material owners within the existing
 2 GiB reservation (262,144 nodes). Default 720×540 at mesh 2 fits; larger rejected requests
 must choose their geometry explicitly. No automatic resolution reduction occurs. Empty film
 uses sparse rows. This reservation excludes population/ancestry and is not a measured RSS.
-Physical format v42 rejects v41 without migration; deployment needs an explicit new-world
-cutover if the continuing server still holds v41. Constructed checks and their negative
+Physical format v43 rejects earlier worlds without migration; deployment needs an explicit
+new-world cutover if the continuing server holds an earlier format. Constructed checks and their negative
 payback findings are in [light ecology results](../../light-ecology-results.md).
 
-All internal species can fund biomass, selected proportionally. Assembly pays .5 work per
+All internal species can fund biomass, selected proportionally. Growth pays .5 work per
 unit and transfers the consumed mixture into bound material without changing chemical identity.
 Bound reference value is its mixture dotted with chemical reference values; no usable work is
-captured by construction. Bound mass equals total funded stock. Growth approaches the neural
-construction request (`2*g*b` optional, `g*(1+b)` core), bounded by actual material, work and
-core-dependent construction rate. Surplus stock can be retired with the shared effort request.
-Construction and retirement use frozen free/bound mixtures, one handling/work budget, and
-storage headroom after any storage retirement. Both pay assembly-price work. Returned material
-or newly created capacity cannot fund the same event.
+captured by growth. With genetic reference vector b and biomass M, each body capacity is
+`M*b_i/sum(b)`. Growth approaches `2*sum(b)`, bounded by `dt*growthRate*M*(1-damage)`, free
+material above the protected reserve and available work. There are no independently stored
+components, construction requests or retirement. All capacities scale together.
 Growth protects work for the proposed larger body's upkeep, current motor effort and learning
-through a complete physiology interval plus one movement tick. This prevents optional construction from consuming the next interval's upkeep.
+through a complete physiology interval plus one movement tick.
 
-Maintenance charges actual stock and damage. Repair exchanges equal proportional amounts of
+Basal work is `(1+damage)*(maintenance*M+controllerCost)`; equipment has no separate ownership
+charge. Repair exchanges equal proportional amounts of
 free and bound material, frozen before the exchange. Material demand and work costs scale with
 total installed mass times the repaired damage fraction. Available free material, bound mass and
 work limit repair; returned material cannot fund the same exchange. Death releases both mixtures
 unchanged. Checkpoint v20 persists and validates bound material; see [the correction](../../bound-material.md).
-Chemical parameters and the enzyme repertoire remain fixed throughout life. Activity and funded
-stock can change through ordinary control and construction. Excess usable work dissipates.
+Chemical parameters and the enzyme repertoire remain fixed throughout life. Activity changes
+through ordinary control; capacities change with biomass. Excess usable work dissipates.
 
-Local division requires funded double core, actual-capacity inventory/work reserves and division cost. Optional
-machinery is partitioned as actually built, including zero stock. Fission
+Local division requires twice the genetic reference biomass, actual-capacity inventory/work
+reserves and division cost. Fission
 ends the parent and creates two daughters; budding retains a reduced parent and one
-daughter. Stocks and inventories split, damage fraction persists, private memory resets,
+daughter. Biomass and inventories split, damage fraction persists, private memory resets,
 and inherited targets can mutate or receive paid birth-local assimilation. Supported
 haploid/diploid and clonal/selfing policies remain. The daughter's complete mutated configuration
-applies at birth without granting stock. Living-cell genetic transfer is removed.
+applies at birth without granting biomass. Living-cell genetic transfer is removed.
 Newborn contact readings reset with private memory; receptor baselines initialize locally.
-Extinction stops visibly without reseeding. Unused genetic payloads can be pruned while retaining
-living birth genotypes, diagnostic catalogs, founder roots and every compact ancestor record.
+An empty world keeps advancing without reseeding. Unused genetic payloads can be pruned while
+retaining living birth genotypes, diagnostic catalogs and founder roots. Ended ancestry expires
+within its retention budget; every living record remains available.
 
 All chemical point coordinates use the common heavy-tail vector mutation with scale
 `R × physicalMutationScale`; orientation uses the corresponding arc length divided by R.
@@ -710,7 +715,7 @@ Each cell has one free mixture and one chemically identified bound mixture. Defi
 `m=sum_s((I_s+B_s)*p_s)/(K*area+sum_s(I_s+B_s))`. For a compiled work coefficient
 `a=J*Delta_p/4`, reaction throughput gains `mu=1+z/(1+abs(z))`, `z=4*a dot m`.
 This changes rates, not per-conversion work. Activity, actual stock, damage, substrate and
-product occupancy still bound flux. Zero stock/activity and retired programs skip rows.
+product occupancy still bound flux. Zero capacity/activity and inactive programs skip rows.
 
 Receptor stock splits by a paid installed inward fraction. Four additional tonic/change pairs
 sense recognized free internal concentration. The corrected v36 contact law uses perfect

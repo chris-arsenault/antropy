@@ -78,8 +78,7 @@ export interface Flows {
   reacted: number;
   captured: number;
   externalWork: number;
-  constructed: number;
-  retired: number;
+  grown: number;
   contactImported: number;
   contactLost: number;
   maintenance: number;
@@ -87,7 +86,8 @@ export interface Flows {
   learning: number;
   transport: number;
   reactionHeat: number;
-  construction: number;
+  growth: number;
+  coverWork: number;
   repair: number;
   repaired: number;
   exposure: number;
@@ -204,8 +204,6 @@ export interface CellState {
     repair: number;
     transport: number[];
     activity: number[];
-    allocation: number[];
-    retirement: number;
     cover: number;
     emission: number;
   };

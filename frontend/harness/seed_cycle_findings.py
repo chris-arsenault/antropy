@@ -69,10 +69,14 @@ def capacity_blocks(ceiling, config):
         # Archived reports retain their original absolute-allowance interpretation.
         return (storage < 2 * config["daughterInventory"],
                 energy < 2 * config["daughterEnergy"] + config["divisionCost"])
-    upkeep = (ceiling[:, 0] * config["maintenance"] + ceiling[:, 1] * config["motorMaintenance"]
-              + ceiling[:, 2] * config["storageMaintenance"]
-              + ceiling[:, 3:].sum(axis=1) * config["machineryMaintenance"]
-              + 2 * config["controllerCost"])
+    if "growthEnergy" in config:
+        upkeep = ceiling.sum(axis=1) * config["maintenance"] + 2 * config["controllerCost"]
+    else:
+        # Historical saved reports retain their original equipment upkeep law.
+        upkeep = (ceiling[:, 0] * config["maintenance"] + ceiling[:, 1] * config["motorMaintenance"]
+                  + ceiling[:, 2] * config["storageMaintenance"]
+                  + ceiling[:, 3:].sum(axis=1) * config["machineryMaintenance"]
+                  + 2 * config["controllerCost"])
     if config["learning"] == "plastic":
         upkeep += ceiling[:, 0] * config["plasticityCost"]
     reserve = np.maximum(energy * config["daughterEnergyFraction"],

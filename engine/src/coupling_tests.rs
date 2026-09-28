@@ -164,8 +164,10 @@ fn motion_prices_actual_velocity_and_scales_funding_consistently() {
     assert!((large.flows.distance - full.flows.distance).abs() < 1e-12);
     assert!((large.flows.motors - full.flows.motors).abs() < 1e-12);
     assert!(
-        crate::organism::maintenance_rate(&large.body, 0., &w.config)
-            > crate::organism::maintenance_rate(&full.body, 0., &w.config)
+        (crate::organism::maintenance_rate(&large.body, 0., &w.config)
+            - crate::organism::maintenance_rate(&full.body, 0., &w.config))
+        .abs()
+            < 1e-12
     );
 }
 
@@ -225,5 +227,5 @@ fn construction_budget_cannot_spend_unprocessed_imports() {
     );
     assert!(budget.surplus > 0.);
     assert_eq!(budget.processing_work, 0.);
-    assert_eq!(budget.construction_ceiling, 0.);
+    assert_eq!(budget.growth_ceiling, 0.);
 }

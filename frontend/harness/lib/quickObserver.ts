@@ -83,7 +83,7 @@ function result(group: TraceGroup, definition: Definition) {
     speciesFlows: speciesFlows(group),
     importedPotential,
     motorPercentImportedPotential: percent(flows.motors, importedPotential),
-    constructedMaterialPerInitialCell: perCell(flows.constructed),
+    grownMaterialPerInitialCell: perCell(flows.grown),
     birthsPerInitialCell: perCell(group.ledger.births),
     divisionsPerInitialCell: perCell(group.ledger.divisions),
     founderArrivalsPercent: percent(

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — Genetic physiology
+
+- Express inherited physiology directly at current biomass. Remove machinery construction,
+  retirement, controller allocation outputs and category-specific equipment upkeep.
+- Grow the whole body proportionally and apply daughter mutations immediately while conserving
+  biomass, chemical inventories and work accounts. Keep physical action costs and basal metabolism.
+- Advance checkpoints to v43 without migration. Reconstruct body capacities from genetics and
+  biomass; report genetic capacity and biomass growth in inspection and analysis.
+
 ## Unreleased — Irregular terrain shade
 
 - Replace the repeating cosine grids with seeded multiscale noise and smooth coordinate

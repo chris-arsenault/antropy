@@ -35,16 +35,13 @@ export function install(
   assignments: Assignment[],
   mature = false
 ) {
-  return world.command<{ genomes: number[]; constructed: number; constructionHeat: number }>(
-    "installFixture",
-    {
-      fixture: {
-        variants: variants.map(({ genotype, changes }) => ({ genotype, changes })),
-        assignments,
-        mature,
-      },
-    }
-  );
+  return world.command<{ genomes: number[]; grown: number; growthHeat: number }>("installFixture", {
+    fixture: {
+      variants: variants.map(({ genotype, changes }) => ({ genotype, changes })),
+      assignments,
+      mature,
+    },
+  });
 }
 export function pulse(
   world: EngineWorld,

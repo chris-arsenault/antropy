@@ -36,7 +36,7 @@ fn growth_and_death_return_each_funded_species_with_paid_assembly() {
         let (built, heat) = metabolism::assemble(cell, &w.chemistry, &w.config, 0.5, 0., 0.);
         cell.body[0] += built;
         close(built, 0.5);
-        close(heat, built * w.config.construction_energy);
+        close(heat, built * w.config.growth_energy);
         close(
             cell.bound_material.value(species) - initial.value(species),
             0.35,
@@ -132,7 +132,7 @@ fn division_splits_actual_composition_for_fission_and_budding() {
 }
 
 #[test]
-fn restore_preserves_mixtures_and_rejects_unfunded_body_and_old_schema() {
+fn restore_preserves_mixtures_rederives_body_and_rejects_old_schema() {
     let mut w = world();
     let cell = &mut w.cells[0];
     let mass = cell.mass();
@@ -148,14 +148,15 @@ fn restore_preserves_mixtures_and_rejects_unfunded_body_and_old_schema() {
         restored.step();
     }
     assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
-    restored.cells[0].bound_material.scale(0.5);
-    assert!(
-        World::restore(&restored.snapshot().unwrap())
-            .unwrap_err()
-            .contains("Bound material")
-    );
+    // A derived cache cannot become a second persisted source of physiology.
+    let expected = restored.cells[0].body;
+    restored.cells[0].body.fill(0.);
+    let rebuilt = World::restore(&restored.snapshot().unwrap()).unwrap();
+    for (actual, expected) in rebuilt.cells[0].body.iter().zip(expected) {
+        close(*actual, expected);
+    }
     let mut old = saved;
     old[7] = b'1';
     old[8] = b'9';
-    assert!(World::restore(&old).unwrap_err().contains("v42 required"));
+    assert!(World::restore(&old).unwrap_err().contains("v43 required"));
 }

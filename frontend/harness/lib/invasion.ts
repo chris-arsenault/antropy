@@ -1,6 +1,6 @@
 /**
  * Mutual-invasibility assay for actual evolved genotypes. Clusters a checkpoint's living cells
- * by inherited construction traits, takes each cluster's medoid genotype and runs rare-invasion
+ * by inherited physiological traits, takes each cluster's medoid genotype and runs rare-invasion
  * contests between those genotypes in a fresh zoned world. Clustering describes; it never
  * selects parents in the source population, and no genotype is promoted anywhere.
  */

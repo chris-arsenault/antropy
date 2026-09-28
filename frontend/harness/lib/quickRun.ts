@@ -128,8 +128,9 @@ function manifest(
       exported: "material",
       reaction: "material transformed from species to product",
       motors: "usable energy",
-      constructed: "built material",
-      construction: "dissipated energy",
+      grown: "biomass gained",
+      growth: "dissipated energy",
+      coverWork: "dissipated energy",
     },
     traceContract:
       "Positions at frame tick; inputs/actions from preceding inference. localInputsNow probes a copy at the current position. Cumulative uptake may include recycling. Descendants remain in their initial founder-genotype group; no parental selection uses these observations.",

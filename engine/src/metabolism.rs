@@ -68,7 +68,7 @@ pub fn assemble(
     if total <= 0. {
         return (0., 0.);
     }
-    let cost = c.construction_energy;
+    let cost = c.growth_energy;
     let built = requested
         .max(0.)
         .min((total - reserve).max(0.))
@@ -79,7 +79,7 @@ pub fn assemble(
 }
 pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64) {
     let _ = chemistry;
-    crate::organization::remodel(cell, g, c, dt);
+    crate::physiology::grow(cell, g, c, dt);
 }
 
 pub fn retained_response(cell: &Cell, c: &Config, chemistry: &Chemistry) -> [f64; 2] {

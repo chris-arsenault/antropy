@@ -1,9 +1,8 @@
 import { type Inspection } from "./types";
-import { BODY_PARTS, enzymeStock } from "./bodyParts";
+import { enzymeStock } from "./bodyParts";
 import { Table, numberText as n } from "./Table";
 
-const PROGRAM_COLUMNS = ["Program", "State", "Stock", "Activity", "Construction request"];
-const ALLOCATION_COLUMNS = ["Component", "Request"];
+const PROGRAM_COLUMNS = ["Program", "State", "Capacity", "Activity"];
 
 export function CellOrganization({ inspection }: { inspection: Inspection }) {
   const cell = inspection.cell;
@@ -20,41 +19,32 @@ export function CellOrganization({ inspection }: { inspection: Inspection }) {
     <details open>
       <summary>Cellular organization · {active} enzyme programs</summary>
       <p>
-        One internal mixture. Retained free and bound chemistry changes processing rates; activity
-        does not remove machinery upkeep. Retired stock remains until paid dismantling.
+        Genes determine physiology at the current biomass. Retained free and bound chemistry changes
+        processing rates; the controller chooses which reactions to run.
       </p>
       <Table
         columns={PROGRAM_COLUMNS}
         rows={records.map(({ program, slot, stock }) => [
           slot,
-          program ? "active" : "retired",
+          program ? "active" : "absent",
           n(stock),
           program ? n(cell.action.activity[slot]) : "0",
-          program ? n(cell.action.allocation[enzymeStock(slot)]) : "0",
         ])}
       />
       <p>
-        Retirement effort {n(cell.action.retirement)}. Last tick: material constructed{" "}
-        {n(cell.flows.constructed)}, retired {n(cell.flows.retired)}; work spent{" "}
-        {n(cell.flows.construction)}.
+        Last tick: biomass gained {n(cell.flows.grown)}; growth work {n(cell.flows.growth)}.
       </p>
       <p>
         Field-facing interface {n((inspection.fieldInterface ?? 1) * 100)}%. Contact material:
         received {n(cell.flows.contactImported)}, lost {n(cell.flows.contactLost)} this tick. Direct
         uptake requires an injured neighbor; ordinary export enters the public field.
       </p>
-      <details>
-        <summary>Construction allocation</summary>
-        <Table
-          columns={ALLOCATION_COLUMNS}
-          rows={BODY_PARTS.map((part, i) => [part, n(cell.action.allocation[i])])}
-        />
-      </details>
       <p>
         Cover effort {n(cell.action.cover)} (positive deposits, negative recovers). This tick:
-        deposited {n(cell.flows.coverDeposited)}, recovered {n(cell.flows.coverRecovered)} material.
-        Emission effort {n(cell.action.emission)}; paid {n(cell.flows.emission)} work, recovered
-        optical work {n(cell.flows.recycledWork)}. Zero between physiology updates.
+        deposited {n(cell.flows.coverDeposited)}, recovered {n(cell.flows.coverRecovered)} material;
+        work {n(cell.flows.coverWork)}. Emission effort {n(cell.action.emission)}; paid{" "}
+        {n(cell.flows.emission)} work, recovered optical work {n(cell.flows.recycledWork)}. Zero
+        between physiology updates.
       </p>
     </details>
   );

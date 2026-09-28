@@ -1,6 +1,7 @@
 # Birth-fixed chemical capabilities
 
-Physical checkpoint v37 removes machinery refitting. Each cell uses its complete birth
+Physical checkpoint v37 removed machinery refitting; v43 also removes machinery construction.
+Each cell uses its complete birth
 genotype throughout its lifetime: four receptors, four transporters, one to eight enzyme
 programs and a membrane coordinate. Recognition neighborhoods and the existing transformation
 algebra still allow several chemicals and transformations per cell.
@@ -12,14 +13,14 @@ configuration used by sensing, transport, reactions, membrane response and obser
 Restoration compiles the birth genotype and shares those operators; there is no separately
 persisted installed identity, provenance, revision, refitting progress or work account.
 
-Division conservatively partitions actual stocks, bound material, free material and usable
+Division conservatively partitions biomass, free material and usable
 energy after the existing division cost. Each daughter immediately uses its own mutated
-configuration. Mutation grants no additional stock. Program duplication splits existing stock;
-deletion leaves inactive material for ordinary paid retirement. Small chemical edits retain
+configuration and derived body proportions. Mutation grants no additional biomass. Program
+duplication splits genetic capacity weights; deletion immediately removes that capacity. Small chemical edits retain
 the smooth affinity law, but no rule protects a mutant's access to its parent's food.
 
-During life, neural activity and construction allocation, funded growth/retirement, chemistry,
-damage and private learning remain dynamic. The capability repertoire and its chemical
+During life, neural activity, automatic biomass growth, chemistry, damage and private learning
+remain dynamic. The capability repertoire and its chemical
 parameters stay fixed. Living-cell genetic transfer is removed; ordinary material exchange
 between cells remains. Diagnostic genotype replacements are explicit constructed-state
 interventions, not biological adaptation.
@@ -27,8 +28,8 @@ interventions, not biological adaptation.
 The old survival-buffer requirement was an agent-created constraint rejected by the user.
 A changed daughter may fail to feed in its birth environment. Neither survival guarantees nor
 a replacement price are part of the new rule. The [execution plan](../../plans/MODEL-SIMPLIFICATION-PLAN.md)
-records implementation and verification. `make ci` passes with 301 Rust tests and 78 Vitest
-tests. Constructed checks cover mutated birth, lost/gained food access, program counts, funded
+records that implementation and verification. Its v37 `make ci` run passed with 301 Rust tests
+and 78 Vitest tests. Constructed checks covered mutated birth, lost/gained food access, program counts, funded
 quantities, shared restoration and selected inspection. They do not establish long-run ecology.
 
 ## Historical continuous-refitting rule

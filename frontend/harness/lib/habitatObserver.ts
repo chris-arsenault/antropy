@@ -37,7 +37,7 @@ function eligible(c: HabitatCell, group: TraceGroup, d: Definition, tick: number
   }
   const f = group.ledger.flows;
   const cost = f.maintenance + f.motors + f.learning + f.transport + f.repair;
-  return invested >= 0.1 && invested >= total * 0.1 && f.captured > cost && f.constructed > 0;
+  return invested >= 0.1 && invested >= total * 0.1 && f.captured > cost && f.grown > 0;
 }
 export function habitatObserver(
   engine: Engine,

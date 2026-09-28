@@ -26,9 +26,9 @@ export function GroupComparison({ report }: { report: PhenotypeReport }) {
       <div className="phenotype-table-scroll">
         <table className="phenotype-table">
           <caption>
-            Median and 10th–90th percentiles. Targets show inherited construction proportions; built
-            mass also reflects growth. Membrane coordinates wrap at 16; ranges across that boundary
-            are not distances.
+            Median and 10th–90th percentiles. Genetics determines proportions; current biomass
+            reflects growth. Membrane coordinates wrap at 16; ranges across that boundary are not
+            distances.
           </caption>
           <thead>
             <tr>
@@ -50,7 +50,7 @@ export function GroupComparison({ report }: { report: PhenotypeReport }) {
                     <QuantileValue value={g.actual[i]} />
                     {i < 5 && (
                       <div className="inherited-target">
-                        Target <QuantileValue value={g.target[i]} />
+                        Genetic reference <QuantileValue value={g.target[i]} />
                       </div>
                     )}
                   </td>
@@ -112,7 +112,8 @@ const ACCOUNTS: [string, (a: Activity) => number][] = [
   ["Movement", (a) => a.flows.motors],
   ["Transport", (a) => a.flows.transport],
   ["Reaction heat", (a) => a.flows.reactionHeat],
-  ["Construction / division", (a) => a.flows.construction + a.division],
+  ["Growth / division", (a) => a.flows.growth + a.division],
+  ["Cover transfer", (a) => a.flows.coverWork],
   ["Repair / learning", (a) => a.flows.repair + a.flows.learning],
   ["Overflow", (a) => a.overflow],
 ];

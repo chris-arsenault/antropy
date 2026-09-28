@@ -125,7 +125,7 @@ def summarize(sample, previous, genotypes, config):
         "chemical": flows, "intervalChemical": interval, "ledger": ledger,
         "interval": changes, "organismSeconds": seconds, "intervalOrganismSeconds": elapsed,
         "importsPerCellSecond": fraction(imports, elapsed),
-        "constructionPerCellSecond": fraction(changes["flows"]["constructed"], elapsed),
+        "constructionPerCellSecond": fraction(changes["flows"].get("grown", changes["flows"].get("constructed", 0)), elapsed),
         "intervalNonFeedImportShare": fraction(sum(q for s, q in enumerate(interval["imported"]) if s not in source_ids), imports),
         "familyFlows": [{"lineage": g["lineage"], "living": g["living"], "organismSeconds": g["organismSeconds"],
                          "ledger": g["ledger"], "chemical": g["chemical"]} for g in sample["groups"]],

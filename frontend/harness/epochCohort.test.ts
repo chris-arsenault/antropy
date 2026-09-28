@@ -18,7 +18,7 @@ it("samples individuals reproducibly without changing source physics or filterin
     w.dispose();
   }
 });
-it("swaps inherited cohorts on common funded bodies and keeps descendant assignments", async () => {
+it("swaps inherited cohorts on common biomass and keeps descendant assignments", async () => {
   const engine = await loadEngine(),
     context = chemicalContext(engine, { width: 24, height: 24, sourceCount: 0 });
   const a = context.genotype,
@@ -33,11 +33,18 @@ it("swaps inherited cohorts on common funded bodies and keeps descendant assignm
         x: c.x,
         y: c.y,
         body: c.body,
+        boundMaterial: c.boundMaterial,
         brain: c.brain,
         inventory: c.inventory,
         energy: c.energy,
       }));
-    expect(cells(first.world)).toEqual(cells(second.world));
+    const firstCells = cells(first.world),
+      secondCells = cells(second.world);
+    firstCells.forEach(({ body, ...state }, i) => {
+      const { body: otherBody, ...otherState } = secondCells[i];
+      expect(state).toEqual(otherState);
+      body.forEach((value, j) => expect(value).toBeCloseTo(otherBody[j], 12));
+    });
     const assigned = (w: typeof first.world) =>
       w.command<{ cells: CellState[] }>("frame").cells[0].genome;
     expect(

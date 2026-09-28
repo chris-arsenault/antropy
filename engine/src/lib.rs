@@ -94,7 +94,6 @@ pub mod optics;
 #[cfg(test)]
 mod optics_tests;
 pub mod organism;
-pub mod organization;
 #[cfg(test)]
 mod organization_tests;
 pub mod phenotype;
@@ -105,6 +104,7 @@ mod phenotype_report;
 mod phenotype_tests;
 #[cfg(test)]
 mod photoreception_tests;
+pub mod physiology;
 mod population_diagnostics;
 mod presentation;
 pub mod random;

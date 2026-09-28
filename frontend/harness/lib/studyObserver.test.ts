@@ -86,8 +86,9 @@ it("streams kernel facts without changing physics and reconciles applied reactio
       maintenance: "maintenance",
       learning: "learning",
       repair: "repair",
-      construction: "construction",
-      constructed: "constructed",
+      growth: "growth",
+      grown: "grown",
+      coverWork: "cover-work",
       reactionHeat: "reaction_heat",
     }))
       expect(sums.get(name) ?? 0, name).toBeCloseTo(l[key as keyof typeof l], 9);

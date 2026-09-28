@@ -21,7 +21,9 @@ fn birth_parameters_and_actual_stock_survive_checkpoint() {
     let bytes = w.snapshot().unwrap();
     let restored = World::restore(&bytes).unwrap();
     assert_eq!(restored.cells[0].chemistry(), w.cells[0].chemistry());
-    assert_eq!(restored.cells[0].body, w.cells[0].body);
+    for (actual, expected) in restored.cells[0].body.iter().zip(w.cells[0].body) {
+        assert!((actual - expected).abs() < 1e-12);
+    }
     assert_eq!(
         restored.cells[0].chemistry(),
         &w.genomes[&1].express().chemistry

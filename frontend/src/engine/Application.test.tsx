@@ -127,7 +127,9 @@ async function checkLineage(container: HTMLElement) {
   await click(container, "Founder 1");
   expect(container.querySelector("dialog[open] .window-content")?.scrollTop).toBe(0);
   expect(container.querySelector("dialog[open] h2")?.textContent).toBe("Cell");
-  expect(container.textContent).toContain("Funded body and inherited genes");
+  expect(container.textContent).toContain("Physiology and inherited genes");
+  expect(container.textContent).not.toContain("Construction allocation");
+  expect(container.textContent).not.toContain("Retirement effort");
   expect(container.textContent).toContain("Photoreceptor: level");
   expect(container.textContent).toContain("Light left − right");
   expect(container.textContent).toContain("Built photoreceptor capacity");

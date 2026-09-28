@@ -15,7 +15,7 @@ alter inherited traits or supply controller inputs.
   enzyme route matches that pair. A cell can execute other routes; this group is not the set of all
   contributors to the selected measured edge.
 - **Phenotypes** compares the world, a selected primary role or spatial region, and one pinned
-  descendant cohort. Tables show current built traits alongside inherited targets, local illumination,
+  descendant cohort. Tables show current capacities alongside genetic references, local illumination,
   accepted material flow and recent work accounts per living-cell second. Traits show median and
   10th–90th percentiles. Membrane coordinate ranges are chart coordinates, not periodic distances.
 - **Highlight selected group** adds outlines and dims other cells while preserving the selected
@@ -47,7 +47,7 @@ pin. Route counters have 65,536 slots with touched-only clearing; transport has 
 counters. Closing measured views without a pin disables collection. A highlight alone does not
 enable recording. A pin continues collection and compact history sampling while windows are closed.
 
-The feature was introduced on physical v30. Current physical v32 still omits transient observer state. Rendering borrows the same
+The feature was introduced on physical v30. Current physical v43 still omits transient observer state. Rendering borrows the same
 worker-owned WASM projection; an existing unused display lane carries selection membership.
 Ordinary reduced replies retain the 16 KiB ceiling. Route pages contain at most 64 pairs, transport
 tables eight species per direction with an explicit remainder, and original pin IDs travel only

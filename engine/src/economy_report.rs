@@ -131,7 +131,7 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
             "Budget work uses uniform unit illumination and the stated free-field plus conditional private mixture; geographic reservoir and surrounding-body projections are omitted",
             "Active-pump budget only: no passive membrane exchange, shared depletion, export, repair or movement through gradients",
             "grossWork uses the best installed conversion per imported species without throughput limits; processingWork applies installed enzyme throughput to the assumed internal mixture",
-            "constructionCeiling uses processingSurplus; extra uphill assembly cost and omitted expenses can reduce it further",
+            "growthCeiling uses processingSurplus; action reserves and omitted expenses can reduce it further",
             "Closure holds internal inventory fixed and removes a proportional mixture as construction",
             "Renewal average excludes initial priming transient and timestep overshoot",
             "Uniform budgets freeze the current replenishment distribution; evolving supply, material redistribution and weathering change actual local delivery",

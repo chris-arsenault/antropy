@@ -176,6 +176,7 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     });
     let mut result = json!({"tick":w.tick,"cell":cell,"ancestor":ancestor,"local":local,"events":events,"exposure":exposure,"impedance":impedance,"mobility":impedance.map(|load| crate::movement::mobility(load,w.config.movement_impedance))});
     if let Some(cell) = cell {
+        result["cell"]["body"] = json!(cell.body);
         result["cell"]["brain"] = json!(crate::controller::observed_state(&cell.brain));
     }
     result["fieldInterface"] = json!(interface.map(|r| r.field));

@@ -22,7 +22,7 @@ export async function capabilitySources(flags: Flags, engine: Engine) {
     }>("frame");
     const living = frame.cells.sort((a, b) => a.born - b.born || a.id - b.id);
     if (!living.length)
-      throw new Error("Memory and allocation interventions require living source cells");
+      throw new Error("Memory and physiology interventions require living source cells");
     const capacities = new Map<number, number>();
     for (const c of living)
       if (!capacities.has(c.genome)) {

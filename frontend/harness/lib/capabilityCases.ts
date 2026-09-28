@@ -36,7 +36,7 @@ function movementCases(c: ChemicalContext): CapabilityCase[] {
       context,
       mature: true,
       hypothesis:
-        "Coordinated motor investment changes speed versus construction and maintenance costs",
+        "Genetic motor capacity changes speed and body proportions under ordinary action costs",
       variants: [
         {
           label: "half motor, gain sqrt(2)",

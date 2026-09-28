@@ -86,7 +86,7 @@ def trajectory(base, labels, through):
 
 def flow_group(cells):
     flows = {k: sum(c["lastStepFlows"][k] for c in cells) for k in cells[0]["lastStepFlows"]}
-    costs = ["repair", "maintenance", "motors", "learning", "construction", "refitting", "transport"]
+    costs = ["repair", "maintenance", "motors", "learning", "growth", "coverWork", "emission", "transport"]
     expense = sum(flows[k] for k in costs)
     imports = np.sum([c["chemicalFlows"]["imported"] for c in cells], axis=0)
     consumed = np.sum([c["chemicalFlows"]["consumed"] for c in cells], axis=0)

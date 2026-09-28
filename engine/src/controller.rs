@@ -25,11 +25,9 @@ mod symmetry_tests;
 pub const HIDDEN: usize = 24;
 pub const OUTPUTS: usize = 9;
 pub const ACTIVITY: usize = OUTPUTS;
-pub const ALLOCATION: usize = ACTIVITY + crate::organism::MAX_ENZYMES;
-pub const RETIREMENT: usize = ALLOCATION + crate::organism::STOCKS;
-pub const COVER: usize = RETIREMENT + 1;
-pub const EMISSION: usize = RETIREMENT + 2;
-pub const TOTAL_OUTPUTS: usize = RETIREMENT + 3;
+pub const COVER: usize = ACTIVITY + crate::organism::MAX_ENZYMES;
+pub const EMISSION: usize = COVER + 1;
+pub const TOTAL_OUTPUTS: usize = COVER + 2;
 pub const RECURRENT: usize = INPUTS * HIDDEN;
 const BIAS: usize = RECURRENT + HIDDEN * HIDDEN;
 const OUTPUT: usize = BIAS + HIDDEN;
@@ -66,8 +64,6 @@ pub struct Action {
     pub repair: f64,
     pub transport: [f64; 4],
     pub activity: [f64; crate::organism::MAX_ENZYMES],
-    pub allocation: [f64; crate::organism::STOCKS],
-    pub retirement: f64,
     pub cover: f64,
     pub emission: f64,
 }
@@ -79,8 +75,6 @@ impl Default for Action {
             repair: 0.,
             transport: [0.5; 4],
             activity: [1.; crate::organism::MAX_ENZYMES],
-            allocation: [1.; crate::organism::STOCKS],
-            retirement: 0.,
             cover: 0.,
             emission: 0.,
         }
@@ -171,8 +165,6 @@ fn decode(logits: &[f32], state: &mut State) -> Action {
         repair: squash(logits[2]).max(0.) as f64,
         transport: std::array::from_fn(|s| (1. + squash(logits[5 + s]) as f64) * 0.5),
         activity: std::array::from_fn(|s| squash(logits[ACTIVITY + s]).max(0.) as f64),
-        allocation: std::array::from_fn(|s| squash(logits[ALLOCATION + s]).max(0.) as f64),
-        retirement: squash(logits[RETIREMENT]).max(0.) as f64,
         cover: squash(logits[COVER]) as f64,
         emission: squash(logits[EMISSION]).max(0.) as f64,
     }

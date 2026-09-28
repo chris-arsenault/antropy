@@ -105,6 +105,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 - [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
+- [Genetic physiology without machinery construction](design/README.md#design-genetic-physiology)
 - [Crowding, waste and independent light metabolism](design/README.md#design-ecological-incentives)
 - [Immediate model simplification](design/README.md#design-model-simplification)
 - [Terrain shade and organism-built light ecology](design/README.md#design-light-ecology)
@@ -144,7 +145,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 ## Funded bodies, genes and inherited learning
 
-- [Construction and physical genes](design/funded-bodies.md#bodies-construction-and-physical-genes)
+- [Genetic physiology and physical genes](design/funded-bodies.md#bodies-construction-and-physical-genes)
 - [Geometry, motion and uptake](design/funded-bodies.md#bodies-geometry-motion-and-uptake)
 - [Accounting](design/funded-bodies.md#bodies-accounting)
 - [Lifetime-static and lifetime-dynamic information](design/funded-bodies.md#bodies-lifetimestatic-and-lifetimedynamic-information)

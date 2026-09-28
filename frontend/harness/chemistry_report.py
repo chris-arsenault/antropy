@@ -58,7 +58,7 @@ def quick_row(manifest, result):
                        "motorShareOfEnergyFlowsPercent": percent(flows.get("motors", 0), expense),
                        "repairShareOfEnergyFlowsPercent": percent(flows.get("repair", 0), expense),
                        "constructionPerImportedMaterialPercent":
-                           percent(flows.get("constructed", 0), flows.get("imported", 0))})
+                           percent(flows.get("grown", flows.get("constructed", 0)), flows.get("imported", 0))})
     return {"kind": "constructed opportunity", "ticks": result["ticks"],
             "stop": result["stop"], "completed": result["completed"],
             "frequencies": frequencies(groups), "groups": groups,

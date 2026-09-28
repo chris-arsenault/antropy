@@ -59,7 +59,7 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
                 * (1. - cell.damage)
                 * cell.action.cover.abs();
             let reserve = crate::accounting::interval_reserve(cell, &cell.body, c);
-            let affordable = (cell.energy - reserve).max(0.) / c.construction_energy;
+            let affordable = (cell.energy - reserve).max(0.) / c.growth_energy;
             let material = if cell.action.cover >= 0. {
                 (cell.material() - cell.capacity(c) * c.protected_inventory_fraction).max(0.)
             } else {
@@ -118,7 +118,7 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
                 observer.transfer(cell.id, s, incoming, outgoing);
             }
         }
-        cell.flows.construction += cell.pay(amount.abs() * c.construction_energy);
+        cell.flows.cover_work += cell.pay(amount.abs() * c.growth_energy);
         cell.flows.cover_deposited += amount.max(0.);
         cell.flows.cover_recovered += (-amount).max(0.);
     }

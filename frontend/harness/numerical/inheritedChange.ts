@@ -114,8 +114,7 @@ try {
         changed,
         stop,
         ticks: final.summary.tick - initialTick,
-        constructed:
-          final.summary.ledger.flows.constructed - before.summary.ledger.flows.constructed,
+        grown: final.summary.ledger.flows.grown - before.summary.ledger.flows.grown,
         imported: final.summary.ledger.flows.imported - before.summary.ledger.flows.imported,
       })
     );

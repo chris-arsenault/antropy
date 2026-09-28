@@ -52,7 +52,7 @@ pub fn initialize(w: &mut World) {
     for cell in &mut w.cells {
         if w.tick == 0 {
             let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
-            cell.operators = Some(g.operators.clone());
+            crate::physiology::express(cell, g);
         }
         sensing::initialize(
             cell,

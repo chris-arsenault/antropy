@@ -66,11 +66,7 @@ function budget(world: EngineWorld) {
   const b = cell.body;
   const upkeep =
     (1 + cell.damage) *
-    (b[0] * Number(config.maintenance) +
-      b[1] * Number(config.motorMaintenance) +
-      b[2] * Number(config.storageMaintenance) +
-      b.slice(3).reduce((a, v) => a + v, 0) * Number(config.machineryMaintenance) +
-      Number(config.controllerCost));
+    (b.reduce((a, v) => a + v, 0) * Number(config.maintenance) + Number(config.controllerCost));
   const power = b[1] * Number(config.motorPowerDensity) * (1 - cell.damage);
   return {
     body: b,

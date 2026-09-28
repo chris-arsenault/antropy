@@ -41,6 +41,9 @@ Select equations, accounting and operating bounds together; measure the full com
 before accepting the mathematics. Real-world fidelity and reproduction of a conventional
 continuum model are not default correctness requirements. Conserved material, explicit sources
 and sinks, funded capabilities, bounded work and coherent closed cycles remain requirements.
+Capabilities follow genetics directly at current biomass. Their tradeoffs should follow shared
+physical relationships, not a separate machinery-building requirement or equipment ownership tax.
+Whole-body growth and reproduction still conserve material and pay their ordinary work costs.
 Numerical formulas and their safeguards are implementer-owned choices, not immutable contracts
 merely because a previous plan selected them. See the
 [computational foundation](design/chemistry/computational-foundation.md).

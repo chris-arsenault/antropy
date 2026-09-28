@@ -270,7 +270,7 @@ mod tests {
         cell.set_fixture_body(cell.body.map(|q| q * 2.));
         cell.energy = 1.;
         let installed = cell.chemistry().clone();
-        let stock = cell.body;
+        let mass = cell.mass();
         let original = w.genomes[&cell.genome].chromosomes.clone();
         let before = w.held();
         crate::lifecycle::reproduce(&mut w);
@@ -294,7 +294,11 @@ mod tests {
                     .iter()
                     .any(|e| e.angle != 0.)
             );
-            assert_eq!(cell.body, stock.map(|q| q * 0.5));
+            assert!((cell.mass() - mass * 0.5).abs() < 1e-12);
+            let expected = crate::physiology::body(child.compiled.as_ref().unwrap(), mass * 0.5);
+            for (actual, expected) in cell.body.iter().zip(expected) {
+                assert!((actual - expected).abs() < 1e-12);
+            }
         }
         let after = w.held();
         assert!((before.0 - after.0).abs() < 1e-12);

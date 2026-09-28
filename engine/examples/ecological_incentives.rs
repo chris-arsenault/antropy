@@ -40,7 +40,7 @@ fn isolated(dark: bool) -> Result<World, String> {
         let mut logits = vec![0.; controller::TOTAL_OUTPUTS];
         logits[2] = 3.; // ordinary repair
         logits[4] = -1.;
-        logits[controller::ACTIVITY..controller::ALLOCATION].fill(3.);
+        logits[controller::ACTIVITY..controller::COVER].fill(3.);
         ch.behavior = controller::diagnostics::authored(logits, None)?;
     }
     g.compile(&w.config, &w.chemistry);
@@ -163,7 +163,7 @@ fn growth(w: &mut World) -> Result<(), String> {
         logits[2] = 3.;
         logits[4] = -1.;
         logits[5] = 3.;
-        logits[controller::ACTIVITY..controller::RETIREMENT].fill(3.);
+        logits[controller::ACTIVITY..controller::COVER].fill(3.);
         ch.behavior = controller::diagnostics::authored(logits, None)?;
     }
     g.compile(&w.config, &w.chemistry);
@@ -180,7 +180,7 @@ fn avoidance(w: &mut World, respond: bool) -> Result<(), String> {
         logits[0] = 0.5;
         logits[2] = 3.;
         logits[4] = -1.;
-        logits[controller::ACTIVITY..controller::ALLOCATION].fill(3.);
+        logits[controller::ACTIVITY..controller::COVER].fill(3.);
         ch.behavior = controller::diagnostics::authored(
             logits,
             if respond { Some((3, 1, -16.)) } else { None },

@@ -65,7 +65,7 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
         <>
           <CellDetails inspection={p} definition={definition} />
           <p>
-            Chemical capabilities are fixed at birth. Activity and funded stock can change;
+            Physiology is specified at birth. Activity, biomass and condition can change;
             descendants may inherit mutated capabilities.
           </p>
           {bridge.getSnapshot().status?.execution?.operator !== false && (
@@ -142,8 +142,8 @@ function CellDetails({
         Generation {c.generation} · genotype {c.genome} · task byte {c.brain.task}
       </p>
       <p>
-        Usable energy {n(c.energy)} · built material {n(c.body.reduce((a, b) => a + b, 0))} ·
-        internal material {n(c.inventory.material)} · damage {(100 * c.damage).toFixed(1)}%
+        Usable energy {n(c.energy)} · biomass {n(c.body.reduce((a, b) => a + b, 0))} · internal
+        material {n(c.inventory.material)} · damage {(100 * c.damage).toFixed(1)}%
       </p>
       <p>
         Swim {n(c.action.swim)} · turn {n(c.action.turn)} · repair {n(c.action.repair)}. Stress load{" "}
@@ -182,13 +182,13 @@ function CellDetails({
         <pre>{JSON.stringify({ hidden: c.brain.hidden, events: p.events }, null, 2)}</pre>
       </details>
       <details>
-        <summary>Funded body and inherited genes</summary>
+        <summary>Physiology and inherited genes</summary>
         <p>
           Genotype inherited learning change {n(p.genotype?.learned)}. Chromosomes:{" "}
-          {p.genotype?.chromosomes.length}. Constructed stocks and newborn targets are separate.
+          {p.genotype?.chromosomes.length}. Body proportions follow genetics at the current biomass.
         </p>
         <Table
-          columns={["Stock", "Built", "Newborn target"]}
+          columns={["Component", "Current capacity", "Genetic reference"]}
           rows={PARTS.map((part, i) => [part, n(c.body[i]), n(p.blueprint?.[i])])}
         />
         <pre>{JSON.stringify({ inherited: p.genotype, acquired: c.brain.traces }, null, 2)}</pre>
@@ -204,7 +204,7 @@ function Photoreception({ cell: c }: { cell: CellState }) {
   return (
     <p>
       Photoreceptor: level {n(c.inputs[39])} · change {n(c.inputs[40])} · front − back{" "}
-      {n(c.inputs[41])} · left − right {n(c.inputs[42])}. Built stock {n(c.body[15])}.
+      {n(c.inputs[41])} · left − right {n(c.inputs[42])}. Capacity {n(c.body[15])}.
     </p>
   );
 }

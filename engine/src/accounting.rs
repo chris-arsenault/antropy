@@ -1,7 +1,7 @@
 //! Linear material value and usable-work accounts. Spatial signals store no spendable work.
 use crate::{chemistry::Chemistry, organism::Flows};
 use serde::{Deserialize, Serialize};
-/// Automatic construction protects already funded work until the next physiology event.
+/// Automatic biomass growth protects work until the next physiology event.
 pub fn interval_reserve(
     cell: &crate::organism::Cell,
     body: &crate::organism::Body,
@@ -79,7 +79,8 @@ impl Ledger {
             + f.learning
             + f.transport
             + f.reaction_heat
-            + f.construction
+            + f.growth
+            + f.cover_work
             + f.repair
             + self.death_heat
             + self.division_heat
@@ -96,8 +97,7 @@ impl Ledger {
             reacted,
             captured,
             external_work,
-            constructed,
-            retired,
+            grown,
             cover_deposited,
             cover_recovered,
             emission,
@@ -109,7 +109,8 @@ impl Ledger {
             learning,
             transport,
             reaction_heat,
-            construction,
+            growth,
+            cover_work,
             repair,
             repaired,
             exposure,

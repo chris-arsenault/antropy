@@ -346,7 +346,7 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             g.validate(&w.config)?;
             g.compile(&w.config, &w.chemistry);
             cell.genome = g.id;
-            cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+            crate::physiology::express(&mut cell, g.compiled.as_ref().unwrap());
             genotype = Some(g);
         }
         if let Some(value) = v.get("inventory") {

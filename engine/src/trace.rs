@@ -25,6 +25,7 @@ pub fn frame(w: &crate::world::World) -> serde_json::Value {
         let local:Vec<_>=(0..256).map(|s| w.field.sample(s,&sites)).collect();
         let impedance=w.field.medium_load(&sites);
         let mut result=serde_json::json!({"cell":c,"localInputsNow":probe.inputs,"local":local,"impedance":impedance,"mobility":crate::movement::mobility(impedance,w.config.movement_impedance),"weathering":crate::climate::local(w,c.x,c.y),"stressLoad":crate::sensing::stress_load(c,g,&w.config,&w.field,&w.chemistry)});
+        result["cell"]["body"] = serde_json::json!(c.body);
         result["cell"]["brain"]=serde_json::json!(crate::controller::observed_state(&c.brain));
         result
     }).collect();

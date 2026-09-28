@@ -30,11 +30,12 @@ Preserve these functions through coherent implementation changes:
 
 - 256 discrete chemical IDs on a smooth bounded 16×16 chemical manifold; deterministic,
   validated property coverage independent of organism success.
-- Individual cells with internal mixtures, usable energy, actual built stocks, damage and
-  inherited machinery. Initially four receptor, transporter and unary-enzyme slots each,
-  plus an installed membrane coordinate. Any internal chemical can fund paid generic biomass.
+- Individual cells with internal mixtures, usable energy, biomass, damage and directly
+  inherited physiology. Four receptor and transporter slots, one to eight enzyme programs,
+  and a membrane coordinate. Any internal chemical can fund paid generic biomass growth.
 - Local genome/RNN control, mutation, paid private learning, birth-local assimilation,
-  actual-stock inheritance and durable genealogy. Instructions do not grant functioning stock.
+  conservative biomass inheritance and bounded genealogy. Genetic capabilities are expressed
+  immediately; changes in their proportions do not create material or usable energy.
 - A separate periodic geographic XY world with finite local delivery, shared fields that cells
   both affect and experience, uneven finite sources and one slow extracellular washout rate.
 - A usable ordinary startup with 48 founders in at least two colonies, useful movement and

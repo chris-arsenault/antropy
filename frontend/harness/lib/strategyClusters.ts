@@ -1,5 +1,5 @@
 /**
- * Strategy clusters: living cells grouped by inherited construction targets. Deterministic
+ * Strategy clusters: living cells grouped by inherited physiology. Deterministic
  * k-means on standardized traits; ranks are ordered by membrane X coordinate. This is a view of
  * the population and an assay input. It never touches the kernel, randomness or reproduction.
  */

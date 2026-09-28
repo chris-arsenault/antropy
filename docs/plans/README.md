@@ -1,5 +1,9 @@
 # Plan ownership and disposition — September20, 2026
 
+The [genetic physiology plan](GENETIC-PHYSIOLOGY-PLAN.md), Sulion
+`ea4b2307-f92a-4600-8c52-44c9e3071f4e`, removes machinery construction and retirement across
+the kernel, controller, persistence and observation. Local implementation; live deployment is separate.
+
 Current behavior belongs to the [design work order](../design/README.md),
 [composed laws](../design/chemistry/composed-runtime.md) and
 [decision/evidence record](../design/decisions-and-evidence.md). Plans below preserve execution,

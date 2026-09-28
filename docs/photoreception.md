@@ -1,10 +1,11 @@
-# Funded local photoreception
+# Local photoreception
 
 ## Design
 
-One photoreceptor investment locus and actual body stock occupy index 15. Its reference
-mass is the existing receptor ratio times core mass. The ordinary investment law, mutation,
-inheritance, proportional assembly, maintenance, occupied area and death accounting apply.
+One photoreceptor locus and derived body capacity occupy index 15. Its reference
+capacity is the existing receptor ratio times reference core. In v43, the ordinary genetic
+proportion law expresses it immediately at current biomass. No separate construction or
+receptor ownership charge applies; whole-body growth and basal metabolism remain.
 Chemical machinery keeps its four existing receptor channels and their installed identities.
 
 The optical stimulus is the single scalar illumination used by
@@ -17,12 +18,15 @@ The shared receptor adaptation time produces recent change. No additional sensin
 direction oracle, temporal clock, harvesting process or response policy is introduced.
 
 Inputs 39–42 are brightness, change, front-minus-back and left-minus-right; input 43 is
-built photoreceptor stock relative to the inherited target. Existing input indices stay fixed.
-The current v42 controller has 58 inputs, 24 recurrent units and 42 outputs. At introduction, new founder weights started at
+photoreceptor capacity relative to the genetic newborn reference. Input indices stay fixed.
+The current v43 controller has 58 inputs, 24 recurrent units and 19 outputs. At introduction, new founder weights started at
 zero; mutation can connect the new cues to behavior. Sensing does not establish evolved use.
-Photoreception introduced checkpoint v31; current physical semantics require v36.
+Photoreception introduced checkpoint v31; current physical semantics require v43.
 
 ## Verification registration
+
+The following registration and results describe the original v31 construction model.
+Current direct-expression checks are recorded in the [physiology plan](plans/GENETIC-PHYSIOLOGY-PLAN.md).
 
 Question: can paid local light sensing reach ordinary neural actions, with no cue from an
 unbuilt receptor and no change to the imposed illumination or chemical laws?
@@ -94,8 +98,8 @@ over longer distances. Tonic and temporal inputs remain available.
 
 Start a new world with the rebuilt local application. Selecting a cell shows photoreceptor
 readings directly, with all five inputs under **Local inputs and private recurrent state**.
-**Funded body and inherited genes** shows built stock separately from its newborn target.
-The population's developed-body table includes photoreceptor investment. This feature introduced physical v31. Current v36 accepts its own body/controller and habitat
+**Physiology and inherited genes** shows current capacity alongside its genetic reference.
+The population's body table includes photoreceptor capacity. This feature introduced physical v31. Current v43 accepts its own body/controller and habitat
 state; older physical versions are rejected rather than migrated or reseeded.
 
 From `frontend`, rerun the registered probes with a new output directory:

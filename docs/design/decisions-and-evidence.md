@@ -147,6 +147,20 @@ The short finite-food probes all died, despite demonstrating controllable optica
 The later200k run shows inherited optical connections affecting actions; it does not establish
 successful light navigation or a specific fitness advantage.
 
+## Genetic physiology replaces machinery development
+
+September28: the user clarified that physical tradeoffs mean consequences of drag, capacity,
+geometry and conversion equations, not a requirement to construct individual capabilities.
+The agent had introduced that construction requirement while replacing an attribute tuple;
+it was not the intended interpretation. The user explicitly authorized its removal.
+
+V43 derives every body component from birth genetics and current biomass. It removes neural
+construction/retirement outputs and per-category ownership charges. Whole-body growth,
+basal metabolism, action work and conservative division remain. Daughter mutations apply
+immediately, including body proportions. The [implementation plan](../plans/GENETIC-PHYSIOLOGY-PLAN.md)
+records direct-expression and accounting tests. This removes a developmental coordination
+failure; it does not establish that movement pays or that the live colony will disperse.
+
 ## Cellular organization and shared interfaces
 
 V33 implements the [joint design](cellular-organization-and-exchange.md). The user withdrew internal

@@ -29,7 +29,7 @@ function EvolutionDetails({ status }: { status: LiveStatus }) {
   return (
     <>
       <p>
-        Compare what living cells have built and what they do. Shared ancestry does not imply shared
+        Compare physiology and behavior across living cells. Shared ancestry does not imply shared
         function; different ancestry does not imply different function.
       </p>
       <table>

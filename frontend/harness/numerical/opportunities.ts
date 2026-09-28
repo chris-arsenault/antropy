@@ -94,7 +94,7 @@ try {
         name,
         tick: summary.tick,
         population: summary.population,
-        constructed: summary.ledger.flows.constructed,
+        grown: summary.ledger.flows.grown,
         imported: summary.ledger.flows.imported,
         divisions: summary.ledger.divisions,
         stopping,

@@ -41,7 +41,7 @@ def point(sample, initial, config):
         "sourceDistance": ledger["sourceDistance"], "sourceConverted": ledger["sourceConverted"],
         "sourceHeat": ledger["sourceHeat"], "imported": total,
         "nonFeedImportFraction": nonfeed / total if total else 0,
-        "constructed": ledger["flows"]["constructed"], "motorWork": ledger["flows"]["motors"],
+        "constructed": ledger["flows"].get("grown", ledger["flows"].get("constructed", 0)), "motorWork": ledger["flows"]["motors"],
         "cellDistance": ledger["flows"]["distance"], "divisions": ledger["divisions"],
         "sourcePositions": [[s["habitat"]["x"], s["habitat"]["y"]] for s in sources],
         "resources": sample["resources"],

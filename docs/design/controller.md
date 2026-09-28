@@ -2,7 +2,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 58×24×42 Rust controller, with a physiological evaluation clock in checkpoint v42.
+the 58×24×19 Rust controller, with a physiological evaluation clock in checkpoint v43.
 
 <a id="controller-observation-contract"></a>
 
@@ -32,7 +32,8 @@ wrapped. They are local contrasts, not bearings to a source. Phasic input is cur
 the saved baseline; baseline relaxation uses 1−exp(−dt/2). Birth initializes it locally.
 
 Controllers receive no coordinates, compass, clock, chemical ID, route, lineage label, destination
-or reproductive score. Machinery inputs distinguish installed capacity from genetic intent.
+or reproductive score. Body inputs describe capacity at current biomass relative to the
+genetic newborn reference; zero genetic capabilities have zero readings.
 
 <a id="controller-action-contract"></a>
 
@@ -47,28 +48,26 @@ or reproductive score. Machinery inputs distinguish installed capacity from gene
 | 4 | Nonnegative logit commits the candidate |
 | 5–8 | Half of one plus signed saturation: independent transporter direction/effort |
 | 9–16 | Positive saturation: activity of each enzyme program |
-| 17–38 | Positive saturation: requested construction allocation for each stock record |
-| 39 | Positive saturation: shared retirement effort |
-| 40 | Signed saturation: deposit/recover overhead material with funded builder stock |
-| 41 | Positive saturation: paid light emission with funded emitter stock |
+| 17 | Signed saturation: deposit/recover overhead material with genetic builder capacity |
+| 18 | Positive saturation: paid light emission with genetic emitter capacity |
 
 A transporter's allele selects its chemical target. Neural output selects direction and effort:
 0 exports fully, 0.5 holds, and 1 imports fully. Actual transport requires machinery, available species, storage, conductance and
-usable energy. Enzyme activity multiplies funded turnover; construction requests define desired
-stock, and retirement pays to return surplus bound material to free inventory. These requests
-cannot grant material or work. Repair competes with growth. Movement costs remain physical even when contact restricts it.
+usable energy. Enzyme activity multiplies genetic turnover capacity. There are no machinery
+construction or retirement requests. Repair competes with automatic biomass growth. Movement
+costs remain physical even when contact restricts it.
 The task byte has no task semantics in physics; manual writes are recorded diagnostic interventions.
 
 <a id="controller-topology-and-founder"></a>
 
 ## Topology and founder
 
-The network has 58 inputs, 24 recurrent saturating units and 42 output logits: 1,392 input weights,
-576 recurrent weights, 24 hidden biases, 1,008 output weights and 42 output biases, totaling
-3,042 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
-belong to program records; inactive records have no funded function. Neutral duplication copies
-activity/construction readouts and divides incoming stock contributions. Deletion removes the
-program's ports but leaves its physical stock until paid retirement.
+The network has 58 inputs, 24 recurrent saturating units and 19 output logits: 1,392 input weights,
+576 recurrent weights, 24 hidden biases, 456 output weights and 19 output biases, totaling
+2,467 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
+belong to program records; inactive records have no function. Neutral duplication copies
+activity readouts and divides incoming capacity contributions. Deletion removes the program's
+ports and the daughter immediately expresses the resulting genetic body proportions.
 
 Private state includes 24 hidden values, 576 bounded traces, the private byte, a physiological
 execution epoch and previous
@@ -102,9 +101,8 @@ export. Optical connections begin at zero and can mutate; there is no seeded lig
 The [initial ecosystem design](chemistry/regenerative-ecosystem.md) explains their paid budgets. This seed is a declared initial
 condition, not an evolved discovery or an authored final community.
 
-Activity and construction biases start at saturation 3 (effort 1); retirement and inward
-allocation start at zero. These are mutable alleles. Saturation reaches exactly one, allowing
-core construction to reach its division threshold. A reduced core allocation can defer division.
+Activity biases start at saturation 3 (effort 1); inward allocation and optical effort start at
+zero. These are mutable alleles. Biomass growth and division have no construction control gate.
 
 <a id="controller-learning-and-module-boundary"></a>
 

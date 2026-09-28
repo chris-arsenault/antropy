@@ -19,8 +19,8 @@ it("funds mature targets without genotype-dependent grants", () => {
       const x = a.command<Summary>("summary"),
         y = b.command<Summary>("summary");
       expect(x.heldMaterial).toBeCloseTo(y.heldMaterial, 10);
-      expect(x.heldEnergy + x.ledger.flows.construction).toBeCloseTo(
-        y.heldEnergy + y.ledger.flows.construction,
+      expect(x.heldEnergy + x.ledger.flows.growth).toBeCloseTo(
+        y.heldEnergy + y.ledger.flows.growth,
         10
       );
       expect(x.energyResidual).toBeCloseTo(0, 9);

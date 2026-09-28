@@ -1,15 +1,16 @@
-# Funded bodies, genes and inherited learning
+# Genetic physiology, biomass and inherited learning
 
-Throughput depends on actual funded stock. Birth genes define chemical function; they do not
-grant body material.
+Physical checkpoint v43 removes machinery construction and retirement. Birth genes directly
+specify physiology; biomass and damage scale capacity, and actions consume usable work.
+There are no separately accumulated motor, receptor, transporter or enzyme inventories.
 
 <a id="bodies-construction-and-physical-genes"></a>
 
-## Construction and physical genes
+## Physiology and physical genes
 
 Each chromosome has twenty-two bounded float32 investment records plus chemical alleles:
 
-| Loci | Actual stock / allele | Reference newborn stock |
+| Loci | Physiological component / allele | Reference newborn capacity |
 | --- | --- | ---: |
 | 0 | Core | 1 |
 | 1 | Motor | 0.08 |
@@ -26,26 +27,32 @@ A membrane coordinate controls chemical compatibility, protection and passive so
 The existing susceptibility law scales bidirectional diffusion; unmatched products escape
 more readily, while the same pathway can lose useful material. Paid pumps remain independently
 controlled. Free and bound chemistry provides the private light-reaction environment, and
-actual funded enzymes bound accepted work; no photosynthesis flag grants energy.
-One to eight enzyme programs occupy
-a bounded arena shared with retired installed stock. Four programs start present. Duplication
-splits actual stock and target, copying controls and splitting sensory contributions; deletion
-leaves stock retired and maintained until paid decommission. Core target is reference core × exp(g0). Other stocks use
-core target × reference ratio × max(0,1+gi). Zero investment is reachable and can mutate back.
-All actual stocks occupy volume and require maintenance.
+genetic enzyme capacities bound accepted work; no photosynthesis flag grants energy.
+One to eight enzyme programs occupy a bounded genetic arena. Four programs start present.
+Duplication splits the genetic component weight, copies activity controls and splits sensory
+contributions. Deletion immediately removes the program from the daughter's physiology.
+Reference core is `birthMass × exp(g0)`; other reference components are
+`referenceCore × referenceRatio × max(0,1+gi)`. Zero traits remain reachable and can mutate back.
+
+For reference vector b, reference mass B=sum(b), and current biomass M, every capacity is
+`body_i=M*b_i/B`. This one projection governs motors, sensing, storage, enzymes and optics.
+Components share the finite body; larger biomass increases area, drag and basal metabolism.
+Basal work rate is `(1+damage)*(maintenance*M+controllerCost)`. There are no component-specific
+ownership charges. The vector is a derived runtime cache; only biomass chemistry and genetics
+are persisted. Changing genetic proportions cannot create matter or usable energy.
 
 [Photoreception](../photoreception.md) uses the same funded gain and adaptation law as chemical
 receptors, with unit reference illumination. It adds no harvesting or automatic steering.
 
-Growth shares paid assembly across deficits toward neural requests: optional stock targets are
-`2*g*b`, core is `g*(1+b)`. A shared retirement request decommissions surplus, returning the
-bound mixture unchanged and paying assembly-price work. Both operations share core handling,
-frozen donors and work reserve; retirement reserves lost storage capacity. Core at `2*g` and
-actual daughter material/work reserves permit division without requiring every optional stock.
-Birth splits actual stock, bound/free material and usable energy. Each daughter's mutated
-chemical configuration applies immediately and stays fixed throughout its life. Mutation
-creates no stock and may remove access to parental food. Activity and funded quantities remain
-dynamic; there is no refitting or living-cell gene transfer.
+Growth automatically increases biomass toward `2*B`. Its requested increment is the minimum
+of the biomass deficit, `dt*growthRate*M*(1-damage)`, and free inventory above its protected
+reserve. Available work above the proposed body's action reserve bounds the paid increment.
+Growth transfers that amount of free mixture to biomass and pays `growthEnergy` per unit;
+all capacities increase proportionally. There are no neural construction or retirement outputs.
+Biomass at `2*B` and actual daughter material/work reserves permit division. Birth halves
+biomass, free material and usable energy. Each daughter immediately expresses its own mutated
+physiology at that inherited mass. Mutation can remove access to parental food. Activity and
+condition remain dynamic; there is no refitting or living-cell gene transfer.
 See [birth-fixed capabilities](chemistry/installed-machinery.md).
 
 <a id="bodies-geometry-motion-and-uptake"></a>
@@ -60,8 +67,8 @@ Artificial drag is 8ηr. Funded motor power, damage, efficiency and local impeda
 bound swimming and turning. Shared chemical/body profiles also produce bounded passive drift,
 without crediting usable work. There is no Brownian temperature or inertial coasting.
 Motor work uses `power × (swim² + 0.25 × turn²)` and velocity scales with the square root
-of available-work funding. Extra motor capacity costs construction, upkeep and occupied area;
-it does not add an operating penalty at the same actual speed and radius.
+of available-work funding. At fixed biomass, more motor capacity occupies a larger body share;
+it carries no separate ownership tax or operating penalty at the same actual speed and radius.
 
 Each transporter divides finite funded throughput among its recognized local mixture.
 Diffusion/drift and the finite body footprint determine delivery. Imports face shared
@@ -73,9 +80,9 @@ specifies occupancy, shared demand and the simultaneous commitment.
 
 ## Accounting
 
-Matter includes extracellular mixtures, unreleased source inventory, cellular mixtures and all
-built stocks. Shared cohesion-dependent washout is an external sink. Energy includes each chemical's potential,
-generic body potential and usable energy, with all external supply, washout and dissipated work
+Matter includes extracellular mixtures, unreleased source inventory, free cellular mixtures and
+biomass. Ordinary fractional washout is an external sink. Energy includes each chemical's potential
+in free and bound mixtures and usable energy, with all external supply, washout and dissipated work
 recorded separately.
 
 Unary reactions preserve scalar material and change identity. The shared local external-work term augments the potential difference before applying
@@ -87,14 +94,14 @@ Every internal species can fund generic biomass. Assembly transfers matter propo
 the bound mixture and pays 0.5 work per unit. There is no privileged biomass ingredient or free
 catabolic reserve. Bound material retains chemical identity and reference value. Repair exchanges
 equal amounts of the frozen free and bound mixtures and pays work proportional to the repaired
-damage fraction times total installed body mass. Bound mass always equals total funded stock.
+damage fraction times total biomass. Bound mass equals the sum of derived body capacities.
 Death returns both mixtures unchanged and dissipates remaining usable energy. Death-material
 totals are throughput, not another sink. See [bound-material rules and checks](../bound-material.md).
 
 The [v19 correction](../physical-coupling-correction.md) specifies capacity-based growth and
 daughter reserves. Division retains enough work for both actual half-bodies' initial upkeep
 and learning, and charges work per parent core. This removes absolute starter-size reserve
-requirements while retaining ordinary material, construction and maintenance costs.
+requirements while retaining ordinary growth, reproduction and basal metabolism costs.
 
 <a id="bodies-lifetimestatic-and-lifetimedynamic-information"></a>
 
@@ -106,7 +113,7 @@ requirements while retaining ordinary material, construction and maintenance cos
 | Investments and chemical alleles | Immutable birth genotype | Current chromosomes, crossover and mutation |
 | Acquired recurrent traces | Paid bounded local updates | Retained delta enters offspring baseline weights |
 | Hidden state, byte, contacts and receptor baseline | Individual experience | Private state resets; receptors initialize locally |
-| Actual stocks, species mixtures, usable energy and injury | Physiology | Conservative split; daughter configuration comes from its birth genotype |
+| Biomass, free species mixtures, usable energy and injury | Growth and condition | Conservative split; daughter physiology is derived from its birth genotype |
 
 <a id="bodies-inheritable-learning"></a>
 
@@ -137,7 +144,7 @@ parameters compile mixtures of exact bounded chemical permutations with at most 
 product species per substrate. These mixtures are not group elements; component actions
 have exact composition and inverses. Neural effort can reverse any transporter. Enzyme program
 count mutates with the same scalar heavy tail in program units, stochastically rounded before
-reflection into 1–8. Vacant records must have zero retired stock before duplication can use them.
+reflection into 1–8. An inactive genetic record is available for duplication immediately.
 
 All mutations use the same heavy-tail law: for signed uniform u, the proposed scalar
 step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
@@ -158,5 +165,6 @@ arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
 chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v33 preserves complete allele and actual-state
-distinctions; unavailable pruned genotype payloads remain labeled provenance.
+No score selects parents or filters mutants. Checkpoint v43 preserves alleles and biomass and
+reconstructs derived physiology; earlier checkpoints are rejected without migration.
+Unavailable pruned genotype payloads remain labeled provenance.

@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 42;
+pub const VERSION: u32 = 43;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -442,23 +442,35 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY42\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY43\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY42\0")
-            .ok_or("Unsupported physical checkpoint; v42 required")?;
+            .strip_prefix(b"ANTROPY43\0")
+            .ok_or("Unsupported physical checkpoint; v43 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
             return Err("Unsupported or trailing physical checkpoint data".into());
         }
         // Site projections are derived state: recompute them before validating the world.
+        world.config.validate()?;
         world.chemistry.validate()?;
         world.field.validate()?;
         world.field.refresh_features(&world.chemistry);
         world.cover.validate()?;
         world.cover.refresh_features(&world.chemistry);
+        for g in world.genomes.values_mut() {
+            g.validate(&world.config)?;
+            g.compile(&world.config, &world.chemistry);
+        }
+        for cell in &mut world.cells {
+            let g = world
+                .genomes
+                .get(&cell.genome)
+                .ok_or("Missing cell genotype")?;
+            crate::physiology::express(cell, g.compiled.as_ref().unwrap());
+        }
         world.validate()?;
         crate::ancestry::compact(&mut world);
         if matches!(
@@ -486,13 +498,6 @@ impl World {
             } else {
                 0.
             };
-        }
-        for g in world.genomes.values_mut() {
-            g.compile(&world.config, &world.chemistry);
-        }
-        for cell in &mut world.cells {
-            let target = world.genomes[&cell.genome].compiled.as_ref().unwrap();
-            cell.operators = Some(target.operators.clone());
         }
         crate::source_medium::project(&mut world);
         Ok(world)

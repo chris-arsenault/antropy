@@ -32,7 +32,7 @@ function exchange(target: Genotype, donor: Genotype, flags: Flags) {
   const offsets = { receptors: 3, transporters: 7, enzymes: 11 };
   if (!(part in offsets) || slot > 3) throw new Error("Invalid machinery selection");
   const key = part as keyof typeof offsets;
-  // Whole machinery alleles include their corresponding construction investment.
+  // Whole machinery alleles include their corresponding genetic capacity.
   Object.assign(a.chemistry[key][slot], structuredClone(b.chemistry[key][slot]));
   a.physical[offsets[key] + slot] = b.physical[offsets[key] + slot];
 }

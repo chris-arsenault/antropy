@@ -15,7 +15,7 @@ fn world() -> World {
         washout: 0.,
         weathering_rate: 0.,
         growth_rate: 1.,
-        construction_energy: 0.5,
+        growth_energy: 0.5,
         ..Config::default()
     };
     let mut w = World::new(27, c).unwrap();
@@ -44,7 +44,7 @@ fn constructed_cover_preserves_identity_and_pays_for_real_attenuation() {
     let after = w.held();
     assert!((before.0 - after.0 - w.ledger.numerical_material).abs() < 1e-10);
     assert!(
-        (before.1 - after.1 - w.ledger.numerical_energy - w.cells[0].flows.construction).abs()
+        (before.1 - after.1 - w.ledger.numerical_energy - w.cells[0].flows.cover_work).abs()
             < 1e-10
     );
     assert!((w.field.illumination.node(0) - (-1_f64).exp()).abs() < 1e-7);
@@ -76,7 +76,7 @@ fn simultaneous_recovery_shares_frozen_material_and_respects_headroom() {
         assert!((cell.chemical_flows.imported.value(42) - 0.05).abs() < 1e-7);
     }
     let after = w.held();
-    let cost = w.cells.iter().map(|c| c.flows.construction).sum::<f64>();
+    let cost = w.cells.iter().map(|c| c.flows.cover_work).sum::<f64>();
     assert!((before.0 - after.0 - w.ledger.numerical_material).abs() < 1e-10);
     assert!((before.1 - after.1 - w.ledger.numerical_energy - cost).abs() < 1e-10);
     w.cells[0].inventory.fill(0.);

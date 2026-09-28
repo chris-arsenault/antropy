@@ -86,7 +86,7 @@ and paid learning time advance every base step. The phase order is:
 4. On physiology boundaries resolve passive membrane concentration exchange, then funded
    import/export from shared supply, storage and usable work.
 5. On those boundaries apply membrane-dependent external/internal injury, unary reactions,
-   repair, generic construction and work overflow.
+   repair, automatic biomass growth and work overflow.
 6. Pay maintenance every movement tick; resolve death, optional disturbance
    and funded reproduction. Daughters initialize from local observations and first advance
    their private controller on the next base step.
@@ -113,18 +113,18 @@ for every chemical, with fixed points and susceptibility determined by the chemi
 
 ## Growth, death and reproduction
 
-Any internal chemical can fund generic biomass, paying assembly work and retaining its identity
-in the bound mixture. Growth fills deficits toward neural construction requests bounded by
-twice the inherited target. Paid retirement shares handling/work and preserves chemical identity. Genes
-prescribe targets; only installed stocks provide capability. Repair pays work and exchanges equal
+Any internal chemical can fund generic biomass, paying uniform growth work and retaining its
+identity in the bound mixture. Growth increases the whole body proportionally toward twice
+the inherited reference mass. Genes directly prescribe physiology at current biomass; there
+are no construction requests, separate machinery inventories or retirement. Repair exchanges equal
 amounts of the frozen inventory and bound mixtures before growth. Replaced material retains its identity.
 
-Fission requires twice the inherited core target, actual daughter inventory/energy reserves, the division charge and local
+Fission requires twice the inherited reference biomass, actual daughter inventory/energy reserves, the division charge and local
 placement in the periodic plane. Daughters separate along the parent's heading and subsequently
-participate in ordinary local overlap resolution. Fission splits stocks, each chemical and
+participate in ordinary local overlap resolution. Fission splits biomass, each chemical and
 post-cost energy equally; budding uses the same split while retaining the experienced parent.
-Each daughter immediately uses its mutated chemical capabilities and retains that configuration
-throughout life. Birth splits actual stock without granting new material. There is no refitting
+Each daughter immediately expresses its mutated physiology at the inherited biomass and retains
+those proportions throughout life. Birth grants no new material. There is no refitting
 or living-cell gene transfer. Damage fraction
 persists. Starvation or unit injury releases inventory and bound material unchanged and dissipates
 remaining usable energy. No killer receives a direct grant. [Bound material](../bound-material.md)
@@ -144,7 +144,8 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v33 stores complete chemistry, free and bound mixtures, actual stocks, bounded enzyme programs, inward allocation and installed coordinates/orientation/revision, chemical/behavioral genes,
+Checkpoint v43 stores complete chemistry, free and bound mixtures, bounded enzyme programs,
+inward allocation, birth chemical/physical/behavioral genes and
 private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; retained organism parentage keeps their IDs

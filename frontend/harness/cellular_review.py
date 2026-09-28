@@ -37,7 +37,7 @@ def temporal_plot(series, checkpoints, windows, output):
     axes[1, 1].set_title("Chemical geography")
     for kind in ["inwardAbsent", "inwardShifted", "lightAbsent"]:
         axes[2, 0].plot(ct, [r["organization"].get("sensitivities", {}).get(kind, {}).get(
-            "fundedOrConstructibleOver01", 0) / max(r["population"], 1) for r in checkpoints], label=kind)
+            "availableActionsOver01", 0) / max(r["population"], 1) for r in checkpoints], label=kind)
     axes[2, 0].set_title("Controller responses > .01 on available actions")
     for count in range(9):
         values = [r["organization"].get("programCounts", {}).get(count, 0) / max(r["population"], 1)
@@ -74,8 +74,8 @@ def phenotype_plot(data, output):
     axes[0, 0].legend(fontsize=8)
     for ax, values, title in [(axes[0, 1], np.log10(mass), "Log10 funded mass"),
                               (axes[1, 0], count, "Inherited enzyme programs"),
-                              (axes[1, 1], [c["organization"]["control"]["retirement"] for c in cells],
-                               "Retirement request")]:
+                              (axes[1, 1], [c["organization"]["control"]["swim"] for c in cells],
+                               "Swimming effort")]:
         scatter = ax.scatter([c["position"][0] for c in cells], [c["position"][1] for c in cells],
                              c=values, s=10, alpha=.7, cmap="viridis")
         ax.set(xlim=(0, data["config"]["width"]), ylim=(data["config"]["height"], 0), title=title)
@@ -100,7 +100,7 @@ def budget_plot(series, checkpoints, windows, balances, output):
     fig, axes = plt.subplots(2, 2, figsize=(13, 9), constrained_layout=True)
     complete = [w for w in windows if w["end"] in {b["end"] for b in balances}]
     ticks = [w["end"] for w in complete]
-    for key in ["maintenance", "repair", "motors", "construction", "learning"]:
+    for key in ["maintenance", "repair", "motors", "growth", "learning"]:
         axes[0, 0].plot(ticks, [w["costs"][key] / w["organismSeconds"] for w in complete], label=key)
     axes[0, 0].plot(ticks, [w["netReactionWork"] / w["organismSeconds"] for w in complete],
                     color="black", linewidth=2, label="Net reaction work")
@@ -133,8 +133,8 @@ def energy_balances(series, windows):
         if window["end"] not in indexed or "netReactionWork" not in window:
             continue
         before, after = [indexed[t] for t in [window["start"], window["end"]]]
-        costs = sum(window["costs"][k] for k in ["maintenance", "motors", "learning", "transport",
-                                                "construction", "refitting", "repair"])
+        costs = sum(window["costs"].get(k, 0) for k in ["maintenance", "motors", "learning", "transport",
+                                                "growth", "coverWork", "emission", "repair"])
         heat = {k: after["ledger"][k] - before["ledger"][k]
                 for k in ["deathHeat", "divisionHeat", "overflowHeat"]}
         change = after["cellEnergy"] - before["cellEnergy"]

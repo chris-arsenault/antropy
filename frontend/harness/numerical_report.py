@@ -7,7 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 
-ENERGY = ("maintenance", "motors", "learning", "transport", "reactionHeat", "construction", "repair")
+ENERGY = ("maintenance", "motors", "learning", "transport", "reactionHeat", "growth", "coverWork", "construction", "repair")
 
 
 def read(path):
@@ -38,7 +38,7 @@ def quick(manifest, result):
         groups.append({**group, "dissipatedEnergy": expense,
                        "motorPercentDissipated": percentage(f["motors"], expense),
                        "repairPercentDissipated": percentage(f["repair"], expense),
-                       "constructionPercentImported": percentage(f["constructed"], f["imported"])})
+                       "growthPercentImported": percentage(f.get("grown", f.get("constructed", 0)), f["imported"])})
     total = sum(g["living"] for g in groups)
     return {"kind": "constructed opportunity", "tick": result["ticks"],
             "completed": result["completed"], "stop": result["stop"], "groups": groups,

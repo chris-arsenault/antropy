@@ -1,5 +1,16 @@
 # Current design and work order
 
+<a id="design-genetic-physiology"></a>
+
+## Genetic physiology — September 28
+
+The [physiology plan](../plans/GENETIC-PHYSIOLOGY-PLAN.md) removes machinery construction and
+retirement. In v43, genes directly determine body proportions at current biomass. Growth and
+reproduction conserve material and pay whole-body costs; physical actions retain their own
+equations. The controller operates capabilities without constructing them. The
+[body contract](funded-bodies.md) supersedes earlier development and ownership-tax requirements.
+This is a local implementation; the continuing server is not reset or deployed by this task.
+
 <a id="design-ecological-incentives"></a>
 
 ## Ecological incentives — September 26

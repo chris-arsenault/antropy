@@ -1,5 +1,5 @@
 use crate::{
-    chemical_operators::Operators, controller, diagnostics, metabolism, organization, sensing,
+    chemical_operators::Operators, controller, diagnostics, metabolism, physiology, sensing,
 };
 
 #[test]
@@ -85,23 +85,24 @@ fn inward_sensing_requires_stock_and_allocation_and_tracks_free_material() {
 }
 
 #[test]
-fn retirement_preserves_identity_pays_work_and_reserves_lost_storage() {
+fn automatic_growth_preserves_identity_and_genetic_proportions() {
     let w = diagnostics::nutrition(0.8, 2., false, false);
     let mut cell = w.cells[0].clone();
     let g = w.genomes[&1].compiled.as_ref().unwrap();
-    cell.action.allocation.fill(0.);
-    cell.action.retirement = 1.;
     cell.energy = 10.;
     cell.inventory.fill(0.);
+    cell.inventory.set(0, 2.);
     let before: Vec<_> = (0..256)
         .map(|s| cell.inventory.value(s) + cell.bound_material.value(s))
         .collect();
     let mass = cell.mass();
-    organization::remodel(&mut cell, g, &w.config, 100.);
-    assert!(cell.flows.retired > 0.);
-    assert!((mass - cell.mass() - cell.flows.retired).abs() < 1e-12);
-    assert!(cell.material() <= cell.capacity(&w.config) + 1e-12);
-    assert!((10. - cell.energy - cell.flows.retired * w.config.construction_energy).abs() < 1e-12);
+    physiology::grow(&mut cell, g, &w.config, 1.);
+    assert!(cell.flows.grown > 0.);
+    assert!((cell.mass() - mass - cell.flows.grown).abs() < 1e-12);
+    assert!((10. - cell.energy - cell.flows.grown * w.config.growth_energy).abs() < 1e-12);
+    for (actual, reference) in cell.body.iter().zip(g.body) {
+        assert!((actual / cell.mass() - reference / g.body.iter().sum::<f64>()).abs() < 1e-12);
+    }
     for (s, q) in before.iter().enumerate() {
         assert!((cell.inventory.value(s) + cell.bound_material.value(s) - q).abs() < 1e-12);
     }
@@ -109,10 +110,10 @@ fn retirement_preserves_identity_pays_work_and_reserves_lost_storage() {
 }
 
 #[test]
-fn optional_targets_do_not_prevent_core_funded_division_or_grant_daughter_machinery() {
+fn daughters_express_genetics_instead_of_inheriting_missing_machinery() {
     let mut w = diagnostics::nutrition(0.8, 2., true, false);
-    let mut body = w.cells[0].body;
-    body[0] *= 2.;
+    let mut body = w.cells[0].body.map(|q| 2. * q);
+    body[0] += body[11];
     body[11] = 0.;
     w.cells[0].set_fixture_body(body);
     w.cells[0].energy = 10.;
@@ -121,25 +122,25 @@ fn optional_targets_do_not_prevent_core_funded_division_or_grant_daughter_machin
     w.cells[0].inventory.set(0, capacity);
     crate::lifecycle::reproduce(&mut w);
     assert_eq!(w.cells.len(), 2);
-    assert!(w.cells.iter().all(|cell| cell.body[11] == 0.));
+    assert!(w.cells.iter().all(|cell| cell.body[11] > 0.));
 }
 
 #[test]
-fn inactive_and_retired_programs_cannot_convert_and_extra_programs_can() {
+fn inactive_and_deleted_programs_cannot_convert_and_extra_programs_can() {
     let w = diagnostics::nutrition(0.8, 2., false, false);
     let mut g = w.genomes[&1].clone();
     let mut cell = w.cells[0].clone();
-    crate::genetics::repertoire::duplicate(&mut g, &mut cell, 0, 4);
+    crate::genetics::repertoire::duplicate(&mut g, 0, 4);
     cell.action.activity.fill(0.);
     cell.action.activity[4] = 1.;
     g.compile(&w.config, &w.chemistry);
-    cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+    physiology::express(&mut cell, g.compiled.as_ref().unwrap());
     metabolism::react(&mut cell, &w.config, &w.chemistry, 0.1);
     assert!(cell.flows.reacted > 0.);
     cell.flows = Default::default();
     crate::genetics::repertoire::remove(&mut g, 4);
     g.compile(&w.config, &w.chemistry);
-    cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+    physiology::express(&mut cell, g.compiled.as_ref().unwrap());
     metabolism::react(&mut cell, &w.config, &w.chemistry, 0.1);
     assert_eq!(cell.flows.reacted, 0.);
 }

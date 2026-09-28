@@ -1,5 +1,11 @@
 # Cellular organization and exchange
 
+September28 revision: v43 [genetic physiology](funded-bodies.md) supersedes the construction,
+retirement, separately inherited stock and core-only division sections below. Capabilities now
+follow birth genetics at current biomass. This v33 design remains the historical derivation of
+retained chemistry, activity regulation, inward sensing and shared interfaces; its original
+development equations must not be reinstated as current requirements.
+
 September 20, 2026. **Implemented feature design, physical checkpoint v33.**
 This is the joint design for intracellular organization and interactions between cells.
 It develops the [strategic hypothesis](intracellular-organization.md) and supersedes the

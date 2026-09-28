@@ -1,15 +1,9 @@
-//! Birth-local program changes preserve installed material and controller ownership.
+//! Birth-local program changes edit genetics only; biomass is inherited independently.
 use super::*;
-use crate::organism::{Body, Cell, MAX_ENZYMES, enzyme_stock};
+use crate::organism::{MAX_ENZYMES, enzyme_stock};
 
 /// A count event uses the scalar law in program units, rounded before reflection.
-pub fn mutate(
-    g: &mut Genotype,
-    cell: &mut Cell,
-    rng: &mut Random,
-    c: &Config,
-    chemistry: &Chemistry,
-) {
+pub fn mutate(g: &mut Genotype, rng: &mut Random, c: &Config, chemistry: &Chemistry) {
     if c.physical_mutation_rate <= 0.
         || c.physical_mutation_scale <= 0.
         || rng.unit() >= c.physical_mutation_rate
@@ -26,15 +20,13 @@ pub fn mutate(
     if next > count {
         for _ in count..next {
             let candidates: Vec<_> = (0..MAX_ENZYMES).filter(|&s| active[s]).collect();
-            let vacancies: Vec<_> = (0..MAX_ENZYMES)
-                .filter(|&s| !active[s] && cell.body[enzyme_stock(s)] == 0.)
-                .collect();
+            let vacancies: Vec<_> = (0..MAX_ENZYMES).filter(|&s| !active[s]).collect();
             if vacancies.is_empty() {
                 break;
             }
             let source = candidates[rng.index(candidates.len())];
             let destination = vacancies[rng.index(vacancies.len())];
-            duplicate(g, cell, source, destination);
+            duplicate(g, source, destination);
             active[destination] = true;
         }
     } else {
@@ -58,9 +50,8 @@ pub fn remove(g: &mut Genotype, slot: usize) {
     }
 }
 
-pub fn duplicate(g: &mut Genotype, cell: &mut Cell, source: usize, destination: usize) {
+pub fn duplicate(g: &mut Genotype, source: usize, destination: usize) {
     assert!(!g.express().chemistry.programs[destination]);
-    assert_eq!(cell.body[enzyme_stock(destination)], 0.);
     let (a, b) = (enzyme_stock(source), enzyme_stock(destination));
     for allele in &mut g.chromosomes {
         allele.chemistry.enzymes[destination] = allele.chemistry.enzymes[source];
@@ -70,18 +61,6 @@ pub fn duplicate(g: &mut Genotype, cell: &mut Cell, source: usize, destination: 
         allele.physical[b] = half;
         controller::programs::duplicate(&mut allele.behavior, source, destination);
     }
-    cell.body[a] *= 0.5;
-    cell.body[b] = cell.body[a];
-}
-
-pub fn desired(g: &Compiled, cell: &Cell) -> Body {
-    std::array::from_fn(|i| {
-        if i == 0 {
-            g.body[i] * (1. + cell.action.allocation[i])
-        } else {
-            2. * g.body[i] * cell.action.allocation[i]
-        }
-    })
 }
 
 #[cfg(test)]
@@ -145,30 +124,26 @@ mod tests {
         }
     }
     #[test]
-    fn deleting_a_program_retains_actual_stock_and_requires_paid_retirement() {
+    fn deleting_a_program_changes_physiology_without_material_or_work_transfer() {
         let w = crate::diagnostics::nutrition(0.8, 2., false, false);
         let mut g = w.genomes[&1].clone();
         let mut cell = w.cells[0].clone();
-        let body = cell.body;
+        let mass = cell.mass();
         let material = cell.material();
         let energy = cell.energy;
         remove(&mut g, 0);
         g.compile(&w.config, &w.chemistry);
-        cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
-        assert_eq!(body, cell.body);
+        crate::physiology::express(&mut cell, g.compiled.as_ref().unwrap());
+        assert!((mass - cell.mass()).abs() < 1e-12);
         assert_eq!(material, cell.material());
         assert_eq!(energy, cell.energy);
         assert_eq!(g.compiled.as_ref().unwrap().body[11], 0.);
         assert!(!cell.chemistry().programs[0]);
-        cell.action.allocation.fill(0.5);
-        cell.action.retirement = 1.;
-        crate::organization::remodel(&mut cell, g.compiled.as_ref().unwrap(), &w.config, 1.);
-        assert!(cell.body[11] < body[11]);
-        assert!(cell.energy < energy);
+        assert_eq!(cell.body[11], 0.);
         cell.validate(&w.config).unwrap();
     }
     #[test]
-    fn duplicate_preserves_funded_body_targets_and_neural_response() {
+    fn duplicate_preserves_total_capacity_and_neural_response() {
         let w = crate::diagnostics::nutrition(0.8, 2., false, false);
         let mut g = w.genomes[&1].clone();
         controller::diagnostics::perturb_weights(
@@ -188,9 +163,9 @@ mod tests {
             &w.config,
             false,
         );
-        duplicate(&mut g, &mut cell, 0, 4);
+        duplicate(&mut g, 0, 4);
         g.compile(&w.config, &w.chemistry);
-        cell.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+        crate::physiology::express(&mut cell, g.compiled.as_ref().unwrap());
         crate::sensing::initialize(&mut cell, g.compiled.as_ref().unwrap(), &w.config, &w.field);
         let after = controller::act(
             &g.express().behavior,

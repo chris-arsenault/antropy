@@ -33,6 +33,8 @@ pub struct Cell {
     pub x: f64,
     pub y: f64,
     pub heading: f64,
+    /// Derived projection of birth genetics at current biomass; rebuilt on restore.
+    #[serde(skip)]
     pub body: Body,
     pub bound_material: crate::inventory::Inventory,
     pub inventory: crate::inventory::Inventory,
@@ -65,8 +67,7 @@ pub struct Flows {
     pub reacted: f64,
     pub captured: f64,
     pub external_work: f64,
-    pub constructed: f64,
-    pub retired: f64,
+    pub grown: f64,
     pub cover_deposited: f64,
     pub cover_recovered: f64,
     pub emission: f64,
@@ -78,7 +79,8 @@ pub struct Flows {
     pub learning: f64,
     pub transport: f64,
     pub reaction_heat: f64,
-    pub construction: f64,
+    pub growth: f64,
+    pub cover_work: f64,
     pub repair: f64,
     pub repaired: f64,
     pub exposure: f64,
@@ -229,8 +231,6 @@ impl Cell {
                 .transport
                 .iter()
                 .chain(&self.action.activity)
-                .chain(&self.action.allocation)
-                .chain([&self.action.retirement])
                 .chain([&self.action.emission])
                 .chain([&self.action.swim, &self.action.repair])
                 .any(|x| !(0. ..=1.).contains(x))
@@ -244,10 +244,5 @@ impl Cell {
 }
 
 pub fn maintenance_rate(body: &Body, damage: f64, c: &Config) -> f64 {
-    (1. + damage)
-        * (body[0] * c.maintenance
-            + body[1] * c.motor_maintenance
-            + body[2] * c.storage_maintenance
-            + body[3..].iter().sum::<f64>() * c.machinery_maintenance
-            + c.controller_cost)
+    (1. + damage) * (body.iter().sum::<f64>() * c.maintenance + c.controller_cost)
 }

@@ -91,8 +91,8 @@ function Traits({ status }: { status: LiveStatus }) {
     <details>
       <summary>Inherited traits and sampled behavior</summary>
       <p>
-        Each living cell contributes once. Targets are inherited construction targets, separate from
-        growth and damage.
+        Each living cell contributes once. Genetic references determine physiology; current biomass
+        and damage determine available capacity.
       </p>
       {p.traits.map((t, i) => (
         <div key={i}>
@@ -248,7 +248,7 @@ function metricRows(status: LiveStatus) {
     ["Source conversion heat · lifetime", l.sourceHeat.toFixed(3)],
     ["Reservoir external work · lifetime", l.sourceWork.toFixed(3)],
     ["Exported / imported · lifetime", percentage(f.exported, f.imported)],
-    ["Construction / imports · lifetime", percentage(f.constructed, f.imported)],
+    ["Biomass growth / imports · lifetime", percentage(f.grown, f.imported)],
     ["Material balance error", s.materialResidual.toExponential(2)],
     ["Energy balance error", s.energyResidual.toExponential(2)],
     ["Mutation events", l.mutations],

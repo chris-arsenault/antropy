@@ -247,12 +247,17 @@ pub fn validate_state(state: &State) -> Result<(), String> {
                 .iter()
                 .chain(&e.flow.offset)
                 .any(|v| !v.is_finite())
-            || [action.swim, action.turn, action.repair, action.retirement]
-                .iter()
-                .chain(&action.transport)
-                .chain(&action.activity)
-                .chain(&action.allocation)
-                .any(|v| !v.is_finite() || v.abs() > 1.)
+            || [
+                action.swim,
+                action.turn,
+                action.repair,
+                action.cover,
+                action.emission,
+            ]
+            .iter()
+            .chain(&action.transport)
+            .chain(&action.activity)
+            .any(|v| !v.is_finite() || v.abs() > 1.)
         {
             return Err("Invalid physiological controller epoch".into());
         }

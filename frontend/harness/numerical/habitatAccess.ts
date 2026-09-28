@@ -74,7 +74,7 @@ try {
         population: final.population,
         divisions: final.ledger.divisions,
         imported: final.ledger.flows.imported,
-        constructed: final.ledger.flows.constructed,
+        grown: final.ledger.flows.grown,
         distance: final.ledger.flows.distance,
       })
     );

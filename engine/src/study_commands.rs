@@ -76,7 +76,7 @@ pub fn replace(w: &mut World, v: &Value) -> Result<Value, String> {
         {
             cell.genome = g.id;
             let capabilities = g.compiled.as_ref().unwrap();
-            cell.operators = Some(capabilities.operators.clone());
+            crate::physiology::express(&mut cell, capabilities);
             sensing::initialize(&mut cell, capabilities, &w.config, &w.field);
             crate::ancestry::get_mut(&mut w.ancestry, cell.id)
                 .unwrap()

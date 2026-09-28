@@ -6,19 +6,12 @@ fn action_change(a: controller::Action, b: controller::Action) -> f64 {
         a.swim - b.swim,
         (a.turn - b.turn) / 2.,
         a.repair - b.repair,
-        a.retirement - b.retirement,
         (a.cover - b.cover) / 2.,
         a.emission - b.emission,
     ]
     .into_iter()
     .chain(a.transport.into_iter().zip(b.transport).map(|(a, b)| a - b))
     .chain(a.activity.into_iter().zip(b.activity).map(|(a, b)| a - b))
-    .chain(
-        a.allocation
-            .into_iter()
-            .zip(b.allocation)
-            .map(|(a, b)| a - b),
-    )
     .map(f64::abs)
     .fold(0., f64::max)
 }
@@ -236,7 +229,7 @@ pub(super) fn physiology_rates(
         + emission
         + cell.basal(c) / dt
         + learning
-        + (probe.flows.repair + probe.flows.construction) / dt;
+        + (probe.flows.repair + probe.flows.growth) / dt;
     let energy = spending / (cell.energy + c.receptor_k * cell.energy_capacity(c)).max(1e-30);
     let net = std::array::from_fn(|s| (probe.inventory.value(s) - cell.inventory.value(s)) / dt);
     (gross, net, stock.max(damage), energy, count)

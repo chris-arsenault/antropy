@@ -32,25 +32,17 @@ struct Fixture {
 }
 
 fn fund(cell: &mut Cell, g: &Genotype, w: &World) -> Result<(f64, f64), String> {
-    let target = g.compiled.as_ref().unwrap().body;
-    let mut surplus = 0.;
-    for (stock, goal) in cell.body.iter_mut().zip(target) {
-        let returned = (*stock - goal).max(0.);
-        *stock -= returned;
-        surplus += returned;
-    }
+    let target = g.compiled.as_ref().unwrap();
+    let target_mass = target.body.iter().sum::<f64>();
+    let surplus = (cell.mass() - target_mass).max(0.);
     cell.bound_material
         .transfer_to(&mut cell.inventory, surplus);
-    let requested = target
-        .iter()
-        .zip(cell.body)
-        .map(|(goal, stock)| goal - stock)
-        .sum();
+    let requested = (target_mass - cell.bound_material.material()).max(0.);
     let (built, heat) = metabolism::assemble(cell, &w.chemistry, &w.config, requested, 0., 0.);
     if (built - requested).abs() > 1e-10 {
         return Err("Cannot fund diagnostic mature body from common packet".into());
     }
-    cell.body = target;
+    crate::physiology::express(cell, target);
     Ok((built, heat))
 }
 
@@ -93,7 +85,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
             .ok_or("Unknown founder")?;
         let g = variants.get(a.variant).ok_or("Unknown fixture variant")?;
         c.genome = g.id;
-        c.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
+        crate::physiology::express(c, g.compiled.as_ref().unwrap());
         c.x = a.x;
         c.y = a.y;
         c.heading = a.heading;
@@ -117,10 +109,10 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
             .unwrap()
             .genome = c.genome;
     }
-    w.ledger.flows.constructed += built;
-    w.ledger.flows.construction += heat;
+    w.ledger.flows.grown += built;
+    w.ledger.flows.growth += heat;
     w.event("authored-founders", 0, ids.clone());
-    Ok(json!({"genomes":ids,"constructed":built,"constructionHeat":heat}))
+    Ok(json!({"genomes":ids,"grown":built,"growthHeat":heat}))
 }
 
 #[derive(Deserialize)]

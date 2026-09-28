@@ -40,17 +40,10 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
         &w.chemistry,
     );
     let mut cell = parent.clone();
-    cell.body = cell.body.map(|q| q * 0.5);
     cell.bound_material.scale(0.5);
     cell.inventory = cell.inventory.half();
     cell.energy *= 0.5;
-    crate::genetics::repertoire::mutate(
-        &mut g,
-        &mut cell,
-        &mut w.genetic_rng,
-        &w.config,
-        &w.chemistry,
-    );
+    crate::genetics::repertoire::mutate(&mut g, &mut w.genetic_rng, &w.config, &w.chemistry);
     let same = g.chromosomes == genotype.chromosomes;
     let genome = if same { parent.genome } else { g.id };
     if !same {
@@ -62,7 +55,7 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
     cell.parent = Some(parent.id);
     cell.genome = genome;
     let compiled = w.genomes[&genome].compiled.as_ref().unwrap();
-    cell.operators = Some(compiled.operators.clone());
+    crate::physiology::express(&mut cell, compiled);
     cell.born = w.tick;
     cell.generation += 1;
     cell.brain = controller::State::default();
@@ -98,7 +91,7 @@ fn division_cost(
     target: &crate::organism::Body,
     config: &crate::config::Config,
 ) -> Option<f64> {
-    if cell.body[0] + 1e-12 < 2. * target[0] {
+    if cell.mass() + 1e-12 < 2. * target.iter().sum::<f64>() {
         return None;
     }
     let (material, energy, cost) = crate::accounting::division_requirements(cell, config);
@@ -135,10 +128,10 @@ pub fn reproduce(w: &mut World) {
             }
             w.cells.push(b);
         } else {
-            cell.body = cell.body.map(|q| q * 0.5);
             cell.bound_material.scale(0.5);
             cell.inventory.scale(0.5);
             cell.energy *= 0.5;
+            crate::physiology::express(cell, w.genomes[&cell.genome].compiled.as_ref().unwrap());
         }
         w.cells.push(a);
         !fission

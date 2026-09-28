@@ -1,5 +1,10 @@
 # Resource economy: model, calibration and checks
 
+September28 current-tool note: v43 uses genetic physiology at current biomass, whole-body
+basal metabolism and automatic growth. Per-category equipment upkeep and construction requests
+are removed. The current analytical output is `growthCeiling`, priced by `growthEnergy`.
+Earlier construction/upkeep measurements below remain historical, not current calibration.
+
 September26 current-tool note: the zero-tick active-pump budget now uses the same private
 free/bound light environment as ordinary cellular reactions. It remains an active-pump
 estimate at unit illumination and explicitly excludes passive membrane loss/gain, repair,

@@ -9,7 +9,7 @@ remain evidence about their particular bodies, controllers and environments.
 
 ## Independent views
 
-Current diversity means differences in capabilities, funded bodies and expressed behavior,
+Current diversity means differences in genetic physiology, biomass and expressed behavior,
 regardless of parentage. The population panel leads with stock distributions and recent efforts;
 the phenotype panel compares actual machinery, inherited targets and measured activity. A shared
 founder can support different functions, and separate pedigrees can converge on the same function.
@@ -45,7 +45,7 @@ from zero genetic distance.
 
 Selecting an organism permits separate genealogical and genetic comparisons. Genealogical distance
 is the number of parent-child links through the most recent shared ancestor; separate founder trees
-have no recorded common ancestor. Physical genetic distance includes expressed construction investments and fixed chemical alleles. Controller distance uses the controller's opaque genomeDistance operation,
+have no recorded common ancestor. Physical genetic distance includes genetic body proportions and fixed chemical alleles. Controller distance uses the controller's opaque genomeDistance operation,
 including its learning genes. Neither raw weight proximity nor shared ancestry declares behavioral
 equivalence. These distances are not merged into a single similarity score.
 

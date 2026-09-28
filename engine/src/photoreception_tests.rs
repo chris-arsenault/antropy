@@ -116,7 +116,7 @@ fn identical_local_cue_can_drive_opposite_neural_responses() {
 }
 
 #[test]
-fn photo_targets_require_construction_and_actual_stock_splits_at_birth() {
+fn genetic_photoreception_is_immediate_and_scales_with_biomass() {
     let mut w = world();
     let id = w.cells[0].genome;
     let g = w.genomes.get_mut(&id).unwrap();
@@ -126,14 +126,19 @@ fn photo_targets_require_construction_and_actual_stock_splits_at_birth() {
     assert!((target.body[PHOTO_STOCK] - 2. * w.cells[0].body[PHOTO_STOCK]).abs() < 1e-12);
     let before = w.cells[0].clone();
     w.cells[0].energy = 0.;
+    crate::physiology::express(&mut w.cells[0], target);
+    assert!(w.cells[0].body[PHOTO_STOCK] > before.body[PHOTO_STOCK]);
+    assert!((w.cells[0].mass() - before.mass()).abs() < 1e-12);
+    assert_eq!(w.cells[0].energy, 0.);
+    let expressed = w.cells[0].body;
     crate::metabolism::grow(&mut w.cells[0], target, &w.config, &w.chemistry, 1.);
-    assert_eq!(before.body, w.cells[0].body);
+    assert_eq!(expressed, w.cells[0].body);
     w.cells[0].energy = 10.;
     crate::metabolism::grow(&mut w.cells[0], target, &w.config, &w.chemistry, 1.);
     let c = &w.cells[0];
     assert!(c.body[PHOTO_STOCK] > before.body[PHOTO_STOCK]);
-    assert!((c.mass() - before.mass() - c.flows.constructed).abs() < 1e-12);
-    assert!((10. - c.energy - c.flows.constructed * w.config.construction_energy).abs() < 1e-12);
+    assert!((c.mass() - before.mass() - c.flows.grown).abs() < 1e-12);
+    assert!((10. - c.energy - c.flows.grown * w.config.growth_energy).abs() < 1e-12);
     assert!((c.bound_material.material() - c.mass()).abs() < 1e-12);
     assert!(c.basal(&w.config) > before.basal(&w.config));
     // Fixture grants an explicitly accounted mature body solely to exercise division.
@@ -144,7 +149,7 @@ fn photo_targets_require_construction_and_actual_stock_splits_at_birth() {
     crate::lifecycle::reproduce(&mut w);
     assert_eq!(w.cells.len(), 2);
     for c in &w.cells {
-        assert_eq!(c.body[PHOTO_STOCK], stock * 0.5);
+        assert!((c.body[PHOTO_STOCK] - stock * 0.5).abs() < 1e-12);
         assert_eq!(c.inputs[LIGHT_INPUT + 1], 0.);
         assert_eq!(
             w.genomes[&c.genome].chromosomes[0].physical[PHOTO_STOCK],

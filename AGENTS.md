@@ -101,23 +101,28 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v42 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v43 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
-Current physiology has 58 local RNN inputs, 24 recurrent units and 42 outputs, twenty-two bounded
-stock records, four receptors/transporters, one to eight enzyme programs, membrane compatibility
+Current physiology has 58 local RNN inputs, 24 recurrent units and 19 outputs, twenty-two derived
+body capacities, four receptors/transporters, one to eight enzyme programs, membrane compatibility
 and paid photoreception. Cells retain one internal mixture; internal compartments were rejected.
-Retained composition modulates rates without changing per-conversion work. Funded inward sensing,
-activity/construction control, paid retirement and shared field/contact access implement the
-[joint design](docs/design/cellular-organization-and-exchange.md). Injured cells expose free
+Retained composition modulates rates without changing per-conversion work. Genetic inward sensing,
+activity control and shared field/contact access retain the
+[joint design](docs/design/cellular-organization-and-exchange.md). The user rejected machinery
+construction as a substitute for physical tradeoffs: v43 expresses genetic body proportions
+directly at current biomass. Automatic biomass growth, action costs, basal metabolism and
+conservative reproduction remain; there are no construction/retirement controls or per-component
+ownership charges. See [genetic physiology](docs/design/funded-bodies.md). Injured cells expose free
 inventory through ordinary paid transport. No role, kin rule or community reward assigns cooperation.
 Genotypes are immutable; private experience transmits only through explicit birth-local
 assimilation. Complete chemical capabilities are fixed at birth. Daughter mutations apply immediately,
-while actual stock and material split conservatively. Do not restore refitting or parental-function
-buffers. Reproduction grants no additional stock; living-cell gene transfer is removed. No fallback policy, remote parent selector, coordinates, compass,
+while biomass and free material split conservatively. Do not restore machinery construction,
+refitting or parental-function buffers. Reproduction grants no additional material;
+living-cell gene transfer is removed. No fallback policy, remote parent selector, coordinates, compass,
 lineage label or reproductive score enters the controller.
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
