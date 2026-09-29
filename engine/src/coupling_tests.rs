@@ -74,7 +74,8 @@ fn smaller_bodies_and_storage_can_divide_with_capacity_scaled_reserves() {
         g.chromosomes[0].physical[2] = storage - 1.;
         g.compile(&w.config, &w.chemistry);
         w.cells[0].set_fixture_body(g.compiled.as_ref().unwrap().body.map(|q| 2. * q));
-        let (material, energy, cost) = accounting::division_requirements(&w.cells[0], &w.config);
+        let (material, energy, cost) =
+            accounting::division_requirements(&w.cells[0], &w.config, w.tick);
         assert!(material < w.cells[0].capacity(&w.config));
         assert!(energy < w.cells[0].energy_capacity(&w.config));
         if scale < 1. || storage < 1. {
@@ -102,7 +103,8 @@ fn smaller_bodies_and_storage_can_divide_with_capacity_scaled_reserves() {
         assert!((before.1 - after.1 - cost).abs() < 1e-12);
         for cell in &w.cells {
             assert!(
-                cell.energy + 1e-12 >= accounting::interval_reserve(cell, &cell.body, &w.config)
+                cell.energy + 1e-12
+                    >= accounting::interval_reserve(cell, &cell.body, &w.config, w.tick)
             );
         }
         w.validate().unwrap();
@@ -125,7 +127,7 @@ fn small_body_growth_protects_a_fraction_of_its_own_storage() {
     let before = cell.mass();
     assert!(cell.material() < 0.2);
     let reserve = cell.capacity(&w.config) * w.config.protected_inventory_fraction;
-    metabolism::grow(cell, g, &w.config, &w.chemistry, 1.);
+    metabolism::grow(cell, g, &w.config, &w.chemistry, 1., w.tick);
     assert!(cell.mass() > before);
     assert!(cell.material() >= reserve);
 }
@@ -164,8 +166,8 @@ fn motion_prices_actual_velocity_and_scales_funding_consistently() {
     assert!((large.flows.distance - full.flows.distance).abs() < 1e-12);
     assert!((large.flows.motors - full.flows.motors).abs() < 1e-12);
     assert!(
-        (crate::organism::maintenance_rate(&large.body, 0., &w.config)
-            - crate::organism::maintenance_rate(&full.body, 0., &w.config))
+        (crate::organism::maintenance_rate(&large.body, 0., 0., &w.config)
+            - crate::organism::maintenance_rate(&full.body, 0., 0., &w.config))
         .abs()
             < 1e-12
     );
@@ -198,11 +200,11 @@ fn growth_reserve_covers_damaged_combined_motion_and_upkeep() {
     cell.damage = 0.3;
     cell.action.swim = 0.6;
     cell.action.turn = -0.8;
-    cell.energy = accounting::interval_reserve(&cell, &cell.body, &w.config);
+    cell.energy = accounting::interval_reserve(&cell, &cell.body, &w.config, w.tick);
     let ticks = ((w.config.physiology_interval + w.config.dt) / w.config.dt).round() as usize;
-    for _ in 0..ticks {
+    for tick in 0..ticks {
         cell = move_once(cell, &w);
-        let due = cell.basal(&w.config);
+        let due = cell.basal(&w.config, w.tick + tick as u64);
         assert!((cell.pay(due) - due).abs() < 1e-12);
     }
     assert!(cell.energy < 1e-12);

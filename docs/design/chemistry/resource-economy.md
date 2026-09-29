@@ -1,5 +1,11 @@
 # Resource economy: model, calibration and checks
 
+September29 current-tool note: v45's zero-tick budgets explicitly price newborn age-zero
+bodies. Live inspection and frozen-state diagnostics use actual age. Core fraction slows the
+linear increase in body maintenance; growth, cover and division reserves integrate the same
+law. See [composed runtime](composed-runtime.md) and the
+[birth/aging delivery](../../plans/BIRTH-AND-AGING-PLAN.md) for the equation and bounded checks.
+
 September28 current-tool note: v43 uses genetic physiology at current biomass, whole-body
 basal metabolism and automatic growth. Per-category equipment upkeep and construction requests
 are removed. The current analytical output is `growthCeiling`, priced by `growthEnergy`.

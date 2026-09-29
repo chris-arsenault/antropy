@@ -44,7 +44,7 @@ fn funded_division_crosses_ten_thousand_cells_without_a_population_stop() {
             .body;
         w.cells[0].set_fixture_body(target.map(|q| 2. * q));
         let (material, energy, _) =
-            crate::accounting::division_requirements(&w.cells[0], &w.config);
+            crate::accounting::division_requirements(&w.cells[0], &w.config, w.tick);
         w.cells[0].inventory.fill(0.);
         w.cells[0].inventory.set(0, material);
         w.cells[0].energy = energy;
@@ -226,14 +226,20 @@ fn growth_keeps_funded_upkeep_until_the_next_metabolic_update() {
             &w.config,
             &w.chemistry,
             interval,
+            w.tick,
         );
         assert!(cell.energy < initial);
         let expense = (interval + w.config.dt)
-            * crate::organism::maintenance_rate(&cell.body, cell.damage, &w.config);
+            * crate::organism::maintenance_rate(
+                &cell.body,
+                cell.damage,
+                cell.age(&w.config, w.tick) + (interval + w.config.dt) / 2.,
+                &w.config,
+            );
         assert!(cell.energy >= expense - 1e-12);
         let at_growth = cell.energy;
-        for _ in 0..(interval / w.config.dt).round() as usize {
-            cell.pay(cell.basal(&w.config));
+        for tick in 0..(interval / w.config.dt).round() as u64 {
+            cell.pay(cell.basal(&w.config, w.tick + tick));
         }
         assert!(cell.energy > 0.);
         assert!(cell.energy < at_growth);

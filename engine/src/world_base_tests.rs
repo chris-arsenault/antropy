@@ -56,7 +56,10 @@ fn newly_evaluated_action_moves_immediately_and_each_base_step_pays_once() {
         assert!((cell.flows.motors - motors).abs() < 1e-12);
         assert!((world.ledger.flows.motors - previous_motors - motors).abs() < 1e-12);
         assert!(
-            (world.ledger.flows.maintenance - previous_upkeep - cell.basal(&world.config)).abs()
+            (world.ledger.flows.maintenance
+                - previous_upkeep
+                - cell.basal(&world.config, world.tick - 1))
+            .abs()
                 < 1e-12
         );
         assert!(world.field_elapsed > 0.);
@@ -87,4 +90,50 @@ fn frozen_contact_motion_is_reciprocal_and_independent_of_cell_loop_order() {
             assert!((left - right).abs() < 1e-12);
         }
     }
+}
+
+#[test]
+fn aging_exhausts_fixed_newborn_income_and_core_allocation_delays_it() {
+    // Fixed-mass upkeep probe: E(t)=E0-slope*t^2/2 with income equal to newborn upkeep.
+    // Ordinary payments, ledger accumulation and lifecycle death; no ecological time run.
+    let mut lifetimes = Vec::new();
+    for motor_gene in [-0.5, 3.] {
+        let mut w = fixture(1, 0.);
+        let g = w.genomes.get_mut(&1).unwrap();
+        for ch in &mut g.chromosomes {
+            ch.physical[1] = motor_gene;
+        }
+        g.compile(&w.config, &w.chemistry);
+        crate::physiology::express(&mut w.cells[0], g.compiled.as_ref().unwrap());
+        w.cells[0].energy = 0.1;
+        w.cells[0].inventory.fill(0.);
+        diagnostics::initialize(&mut w);
+        let c = &w.cells[0];
+        let base = crate::organism::maintenance_rate(&c.body, 0., 0., &w.config);
+        let slope = w.config.maintenance * c.mass().powi(2) / (w.config.aging_time * c.body[0]);
+        let expected = (2. * c.energy / slope).sqrt();
+        assert!(expected < 1000.);
+        for _ in 0..5000 {
+            w.cells[0].flows = Default::default();
+            let income = base * w.config.dt;
+            w.cells[0].energy += income;
+            w.ledger.supplied_energy += income;
+            w.finish_cells();
+            w.tick += 1;
+            crate::lifecycle::advance(&mut w);
+            if w.cells.is_empty() {
+                break;
+            }
+        }
+        let measured = w.tick as f64 * w.config.dt;
+        assert!(w.cells.is_empty());
+        assert!((measured - expected).abs() <= w.config.dt);
+        assert_eq!(w.ledger.deaths, 1);
+        assert_eq!(w.ledger.divisions, 0);
+        let summary = crate::observation::summary(&w);
+        assert!(summary["energyResidual"].as_f64().unwrap().abs() < 1e-8);
+        println!("motor gene {motor_gene}: predicted {expected:.3}s; died at {measured:.3}s");
+        lifetimes.push(measured);
+    }
+    assert!(lifetimes[0] > lifetimes[1]);
 }

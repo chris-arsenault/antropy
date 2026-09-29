@@ -120,9 +120,11 @@ are no construction requests, separate machinery inventories or retirement. Repa
 amounts of the frozen inventory and bound mixtures before growth. Replaced material retains its identity.
 
 Fission requires twice the inherited reference biomass, actual daughter inventory/energy reserves, the division charge and local
-placement in the periodic plane. Daughters separate along the parent's heading and subsequently
+placement in the periodic plane. Daughters separate along a uniformly drawn local axis and subsequently
 participate in ordinary local overlap resolution. Fission splits biomass, each chemical and
 post-cost energy equally; budding uses the same split while retaining the experienced parent.
+Each newborn receives an independent uniform heading from the body random stream. Its heading
+is independent of the separation axis and parent orientation. A budding parent keeps its heading.
 Each daughter immediately expresses its mutated physiology at the inherited biomass and retains
 those proportions throughout life. Birth grants no new material. There is no refitting
 or living-cell gene transfer. Damage fraction
@@ -130,7 +132,10 @@ persists. Starvation or unit injury releases inventory and bound material unchan
 remaining usable energy. No killer receives a direct grant. [Bound material](../bound-material.md)
 records the shared transfer rules and their work accounts.
 
-There is no age timer, remote parent selection, fitness culling or automatic reseeding. An empty
+V45 uses age since birth to increase maintenance through the inherited core fraction, following
+the [composed law](chemistry/composed-runtime.md). Newborns start at age zero; a budding parent
+keeps its age. Energy exhaustion and injury remain the death rules, without a fixed death age.
+There is no remote parent selection, fitness culling or automatic reseeding. An empty
 world keeps advancing its environment. Population and historical-record counts never pause the
 run; old ended parentage expires while every living record remains available.
 

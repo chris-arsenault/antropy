@@ -60,8 +60,12 @@ fn budget(w: &World) -> Value {
         false,
         drive,
     );
-    let maintenance =
-        antropy_engine::organism::maintenance_rate(&cell.body, cell.damage, &w.config);
+    let maintenance = antropy_engine::organism::maintenance_rate(
+        &cell.body,
+        cell.damage,
+        cell.age(&w.config, w.tick),
+        &w.config,
+    );
     let rows: Vec<_> = cell
         .operators
         .as_ref()

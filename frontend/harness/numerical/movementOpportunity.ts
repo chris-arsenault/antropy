@@ -60,13 +60,18 @@ function scenario(distance: number, treatment: Treatment): QuickScenario {
 
 function budget(world: EngineWorld) {
   const config = world.command<Definition>("definition").config;
-  const [{ cell, mobility }] = world.command<{ cells: { cell: CellState; mobility: number }[] }>(
-    "assayFrame"
-  ).cells;
+  const { tick, cells } = world.command<{
+    tick: number;
+    cells: { cell: CellState; mobility: number }[];
+  }>("assayFrame");
+  const [{ cell, mobility }] = cells;
   const b = cell.body;
+  const mass = b.reduce((a, v) => a + v, 0);
+  const age = (tick - cell.born) * Number(config.dt);
+  const wear = (age / config.agingTime) * (mass / b[0]);
   const upkeep =
     (1 + cell.damage) *
-    (b.reduce((a, v) => a + v, 0) * Number(config.maintenance) + Number(config.controllerCost));
+    (mass * Number(config.maintenance) * (1 + wear) + Number(config.controllerCost));
   const power = b[1] * Number(config.motorPowerDensity) * (1 - cell.damage);
   return {
     body: b,
@@ -78,6 +83,7 @@ function budget(world: EngineWorld) {
     fullMotorPower: power,
     initialMobility: mobility,
     viscosity: config.viscosity,
+    reserveAssumption: "Instantaneous upkeep upper bounds; aging raises later expenses",
     reserveSecondsAtRestWithoutIncomeOrOtherCosts: cell.energy / upkeep,
     reserveSecondsAtFullSwimWithoutIncomeOrOtherCosts: cell.energy / (upkeep + power),
   };

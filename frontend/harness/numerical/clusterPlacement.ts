@@ -97,13 +97,17 @@ function create(
 
 function budget(world: EngineWorld) {
   const config = world.command<Definition>("definition").config;
-  const cells = world.command<{ cells: { cell: CellState }[] }>("assayFrame").cells;
+  const { tick, cells } = world.command<{ tick: number; cells: { cell: CellState }[] }>(
+    "assayFrame"
+  );
   return cells.map(({ cell }) => {
     const body = cell.body;
+    const mass = body.reduce((a, b) => a + b, 0);
+    const age = (tick - cell.born) * Number(config.dt);
+    const wear = (age / Number(config.agingTime)) * (mass / body[0]);
     const maintenance =
       (1 + cell.damage) *
-      (body.reduce((a, b) => a + b, 0) * Number(config.maintenance) +
-        Number(config.controllerCost));
+      (mass * Number(config.maintenance) * (1 + wear) + Number(config.controllerCost));
     const motorPower = body[1] * Number(config.motorPowerDensity) * (1 - cell.damage);
     const energyCapacity = body[0] * Number(config.energyCapacity);
     return {
@@ -114,6 +118,7 @@ function budget(world: EngineWorld) {
       energyCapacity,
       maintenancePerSecond: maintenance,
       maxTranslationAndTurningWorkPerSecond: 1.25 * motorPower,
+      reserveAssumption: "Instantaneous upkeep upper bounds; aging raises later expenses",
       reserveSecondsWithoutIncomeOrOtherExpenses: cell.energy / maintenance,
       capacityLimitedReserveSeconds: Math.min(cell.energy, energyCapacity) / maintenance,
       allSlotImportTurnoverCeiling:

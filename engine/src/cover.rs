@@ -61,7 +61,7 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
             if handling == 0. {
                 return 0.;
             }
-            let reserve = crate::accounting::interval_reserve(cell, &cell.body, c);
+            let reserve = crate::accounting::interval_reserve(cell, &cell.body, c, w.tick);
             let affordable = (cell.energy - reserve).max(0.) / c.growth_energy;
             let material = if cell.action.cover >= 0. {
                 (cell.material() - cell.capacity(c) * c.protected_inventory_fraction).max(0.)

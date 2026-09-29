@@ -205,7 +205,7 @@ pub(super) fn physiology_rates(
     }
     let count = work.reactions().count();
     crate::metabolism::repair(&mut probe, c, &w.chemistry, dt);
-    crate::metabolism::grow(&mut probe, g, c, &w.chemistry, dt);
+    crate::metabolism::grow(&mut probe, g, c, &w.chemistry, dt, w.tick);
     let stock = cell
         .body
         .iter()
@@ -227,7 +227,7 @@ pub(super) fn physiology_rates(
     };
     let spending = motor
         + emission
-        + cell.basal(c) / dt
+        + cell.basal(c, w.tick) / dt
         + learning
         + (probe.flows.repair + probe.flows.growth) / dt;
     let energy = spending / (cell.energy + c.receptor_k * cell.energy_capacity(c)).max(1e-30);

@@ -1,5 +1,9 @@
 # Plan ownership and disposition — September20, 2026
 
+[Birth orientation and physiological aging](BIRTH-AND-AGING-PLAN.md), Sulion
+`404e9450-689d-4d1c-91b8-bb0a032e31c0`, delivers independent newborn orientations and
+core-protected age-dependent maintenance in v45. Local implementation; live delivery is separate.
+
 The [genetic physiology plan](GENETIC-PHYSIOLOGY-PLAN.md), Sulion
 `ea4b2307-f92a-4600-8c52-44c9e3071f4e`, removes machinery construction and retirement across
 the kernel, controller, persistence and observation. Local implementation; live deployment is separate.

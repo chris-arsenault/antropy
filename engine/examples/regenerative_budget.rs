@@ -58,8 +58,8 @@ fn main() {
             .collect();
         rows.push(json!({"from":s,"to":t,"compiledRows":compiled.operators.enzymes[0].conversions.len(),
             "membraneProfile":compiled.operators.profile,"referenceWorkPerSecond":reference_work,
-            "maintenance":antropy_engine::organism::maintenance_rate(&cell.body,cell.damage,&c),
-            "division":antropy_engine::accounting::division_requirements(&cell,&c),"startup":local}));
+            "maintenance":antropy_engine::organism::maintenance_rate(&cell.body,cell.damage,0.,&c),
+            "division":antropy_engine::accounting::division_requirements(&cell,&c,0),"startup":local}));
     }
     let report = json!({"ticksAdvanced":0,"physicalVersion":w.version,"seed":27,
         "epsilon":119.31341917861687,"referenceMedium":reference,"rows":rows,

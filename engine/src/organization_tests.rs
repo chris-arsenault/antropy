@@ -96,7 +96,7 @@ fn automatic_growth_preserves_identity_and_genetic_proportions() {
         .map(|s| cell.inventory.value(s) + cell.bound_material.value(s))
         .collect();
     let mass = cell.mass();
-    physiology::grow(&mut cell, g, &w.config, 1.);
+    physiology::grow(&mut cell, g, &w.config, 1., w.tick);
     assert!(cell.flows.grown > 0.);
     assert!((cell.mass() - mass - cell.flows.grown).abs() < 1e-12);
     assert!((10. - cell.energy - cell.flows.grown * w.config.growth_energy).abs() < 1e-12);

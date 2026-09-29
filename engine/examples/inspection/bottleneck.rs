@@ -68,7 +68,7 @@ fn reactions(w: &World, bodies: &[[f64; 2]]) -> Vec<Value> {
                 .collect();
             json!({"id":c.id,"genome":c.genome,"lineage":c.lineage,
             "position":[c.x,c.y],"motorCore":c.body[1]/c.body[0],
-            "maintenance":organism::maintenance_rate(&c.body,c.damage,&w.config)*w.config.dt,
+            "maintenance":c.basal(&w.config,w.tick),
             "outcomes":outcomes})
         })
         .collect()

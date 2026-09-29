@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let cell = &w.cells[0];
         records.push(json!({"name":name,"body":cell.body,
             "inventory":cell.material(),"energy":cell.energy,
-            "maintenancePerSecond":organism::maintenance_rate(&cell.body,cell.damage,&w.config),
+            "maintenancePerSecond":organism::maintenance_rate(&cell.body,cell.damage,cell.age(&w.config,w.tick),&w.config),
             "motorPower":cell.body[1]*w.config.motor_power_density,
             "summary":antropy_engine::observation::summary(&w)}));
         save(&output.join(format!("{name}.bin")), &w.snapshot()?)?;

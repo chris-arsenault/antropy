@@ -700,8 +700,22 @@ components, construction requests or retirement. All capacities scale together.
 Growth protects work for the proposed larger body's upkeep, current motor effort and learning
 through a complete physiology interval plus one movement tick.
 
-Basal work is `(1+damage)*(maintenance*M+controllerCost)`; equipment has no separate ownership
-charge. Repair exchanges equal proportional amounts of
+V45 basal work at age a is
+`P(a)=(1+damage)*(maintenance*M*(1+a/(agingTime*f))+controllerCost)`, where
+`a=(tick-born)*dt` is model seconds, `M=sum(body)`, and `f=body[0]/M` is core fraction.
+Core is the support capacity over which age-related upkeep is spread; increasing f slows the
+rise but displaces other capacities at fixed mass. Scaling the whole body leaves that multiplier
+unchanged. One independent wear timescale, `agingTime=6000` model seconds by default, sets this
+artificial law; it is not tied to source renewal, climate or a dedicated longevity gene.
+For f=0.5, body maintenance doubles at age 3000 and triples at 6000. Newborn baseline costs
+are unchanged. No fixed death age or free recovery of injury is introduced.
+
+For an interval h with fixed body and damage, upkeep is exactly `h*P(a+h/2)`.
+The base step, growth/cover reserves and daughter reserves use this same integration. Fission
+prices newborn age-zero halves. Budding protects equal energy halves at the retained parent's
+older cost so that neither half's immediate upkeep is underfunded. Genetic mutations can still
+change a daughter's capacities and prospects. Equipment has no separate ownership charge.
+Repair exchanges equal proportional amounts of
 free and bound material, frozen before the exchange. Material demand and work costs scale with
 total installed mass times the repaired damage fraction. Available free material, bound mass and
 work limit repair; returned material cannot fund the same exchange. Death releases both mixtures
@@ -717,6 +731,10 @@ and inherited targets can mutate or receive paid birth-local assimilation. Suppo
 haploid/diploid and clonal/selfing policies remain. The daughter's complete mutated configuration
 applies at birth without granting biomass. Living-cell genetic transfer is removed.
 Newborn contact readings reset with private memory; receptor baselines initialize locally.
+One uniform body-stream angle supplies the local separation axis, independent of the parent
+heading. Each newborn draws its own uniform heading. Body placement remains local and each
+half is offset by its physical radius. Budding retains the parent's position and heading.
+Newborn age is zero from its birth tick; budding does not reset the retained parent's age.
 An empty world keeps advancing without reseeding. Unused genetic payloads can be pruned while
 retaining living birth genotypes, diagnostic catalogs and founder roots. Ended ancestry expires
 within its retention budget; every living record remains available.

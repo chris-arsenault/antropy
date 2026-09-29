@@ -162,8 +162,11 @@ impl Cell {
     pub fn energy_capacity(&self, c: &Config) -> f64 {
         self.body[0] * c.energy_capacity
     }
-    pub fn basal(&self, c: &Config) -> f64 {
-        c.dt * maintenance_rate(&self.body, self.damage, c)
+    pub fn age(&self, c: &Config, tick: u64) -> f64 {
+        tick.saturating_sub(self.born) as f64 * c.dt
+    }
+    pub fn basal(&self, c: &Config, tick: u64) -> f64 {
+        c.dt * maintenance_rate(&self.body, self.damage, self.age(c, tick) + c.dt / 2., c)
     }
     pub fn pay(&mut self, requested: f64) -> f64 {
         let amount = requested.max(0.).min(self.energy);
@@ -243,6 +246,17 @@ impl Cell {
     }
 }
 
-pub fn maintenance_rate(body: &Body, damage: f64, c: &Config) -> f64 {
-    (1. + damage) * (body.iter().sum::<f64>() * c.maintenance + c.controller_cost)
+/// Linear wear per unit support capacity; age is model seconds since this cell's birth.
+pub fn aging_multiplier(body: &Body, age: f64, c: &Config) -> f64 {
+    let mass = body.iter().sum::<f64>();
+    1. + age / c.aging_time * mass / body[0].max(1e-30)
 }
+
+pub fn maintenance_rate(body: &Body, damage: f64, age: f64, c: &Config) -> f64 {
+    let mass = body.iter().sum::<f64>();
+    (1. + damage) * (mass * c.maintenance * aging_multiplier(body, age, c) + c.controller_cost)
+}
+
+#[cfg(test)]
+#[path = "aging_tests.rs"]
+mod aging_tests;

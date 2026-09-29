@@ -42,7 +42,10 @@ Reference core is `birthMass × exp(g0)`; other reference components are
 For reference vector b, reference mass B=sum(b), and current biomass M, every capacity is
 `body_i=M*b_i/B`. This one projection governs motors, sensing, storage, enzymes and optics.
 Components share the finite body; larger biomass increases area, drag and basal metabolism.
-Basal work rate is `(1+damage)*(maintenance*M+controllerCost)`. There are no component-specific
+With core fraction f and age a in model seconds, v45 basal work rate is
+`(1+damage)*(maintenance*M*(1+a/(agingTime*f))+controllerCost)`. More core slows the growing
+upkeep burden but displaces other capacities at fixed biomass. `agingTime` defaults to 6000
+model seconds; it is independent of environmental cycles. There are no component-specific
 ownership charges. The vector is a derived runtime cache; only biomass chemistry and genetics
 are persisted. Changing genetic proportions cannot create matter or usable energy.
 
@@ -118,6 +121,8 @@ requirements while retaining ordinary growth, reproduction and basal metabolism 
 | Investments and chemical alleles | Immutable birth genotype | Current chromosomes, crossover and mutation |
 | Acquired recurrent traces | Paid bounded local updates | Retained delta enters offspring baseline weights |
 | Hidden state, byte, contacts and receptor baseline | Individual experience | Private state resets; receptors initialize locally |
+| Heading and local division axis | Physical orientation | Independent uniform newborn headings and one uniformly drawn division axis |
+| Age | Time since the existing birth tick | Newborn age zero; a budding parent keeps its age |
 | Biomass, free species mixtures, usable energy and injury | Growth and condition | Conservative split; daughter physiology is derived from its birth genotype |
 
 <a id="bodies-inheritable-learning"></a>
@@ -170,6 +175,6 @@ arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
 chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v44 preserves alleles and biomass and
+No score selects parents or filters mutants. Checkpoint v45 preserves alleles, birth ticks and biomass and
 reconstructs derived physiology; earlier checkpoints are rejected without migration.
 Unavailable pruned genotype payloads remain labeled provenance.

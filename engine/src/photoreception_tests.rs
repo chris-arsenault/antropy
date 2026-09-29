@@ -131,16 +131,16 @@ fn genetic_photoreception_is_immediate_and_scales_with_biomass() {
     assert!((w.cells[0].mass() - before.mass()).abs() < 1e-12);
     assert_eq!(w.cells[0].energy, 0.);
     let expressed = w.cells[0].body;
-    crate::metabolism::grow(&mut w.cells[0], target, &w.config, &w.chemistry, 1.);
+    crate::metabolism::grow(&mut w.cells[0], target, &w.config, &w.chemistry, 1., w.tick);
     assert_eq!(expressed, w.cells[0].body);
     w.cells[0].energy = 10.;
-    crate::metabolism::grow(&mut w.cells[0], target, &w.config, &w.chemistry, 1.);
+    crate::metabolism::grow(&mut w.cells[0], target, &w.config, &w.chemistry, 1., w.tick);
     let c = &w.cells[0];
     assert!(c.body[PHOTO_STOCK] > before.body[PHOTO_STOCK]);
     assert!((c.mass() - before.mass() - c.flows.grown).abs() < 1e-12);
     assert!((10. - c.energy - c.flows.grown * w.config.growth_energy).abs() < 1e-12);
     assert!((c.bound_material.material() - c.mass()).abs() < 1e-12);
-    assert!(c.basal(&w.config) > before.basal(&w.config));
+    assert!(c.basal(&w.config, w.tick) > before.basal(&w.config, w.tick));
     // Fixture grants an explicitly accounted mature body solely to exercise division.
     w.cells[0].set_fixture_body(target.body.map(|q| 2. * q));
     w.cells[0].inventory.set(0, 10.);

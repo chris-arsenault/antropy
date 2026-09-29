@@ -62,7 +62,7 @@ def ancestry_summary(points, ancestry):
 
 
 def capacity_blocks(ceiling, config):
-    """Optimistic capacity bounds at full growth and zero damage, not a division prediction."""
+    """Optimistic newborn-half bounds at full growth and zero damage; budding age can cost more."""
     storage = ceiling[:, 2] * config["storageCapacity"]
     energy = ceiling[:, 0] * config["energyCapacity"]
     if "daughterInventoryFraction" not in config:
@@ -70,7 +70,12 @@ def capacity_blocks(ceiling, config):
         return (storage < 2 * config["daughterInventory"],
                 energy < 2 * config["daughterEnergy"] + config["divisionCost"])
     if "growthEnergy" in config:
-        upkeep = ceiling.sum(axis=1) * config["maintenance"] + 2 * config["controllerCost"]
+        mass = ceiling.sum(axis=1)
+        multiplier = 1
+        if "agingTime" in config:
+            midpoint = (config["physiologyInterval"] + config["dt"]) / 2
+            multiplier = 1 + midpoint / config["agingTime"] * mass / np.maximum(ceiling[:, 0], 1e-30)
+        upkeep = mass * config["maintenance"] * multiplier + 2 * config["controllerCost"]
     else:
         # Historical saved reports retain their original equipment upkeep law.
         upkeep = (ceiling[:, 0] * config["maintenance"] + ceiling[:, 1] * config["motorMaintenance"]

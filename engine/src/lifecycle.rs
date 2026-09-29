@@ -29,7 +29,7 @@ pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
     }
     w.event(cause.as_str(), cell.id, vec![]);
 }
-fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
+fn child(w: &mut World, parent: &Cell, offset: [f64; 2]) -> Cell {
     let genotype = &w.genomes[&parent.genome];
     let mut g = genotype.inherit(
         w.next_genome,
@@ -64,9 +64,10 @@ fn child(w: &mut World, parent: &Cell, sign: f64) -> Cell {
     cell.interface = Default::default();
     cell.flows = Default::default();
     cell.chemical_flows = Default::default();
+    cell.heading = w.rng.unit() * std::f64::consts::TAU;
     let radius = cell.radius(&w.config);
-    cell.x = (cell.x + sign * radius * parent.heading.cos()).rem_euclid(w.config.width);
-    cell.y = (cell.y + sign * radius * parent.heading.sin()).rem_euclid(w.config.height);
+    cell.x = (cell.x + radius * offset[0]).rem_euclid(w.config.width);
+    cell.y = (cell.y + radius * offset[1]).rem_euclid(w.config.height);
     crate::sensing::initialize(&mut cell, compiled, &w.config, &w.field);
     w.ancestry.push(Ancestor {
         id: cell.id,
@@ -90,18 +91,19 @@ fn division_cost(
     cell: &Cell,
     target: &crate::organism::Body,
     config: &crate::config::Config,
+    tick: u64,
 ) -> Option<f64> {
     if cell.mass() + 1e-12 < 2. * target.iter().sum::<f64>() {
         return None;
     }
-    let (material, energy, cost) = crate::accounting::division_requirements(cell, config);
+    let (material, energy, cost) = crate::accounting::division_requirements(cell, config, tick);
     (cell.material() >= material && cell.energy >= energy).then_some(cost)
 }
 pub fn reproduce(w: &mut World) {
     let mut parents = std::mem::take(&mut w.cells);
     parents.retain_mut(|cell| {
         let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
-        let Some(division) = division_cost(cell, &g.body, &w.config) else {
+        let Some(division) = division_cost(cell, &g.body, &w.config, w.tick) else {
             return true;
         };
         let fission = w.config.reproduction == "fission";
@@ -117,9 +119,10 @@ pub fn reproduce(w: &mut World) {
         if let Some(t) = &mut w.trace {
             t.life(cell, "division", w.tick);
         }
-        let a = child(w, cell, 1.);
+        let (sin, cos) = (w.rng.unit() * std::f64::consts::TAU).sin_cos();
+        let a = child(w, cell, [cos, sin]);
         if fission {
-            let b = child(w, cell, -1.);
+            let b = child(w, cell, [-cos, -sin]);
             let record = crate::ancestry::get_mut(&mut w.ancestry, cell.id).unwrap();
             record.ended = w.tick;
             record.cause = Cause::Division;

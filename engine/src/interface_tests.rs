@@ -104,7 +104,12 @@ fn exposed_material_is_visible_and_can_be_recycled_for_paid_work() {
     crate::metabolism::react_observed(cell, &w.config, &w.chemistry, 1., false, [1., 1.]);
     assert!(cell.flows.reacted > 0.);
     assert!(cell.energy > energy);
-    let upkeep = crate::organism::maintenance_rate(&cell.body, cell.damage, &w.config);
+    let upkeep = crate::organism::maintenance_rate(
+        &cell.body,
+        cell.damage,
+        cell.age(&w.config, w.tick),
+        &w.config,
+    );
     let net = cell.energy - 100. - upkeep;
     println!(
         "contact recipient: imported={} transport={} captured={} upkeep={} private_net={}",

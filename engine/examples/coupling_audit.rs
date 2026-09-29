@@ -26,7 +26,7 @@ fn scaling(w: &World) -> Vec<Value> {
         .map(|scale| {
             let mut c = cell(w, scale);
             let (speed, power) = movement::motor_limits(&c, &w.config, 1.);
-            let baseline = maintenance_rate(&c.body, 0., &w.config);
+            let baseline = maintenance_rate(&c.body, 0., 0., &w.config);
             c.damage = 0.2;
             c.action.repair = 1.;
             metabolism::repair(&mut c, &w.config, &w.chemistry, 1.);
@@ -68,7 +68,7 @@ fn motors(w: &World) -> Vec<Value> {
             assert!((c.flows.motors / w.config.dt - power * effort * effort).abs() < 1e-12);
             json!({"motorScale":scale,"maximumSpeed":maximum,"effort":effort,
             "measuredSpeed":measured,"operatingPower":c.flows.motors/w.config.dt,
-            "maintenance":maintenance_rate(&c.body,0.,&w.config),
+            "maintenance":maintenance_rate(&c.body,0.,0.,&w.config),
             "additionalBuiltStock":c.body[1]-reference.body[1]})
         })
         .collect()

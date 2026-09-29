@@ -1,5 +1,17 @@
 # Current design and work order
 
+<a id="design-birth-and-aging"></a>
+
+## Birth orientation and aging — September 29
+
+Physical v45 gives newborns independent uniform headings and a random local division axis.
+Age progressively increases body maintenance; inherited core fraction slows that rise at the
+expense of other body capacities. Fission rejuvenates daughter age while conserving injury,
+material and work; a budding parent keeps its age. The [delivery plan](../plans/BIRTH-AND-AGING-PLAN.md)
+records bounded checks and limits. [Composed laws](chemistry/composed-runtime.md) own the equation.
+Local implementation does not reset or deploy the continuing server. Older checkpoints are
+rejected without migration.
+
 <a id="design-dispersal-opportunities"></a>
 
 ## Dispersal geography and neural response — September 28

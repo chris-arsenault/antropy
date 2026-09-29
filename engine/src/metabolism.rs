@@ -77,9 +77,9 @@ pub fn assemble(
     cell.pay(built * cost);
     (built, built * cost)
 }
-pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64) {
+pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, chemistry: &Chemistry, dt: f64, tick: u64) {
     let _ = chemistry;
-    crate::physiology::grow(cell, g, c, dt);
+    crate::physiology::grow(cell, g, c, dt, tick);
 }
 
 pub fn retained_response(cell: &Cell, c: &Config, chemistry: &Chemistry) -> [f64; 2] {

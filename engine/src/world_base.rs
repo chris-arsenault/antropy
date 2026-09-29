@@ -54,9 +54,10 @@ impl World {
     /// Basal maintenance is cell-local; ledger, observer and trace records keep cell order.
     pub(super) fn finish_cells(&mut self) {
         let config = &self.config;
+        let tick = self.tick;
         let cost = crate::parallel::cost::CELL_READ;
         crate::parallel::for_each(&mut self.cells, cost, |_, cell| {
-            let paid = cell.pay(cell.basal(config));
+            let paid = cell.pay(cell.basal(config, tick));
             cell.flows.maintenance += paid;
         });
         for cell in &mut self.cells {

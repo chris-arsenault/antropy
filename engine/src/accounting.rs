@@ -6,8 +6,11 @@ pub fn interval_reserve(
     cell: &crate::organism::Cell,
     body: &crate::organism::Body,
     c: &crate::config::Config,
+    tick: u64,
 ) -> f64 {
-    let maintenance = crate::organism::maintenance_rate(body, cell.damage, c);
+    let duration = c.physiology_interval + c.dt;
+    let age = cell.age(c, tick) + duration / 2.;
+    let maintenance = crate::organism::maintenance_rate(body, cell.damage, age, c);
     let motors =
         crate::movement::motor_work_rate(body, cell.damage, cell.action.swim, cell.action.turn, c);
     let learning = if c.learning == "plastic" {
@@ -15,21 +18,30 @@ pub fn interval_reserve(
     } else {
         0.
     };
-    (c.physiology_interval + c.dt) * (maintenance + motors + learning)
+    duration * (maintenance + motors + learning)
 }
 /// Combined reserves for two conservative halves, priced from their actual capacities.
 pub fn division_requirements(
     cell: &crate::organism::Cell,
     c: &crate::config::Config,
+    tick: u64,
 ) -> (f64, f64, f64) {
     let daughter = cell.body.map(|q| q * 0.5);
-    let maintenance = crate::organism::maintenance_rate(&daughter, cell.damage, c);
+    let duration = c.physiology_interval + c.dt;
+    // Both halves receive equal energy; a retained budding parent must afford its older body.
+    let age = if c.reproduction == "budding" {
+        cell.age(c, tick)
+    } else {
+        0.
+    };
+    let maintenance =
+        crate::organism::maintenance_rate(&daughter, cell.damage, age + duration / 2., c);
     let learning = if c.learning == "plastic" {
         daughter[0] * c.plasticity_cost
     } else {
         0.
     };
-    let interval = (c.physiology_interval + c.dt) * (maintenance + learning);
+    let interval = duration * (maintenance + learning);
     let material = cell.capacity(c) * c.daughter_inventory_fraction;
     let division = cell.body[0] * c.division_work_per_core;
     let energy =

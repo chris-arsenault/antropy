@@ -115,5 +115,6 @@ pub fn inspect(w: &World, c: &Cell, graph: &Graph, index: usize, bodies: &[[f64;
         "externalDrive":external_drive(w,c,bodies),
         "regulation":regulation(w,c),"freeChemistry":c.inventory,"boundChemistry":c.bound_material,
         "inheritedMachinery":g.chromosome.chemistry,"fieldInterface":graph.field[index],
-        "neighbors":neighbors,"maintenancePerSecond":antropy_engine::organism::maintenance_rate(&c.body,c.damage,&w.config)})
+        "neighbors":neighbors,"ageSeconds":c.age(&w.config,w.tick),
+        "maintenancePerSecond":antropy_engine::organism::maintenance_rate(&c.body,c.damage,c.age(&w.config,w.tick),&w.config)})
 }

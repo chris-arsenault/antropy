@@ -74,7 +74,7 @@ pub fn budget(
                     / (c.receptor_k + total);
         }
     }
-    let maintenance = maintenance_rate(&cell.body, 0., c);
+    let maintenance = maintenance_rate(&cell.body, 0., 0., c);
     let transport = imports.iter().sum::<f64>() * c.transport_energy;
     let motor = crate::movement::motor_work_rate(&cell.body, 0., swim, 0., c);
     // Conditional internal mixture: the imported proportions, with no accumulated products.

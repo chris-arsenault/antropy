@@ -14,6 +14,7 @@ struct Context<'a> {
     field: &'a Field,
     genomes: &'a GenotypeStore,
     dt: f64,
+    tick: u64,
 }
 impl Context<'_> {
     fn advance<'a>(
@@ -44,7 +45,7 @@ impl Context<'_> {
         cell.flows.external_work -= paid;
         cell.flows.recycled_work += paid;
         crate::metabolism::repair(cell, self.config, self.chemistry, self.dt);
-        crate::metabolism::grow(cell, g, self.config, self.chemistry, self.dt);
+        crate::metabolism::grow(cell, g, self.config, self.chemistry, self.dt, self.tick);
         let excess = (cell.energy - cell.energy_capacity(self.config)).max(0.);
         cell.energy -= excess;
         crate::sensing::observe_physiology(cell, g, self.config);
@@ -60,6 +61,7 @@ impl World {
             field: &self.field,
             genomes: &self.genomes,
             dt,
+            tick: self.tick,
         };
         let observer = self.observer.as_deref_mut().filter(|o| o.active());
         // Detailed experiment traces retain their existing serial stream. Live reduced

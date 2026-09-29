@@ -17,7 +17,7 @@ pub fn express(cell: &mut Cell, g: &Compiled) {
 }
 
 /// Automatic whole-body growth. No capability has its own construction request or inventory.
-pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, dt: f64) {
+pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, dt: f64, tick: u64) {
     let mass = cell.mass();
     let deficit = (2. * g.body.iter().sum::<f64>() - mass).max(0.);
     let available = (cell.material() - cell.capacity(c) * c.protected_inventory_fraction).max(0.);
@@ -25,7 +25,7 @@ pub fn grow(cell: &mut Cell, g: &Compiled, c: &Config, dt: f64) {
         .min(dt * c.growth_rate * mass * (1. - cell.damage))
         .min(available);
     let proposed = body(g, mass + requested);
-    let reserve = crate::accounting::interval_reserve(cell, &proposed, c);
+    let reserve = crate::accounting::interval_reserve(cell, &proposed, c, tick);
     let grown = requested.min((cell.energy - reserve).max(0.) / c.growth_energy);
     if grown <= 0. {
         return;

@@ -216,6 +216,11 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         result["cell"]["body"] = json!(cell.body);
         result["cell"]["brain"] = json!(crate::controller::observed_state(&cell.brain));
     }
+    result["upkeep"] = json!(cell.map(|c| {
+        let age = c.age(&w.config, w.tick);
+        json!({"ageSeconds":age,"bodyMultiplier":crate::organism::aging_multiplier(&c.body,age,&w.config),
+            "maintenancePerSecond":crate::organism::maintenance_rate(&c.body,c.damage,age,&w.config)})
+    }));
     result["fieldInterface"] = json!(interface.map(|r| r.field));
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));

@@ -34,6 +34,13 @@ export function CellOrganization({ inspection }: { inspection: Inspection }) {
       <p>
         Last tick: biomass gained {n(cell.flows.grown)}; growth work {n(cell.flows.growth)}.
       </p>
+      {inspection.upkeep && (
+        <p>
+          Age {n(inspection.upkeep.ageSeconds)} simulated seconds · body upkeep{" "}
+          {n(inspection.upkeep.bodyMultiplier)}× newborn rate · maintenance{" "}
+          {n(inspection.upkeep.maintenancePerSecond)} work / second.
+        </p>
+      )}
       <p>
         Field-facing interface {n((inspection.fieldInterface ?? 1) * 100)}%. Contact material:
         received {n(cell.flows.contactImported)}, lost {n(cell.flows.contactLost)} this tick. Direct

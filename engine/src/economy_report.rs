@@ -126,7 +126,7 @@ pub fn report(seed: u64, config: Config) -> Result<Value, String> {
         "environmentalOpportunity":crate::weathering_budget::report(&w.config,&w.chemistry),
         "reservoirResponse":crate::source_medium::observe(&w),
         "cases":cases(&w),"investments":investments(&w),"startup":startup,
-        "assumptions":["Undamaged funded stocks; import effort one; motor effort 0.5 in budget cases",
+        "assumptions":["Newborn age-zero undamaged bodies; import effort one; motor effort 0.5 in budget cases. Older cells pay the core-protected aging maintenance law",
             "sourceLimits terminalConversionWorkCeiling is a zero-medium reference for founder 1, not an upper bound on environmentally driven work",
             "Budget work uses uniform unit illumination and the stated free-field plus conditional private mixture; geographic reservoir and surrounding-body projections are omitted",
             "Active-pump budget only: no passive membrane exchange, shared depletion, export, repair or movement through gradients",

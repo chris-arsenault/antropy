@@ -279,7 +279,8 @@ async fn operator_saves_lists_loads_and_deletes_stored_worlds() {
     let shutdown = host.save(None, Reason::Automatic, true).await.unwrap();
     let (relaunched, _) = stored_fixture(Some(TOKEN), Some(persistence)).await;
     let status = json_body(call(&relaunched, "GET", "/api/status", None).await).await;
-    assert_eq!(status["tick"], shutdown.tick);
+    // Startup resumes immediately; the fixture's pause can arrive after a physical step.
+    assert!(status["tick"].as_u64().unwrap() >= shutdown.tick);
     let (disabled, _) = stored_fixture(Some(TOKEN), None).await;
     let off = call(&disabled, "GET", "/api/checkpoints", None).await;
     assert_eq!(off.status(), StatusCode::NOT_IMPLEMENTED);

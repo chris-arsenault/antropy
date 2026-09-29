@@ -68,7 +68,7 @@ fn growth_requires_resources_and_preserves_every_genetic_proportion() {
         cell.inventory.fill(0.);
         cell.inventory.set(0, material);
         let before = cell.mass();
-        physiology::grow(&mut cell, g, &w.config, 10000.);
+        physiology::grow(&mut cell, g, &w.config, 10000., w.tick);
         if energy == 0. || material == 0. {
             close(cell.mass(), before);
         } else {
@@ -141,8 +141,8 @@ fn repeated_division_cannot_dilute_genetic_capabilities() {
 fn equal_biomass_has_equal_basal_cost_regardless_of_equipment() {
     let w = diagnostics::nutrition(0.8, 2., false, false);
     let mut a = w.cells[0].body;
-    let before = maintenance_rate(&a, 0.2, &w.config);
+    let before = maintenance_rate(&a, 0.2, 0., &w.config);
     a[1] += a[11];
     a[11] = 0.;
-    close(before, maintenance_rate(&a, 0.2, &w.config));
+    close(before, maintenance_rate(&a, 0.2, 0., &w.config));
 }

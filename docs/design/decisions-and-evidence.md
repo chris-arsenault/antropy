@@ -163,6 +163,18 @@ failure; it does not establish that movement pays or that the live colony will d
 
 ## Cellular organization and shared interfaces
 
+September29: the user requested independent birth headings and an effective lifespan with
+an inherited tradeoff. V45 randomizes newborn heading and the local division axis with the
+body RNG; chemistry, genes, conservative resource splits and inherited injury retain their
+own rules. The parent's spatial direction is not genetic information. Private neural state
+already resets at birth and receptor baselines initialize from the daughter's surroundings.
+
+Age now raises body maintenance through a shared core-fraction law. More core slows the rise
+at the expense of functional capacity; no separate lifespan allele or birthday death rule is
+introduced. Fission creates age-zero daughters, while a budding parent remains old. The
+[delivery plan](../plans/BIRTH-AND-AGING-PLAN.md) records mechanics evidence and the chosen
+initial timescale. This does not establish improved dispersal or eventual colony turnover.
+
 V33 implements the [joint design](cellular-organization-and-exchange.md). The user withdrew internal
 compartments: each cell retains access to all 256 chemicals through one free mixture. Retained
 free/bound composition changes relative enzyme rates through the existing signed profiles;

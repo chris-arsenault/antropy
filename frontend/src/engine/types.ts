@@ -8,6 +8,7 @@ export interface EngineConfig extends Record<string, unknown> {
   mesh: number;
   dt: number;
   physiologyInterval: number;
+  agingTime: number;
   weatheringRate: number;
   illuminationContrast: number;
   illuminationFastPeriod: number;
@@ -211,6 +212,7 @@ export interface CellState {
   chemicalFlows: { imported: number[]; exported: number[]; consumed: number[]; produced: number[] };
 }
 export interface Inspection {
+  upkeep: { ageSeconds: number; bodyMultiplier: number; maintenancePerSecond: number } | null;
   fieldInterface: number | null;
   genealogy: {
     complete: boolean;

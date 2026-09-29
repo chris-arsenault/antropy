@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 44;
+pub const VERSION: u32 = 45;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -452,12 +452,12 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY44\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, b"ANTROPY45\0".to_vec()).map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY44\0")
-            .ok_or("Unsupported physical checkpoint; v44 required")?;
+            .strip_prefix(b"ANTROPY45\0")
+            .ok_or("Unsupported physical checkpoint; v45 required")?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
