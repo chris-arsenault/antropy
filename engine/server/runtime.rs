@@ -1,5 +1,5 @@
 use super::{
-    display::{ViewKey, encode},
+    display::{ViewKey, encode, encode_terrain},
     observations::Observations,
     persistence::Persistence,
     store::{Capture, Reason},
@@ -26,6 +26,8 @@ pub struct Publication {
     pub frames: BTreeMap<ViewKey, Bytes>,
     pub projections: u64,
     pub common: axum::extract::ws::Utf8Bytes,
+    pub terrain: Bytes,
+    pub terrain_revision: u32,
 }
 pub struct Command {
     pub generation: u64,
@@ -98,6 +100,8 @@ pub struct Runtime {
     sequence: u64,
     projections: u64,
     queries: BTreeMap<String, Value>,
+    terrain: Bytes,
+    terrain_revision: u32,
 }
 impl Runtime {
     pub fn new(seed: u64, config: Config, threads: usize) -> Result<Self, String> {
@@ -121,6 +125,8 @@ impl Runtime {
             sequence: 0,
             projections: 0,
             queries: BTreeMap::new(),
+            terrain: Bytes::new(),
+            terrain_revision: 0,
         })
     }
     pub fn command(&mut self, op: &str, payload: Value) -> Result<Value, String> {
@@ -235,6 +241,11 @@ impl Runtime {
             self.threads,
         )?;
         let mut frames = BTreeMap::new();
+        self.buffers.terrain.prepare(&self.world);
+        if self.terrain_revision != self.buffers.terrain.revision {
+            self.terrain = encode_terrain(&self.buffers, self.generation);
+            self.terrain_revision = self.buffers.terrain.revision;
+        }
         for key in keys
             .into_iter()
             .collect::<std::collections::BTreeSet<_>>()
@@ -271,6 +282,8 @@ impl Runtime {
             frames,
             projections: self.projections,
             common,
+            terrain: self.terrain.clone(),
+            terrain_revision: self.terrain_revision,
         })
     }
 }

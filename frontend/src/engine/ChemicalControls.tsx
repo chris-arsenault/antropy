@@ -15,6 +15,7 @@ export function ChemicalControls({
           value={value.base}
           onChange={(e) => change({ ...value, base: e.target.value as ChemicalDisplay["base"] })}
         >
+          <option value="landscape">Living landscape</option>
           <option value="matter">Dissolved amount</option>
           <option value="potential">Energy per material</option>
           <option value="chemical">Chemical #{value.species}</option>
@@ -101,6 +102,8 @@ function baseLegend(value: ChemicalDisplay) {
 }
 
 const terrainLegend: Partial<Record<ChemicalDisplay["base"], string>> = {
+  landscape:
+    "Earth → teal: resistant → conductive ground. Contours show height every four units; closer lines mean steeper slopes. Ground brightness follows received light. Translucent blue → amber chemistry shows 0.5 → 8 energy / material. Reservoir outer bands show the local supply clock: copper 0×, pale 1×, teal 2×; inner solid/cross or dashed rings still mean stocked or empty. Cells retain their energy colors.",
   height:
     "Blue → sand: low → high terrain. Height changes resistance; cells remain on the XY plane.",
   conductance:

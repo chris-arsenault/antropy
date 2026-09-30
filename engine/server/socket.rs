@@ -102,6 +102,7 @@ struct Viewer {
     operator: bool,
     awaiting: Option<u64>,
     last: u64,
+    terrain_revision: u32,
 }
 impl Drop for Viewer {
     fn drop(&mut self) {
@@ -179,6 +180,7 @@ async fn run(socket: WebSocket, state: State, _permit: OwnedSemaphorePermit) {
         operator: false,
         awaiting: None,
         last: 0,
+        terrain_revision: 0,
     };
     let (mut sink, mut source) = socket.split();
     let mut publications = state.host.publications.clone();
@@ -208,14 +210,18 @@ async fn run(socket: WebSocket, state: State, _permit: OwnedSemaphorePermit) {
                 let metadata = publication_metadata(&p, &viewer);
                 let common = p.common.clone();
                 let sequence = p.sequence;
+                let terrain_revision = p.terrain_revision;
+                let terrain = (viewer.terrain_revision != terrain_revision).then(|| p.terrain.clone());
                 drop(p);
                 let send = async {
                     sink.send(Message::Text(metadata.to_string().into())).await?;
                     sink.send(Message::Text(common)).await?;
+                    if let Some(terrain) = terrain { sink.send(Message::Binary(terrain)).await?; }
                     sink.send(Message::Binary(frame)).await
                 };
                 if !matches!(tokio::time::timeout(Duration::from_secs(5), send).await, Ok(Ok(()))) { break; }
                 viewer.last = sequence; viewer.awaiting = Some(sequence);
+                viewer.terrain_revision = terrain_revision;
             }
             _ = heartbeat.tick() => {
                 if last_input.elapsed() > Duration::from_secs(30) { break; }

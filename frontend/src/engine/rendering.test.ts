@@ -58,13 +58,13 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
     buffer = view.cells.buffer,
     expectedMatter = view.field[0];
   renderer.draw(world, [24, 24], options, true);
-  expect(g.uploads.length).toBe(3);
+  expect(g.uploads.length).toBe(4);
   expect(g.uploads.every((v) => v.buffer === buffer)).toBe(true);
-  expect(g.uploads[0].byteOffset).toBe(view.cells.byteOffset);
+  expect(g.uploads[3].byteOffset).toBe(view.cells.byteOffset);
   expect([view.nx, view.ny]).toEqual([12, 12]);
-  expect(g.uploads[1].byteLength).toBe(12 * 12 * 8 * 4);
+  expect(g.uploads[0].byteLength).toBe(12 * 12 * 8 * 4);
   // The illumination overlay must retain amount/energy data, not select the dedicated light map.
-  expect((g.uploads[1] as Float32Array)[0]).toBe(expectedMatter);
+  expect((g.uploads[0] as Float32Array)[0]).toBe(expectedMatter);
   const fieldUploads = () => g.uploads.filter((v) => v.byteOffset === view.field.byteOffset).length;
   const textures = fieldUploads();
   g.completion.ready = false;
@@ -82,6 +82,12 @@ it("uploads borrowed WASM views and keeps field uploads independent from camera 
   expect(fieldUploads()).toBe(textures + 1);
   renderer.draw(world, [24, 24], options, false);
   expect(fieldUploads()).toBe(textures + 2);
+  const terrainUploads = () =>
+    g.uploads.filter((v) => v.byteOffset === view.terrain.values.byteOffset).length;
+  expect(terrainUploads()).toBe(1);
+  renderer.resetTerrain();
+  renderer.draw(world, [24, 24], options, false);
+  expect(terrainUploads()).toBe(2);
   expect(g.calls).not.toContain("drawArraysInstanced");
   expect(world.snapshot()).toEqual(before);
   renderer.dispose();

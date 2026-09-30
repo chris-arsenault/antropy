@@ -35,6 +35,7 @@ vi.mock("./remoteConnection", () => ({
 vi.mock("./renderer", () => ({
   Renderer: class {
     draw = transport.draw;
+    resetTerrain = vi.fn();
   },
 }));
 afterEach(() => {
@@ -70,7 +71,10 @@ it("publishes remote status through the existing budget and keeps binary frames 
     })
   );
   const packet = new ArrayBuffer(96);
-  new Uint32Array(packet, 0, 12).set([0x42545250, 1, 1, 1, 0, 0, 1, 1, 0, 8, 0, 0]);
+  const terrain = new ArrayBuffer(48);
+  new Uint32Array(terrain, 0, 8).set([0x42545452, 1, 1, 7, 1, 1, 4, 0]);
+  transport.receive(terrain);
+  new Uint32Array(packet, 0, 12).set([0x42545250, 2, 1, 1, 0, 0, 1, 1, 0, 8, 0, 7]);
   new Float32Array(packet, 48, 4).set([0, 0, 2, 2]);
   transport.receive(packet);
   expect(sent.some((m) => m.kind === "definition")).toBe(true);
@@ -93,7 +97,9 @@ it("requests fresh remote projections when switching terrain, film and emitted l
   worker.onmessage!({
     data: { id: 1, op: "initialize", payload: { endpoint: "ws://localhost/stream", canvas: {} } },
   } as MessageEvent<Request>);
-  for (const [index, base] of (["terrain", "cover", "emission", "potential"] as const).entries()) {
+  for (const [index, base] of (
+    ["terrain", "cover", "emission", "height", "landscape"] as const
+  ).entries()) {
     const layers = chemicalLayers({ ...initialChemicalDisplay, base });
     worker.onmessage!({
       data: {

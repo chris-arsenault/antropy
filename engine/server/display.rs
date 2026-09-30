@@ -34,7 +34,7 @@ impl ViewKey {
             .ok_or("Invalid cell color")? as u32;
         let layers = p["layers"]
             .as_array()
-            .filter(|v| v.len() == 18 && v.iter().all(Value::is_boolean))
+            .filter(|v| v.len() == 19 && v.iter().all(Value::is_boolean))
             .ok_or("Invalid layers")?;
         let selected = if (11..=13).contains(&color) {
             p["selected"].as_u64().unwrap_or(0)
@@ -101,7 +101,7 @@ pub fn encode(b: &Buffers, sequence: u64, generation: u64, tick: u64, extent: [f
     let mut out = Vec::with_capacity(64 + (b.cells.len() + b.field.len() + b.markers.len()) * 4);
     for n in [
         0x42545250,
-        1,
+        2,
         generation as u32,
         sequence as u32,
         tick as u32,
@@ -111,7 +111,7 @@ pub fn encode(b: &Buffers, sequence: u64, generation: u64, tick: u64, extent: [f
         b.cells.len() as u32,
         b.field.len() as u32,
         b.markers.len() as u32,
-        0,
+        b.terrain.revision,
     ] {
         out.extend(n.to_le_bytes());
     }
@@ -119,6 +119,28 @@ pub fn encode(b: &Buffers, sequence: u64, generation: u64, tick: u64, extent: [f
         out.extend(v.to_le_bytes());
     }
     for v in b.cells.iter().chain(&b.field).chain(&b.markers) {
+        out.extend(v.to_le_bytes());
+    }
+    Bytes::from(out)
+}
+
+/// Static bounded overview, shared by all view selections and sent once per world/connection.
+pub fn encode_terrain(b: &Buffers, generation: u64) -> Bytes {
+    let t = &b.terrain;
+    let mut out = Vec::with_capacity(32 + t.values.len() * 4);
+    for n in [
+        0x42545452,
+        1,
+        generation as u32,
+        t.revision,
+        t.nx,
+        t.ny,
+        t.values.len() as u32,
+        0,
+    ] {
+        out.extend(n.to_le_bytes());
+    }
+    for v in &t.values {
         out.extend(v.to_le_bytes());
     }
     Bytes::from(out)
@@ -142,7 +164,7 @@ mod tests {
             (16, 15),
             (17, 16),
         ] {
-            let mut layers = [false; 18];
+            let mut layers = [false; 19];
             layers[index] = true;
             let request = serde_json::json!({"species":0,"color":3,"layers":layers});
             assert_eq!(ViewKey::parse(&request).unwrap().kind, kind);

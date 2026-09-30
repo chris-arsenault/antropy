@@ -149,8 +149,8 @@ export class Engine {
       this.exports.antropy_render(handle, kind, species, color, Number(field), selected) >>> 0;
     if (!pointer) throw new Error("Invalid render request");
     const memory = this.exports.memory.buffer;
-    const d = new Uint32Array(memory, pointer, 13);
-    if (d[0] !== 2) throw new Error("Incompatible render layout");
+    const d = new Uint32Array(memory, pointer, 18);
+    if (d[0] !== 3) throw new Error("Incompatible render layout");
     return {
       cells: new Float32Array(memory, d[2], d[3]),
       field: new Float32Array(memory, d[4], d[5]),
@@ -160,6 +160,12 @@ export class Engine {
       nx: d[6],
       ny: d[7],
       tick: d[8] + d[9] * 4294967296,
+      terrain: {
+        values: new Float32Array(memory, d[13], d[14]),
+        nx: d[15],
+        ny: d[16],
+        revision: d[17],
+      },
     };
   }
 }

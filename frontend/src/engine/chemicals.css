@@ -136,3 +136,29 @@
 .context-swatch.stress {
   background: radial-gradient(circle, #ed829b 1px, transparent 2px) 0 0 / 5px 5px;
 }
+.landscape-key {
+  column-gap: 14px;
+  row-gap: 6px;
+}
+.landscape-key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #bdc9cd;
+}
+.context-swatch.ground,
+.field-ramp.landscape {
+  background: linear-gradient(90deg, #3d2e21, #1f524d);
+}
+.context-swatch.chemistry {
+  background: linear-gradient(90deg, #3966cb, #ecb04c);
+}
+.context-swatch.contours {
+  background: repeating-linear-gradient(155deg, transparent 0 4px, #7f8c78 4px 5px);
+}
+.context-swatch.season {
+  border-radius: 50%;
+  background: linear-gradient(90deg, #b85c2e, #b8b38c, #1fccad);
+  mask: radial-gradient(circle, transparent 30%, #000 40%);
+}

@@ -1,6 +1,7 @@
 import { type EngineWorld } from "./client";
 import { cellFragment, cellVertex, fieldFragment, fieldVertex } from "./shaders";
 import { SpriteBatch } from "./spriteBatch";
+import { TerrainTexture } from "./terrainTexture";
 
 export type DisplayFrame = ReturnType<EngineWorld["render"]> & {
   extent?: [number, number, number, number];
@@ -61,6 +62,7 @@ export class Renderer {
   private readonly fieldProgram: WebGLProgram;
   private readonly cellProgram: WebGLProgram;
   private readonly texture: WebGLTexture;
+  private readonly terrain: TerrainTexture;
   private readonly sprites: SpriteBatch;
   private readonly empty: WebGLVertexArrayObject;
   private textureSize = "";
@@ -79,6 +81,7 @@ export class Renderer {
     this.cellProgram = program(gl, cellVertex, cellFragment);
     this.texture = gl.createTexture()!;
     this.sprites = new SpriteBatch(gl);
+    this.terrain = new TerrainTexture(gl);
     this.empty = gl.createVertexArray()!;
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -109,9 +112,11 @@ export class Renderer {
       Math.max(0, options.selected)
     );
     this.upload(frame, refreshField, size);
+    const terrainBytes = this.terrain.upload(frame.terrain);
     this.drawField(size, options);
-    this.drawCells(size, options, frame.count);
     this.drawMarkers(size, options, frame.markers, frame.markerCount);
+    this.sprites.upload(frame.cells);
+    this.drawCells(size, options, frame.count);
     this.drawShadow(size, options);
     this.pending = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
     if (!this.pending) throw new Error("Graphics completion fence unavailable");
@@ -119,6 +124,7 @@ export class Renderer {
     return {
       tick: frame.tick,
       uploadedBytes:
+        terrainBytes +
         frame.cells.byteLength +
         frame.markers.byteLength +
         (refreshField ? frame.field.byteLength : 0),
@@ -128,7 +134,6 @@ export class Renderer {
   private upload(frame: DisplayFrame, refresh: boolean, size: [number, number]) {
     this.fieldExtent = frame.extent ?? [0, 0, ...size];
     const gl = this.gl;
-    this.sprites.upload(frame.cells);
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     const key = `${frame.nx}:${frame.ny}`;
     if (key !== this.textureSize) {
@@ -174,6 +179,7 @@ export class Renderer {
     gl.useProgram(p);
     gl.uniform2f(gl.getUniformLocation(p, "viewport"), o.width, o.height);
     gl.uniform3f(gl.getUniformLocation(p, "camera"), o.camera.x, o.camera.y, o.camera.scale);
+    gl.uniform1i(gl.getUniformLocation(p, "landscape"), Number(o.layers[18] ?? false));
   }
   private drawMarkers(
     size: [number, number],
@@ -185,7 +191,10 @@ export class Renderer {
       p = this.cellProgram;
     this.sprites.upload(records);
     this.common(p, o);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.bindVertexArray(this.empty);
+    gl.uniform2f(gl.getUniformLocation(p, "worldSize"), ...size);
     gl.uniform1i(gl.getUniformLocation(p, "records"), 1);
     gl.uniform1f(gl.getUniformLocation(p, "halo"), 2);
     gl.uniform1f(gl.getUniformLocation(p, "showSources"), Number(o.sources));
@@ -198,7 +207,7 @@ export class Renderer {
   }
 
   private drawShadow(size: [number, number], o: ViewOptions) {
-    if (!o.layers[7] || illuminationMode(o.layers) > 0) return;
+    if (!o.layers[7] || o.layers[18] || illuminationMode(o.layers) > 0) return;
     this.drawField(size, o, true);
   }
 
@@ -223,6 +232,8 @@ export class Renderer {
     gl.uniform1i(gl.getUniformLocation(p, "illuminationMode"), illuminationMode(o.layers));
     gl.uniform1i(gl.getUniformLocation(p, "shadowPass"), Number(shadow));
     gl.uniform1f(gl.getUniformLocation(p, "exposure"), o.exposure);
+    gl.uniform1i(gl.getUniformLocation(p, "terrain"), 2);
+    gl.uniform1i(gl.getUniformLocation(p, "showLight"), Number(o.layers[7] ?? false));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
@@ -241,7 +252,7 @@ export class Renderer {
       gl.uniform1f(gl.getUniformLocation(p, "halo"), halo);
       gl.uniform1f(
         gl.getUniformLocation(p, "opacity"),
-        halo ? (1 - detail) * 0.32 : 0.2 + detail * 0.8
+        halo ? (1 - detail) * 0.22 : 0.65 + detail * 0.35
       );
       for (const x of [-size[0], 0, size[0]])
         for (const y of [-size[1], 0, size[1]]) {
@@ -251,6 +262,10 @@ export class Renderer {
     }
   }
 
+  resetTerrain() {
+    this.terrain.reset();
+  }
+
   dispose() {
     const gl = this.gl;
     if (this.pending) gl.deleteSync(this.pending);
@@ -258,6 +273,7 @@ export class Renderer {
     gl.deleteProgram(this.fieldProgram);
     gl.deleteProgram(this.cellProgram);
     gl.deleteTexture(this.texture);
+    this.terrain.dispose();
     this.sprites.dispose();
     gl.deleteVertexArray(this.empty);
   }

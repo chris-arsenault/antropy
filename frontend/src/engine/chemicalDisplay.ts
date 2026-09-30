@@ -1,6 +1,7 @@
 export interface ChemicalDisplay {
   species: number;
   base:
+    | "landscape"
     | "matter"
     | "potential"
     | "chemical"
@@ -24,16 +25,16 @@ export interface ChemicalDisplay {
 }
 export const initialChemicalDisplay: ChemicalDisplay = {
   species: 0,
-  base: "potential",
+  base: "landscape",
   illumination: true,
-  impedance: true,
-  stress: true,
+  impedance: false,
+  stress: false,
   exposure: 4,
 };
 export function chemicalLayers(view: ChemicalDisplay) {
   return [
     view.base === "matter",
-    view.base === "potential",
+    view.base === "potential" || view.base === "landscape",
     view.impedance,
     view.stress,
     view.base === "chemical",
@@ -50,6 +51,7 @@ export function chemicalLayers(view: ChemicalDisplay) {
     view.base === "seasonAmplitude",
     view.base === "seasonPhase",
     view.base === "ceiling",
+    view.base === "landscape",
   ];
 }
 export const quantity = (n: number) => (n === 0 ? "0" : n.toPrecision(3));

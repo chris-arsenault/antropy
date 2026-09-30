@@ -32,10 +32,9 @@ it("preserves the world, display controls and drafts through panel navigation", 
     const canvas = container.querySelector("canvas");
     expect(container.textContent).toContain("Tick 0");
     expect(container.querySelector("dialog[open]")).toBeNull();
-    expect(button(container, "Light").getAttribute("aria-pressed")).toBe("true");
-    expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("true");
-    expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("true");
-    await click(container, "Light");
+    expect(container.querySelector('[aria-label="Landscape legend"]')).not.toBeNull();
+    expect(container.textContent).toContain("Ground: resistant → conductive");
+    expect(container.textContent).toContain("Reservoir band: slow → fast");
     await click(container, "Population");
     expect(container.querySelector(".population-totals dd")?.textContent).toBe("48");
     expect(container.querySelector(".genealogy-panel")).toBeNull();
@@ -94,9 +93,10 @@ async function checkMapSelection(container: HTMLElement) {
   await click(container, "Map");
   expect(container.textContent).toContain("Browse retained spatial samples");
   expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
-  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("potential");
-  expect(control<HTMLInputElement>(container, "Light and shadow").checked).toBe(false);
-  expect(control<HTMLInputElement>(container, "Movement resistance").checked).toBe(true);
+  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("landscape");
+  expect(control<HTMLInputElement>(container, "Light and shadow").checked).toBe(true);
+  expect(control<HTMLInputElement>(container, "Movement resistance").checked).toBe(false);
+  expect(control<HTMLInputElement>(container, "Stress exposure").checked).toBe(false);
   await act(async () => control<HTMLInputElement>(container, "Stress exposure").click());
   await act(async () => control<HTMLInputElement>(container, "Population regions").click());
   await click(container, "Step");
@@ -111,9 +111,9 @@ async function checkMapSelection(container: HTMLElement) {
   expect(control<HTMLSelectElement>(container, "Environment").value).toBe("chemical");
   expect(control<HTMLSelectElement>(container, "Cell colors").value).toBe("3");
   expect(control<HTMLInputElement>(container, "Population regions").checked).toBe(false);
-  expect(button(container, "Light").getAttribute("aria-pressed")).toBe("false");
-  expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("false");
-  expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("true");
+  expect(button(container, "Light").getAttribute("aria-pressed")).toBe("true");
+  expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("true");
+  expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("false");
 }
 async function checkLineage(container: HTMLElement) {
   await click(container, "Lineage");

@@ -1,3 +1,5 @@
+import { landscapeShader } from "./landscapeShader";
+
 export const fieldVertex = `#version 300 es
 precision highp float;
 out vec2 pixel;
@@ -22,6 +24,7 @@ uniform bool shadowPass;
 uniform float exposure;
 in vec2 pixel;
 out vec4 color;
+${landscapeShader}
 vec4 sampleField(ivec2 p, ivec2 n) {
   ivec2 node=(p+n)%n;
   return texelFetch(chemistry,ivec2(node.x*2,node.y),0);
@@ -57,12 +60,11 @@ void main() {
   }
   vec4 detail=mix(mix(sampleSelected(base,n),sampleSelected(base+ivec2(1,0),n),f.x),mix(sampleSelected(base+ivec2(0,1),n),sampleSelected(base+ivec2(1,1),n),f.x),f.y);
   float presence=1.0-exp(-exposure*amount.x);
-  // A constant slate surface leaves room for shadow without inventing field detail.
-  vec3 background=vec3(0.09,0.17,0.21);
+  vec3 background=landscape ? landscapeGround(world) : vec3(0.09,0.17,0.21);
   vec3 light=mix(background,vec3(0.36,0.68,0.65),presence*layers.x);
   float quality=clamp((amount.y/max(amount.x,1e-20)-0.5)/7.5,0.0,1.0);
   vec3 energy=mix(vec3(0.22,0.4,0.8),vec3(0.93,0.69,0.3),quality);
-  light=mix(light,energy,presence*layers.y);
+  light=mix(light,energy,presence*layers.y*(landscape ? 0.52 : 1.0));
   light=mix(light,mix(vec3(0.035,0.12,0.23),vec3(0.72,0.4,0.12),clamp(detail.w,0.0,1.0)),weatheringLayer);
   light=mix(light,vec3(0.83,0.64,0.93),selectedLayer*(1.0-exp(-exposure*max(0.0,detail.x))));
   if(illuminationMode>0) {
@@ -78,7 +80,8 @@ void main() {
     if(illuminationMode==10) light=mix(vec3(0.25),0.5+0.5*cos(6.2831853*(amount.x+vec3(0.0,0.3333333,0.6666667))),clamp(amount.y,0.0,1.0));
     if(illuminationMode==11) light=solarGround(clamp(amount.x,0.0,1.0));
   }
-  // Screen-space patterns keep hazards distinguishable at every zoom.
+  if(landscape && showLight) light=receivedShade(light,amount.z);
+  // Optional diagnostic patterns remain available outside the default composition.
   float band=1.0-smoothstep(0.025,0.075,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/12.0)-0.5));
   float dotMark=1.0-smoothstep(0.13,0.23,length(fract(gl_FragCoord.xy/8.0)-0.5));
   light=mix(light,vec3(0.95,0.75,0.42),layers.z*detail.y*band*0.38);
@@ -93,6 +96,7 @@ uniform vec2 viewport;
 uniform vec3 camera;
 uniform vec2 offset;
 uniform float halo;
+uniform bool landscape;
 out vec2 local;
 out vec4 shade;
 out vec4 details;
@@ -107,6 +111,7 @@ void main() {
   vec4 detail = texelFetch(records,address+ivec2(2,0),0);
   local = corners[gl_VertexID % 6];
   float r = halo > 0.5 && halo < 1.5 ? max(geometry.z*3.5,2.0) : max(geometry.z,1.2/camera.z);
+  if(landscape && halo>1.5 && detail.x<0.5) r*=1.25;
   vec2 point = geometry.xy + offset + local*r;
   worldPoint = point;
   vec2 clip = (point-camera.xy)*camera.z/viewport*2.0;
@@ -123,6 +128,7 @@ uniform float opacity;
 uniform float selected;
 uniform float showSources;
 uniform float showDeaths;
+uniform bool landscape;
 uniform vec2 worldSize;
 in vec2 local;
 in vec4 shade;
@@ -142,10 +148,18 @@ void main() {
     float stroke;
     if(details.x<0.5) {
       if(showSources<0.5) discard;
-      stroke=max(step(0.92,d),step(min(abs(local.x),abs(local.y)),0.035)*step(d,0.25));
+      if(landscape && membership>0.5 && d>0.85) {
+        vec3 season=details.z<1.0 ? mix(vec3(0.72,0.36,0.18),vec3(0.72,0.70,0.55),details.z)
+          : mix(vec3(0.72,0.70,0.55),vec3(0.12,0.80,0.68),details.z-1.0);
+        color=vec4(season,0.78*smoothstep(0.85,0.89,d)*(1.0-smoothstep(0.96,1.0,d)));
+        return;
+      }
+      float sourceD=d*(landscape ? 1.25 : 1.0);
+      if(sourceD>1.0) discard;
+      stroke=max(step(0.92,sourceD),step(min(abs(local.x),abs(local.y)),0.035)*step(sourceD,0.25));
       if(shade.a<0.5) {
         float dash=step(0.45,fract(atan(local.y,local.x)*3.82));
-        stroke=step(0.92,d)*dash*0.38;
+        stroke=step(0.92,sourceD)*dash*0.38;
       }
     } else {
       if(showDeaths<0.5) discard;

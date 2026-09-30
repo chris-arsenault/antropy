@@ -26,6 +26,13 @@ array. A batched triangle draw addresses records by vertex ID. This replaces tin
 whose software-rendering cost caused the integrated throughput failure. Periodic images, cell
 detail, selection and population halos retain the same shader geometry and appearance.
 
+The integrated landscape adds a cached, derived RGBA terrain projection with at most 256 samples
+per axis. Height and enabled conductance occupy two lanes; the remaining lanes are reserved.
+It uses the periodic physical sampler without changing physics resolution. The renderer uploads
+its borrowed view to a separate texture once per terrain revision, then reacquires ordinary
+dynamic field and marker views as before. Source markers carry local seasonal timing separately
+from stock state. No additional arrays enter React or main-thread messages.
+
 Simulation ticks use scalar WASM exports without request/reply allocation or JSON. GPU uploads
 still transfer CPU bytes to device memory. This contract removes intermediate CPU copies; it does
 not claim that WebGL uses CPU memory as GPU memory. Keeping rendering beside WASM avoids the need
@@ -60,6 +67,12 @@ display records and eight display-field lanes as bounded binary packets; native 
 256-chemical physical field never leave the host. A remote browser worker owns these packets and
 feeds the same WebGL renderer. It runs no physical kernel. Local browser execution continues to
 borrow WASM views synchronously without a network-shaped copy path.
+
+Native terrain uses one shared encoded static packet, capped at 1 MiB plus its 32-byte header,
+sent before the first dynamic display per connection/world. Dynamic binary display version 2
+references its terrain revision; the worker requires matching generation and revision. Reconnect
+and world replacement discard cached terrain. Static terrain and its first dynamic frame share
+the existing one-publication acknowledgement boundary; later frames reuse the terrain packet.
 
 The server shares encoded common observations and matching projections across connections, with
 32 viewers, 16 distinct display selections, 32 queued commands and 64 cached queries per publication

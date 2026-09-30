@@ -33,10 +33,22 @@ fn common_projection_is_shared_and_does_not_advance_world() {
         species: 1,
         ..ViewKey::default()
     });
-    assert_eq!(r.publish(keys, 0.).unwrap().frames.len(), 2);
+    let next = r.publish(keys, 0.).unwrap();
+    assert_eq!(next.frames.len(), 2);
+    assert_eq!(p.terrain.as_ptr(), next.terrain.as_ptr());
+    assert_eq!(p.terrain_revision, next.terrain_revision);
+    assert!(p.terrain.len() <= 32 + 256 * 256 * 16);
+    assert_eq!(
+        u32::from_le_bytes(p.terrain[0..4].try_into().unwrap()),
+        0x42545452
+    );
     assert_eq!(before, r.world.snapshot().unwrap());
     assert_eq!(p.status["summary"]["tick"], 0);
     let bytes = p.frames.values().next().unwrap();
+    assert_eq!(
+        u32::from_le_bytes(bytes[44..48].try_into().unwrap()),
+        p.terrain_revision
+    );
     assert_eq!(
         u32::from_le_bytes(bytes[0..4].try_into().unwrap()),
         0x42545250
@@ -45,6 +57,7 @@ fn common_projection_is_shared_and_does_not_advance_world() {
 #[test]
 fn controls_apply_between_ticks_and_restart_replaces_generation() {
     let mut r = fixture();
+    let before = r.publish(vec![ViewKey::default()], 0.).unwrap();
     r.command("step", json!({})).unwrap();
     assert_eq!(r.world.tick, 1);
     assert!(!r.running);
@@ -55,6 +68,12 @@ fn controls_apply_between_ticks_and_restart_replaces_generation() {
     .unwrap();
     assert_eq!(r.generation, 2);
     assert_eq!(r.world.tick, 0);
+    let after = r.publish(vec![ViewKey::default()], 0.).unwrap();
+    assert_ne!(before.terrain_revision, after.terrain_revision);
+    assert_eq!(
+        u32::from_le_bytes(after.terrain[8..12].try_into().unwrap()),
+        2
+    );
 }
 #[test]
 fn spectator_allowlist_excludes_physical_and_cohort_mutations() {
@@ -119,6 +138,7 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
     let mut first = None;
     let mut rejected = false;
     let mut frames = 0;
+    let mut terrains = 0;
     tokio::time::timeout(Duration::from_secs(5), async {
         while let Some(Ok(message)) = active.next().await {
             match message {
@@ -129,6 +149,11 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
                     }
                 }
                 Message::Binary(b) => {
+                    if u32::from_le_bytes(b[..4].try_into().unwrap()) == 0x42545452 {
+                        terrains += 1;
+                        continue;
+                    }
+                    assert_eq!(terrains, 1);
                     let tick = u32::from_le_bytes(b[16..20].try_into().unwrap());
                     let seq = u32::from_le_bytes(b[12..16].try_into().unwrap());
                     if let Some(before) = first {
@@ -160,10 +185,11 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
     .unwrap();
     assert!(rejected);
     assert_eq!(frames, 3);
+    assert_eq!(terrains, 1);
     let publication = host.publications.borrow().clone();
     assert_eq!(publication.frames.len(), 1);
     assert!(publication.status["running"] == true);
-    // The unacknowledged consumer can have only its first binary frame.
+    // The unacknowledged consumer receives one static terrain and one dynamic frame.
     let mut slow_frames = 0;
     let _ = tokio::time::timeout(Duration::from_millis(100), async {
         while let Some(Ok(message)) = slow.next().await {
@@ -173,7 +199,7 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
         }
     })
     .await;
-    assert_eq!(slow_frames, 1);
+    assert_eq!(slow_frames, 2);
     let tick = host.publications.borrow().status["summary"]["tick"]
         .as_u64()
         .unwrap();

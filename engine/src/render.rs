@@ -2,6 +2,8 @@
 use crate::world::World;
 
 pub const STRIDE: usize = 12;
+#[path = "render_terrain.rs"]
+pub mod terrain;
 #[derive(Default)]
 pub struct Buffers {
     pub cells: Vec<f32>,
@@ -9,7 +11,8 @@ pub struct Buffers {
     body_signal: Vec<[f64; 2]>,
     illumination: crate::illumination::Illumination,
     pub markers: Vec<f32>,
-    pub descriptor: [u32; 13],
+    pub descriptor: [u32; 18],
+    pub terrain: terrain::Terrain,
     selection: Option<(u32, usize)>,
     pub colors: crate::presentation::Colors,
 }
@@ -40,6 +43,7 @@ impl Buffers {
             return Err("Invalid render selection".into());
         }
         self.colors.prepare(w, color, selected);
+        self.terrain.prepare(w);
         self.cells.clear();
         self.cells.reserve(w.cells.len() * STRIDE);
         for c in &w.cells {
@@ -89,7 +93,7 @@ impl Buffers {
             }
         }
         for s in &w.sources {
-            if !window.contains(w, s.habitat.x, s.habitat.y, s.habitat.radius) {
+            if !window.contains(w, s.habitat.x, s.habitat.y, s.habitat.radius * 1.25) {
                 continue;
             }
             let active = s.amount > 0.;
@@ -98,7 +102,9 @@ impl Buffers {
                 h.x as f32,
                 h.y as f32,
                 h.radius as f32,
-                0.,
+                w.shade
+                    .geography
+                    .season([h.x, h.y], w.tick as f64 * w.config.dt) as f32,
                 0.6,
                 0.85,
                 0.67,
@@ -106,7 +112,7 @@ impl Buffers {
                 0.,
                 -1.,
                 0.,
-                0.,
+                u8::from(w.config.terrain.seasons) as f32,
             ]);
         }
         for e in &w.events {
@@ -204,7 +210,7 @@ impl Buffers {
             self.selection = Some((kind, species));
         }
         self.descriptor = [
-            2,
+            3,
             (self.cells.len() / STRIDE) as u32,
             self.cells.as_ptr() as usize as u32,
             self.cells.len() as u32,
@@ -217,6 +223,11 @@ impl Buffers {
             self.markers.as_ptr() as usize as u32,
             self.markers.len() as u32,
             (self.markers.len() / STRIDE) as u32,
+            self.terrain.values.as_ptr() as usize as u32,
+            self.terrain.values.len() as u32,
+            self.terrain.nx,
+            self.terrain.ny,
+            self.terrain.revision,
         ];
         Ok(())
     }

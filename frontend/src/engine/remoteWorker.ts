@@ -3,7 +3,13 @@ import { ObservationPublisher } from "./observationPublisher";
 import { type Definition, type LiveStatus, type Inspection } from "./types";
 import { type Message, type Request } from "./protocol";
 import { RemoteConnection } from "./remoteConnection";
-import { decodeDisplay, type RemoteFrame } from "./remoteFrame";
+import {
+  decodeDisplay,
+  decodeTerrain,
+  isTerrainPacket,
+  type RemoteFrame,
+  type RemoteTerrain,
+} from "./remoteFrame";
 
 const port = self as unknown as {
   postMessage(m: Message): void;
@@ -18,6 +24,7 @@ let inspection: Inspection | null = null;
 let selected: number | null = null;
 let view: ViewOptions | null = null;
 let frame: RemoteFrame | null = null;
+let terrain: RemoteTerrain | null = null;
 let revision = 0;
 let generation = 0;
 let sequence = 0;
@@ -54,6 +61,8 @@ function connectionState(value: boolean) {
 }
 function opened() {
   frame = null;
+  terrain = null;
+  renderer.resetTerrain();
   definition = null;
   sequence = 0;
   viewKey = "";
@@ -62,17 +71,7 @@ function opened() {
 }
 function receive(data: string | ArrayBuffer) {
   if (typeof data !== "string") {
-    const next = decodeDisplay(data);
-    if (next.generation !== generation || next.sequence !== sequence)
-      throw new Error("Stale display identity");
-    if (acceptedRevision !== revision) {
-      connection.call("ack", { sequence }).catch(() => {});
-      return;
-    }
-    frame = next;
-    framePending = true;
-    drawDirty = true;
-    draw();
+    receiveBinary(data);
     return;
   }
   const m = JSON.parse(data) as Record<string, unknown>;
@@ -84,6 +83,24 @@ function receive(data: string | ArrayBuffer) {
   if (m.kind !== "publication" || m.version !== 1) throw new Error("Incompatible server protocol");
   receivePublication(m);
 }
+function receiveBinary(data: ArrayBuffer) {
+  if (isTerrainPacket(data)) {
+    terrain = decodeTerrain(data);
+    if (terrain.generation !== generation) throw new Error("Stale terrain identity");
+    return;
+  }
+  const next = decodeDisplay(data, terrain);
+  if (next.generation !== generation || next.sequence !== sequence)
+    throw new Error("Stale display identity");
+  if (acceptedRevision !== revision) {
+    connection.call("ack", { sequence }).catch(() => {});
+    return;
+  }
+  frame = next;
+  framePending = true;
+  drawDirty = true;
+  draw();
+}
 function receivePublication(m: Record<string, unknown>) {
   const changed = generation !== m.generation;
   const replaced = changed || !definition;
@@ -91,6 +108,8 @@ function receivePublication(m: Record<string, unknown>) {
   connection.generation = generation;
   sequence = Number(m.sequence);
   if (replaced) {
+    terrain = null;
+    renderer.resetTerrain();
     definition = m.definition as Definition;
     inspection = null;
     selected = null;
@@ -161,7 +180,7 @@ function setView(p: Record<string, unknown>) {
   const key = JSON.stringify([
     view.species,
     view.color,
-    [view.layers[6], view.layers[8], view.layers[9], view.layers[10]],
+    [view.layers[6], ...view.layers.slice(8)],
     selected,
     viewport(),
   ]);
