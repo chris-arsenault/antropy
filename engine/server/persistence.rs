@@ -51,13 +51,18 @@ impl Persistence {
 }
 
 /// Restores the newest compatible stored world, otherwise starts the configured seed.
+/// Compatible checkpoints that all fail to restore stop the launch.
 pub fn initial(
     persistence: Option<&Persistence>,
     seed: u64,
     config: Config,
     threads: usize,
 ) -> Result<Runtime, String> {
-    if let Some((meta, world)) = persistence.and_then(|p| p.store.restore_latest()) {
+    let restored = match persistence {
+        Some(p) => p.store.restore_latest()?,
+        None => None,
+    };
+    if let Some((meta, world)) = restored {
         eprintln!(
             "Restored stored checkpoint {} at tick {}",
             meta.id, meta.tick

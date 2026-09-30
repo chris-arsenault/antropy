@@ -135,11 +135,45 @@ fn launch_restore_skips_other_formats_and_corrupt_data_and_cleans_partials() {
     let store = Store::open(&dir.0, u64::MAX).unwrap();
     assert!(!dir.0.join("partial.bin.gz.tmp").exists());
     assert!(!dir.0.join("automatic-9-t9.bin.gz").exists());
-    let (meta, restored) = store.restore_latest().unwrap();
+    let (meta, restored) = store.restore_latest().unwrap().unwrap();
     assert_eq!(meta.id, good.id);
     assert_eq!(restored.tick, 1);
     // Incompatible checkpoints are listed for the operator, never deleted by launch.
     assert_eq!(store.list().unwrap().len(), 3);
+}
+
+#[test]
+fn retention_keeps_the_newest_living_checkpoint_behind_empty_saves() {
+    let mut entries: Vec<_> = (0..10)
+        .map(|i| meta(&format!("automatic-{i}"), Reason::Automatic, 100 - i, 10))
+        .collect();
+    entries[8].population = 5;
+    let keep = retained(&entries, 1000);
+    assert!(keep.contains("automatic-8"));
+    assert!(!keep.contains("automatic-7") && !keep.contains("automatic-9"));
+    assert_eq!(keep.len(), 1 + AUTOMATIC);
+}
+
+#[test]
+fn launch_keeps_unreadable_checkpoints_and_refuses_to_replace_them() {
+    let dir = Dir::new("unreadable");
+    let store = Store::open(&dir.0, u64::MAX).unwrap();
+    let mut w = world();
+    w.step();
+    let unreadable = store.write(capture(&w, Reason::Automatic)).unwrap();
+    // A sidecar from a newer metadata schema no longer parses; its data must survive.
+    let sidecar = dir.0.join(format!("{}.json", unreadable.id));
+    std::fs::write(&sidecar, br#"{"future":true}"#).unwrap();
+    w.step();
+    let corrupt = store.write(capture(&w, Reason::Automatic)).unwrap();
+    let data = dir.0.join(format!("{}.bin.gz", corrupt.id));
+    let mut bytes = std::fs::read(&data).unwrap();
+    bytes[20] ^= 0xff;
+    std::fs::write(&data, &bytes).unwrap();
+    let store = Store::open(&dir.0, u64::MAX).unwrap();
+    assert!(dir.0.join(format!("{}.bin.gz", unreadable.id)).exists());
+    let error = store.restore_latest().unwrap_err();
+    assert!(error.contains(&corrupt.id));
 }
 
 #[test]

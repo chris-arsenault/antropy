@@ -72,19 +72,19 @@ pub struct Store {
 }
 
 impl Store {
-    /// Opens the directory and removes partial writes left by an interrupted save.
+    /// Opens the directory and removes partial writes left by an interrupted save or delete.
+    /// Data whose sidecar exists but no longer parses is kept for the operator.
     pub fn open(dir: impl Into<PathBuf>, budget: u64) -> Result<Self, StoreError> {
         let store = Self {
             dir: dir.into(),
             budget,
         };
         fs::create_dir_all(&store.dir)?;
-        let listed: BTreeSet<_> = store.list()?.into_iter().map(|m| m.id).collect();
         for entry in fs::read_dir(&store.dir)? {
             let name = entry?.file_name().to_string_lossy().into_owned();
             let orphan = name
                 .strip_suffix(".bin.gz")
-                .is_some_and(|id| !listed.contains(id));
+                .is_some_and(|id| !store.sidecar(id).exists());
             if name.ends_with(".tmp") || orphan {
                 fs::remove_file(store.dir.join(&name))?;
             }
@@ -190,18 +190,31 @@ impl Store {
         Ok(())
     }
     /// Newest checkpoint written by this physical format that also restores; others are kept.
-    pub fn restore_latest(&self) -> Option<(Meta, World)> {
-        for meta in self.list().ok()?.into_iter().filter(Meta::compatible) {
+    /// When this format's checkpoints exist but none restores, launch fails rather than
+    /// starting a fresh world whose saves would later prune them.
+    pub fn restore_latest(&self) -> Result<Option<(Meta, World)>, String> {
+        let listed = self.list().map_err(|e| format!("{e:?}"))?;
+        let mut failures = Vec::new();
+        for meta in listed.into_iter().filter(Meta::compatible) {
             match self
                 .read(&meta.id)
                 .map_err(|e| format!("{e:?}"))
                 .and_then(|(_, raw)| World::restore(&raw))
             {
-                Ok(world) => return Some((meta, world)),
-                Err(e) => eprintln!("Skipping stored checkpoint {}: {e}", meta.id),
+                Ok(world) => return Ok(Some((meta, world))),
+                Err(e) => {
+                    eprintln!("Skipping stored checkpoint {}: {e}", meta.id);
+                    failures.push(format!("{}: {e}", meta.id));
+                }
             }
         }
-        None
+        if failures.is_empty() {
+            return Ok(None);
+        }
+        Err(format!(
+            "No stored format-{VERSION} checkpoint restores; refusing to replace them: {}",
+            failures.join("; ")
+        ))
     }
     fn find(&self, id: &str) -> Result<Meta, StoreError> {
         if !valid_id(id) {
@@ -220,13 +233,15 @@ impl Store {
     }
 }
 
-/// Always keep the newest checkpoint and every manual one; fill the byte budget with the
-/// newest automatic checkpoints, at most six of them.
+/// Always keep the newest checkpoint, the newest one with living cells and every manual one;
+/// fill the byte budget with the newest automatic checkpoints, at most six of them. An
+/// extinct world keeps saving, so the living state must not age out behind empty saves.
 pub fn retained(entries: &[Meta], budget: u64) -> BTreeSet<String> {
     let mut keep = BTreeSet::new();
     let mut bytes = 0;
+    let living = entries.iter().find(|m| m.population > 0);
     let manual = entries.iter().filter(|m| m.reason == Reason::Manual);
-    for meta in entries.first().into_iter().chain(manual) {
+    for meta in entries.first().into_iter().chain(living).chain(manual) {
         if keep.insert(meta.id.clone()) {
             bytes += meta.bytes;
         }

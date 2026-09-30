@@ -136,7 +136,8 @@ cannot undo a control. Neither transport automatically replays uncertain command
 
 Native HTTP tests cover authentication, operation without viewers, restart validation and stale
 generations, checkpoint restoration, byte limits, and export ownership through slow consumption
-and cancellation. Store tests cover retention, the manual quota, id validation, partial-write
-cleanup, launch restore past incompatible and corrupt checkpoints, autosave skipping unchanged
+and cancellation. Store tests cover retention (including the newest living checkpoint), the manual quota, id
+validation, partial-write cleanup, preservation of data with unreadable sidecars, launch restore
+past incompatible and corrupt checkpoints, launch failure when none restores, autosave skipping unchanged
 worlds, and operator save/list/load/delete through HTTP. These tests do not claim that the
 updated API has been deployed.

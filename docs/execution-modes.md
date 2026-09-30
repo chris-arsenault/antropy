@@ -53,9 +53,10 @@ saved configuration rather than reapplying startup overrides.
 
 The server stores ordinary physical checkpoints in the running format, gzip-compressed, with a JSON sidecar
 recording reason, format version, seed, tick, generation, population, creation time and sizes.
-This mirrors browser recovery. It keeps the newest checkpoint, every manual checkpoint (at most
-eight), and the six newest automatic checkpoints within the byte budget. Older automatic ones
-expire. Manual checkpoints leave only by operator deletion; a ninth manual save is refused.
+This mirrors browser recovery. It keeps the newest checkpoint, the newest checkpoint with living
+cells, every manual checkpoint (at most eight), and the six newest automatic checkpoints within
+the byte budget. An extinct world keeps advancing environmental time and saving, so the last
+living state never ages out behind empty saves. Older automatic ones expire. Manual checkpoints leave only by operator deletion; a ninth manual save is refused.
 
 Automatic saves run every `BIOTROPY_AUTOSAVE_SECONDS` while the world changes, and once more on
 SIGTERM or Ctrl-C. The shutdown save waits up to 90 seconds behind an in-progress save, then the
@@ -65,11 +66,14 @@ time. Before encoding, the owner drops genotypes no live cell, founder or catalo
 references. This is the existing retention rule, applied at save time instead of waiting for
 the backlog to double. The last save attempt is reported in `/api/status`. Restart diagnostics
 live on the same volume ([server management](server-management.md#restart-diagnostics)). A write goes to a temporary file, is synced and renamed, then its sidecar is written the
-same way. Launch removes temporary files and data without a sidecar.
+same way. Launch removes temporary files and data without a sidecar file. Data whose sidecar
+exists but no longer parses stays on the volume for the operator.
 
 At launch the server restores the newest checkpoint whose recorded format equals the running
-binary's physical version and that decodes and validates. It logs and skips failures, and
-starts the configured seed when none qualifies. Checkpoints from another format are never
+binary's physical version and that decodes and validates. It logs and skips failures and falls
+back to older checkpoints of that format. It starts the configured seed only when no checkpoint
+of the running format exists; if such checkpoints exist and none restores, launch fails with the
+reasons instead of replacing them with a new world. Checkpoints from another format are never
 migrated or deleted at launch; they remain listed as incompatible until expired or deleted.
 The phenotype observer is not part of a checkpoint and is reconfigured as for a new world.
 [Server management](server-management.md) documents the operator save/list/load/delete API.
