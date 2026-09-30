@@ -14,7 +14,7 @@ pub fn map(w: &World, n: usize, kind: u32, (sin, cos): (f64, f64)) -> [f64; 2] {
     let [c, d] = g.seasons.get(n).copied().unwrap_or([0.; 2]);
     let amplitude = c.hypot(d);
     let value = match kind {
-        10 => 0.5 + 0.5 * h / w.config.shade_scale,
+        10 => 0.5 + 2. * h / w.config.terrain.feature_wavelength,
         11 => q,
         12 => {
             let slope = node_slope(w, n);

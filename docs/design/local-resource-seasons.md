@@ -2,9 +2,9 @@
 
 **Status:** Implemented (v46) — static circular seasonal maps drive local release and refill-waiting clocks for every reservoir; the [composed runtime](chemistry/composed-runtime.md) owns the installed equations.
 
-The proposed [spatial hierarchy revision](spatial-scale.md) separates local terrain wavelength
-from regional seasonal wavelength. It changes future map generation, not the supply-clock law
-below, and has not been implemented.
+The v47 [spatial hierarchy revision](spatial-scale.md) separates local terrain wavelength
+from regional seasonal wavelength. It changes map generation; the supply-clock law below remains
+the same. Publication and live activation are tracked by the terrain delivery plan.
 
 Proposed September 25, 2026, backlogged September 26 and implemented with persistent
 geography in physical v46 (`569f1a0`). The active [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md)

@@ -16,7 +16,8 @@ export interface EngineConfig extends Record<string, unknown> {
   illuminationSlowPeriod: number;
   illuminationModulationPeriod: number;
   shadeStrength: number;
-  shadeScale: number;
+  landscapeRegionSpacing: number;
+  landscapeSpread: number;
   opticalColumn: number;
   opticalReach: number;
   opticalPowerDensity: number;

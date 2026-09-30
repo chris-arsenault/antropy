@@ -18,7 +18,7 @@ const fields = [
   ["ceilingMax", "Maximum light ceiling", 0],
   ["seasonAmplitude", "Season amplitude ceiling (0–1)", 0],
   ["seasonPeriod", "Season period (model seconds)", 0.01],
-  ["placementContrast", "Reservoir clustering contrast (0–40)", 0],
+  ["featureWavelength", "Local terrain wavelength (world units)", 0.01],
 ] as const;
 
 export function TerrainSettings({
@@ -40,7 +40,7 @@ export function TerrainSettings({
         Integrated terrain
       </button>
       <button type="button" onClick={() => set(terrainPreset(config.terrain, false))}>
-        Previous ecology
+        Shade and radial placement
       </button>
       {switches.map(([key, label]) => (
         <label key={key}>
@@ -60,8 +60,8 @@ export function TerrainSettings({
             set({ ...config.terrain, placement: e.target.value as TerrainConfig["placement"] })
           }
         >
-          <option value="fractal">Fractal density</option>
-          <option value="current">Regional clusters</option>
+          <option value="fractal">Fractal resource neighborhoods</option>
+          <option value="current">Radial resource neighborhoods</option>
           <option value="uniform">Uniform</option>
         </select>
       </label>

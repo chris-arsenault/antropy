@@ -96,7 +96,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns compact occupied f32 geographic rows, f64 free and biomass mixtures, twenty-two derived
 body capacities, usable work, damage, private controllers and bounded compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v46 persists one birth genome identity per cell
+The same worker renders borrowed WASM views. Checkpoint v47 persists one birth genome identity per cell
 and one reservoir composition plus amount; it rejects earlier physical bytes.
 Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
@@ -153,6 +153,14 @@ ecology settings. `preset: "diagnostic"` explicitly selects neutral defaults; fu
 configurations override every field and remain round-trippable. The preset is a request choice,
 not additional checkpoint state. No live map
 regeneration or checkpoint migration is provided.
+
+V47 uses the existing periodic fractal generator with distinct physical bands: local height,
+conductance and cover start at `terrain.featureWavelength` (36); seasonal cosine/sine start
+at `landscapeRegionSpacing` (about 105.4) and omit wavelengths below the local terrain band.
+Resource envelopes use the retained `landscapeSpread` (18), with independent fractal deformation
+at twice that spread. The [spatial hierarchy](../spatial-scale.md) owns their normalized mixture
+and derivative bound. Generator provenance 2 records the derived region count and retained
+local, seasonal and resource bands. Elevation amplitude is one quarter of local wavelength.
 
 The default grid is h=2 on 720×540 geography: 97,200 possible nodes. Persistent 8×8-node
 regions own contiguous 256-chemical rows and reusable current/destination buffers. Missing
@@ -366,8 +374,11 @@ same-event exports cannot fund imports. Inactive rows do not allocate256-species
 
 ### Mobile resource reservoirs
 
-Two hundred forty externally renewing reservoirs start from an independent fractal density
-in the v46 integrated preset. The current-behavior preset retains 35 uneven neighborhoods.
+Two hundred forty externally renewing reservoirs start from 35 uneven boot resource envelopes
+in the v47 integrated preset. Region count follows area divided by squared regional spacing;
+the normalized envelopes have spread 18 and bounded independent fractal deformation. Their
+centers are discarded after placement and never anchor mobile reservoirs. The diagnostic radial
+preset uses the same derived region count and spread with the earlier radial sampler.
 Independently timed renewals
 continue to import accounted material and reference value. Defaults are sourceDrift1
 (reservoir mobility), reservoirRepulsion5, reservoirRange30, sourceProcessing0.25 and
@@ -759,7 +770,7 @@ Geographic admission reserves 8192 bytes/node for the two material owners within
 2 GiB reservation (262,144 nodes). Default 720×540 at mesh 2 fits; larger rejected requests
 must choose their geometry explicitly. No automatic resolution reduction occurs. Empty film
 uses sparse rows. This reservation excludes population/ancestry and is not a measured RSS.
-Physical format v46 rejects earlier worlds without migration; deployment needs an explicit
+Physical format v47 rejects earlier worlds without migration; deployment needs an explicit
 new-world cutover if the continuing server holds an earlier format. Constructed checks and their negative
 payback findings are in [light ecology results](../../light-ecology-results.md).
 

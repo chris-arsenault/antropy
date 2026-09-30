@@ -4,32 +4,35 @@ use super::{
 };
 use crate::{config::Config, geography::Geography, random::Random};
 
-fn generator(seed: u64, name: &str, c: &Config, coarse: bool) -> Generator {
-    let largest = (4. * c.shade_scale).min(c.width.min(c.height) / 2.);
-    let minimum = if coarse {
-        (largest / 4.).max(4. * c.mesh)
-    } else {
-        4. * c.mesh
+#[derive(Clone, Copy)]
+pub(crate) enum Band {
+    Local,
+    Seasonal,
+    Resource,
+}
+
+fn generator(seed: u64, name: &str, c: &Config, band: Band) -> Generator {
+    let (largest, minimum) = match band {
+        Band::Local => (c.terrain.feature_wavelength, 4. * c.mesh),
+        Band::Seasonal => (
+            c.landscape_region_spacing,
+            c.terrain.feature_wavelength.max(4. * c.mesh),
+        ),
+        Band::Resource => (2. * c.landscape_spread, 4. * c.mesh),
     };
-    Generator::new(
-        channel(seed, name),
-        [c.width, c.height],
-        c.shade_scale,
-        c.mesh,
-    )
-    .coarse(minimum)
+    Generator::new(channel(seed, name), [c.width, c.height], largest, c.mesh).coarse(minimum)
 }
 
 pub(crate) fn map(
     seed: u64,
     name: &str,
     c: &Config,
-    coarse: bool,
+    band: Band,
     transform: impl Fn(f64) -> f64,
 ) -> Vec<f64> {
     let nx = (c.width / c.mesh) as usize;
     let ny = (c.height / c.mesh) as usize;
-    let mut generator = generator(seed, name, c, coarse);
+    let mut generator = generator(seed, name, c, band);
     let steps = generator.quadrature(c.mesh);
     (0..nx * ny)
         .map(|n| {
@@ -55,10 +58,11 @@ pub fn generate(seed: u64, c: &Config, nx: usize, ny: usize) -> Shade {
         spacing: c.mesh,
         config: t.clone(),
         seed,
-        generator_version: 1,
+        generator_version: 2,
+        resource_regions: c.landscape_region_count(),
         // Sampling depends on geometry and analytic bounds, not random values.
-        sampling: [false, true].map(|coarse| {
-            let mut g = generator(seed, "sampling", c, coarse);
+        sampling: [Band::Local, Band::Seasonal, Band::Resource].map(|band| {
+            let mut g = generator(seed, "sampling", c, band);
             let steps = g.quadrature(c.mesh);
             (steps, g.wavelengths())
         }),
@@ -66,20 +70,22 @@ pub fn generate(seed: u64, c: &Config, nx: usize, ny: usize) -> Shade {
         ..Default::default()
     };
     if enabled {
-        geography.height = map(seed, "height", c, false, |v| c.shade_scale * v);
-        geography.conductance = map(seed, "conductance", c, false, |v| {
+        geography.height = map(seed, "height", c, Band::Local, |v| {
+            t.feature_wavelength * v / 4.
+        });
+        geography.conductance = map(seed, "conductance", c, Band::Local, |v| {
             (t.minimum_conductance.ln() * (v + 1.) / 2.).exp()
         });
-        let cos = map(seed, "season-cos", c, true, |v| {
+        let cos = map(seed, "season-cos", c, Band::Seasonal, |v| {
             t.season_amplitude * v / std::f64::consts::SQRT_2
         });
-        let sin = map(seed, "season-sin", c, true, |v| {
+        let sin = map(seed, "season-sin", c, Band::Seasonal, |v| {
             t.season_amplitude * v / std::f64::consts::SQRT_2
         });
         geography.seasons = cos.into_iter().zip(sin).map(|(c, s)| [c, s]).collect();
         geography.rebuild();
     }
-    let cover = map(seed, "cover", c, false, |v| ((v + 1.) / 2.).powi(2));
+    let cover = map(seed, "cover", c, Band::Local, |v| ((v + 1.) / 2.).powi(2));
     Shade {
         transmission: cover
             .iter()

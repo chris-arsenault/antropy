@@ -58,6 +58,9 @@ impl Octave {
 
 fn octaves(rng: &mut Random, extent: [f64; 2], largest: f64, smallest: f64) -> Vec<Octave> {
     let mut result = Vec::new();
+    if largest < smallest {
+        return result;
+    }
     let (mut scale, mut amplitude) = (largest, 1.);
     loop {
         result.push(Octave::new(rng, extent, scale, amplitude));
@@ -71,6 +74,9 @@ fn octaves(rng: &mut Random, extent: [f64; 2], largest: f64, smallest: f64) -> V
 }
 
 fn sample(octaves: &[Octave], point: [f64; 2]) -> f64 {
+    if octaves.is_empty() {
+        return 0.;
+    }
     let value: f64 = octaves.iter().map(|o| o.amplitude * o.sample(point)).sum();
     value / octaves.iter().map(|o| o.amplitude).sum::<f64>()
 }
@@ -82,9 +88,9 @@ pub(crate) struct Generator {
 }
 
 impl Generator {
-    pub fn new(seed: u64, extent: [f64; 2], scale: f64, mesh: f64) -> Self {
+    pub fn new(seed: u64, extent: [f64; 2], largest: f64, mesh: f64) -> Self {
         let mut rng = Random::new(seed ^ 0x73686164655f7879);
-        let largest = (4. * scale).min(extent[0].min(extent[1]) / 2.);
+        let largest = largest.min(extent[0].min(extent[1]) / 2.);
         let smallest = 4. * mesh;
         Self {
             detail: octaves(&mut rng, extent, largest, smallest),

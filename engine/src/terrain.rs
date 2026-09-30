@@ -1,6 +1,7 @@
 //! Canonical geographic shade. Generation never reads organisms or reservoir placement.
 use crate::config::Config;
 pub use crate::terrain_placement::density as resource_density;
+pub use crate::terrain_placement::resource_centers;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

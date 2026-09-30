@@ -8,7 +8,7 @@ it("measures completed tick work and excludes time spent paused", async () => {
   const engine = await Engine.load(
     new Uint8Array(readFileSync(new URL("../../public/antropy-engine.wasm", import.meta.url)))
   );
-  const session = new Session(engine);
+  const session = new Session(engine, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   let now = 10000;
   vi.spyOn(performance, "now").mockImplementation(() => now);
   vi.spyOn(session, "step").mockImplementation(() => {

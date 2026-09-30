@@ -4,7 +4,7 @@ use crate::{config::Config, movement, random::Random, sources};
 fn radial_tail_keeps_dense_centers_and_outliers_in_the_periodic_world() {
     let c = Config {
         source_count: 2000,
-        landscape_regions: 1,
+        landscape_region_spacing: 720.,
         ..Config::default()
     };
     let (centers, sites) = sources::landscape(&c, &mut Random::new(27));

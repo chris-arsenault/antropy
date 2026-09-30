@@ -44,9 +44,11 @@ owns gradual change, tectonics and local events, including physical accounts, pe
 It remains open and unimplemented independently of this plan. Live physical switches remain a
 distinct unselected configuration extension.
 
-The subsequent [spatial hierarchy revision](../design/spatial-scale.md) separately specifies
-new placement and feature scales. Its design task is complete; it is not an additional phase
-of this delivery plan or an implemented replacement of the v46 generator.
+The subsequent [spatial hierarchy revision](../design/spatial-scale.md) is now implemented in
+v47 under Sulion `0d03350f-9bc9-4c9f-a703-8f611940afe9`. The user explicitly requested completion
+of the specified runtime and a new live world after the documentation-only task. Its phases are
+spatial configuration/placement, consumer/display integration, and publication/live activation.
+It reuses the existing periodic generator and physics. Dynamic terrain remains separate.
 The original M9 testing/acceptance stage and its child review stage are retired. Their retirement
 does not claim the omitted experiments ran or that the user approved a visual result.
 
@@ -69,11 +71,16 @@ results; Sulion `c4b3f43f-1704-44e6-be66-aaed2f2d4688` tracks this repair and th
 
 ### Publish terrain corrections
 
-Commit and push authorized corrections through the existing shared CI/CD pipeline and resolve
-actual delivery failures. Preserve the continuing world and existing schema/reset authorization
-boundaries. Publication was authorized September 30 together with the spatial-scale design.
-The Sulion delivery phase records the published revision and pipeline status. This source record
-does not certify deployment or authorize a reset of the continuing server world.
+Corrections were published as `4c7a270`. Publish the completed v47 spatial hierarchy through the
+same shared CI/CD pipeline, then activate the user-authorized new server world. The live status
+must expose the new effective configuration and advancing ticks before activation is complete.
+The Sulion delivery phases record published revisions and actual activation status.
+
+Automatic engineering work uses one seed27 boot preview, the existing 2,000-cell/240-source
+capacity fixture (8 warmup and 40 measured ticks, four threads, 120-second stepping cap),
+checkpoint round-trip and the repository CI suite. Local map diagnostics describe region
+occupancy, inter-region edge gaps, empty-space distances, wavelengths and correlations;
+they do not claim evolved colonization or prescribe colony counts. Artifacts stay ignored.
 
 Close the root when these implementation and authorized delivery tasks finish. Do not wait for
 human acceptance, additional long-running ecology or optional terrain extensions.

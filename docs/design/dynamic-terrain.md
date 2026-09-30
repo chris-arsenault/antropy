@@ -22,7 +22,7 @@ source anchors, new organism categories or a second physical economy.
 static maps. Ordinary light cycles already vary received illumination. Neither mechanism is
 dynamic terrain. Live feature switches are a separate configuration concern below.
 
-The proposed [spatial hierarchy](spatial-scale.md) distinguishes local terrain wavelength F,
+The implemented [spatial hierarchy](spatial-scale.md) distinguishes local terrain wavelength F,
 resource-neighborhood spread R and area-per-neighborhood spacing D. Dynamic forcing and event
 footprints must declare which of these physical scales they affect; they must not resume the
 old single shade-scale convention. Changing a local ridge should not silently deform an entire

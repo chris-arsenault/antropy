@@ -10,7 +10,7 @@ import { checkObservationBudget } from "./observationBudget";
 const empty: ObservationView = { status: null, inspection: null };
 async function fixture() {
   const engine = await Engine.load(new Uint8Array(readFileSync("public/antropy-engine.wasm")));
-  const session = new Session(engine);
+  const session = new Session(engine, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   session.restart(101, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   const status = session.status();
   session.world.dispose();

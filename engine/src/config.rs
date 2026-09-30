@@ -28,7 +28,7 @@ pub struct Config {
     pub founders: usize,
     pub max_ancestry_records: usize,
     pub source_count: usize,
-    pub landscape_regions: usize,
+    pub landscape_region_spacing: f64,
     pub landscape_spread: f64,
     pub source_priming: f64,
     pub source_rate: f64,
@@ -85,7 +85,6 @@ pub struct Config {
     pub environmental_work: f64,
     pub illumination_contrast: f64,
     pub shade_strength: f64,
-    pub shade_scale: f64,
     pub terrain: crate::terrain_config::TerrainConfig,
     pub optical_column: f64,
     pub optical_reach: f64,
@@ -132,7 +131,7 @@ impl Default for Config {
             founders: 48,
             max_ancestry_records: 2000000,
             source_count: 240,
-            landscape_regions: 35,
+            landscape_region_spacing: (720_f64 * 540. / 35.).sqrt(),
             landscape_spread: 18.,
             source_priming: 0.1,
             source_rate: 0.2,
@@ -184,7 +183,6 @@ impl Default for Config {
             environmental_work: crate::transformation_work::DEFAULT_STRENGTH,
             illumination_contrast: 0.8,
             shade_strength: 0.8,
-            shade_scale: 32.,
             terrain: Default::default(),
             optical_column: 0.1,
             optical_reach: 2.,
@@ -221,6 +219,17 @@ impl Default for Config {
 }
 
 impl Config {
+    /// Boot scaffolding only; neither an occupied-region target nor persistent anchors.
+    pub fn landscape_region_count(&self) -> usize {
+        if self.source_count == 0 {
+            0
+        } else {
+            (self.width * self.height / self.landscape_region_spacing.powi(2))
+                .round()
+                .max(1.) as usize
+        }
+    }
+
     /// Production new-world preset. Request parsing explicitly selects diagnostic defaults.
     pub fn ecology() -> Self {
         Self {
@@ -265,7 +274,8 @@ impl Config {
             ("growthEnergy", self.growth_energy),
             ("sourceLifetime", self.source_lifetime),
             ("illuminationFastPeriod", self.illumination_fast_period),
-            ("shadeScale", self.shade_scale),
+            ("landscapeRegionSpacing", self.landscape_region_spacing),
+            ("landscapeSpread", self.landscape_spread),
             ("opticalColumn", self.optical_column),
             ("opticalReach", self.optical_reach),
             ("opticalPowerDensity", self.optical_power_density),
@@ -290,7 +300,7 @@ impl Config {
         {
             return Err("Invalid chemical mesh; dimensions must be integral multiples and fit the 2 GiB geographic memory reservation".into());
         }
-        if self.shade_scale < 2. * self.mesh || self.optical_reach < self.mesh / 2. {
+        if self.optical_reach < self.mesh / 2. {
             return Err("Optical scales must resolve on the configured mesh".into());
         }
         if self.dt > 1.
@@ -334,8 +344,7 @@ impl Config {
             || self.affinity_radius > 6.
             || self.max_ancestry_records == 0
             || self.max_ancestry_records > 5000000
-            || self.landscape_regions == 0
-            || self.landscape_regions > 10000
+            || self.landscape_region_count() > 10000
             || self.source_count > 10000
             || self.source_species.iter().any(|s| *s >= 256)
         {

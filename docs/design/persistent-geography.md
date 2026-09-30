@@ -1,19 +1,18 @@
 # Persistent geography and conditional survival
 
-**Status:** Partly implemented (v46) — static fractal elevation, conductance, overhead transmission, optional ceilings and fractal reservoir placement are installed; dynamic terrain, tectonics, catastrophes and live physical switches are unselected.
+**Status:** Static implementation v47 — fractal elevation, conductance, overhead transmission, optional ceilings and regional fractal reservoir placement are implemented; dynamic terrain, tectonics, catastrophes and live physical switches remain separate unselected work.
 
-**September 30 scale revision:** [Spatial hierarchy](spatial-scale.md) specifies the proposed
+**September 30 scale revision:** [Spatial hierarchy](spatial-scale.md) implements the
 replacement of shared shade-scale generation and center-free resource placement. It restores
 explicit neighborhood size and area per neighborhood, with finer local terrain and regional
-seasons. Design work is complete; the replacement is not implemented. Its generator/configuration
-sections supersede the corresponding future recommendations below. Existing v46 descriptions
-remain accurate records of the installed generator.
+seasons. Its generator/configuration sections govern v47. The explicitly historical v46
+generation section below preserves the earlier design and its rationale.
 
 First proposed September 24, 2026; expanded September 30 for integrated terrain and local-season
 design and implementation. The user requested the full terrain direction,
 configuration switches and concrete fractal generation/placement algorithms. The static
 substrate and [local resource seasons](local-resource-seasons.md) form one design, implemented
-locally in physical v46. The [composed laws](chemistry/composed-runtime.md#geographic-composition)
+initially in physical v46 and extended with the v47 spatial hierarchy. The [composed laws](chemistry/composed-runtime.md#geographic-composition)
 record the installed operations; the implementation plan owns concrete repairs and delivery.
 Slow terrain changes and catastrophes remain unselected backlog proposals, not a delivery gate.
 The earlier static-first recommendation does not approve or reject that future scope. This document
@@ -96,7 +95,7 @@ can be considered later; no independent per-biome rules are needed.
 
 ## Fractal map generation and placement
 
-This section records the installed v46 generator. For the next generator, use the
+This section records the historical v46 generator. For the current implementation, use the
 [spatial hierarchy revision](spatial-scale.md): distinct D/R/F lengths, bounded fractal resource
 envelopes and their normalized mixture. In particular, the single shared L and prohibition on
 boot regional centers below do not govern that revision. No persistent source homes are proposed.
@@ -281,7 +280,7 @@ Old center-count/spread settings apply only to current placement, never secretly
 placement. All effective choices must appear in browser, native and harness configuration.
 
 The [scale revision](spatial-scale.md#scale-contract-and-starting-values) replaces these generation
-controls in a future schema. It does not reinterpret settings or maps in a saved v46 world.
+controls in v47. It does not reinterpret settings or maps in a saved v46 world.
 
 World-start switches are required. Live changes remain a review decision: changing a seed,
 scale or placement method requires a new world, not regeneration beneath existing cells.

@@ -28,7 +28,7 @@ pub struct TerrainConfig {
     pub season_amplitude: f64,
     pub season_period: f64,
     pub placement: Placement,
-    pub placement_contrast: f64,
+    pub feature_wavelength: f64,
 }
 impl Default for TerrainConfig {
     fn default() -> Self {
@@ -48,7 +48,7 @@ impl Default for TerrainConfig {
             season_amplitude: 1.,
             season_period: 3000.,
             placement: Placement::Current,
-            placement_contrast: 6.,
+            feature_wavelength: 36.,
         }
     }
 }
@@ -73,7 +73,7 @@ impl TerrainConfig {
             self.ceiling_max,
             self.season_amplitude,
             self.season_period,
-            self.placement_contrast,
+            self.feature_wavelength,
         ];
         if finite.iter().any(|v| !v.is_finite() || *v < 0.)
             || self.minimum_conductance <= 0.
@@ -81,7 +81,7 @@ impl TerrainConfig {
             || self.ceiling_min > self.ceiling_max
             || self.season_amplitude > 1.
             || self.season_period <= 0.
-            || self.placement_contrast > 40.
+            || self.feature_wavelength <= 0.
         {
             return Err("Invalid terrain configuration".into());
         }

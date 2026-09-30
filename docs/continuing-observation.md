@@ -71,7 +71,7 @@ automatic saves, and only points fitting the remaining byte budget are retained.
 checkpoint is limited to 192 MiB. Failed saves report a recovery warning while the simulation
 continues; the last good save and live world remain intact. Explicit browser restore starts paused.
 
-Physical bytes (v46) contain chemistry, sources, terrain, bodies, neural state, inherited genomes, parentage,
+Physical bytes (v47) contain chemistry, sources, terrain, bodies, neural state, inherited genomes, parentage,
 random streams, integration clock, ledgers and interventions. Gzip packages separately include
 bounded observations and execution provenance. Old physical schemas are rejected; no adapter
 guesses missing chemistry. The previous manual-save store is untouched and never used as fallback.

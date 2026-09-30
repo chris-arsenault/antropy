@@ -1,11 +1,11 @@
 # Spatial hierarchy for terrain and resource neighborhoods
 
-**Status:** Proposed design revision, September 30, 2026; design work authorized, runtime
-implementation not yet authorized. Sulion documentation task `59485420-e321-4a89-b4fe-f97a73b93751`.
-This document owns the next generator's spatial scale and placement design. It supersedes the
-single-scale and center-free recommendations in [persistent geography](persistent-geography.md)
-for future implementation. The [composed runtime](chemistry/composed-runtime.md) still describes
-installed v46 physics. No world reset, parameter change or new generator is delivered here.
+**Status:** Implemented in physical v47; publication and live activation tracked by Sulion
+`0d03350f-9bc9-4c9f-a703-8f611940afe9`, September 30, 2026. This document owns the current
+spatial scale and placement contract. It supersedes the single-scale and center-free
+recommendations in [persistent geography](persistent-geography.md). The user authorized
+completion, publication and a fresh live world after the original documentation-only task.
+The existing periodic generator and physical operators remain the shared implementation.
 
 ## Purpose and first principles
 
@@ -229,25 +229,35 @@ to zoom, not decorative region borders or a second renderer. Preserve the layer 
 Use the same physical source positions and terrain in all views; no display-only stretching,
 extra texture standing in for missing geography, or fixed pixel-sized physical features.
 
-Proposed configuration names are `landscapeRegionSpacing` (D), retained `landscapeSpread` (R),
-and `terrain.featureWavelength` (F). Replace `landscapeRegions` and `shadeScale`, and remove
-`placementContrast`, in the next physical schema rather than keeping conflicting aliases.
+Configuration names are `landscapeRegionSpacing` (D), retained `landscapeSpread` (R),
+and `terrain.featureWavelength` (F). These replace `landscapeRegions`, `shadeScale` and
+`placementContrast` in physical v47; the old names are rejected rather than kept as aliases.
 Validate finite positive D, R and F and the derived K against the existing boot resource limits;
 reject unsupported requests rather than silently reducing centers or increasing mesh size.
 Record resolved K and per-channel wavelengths as generation provenance. Existing physical switches remain independent; changing
-optical settings must not alter source positions. The new generator is version 2 and the new
-configuration requires an explicit physical-format change on implementation. No save adapter,
-silent map regeneration or automatic live-world cutover is authorized by this document.
+optical settings must not alter source positions. Generator provenance is version 2; physical
+checkpoints are v47 and reject earlier formats. No save adapter or silent regeneration exists.
+The live reset is authorized by the user's subsequent delivery request.
 
 ## Engineering scope and open assumptions
 
-The concrete implementation would replace boot placement and scale plumbing, update native,
-browser and harness configuration, persist the new settings/provenance, and adjust terrain
-observation normalization and the scale bar. Ordinary movement, source lifecycle and field
+The implementation replaces boot placement and scale plumbing, updates native,
+browser and harness configuration, persists the new settings/provenance, and adjusts terrain
+observation normalization. The existing zoom-aware world-unit scale bar and layer selector are
+retained. Area presets explicitly scale source count while retaining local lengths.
+Ordinary movement, source lifecycle and field
 operators are reused. At current dimensions, K times mesh nodes is about 3.4 million envelope
 evaluations per quadrature sample. Stream one envelope into the aggregate density at a time;
 retain O(mesh nodes + K) temporary storage, never a K-by-map array or per-tick regional work.
 Budget boot quadrature separately from ordinary stepping. No new runtime spatial index is needed.
+
+Implementation details: envelope integration uses 4×4 samples per mesh cell; the independent
+fractal fields retain the existing derivative-bounded quadrature. `Geography.sampling` records
+three bands in order: local (height/conductance/cover), seasonal (cosine/sine), and resource
+deformation (x/y). All channels within a band share resolved wavelengths and quadrature counts,
+but use independent named random streams. `resource_regions` records derived K; placement
+centers and their weights are reconstructed only in the local boot preview. The
+[implementation record](../evidence/spatial-hierarchy/README.md) gives reproduction commands.
 
 Implementers own bounded automatic mechanics and map checks. Report within-region distances,
 edge gaps, empty-space distances, overlap/settling, density at R and D, retained wavelengths and

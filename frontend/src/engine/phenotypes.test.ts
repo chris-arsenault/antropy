@@ -14,7 +14,12 @@ import { type Inspection, type Summary } from "./types";
 const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
 
 it("restores the physical world when cohort history expires and clears expired inspection", async () => {
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), {
+    width: 24,
+    height: 24,
+    founders: 2,
+    sourceCount: 2,
+  });
   session.restart(27, {
     width: 24,
     height: 24,
@@ -56,7 +61,12 @@ it("restores the physical world when cohort history expires and clears expired i
   session.world.dispose();
 });
 async function fixture(founders = 4) {
-  const session = new Session(await Engine.load(bytes, true));
+  const session = new Session(await Engine.load(bytes, true), {
+    width: 24,
+    height: 24,
+    founders: 2,
+    sourceCount: 2,
+  });
   session.restart(27, { width: 24, height: 24, founders, sourceCount: 4 });
   return session;
 }

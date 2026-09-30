@@ -79,10 +79,44 @@ local_amplitude = np.linalg.norm(local_seasons, axis=1)
 neighbor = distance.argmin(axis=1)
 # At source i's trough, the neighboring multiplier is 1 - dot(s_i,s_j)/|s_i|.
 neighbor_advantage = local_amplitude - np.sum(local_seasons*local_seasons[neighbor], axis=1)/np.maximum(local_amplitude, 1e-30)
+centers = np.asarray([row[0] for row in record["resourceCenters"]])
+period = np.asarray(extent[1::2])
+delta = np.abs(sources[:, None, :] - centers[None, :, :])
+center_distance = np.linalg.norm(np.minimum(delta, period-delta), axis=2)
+# Geographic assignment for description only, not mixture ancestry or colony identity.
+region = center_distance.argmin(axis=1)
+same_region = region[:, None] == region[None, :]
+within = np.where(same_region, distance, np.inf).min(axis=1)
+edge = np.maximum(0, distance-radii[:, None]-radii[None, :])
+between = np.where(~same_region, edge, np.inf).min(axis=1)
+grid_y, grid_x = np.indices(shape)
+points = np.column_stack(((grid_x.ravel()+.5)*g["spacing"], (grid_y.ravel()+.5)*g["spacing"]))
+empty = []
+for chunk in np.array_split(points, max(1, len(points)//512)):
+    delta = np.abs(chunk[:, None, :]-sources[None, :, :])
+    gaps = np.maximum(0, np.linalg.norm(np.minimum(delta, period-delta), axis=2)-radii)
+    empty.extend(gaps.min(axis=1))
+scales = {"Spread": record["config"]["landscapeSpread"],
+          "RegionSpacing": record["config"]["landscapeRegionSpacing"]}
+correlations = {}
+for name, length in scales.items():
+    lag = round(length/g["spacing"])
+    for label, values in [("placement", rho), ("height", h), ("seasonCos", season[:, :, 0])]:
+        centered_values = values-values.mean()
+        correlations[f"{label}At{name}"] = [float(np.mean(centered_values*np.roll(centered_values, lag, axis))/np.mean(centered_values**2)) for axis in [0, 1]]
 report = {"generationMs": record["generationMs"], "quantiles": {
     "grade": quantiles(slope), "conductance": quantiles(q), "transmission": quantiles(t),
     "seasonAmplitude": quantiles(amplitude), "supplyAtBoot": quantiles(supply),
-    "sourceNearestNeighbor": quantiles(distance.min(axis=1))},
+    "sourceNearestNeighbor": quantiles(distance.min(axis=1)),
+    "nearestPlacementCenter": quantiles(center_distance.min(axis=1)),
+    "nearestWithinRegionSource": quantiles(within[np.isfinite(within)]),
+    "nearestOtherRegionEdgeGap": quantiles(between[np.isfinite(between)]),
+    "emptySpaceToReservoirEdge": quantiles(empty)},
+    "placementCenters": len(centers),
+    "nearestCenterOccupancy": np.bincount(region, minlength=len(centers)).tolist(),
+    "spatialCorrelationsAtPhysicalScales": correlations,
+    "generationVersion": g["generator_version"],
+    "resourceRegions": g["resource_regions"],
     "heightConductanceShadeAmplitudeCorrelation": np.corrcoef([a.ravel() for a in [h, q, t, amplitude]]).tolist(),
     "heightDirectionalGradientVarianceRatio": float(np.var(dx)/np.var(dy)),
     "heightAutocorrelationAtMeshLags1_4_8_16_32_64": autocorrelation,

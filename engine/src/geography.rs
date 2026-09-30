@@ -13,8 +13,9 @@ pub struct Geography {
     pub phase: f64,
     pub seed: u64,
     pub generator_version: u32,
-    /// Full-detail and seasonal retained wavelengths, with quadrature samples per axis.
-    pub sampling: [(usize, Vec<[f64; 2]>); 2],
+    pub resource_regions: usize,
+    /// Local (height/q/cover), seasonal (cos/sin), resource (x/y) bands and quadrature.
+    pub sampling: [(usize, Vec<[f64; 2]>); 3],
     pub nx: usize,
     pub ny: usize,
     pub spacing: f64,
@@ -180,7 +181,8 @@ impl Geography {
             || self.nx != (c.width / c.mesh) as usize
             || self.ny != (c.height / c.mesh) as usize
             || self.spacing != c.mesh
-            || self.generator_version != 1
+            || self.generator_version != 2
+            || self.resource_regions != c.landscape_region_count()
             || !self.phase.is_finite()
             || self.sampling.iter().any(|(steps, scales)| {
                 !(1..=8).contains(steps)
@@ -220,7 +222,7 @@ impl Geography {
                 .iter()
                 .any(|s| !s[0].is_finite() || !s[1].is_finite() || s[0].hypot(s[1]) > 1. + 1e-12)
             || !self.phase.is_finite()
-            || self.generator_version != 1
+            || self.generator_version != 2
         {
             return Err("Invalid canonical geography".into());
         }

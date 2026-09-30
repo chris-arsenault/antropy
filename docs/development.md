@@ -58,7 +58,7 @@ Historical raw files under `docs/evidence/` remain local and ignored; only autho
 and are optional for documentation validation. CI rejects tracked experiment payloads.
 Removing them from the current tree does not remove copies in earlier Git commits.
 
-The [digital chemistry contract](design/chemistry/composed-runtime.md) governs current v46 checkpoints and
+The [digital chemistry contract](design/chemistry/composed-runtime.md) governs current v47 checkpoints and
 schema-v3 evidence. Historical studies preserve their original results, not executable current
 registrations. Read [environmental evidence](design/chemistry/environmental-results.md) and
 [rebuild evidence](design/chemistry/rebuild-results.md) before selecting a new comparison.
@@ -126,7 +126,7 @@ No diagnostic or observed winner automatically replaces the browser founder.
 ## Studies, cohorts and batches
 
 The retired `--weathering-period` flag fails explicitly; local mixtures now drive conversion.
-All saved-genotype paths require explicit current-format (v46) binary checkpoints or browser packages. There is no default historical export,
+All saved-genotype paths require explicit current-format (v47) binary checkpoints or browser packages. There is no default historical export,
 hardcoded successful genotype or old-schema adapter. A short study invocation is:
 
 ```bash
@@ -168,7 +168,7 @@ chemical injury or motor/scheduled-resource questions. Historical batch defaults
 
 ## Persistence, reporting and verification
 
-Physical checkpoint v46 preserves chemical definitions, terrain, source response settings, environmental configuration, inventories,
+Physical checkpoint v47 preserves chemical definitions, terrain, source response settings, environmental configuration, inventories,
 biomass, immutable genes,
 private state, random streams, ledgers, retained parentage and bounded browser history. Older
 versions are rejected. Recovery retains up to six automatic/two manual points within 256 MiB, expiring older points to fit;

@@ -80,7 +80,7 @@ fn restore_rejects_nonfinite_accounting_and_controller_state() {
     rejected(|w| w.cells[0].receptors[0] = f64::NAN);
     rejected(|w| w.cells[0].action.swim = 2.);
     rejected(|w| w.cells[0].brain.last_energy = Some(f32::NAN));
-    rejected(|w| w.patch_centers[0][0] = -1.);
+    rejected(|w| w.patch_centers.push([-1., 0.]));
 }
 #[test]
 fn manual_interventions_survive_recent_event_rollover_and_restore() {

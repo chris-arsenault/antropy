@@ -4,14 +4,16 @@ use crate::{
     terrain_config::Placement,
 };
 
+#[path = "terrain_envelopes.rs"]
+mod envelopes;
+pub use envelopes::centers as resource_centers;
+
 /// Reconstructible boot intensity for placement and local map review; never retained by physics.
 pub fn density(seed: u64, c: &Config) -> Vec<f64> {
     if c.terrain.placement == Placement::Uniform {
         return vec![1.; (c.width / c.mesh) as usize * (c.height / c.mesh) as usize];
     }
-    crate::terrain::generation::map(seed, "resource-density", c, false, |n| {
-        (c.terrain.placement_contrast * n).exp()
-    })
+    envelopes::density(seed, c)
 }
 
 pub fn landscape(seed: u64, c: &Config, current: &mut Random) -> (Vec<[f64; 2]>, Vec<Habitat>) {
@@ -91,6 +93,7 @@ mod tests {
         c.source_zones = Some(vec![vec![0.5, 0.5]; 3]);
         let a = landscape(27, &c, &mut Random::new(1)).1;
         c.terrain.seasons = false;
+        c.terrain.feature_wavelength = 12.;
         c.shade_strength = 0.;
         let b = landscape(27, &c, &mut Random::new(999)).1;
         assert_eq!(a.len(), 120);
@@ -113,6 +116,29 @@ mod tests {
             assert_eq!(a.richness, b.richness);
             assert_eq!(a.radius, b.radius);
             assert_eq!(a.share, b.share);
+        }
+    }
+
+    #[test]
+    fn resource_spacing_and_spread_change_placement_without_changing_attributes() {
+        let mut c = Config {
+            width: 80.,
+            height: 64.,
+            source_count: 32,
+            landscape_region_spacing: 32.,
+            terrain: crate::terrain_config::TerrainConfig::integrated(),
+            ..Config::default()
+        };
+        let a = landscape(27, &c, &mut Random::new(1)).1;
+        c.landscape_spread /= 2.;
+        c.landscape_region_spacing *= 2.;
+        let b = landscape(27, &c, &mut Random::new(1)).1;
+        assert!(a.iter().zip(&b).any(|(a, b)| a.x != b.x || a.y != b.y));
+        for (a, b) in a.iter().zip(&b) {
+            assert_eq!(
+                [a.radius, a.richness, a.share],
+                [b.radius, b.richness, b.share]
+            );
         }
     }
 }

@@ -46,7 +46,12 @@ afterEach(() => {
 
 it("publishes remote status through the existing budget and keeps binary frames inside the worker", async () => {
   const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), {
+    width: 24,
+    height: 24,
+    founders: 2,
+    sourceCount: 2,
+  });
   const sent: Message[] = [];
   const worker = {
     postMessage: (m: Message) => sent.push(m),

@@ -38,12 +38,12 @@ feature switches are specified separately within that document; display toggles 
 
 ## Seasonal ecology and continuing terrain refinement
 
-**Status:** Unselected — static terrain and seasons are implemented in v46.
+**Status:** Continuing refinement — static terrain and seasons are implemented, with spatial hierarchy in v47.
 
-The [spatial hierarchy revision](design/spatial-scale.md) is specified following the September 30
+The [spatial hierarchy revision](design/spatial-scale.md) is implemented in v47 following the September 30
 scale review. It restores explicit resource-neighborhood geometry and separates local terrain
-from regional seasonal variation. Its design task is complete; implementation remains unselected.
-It replaces the old single-scale recommendation without reopening the static delivery plan.
+from regional seasonal variation. The terrain delivery plan tracks publication and the authorized
+fresh live world; continued ecological observation does not block implementation completion.
 
 Seasonal relocation benefit, affordable default reservoir gaps and long-term specialization
 are refinement questions that longer observation can inform. Motion, configuration and refill-timing

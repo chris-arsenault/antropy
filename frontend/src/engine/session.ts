@@ -29,9 +29,12 @@ export class Session {
   private throughput = 0;
   private revision = 0;
 
-  constructor(readonly engine: Engine) {
+  constructor(
+    readonly engine: Engine,
+    config: Record<string, unknown> = {}
+  ) {
     this.observation = this.newObservation();
-    this.world = engine.create();
+    this.world = engine.create(27, config);
     this.definition = this.world.command("definition");
     this.population = observe(this.world, this.observation.spatial);
   }

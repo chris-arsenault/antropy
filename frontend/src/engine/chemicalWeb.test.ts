@@ -12,7 +12,7 @@ it("requests bounded routes only while open, caches unchanged ticks and resets o
     new Uint8Array(readFileSync("public/antropy-engine.wasm")),
     true
   );
-  const session = new Session(engine);
+  const session = new Session(engine, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   session.restart(101, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   const calls = vi.spyOn(session.world, "command");
   const before = session.world.snapshot();

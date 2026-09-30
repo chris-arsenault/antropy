@@ -10,7 +10,7 @@ fn fixture(scale: usize, dense: bool) -> World {
             width: 320.,
             height: 240.,
             source_count: 48,
-            landscape_regions: 7,
+            landscape_region_spacing: (320_f64 * 240. / 7.).sqrt(),
             ..Config::default()
         },
     )

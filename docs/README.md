@@ -36,6 +36,7 @@ them. See the [storage policy](evidence/README.md).
 | Regional execution and multicore ownership | [Spatial execution](design/spatial-execution.md) |
 | Terrain, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md) — static v46 implemented; [active repair plan](plans/TERRAIN-AND-SEASONS-PLAN.md) |
 | Local supply clocks | [Local resource seasons](design/local-resource-seasons.md) — implemented v46 |
+| Reservoir neighborhoods, intervening gaps and local terrain scale | [Spatial hierarchy revision](design/spatial-scale.md) — implemented v47; terrain plan tracks deployment |
 | Changing terrain, tectonics and local events | [Dynamic terrain](design/dynamic-terrain.md) — separate open design direction; not implemented |
 | Shade, overhead film and paid emission | [Light ecology](design/light-ecology.md) — implemented v42; [results](light-ecology-results.md) |
 | Paid local light sensing | [Photoreception](photoreception.md) |
@@ -60,7 +61,6 @@ them. See the [storage policy](evidence/README.md).
 | Paid byte broadcasts with coarse listener-relative hearing | [Directional cell utterances](design/cell-utterances.md) |
 | Slow learned strategy layer feeding the reflex RNN | [Strategic controller](design/strategic-controller.md) |
 | Gradual geographic change, tectonics and bounded local events | [Dynamic terrain](design/dynamic-terrain.md) |
-| Reservoir neighborhoods, intervening gaps and local terrain scale | [Spatial hierarchy revision](design/spatial-scale.md) — design specified; not implemented |
 | Rugged chemical interaction: surprising mutations and co-located roles | [Direction](design/rugged-interaction.md), [Kauffman research paper](design/kauffman-landscapes-research.md) |
 
 ## Historical design records

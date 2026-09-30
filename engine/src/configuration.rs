@@ -66,6 +66,9 @@ mod tests {
         for bad in [
             json!({"preset":"typo"}),
             json!({"terrain":{"typo":true}}),
+            json!({"shadeScale":32}),
+            json!({"landscapeRegions":35}),
+            json!({"terrain":{"placementContrast":6}}),
             Value::Null,
         ] {
             assert!(parse(&bad).is_err());

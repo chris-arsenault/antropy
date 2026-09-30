@@ -9,7 +9,7 @@ vi.mock("./recovery", () => ({ storeRecovery: vi.fn(async () => "saved") }));
 
 it("serializes multiple save requests before allocating their snapshots", async () => {
   const engine = await Engine.load(new Uint8Array(readFileSync("public/antropy-engine.wasm")));
-  const session = new Session(engine);
+  const session = new Session(engine, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   let active = 0,
     maximum = 0;
   const encode = vi.spyOn(packages, "encodePackage").mockImplementation(async () => {

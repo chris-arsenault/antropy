@@ -168,7 +168,7 @@ pub fn community(swap: bool) -> Result<World, String> {
             height: 48.,
             founders: 8,
             source_count: 8,
-            landscape_regions: 2,
+            landscape_region_spacing: (48_f64 * 48. / 2.).sqrt(),
             landscape_spread: 3.,
             mutation_rate: 0.,
             physical_mutation_rate: 0.,

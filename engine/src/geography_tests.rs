@@ -32,6 +32,29 @@ fn geographic_maps_are_bounded_periodic_and_restore_cached_faces() {
     let restored = World::restore(&w.snapshot().unwrap()).unwrap();
     assert_eq!(g.height, restored.shade.geography.height);
     assert_eq!(g.faces, restored.shade.geography.faces);
+    assert_eq!(g.sampling, restored.shade.geography.sampling);
+    assert_eq!(
+        g.resource_regions,
+        restored.shade.geography.resource_regions
+    );
+    assert_eq!(g.generator_version, 2);
+}
+
+#[test]
+fn spatial_controls_preserve_local_scale_when_area_grows() {
+    let mut c = Config::ecology();
+    assert_eq!(c.landscape_region_count(), 35);
+    c.width *= 2.;
+    c.height *= 2.;
+    assert_eq!(c.landscape_region_count(), 140);
+    assert_eq!(c.landscape_spread, 18.);
+    assert_eq!(c.terrain.feature_wavelength, 36.);
+    c.landscape_region_spacing = 0.;
+    assert!(c.validate().is_err());
+    c.landscape_region_spacing = 1.;
+    assert!(c.validate().is_err());
+    c.landscape_region_spacing = f64::NAN;
+    assert!(c.validate().is_err());
 }
 
 #[test]

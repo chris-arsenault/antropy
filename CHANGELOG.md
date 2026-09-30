@@ -2,6 +2,18 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-09-30 — Resource neighborhoods and terrain scale
+
+- Restored uneven resource neighborhoods using normalized regional envelopes with bounded
+  fractal deformation, reusing the periodic terrain generator. Regional spacing, neighborhood
+  spread and local terrain wavelength now have separate physical meanings.
+- Reduced default local terrain wavelengths to 36/18/9 world units and gave seasons a separate
+  regional band. Radius, supply, movement laws and world dimensions remain unchanged.
+- Added area presets that explicitly scale reservoir count while retaining local physical sizes.
+  The integrated landscape, world-unit ruler and layer selector remain available.
+- Advanced physical checkpoints to v47 and generation provenance to 2. Removed obsolete
+  `landscapeRegions`, `shadeScale` and `placementContrast` configuration names.
+
 ## 2026-09-30 — Fractal terrain, local seasons and integrated landscape view
 
 - Added persistent fractal elevation, conductance, overhead transmission and optional ceilings,

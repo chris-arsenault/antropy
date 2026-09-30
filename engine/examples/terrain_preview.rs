@@ -36,6 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         };
         maps.push(json!({"seed":seed,"config":config,"nx":nx,"ny":ny,
             "generationMs":generation_ms,"shade":shade,"resourceDensity":density,
+            "resourceCenters":integrated.then(|| antropy_engine::terrain::resource_centers(seed, &config)),
             "sources":world.sources.iter().map(|s| &s.habitat).collect::<Vec<_>>()}));
     }
     let file = fs::OpenOptions::new()

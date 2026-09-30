@@ -14,7 +14,7 @@ export interface TerrainConfig {
   seasonAmplitude: number;
   seasonPeriod: number;
   placement: "current" | "fractal" | "uniform";
-  placementContrast: number;
+  featureWavelength: number;
 }
 
 export interface LocalTerrain {

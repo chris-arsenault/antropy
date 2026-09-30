@@ -32,6 +32,8 @@ it("starts the larger default world at mesh 2 and advances with valid accounts",
     expect(config.terrain.placement).toBe("fractal");
     expect(config.terrain.seasons).toBe(true);
     expect(config.landscapeSpread).toBe(18);
+    expect(config.landscapeRegionSpacing).toBeCloseTo(Math.sqrt((720 * 540) / 35));
+    expect(config.terrain.featureWavelength).toBe(36);
     expect(config.sourceRadius).toBe(3);
     expect(config.sourceRate).toBe(0.2);
     world.step(4);
@@ -44,16 +46,16 @@ it("starts the larger default world at mesh 2 and advances with valid accounts",
   } finally {
     world.dispose();
   }
-});
+}, 30000);
 
 it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the unchanged package", async () => {
-  const session = new Session(await Engine.load(bytes, true));
+  const session = new Session(await Engine.load(bytes, true), compact);
   expect(() => session.restart(101, { ...compact, weatheringPeriod: 1200 })).toThrow(
     /unknown field.*weatheringPeriod/
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(46);
+  expect(definition.version).toBe(47);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -69,7 +71,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v46 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v47 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });
@@ -97,7 +99,7 @@ it("borrows render storage and refreshes world and chemical selection without ch
 });
 
 it("restores physical state and observations paused, then continues with valid accounts", async () => {
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), compact);
   session.restart(101, compact);
   session.world.step(3);
   session.status();
@@ -119,7 +121,7 @@ it("restores physical state and observations paused, then continues with valid a
 });
 
 it("rejects corrupt or mismatched packages without discarding the current world", async () => {
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), compact);
   session.restart(101, compact);
   const before = session.world.snapshot();
   await expect(session.restore(new Blob(["invalid"]))).rejects.toThrow();
@@ -134,7 +136,7 @@ it("rejects corrupt or mismatched packages without discarding the current world"
 });
 
 it("does not let a pending import overwrite a newer restart", async () => {
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), compact);
   session.restart(101, compact);
   const blob = await session.export(),
     restore = session.restore(blob);
@@ -167,7 +169,7 @@ it("retains six automatic and two manual saves and works without randomUUID", as
 });
 
 it("keeps running on failed recovery and preserves the last successful physical checkpoint", async () => {
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), compact);
   session.restart(101, compact);
   session.world.step(1);
   await session.save("manual");
@@ -185,7 +187,7 @@ it("keeps running on failed recovery and preserves the last successful physical 
 });
 
 it("keeps running and restores the latest save when large recovery points fill the budget", async () => {
-  const session = new Session(await Engine.load(bytes));
+  const session = new Session(await Engine.load(bytes), compact);
   session.restart(27, compact);
   session.setRunning(true);
   // Model the uploaded checkpoint's compressed size without allocating six large blobs.

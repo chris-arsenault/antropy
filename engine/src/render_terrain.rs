@@ -63,6 +63,11 @@ mod tests {
                 height: 24.,
                 founders: 2,
                 source_count: 2,
+                landscape_region_spacing: 12.,
+                terrain: crate::terrain_config::TerrainConfig {
+                    feature_wavelength: 8.,
+                    ..crate::terrain_config::TerrainConfig::integrated()
+                },
                 ..crate::config::Config::ecology()
             },
         )

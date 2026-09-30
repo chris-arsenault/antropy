@@ -278,7 +278,7 @@ pub(crate) fn composition(h: &Habitat, tick: u64, c: &Config) -> Vec<f64> {
     }
 }
 pub fn landscape(c: &Config, rng: &mut Random) -> (Vec<[f64; 2]>, Vec<Habitat>) {
-    let centers: Vec<_> = (0..c.landscape_regions)
+    let centers: Vec<_> = (0..c.landscape_region_count())
         .map(|_| [rng.unit() * c.width, rng.unit() * c.height])
         .collect();
     let weights: Vec<_> = centers
