@@ -137,7 +137,7 @@ impl Default for Config {
             source_rate: 0.2,
             source_radius: 3.,
             source_lifetime: 600.,
-            source_gap: 2400.,
+            source_gap: 600.,
             source_drift: 1.,
             reservoir_repulsion: 5.,
             reservoir_range: 30.,

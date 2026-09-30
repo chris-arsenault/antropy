@@ -12,6 +12,15 @@ owns the equations; the archived [birth/aging delivery](../../plans/archive/BIRT
 records bounded checks. A positive calculated surplus does not predict controller expression
 or evolved benefit.
 
+## September 30 renewal correction
+
+Current defaults retain T=600 model seconds and reduce G to 600. The nominal mean supply
+is now 0.5r, 2.5 times the former 0.2r. Full batch sizes and finite startup priming are
+unchanged. The shorter gap is comparable to the field's 693-second washout half-life.
+The [extinction comparison](../../extinction-correction.md) records the decision, rejected
+equal-average-supply candidate and limits of the observed outcomes. The older numerical
+calibration below retains its historical settings.
+
 ## Historical calibration (v9–v38)
 
 The notes and sections below record earlier runtimes. Construction/upkeep measurements are

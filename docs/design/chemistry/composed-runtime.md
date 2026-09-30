@@ -382,7 +382,9 @@ preset uses the same derived region count and spread with the earlier radial sam
 Independently timed renewals
 continue to import accounted material and reference value. Defaults are sourceDrift1
 (reservoir mobility), reservoirRepulsion5, reservoirRange30, sourceProcessing0.25 and
-sourceGap2400; sourceProcessing multiplies the common weathering rate.
+sourceGap600; sourceProcessing multiplies the common weathering rate. Batch duration remains
+600 model seconds. The [extinction correction](../../extinction-correction.md) records the
+shorter-outage decision and its 2.5-fold increase in nominal mean supply.
 The world remains open. Environmental transformations now have an explicit external work
 account modulated by the composed local illumination field.
 

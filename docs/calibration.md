@@ -20,7 +20,7 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
 | Compact affinity support / minimum susceptibility | R=3 coordinate units / 0.05 |
-| Renewing reservoirs | 240 initially around 35 unequal regions, spread 18; fixed per-site rate scale 0.2, radius 3, batch duration 600 s, empty wait 2,400 s; accounted external replenishment |
+| Renewing reservoirs | 240 initially around 35 unequal regions, spread 18; fixed per-site rate scale 0.2, radius 3, batch duration 600 s, mean empty wait 600 s; accounted external replenishment |
 | Reservoir drift / medium processing | 1 / 0.25; shared material forces move finite owners; shared funded transformations process inventory and evolving renewal mixtures |
 | Reservoir repulsion / range | 5 / 30; long-range like-charge repulsion between reservoirs plus circle exclusion |
 | Terrain (new-world preset) | Elevation, conductance effects on movement/transport/processing, overhead transmission, local seasons and feedback on; ceilings off; slope resistance 1, minimum conductance 0.25, season amplitude 1 / period 3,000 s; fractal source placement, contrast 6 |

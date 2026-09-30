@@ -286,9 +286,10 @@ footprint W. Matched sampling and deposition with an antisymmetric gradient give
 
 Reservoirs are finite, renewing external sources. Each owns one normalized composition p, an
 amount Q, a fixed release rate r and a waiting clock. It releases `min(Q, r·dτ)` in composition
-p. When empty it waits an exponential interval with mean G = 2,400 model seconds, then refills
+p. When empty it waits an exponential interval with mean G = 600 model seconds, then refills
 `Q = r·T` with fresh accounted material. The shared public operator keeps transforming p, so a
 reservoir's supply evolves with its local chemistry; renewal uses that evolved composition.
+The nominal batch duration T remains 600 seconds, so the mean stocked fraction is now 0.5.
 
 Local seasons scale supply time:
 

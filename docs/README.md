@@ -23,6 +23,7 @@ them. See the [storage policy](evidence/README.md).
 | --- | --- |
 | What Biotropy is: question, philosophy and mathematics | [White paper](white-paper.md) |
 | Observed outcomes, negative results and open research directions | [Outcomes and open directions](outcomes-and-directions.md) |
+| September 30 starvation investigation and renewal correction | [Extinction correction](extinction-correction.md) |
 | Work order, installed runtime and design owners | [Current design](design/README.md) |
 | Every design direction and its status | [Design directions registry](design/directions.md) |
 | Decisions, rejected approaches and negative evidence | [Decision record](design/decisions-and-evidence.md), [ADR index](adr/README.md) |

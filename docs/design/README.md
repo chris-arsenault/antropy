@@ -259,7 +259,7 @@ body capacities directly at current biomass, including four chemical receptors, 
 one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v46; the outer observation package remains v11.
+checkpoints use v47; the outer observation package remains v11.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping
@@ -283,7 +283,9 @@ The irregular resource arrangement is a revisable hypothesis. No region count or
 is an acceptance criterion. Do not seed a diagnostic or evolved winner into the default.
 
 The [resource-economy model](chemistry/resource-economy.md) governs current supply calibration:
-delivery-aware source selection, mean renewal gap 2,400 model seconds and washout 0.001/second.
+delivery-aware source selection, mean renewal gap 600 model seconds and washout 0.001/second.
+Batch duration remains 600 seconds. The [extinction correction](../extinction-correction.md)
+shortens outages while preserving initial funding; nominal ongoing supply increases 2.5-fold.
 It calculates budgets and a spatial reference without advancing organisms. Short checks show
 repeated local reproduction and both ordinary starting colonies reproducing; a weak isolated
 site still fails. This prepares an evolutionary opportunity, not an evolved community.
