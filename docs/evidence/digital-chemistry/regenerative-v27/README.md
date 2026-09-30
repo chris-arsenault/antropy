@@ -104,5 +104,5 @@ Terraform format. ESLint reports12warnings and no errors. Local artifacts total9
 
 No horizon extension, seed sweep or long-run endurance claim. The default remains externally
 driven and materially open. Positive short opportunity and persistence of authored branches
-do not establish stable coexistence or evolved dependence. Human motion/legibility review is
-pending. Checkpoint v27 intentionally rejects earlier physical schemas; use a fresh world.
+do not establish stable coexistence or evolved dependence. Human motion/legibility review was
+not performed; the gate was retired September 30. Checkpoint v27 intentionally rejects earlier physical schemas; use a fresh world.

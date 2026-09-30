@@ -1,10 +1,16 @@
 # Ecological incentives: crowding, waste and independent light metabolism
 
+**Status:** Delivered plan (archived) — crowding costs, retained/released product costs,
+passive exchange and independent light metabolism shipped on physical v42 at `3ee29b3`, with
+investigation records at `a3a97ee`. Body is the execution record; its open-gate, "remaining",
+"uncommitted/undeployed" and human-review statements are historical and retired by the
+September 30 delivery policy ([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
+
 September 26, 2026. Authorized: implement all phases and take bounded measurements.
 Publication, live reset and changes to numerical chemical participation are outside this work.
 Sulion root: `fce0b678-3b92-4234-8ea6-96a66aa76408`.
-All implementation and measurement phases are complete. Final results below supersede the
-earlier effect sizes; the full CI suite passes. Changes remain local and the live world is untouched.
+Final results below supersede the earlier effect sizes.
 
 ## Outcome and first principles
 
@@ -34,7 +40,7 @@ The ordinary quick runner owns checkpoints, traces and the local experiment ledg
 Earlier movement probes show that paid movement can help reach finite food. Earlier
 overfilled reconstructed mature fixtures do not establish isolated-cell dependence on colonies.
 The finite-food transplant extinctions do not identify the remedy. Local resource seasons
-remain [deferred](../design/local-resource-seasons.md); they change timing rather than the
+remain [deferred](../../design/local-resource-seasons.md); they change timing rather than the
 incentive to leave a profitable site. Chemical numerical-floor investigation stays excluded.
 
 ## Governing changes

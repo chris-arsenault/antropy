@@ -22,7 +22,8 @@ formulas, trajectories, save compatibility and replayability do not make a rejec
 structure mandatory. A faster existing path or a completed threading phase cannot stand in for
 the structural result. Necessary fixes within the replacement remain ordinary implementation.
 
-[SCALING-PLAN.md](SCALING-PLAN.md) is the sole current performance work order. Archived
+[The archived scaling plan](docs/plans/archive/SCALING-PLAN.md) records the delivered structural
+replacement; future performance work follows this rule. Archived
 optimization sequences and past assistant proposals are evidence only; do not load them as
 instructions or resume their patch queues. If a phase requires structural work to achieve the
 goal, keep that work explicit and unfinished until ordinary production consumers use it.
@@ -35,11 +36,34 @@ established principles and authorized scope. Never use "the smallest coherent ch
 diff size, or an easy interim slice as the objective. Complete the necessary interacting parts
 of the design; do not leave the intended outcome incomplete merely to keep a change small.
 
-Phases organize delivery and validation of the complete solution. They must not silently reduce
+Phases organize implementation and deployment of the complete solution. They must not silently reduce
 its ambition or postpone dependencies that make it useful. Use an interim result only when the
 user explicitly requests one. Avoid unnecessary complexity through sound design and shared
 mathematics, not by substituting a less consequential result. Bounded experiments control the
 cost of obtaining evidence; they do not set the scope of the implementation.
+
+## Plan completion and testing responsibility
+
+Plans contain implementation and deployment work. Do not create verification, validation,
+certification, observation, or user-acceptance phases. Run appropriate automated tests, bounded
+mechanism checks, performance checks and deployment checks as part of doing the work, without
+asking the user to run them or approve routine results. Substantial bounded checks are still
+the implementer's responsibility; record their detail in test/results documents, not plan stages.
+
+Close each plan and its children when the scoped implementation and authorized deployment are
+finished. Never leave a delivered plan open solely for visual review, the user's acknowledgment,
+more measurements, or a long-running world. Retire obsolete review phases as skipped with a
+short explanation; do not fabricate a passed test or approval. Concrete code defects and failed
+deployments remain implementation work with a named owner. Optional unselected features belong
+in the backlog rather than blocking delivery behind a scope-question phase.
+
+Long-running ecology and endurance observation inform continued development. They are not
+release gates, automatic rollback criteria, or reasons to stop other work. Do not start costly
+long campaigns implicitly. Preserve useful findings and refine the implementation when actual
+problems appear. User feedback about visible behavior is actionable feedback, not a mandatory
+sign-off ceremony. Report consequential failures and limits; omit recurring acceptance disclaimers
+and routine test narration. This policy supersedes older acceptance-gate language in all plans,
+designs and execution records. See [plan disposition](docs/plans/README.md).
 
 ## Primary design constraint: shared mathematics and few controls
 
@@ -86,7 +110,7 @@ and let runtime consumers sample it; this exception does not change physical wor
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
 | Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
-| Current measurements | [Cellular delivery](docs/cellular-organization-results.md), [habitat evidence](docs/material-habitats.md), [runtime investigation](docs/session-runtime-review.md) |
+| Dated measurements | [Light ecology checks (v42)](docs/light-ecology-results.md), [cellular delivery (v33)](docs/cellular-organization-results.md), [habitat evidence (v32)](docs/material-habitats.md), [runtime investigation (v32)](docs/session-runtime-review.md), [September 28 performance pass](docs/plans/archive/SCALING-PLAN.md#september-28-continuing-world-performance-pass) |
 | Historical ant certification | [docs/certifications.md](docs/certifications.md) |
 | Documentation index    | [docs/README.md](docs/README.md)                                                 |
 | Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
@@ -101,20 +125,20 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v43 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v46 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
-Current physiology has 58 local RNN inputs, 24 recurrent units and 19 outputs, twenty-two derived
+Current physiology has 59 local RNN inputs, 24 recurrent units and 19 outputs, twenty-two derived
 body capacities, four receptors/transporters, one to eight enzyme programs, membrane compatibility
 and paid photoreception. Cells retain one internal mixture; internal compartments were rejected.
 Retained composition modulates rates without changing per-conversion work. Genetic inward sensing,
 activity control and shared field/contact access retain the
 [joint design](docs/design/cellular-organization-and-exchange.md). The user rejected machinery
-construction as a substitute for physical tradeoffs: v43 expresses genetic body proportions
-directly at current biomass. Automatic biomass growth, action costs, basal metabolism and
+construction as a substitute for physical tradeoffs: since v43, genetic body proportions are
+expressed directly at current biomass. Automatic biomass growth, action costs, basal metabolism and
 conservative reproduction remain; there are no construction/retirement controls or per-component
 ownership charges. See [genetic physiology](docs/design/funded-bodies.md). Injured cells expose free
 inventory through ordinary paid transport. No role, kin rule or community reward assigns cooperation.
@@ -123,7 +147,11 @@ assimilation. Complete chemical capabilities are fixed at birth. Daughter mutati
 while biomass and free material split conservatively. Do not restore machinery construction,
 refitting or parental-function buffers. Reproduction grants no additional material;
 living-cell gene transfer is removed. No fallback policy, remote parent selector, coordinates, compass,
-lineage label or reproductive score enters the controller.
+lineage label or reproductive score enters the controller. V44 adds sparse-tail outlying
+reservoirs and one shared incoming-strength budget on every neural row. V45 randomizes newborn
+headings and division axes and adds age-dependent maintenance slowed by core fraction. V46 adds
+persistent fractal terrain, fractal source placement and local seasonal release/refill clocks;
+input 58 reports the previous paid local motor load.
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
 washout, evolving source renewal and multiscale public transformations are implemented.
@@ -131,7 +159,7 @@ There is no broad opposing attraction field, attraction gain or cohesion-based l
 V41 couples each class separately to the shared chemical response: crowding pressure acts
 only on dissolved material; reservoirs add long-range like-charge repulsion and circle
 exclusion (finite clusters, no stored anchors); cells add compatibility-weighted contact
-adhesion that credits no work ([material coupling](docs/plans/MATERIAL-COUPLING-PLAN.md)).
+adhesion that credits no work ([material coupling](docs/plans/archive/MATERIAL-COUPLING-PLAN.md)).
 Each reservoir has one evolving
 composition and a finite amount, with fixed per-site release and delayed accounted refill.
 There is no independent expiry clock or second supply mixture. Reservoirs expose their
@@ -140,24 +168,25 @@ cohering; they supply nothing.
 Illumination composes several
 slow spatial/temporal axes into shared transformation work; it is not direct energy credited
 to cells. V42 adds permanent geographic shade, a sparse overhead material film and paid local
-emission. Funded builder and emitter stocks use ordinary allocation and inheritance. Public
+emission. Builder and emitter capacities follow the ordinary genetic proportion law and inheritance. Public
 conversion is photochemical; private enzyme kinetics remain unchanged. Finite emitted work
 is allocated once across recipients and accounted separately from external solar work.
 See [light ecology](docs/design/light-ecology.md) and its [checks](docs/light-ecology-results.md).
 Cells can pay for local optical sensing. See [material habitats](docs/material-habitats.md),
 [photoreception](docs/photoreception.md) and the composed laws for definitions and limits.
 
-Default observation is a full-screen viewport, usable-energy cell colors, energy-per-material
-chemistry and independently controlled context layers. Bounded phenotype and measured-flow panels
+Default observation integrates muted conductance ground, height contours, received-light shade,
+translucent energy-per-material chemistry, usable-energy cell colors and seasonal reservoir bands.
+A permanent legend explains the view; optional diagnostic maps remain available. Bounded phenotype and measured-flow panels
 report actual recent transfers separately from possible enzyme transformations. Rust owns all
 physical state; rendering borrows WASM views in the same worker. Full field/population frames
 must never be serialized or copied to React. The [ownership contract](docs/design/chemistry/data-ownership.md)
 and its CI guards remain mandatory.
 
-Source zones/epochs and optional disturbance remain available; disturbance is off by default. Direct adhesion, multiple substrates, unrestricted genome/neural topology,
-terrain elevation/conductance and rotational climate are deferred. Permanent terrain shade is
-installed. The user resumed multicore execution September 21.
-The [scaling plan](SCALING-PLAN.md#multicore-design) records the installed persistent Rayon pool,
+Source zones/epochs and optional disturbance remain available; disturbance is off by default. Bonded attachment beyond contact adhesion, multiple substrates,
+unrestricted genome/neural topology and rotational climate are deferred. V46 installs static elevation/conductance, overhead shade,
+fractal source placement and local resource seasons. The user resumed multicore execution September 21.
+The [scaling plan](docs/plans/archive/SCALING-PLAN.md#multicore-design) records the installed persistent Rayon pool,
 shared WASM memory, disjoint field/cell jobs and small-work serial crossover. The owning worker
 still coordinates the sole World and renders borrowed views after every phase joins. Development
 requires cross-origin isolation; unsupported browsers use the same operators in the serial build.
@@ -169,7 +198,8 @@ Contact uses perfect circles: scalar
 penetration, center-line soft separation and permeable material access. No contact sampling
 lattice, angular moments or heading dependence. The sampled contact replacement was rejected.
 The scaling plan records structural acceptance and remaining area-dependent memory/output costs.
-P3 live operating acceptance and human motion review remain open. V40 enlarges default area 5.0625-fold while
+The delivered scaling plan is closed; ongoing operating observations do not block completion.
+V40 enlarges default area 5.0625-fold while
 preserving aspect ratio and mesh. There is no population-count or ancestry-triggered stop.
 History retains living records plus bounded recent ended records; gaps are explicit.
 
@@ -202,8 +232,7 @@ history is distinct from ancestry. Recovery-save failures warn and preserve the 
 while simulation continues. Fatal execution failures remain visible.
 Assess diversity through current capabilities, funded bodies and expressed behavior, never founder
 lineage counts or exact genotype counts. Genealogy is an optional historical diagnostic.
-[Continuing observation](docs/continuing-observation.md)
-records measured limits; uninterrupted days/weeks operation is not certified.
+[Continuing observation](docs/continuing-observation.md) records measured limits.
 
 Implementers own numerical methods, resolution, sparse thresholds and tuning within the stated
 semantics. Target at least 30 ticks/second and report workloads that miss it. Byte identity,
@@ -253,7 +282,7 @@ that a cell senses a cue, acts on it and obtains a benefit that repays its cost.
    Simple biases and sensor-response connections are feasible; a programmed fallback or oracle
    is unnecessary. Freeze mutation and specify private learning, inherited-learning settings. Living-cell gene transfer is not supported. Physiological opportunities need a physical response, not an invented
    neural cue.
-   Record funded bodies separately from genetic construction targets.
+   Record expressed body capacities separately from genotype values.
 3. Start with single-cell probes lasting hundreds of ticks. Verify actual local readings, steering,
    displacement, uptake and expenses before testing population outcomes. A missing signal or
    unexpressed behavior is a finding, not a reason to launch a long population run.
@@ -307,7 +336,7 @@ explicit current-schema checkpoint/candidate inputs. Old campaign outcomes and d
 must not become new chemical evidence. The [work order](docs/design/README.md) governs current work.
 
 Rust and Vitest check bounded invariants, including observers not changing simulation state. Headless
-assays measure behavior; human review judges visible motion. Inspect browser startup configuration
+assays measure behavior; user feedback informs subsequent motion fixes. Inspect browser startup configuration
 rather than launching browser simulations. Run `make ci` after code changes, but do not repeat
 expensive ecological panels merely for formatting or documentation changes.
 
@@ -321,7 +350,7 @@ expensive ecological panels merely for formatting or documentation changes.
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive fifty-eight local chemical,
+- Author physical pressures and local carriers. Controllers receive fifty-nine local chemical,
   light, body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
@@ -332,8 +361,8 @@ expensive ecological panels merely for formatting or documentation changes.
 - Isolate causal changes when measuring mechanisms, predict their effects, and measure them.
   This is an evidence rule, not a limit on delivering a complete interacting design. When
   parameter motion does not change the claimed outcome, stop tuning and record a structural finding.
-- Human review is a real gate for motion. Ratios and final counts cannot certify circling, jitter,
-  congestion, or other visibly broken trajectories.
+- Inspect motion through available bounded checks and act on user reports of circling, jitter,
+  congestion or other defects. Do not require human motion approval to close a delivery plan.
 - Treat the controller as a pluggable module behind `seed`, `createState`, `act`, `assimilate`, `mutate`, `recombine`, and
   `genomeDistance`. Code outside a controller does not inspect genome internals.
 - Keep Vitest bounded to deterministic mechanics and integration invariants. Ecological and
@@ -369,7 +398,7 @@ expensive ecological panels merely for formatting or documentation changes.
 | `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
 | `cd frontend && pnpm harness bacteria-capacity` | Fixed 48/2000/2000-growth loads with census, inspection and render preparation |
 | `cd frontend && pnpm harness rps --case pairwise` | Constructed chemical production/compatibility contests |
-| `cd frontend && pnpm harness zones --case three-way --shares 1,0` | Constructed machinery-allocation contests in source-mixture worlds |
+| `cd frontend && pnpm harness zones --case three-way --shares 1,0` | Constructed diet-specialist/generalist contests (genetic capacity split between two source mixtures) in zoned or mixed worlds |
 | `cd frontend && pnpm harness evolve --world zones --seed 101 --justification REGISTRATION` | De novo evolution with trait samples and checkpoints |
 | `cd frontend && pnpm harness invasion --checkpoint path` | Rare-start comparisons of descriptive current-checkpoint clusters |
 | `cd frontend && pnpm harness recent`             | Read recent ledger rows                                                  |

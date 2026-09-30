@@ -1,5 +1,23 @@
 # Current design and work order
 
+Plans track implementation and deployment. Agents own appropriate automatic testing within the
+work; verification, human acceptance and continuing observation are not plan stages or closure
+gates. The [September 30 disposition](../plans/README.md) closes stale delivery queues and
+supersedes older review-gate wording. Keep actual defects actionable and long-run questions in
+their observation/backlog owners while development continues. The
+[design directions registry](directions.md) lists every past and future direction with its
+status, owner and decision record.
+
+<a id="design-terrain-display"></a>
+
+## Integrated terrain display — September 30
+
+The default landscape view shows conductance ground, height contours, received-light shade,
+translucent chemistry and seasonal reservoir bands together. Cells remain above these cues; a
+permanent legend removes the need to select diagnostic layers. This presentation change, pushed
+to main as `fc016c7`, changes no physical rule or checkpoint format. Its completed plan is listed
+in the [plan index](../plans/README.md).
+
 <a id="design-terrain-seasons"></a>
 
 ## Fractal terrain and local resource seasons — September 30
@@ -7,11 +25,11 @@
 Physical v46 implements persistent elevation, conductance, overhead transmission and optional
 ceilings, independent fractal source placement and local seasonal release/refill clocks.
 World-start configuration exposes each coupling and current-behavior/integrated presets.
-The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns acceptance, measurements and the
-still-open scope of changing terrain and live physical switches. The
+The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns remaining motion/configuration
+repairs and delivery. Changing terrain and live physical switches are unselected backlog ideas. The
 [composed laws](chemistry/composed-runtime.md#geographic-composition) own the physical operations.
-Local implementation does not deploy or reset the continuing world. Format v46 rejects older
-checkpoints without migration. Human map/motion acceptance remains separate from automated checks.
+Format v46 rejects older checkpoints without migration. The static implementation is pushed to
+main as `569f1a0`.
 
 <a id="design-birth-and-aging"></a>
 
@@ -20,10 +38,9 @@ checkpoints without migration. Human map/motion acceptance remains separate from
 Physical v45 gives newborns independent uniform headings and a random local division axis.
 Age progressively increases body maintenance; inherited core fraction slows that rise at the
 expense of other body capacities. Fission rejuvenates daughter age while conserving injury,
-material and work; a budding parent keeps its age. The [delivery plan](../plans/BIRTH-AND-AGING-PLAN.md)
+material and work; a budding parent keeps its age. The [delivery plan](../plans/archive/BIRTH-AND-AGING-PLAN.md)
 records bounded checks and limits. [Composed laws](chemistry/composed-runtime.md) own the equation.
-Local implementation does not reset or deploy the continuing server. Older checkpoints are
-rejected without migration.
+Pushed to main as `79ea580`. Older checkpoints are rejected without migration.
 
 <a id="design-dispersal-opportunities"></a>
 
@@ -31,64 +48,64 @@ rejected without migration.
 
 Physical v44 adds a sparse tail to regional reservoir placement and a shared incoming-weight
 budget to every neural row, including effective learned recurrence. It preserves source
-counts, supply rates and refill timing. The [delivery plan](../plans/DISPERSAL-OPPORTUNITIES-PLAN.md)
+counts, supply rates and refill timing. The [delivery plan](../plans/archive/DISPERSAL-OPPORTUNITIES-PLAN.md)
 records bounded before/after checks and their limits; the [live evidence](../evidence/dispersal-v43/README.md)
-motivates the changes. These local changes do not deploy or reset the continuing server.
-Older physical checkpoints are rejected without migration.
+motivates the changes. Pushed to main as `f6f2a2a`. Older physical checkpoints are rejected
+without migration.
 
 <a id="design-genetic-physiology"></a>
 
 ## Genetic physiology — September 28
 
-The [physiology plan](../plans/GENETIC-PHYSIOLOGY-PLAN.md) removes machinery construction and
+The [physiology plan](../plans/archive/GENETIC-PHYSIOLOGY-PLAN.md) removes machinery construction and
 retirement. In v43, genes directly determine body proportions at current biomass. Growth and
 reproduction conserve material and pay whole-body costs; physical actions retain their own
 equations. The controller operates capabilities without constructing them. The
 [body contract](funded-bodies.md) supersedes earlier development and ownership-tax requirements.
-This is a local implementation; the continuing server is not reset or deployed by this task.
+Pushed to main as `dc41e40`.
 
 <a id="design-ecological-incentives"></a>
 
 ## Ecological incentives — September 26
 
-The [ecological incentives plan](../plans/ECOLOGICAL-INCENTIVES-PLAN.md) implements
+The [ecological incentives plan](../plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md) implements
 compression-driven separation, passive membrane exchange and private light-supported
 metabolism. Short probes show mobile growth in dilute material and receptor-driven reduction
 of harmful exposure. Avoidance also sacrifices nutrient income; no evolved dispersal outcome
 is claimed. Current equations belong to the [composed laws](chemistry/composed-runtime.md).
-Local resource seasons are now implemented through the terrain delivery above. The continuing live world has not been changed by
-this local implementation; publication and human motion review remain separate.
+Pushed to main as `3ee29b3`/`a3a97ee`. Local resource seasons are implemented in v46 above.
 
 <a id="design-model-simplification"></a>
 
 ## Completed model simplification
 
-The [model-simplification plan](../plans/MODEL-SIMPLIFICATION-PLAN.md) tracks unnecessary
+The [model-simplification plan](../plans/archive/MODEL-SIMPLIFICATION-PLAN.md) records unnecessary
 modeled machinery in refitting, reservoir behavior, and binding/retention. M0 removes refitting:
 complete chemical capabilities are fixed at birth, and daughter mutations apply immediately to
-conservatively inherited stock. M0–M2 are complete with passing `make ci`. M1 replaces
+conservatively inherited stock; living-cell gene transfer is removed.
+M0–M2 are complete with passing `make ci`. M1 replaces
 duplicate reservoir mixtures and lifetime expiry with one composition, finite amount, release
 and delayed refill. M2 removes the broad opposing attraction field, its gain control and
 cohesion-based washout discount. One finite attraction range, local repulsion and nonlinear
-crowding remain. Bounded mechanism checks pass; human motion review and long-run ecological
-effects remain unverified. The separate structural execution work is recorded below.
+crowding remain. Bounded mechanism checks pass. V43 later replaced inherited stock with
+genetic capacities at current biomass. The separate structural execution work is recorded below.
 
 <a id="design-light-ecology"></a>
 
-## Current delivery: terrain shade and organism-built light ecology
+## Light ecology (v42)
 
-The [light ecology plan](../plans/LIGHT-ECOLOGY-PLAN.md) implements static geographic shade,
+The [light ecology plan](../plans/archive/LIGHT-ECOLOGY-PLAN.md) implements static geographic shade,
 funded overhead cover, paid emission and common public photochemistry in physical v42.
 Sunlight remains overhead and non-depleting. The [results](../light-ecology-results.md) separate
-physical/controller opportunities from failed or unproven ecological returns. Final operating
-and human review gates remain explicit; the continuing v41 server is not silently migrated.
+physical/controller opportunities from failed or unproven ecological returns. The implementation
+and publication are complete; the old operating/human-review gates are retired.
 
 <a id="design-material-coupling"></a>
 
 ## Class-specific material coupling baseline
 
 The v40 server world showed reservoir regions dispersing to a random layout and cells spreading
-toward an even distribution. The [material coupling plan](../plans/MATERIAL-COUPLING-PLAN.md)
+toward an even distribution. The [material coupling plan](../plans/archive/MATERIAL-COUPLING-PLAN.md)
 keeps the shared chemical response but couples dissolved material, reservoirs and cells to it
 separately, restoring reservoir cluster tension and adding cell adhesion. Its v41 implementation
 underpins the light extension; its recorded observation limits remain valid.
@@ -98,7 +115,8 @@ underpins the light extension; its recorded observation limits remain valid.
 ## Regional structural execution
 
 The user's repeated direction is to address computational structure before accelerating the
-existing base. [SCALING-PLAN.md](../../SCALING-PLAN.md) is the current performance work order.
+existing base. The [archived scaling plan](../plans/archive/SCALING-PLAN.md) records the delivered
+structural replacement; future performance work follows the same rule.
 Reconsider ownership, interaction representation, distance bounds, magnitude thresholds and
 update timing together. Preserve the governing mathematical relationships and ecological
 opportunities; do not treat the installed dense arrays, filters or phase schedule as requirements.
@@ -107,30 +125,34 @@ support-owned finite convolution and footprint-local dependencies. The sampled c
 was rejected and replaced with simple circle overlap and permeability. Persistent spatial
 tiles and local derived scheduling are now implemented in the
 [regional execution contract](spatial-execution.md), with private material/feature commits and
-shared carrier ownership. The scaling plan records acceptance measurements and remaining limits;
-its earlier withdrawn closeout remains historical evidence.
+shared carrier ownership. The user resumed multicore execution on September 21. The scaling
+plan records acceptance measurements and remaining limits; its earlier withdrawn closeout
+remains historical evidence.
 
 <a id="design-installed-runtime"></a>
 
 ## Installed runtime
 
-Updated September 22, 2026. Physical v40 uses sparse chemical owners and one finite shared
+Physical v46 uses sparse chemical owners in persistent 8×8 regions and one finite shared
 circle-overlap law for pressure, isotropic sensing and funded material exchange. Direct chemical
 composition and physiological neural recurrence retain owner-published inputs. The earlier
 single-thread investigation ended below its throughput target. Shared-memory execution
-is now tracked in the [multicore plan](../../SCALING-PLAN.md#multicore-design), with one Rust
+is recorded in the [multicore plan](../plans/archive/SCALING-PLAN.md#multicore-design), with one Rust
 World, a persistent compute pool and the existing coordinator-owned renderer. It uses one scalar illumination field throughout chemistry,
-photoreception and display. It retains v33 cellular organization and exchange, material-supported
-habitats, composed source periods and bounded phenotype/chemical-flow observation.
-Before this feature, the user reported dense, long-lived colonies and a promising visual result.
+photoreception and display, attenuated by terrain transmission and overhead film. It retains the
+v33 retained-mixture organization and shared interfaces under v43 genetic physiology,
+material-supported habitats with v41 class-specific coupling, composed source periods, local
+seasonal supply clocks and bounded phenotype/chemical-flow observation.
+Before the multicore runtime, the user reported dense, long-lived colonies and a promising visual result.
 The [83,980-tick checkpoint review](../material-habitats-review.md) records differentiated
 chemistry and continued turnover. The [session slowdown investigation](../session-runtime-review.md)
 records the reload-related performance report and its unresolved attribution.
 
 [Composed runtime laws](chemistry/composed-runtime.md) own the current equations.
 [Browser/native execution](../execution-modes.md) adds explicit browser 1/4 and a shared
-headless server with the same UI. Private Komodo deployment is authorized; public ingress and
-the hosted server default remain disabled. This changes execution and observation, not chemistry.
+native server with the same UI. The server runs on private TrueNAS/Komodo; the public spectator
+route `server.biotropy.ahara.io` forwards only `/stream` and `/health`, `/api` stays LAN-only,
+and the public site defaults to the server world. This changes execution and observation, not chemistry.
 [Decisions and evidence](decisions-and-evidence.md) explain the selected direction and failures.
 [Execution plans](../plans/README.md) preserve version-specific work without becoming a second
 current specification. The pre-cleanup [work order](../sources/history/2026-09-20-design-work-order.md)
@@ -153,7 +175,7 @@ supported by world design, not an outcome that can be guaranteed or inferred fro
 The runtime supports paid bodies, local RNN decisions, inheritance, mutation, learning, births
 and deaths on a nonuniform 256-species chemical manifold. External work can fund uphill
 transformations, while each process pays its own costs. Shared material fields influence motion,
-retention, source renewal and extracellular chemistry. Local optical sensing is paid machinery.
+retention, source renewal and extracellular chemistry. Local optical sensing is a paid genetic capacity.
 
 The v31 [200k review](../integrated-200k-review.md) found differentiated bodies and inherited
 light responses, but also feedstock dependence and source dispersion. V32 addresses those
@@ -179,18 +201,27 @@ changes improved it; this historical diagnosis is not the current work order.
 
 | Document | Owns |
 | --- | --- |
+| [Design directions](directions.md) | Registry of every design direction with its status, owning document and decision record |
 | [Computational foundation](chemistry/computational-foundation.md) | Governing mathematical design, composed manifold operations and cost-first selection |
 | [Transformation algebra white paper](chemistry/transformation-algebra.md) | Group-theoretic direction, finite-state constraints and evidence contract; selected v23 implementation tracked in the canonical plan |
 | [Digital chemistry](chemistry/README.md) | Chemical identity, funded machinery, implementation records and replacement decisions |
-| [Cellular organization](cellular-organization-and-exchange.md) | Retained-mixture response, regulated machinery, variable enzyme programs and shared interfaces; [delivery evidence](../cellular-organization-results.md) |
-| [Sparse spatial ecology](spatial-ecology.md) | Implemented world hypothesis, movement retuning, spatial populations, multiscale observation and handoff |
+| [Cellular organization](cellular-organization-and-exchange.md) | Implemented v33: retained-mixture response, activity regulation, variable enzyme programs and shared interfaces; construction sections superseded by v43; [delivery evidence](../cellular-organization-results.md) |
+| [Intracellular organization](intracellular-organization.md) | Historical strategic rationale for v33; internal compartments rejected |
+| [Cell interaction research](cell-interaction-research.md) | Historical September 19 mechanism inventory; recommendations superseded by v33 |
+| [Sparse spatial ecology](spatial-ecology.md) | Historical pre-chemistry world hypothesis, movement retuning, spatial populations and observation structure |
+| [Persistent geography](persistent-geography.md) | Implemented v46 static fractal terrain; changing terrain and live switches unselected |
+| [Local resource seasons](local-resource-seasons.md) | Implemented v46 local seasonal release/refill clocks |
+| [Regional execution](spatial-execution.md) | Current contract for persistent 8×8 regional ownership, private commits and shared carriers |
+| [Spatial isolation review](spatial-isolation-review.md) | Historical September 18 study; fixed basins rejected, directional climate unselected |
+| [Resource binding investigation](resource-binding-investigation.md), [proposal](resource-binding-proposal.md) | Historical September 19 record of shared-attraction binding, implemented v28 and modified in v32, v39 and v41 |
 | [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
 | [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
 | [Bodies and inheritance](funded-bodies.md) | Physical costs, genes and lifetime/inherited learning |
 | [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
 | [Composed runtime](chemistry/composed-runtime.md) | Current shared operators, illumination, material habitat laws and execution bounds |
-| [Light ecology](light-ecology.md) | Scalar correction, day/night opportunities and future shared shelter/emission accounting |
+| [Light ecology](light-ecology.md) | Implemented v42: scalar illumination, geographic shade, overhead film, paid emission and shared optical accounting |
 | [Directional cell utterances](cell-utterances.md) | Deferred specification for paid bytes, coarse listener-relative bearing, funded inheritance and natural observation after implementation; no prior payoff or evolution gate |
+| [Strategic controller](strategic-controller.md) | Deferred specification for a slow learned strategy layer: history transform, local rhythm phases, neighbor display, reflex context inputs and learning gain |
 | [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
 | [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
 | [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
@@ -201,7 +232,7 @@ changes improved it; this historical diagnosis is not the current work order.
 [calibration](../calibration.md) records scales; [backlog](../backlog.md) owns unresolved work.
 The [plan closeout](plan-closeout.md) records OBE dispositions and migrated requirements from
 earlier plans. Current runtime documents describe implemented behavior; the spatial design records
-the accepted direction and prior calibration. Chemistry changes require a new motion review.
+the pre-chemistry direction and prior calibration.
 
 <a id="design-current-default-and-disabled-scope"></a>
 
@@ -215,11 +246,12 @@ Finite initial8/128 priming starts delivery; later processing follows ordinary l
 bound material retain actual identities through repair and death. No chemical has a privileged
 waste role. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
-The controller has 56 inputs, 24 recurrent units and 38 outputs. Twenty bounded stock records support
-four chemical receptors, four transporters and up to eight enzyme programs plus core, motor, storage and
-[photoreception](../photoreception.md). The light sensor uses the same embodied sampling and
+The controller has 59 inputs, 24 recurrent units and 19 outputs. Genes express twenty-two derived
+body capacities directly at current biomass, including four chemical receptors, four transporters,
+one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
+is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v40; the outer observation package remains v11.
+checkpoints use v46; the outer observation package remains v11.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping
@@ -231,11 +263,11 @@ founder lineage and sequence counts do not. See [continuation](../continuing-obs
 Memory and observation budgets remain finite. Larger area is not a speed guarantee.
 The [material-habitat changes](../material-habitats.md) introduced shared attraction,
 locally evolving source renewal and multiscale public chemistry. The
-[simplification](../plans/MODEL-SIMPLIFICATION-PLAN.md) now uses one normalized attraction
+[simplification](../plans/archive/MODEL-SIMPLIFICATION-PLAN.md) now uses one normalized attraction
 range and ordinary washout; the broad opposing field and cohesion discount are removed.
 IDs0/136 are initial landscape choices; ordinary renewal no longer reinstates them.
 Generic stress, compatibility, repair and impedance replace named toxin/defense/
-matrix pathways. Source zones and epochs remain selectable. Disturbance is an experimental option, disabled by default. Living-cell genetic transfer is removed. Direct cell adhesion remains deferred.
+matrix pathways. Source zones and epochs remain selectable. Disturbance is an experimental option, disabled by default. Living-cell genetic transfer is removed. V41 compatibility-weighted contact adhesion is installed; bonded attachment remains unselected.
 Smooth geographic weathering and chemical shelter are active. The weathering display and
 selected-cell exposure readings describe physical conditions without adding controller inputs.
 
@@ -243,7 +275,7 @@ The irregular resource arrangement is a revisable hypothesis. No region count or
 is an acceptance criterion. Do not seed a diagnostic or evolved winner into the default.
 
 The [resource-economy model](chemistry/resource-economy.md) governs current supply calibration:
-delivery-aware source selection, mean renewal gap 1,200 model seconds and washout 0.001/second.
+delivery-aware source selection, mean renewal gap 2,400 model seconds and washout 0.001/second.
 It calculates budgets and a spatial reference without advancing organisms. Short checks show
 repeated local reproduction and both ordinary starting colonies reproducing; a weak isolated
 site still fails. This prepares an evolutionary opportunity, not an evolved community.
@@ -252,8 +284,8 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
-The structural replacement remains unfinished; [the scaling work order](../../SCALING-PLAN.md)
-tracks the circle simplification and required tiled execution. The September 21 sampled-contact
+The structural replacement is delivered; [the scaling record](../plans/archive/SCALING-PLAN.md)
+records the circle simplification and installed tiled execution. The September 21 sampled-contact
 implementation produced the following historical results, superseded for contact behavior. At 20× area,
 the ordinary 48-founder workload improved from 20.6 to 129.5 ticks/s with one native worker.
 The concentrated 2,000-cell case is almost independent of added empty area, but at the original
@@ -266,15 +298,16 @@ The reload-related slowdown remains an unresolved [operating observation](../ses
 not a reason to displace the structural work with a garbage-collection or persistence investigation.
 
 Future work belongs in the [backlog](../backlog.md): meaningful long-term specialization,
-less dependence on original feedstock, useful public-food returns, operating headroom, terrain
-and climate, and conditional cell interaction research. The scaling plan owns the delivered
-structural record and its subsequent operating-envelope assessment. Source geometry
+less dependence on original feedstock, useful public-food returns, operating headroom,
+changing terrain, rotational climate and conditional biological extensions. Static terrain and
+v33 cell interactions are implemented. The scaling plan owns the delivered
+structural record and measured operating limits. Source geometry
 is a revisable initial condition, not a requirement for predetermined wells or colony counts.
 Do not turn these open questions into a mandatory verification campaign.
 
 The [joint cellular organization and exchange design](cellular-organization-and-exchange.md)
 connects retained composition, funded local control, evolvable enzyme repertoires and contested
-material access. Cells retain one mixture. Its [execution plan](../CELLULAR-ORGANIZATION-PLAN.md)
+material access. Cells retain one mixture. Its [execution plan](../plans/archive/CELLULAR-ORGANIZATION-PLAN.md)
 records integration and [bounded evidence](../cellular-organization-results.md). These mechanisms provide possible paths to cooperative larger
 organizations and antagonism; they do not assign roles or establish evolved meta-organisms.
 
@@ -292,7 +325,7 @@ purpose above; its studies remain evidence for particular configurations:
 
 | Work | Retained finding | Limit |
 | --- | --- | --- |
-| Kernel and stats performance | Faster headless execution and less frequent UI statistics | Current days/weeks browser readiness is unmeasured |
+| Kernel and stats performance | Faster headless execution and less frequent UI statistics | Pre-chemistry measurement; not a current throughput figure |
 | Toxin immunity/contact injury | Damage and protection can change payoffs in constructed contests | No required producer/resistant/sensitive cycle; persistence was overstated |
 | A/B regions | Constructed diet choices respond differently to food layout | An authored regional opportunity, not a target species count |
 | Thick medium and evolution | Slower dispersal supports residency; recorded diet differences correlate with region | Several world parameters changed together; no isolated attribution of the whole result to viscosity |
@@ -318,7 +351,7 @@ spatially varying positions and compositions; the experiments were not spatially
 | [Typed toxin](../family-study.md) | Chemical compatibility changes the costs of neighboring producers | Tint did not split into separate modes; kin cooperation was not established |
 | [Predation](../predation-study.md) | Material from damaged neighbors can repay toxin investment | Two endpoint pairs gained share both ways; active hunting and persistent prey roles were not shown |
 | [Disturbance](../disturbance-study.md) | Open space could favor recolonization in some circumstances | Mortality occurs; a colonizer/holder tradeoff was not shown |
-| [Gene transfer](../transfer-study.md) | Physical traits can spread through contact as well as descent | Ancestry-group counts cannot show persistence of unchanged strategies; no pair gained share both ways |
+| [Gene transfer](../transfer-study.md) | Physical traits can spread through contact as well as descent | Ancestry-group counts cannot show persistence of unchanged strategies; no pair gained share both ways. Living-cell transfer was removed September 22 |
 | [Reserve sharing](../sharing-study.md) | Transfers could change the value of gathering and contact | Food moves, but no adhesion or division of labor was demonstrated |
 | [Neutral signal](../signal-study.md) | Local chemical information could support conditional behavior | Secretion stayed low; communication and the cause of its absence are unresolved |
 

@@ -1,5 +1,7 @@
 # Bound chemical material through the body cycle
 
+**Status:** Implemented (v20) — built material keeps its chemical identity through growth, repair, division and death; v43 replaced installed machinery with genetic body proportions; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 17, 2026. Checkpoint v20 replaces the v19 compulsory body/repair output.
 The [physical coupling correction](physical-coupling-correction.md) remains the reference for
 mass-scaled work, capacity-scaled reserves and funded motor effort. Its fixed decomposition

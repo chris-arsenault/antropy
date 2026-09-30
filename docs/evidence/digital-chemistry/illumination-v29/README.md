@@ -115,4 +115,4 @@ contrast .8. Composite illumination renders smoothly through worker WebGL2; sele
 pause and manual recovery save pass with no worker errors or UI alerts. The 300-tick polling
 target stopped at 431 ticks because the last observation arrived after the target; this is
 the actual short horizon, not a claimed exact 300-tick stop. Save took 231 ms.
-Human initial motion/legibility review remains pending and is not replaced by this screenshot.
+Human initial motion/legibility review was not performed; the gate was retired September 30.

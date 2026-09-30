@@ -1,5 +1,7 @@
 # Simulation goals and operating principles
 
+**Status:** Current contract — goals, evidence standards, structural-performance rule and delivery boundary for all current work.
+
 These principles govern the [current bacterial design](design/README.md). Historical ant examples,
 oracle ladders and implementation gates are preserved in the [archive](sources/history/README.md).
 
@@ -59,7 +61,8 @@ participation resolution and invalidation together. Preserve mathematical relati
 opportunities and explicit accounts while replacing the necessary connected implementation.
 
 Threading, hot-loop tuning and small patches cannot substitute for a requested structural change.
-The [current scaling work order](../SCALING-PLAN.md) owns its implementation. Old performance plans
+The [archived scaling plan](plans/archive/SCALING-PLAN.md) records the delivered structural
+replacement; future performance work follows the same rule. Old performance plans
 are evidence of prior decisions and failures, not competing instructions. Sparse storage is one
 candidate; it does not preselect which interaction laws or execution structure should survive.
 
@@ -74,7 +77,7 @@ task dispatcher or diagnostic fitness selector enters the population.
 
 Founder reflexes may be ordinary mutable genome weights. Label them as authored initial behavior,
 not emergent discoveries. No neutral signaling convention or cooperation is assumed merely because
-a chemical can be released. More machinery must require material, energy, space and maintenance.
+a chemical can be released. Larger genetic capacities pay through biomass, maintenance and action costs.
 
 <a id="principles-mechanisms-before-expansion"></a>
 
@@ -97,6 +100,18 @@ should permit conditional advantages rather than one universally better trait.
 
 ## Review and working boundary
 
+Plans track implementation and deployment only. Automated testing, bounded physical probes,
+performance checks and deployment checks are ordinary engineering responsibilities within that
+work, including substantial checks when needed. Do them without assigning verification tasks
+or approval ceremonies to the user. Keep detailed results outside the execution phases.
+
+Close delivered plans and their children promptly. User acceptance, visual review, additional
+measurements and days/weeks of observation are not completion gates. Record concrete unresolved
+defects as implementation work and optional ideas in the backlog; never relabel a failed test as
+passed to close a plan. Long-running observations inform further refinement while development
+continues, rather than requiring proof of an ecosystem or automatic rollback. Do not launch
+costly long campaigns without a specific request. This supersedes older review-gate instructions.
+
 A retained default system needs a stated ecological purpose and evidence that its physical
 opportunity exists, or an explicit reason to be disabled. It does not need an evolved example of
 the hoped-for strategy before the user can observe it. Executing code or accumulating secretion
@@ -105,8 +120,8 @@ make the reviewed world configuration the tick-zero default and explain active a
 
 Readiness for days or weeks is also an operational responsibility: continuation after interruption,
 bounded memory and storage, useful retained observation, and measured performance as births
-accumulate. An ecological result does not establish that readiness. Record current limits and
-address them before describing unattended long observation as supported.
+accumulate. An ecological result does not establish that readiness. Record measured limits in
+[continuing observation](continuing-observation.md) and fix concrete defects as they appear.
 
 Use bounded mechanics tests and proportionate headless causal assays. Inspect browser startup
 configuration rather than running a browser simulation. Start servers only on explicit request.

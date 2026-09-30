@@ -1,5 +1,7 @@
 # Environmental study
 
+Physical v14, September 16, 2026. Interpretation: [environmental chemistry results](../../../design/chemistry/environmental-results.md).
+
 Chemical identity is not atom provenance. Regions are descriptive. Family size is not a strategy or invasion result. Repair dissipation includes lost material potential; capture minus recorded expenses is the predeclared screening metric, not net usable-work profit. Memory peaks are sampled every1000ticks, not continuous OS peaks.
 
 | Case | Stop | Ticks | Living | Max sampled generation | Non-source ID imports | Ticks/s | RSS MiB |

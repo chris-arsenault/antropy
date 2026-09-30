@@ -1,5 +1,7 @@
 # Travel cost and access to food
 
+**Status:** Historical record (physical v42 before the September 26 ecological incentives, September 25) — its local resource seasons proposal was later implemented in v46; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 25, 2026. Chemical conversion and its performance thresholds are excluded.
 The previous investigation's numerical recommendation is withdrawn from this task.
 
@@ -8,7 +10,7 @@ proposal](design/local-resource-seasons.md). The recommendation below is retaine
 experimental direction, not an active implementation work order.
 
 The measurements below predate the September 26
-[ecological incentives](plans/ECOLOGICAL-INCENTIVES-PLAN.md) changes. New runs use the current
+[ecological incentives](plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md) changes. New runs use the current
 kernel and are new comparisons; the archived kernel retains the historical evidence.
 
 Question: does the current cost of reaching a food patch prevent a mobile cell from

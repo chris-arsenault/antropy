@@ -1,5 +1,7 @@
 # Diagnostic display continuity
 
+**Status:** Historical record (schema 11 display audit, September 14) — browser acceptance named here was retired September 30; current observation is described in [population observation](../population-observation.md).
+
 September 14, 2026. The Rust/WASM migration changed the sidebar more than its data boundary
 required. This audit compares the prior FamilyPanel, LineagePanel, RelationshipPanel,
 InheritedTraits, GeneInspector, TraitPanel, EvolutionStats and StrategyPanel implementations with

@@ -1,9 +1,11 @@
 # Sparse spatial ecology and long observation
 
-Status: the pre-chemistry spatial candidate was accepted on September 13, 2026; its seven phases
+**Status:** Historical record (pre-chemistry spatial world, September 13) — superseded by the digital-chemistry runtime; current owners are the [runtime contract](bacteria.md) and [composed runtime](chemistry/composed-runtime.md).
+
+The pre-chemistry spatial candidate was accepted on September 13, 2026; its seven phases
 are complete. The subsequent [numerical chemistry contract](chemistry/numerical-engine.md) preserves
-this intent and observation structure but changes its physical economy. Its calibration and human
-motion review are separate; numerical proof points below describe the preceding A/B world. Long-term ecological outcomes and browser endurance remain open.
+this intent and observation structure but changes its physical economy. Its calibration was
+separate, and its human motion review was not performed; the gate was retired September 30; numerical proof points below describe the preceding A/B world. Long-term ecological outcomes and browser endurance remain open.
 Sulion plan: `5874e2d8-68cc-47f5-8e74-dd7ac873fa5c` — Build sparse spatial ecology and long observation.
 This is the work design, September 13, 2026. The [runtime contract](bacteria.md) and
 [calibration](../calibration.md) describe the new default. The
@@ -135,8 +137,10 @@ living population size. Background execution, interruption, save latency and res
 their own checks before promising days or weeks of unattended operation.
 
 Follow [ADR 0020](../adr/0020-complete-rust-kernel.md): one implementation per physical rule.
-The complete Rust/WASM simulation and renderer now live in one worker. The old shared inference
-pool and COOP/COEP work remain unnecessary. No backend or hosted storage is authorized here.
+The complete Rust/WASM simulation and renderer then lived in one worker, and the old shared
+inference pool and COOP/COEP work were considered unnecessary. The September 21 multicore
+decision superseded that: [regional execution](spatial-execution.md) uses a persistent Rayon pool
+on shared WASM memory and requires cross-origin isolation. No backend or hosted storage is authorized here.
 
 <a id="spatial-work-sequence"></a>
 
@@ -190,5 +194,6 @@ color scales, zoom-dependent region/cell rendering, retained spatial samples and
 recovery. [Observation](population-observation.md) defines grouping and event uncertainty;
 [continuation](../continuing-observation.md) records storage bounds and operational measurements.
 These remain separate from ecological claims. Sulion records all seven phases completed after
-user review. Future motion and legibility changes still require human review. Start a development
+user review. The later human-review gate for motion and legibility was retired by the
+September 30 delivery policy. Start a development
 server only on explicit user request.

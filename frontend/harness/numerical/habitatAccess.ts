@@ -46,7 +46,7 @@ try {
       sourceDigest: engine.sourceDigest,
       horizon: 600,
       wallCapSeconds: 30,
-      registration: "docs/design/chemistry/reliability-experiments.md",
+      registration: "docs/plans/archive/CHEMISTRY-RELIABILITY-EXPERIMENTS.md",
     };
     const id = recordRun(db, {
       experiment: "chemistry-habitat-access",

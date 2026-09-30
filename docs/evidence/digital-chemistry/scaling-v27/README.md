@@ -1,6 +1,6 @@
 # Active-work optimization evidence
 
-September 18, 2026. [Canonical plan and results](../../../../SCALING-PLAN.md).
+September 18, 2026. [Canonical plan and results](../../../plans/archive/SCALING-PLAN.md).
 
 ## Reports
 

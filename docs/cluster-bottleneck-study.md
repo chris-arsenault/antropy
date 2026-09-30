@@ -1,12 +1,14 @@
 # From clustering to a design direction
 
+**Status:** Historical record (physical v42 before the September 26 ecological incentives, September 25–26) — its numerical recommendation was not selected; the current work order is in [design/README.md](design/README.md).
+
 **Scope correction:** the user excluded chemical conversion from the clustering task.
 The numerical recommendation below is retained as a historical finding and is not the
 selected next action. The subsequent [movement comparison](movement-opportunity-study.md)
 examined travel and food access without modifying conversion or its thresholds.
 
 Historical study: these measurements predate the September 26
-[ecological incentives](plans/ECOLOGICAL-INCENTIVES-PLAN.md) changes. The inspector now uses
+[ecological incentives](plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md) changes. The inspector now uses
 the shared intracellular light environment, and its movement distance includes contact
 separation. New executions therefore do not reproduce the old numerical results. Use the
 archived kernels and local reports for the historical comparisons. Neither this record nor

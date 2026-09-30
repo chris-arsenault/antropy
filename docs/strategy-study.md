@@ -1,5 +1,7 @@
 # Competing bacterial strategies: registered investigation
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 10) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 Plan: `817d1ab2-7291-401f-8d66-901d0f52f6f9`. Registration precedes the runs below.
 The previous [export study](overnight-study.md) established an inherited reduction in toxin
 expenditure. This study asks whether independent physical strategies can be favored in different

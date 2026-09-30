@@ -1,8 +1,15 @@
 # Class-specific material coupling
 
-September 23, 2026. **Design approved by the user. C0–C2 implemented; C3 results below.**
+**Status:** Delivered plan (archived) — separate coupling of dissolved material, reservoirs and
+cells to the shared chemical response shipped as physical v41 at `c7220a6`, with structural
+reservoir exposure (emptied reservoirs keep cohering) at `9a5fc51`. Body is the execution
+record; its open-gate, "remaining", "uncommitted/undeployed" and human-review statements are
+historical and retired by the September 30 delivery policy ([plans README](../README.md)).
+Current laws live in [composed runtime](../../design/chemistry/composed-runtime.md).
+
+September 23, 2026. Design approved by the user; C0–C2 implemented, C3 results below.
 The selected direction and its evidence are recorded in
-[decisions and evidence](../design/decisions-and-evidence.md#class-specific-material-coupling).
+[decisions and evidence](../../design/decisions-and-evidence.md#class-specific-material-coupling).
 Composed runtime laws are updated only when each phase lands.
 
 ## Outcome and boundary

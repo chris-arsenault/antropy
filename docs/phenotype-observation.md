@@ -1,5 +1,7 @@
 # Phenotype and metabolic activity observation
 
+**Status:** Current reference — bounded measured-flow, phenotype comparison, highlight and descendant-pin views; introduced on physical v30.
+
 The Web and Phenotypes windows answer different questions: which chemical conversions actually
 ran recently, and how the cells occupying a chemical role or region differ from the population.
 These views observe ordinary physical operations. They do not assign strategies, select parents,
@@ -11,7 +13,7 @@ alter inherited traits or supply controller inputs.
   Arrow widths use accepted amounts. Uptake and export list accepted transporter flow by chemical;
   they do not include material released by death. Primary and supported enzyme capability views
   remain available. Environmental pathways still show possibilities, not measured environmental flux.
-- **Primary role** beside a Web route opens a comparison with cells whose strongest installed
+- **Primary role** beside a Web route opens a comparison with cells whose strongest expressed
   enzyme route matches that pair. A cell can execute other routes; this group is not the set of all
   contributors to the selected measured edge.
 - **Phenotypes** compares the world, a selected primary role or spatial region, and one pinned
@@ -38,7 +40,7 @@ version is supported. This does not bypass physical checkpoint-version rejection
 Accepted reaction and transport commits feed an opt-in Rust observer. Windows cover 250 ticks;
 the view displays the last completed interval, or the current partial interval until one completes.
 Changing the selected group resets coverage. Window accounts include work by cells that died;
-trait distributions and group counts describe current living cells. Start-of-tick installed role
+trait distributions and group counts describe current living cells. Start-of-tick expressed role
 and the latest 25-tick spatial census determine activity membership. Pin birth/death membership
 updates during lifecycle processing.
 
@@ -47,7 +49,7 @@ pin. Route counters have 65,536 slots with touched-only clearing; transport has 
 counters. Closing measured views without a pin disables collection. A highlight alone does not
 enable recording. A pin continues collection and compact history sampling while windows are closed.
 
-The feature was introduced on physical v30. Current physical v43 still omits transient observer state. Rendering borrows the same
+The feature was introduced on physical v30. Physical checkpoints still omit transient observer state. Rendering borrows the same
 worker-owned WASM projection; an existing unused display lane carries selection membership.
 Ordinary reduced replies retain the 16 KiB ceiling. Route pages contain at most 64 pairs, transport
 tables eight species per direction with an explicit remainder, and original pin IDs travel only

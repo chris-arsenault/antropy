@@ -1,5 +1,7 @@
 # Mature contact-search optimization
 
+**Status:** Historical record (physical v33/v34, September 21) — superseded by the [regional execution owner](design/spatial-execution.md).
+
 September 21, 2026. Plan `90cad6da-8962-4b34-9d36-84077eb99a4c`.
 
 ## Scope and prediction

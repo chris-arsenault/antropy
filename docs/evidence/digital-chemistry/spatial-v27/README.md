@@ -1,4 +1,4 @@
-# Current-default spatial observation, v27
+# Default-world spatial observation, v27
 
 Seed 27, chemistry 101, tick 0–50,000. Registration, findings, definitions and proposed changes
 are in [the spatial isolation review](../../../design/spatial-isolation-review.md).

@@ -1,10 +1,12 @@
 # Material-supported habitats and chemical renewal
 
+**Status:** Historical record (physical v32 delivery, September 20, with September 22 simplification notes) — v39 removed the two-scale attraction and cohesion washout discount and v41 changed reservoir and cell coupling; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 20, 2026. Implemented under [the execution plan](plans/archive/MATERIAL-HABITATS-PLAN.md).
 Physical checkpoints are v32; the chemical definition and observation package retain their
 existing versions. Rust owns the fields and sources; worker rendering still borrows WASM views.
 
-September 22 update: [reservoir simplification](plans/MODEL-SIMPLIFICATION-PLAN.md#m1--single-composition-reservoirs)
+September 22 update: [reservoir simplification](plans/archive/MODEL-SIMPLIFICATION-PLAN.md#m1--single-composition-reservoirs)
 replaces the two-mixture v32-v37 source lifecycle with one composition and an actual amount.
 It retains evolving refill chemistry, removes lifetime expiry and coupled random lifetime/rate
 selection, and stops empty-source motion. Independent exponential renewal waits are retained;

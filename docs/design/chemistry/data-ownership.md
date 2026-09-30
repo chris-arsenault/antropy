@@ -1,5 +1,7 @@
 # Immutable data ownership and sharing contract
 
+**Status:** Current contract — Rust/WASM owns physical state; the owning worker renders borrowed views; changes require an explicit user decision.
+
 The simulation's data-sharing constraints are architecture requirements. A display feature,
 performance shortcut or later implementation plan cannot weaken them. Changing these boundaries
 requires an explicit user decision. This document makes [ADR 0020](../../adr/0020-complete-rust-kernel.md)
@@ -180,7 +182,10 @@ physical continuation state and cannot guarantee a final record after process te
 The [reliability evidence](reliability-results.md) measures these changes, including actual browser
 limits. The older transport measurements below retain their original scope and executable identity.
 
-## Audit and validation registration
+## Historical audit and validation registration (September 14)
+
+This section and the measured repair below record the September 14 transport audit. Its
+measurements retain their original binary and scope; the ownership rules above govern.
 
 The September 14 genealogy restoration preserved the borrowed render path but exposed an observation
 regression: each half-second publication resent all retained history and serialized the selected
@@ -208,7 +213,7 @@ Repeat the existing registered 48/2,000/2,000-growth capacity cases once after t
 figures remain separate from the transport probe. Neither test measures GPU execution, React paint
 or days/weeks endurance. Do not attribute an unmeasured browser slowdown entirely to these copies.
 
-## Measured repair
+## Measured repair (September 14)
 
 Ledger 3680 completed both 20-publication arms within their caps. The legacy-shaped arm uses the
 current decoder and kernel too: this isolates repeated full observations versus revisions, rather

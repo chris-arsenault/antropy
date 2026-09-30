@@ -1,21 +1,27 @@
 # Resource economy: model, calibration and checks
 
-September29 current-tool note: v45's zero-tick budgets explicitly price newborn age-zero
-bodies. Live inspection and frozen-state diagnostics use actual age. Core fraction slows the
-linear increase in body maintenance; growth, cover and division reserves integrate the same
-law. See [composed runtime](composed-runtime.md) and the
-[birth/aging delivery](../../plans/BIRTH-AND-AGING-PLAN.md) for the equation and bounded checks.
+**Status:** Current reference — the zero-tick resource-economy command prices delivery, maintenance and growth budgets without advancing ticks; the calibration record below is historical.
 
-September28 current-tool note: v43 uses genetic physiology at current biomass, whole-body
-basal metabolism and automatic growth. Per-category equipment upkeep and construction requests
-are removed. The current analytical output is `growthCeiling`, priced by `growthEnergy`.
-Earlier construction/upkeep measurements below remain historical, not current calibration.
+The command in [Reproduce the analysis](#reproduce-the-analysis) uses genetic physiology at
+current biomass, whole-body basal metabolism and automatic growth; per-category equipment upkeep
+and construction requests are absent. Its analytical output is `growthCeiling`, priced by
+`growthEnergy`. Budgets price newborn age-zero bodies, while live inspection and frozen-state
+diagnostics use actual age; core fraction slows the linear increase in body maintenance, and
+growth, cover and division reserves integrate the same law. The [composed runtime](composed-runtime.md)
+owns the equations; the archived [birth/aging delivery](../../plans/archive/BIRTH-AND-AGING-PLAN.md)
+records bounded checks. A positive calculated surplus does not predict controller expression
+or evolved benefit.
 
-September26 current-tool note: the zero-tick active-pump budget now uses the same private
+## Historical calibration (v9–v38)
+
+The notes and sections below record earlier runtimes. Construction/upkeep measurements are
+historical, not current calibration.
+
+September26 note: the zero-tick active-pump budget now uses the same private
 free/bound light environment as ordinary cellular reactions. It remains an active-pump
 estimate at unit illumination and explicitly excludes passive membrane loss/gain, repair,
 competition and travel through gradients. It cannot predict independent-cell persistence.
-The [ecological incentives plan](../../plans/ECOLOGICAL-INCENTIVES-PLAN.md) records measured
+The [ecological incentives plan](../../plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md) records measured
 private cycling, passive loss and mobile growth in dilute material. Current governing equations
 remain in [composed runtime](composed-runtime.md); the historical calibration below is unchanged.
 
@@ -26,11 +32,11 @@ findings, then re-derive affected delivery/lifecycle budgets in M5 from the sele
 operators. The spherical capture ceiling and old margins are not constraints or acceptance values
 for the redesign; this document establishes no performance or viability result for that system.
 
-Status: implemented; final verification recorded below, September 14, 2026. Plan
+The original analysis was implemented and verified September 14, 2026. Plan
 `fabff8fc-19a4-4ba6-ad10-6ff41aa73137` owns this work. Operational reliability and
 ecological calibration are separate; the reliability plan does not certify this economy.
 
-## Decision and scope
+### Decision and scope
 
 Calculate resource access, material requirements, energetic limits and inherited
 investment costs before asking evolving populations to reveal them. Use the production
@@ -43,7 +49,7 @@ sites remain localized opportunities, and whether extra machinery has conditiona
 The changes must retain all 256 chemical possibilities, including persistent impedance;
 removing difficult chemistry from the manifold would defeat the experiment.
 
-## Equations and limits
+### Equations and limits
 
 At a location with concentrations C, impedance is J = sum(I_s C_s). An importer's
 rate request is its funded stock times turnover, effort and affinity-weighted
@@ -97,7 +103,7 @@ Gaussian footprint convention and expected site release. No field timesteps are 
 This reference omits consumption and concentration-dependent impedance; it is not a
 pointwise bound on the nonlinear field or a prediction of occupied area.
 
-## Implemented calibration
+### Implemented calibration
 
 The measurements in this section predate the v38 reservoir simplification. Their random-batch
 averages are historical; the current command uses the finite-batch calculation above.
@@ -140,7 +146,7 @@ but lowers it by 0.0000458 when only 80 is present. The chemical-80 importer has
 opposite resource dependence: +0.00258 with 80, -0.0000462 with 0. These compare fully
 funded phenotypes; birth-local expression and evolved discovery are separate.
 
-## Registered validation
+### Registered validation
 
 First calculate baseline and candidate budgets without advancing a world. Record source
 IDs and full properties, both body stages, dilute and concentrated supply, importer and
@@ -167,7 +173,7 @@ Compare against prior ledger 3773, whose 48 founders became 37 cells with two di
 and 13 starvation deaths. This tests integration, not evolved advantage or coexistence.
 Use the existing harness and ledger for these observations; no browser or long campaign.
 
-### Registered follow-up after the initial checks
+#### Registered follow-up after the initial checks
 
 Rows 3774–3776: the first isolated site funded one division and two growing daughters
 by tick 1,500; the weak second site starved its cell at 988; the empty control died at
@@ -219,7 +225,7 @@ registered three small checks through the existing quick runner and ledger. The 
 follow-up uses `--continue-first path/to/first/final.bin` with a new output directory.
 Raw assay checkpoints, traces and archived WASM remain in ignored local artifacts.
 
-## Verification record
+## Verification record (September 14)
 
 Five new mechanics checks compare analytical imports against actual exchange, verify
 the terminal reaction/assembly closure against production metabolism, preserve the
@@ -235,7 +241,7 @@ An additional `cargo clippy --all-targets -- -D warnings` check surfaced four ex
 test-style errors in movement, metabolism and mechanism tests. The repository's standard
 release Clippy target passes; this work does not suppress or rewrite those unrelated tests.
 
-## Acceptance and remaining uncertainty
+## Remaining uncertainty
 
 The deliverable is a reproducible analytical command, justified production calibration,
 mechanics checks, bounded ecological evidence and reconciled documentation. Positive

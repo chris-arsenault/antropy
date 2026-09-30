@@ -95,7 +95,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     save(
         &output.join("preparation.json"),
         &serde_json::to_vec(&json!({
-            "registration":"docs/plans/ECOLOGICAL-INCENTIVES-PLAN.md",
+            "registration":"docs/plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md",
             "records":records,"learning":"static; mutation and assimilation disabled",
             "provisioning":"Ordinary founder stocks; four declared cyclic enzymes, total free matter 0.8"
         }))?,

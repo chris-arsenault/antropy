@@ -1,6 +1,8 @@
 # Intracellular organization and evolutionary strategy
 
-September 20, 2026. **Strategic rationale and pre-feature v32 baseline.**
+**Status:** Historical record (physical v32, September 20) — strategic rationale behind the v33 [joint design](cellular-organization-and-exchange.md); internal compartments were considered and rejected, and current laws are in the [composed runtime](chemistry/composed-runtime.md).
+
+September 20, 2026. Strategic rationale and pre-feature v32 baseline.
 The [joint cellular organization and exchange design](cellular-organization-and-exchange.md)
 develops this hypothesis into the v33 laws, control, inheritance and ecological consequences.
 This document retains the strategic reasoning for intracellular research in the

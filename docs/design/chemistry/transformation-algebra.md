@@ -1,5 +1,7 @@
 # A transformation algebra for Biotropy
 
+**Status:** Current contract — the organizing algebra of exact finite actions and irreversible kinetic mixtures; the [composed runtime](composed-runtime.md) owns the selected laws.
+
 ## Status and purpose
 
 White paper, September 18, 2026. **Pure design record.** Its original publication did not
@@ -13,8 +15,8 @@ This paper records the user's requirement for an organizing mathematical languag
 groups and their actions. It defines what future work must demonstrate before claiming that
 requirement is complete. Completing this document does not complete the simulation work.
 
-Execution is tracked only in the [canonical mathematical plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction),
-current root `dfb36e51-2cd4-4688-9978-bd82e9179238`, phases B0–B3. Completed A0–A5 remain
+Execution was completed under the archived [canonical mathematical plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction)
+(root `dfb36e51-2cd4-4688-9978-bd82e9179238`, phases A0–A5 and B0–B3), which remains
 historical evidence. The follow-up corrects a privileged potential slope, recognition/action
 coupling, mutation units and missing funded environmental returns. Exact group membership
 alone did not establish those ecological opportunities. This paper supplies design and
@@ -254,8 +256,8 @@ preserving the feature values. Product maps, potentials, stress and impedance ta
 follow the same convention. Transforming one cached operator without its dependencies fails
 the contract even when its isolated arithmetic is correct.
 
-Chemical coordinates are not geographic directions. The physical world remains a periodic
-320 by 240 rectangle. Its exact global isometries differ from those of the chemical square:
+Chemical coordinates are not geographic directions. The physical world is a periodic
+720 × 540 rectangle (320 × 240 when this paper was written). Its exact global isometries differ from those of the chemical square:
 a quarter-turn is not a symmetry of that fixed rectangular torus. Local vector laws may be
 rotation-covariant, while a square numerical stencil approximates those laws. Integer mesh
 translations provide a separate exact discrete check. Arbitrary translations relative to
@@ -282,7 +284,8 @@ for one owner solely to obtain an outcome is not justified by calling it intenti
 ### Mutation, inheritance and funded refitting
 
 September 22 disposition: [birth-fixed capabilities](installed-machinery.md) supersede the
-installed-target and partial-refitting assumptions in this historical section. Mutation and
+installed-target and partial-refitting assumptions in this historical section and in the
+partial-refit items of §9 and §10; v43 also removed machinery construction. Mutation and
 chemical transformation algebra remain unchanged; daughter capabilities apply at birth without
 additional stock. Living capabilities do not change during life.
 
@@ -369,7 +372,7 @@ invitation to replace it with a visually interesting run or a completed plan sta
 | Evolution uses the representation | Mutation law, rare-change support, inherited installed identity, paid partial refit and all enabled expression/recombination paths. |
 | The common algebra reaches ecology | Trace ordinary enzymes, environmental conversion and reservoir consumers; name every retained distinct operator and justify its role. |
 | Approximation is controlled | A norm, workload, horizon and numerical tolerance declared before measuring; exact and approximate claims reported separately. |
-| The runtime remains usable | Matched release-WASM full workloads, occupied-field/machinery-change costs, bounded memory, restore equality, ordinary startup and separate human motion review. |
+| The runtime remains usable | Matched release-WASM full workloads, occupied-field/machinery-change costs, bounded memory, restore equality and ordinary startup. |
 
 Exact integer permutation identities should be exact. Floating-point arithmetic downstream
 needs declared tolerances and accumulation accounts. If a continuous candidate is later

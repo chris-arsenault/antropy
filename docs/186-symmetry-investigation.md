@@ -1,5 +1,7 @@
 # Investigating renewed #186 accumulation
 
+**Status:** Historical record (physical v20/v21, September 18) — the [causal follow-up](186-symmetry-causality.md) owns the outcome; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 Registered September 18, 2026. Plan `f0ed1bb2-4302-427d-815d-a28ca81ed354`.
 
 The successful reference is v20 after preserving body material, not v19's compulsory #186

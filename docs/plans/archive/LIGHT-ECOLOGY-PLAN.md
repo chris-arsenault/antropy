@@ -1,9 +1,16 @@
 # Terrain shade and organism-built light ecology
 
+**Status:** Delivered plan (archived) — permanent geographic shade, a sparse overhead material
+film, paid local emission and shared photochemical conversion shipped as physical v42 at
+`ffee2d8`. Body is the execution record; its open-gate, "remaining", "uncommitted/undeployed"
+and human-review statements are historical and retired by the September 30 delivery policy
+([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md). No unperformed visual review
+or experiment is marked passed.
+
 September 25, 2026. Sulion root: `ad5eb2f9-36a9-4447-b18a-6cc910c7cb46`.
-Status: execution authorized September 25, including all phases and commit/push on the current
-branch. M0–M5 are complete; M6 validation and publication are in progress. No new server,
-destructive live-world reset or save migration is authorized.
+Execution was authorized September 25, including all phases and commit/push on the current
+branch. No new server, destructive live-world reset or save migration was authorized.
 
 ## Outcome and first principles
 
@@ -18,10 +25,10 @@ supplies it, what shared operation changes that state, and who pays? Derive the 
 ownership, numerical update and computation together. An attractive formula, extra variation,
 visible congregation or passing accounting test alone does not establish that opportunity.
 
-The [computational foundation](../design/chemistry/computational-foundation.md),
-[transformation algebra](../design/chemistry/transformation-algebra.md),
-[composed runtime](../design/chemistry/composed-runtime.md) and
-[ownership contract](../design/chemistry/data-ownership.md) remain authoritative.
+The [computational foundation](../../design/chemistry/computational-foundation.md),
+[transformation algebra](../../design/chemistry/transformation-algebra.md),
+[composed runtime](../../design/chemistry/composed-runtime.md) and
+[ownership contract](../../design/chemistry/data-ownership.md) remain authoritative.
 Equations below are candidate contracts and derivation obligations. M0 must place selected
 proposed laws in their existing design owners, clearly separated from installed behavior;
 implementation milestones update the runtime contract when those laws actually land.
@@ -67,8 +74,8 @@ single-light correction, not this feature. The completed terrain design task
 Neither is reopened or represented as unfinished implementation of this plan.
 
 For this feature, the user's correction supersedes the future finite-sun requirement and
-sideways-shadow assumptions in [light ecology](../design/light-ecology.md), and the dependent
-finite-sun wording in [persistent geography](../design/persistent-geography.md). Their
+sideways-shadow assumptions in [light ecology](../../design/light-ecology.md), and the dependent
+finite-sun wording in [persistent geography](../../design/persistent-geography.md). Their
 historical evidence remains valid in its stated version. Reconcile that future-design wording
 in M0; do not silently treat it as authority to restore a finite solar donor.
 
@@ -91,8 +98,8 @@ contrasts. Public conversion currently uses unilluminated kinetic engagement; li
 work and gates uphill affordability. Material shelter currently slows public conversion but
 does not create optical shade. There is no cover stock, emitter stock or emitted-light account.
 
-Read the negative [public-food result](../material-habitats.md) and
-[photoreception probes](../photoreception.md) before choosing fixtures. Accessible transformed
+Read the negative [public-food result](../../material-habitats.md) and
+[photoreception probes](../../photoreception.md) before choosing fixtures. Accessible transformed
 food did not repay all whole-cell costs in the former; the latter demonstrated sensory steering
 but ended in finite-reserve extinction. Neither is evidence of successful nocturnal adaptation.
 The recent live review found distinct metabolism and substantial private recycling; visual
@@ -441,10 +448,9 @@ do not pre-expand all future implementation details now. A multistep prerequisit
 owning phase and gets a Sulion branch; return after verified completion. Do not create branches
 for one-line fixes, permission ceremonies or hypothetical failures.
 
-Close milestones only on their acceptance evidence, and close the root only after the complete
-feature lands with required validation. Do not close this pending implementation plan because
-the planning request is finished. This plan neither supersedes the separate scaling work order
-nor marks its operating gates complete.
+The complete feature is delivered and this plan is closed. Required automated checks are part
+of implementation; no human review or continuing observation is required to keep it closed.
+The historical measurements and their limits remain available without an active work queue.
 
 ## Current state and next action
 
@@ -617,7 +623,7 @@ lost physical state. The corrected harness keeps exact round-trip and continuati
 requirements, while reporting future byte equality. The single registered retry completed
 all cases: 61.6, 27.0 and 26.8 ticks/s. The latter two miss the target. Full accounts, memory,
 save/restore limits and negative findings are interpreted in the
-[results](../light-ecology-results.md#operating-cost-and-continuation); raw artifacts remain
+[results](../../light-ecology-results.md#operating-cost-and-continuation); raw artifacts remain
 local. No physical thresholds changed to obtain a pass. Human review and live-world cutover
 remain pending; neither is implied by these checks.
 

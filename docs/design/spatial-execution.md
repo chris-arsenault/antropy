@@ -1,7 +1,9 @@
 # Regional spatial execution
 
+**Status:** Current contract — persistent 8×8 regional ownership, local invalidation and multicore Rayon execution of the installed runtime.
+
 The September 22 replacement implements the ownership work in
-[SCALING-PLAN.md](../../SCALING-PLAN.md). It retains the current chemistry, finite reservoirs,
+[SCALING-PLAN.md](../plans/archive/SCALING-PLAN.md). It retains the current chemistry, finite reservoirs,
 funded organisms and circle-overlap law. The physical mesh remains two units.
 
 ## Owners and boundaries
@@ -57,8 +59,8 @@ Unchanged distant populated regions retain their outputs. All destination region
 same committed prior stage and can run on separate Rayon workers.
 
 Derived dirtiness is not a physical sleep flag. Renewal, illumination and paid cellular work
-retain their existing clocks. Reservoir release accrues stocked time and commits `rate × elapsed`
-at the physiology boundary, where the medium diffuses, is sensed and exchanges. At each physiology boundary, all active material
+retain their existing clocks. Reservoir release accrues local seasonal supply time and commits
+`rate × accrued supply time` at the physiology boundary, where the medium diffuses, is sensed and exchanges. At each physiology boundary, all active material
 and immediate delivery neighbors advance diffusion, drift, weathering and washout over elapsed
 time. Consequently the field pass still sums all physical output regions. It does not use a
 partial total update while silently omitting unchanged material.
@@ -91,7 +93,7 @@ projection remains an observer-only calculation, so observing cannot change the 
 Local WASM borrowing, helper-worker joins, bounded native publication and backpressure remain as
 specified by the [data-sharing contract](chemistry/data-ownership.md).
 
-## Limits and acceptance
+## Limits
 
 Not every array is sparse: carrier planes, illumination and topology lookup still reserve
 space proportional to geographical area. Parallel sections follow one scheduling rule: each

@@ -1,5 +1,7 @@
 # What the 180k run says about the recent design work
 
+**Status:** Historical record (physical v33, September 20) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 20, 2026. Deeper analysis of the stopped seed-27, chemistry-seed-101 v33 run.
 The [first report](cellular-200k-review.md) owns registration, accounting, performance and
 the interrupted endpoint. This report connects the results to the retrieved design history.

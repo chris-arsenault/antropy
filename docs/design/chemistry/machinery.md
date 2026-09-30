@@ -1,11 +1,13 @@
 # Funded machinery and controller contract
 
+**Status:** Historical record (v33 machinery contract) — v43 removed machinery construction, retirement and per-category stocks; the current contract is in [funded bodies](../funded-bodies.md) and [birth-fixed capabilities](installed-machinery.md).
+
 The [composed runtime](composed-runtime.md) implements [computable chemistry](computational-foundation.md):
 heritable manifold kernels, weighted mixture reductions and bounded product mappings with
 actual funded capacity. Checkpoint v33 persists continuous targets and separate actual installed
 coordinates. Earlier categorical direction, integer products and birth-time recycling are retired.
 
-Status: the [joint organization design](../cellular-organization-and-exchange.md) extends the
+The [joint organization design](../cellular-organization-and-exchange.md) extends the
 earlier fixed repertoire with bounded program duplication/deletion and funded local regulation. See the [overview](README.md) and
 [substrate](substrate.md) for scope and chemistry rules.
 

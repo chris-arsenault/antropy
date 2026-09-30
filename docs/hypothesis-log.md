@@ -1,10 +1,21 @@
 # Evolution and ecology hypothesis log
 
+**Status:** Current reference — open hypotheses with dated dispositions; H1's mutation law is implemented, H4 is partly implemented by v33 cellular exchange, and H2/H3 remain questions.
+
 Open hypotheses raised while observing the simulation. Entries preserve the question and its
 evidence; they are not accepted explanations, implementation specifications or automatic experiment
 orders. Append findings and decisions without erasing the original hypothesis.
 
-## Current disposition — September20
+## Disposition update — September 30
+
+V43 replaced machinery construction and
+allocation with genetic body proportions expressed at current biomass; the September 26
+ecological incentives added crowding costs, passive membrane exchange and private
+light-supported metabolism. H4's shared crowding, paid exchange and injured-neighbour access
+were implemented by the v33 [cellular exchange design](design/cellular-organization-and-exchange.md);
+whether a strategy using them repays its costs remains open.
+
+## Disposition — September 20
 
 The dated descriptions below retain their original equations and evidence. They are not all
 current runtime behavior. H1 led to the shared heavy-tail law and geometric mutation now
@@ -34,7 +45,8 @@ Explaining individual phenotypes will eventually support better UI legibility.
 
 ## H1 — Mutation magnitude may prevent major evolutionary departures
 
-**Raised by:** user, September 16, 2026. **Status:** open.
+**Raised by:** user, September 16, 2026. **Status:** heavy-tail mutation mechanism
+implemented; waste feeding unestablished.
 
 The concern is the magnitude and distribution of individual mutations, not simply how often
 mutation happens. If changes are effectively confined to small steps, cells may keep refining an
@@ -80,7 +92,7 @@ processes without changing the energy it extracts from each unit of the same tra
   potential difference and the world-wide `conversionEfficiency`, currently 0.8.
   [Compiled enzyme operators](../engine/src/chemical_operators.rs) also account for the shared
   conversion charge. There is no inherited cell-specific efficiency for an identical transition.
-- Cells do inherit substrate recognition, product mappings and machinery allocation. Their
+- Cells do inherit substrate recognition, product mappings and body-capacity proportions. Their
   processing rates, operating costs and net returns can therefore differ. The unresolved concern
   is whether those differences are enough to prevent convergence driven by the shared yield rule.
 - The observed cells diversified their products, but continued drawing metabolic energy from
@@ -117,7 +129,8 @@ forced death-product sink and reliably evolving away from the founder's inherite
 
 ## H4 — Local cell interactions may support additional conditional strategies
 
-**Raised by:** user, September 19, 2026. **Status:** deferred research, not tested or scheduled.
+**Raised by:** user, September 19, 2026. **Status:** partly implemented in v33 (crowded
+access, paid exchange, injured-neighbour access); strategic payoff untested.
 
 Close neighbors may impose consequential pressure and offer opportunities for chemically
 selective harm or feeding. Current pressure, contact, stress, repair and death-release rules

@@ -1,5 +1,7 @@
 # v27 runtime optimization
 
+**Status:** Historical record (physical v27, September 18) — superseded by the [regional execution owner](../spatial-execution.md); current laws are in the [composed runtime](composed-runtime.md).
+
 September 18, 2026. Sulion plan `6573e08b-6a8a-47ef-88a7-0598c32dbd77`.
 
 ## Scope and registration
@@ -109,5 +111,5 @@ physical bytes still match. `make ci` passes150Rust tests,62Vitest tests, Clippy
 TypeScript, documentation and Terraform formatting. ESLint retains12warnings and no errors.
 `git diff --check` passes. Local artifacts total652MiB; measured process RSS stays below2.04GB.
 No longer ecological horizon, new workload, browser/server session or deployment was introduced.
-Existing v27 checkpoints remain compatible. This pass measures the current5k state and synthetic
+At the time, existing v27 checkpoints remained compatible; the current format rejects them. This pass measures the current5k state and synthetic
 loads, not far-run endurance or all possible future chemical coverage/populations.

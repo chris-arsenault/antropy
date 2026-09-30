@@ -1,12 +1,12 @@
 # Digital chemistry migration audit
 
-> Historical first TypeScript chemistry implementation (v9). Its measurements and decisions
-> remain evidence for that version. The [Rust/WASM numerical contract](numerical-engine.md),
-> [current results](numerical-results.md) and [migration dispositions](numerical-migration.md)
-> supersede its runtime choices and unfinished work order.
+**Status:** Historical record (first TypeScript chemistry implementation, v9, September 13) — dispositions remain evidence for that version; acceptance gates named here were retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
+The later [numerical contract](numerical-engine.md) and [migration dispositions](numerical-migration.md)
+superseded its runtime choices and unfinished work order.
 
 
-Execution record, September 13, 2026. The shared replacement and content migration are implemented; human motion/operating acceptance remains open. Historical measurements
+Execution record, September 13, 2026. The shared replacement and content migration are implemented; human motion/operating acceptance was not performed (the gate was retired September 30). Historical measurements
 keep their original chemistry, schema and conclusions. A migrated command is not a repeated
 experiment, and an executable fixture is not evidence that its hypothesis succeeds.
 

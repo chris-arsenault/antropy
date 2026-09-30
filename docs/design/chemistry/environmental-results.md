@@ -1,5 +1,7 @@
 # Environmental chemistry: rules and evidence
 
+**Status:** Historical record (physical v14, September 16) — the human review named here was not performed and the gate was retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
 September 16, 2026. The [environmental plan](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md)
 adds geographic weathering, extracellular transformations and chemical shelter to the ordinary
 Rust/WASM world. The [composed runtime](composed-runtime.md) retains the other physical laws.

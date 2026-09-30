@@ -1,9 +1,23 @@
 # Browser and headless server execution modes
 
+**Status:** Delivered plan (archived) — browser 1/4-thread and native 32-thread server execution
+with shared UI and bounded remote display shipped at `493a4f1`, private Komodo deployment through
+`d74f1ae` (CI run `35637790565`), and volume persistence plus the public spectator route at
+`fe0499c`. Body is the execution record; its open-gate, "remaining", "uncommitted/undeployed"
+and human-review statements are historical and retired by the September 30 delivery policy
+([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
+
+The deployment record includes a running 32-thread server and acknowledged stream frames.
+Public routing is recorded in the [runtime guide](../../execution-modes.md). The retired
+measurement/visual stage was not marked as a passed experiment. The historical close-code 1006
+anomaly and unmeasured viewer costs remain in
+[continuing observation](../../continuing-observation.md).
+
 September 21, 2026. **Implementation and private TrueNAS/Komodo deployment authorized.**
 September 23: the user requested the public spectator route and volume-backed server
-persistence. [Execution modes](../execution-modes.md#public-route) and
-[server persistence](../execution-modes.md#server-persistence) record the implementation; the
+persistence. [Execution modes](../../execution-modes.md#public-route) and
+[server persistence](../../execution-modes.md#server-persistence) record the implementation; the
 earlier exclusions of public routing and server saves below are superseded.
 Sulion root: `14e9bf4a-fc5f-4c8c-ba92-6dd961848f57`.
 
@@ -69,7 +83,7 @@ environmental display layers. It excludes the complete 256-chemical field, genom
 private neural state. Selected-cell inspection stays a separate bounded query.
 
 This is the necessary proposed extension to the
-[ownership contract](../design/chemistry/data-ownership.md): network display copies are allowed
+[ownership contract](../../design/chemistry/data-ownership.md): network display copies are allowed
 for remote execution, while local borrowing and bounded UI messages remain required. Update
 that contract during implementation. There is no client-side physical simulation in remote mode.
 
@@ -228,7 +242,7 @@ slow-client isolation and reconnect. Check browser one/four modes on the same bu
 review. Use bounded workload checks before any separately registered long run.
 No save-rotation, crash-recovery or cross-context transfer gates.
 
-[SCALING-PLAN.md](../../SCALING-PLAN.md#multicore-design) retains shared performance targets
+[SCALING-PLAN.md](SCALING-PLAN.md#multicore-design) retains shared performance targets
 and prior measurements. This plan adds the execution choices and remote UI; it does not
 inherit all of P3's browser persistence work or P4's terrain scope.
 

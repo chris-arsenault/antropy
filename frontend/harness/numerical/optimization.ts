@@ -79,7 +79,7 @@ try {
         seed: name === "default-5000" ? 27 : 101,
         ticks: timing.steps,
         params: {
-          registration: "SCALING-PLAN.md",
+          registration: "docs/plans/archive/SCALING-PLAN.md",
           sourceDigest: engine.sourceDigest,
           wasmDigest,
           inputDigest: result.inputDigest,

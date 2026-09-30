@@ -1,5 +1,7 @@
 # Local-weathering trajectory: 50,000 ticks
 
+**Status:** Historical record (physical v18, September 17) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 17, 2026. Ledger **3989**, seed **27**, chemistry **101**, physical checkpoint **v18**.
 The [registration](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#weathering-50k) authorized one unchanged
 default run, observations every 250 ticks and checkpoints every 2,500 ticks. No simulation

@@ -1,5 +1,12 @@
 # Genetic physiology without machinery construction
 
+**Status:** Delivered plan (archived) — genetic body proportions expressed directly at current
+biomass replaced machinery construction and retirement, shipped as physical v43 at `dc41e40`.
+Body is the execution record; its open-gate, "remaining", "uncommitted/undeployed" and
+human-review statements are historical and retired by the September 30 delivery policy
+([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
+
 September 28, 2026. Authorized local implementation; publication and live-world reset are not
 part of this request. Sulion root: `ea4b2307-f92a-4600-8c52-44c9e3071f4e`.
 

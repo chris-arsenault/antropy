@@ -1,5 +1,7 @@
 # Short food-access experiment
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 11) — the `quick-food-access` harness command remains; new chemical runs use schema v3; the current work order is in [design/README.md](design/README.md).
+
 Registered September 11, 2026, before execution. Plan
 `f9255235-8c5b-4b1d-b8a5-60ecd2dbe0c5`.
 

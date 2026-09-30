@@ -1,14 +1,9 @@
 # Bounded numerical chemistry engine
 
-The [fresh composed runtime](composed-runtime.md) supersedes this record's numerical
-formulas and implementation sequence. The body below preserves previous evidence.
+**Status:** Historical record (first Rust/WASM numerical engine, schema 10–12, September 14) — superseded by the September 15 fresh runtime; acceptance gates named here were retired September 30; current laws are in the [composed runtime](composed-runtime.md).
 
-The [computational foundation](computational-foundation.md) and [ADR 0022](../../adr/0022-computable-chemistry.md)
-govern the next mathematical design. The body below records the September 14 runtime, clocks,
-laws and measurements; it is not a requirement to preserve those formulas or an active work
-sequence. M1 subsequently added v4 profiles and physical checkpoint v12. New coupled spatial
-operators remain experimental. Reuse ownership and useful numerical components, then select
-computable composed laws and verify their cost through the current root plan.
+The body below records the September 14 runtime, clocks, laws and measurements; it is not a
+requirement to preserve those formulas or an active work sequence.
 
 Approved for implementation September 14, 2026. Sulion plan
 `cad67253-df16-4762-9c69-ec1a9121130b` replaces the unfinished acceptance of

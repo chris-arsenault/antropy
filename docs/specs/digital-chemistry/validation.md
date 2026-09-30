@@ -1,6 +1,8 @@
 # M0 evidence and later proof registrations
 
-Current acceptance authority, September 15: [computable chemistry](../../design/chemistry/computational-foundation.md)
+**Status:** Historical record — M0/M1 evidence and registrations (September 13–15); the suspended registrations below were not resumed, and separate acceptance gates were retired September 30.
+
+Acceptance authority as of September 15: [computable chemistry](../../design/chemistry/computational-foundation.md)
 and the [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) govern new work. The M0/M1 results below
 remain evidence for those versions. M0's future registrations are suspended pending M2–M4
 re-expansion: retain their causal questions, controls and bounded scope, but replace predictions

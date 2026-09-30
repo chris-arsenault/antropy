@@ -1,5 +1,7 @@
 # Fresh composed runtime: registration and evidence
 
+**Status:** Historical record (fresh composed runtime rebuild, September 15) — pending browser checks named here were retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
 September 15, 2026. [Runtime laws](composed-runtime.md) and the
 [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) govern this rebuild. Reports below exercise
 the sole production World; historical thermodynamic and candidate-only timings remain history.

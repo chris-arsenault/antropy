@@ -2,11 +2,14 @@
 
 The [current design and work order](design/README.md) prepares a world where diverse ecosystems
 and adaptation are likely during the user's days/weeks observation. Hypotheses and small proof
-points guide settings; a pre-evolved community is not the deliverable. Read the
-[corrected ecological analysis](analysis-correction.md) before reusing September 12–13 conclusions.
-Rolling recovery, compact parentage and retained spatial observation are implemented; actual
-days/weeks browser operation remains unverified.
+points guide settings; a pre-evolved community is not the deliverable. Every design direction,
+past or future, is listed with its status in the [design directions registry](design/directions.md).
 The [historical snapshot](sources/history/README.md) preserves superseded contracts and full evidence.
+
+Each document opens with one `**Status:**` line. Kinds: *Current contract* (governs the installed
+runtime), *Current reference* (operation, commands, observation), *Implemented (vNN)*, *Partly
+implemented*, *Deferred proposal*, *Unselected proposal*, *Rejected* and *Historical record (era)*.
+Historical records keep their original measurements and context; they are not instructions.
 
 Experimental data is local-only: the SQLite ledger and new run output live under ignored
 `frontend/harness/artifacts/`. Historical raw reports and plots under `docs/evidence/` are
@@ -14,78 +17,76 @@ also ignored. Git retains written analyses, registrations and evidence README no
 Links to raw data require the corresponding local files; a fresh checkout does not include
 them. See the [storage policy](evidence/README.md).
 
+## Current contracts and references
+
 | Need | Document |
 | --- | --- |
-| Continuous runtime, expiring parentage and current functional diversity | [Continuous-world delivery](plans/CONTINUOUS-WORLD-PLAN.md), [continuation contract](continuing-observation.md) |
-| Crowding pressure, passive metabolic products and light-supported growth away from reservoirs | [Ecological incentives and measurements](plans/ECOLOGICAL-INCENTIVES-PLAN.md) |
-| Earlier clustering, transplant and movement experiments | [Placement](cluster-placement-study.md), [bottleneck investigation and scope correction](cluster-bottleneck-study.md), [food-access comparison](movement-opportunity-study.md) — historical measurements before ecological incentives |
-| Browser 1/4, shared native server and private Komodo deployment | [Execution modes](execution-modes.md) |
-| Current decisions, failed approaches and plan disposition | [Decision record](design/decisions-and-evidence.md), [plan archive](plans/README.md) |
-| Mature checkpoint differentiation and reload-related slowdown | [83,980-tick review](material-habitats-review.md), [runtime investigation](session-runtime-review.md) |
-| Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |
-| Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
-| Deferred paid byte communication, coarse relative hearing and natural observation | [Directional cell utterances](design/cell-utterances.md) — design specification, not implemented |
-| Terrain design, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md#fractal-map-generation-and-placement) — static v46 implementation; [delivery and remaining acceptance](plans/TERRAIN-AND-SEASONS-PLAN.md) |
-| Local supply fluctuations, reservoir clocks and movement opportunities | [Local resource seasons](design/local-resource-seasons.md) — integrated terrain proposal, circular fractal fields and explicit supply accounts; [movement evidence](movement-opportunity-study.md) |
-| 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
-| Scalar illumination, day/night opportunities and future shelter/emission | [Light ecology](design/light-ecology.md); earlier [illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k findings](evidence/digital-chemistry/illumination-design-143249/README.md) retain their original versions |
-| Joint design for intracellular organization, specialization and cell interactions | [Cellular organization and exchange](design/cellular-organization-and-exchange.md) — implemented v33 laws |
-| Cellular delivery, opportunities and costs | [Delivery results](cellular-organization-results.md) — bounded mechanics, startup and operating limits |
-| V33 long observation: inherited differentiation, metabolism, contacts and operating limits | [Cellular 180k analysis](cellular-200k-review.md) — shortened 200k registration, temporal analysis and evidence |
-| Mature-world contact search: exact overlap discovery and measured cost reduction | [Contact performance](contact-performance.md) |
-| Concentration resolution, bounded census work and continued mature-world optimization | [Bounded computation](bounded-computation.md) |
-| Recent design goals against the same run: collective habitats, branch replacement and private recycling | [Connected 180k analysis](cellular-180k-connections.md) — retrieved intent, corrected body signals and cross-system evidence |
-| Earlier crowding, antagonism and feeding research | [Cell interaction research](design/cell-interaction-research.md) — original inventory and proposal |
-| Whole-cell metabolic organization and conditional incentives | [Intracellular organization](design/intracellular-organization.md) — strategic hypothesis underlying the joint design |
-| Current spatial isolation, source migration and directional climate review | [50k study and staged ecology proposal](design/spatial-isolation-review.md) |
-| Full-screen world and observation navigation | [Display contract](design/bacterial-display.md) |
-| Enzyme role colors, counts and transformation web | [Chemical web and phenotype observation](phenotype-observation.md) |
-| Governing computable chemistry and active work | [Computational foundation](design/chemistry/computational-foundation.md), [ADR 0022](adr/0022-computable-chemistry.md), [canonical math plan](plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order), [completed rebuild](plans/archive/DIGITAL-CHEMISTRY-PLAN.md), [current specification](specs/digital-chemistry/README.md) |
-| Chemical system, implementation and current evidence | [Digital chemistry](design/chemistry/README.md), [numerical contract](design/chemistry/numerical-engine.md), [measurements](design/chemistry/numerical-results.md), [migration and retirement](design/chemistry/numerical-migration.md) |
-| Current environmental extension and investigation | [Environmental plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md), [weathering and shelter evidence](design/chemistry/environmental-results.md) |
-| Current 50,000-tick evolution and chemical-flow analysis | [Local-weathering trajectory](local-weathering-50k-study.md) |
-| Physical investment, body scaling and evolutionary tradeoffs | [Physical coupling audit](physical-coupling-audit.md), [v19 corrections](physical-coupling-correction.md) |
-| Group-theoretic design and implementation accountability | [Transformation algebra white paper](design/chemistry/transformation-algebra.md) — rationale for the installed exact finite actions and bounded kinetic mixtures |
-| Mathematical design of a regenerative initial ecosystem | [Initial ecosystem white paper](design/chemistry/regenerative-ecosystem.md) — implemented shared work law, mutable four-founder starting circuit and pressure rationale |
-| Earlier symmetry corrections and remaining limitations | [Mathematical symmetry audit](mathematical-symmetry-audit.md), [v22 correction audit](symmetry-completion-audit.md) |
-| Mobile reservoirs and short calibration | [Source plan](plans/archive/MOBILE-SOURCES-PLAN.md), [source laws and evidence](design/chemistry/mobile-source-results.md) |
-| World hypothesis and prior implementation sequence | [Sparse spatial ecology and long observation](design/spatial-ecology.md) |
-| Open hypotheses from observed evolution | [Evolution and ecology hypothesis log](hypothesis-log.md) |
-| Analytical resource budgets, source calibration and current viability checks | [Resource economy](design/chemistry/resource-economy.md) |
-| Historical A/B movement and local reproduction controls | [Spatial probes](spatial-probes.md) |
-| Recovery, accumulated-state measurements and limits | [Continuing observation](continuing-observation.md) |
-| Earlier plans, OBE decisions and migrated work | [Plan closeout](design/plan-closeout.md) |
-| Corrected frequencies and withdrawn coexistence passes | [Analysis correction and durable endpoint evidence](analysis-correction.md) |
-| Days/weeks continuation, storage and observation | [Runtime readiness limits](backlog.md#backlog-runtime-and-observation-limits) |
-| Runtime ownership | [Architecture](architecture.md) |
-| Commands, persistence and experiments | [Development](development.md) |
-| Exported winner investigation | [Registered adaptation study](overnight-study.md) |
-| Competing physical strategies | [Registered strategy study](strategy-study.md) |
-| Short constructed mechanism experiments | [Food-access harness and results](quick-food-access-study.md) |
-| Six mechanism areas and actual evolved capabilities | [Capability investigation and recommendation](capability-investigation.md) |
-| Families, relatives, genes and behavior | [Population observation](design/population-observation.md) |
-| Sidebar migration, restored genealogy and remaining display gaps | [Diagnostic continuity](design/chemistry/diagnostic-continuity.md) |
-| Immutable WASM/worker ownership, sharing rules and transport measurements | [Data-sharing contract](design/chemistry/data-ownership.md) |
-| Earlier-default long population comparison | [Six 50,000-tick runs](population-50k.md) |
-| Changing resource composition and inheritance | [Registered food-epoch campaign](food-epochs-study.md) |
-| Toxin immunity and the producer/resistant/sensitive cycle | [Contest record](rps-study.md) |
-| Spatial A/B zones and diet specialists | [Zone record](zones-study.md) |
-| De novo evolution and evolved-cluster invasibility | [Evolution record](evolve-study.md) |
-| Element-cycle opportunities and limits | [Cycle record](cycle-study.md) |
-| Typed toxin and compatibility | [Family record](family-study.md) |
-| Damage-related feeding | [Predation record](predation-study.md) |
-| Abiotic disturbance and colonisation | [Disturbance record](disturbance-study.md) |
-| Horizontal gene transfer | [Transfer record](transfer-study.md) |
-| Reserve sharing and its limits | [Sharing record](sharing-study.md) |
-| Neutral chemical signal | [Signal record](signal-study.md) |
-| Review status | [Certification](certifications.md) |
-| Decisions | [ADR index](adr/README.md) |
-| Original supplied sources | [Source index](sources/README.md) |
+| Work order, installed runtime and design owners | [Current design](design/README.md) |
+| Every design direction and its status | [Design directions registry](design/directions.md) |
+| Decisions, rejected approaches and negative evidence | [Decision record](design/decisions-and-evidence.md), [ADR index](adr/README.md) |
+| Goals, evidence standards and delivery boundary | [Principles](principles.md) |
+| World substrate, lifecycle and persistence | [Bacterial world](design/bacteria.md) |
+| Installed artificial laws, accounts and checkpoint format | [Composed runtime](design/chemistry/composed-runtime.md), [chemistry index](design/chemistry/README.md) |
+| Chemistry design rules and exact finite actions | [Computational foundation](design/chemistry/computational-foundation.md), [transformation algebra](design/chemistry/transformation-algebra.md) |
+| Rust/WASM ownership, borrowed rendering and bounded observation | [Data-sharing contract](design/chemistry/data-ownership.md) |
+| Local RNN controller inputs, actions and learning | [Controller](design/controller.md) |
+| Genetic physiology, bodies and inheritance | [Funded bodies](design/funded-bodies.md), [birth-fixed capabilities](design/chemistry/installed-machinery.md) |
+| Regional execution and multicore ownership | [Spatial execution](design/spatial-execution.md) |
+| Terrain, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md) — static v46 implemented; [active repair plan](plans/TERRAIN-AND-SEASONS-PLAN.md) |
+| Local supply clocks | [Local resource seasons](design/local-resource-seasons.md) — implemented v46 |
+| Shade, overhead film and paid emission | [Light ecology](design/light-ecology.md) — implemented v42; [results](light-ecology-results.md) |
+| Paid local light sensing | [Photoreception](photoreception.md) |
+| Strategic ecology scope | [Strategic microbial ecology](design/strategic-ecology.md) |
+| Viewport, integrated landscape and visual meanings | [Display contract](design/bacterial-display.md) |
+| Families, traits, grouping and history | [Population observation](design/population-observation.md), [phenotype and chemical-web views](phenotype-observation.md) |
+| Experiment method and evidence levels | [Experimentation](design/experimentation.md), [development commands](development.md) |
+| Analytical resource budgets | [Resource economy](design/chemistry/resource-economy.md) |
+| Runtime ownership and module map | [Architecture](architecture.md) |
+| Browser 1/4, native server and public spectator route | [Execution modes](execution-modes.md), [server management API](server-management.md) |
+| Recovery, retention and history limits | [Continuing observation](continuing-observation.md) |
+| Default scales and dated throughput | [Calibration](calibration.md) |
+| Open hypotheses | [Hypothesis log](hypothesis-log.md) |
+| Planned and unselected work | [Backlog](backlog.md) |
+| Active and archived plans | [Plan index](plans/README.md) |
+| Shipped changes by date | [Changelog](../CHANGELOG.md) |
 
-Studies retain the physical version and configuration stated in each record. The earlier named
-A/B, toxin and ant studies are historical; recent illumination, photoreception and habitat records
-describe later chemistry versions. Current commands live in Development; archived commands are
-provenance, not instructions to rerun old campaigns.
+## Deferred proposals
+
+| Direction | Document |
+| --- | --- |
+| Paid byte broadcasts with coarse listener-relative hearing | [Directional cell utterances](design/cell-utterances.md) |
+| Slow learned strategy layer feeding the reflex RNN | [Strategic controller](design/strategic-controller.md) |
+
+## Historical design records
+
+| Topic | Document |
+| --- | --- |
+| Cellular organization, specialization and interactions (implemented v33; construction removed v43) | [Cellular organization and exchange](design/cellular-organization-and-exchange.md), [strategic rationale](design/intracellular-organization.md), [earlier interaction research](design/cell-interaction-research.md) |
+| Resource binding (investigation v27; implemented v28, later changed) | [Investigation](design/resource-binding-investigation.md), [proposal](design/resource-binding-proposal.md) |
+| Pre-chemistry sparse spatial world (September 13) | [Sparse spatial ecology](design/spatial-ecology.md) |
+| Spatial isolation review (fixed basins rejected; rotational climate unselected) | [50k study and staged proposal](design/spatial-isolation-review.md) |
+| Regenerative initial ecosystem (implemented v27) | [Initial ecosystem white paper](design/chemistry/regenerative-ecosystem.md) |
+| Earlier plans and migrated work | [Plan closeout](design/plan-closeout.md) |
+| Pre-chemistry world-design evidence | [Evidence](design/bacteria-results.md), [corrected analysis](analysis-correction.md) |
+| Deleted M0/M1 chemistry specification | [Digital chemistry specification](specs/digital-chemistry/README.md) |
+| September 10–11 ant/A-B certification | [Certification](certifications.md) |
+
+## Historical studies by era
+
+Studies retain the physical version and configuration stated in each record. Archived commands
+are provenance, not instructions to rerun old campaigns. Read the
+[corrected ecological analysis](analysis-correction.md) before reusing September 12–13 conclusions.
+
+| Era | Studies |
+| --- | --- |
+| v42, September 25–26 (before ecological incentives) | [Cluster placement](cluster-placement-study.md), [cluster bottleneck](cluster-bottleneck-study.md), [movement opportunity](movement-opportunity-study.md) |
+| v33–v34, September 20–21 | [Cellular delivery results](cellular-organization-results.md), [180k analysis](cellular-200k-review.md), [connected 180k analysis](cellular-180k-connections.md), [contact performance](contact-performance.md), [bounded computation](bounded-computation.md) |
+| v31–v32, September 19–22 | [Integrated 200k review](integrated-200k-review.md), [material-supported habitats](material-habitats.md), [83,980-tick review](material-habitats-review.md), [session runtime](session-runtime-review.md) |
+| v18–v22, September 16–18 | [Local-weathering 50k](local-weathering-50k-study.md), [physical coupling audit](physical-coupling-audit.md), [v19 correction](physical-coupling-correction.md), [bound material](bound-material.md), [bound-material impact](bound-material-impact-study.md), [mathematical symmetry audit](mathematical-symmetry-audit.md), [v22 completion audit](symmetry-completion-audit.md), [#186 investigation](186-symmetry-investigation.md), [#186 causality](186-symmetry-causality.md), [mature checkpoint cost](mature-checkpoint-cost.md) |
+| v14–v15, September 16 | [Default-seed cycles](default-seed-cycles-study.md), [environmental chemistry](design/chemistry/environmental-results.md), [mobile sources](design/chemistry/mobile-source-results.md) |
+| Pre-chemistry TypeScript A/B-food world, September 10–13 | [Overnight adaptation](overnight-study.md), [strategy](strategy-study.md), [quick food access](quick-food-access-study.md), [capability investigation](capability-investigation.md), [six 50k runs](population-50k.md), [food epochs](food-epochs-study.md), [spatial probes](spatial-probes.md), [RPS](rps-study.md), [zones](zones-study.md), [evolve](evolve-study.md), [cycle](cycle-study.md), [family](family-study.md), [predation](predation-study.md), [disturbance](disturbance-study.md), [transfer](transfer-study.md), [sharing](sharing-study.md), [signal](signal-study.md) |
+| Chemistry-era records (September 13–18) | [Chemistry index historical table](design/chemistry/README.md) |
+| Original supplied sources | [Source index](sources/README.md) |
 
 The following index covers every active design, principle, calibration and backlog section.
 Historical indexes remain in the archive; they are not additional work queues.
@@ -97,23 +98,23 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Composed field and transport operations](design/chemistry/computational-foundation.md#compose-the-calculation-end-to-end)
 - [Machinery on chemical space](design/chemistry/computational-foundation.md#machinery-is-computation-on-chemical-space)
 - [Accounting and consistency](design/chemistry/computational-foundation.md#consistency-belongs-to-the-designed-system)
-- [Acceptance before integration](design/chemistry/computational-foundation.md#acceptance-before-integration)
+- [Historical acceptance and evidence (September 15)](design/chemistry/computational-foundation.md#acceptance-before-integration)
 - [Computable artificial rules](principles.md#principles-computable-rules)
 - [Structural performance work](principles.md#principles-structural-performance)
 
 ## Current design and work order
 
-- [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
 - [Birth orientation and physiological aging](design/README.md#design-birth-and-aging)
+- [Integrated terrain display](design/README.md#design-terrain-display)
 - [Fractal terrain and local resource seasons](design/README.md#design-terrain-seasons)
 - [Dispersal geography and bounded neural drive](design/README.md#design-dispersal-opportunities)
 - [Genetic physiology without machinery construction](design/README.md#design-genetic-physiology)
 - [Crowding, waste and independent light metabolism](design/README.md#design-ecological-incentives)
-- [Immediate model simplification](design/README.md#design-model-simplification)
-- [Terrain shade and organism-built light ecology](design/README.md#design-light-ecology)
+- [Completed model simplification](design/README.md#design-model-simplification)
+- [Light ecology (v42)](design/README.md#design-light-ecology)
 - [Class-specific material coupling baseline](design/README.md#design-material-coupling)
-- [Unfinished structural execution](design/README.md#design-structural-priority)
+- [Regional structural execution](design/README.md#design-structural-priority)
 - [Installed runtime](design/README.md#design-installed-runtime)
 - [Design owners](design/README.md#design-design-owners)
 - [Current default and disabled scope](design/README.md#design-current-default-and-disabled-scope)
@@ -122,7 +123,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Earlier roadmap two: opportunities and unresolved questions](design/README.md#design-roadmap-2)
 - [Status and provenance](design/README.md#design-status-and-provenance)
 
-## Sparse spatial ecology
+## Sparse spatial ecology (historical, pre-chemistry)
 
 - [Intent and preserved semantics](design/spatial-ecology.md#spatial-intent)
 - [First landscape hypothesis](design/spatial-ecology.md#spatial-landscape)
@@ -161,7 +162,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Metabolic chains and external energy](design/strategic-ecology.md#ecology-element-cycle)
 - [Injury, death and resource capture](design/strategic-ecology.md#ecology-predation)
 - [Abiotic disturbance](design/strategic-ecology.md#ecology-disturbance)
-- [Horizontal gene transfer](design/strategic-ecology.md#ecology-gene-transfer)
+- [Horizontal gene transfer removed](design/strategic-ecology.md#ecology-gene-transfer)
 - [Export, uptake and recipient benefit](design/strategic-ecology.md#ecology-sharing)
 - [Detectable emissions](design/strategic-ecology.md#ecology-signal)
 - [Stress, compatibility and repair](design/strategic-ecology.md#ecology-toxin-defense-and-repair)
@@ -191,6 +192,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Display and observation
 
 - [World and camera](design/bacterial-display.md#display-world-and-camera)
+- [Integrated landscape](design/bacterial-display.md#display-integrated-landscape)
 - [Visual meanings](design/bacterial-display.md#display-visual-meanings)
 - [Chemical map audit](design/bacterial-display.md#display-chemistry-map-audit)
 - [Stats and history](design/bacterial-display.md#display-stats-and-history)
@@ -214,12 +216,12 @@ Historical indexes remain in the archive; they are not additional work queues.
 
 ## Open questions and deferred features
 
-- [Deferred multicore scaling](backlog.md#backlog-multicore-scaling)
-- [Deferred cell interaction research](backlog.md#backlog-cell-interactions)
+- [Future performance work](backlog.md#backlog-multicore-scaling)
+- [Terrain extensions and continuing refinement](backlog.md#backlog-terrain-refinement)
+- [Cellular organization and remaining interaction research](backlog.md#backlog-cell-interactions)
 - [Light ecology: shelter, emission and conditional activity](backlog.md#backlog-light-ecology)
-- [Persistent geography: elevation, terrain and shade](backlog.md#backlog-persistent-geography)
-- [Local resource seasons: shared reservoir timing](backlog.md#backlog-local-resource-seasons)
 - [Directional cell communication: mouths and ears](backlog.md#backlog-cell-utterances)
+- [Strategic controller: a slow learned layer above the reflex RNN](backlog.md#backlog-strategic-controller)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

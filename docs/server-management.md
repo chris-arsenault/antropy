@@ -1,5 +1,7 @@
 # Native server HTTP management
 
+**Status:** Current reference — authenticated LAN-only `/api` for status, controls, diagnostics and stored checkpoints on the native server.
+
 The native server exposes management independently of `/stream`. Requests share the existing
 32-command queue and execute on the World owner between complete ticks. No viewer needs to be
 connected. WebSocket controls used by the UI remain available.

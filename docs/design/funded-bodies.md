@@ -1,5 +1,7 @@
 # Genetic physiology, biomass and inherited learning
 
+**Status:** Current contract — genetic physiology expressed at current biomass, motion, accounting, inheritance and mutation.
+
 Physical checkpoint v43 removes machinery construction and retirement. Birth genes directly
 specify physiology; biomass and damage scale capacity, and actions consume usable work.
 There are no separately accumulated motor, receptor, transporter or enzyme inventories.
@@ -77,6 +79,9 @@ without crediting usable work. There is no Brownian temperature or inertial coas
 Motor work uses `power × (swim² + 0.25 × turn²)` and velocity scales with the square root
 of available-work funding. At fixed biomass, more motor capacity occupies a larger body share;
 it carries no separate ownership tax or operating penalty at the same actual speed and radius.
+Geographic resistance scales paid motor translation by `sqrt(m)`, so the same motor work moves a
+cell less on resistant or uphill ground; the previous paid local motor load is controller input 58
+([geographic composition](chemistry/composed-runtime.md#geographic-composition)).
 
 Each transporter divides finite funded throughput among its recognized local mixture.
 Diffusion/drift and the finite body footprint determine delivery. Imports face shared
@@ -175,6 +180,6 @@ arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
 chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v45 preserves alleles, birth ticks and biomass and
+No score selects parents or filters mutants. Checkpoint v46 preserves alleles, birth ticks and biomass and
 reconstructs derived physiology; earlier checkpoints are rejected without migration.
 Unavailable pruned genotype payloads remain labeled provenance.

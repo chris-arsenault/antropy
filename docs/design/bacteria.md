@@ -1,5 +1,7 @@
 # Bacterial world and lifecycle
 
+**Status:** Current contract — the installed world substrate, fields, turn order, lifecycle and persistence of the runtime.
+
 The current runtime uses [digital chemistry](chemistry/README.md). The
 [pre-chemistry contract](../sources/history/2026-09-13-pre-chemistry/design/bacteria.md)
 preserves the replaced A/B economy. [Environmental evidence](chemistry/environmental-results.md) records constructed
@@ -19,7 +21,7 @@ inputs. See the [geographic laws](chemistry/composed-runtime.md#geographic-compo
 Funded reproduction has no population-count ceiling. The ancestry budget and runtime memory
 limits remain independent operating limits; they do not kill cells or select parents.
 
-A cell owns position, heading, twenty-two actual material-stock records, a 256-element float64 intracellular chemical
+A cell owns position, heading, twenty-two body capacities derived from birth genes at current biomass, a 256-element float64 intracellular chemical
 mixture, usable energy, injury, four outward/four inward chemical and one optical adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
 drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile
@@ -110,7 +112,7 @@ without requiring concentrated surrounding material. Ordinary enzymes harvest ac
 photoreceptors only sense. Passive membranes release products and lose useful solutes according
 to the same diffusivity/compatibility law. Survival still requires material retention or uptake,
 and growth requires additional matter. See the [equations](chemistry/composed-runtime.md) and
-[bounded measurements](../plans/ECOLOGICAL-INCENTIVES-PLAN.md).
+[bounded measurements](../plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md).
 
 Matter and energy close separately across fields, sources, cells, generic bodies, washout and
 dissipation. There is no automatic scalar-reserve catabolism, direct prey yield, reserve sharing
@@ -157,9 +159,9 @@ Physical quantities use float64; field amounts and neural arithmetic use float32
 reductions preserve exact continued ticks after save/restore on the tested runtime. Cross-machine
 bitwise identity is not promised.
 
-Checkpoint v44 stores complete chemistry, free and bound mixtures, bounded enzyme programs,
+Checkpoint v46 stores complete chemistry, free and bound mixtures, bounded enzyme programs,
 inward allocation, birth chemical/physical/behavioral genes and
-private state, parentage, source state, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
+private state, parentage, source state, persistent geography, environmental configuration, ledgers, interventions and stop reason. Earlier schemas
 and retired configuration/state fields are rejected. There is no adapter supplying missing physics.
 Unused non-founder genotype payloads may be pruned; retained organism parentage keeps their IDs
 as provenance, and unavailable genetic comparisons must be labeled.
@@ -170,4 +172,4 @@ Automatic saves occur every 30 wall seconds and on pause. Failed writes report a
 execution continues, preserving the last committed recovery. Visibility/exit saves are best effort; restoration is
 explicit and starts paused. UUID generation supports browsers without `crypto.randomUUID`.
 See [continuation limits](../continuing-observation.md) and the
-[current accumulated-state measurements](../session-runtime-review.md). Days/weeks browser endurance remains unverified.
+[current accumulated-state measurements](../session-runtime-review.md).

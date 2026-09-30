@@ -1,10 +1,13 @@
 # Reliability execution evidence
 
+**Status:** Historical record (schema 11, September 14) — the human motion review named here was not performed and the gate was retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
 The September15 [fresh-core results](rebuild-results.md) govern the replacement simulation.
 The measurements below retain their original binary/schema scope. Renderer/recovery obligations
 and the unattributed original crash carry forward; these timings do not certify the fresh core.
 
-September 14, 2026. Work is in progress under the [reliability plan](reliability-plan.md).
+September 14, 2026. Recorded under the archived
+[reliability plan](../../plans/archive/CHEMISTRY-RELIABILITY-PLAN.md).
 This record supersedes broad readiness claims inferred from earlier headless checks.
 The user's lost browser run remains an observation without a recovered causal trace.
 

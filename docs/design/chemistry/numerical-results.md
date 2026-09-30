@@ -1,15 +1,17 @@
 # Numerical engine measurements
 
-**Historical measurements.** The September15 fresh core has a separate
-[registration and result record](rebuild-results.md). The binaries, checkpoints and claims below
-retain their original scope and do not certify the new production laws.
+**Status:** Historical record (first Rust/WASM numerical engine, schema 10–11, September 14) — measurements retain their original binaries; review gates named here were retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
+The September15 fresh core has a separate [registration and result record](rebuild-results.md).
+The binaries, checkpoints and claims below retain their original scope and do not certify later
+production laws.
 
 September 14, 2026. These are bounded mechanism and computation checks for the replacement
 Rust/WASM engine. They do not demonstrate evolved adaptation, persistent coexistence or
-days/weeks endurance. The browser and harness now use this sole Rust/WASM runtime.
+days/weeks endurance.
 
-The later [reliability results](reliability-results.md) govern current schema-11 machinery,
-chemistry-version-3 opportunities and actual browser limits. The figures below remain evidence
+The later [reliability results](reliability-results.md) recorded schema-11 machinery,
+chemistry-version-3 opportunities and browser limits at that time. The figures below remain evidence
 for their named binaries; their former v10 continuation claim does not authorize loading old saves.
 
 ## Integrated capacity
@@ -157,7 +159,7 @@ the second storage panel, so its timings are not an isolated speed comparison.
 
 This is storage and continuation evidence, not a days-long ecological run. That version paused
 at its configured ancestry limit. September 27 replaces that stop with explicit bounded retention;
-see [current continuation](../../continuing-observation.md).
+see [continuing observation](../../continuing-observation.md).
 
 Ledger 3675 repeats all seven cases after strict body/history validation and durable intervention
 retention were added. Every case still preserves exact physical and observational continuation.

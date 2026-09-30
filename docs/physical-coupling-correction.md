@@ -1,5 +1,7 @@
 # Physical coupling correction
 
+**Status:** Historical record (physical v19, September 17) — [bound material](bound-material.md) superseded its decomposition accounting in v20; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 17, 2026. Physical checkpoint v19. Plan
 `595f305a-d0a7-4097-8267-542f9499d6b9` implements the user's request to fix the
 [coupling audit](physical-coupling-audit.md). The audit and its v18 measurements remain historical.
@@ -114,7 +116,8 @@ Division reserve calculations run only after installed stocks meet the inherited
 targets; unfunded/nonready cells do not pay for that extra reduction each movement tick. No new
 field pass or per-species runtime work was added. The operator diagnostic preceded this equivalent
 short-circuit refactor; its direct repair/motion/chemistry calls are unaffected. The startup and
-final CI use the final kernel. Current human motion review and long-run consequences remain open.
+final CI use the final kernel. Human motion review was not performed; the gate was retired
+September 30. Long-run consequences were not measured in this record.
 
 Local archive: `frontend/harness/artifacts/physical-coupling-v19-20260917/`. Reproduce the
 registered startup from `frontend` using a fresh directory:

@@ -1,10 +1,13 @@
 # One illumination field and opportunities around light
 
+**Status:** Implemented (v42) — permanent geographic shade, paid overhead cover and paid emission are installed; v46 terrain later supplied overhead transmission and ceilings. The §2 schedule accounts and sections 3–6 are proposal history.
+
 September 25 update: the selected extension is specified below. The older sections 3–6 retain
 proposal history; their finite-sun requirement and lateral-sun screening are superseded by
 the user's overhead, non-depleting sun decision. Execution:
-[light ecology plan](../plans/LIGHT-ECOLOGY-PLAN.md). The extension is implemented locally in v42;
-deployment, operating acceptance and human review are tracked separately in that plan.
+[light ecology plan](../plans/archive/LIGHT-ECOLOGY-PLAN.md). The v42 extension was implemented and
+published. Its delivery plan is closed; ongoing observation informs refinement without a
+human-acceptance gate.
 
 Historical September 21 baseline: scalar correction was implemented in v34; shelter and
 emission were design work. Sulion plan `ed492c49-dd7e-4a73-a33b-7375d4bd5a14`
@@ -98,12 +101,12 @@ average `L_geo*(1-exp(-tau))/tau`, with the continuous limit L_geo at zero. This
 upper material from receiving the darkness of its own bottom surface. Transform at nodes
 before sampling footprints. Terrain is a boundary, not another deposited material owner.
 
-A funded construction capability sets the maximum amount handled per model second through
-the existing growth-rate and stock law. Signed local neural effort chooses assembly/recovery.
-Assembly/recovery cost existing construction work per material; reserve competing donors
+Genetic cover-builder capacity, expressed at current biomass, sets the maximum amount handled
+per model second at the shared growth rate. Signed local neural effort (output 17) chooses
+assembly/recovery. Assembly/recovery cost the shared assembly work per material; reserve competing donors
 before committing actual mixtures. No free recovery, preferred chemical, producer ownership,
 canopy maintenance discount, immortal deposit or hidden conversion of species is introduced.
-New builder and emitter stocks follow the common body investment/mutation/inheritance law.
+Builder and emitter capacities follow the common genetic physiology, mutation and inheritance law.
 
 ### Emission geometry and payment
 
@@ -247,6 +250,10 @@ must use this one value. The worker continues to borrow packed WASM views. No se
 full-field message, geographic depth coordinate or per-cell daylight policy is introduced.
 
 ## 2. What day/night behavior can currently mean
+
+This September 21 analysis predates v42 and v43. Its construction/retirement terms describe
+the removed machinery-construction model; v43 cells express genetic proportions at current
+biomass, and v42 added cover and emission outputs.
 
 The controller already has paid local light level, recent change and body-relative contrasts.
 It can alter movement, transport, repair, enzyme activity and construction; recurrence supplies
@@ -398,8 +405,11 @@ when powered cells fail to displace.
    local transport must use bounded stencil passes, skip inactive emitted support and retain
    shared memory rendering. Global sunshine itself is not sparse; do not conceal full-grid cost.
 
-Steps 2–4 are backlog design, not an authorized implementation or an experiment campaign in this
-turn. No 200k rerun is required to establish the scalar correction or to select these questions.
+Historical note: on September 21 steps 2–4 were backlog design. The v42 extension above
+implemented step 2 in its selected overhead, non-depleting form and ran bounded step 3–4
+checks ([results](../light-ecology-results.md)). Per the [backlog](../backlog.md#backlog-light-ecology),
+a dormant low-maintenance physiology remains unselected, and ecological payoff of shelter and
+emission remains a question for observation. No 200k rerun is required to establish the scalar correction.
 
 ## Scalar correction verification registration
 

@@ -1,5 +1,7 @@
 # Evidence for world-design decisions
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, through September 13) — the current runtime is owned by [composed laws](chemistry/composed-runtime.md) and the [work order](README.md).
+
 Updated September 13, 2026. These findings help prepare a world where diverse strategies and
 adaptation are likely during the user's days/weeks observation. They do not certify a completed
 ecosystem or prescribe which organisms that run should produce. Older measurements retain their

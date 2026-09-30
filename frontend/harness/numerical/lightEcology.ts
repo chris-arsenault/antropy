@@ -68,7 +68,11 @@ for (const name of cases) {
     name: `light-ecology-${name}`,
     hypothesis:
       "Local optical cues can change paid actions; material cover and emitted work have explicit costs.",
-    specification: { registration: "docs/plans/LIGHT-ECOLOGY-PLAN.md#m4-execution", name, config },
+    specification: {
+      registration: "docs/plans/archive/LIGHT-ECOLOGY-PLAN.md#m4-execution",
+      name,
+      config,
+    },
     target: { x: 12, y: 12, radius: 1 },
     create(engine, seed) {
       const world = engine.create(seed, config);

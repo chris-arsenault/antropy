@@ -1,5 +1,7 @@
 # Birth-fixed chemical capabilities
 
+**Status:** Current contract — each cell uses its complete birth genotype for life; refitting (removed v37) and machinery construction (removed v43) are absent.
+
 Physical checkpoint v37 removed machinery refitting; v43 also removes machinery construction.
 Each cell uses its complete birth
 genotype throughout its lifetime: four receptors, four transporters, one to eight enzyme
@@ -27,7 +29,7 @@ interventions, not biological adaptation.
 
 The old survival-buffer requirement was an agent-created constraint rejected by the user.
 A changed daughter may fail to feed in its birth environment. Neither survival guarantees nor
-a replacement price are part of the new rule. The [execution plan](../../plans/MODEL-SIMPLIFICATION-PLAN.md)
+a replacement price are part of the new rule. The [execution plan](../../plans/archive/MODEL-SIMPLIFICATION-PLAN.md)
 records that implementation and verification. Its v37 `make ci` run passed with 301 Rust tests
 and 78 Vitest tests. Constructed checks covered mutated birth, lost/gained food access, program counts, funded
 quantities, shared restoration and selected inspection. They do not establish long-run ecology.

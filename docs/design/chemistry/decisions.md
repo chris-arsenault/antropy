@@ -1,9 +1,9 @@
 # Digital chemistry implementation decisions
 
-> Historical first TypeScript chemistry implementation (v9). Its measurements and decisions
-> remain evidence for that version. The [Rust/WASM numerical contract](numerical-engine.md),
-> [current results](numerical-results.md) and [migration dispositions](numerical-migration.md)
-> supersede its runtime choices and unfinished work order.
+**Status:** Historical record (first TypeScript chemistry implementation, v9, September 13) — decisions remain evidence for that version; current laws are in the [composed runtime](composed-runtime.md).
+
+The later [numerical contract](numerical-engine.md) and [migration dispositions](numerical-migration.md)
+superseded its runtime choices and unfinished work order.
 
 
 September 13, 2026; milestone 1 of the implementation plan. These decisions resolve the draft's

@@ -1,10 +1,12 @@
 # Resource binding proposal
 
+**Status:** Implemented (v28) — later changed by v32 two-scale attraction, v39 removal of the broad opposing field and attraction gain, and v41 class-specific material coupling; the [composed runtime](chemistry/composed-runtime.md) owns the current force laws.
+
 September 19, 2026. Selected proposal, supported by the
 [force investigation](resource-binding-investigation.md) and bounded diagnostics below.
 Investigation plan `e82be48c-7411-4228-8ac4-83f74560a7a7`.
-Implementation belongs to environmental root `5e88cd8a-1314-4622-9989-4bb02af68581`.
-Implementation started September 19 after baseline commit `70ef791` was pushed.
+Implementation belonged to environmental root `5e88cd8a-1314-4622-9989-4bb02af68581`,
+from baseline commit `70ef791`.
 
 ### Integrated execution registration
 

@@ -1,5 +1,7 @@
 # Spatial ecology calibration proof points
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 13) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 Registered September 13, 2026 before execution. These tests use the shared quick runner, its
 typed flow observer, exact initial/final checkpoints, source hashes and SQLite ledger. They do
 not seek evolved communities or select a browser founder. The ordinary founder RNN is unchanged.

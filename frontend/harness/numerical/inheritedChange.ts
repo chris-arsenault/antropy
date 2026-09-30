@@ -89,7 +89,7 @@ try {
       wallCapSeconds: 30,
       binaryDigest,
       sourceDigest: engine.sourceDigest,
-      registration: "docs/design/chemistry/reliability-experiments.md",
+      registration: "docs/plans/archive/CHEMISTRY-RELIABILITY-EXPERIMENTS.md",
     };
     const id = recordRun(db, {
       experiment: "chemistry-inherited-change",

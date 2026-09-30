@@ -1,6 +1,16 @@
 # Reliability experiment registration
 
-September 14, 2026. Implements phases 4–6 of [the reliability plan](reliability-plan.md).
+**Status:** Superseded plan (archived) — September 14 registration of three constructed v9
+digital-chemistry checks (inherited machinery access after slot retirement, ordinary habitat
+access and bounded browser operational duration); the September 15
+[numerical restart](DIGITAL-CHEMISTRY-PLAN.md) superseded the engine they tested. Results are in
+[reliability results](../../design/chemistry/reliability-results.md). Body is the execution
+record; its open-gate, "remaining", "uncommitted/undeployed" and human-review statements are
+historical and retired by the September 30 delivery policy ([plans README](../README.md)).
+Current laws live in [composed runtime](../../design/chemistry/composed-runtime.md).
+
+September 14, 2026. Implements phases 4–6 of
+[the reliability plan](CHEMISTRY-RELIABILITY-PLAN.md).
 These are constructed mechanism and operational checks, not evolution certification.
 
 ## Inherited machinery access

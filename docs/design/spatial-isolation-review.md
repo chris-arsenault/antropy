@@ -1,5 +1,7 @@
 # Spatial isolation and directional ecology
 
+**Status:** Historical record (physical v27, September 18) — fixed geographic basins were rejected September 19; directional/rotational climate is unselected in the [backlog](../backlog.md); persistent height was later installed by v46 through the different [persistent geography](persistent-geography.md) design.
+
 September 18, 2026. Study and proposal, not authorization to change simulation mechanics.
 
 **September 19 correction:** the user rejected the fixed geographic basins proposed below.
@@ -12,13 +14,15 @@ the earlier use of remaining clumps to qualify that failure was misleading. The 
 cell maps are local in `frontend/harness/artifacts/diffuse-754372/geography.png`.
 
 Sulion review: `a9aec36b-ba81-4f17-a8a5-f3f9e36314e9`.
-Future implementation uses the existing environmental root
-`5e88cd8a-1314-4622-9989-4bb02af68581`: CLI phases 6–9 map to E1–E4, all pending.
-The original E1 fixed-basin milestone must not be executed. Earlier environmental
-evidence and its unresolved review remain recorded in that same root.
+Implementation was assigned to the environmental root
+`5e88cd8a-1314-4622-9989-4bb02af68581`, where CLI phases 6–9 mapped to E1–E4. Dispositions
+([plans index](../plans/README.md)): E1 fixed wells were rejected and skipped; E2 optional
+geometry/supply review moved to the backlog; E3 directional external work remains unselected
+rotational-climate backlog; E4 was not executed before the root closed.
 This extends [spatial ecology](spatial-ecology.md) and the
 [environmental ecology work](../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md).
-Multicore implementation remains [deferred](../../SCALING-PLAN.md).
+Multicore implementation was then deferred; the user resumed it September 21 and the
+[regional execution owner](spatial-execution.md) now runs on a Rayon pool.
 
 ## Observation registration
 
@@ -328,7 +332,7 @@ relative returns between capabilities, not merely brighter colors or faster grow
   and contract it only over active chemical support. Do not reactivate empty species for climate.
 - First budget terrain and exposure storage as `O(geographic nodes)`, independent of 256 chemicals,
   and arithmetic as shared per-face/per-node work. Measure complete serial ticks on the current
-  retained world. Multicore is a separate backlog item, not the performance escape route.
+  retained world. Multicore was then a separate backlog item, not the performance escape route.
 
 ## Proposed implementation sequence
 
@@ -350,10 +354,10 @@ opportunities. Neither stage promises a prescribed number of surviving lineages 
 
 ### Decisions and ownership
 
-Settled constraints are single-threaded execution, shared constitutive math, local funded RNN
+Settled constraints on September 18 were single-threaded execution (superseded by September 21 multicore), shared constitutive math, local funded RNN
 cells, open accounted inputs, meaningful geographic separation, and the existing chemical
 action algebra. The implementation must preserve Rust ownership and the current observation
-boundary. Multicore execution is deferred by the user.
+boundary. Multicore execution was then deferred by the user.
 
 The added height term and directional exposure above are the recommended design, not implemented
 or measured behavior. E1 selects the terrain basis and strength using force/transport bounds.
@@ -369,6 +373,7 @@ speed would undermine dispersal. They are weaker first interventions than adding
 persistent carrier and measuring the existing transport against it.
 
 Dynamic erosion, finite radiative-energy allocation, atmospheric circulation, anisotropic
-diffusion tensors and larger-area/multicore execution remain deferred. Implementers may revisit
+diffusion tensors and larger-area/multicore execution were deferred (larger area arrived in v40
+and multicore September 21–22). Implementers may revisit
 them only when a specific ecological opportunity or measured scaling limit requires them.
 The proposed directional input already supplies anisotropy without a new climate solver.

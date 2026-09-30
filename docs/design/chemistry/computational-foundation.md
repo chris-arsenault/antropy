@@ -1,10 +1,12 @@
 # Computable chemistry over a shared manifold
 
-Accepted design direction, September 15, 2026. This document governs mathematical design for
-the integrated chemistry revision, under [ADR 0022](../../adr/0022-computable-chemistry.md) and
-the [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md). It records the user's clarification after
-M2's failed spatial cost measurements. The replacement equations and runtime are not implemented
-by this documentation revision.
+**Status:** Current contract — governing principles for the chemistry's mathematical design; the [composed runtime](composed-runtime.md) owns the selected laws.
+
+Accepted design direction, September 15, 2026, under [ADR 0022](../../adr/0022-computable-chemistry.md)
+and the archived [root plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md). It records the user's
+clarification after M2's failed spatial cost measurements. The replacement equations and runtime
+are implemented; the [composed runtime](composed-runtime.md) records the laws selected under
+this foundation.
 
 ## Design the rules for their computation
 
@@ -157,7 +159,7 @@ M1 conservative products and cache ownership where valid. Its charge-coupling sc
 edge expansion and exact rate interpretation must be assessed against the new rules, not preserved
 by adapters solely because they were already implemented.
 
-One composed system should cover sensing, transport, processing, injury, construction, remodeling
+One composed system should cover sensing, transport, processing, injury, growth, repair
 and death. Reuse a reduction where it represents the same quantity; do not force diffusion,
 stress and energy to become the same attribute merely to eliminate a column. Each remaining
 independent coefficient needs a mechanism, range and cost explanation.
@@ -171,13 +173,14 @@ through incidental iteration order. Zero and tiny amounts need defined behavior 
 global abundance deletion threshold.
 
 The September15 processing-threshold correction introduced a local extracellular concentration
-floor, revised to `1e-9` by the September17 weathering work, with numerical-loss accounting and active-region execution in the
+floor, revised to `1e-9` by the September17 weathering work and raised to `1e-4` by the
+September 21 scaling work, with numerical-loss accounting and active-region execution in the
 [current runtime](composed-runtime.md). It does not remove a chemical identity based on its
 total abundance or grant replacement material. This user-authorized numerical resolution
 supersedes earlier implementation text that required processing every positive diffusion tail.
 
-Usable energy is funded and bounded. Motors, processing, construction, repair, learning and
-remodeling have consistent consequences under the selected accounting rules. A closed sequence
+Usable energy is funded and bounded. Motors, processing, growth, repair, learning and
+reproduction have consistent consequences under the selected accounting rules. A closed sequence
 that restores material, body and relevant field state must not manufacture spendable work.
 Changing a profile, installing a mutation or deleting a cell must not conceal a subsidy. Define
 which fields represent stored energy and which are constitutive transport signals, how external
@@ -191,7 +194,12 @@ capacitor charge, exponential forward/reverse ratio, cubic crowding and a full g
 every event are the previous M0 selection, not requirements of this foundation. Removing them
 requires replacing their intended protection explicitly, not simply dropping accounts or checks.
 
-## Acceptance before integration
+<a id="acceptance-before-integration"></a>
+## Historical acceptance and evidence (September 15)
+
+These acceptance items and measurements record the September 15 integration sequence. The
+September 30 delivery policy retired separate acceptance gates; the runtime described below
+as pending has since replaced ordinary World stepping.
 
 For the replacement mathematical design, provide:
 
@@ -218,7 +226,7 @@ engineering budget, not physical laws. Select resolution and scheduling with the
 record any revised allocation against the whole 33.3 ms budget rather than silently waiving it.
 Full browser/GPU, growth, diagnostics and accumulated-history acceptance still belongs to M7.
 
-## Evidence and next design work
+### September 15 evidence
 
 The earlier M0 established algebraic properties of its reference model, not computational feasibility.
 M1 implemented v4 chemical profiles, continuous parameter/compiler structures and physical

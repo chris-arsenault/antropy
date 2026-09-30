@@ -1,16 +1,18 @@
 # Digital chemistry reliability and validation plan
 
-September 14, 2026. Sulion plan `a3da6ddc-b43a-46bb-a42c-e63d140ed830`.
-Status: superseded by the September 15 [numerical restart](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md).
-Human motion/legibility and user-device acceptance remain unperformed and carry into
-replacement acceptance. The original crash remains unattributed. The following body
-records the prior implementation and its evidence, not work to resume or certification
-of a replacement engine.
+**Status:** Superseded plan (archived) — the September 14 follow-up to the v9 digital-chemistry
+code/evidence audit and the user's reported browser failure: batched rendering repaired the
+2,000-cell browser failure, periodic-index optimization restored the growth workload's margin,
+and constructed inheritance, habitat-access and operational-duration checks were registered.
+The September 15 [numerical restart](DIGITAL-CHEMISTRY-PLAN.md) superseded it; the original
+crash remains unattributed. Body is the execution record; its open-gate, "remaining",
+"uncommitted/undeployed" and human-review statements are historical and retired by the
+September 30 delivery policy ([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
 
-Prior implementation and measured operational checks were complete. Batched rendering repairs the
-2,000-cell browser failure; periodic-index optimization restores the growth workload's margin.
-The performance sub-plan is closed. Human motion and user-device acceptance remain unperformed.
-See [execution evidence](reliability-results.md).
+September 14, 2026. Sulion plan `a3da6ddc-b43a-46bb-a42c-e63d140ed830`.
+See [execution evidence](../../design/chemistry/reliability-results.md) and the
+[experiment registration](CHEMISTRY-RELIABILITY-EXPERIMENTS.md).
 This plan owns the follow-up to the
 code/evidence audit and the user's reported browser failure. It does not claim that
 previous implementation completion established operational readiness.
@@ -22,7 +24,7 @@ lets the user observe an unfolding experiment over long periods. Diagnose and re
 the browser failure, finish migrated observation tools, and resolve the specific
 chemical and evolutionary questions below through small causal checks.
 
-Preserve the [data ownership contract](data-ownership.md): Rust owns physical state,
+Preserve the [data ownership contract](../../design/chemistry/data-ownership.md): Rust owns physical state,
 the same worker renders borrowed WASM views, ticks use scalar exports, and React
 receives bounded observations with revisions and backpressure. New diagnostics must
 not create population/private-state mirrors or serialize fields for rendering.
@@ -120,7 +122,7 @@ producer against its report on a short generated artifact; do not use a generic
 population table as the replacement for trait distributions or frequency histories.
 Retain historical readers only for their documented read-only purpose.
 
-Finish the missing capabilities in [diagnostic continuity](diagnostic-continuity.md):
+Finish the missing capabilities in [diagnostic continuity](../../design/chemistry/diagnostic-continuity.md):
 recent behavior windows; inherited sequence and founder-relative comparisons;
 population RNN divergence; developed-body and acquired-learning summaries;
 source-epoch/task summaries; and longitudinal chemical phenotype observations.
@@ -164,8 +166,8 @@ funded lifecycle opportunity, not widespread adaptation or coexistence.
 ## Phase 5: Validate chemical space and ordinary habitats
 
 Evaluate joint property coverage, not just independent minima/maxima. Read the
-original [proposal](sources/chemistry-proposal.txt) and
-[appendix](sources/migration-proposal.txt) against the implemented smooth manifold.
+original [proposal](../../design/chemistry/sources/chemistry-proposal.txt) and
+[appendix](../../design/chemistry/sources/migration-proposal.txt) against the implemented smooth manifold.
 Measure the restriction imposed by exact diffusion/impedance coupling and decide
 whether the intended chemistry needs additional combinations. If revising generation,
 preserve deterministic coefficients, smooth locality, useful potential/stress ranges

@@ -9,7 +9,7 @@ Registration, laws, interpretation and validation: [study record](../../bounded-
 - [Final mature workload](mature-final.json): ledger 4290–4291, ten warmup and 100
   measured ticks per closed/active-panel arm, including census, inspection and render
   preparation. Compare the [preceding contact pass](../contact-performance/mature-final.json).
-- [Current v34 capacities](capacity.json): ledger 4292–4294, 48 fixed, 2,000 fixed
+- [v34 capacities](capacity.json): ledger 4292–4294, 48 fixed, 2,000 fixed
   and 2,000 growing cells. The prior capacity comparison is retained
   [here](../contact-performance/capacity-after.json).
 

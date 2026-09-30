@@ -1,5 +1,12 @@
 # Continuous worlds and current phenotype
 
+**Status:** Delivered plan (archived) — bounded ancestry retention without a history-driven
+stop, continuation through recovery-save failures and phenotype-first observation shipped on
+physical v42 at `f754772`. Body is the execution record; its open-gate, "remaining",
+"uncommitted/undeployed" and human-review statements are historical and retired by the
+September 30 delivery policy ([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
+
 September 27, 2026. The user requires days/weeks operation without bookkeeping pauses and
 current functional diversity rather than founder lineage as the ecological description.
 Root Sulion plan: `84480ab8-e1c0-493f-a846-3b83abc11a94`.

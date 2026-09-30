@@ -1,16 +1,18 @@
 # Local resource seasons
 
-Proposed September 25, 2026; backlogged September 26 and **included in the terrain design
-review September 30**. The static supply-clock design is implemented locally in v46;
-the [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns delivery and bounded evidence.
-This is not a live-world reset or evidence of evolved migration. The [current work
-order](README.md) retains priority. Earlier documentation tracking: Sulion
+**Status:** Implemented (v46) — static circular seasonal maps drive local release and refill-waiting clocks for every reservoir; the [composed runtime](chemistry/composed-runtime.md) owns the installed equations.
+
+Proposed September 25, 2026, backlogged September 26 and implemented with persistent
+geography in physical v46 (`569f1a0`). The active [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md)
+owns remaining integration repairs and delivery; the
+[original execution record](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retains bounded results.
+The seasonal clock is not evidence of evolved migration. Earlier documentation tracking: Sulion
 `1eb5b783-638b-4ac5-9034-b4d970eda46e`.
 
-The subsequent [ecological incentives delivery](../plans/ECOLOGICAL-INCENTIVES-PLAN.md)
-addresses crowding, byproduct exchange and off-reservoir light metabolism first. This supply
-timing proposal is now reviewed with persistent geography; its earlier movement evidence
-predates that delivery.
+The subsequent [ecological incentives delivery](../plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md)
+addressed crowding, byproduct exchange and off-reservoir light metabolism first. The supply
+timing design was then delivered with persistent geography; its earlier movement evidence
+predates both deliveries.
 
 ## Purpose and evidence
 
@@ -36,14 +38,14 @@ Strongly fluctuating areas and their edges could reward searching, relocation an
 return. Dense colonies remain valid outcomes; no colony-size feedback or community
 target enters the environmental law.
 
-## Current implementation boundary
+## Pre-v46 source lifecycle (historical)
 
-In [sources.rs](../../engine/src/sources.rs), each reservoir has finite stock, a fixed
+Before v46, in [sources.rs](../../engine/src/sources.rs), each reservoir had finite stock, a fixed
 per-site release rate r and an empty waiting interval. On exhaustion, `Source::finish`
 draws an independent exponential wait with mean G = `sourceGap`. `Source::renew`
 refills Q = r T, where T = `sourceLifetime`, at its current position. Reservoirs
 continue to move through ordinary physical interactions; refill does not relocate them.
-The current defaults are T = 600 and G = 2400 model seconds.
+The defaults, unchanged in v46, are T = 600 and G = 2400 model seconds.
 
 Nominal long-run supply per site is r T / (T + G). Its stocked fraction is T / (T + G),
 or 0.2 at these defaults. For n independent stationary sites, the simplified probability
@@ -51,14 +53,15 @@ that all are empty is 0.8^n: about 33% for five and 3.5% for fifteen. This illus
 pooling of availability, not an observed famine rate. Dissolved material persists,
 release rates differ, reservoirs move and nearby sites need not feed the same cells.
 
-The [terrain generator](../../engine/src/terrain_noise.rs) already creates smooth,
-periodic, irregular multiscale geography at boot. Reuse its generation machinery with
+The [terrain generator](../../engine/src/terrain_noise.rs) creates smooth,
+periodic, irregular multiscale geography at boot. Seasons reuse its generation machinery with
 independent environmental seeds. Supply geography must not make shaded locations
 automatically poor, or read cells, lineage identities or initial reservoir centers.
-This complements [persistent geography](persistent-geography.md); it neither implements
-that proposal's remaining elevation/conductance operators nor changes static shade.
+Seasons form one design with [persistent geography](persistent-geography.md), whose
+elevation, conductance and overhead-transmission operators v46 also installs; seasonal
+maps remain independent of shade, elevation and conductance.
 
-## Proposed common operation
+## Common operation
 
 Generate two static periodic component maps c(x), d(x) using the concrete
 [fractal generation and placement algorithms](persistent-geography.md#fractal-map-generation-and-placement).
@@ -127,9 +130,9 @@ before interpreting a population response as a timing benefit. The integrated de
 recommends accepting this path-dependent change in externally supplied material and reporting
 it through the ordinary input ledger. It does not promise invariant moving-source income.
 Do not silently renormalize against population or add a second unaccounted food inventory.
-This explicit budget choice remains a reviewable recommendation.
+V46 installs this choice: it integrates the multiplier at each source's actual trajectory midpoint.
 
-Initially consider P = T + G, currently 3000 model seconds, to reuse the existing
+The default period is P = T + G = 3000 model seconds, reusing the existing
 supply timescale. This is a calibration hypothesis, not a validated period. Spatial
 correlation length has distinct units and must be selected from reservoir spacing,
 food spreading and affordable travel. It cannot be inferred from P alone.
@@ -164,9 +167,11 @@ inspection. A supply overlay should distinguish environmental opportunity from f
 already present. Preserve the existing worker/native ownership and rendering contracts;
 no second simulation, renderer, backend or hosted evidence service is required.
 
-## Investigation when selected
+## Investigation proposed before selection (historical)
 
-Start with budgets and bounded mechanics checks: ordinary behavior at A = 0,
+The terrain [execution record](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) holds the bounded
+checks that ran; the September 30 policy retired the remaining verification stages. The
+proposal read: start with budgets and bounded mechanics checks: ordinary behavior at A = 0,
 nonnegative clocks, donor-bounded release, exactly-once transition accounting,
 stationary mean supply and save/restore continuity. Check moving-source input explicitly.
 

@@ -1,18 +1,20 @@
 # Display and observation
 
-Run and stats are the user's observation path for the intended days/weeks population. The browser
+**Status:** Current contract — the installed viewport, visual meanings, stats and display ownership boundary.
+
+Run and stats are the user's observation path for the continuing population. The browser
 starts the current ecology paused at tick zero; it does not automatically import a checkpoint.
 Digital chemistry supplies ordinary local sensing, transport, reactions and stress. Constructed
-opportunity evidence does not certify an evolved community. Human motion review of this chemical
-replacement remains separate from acceptance of the previous spatial world.
+opportunity evidence does not certify an evolved community.
 
 <a id="display-world-and-camera"></a>
 
 ## World and camera
 
 The viewport fills the screen. A compact dock opens observation and control windows rather than
-reserving a permanent sidebar. Cell colors default to usable energy and the map to energy per
-material. Illumination, impedance bands, stress dots, sources and regions have independent controls.
+reserving a permanent sidebar. Cell colors default to usable energy and the map to the
+[integrated landscape](#display-integrated-landscape). Illumination, impedance bands, stress dots,
+sources and regions have independent controls; impedance bands and stress dots start off.
 [Phenotypes and measured chemical flow](../phenotype-observation.md) distinguish recent activity
 from possible enzyme routes; their windows do not change camera or background selections.
 
@@ -21,6 +23,31 @@ fragments at seams appear at the corresponding opposite edge. Panning stays boun
 is minimum zoom and maximum zoom is 12×. Wheel zoom anchors the pointer subject to boundary clamping.
 CSS-pixel transforms keep rendering/picking consistent on high-DPI screens. Outside margins do not
 select wrapped bodies. Camera actions never alter simulation state or randomness.
+
+<a id="display-integrated-landscape"></a>
+
+## Integrated landscape
+
+The default "Living landscape" background composes the static [geography](chemistry/composed-runtime.md#geographic-composition)
+with dynamic chemistry. Substrate conductance colors the ground from earth (resistant) to teal
+(conductive). Antialiased contours mark every four height units; closer lines mean steeper
+ground. Received light shades the ground within a bounded floor, including terrain shade,
+[constructed cover and paid emission](light-ecology.md). Energy per material overlays it as
+translucent blue-to-amber chemistry whose opacity follows concentration. Cells keep their
+energy colors and outlines. Each reservoir keeps its stocked/empty inner marker and gains an
+outer band for its local supply clock: copper 0×, pale 1×, teal 2×. A permanent key explains
+these cues without opening controls.
+
+Diagnostic backgrounds remain optional: dissolved amount, energy per material, a selected
+chemical, weathering, received light, terrain transmission, constructed cover, received emission,
+elevation, conductance, slope, local supply season, season strength and phase, and light ceiling.
+
+The landscape is presentation only; physical rules and checkpoints are unchanged. Rust derives
+a terrain overview of at most 256 samples per axis with the physical periodic sampler and
+caches it per world. It uploads once to its own texture; camera and seasonal changes do not
+rebuild it. Native viewers receive one shared static packet per connection or world, kept in
+the remote renderer worker. The [data-ownership contract](chemistry/data-ownership.md) records
+these boundaries.
 
 <a id="display-visual-meanings"></a>
 
@@ -34,7 +61,7 @@ select wrapped bodies. Camera actions never alter simulation state or randomness
 | Stress exposure | Rose dots for abiotic reference saturation, `stress/(stressK + stress)`; actual injury also depends on membrane compatibility and paid repair |
 | Selected chemical layer | Concentration of one explicit chemical ID |
 | Chemical weathering | Blue-to-amber local interaction activity, attenuated by impedance; actual conversion also depends on the chemical present |
-| Source marks | Persistent source-size marks: bright ring and center cross while releasing, dim dashed ring while dormant; one Gaussian width, not a resource boundary |
+| Source marks | Persistent source-size marks: bright ring and center cross while releasing, dim dashed ring while dormant; one Gaussian width, not a resource boundary. In the landscape view an outer band shows the local supply clock |
 | Soft population region | Nearby actual cells, each contributing its own color; a viewing aggregate with no biological authority |
 | Small isolated mark | An actual ungrouped cell, kept visible at world scale |
 | Colored body rim / population color | Usable-energy fraction by default; selectable enzyme input/output, membrane, ancestry, distance or other trait view |
@@ -55,8 +82,8 @@ not represent a solid wall.
 Source release is a normalized Gaussian truncated at three source radii; its ring marks one
 radius. Diffusion then carries dissolved chemicals beyond that release stencil.
 
-Choose one background field: dissolved amount, energy per material, selected chemical,
-chemical weathering, or none.
+Choose one background field: the integrated landscape, one of the diagnostic maps listed
+above, or none.
 Movement resistance and stress remain independently selectable. Different pattern shapes
 keep simultaneous hazards identifiable without adding every field into one color wash.
 Sensitivity changes concentration brightness, not potential hue, weathering or hazard scales.
@@ -102,14 +129,14 @@ the display must not invent ecological differences to make layers look different
 
 Living population, divisions, deaths and affected-cell percentages lead observation. Coverage uses
 world area; injury and slowing use living population. Typed material and energy transfers retain
-explicit denominators and conservation residuals. Imports, exports, transformations, construction,
-repair, motor expense, washout and extracellular weathering are separate flows.
+explicit denominators and conservation residuals. Imports, exports, transformations, biomass growth,
+cover deposition, emission, repair, motor expense, washout and extracellular weathering are separate flows.
 
 The source controls offer local mixtures, alternating compositions or spatial zones for a new
 population. Source shares index the world's resolved chemical IDs. Changing composition changes
 potential energy supply even when total material is unchanged. The selected trait trend is independent
 of field and family controls.
-Genetic construction targets are separate from actual grown bodies. Living genotype counts count records; they do not establish distinct behavior or niches. Founder shares and histories describe ancestry abundance,
+Birth genes set body proportions, which are expressed at each cell's current biomass. Living genotype counts count records; they do not establish distinct behavior or niches. Founder shares and histories describe ancestry abundance,
 not fitness or behavioral classes.
 
 Recent families and inherited trait distributions lead the default stats. Family roots are stable
@@ -125,7 +152,7 @@ Capture occurs every 25 simulation ticks, independent of wall-clock speed.
 Spatial history samples each 25 ticks, retains up to 240 frames and the latest 2,048 events, and
 survives browser checkpoint restore. Browse a past sample to inspect recorded population counts,
 trait means and locations; the map continues to show the current world. Effort bars show shares of the most recent census decisions, not energy costs. Trait trends show inherited population medians.
-Task byte, hidden state, genes, actual stocks and sensor/action values remain inspectable. Manual
+Task byte, hidden state, genes, expressed body and sensor/action values remain inspectable. Manual
 task overrides persist as diagnostic interventions. Background selection, hazard toggles,
 cell colors, source/region overlays and inherited settings are independently controlled.
 
@@ -134,7 +161,7 @@ throughput can fall below the request. Maximum means CPU-limited execution, not 
 Maximum-speed simulation yields through one queued worker task; animation requests allow one unanswered presentation at a time; the stats panel and inspector refresh at most every 500 ms
 while running, and immediately on pause, stop or a manual intervention.
 The [numerical evidence](chemistry/numerical-results.md) records measured throughput and recovery limits.
-The cell inspector shows installed machinery, chemical targets, transporter effort, internal and
+The cell inspector shows machinery expressed at current biomass, chemical targets, transporter effort, internal and
 external mixtures, membrane/stress/impedance loads and actual recent transfers. The U/D/I/S atlas
 uses chemical coordinates, independent of world geography; target overlays show the selected cell.
 The inspector also shows mixture activity, attenuated activity and fractional attenuation.

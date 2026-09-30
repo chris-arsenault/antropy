@@ -1,5 +1,7 @@
 # Current calibration
 
+**Status:** Current reference — default model scales from `engine/src/config.rs`, with dated throughput and historical calibration records.
+
 [Configuration](../engine/src/config.rs) and the persisted chemical definition specify authored
 model scales. [Composed runtime](design/chemistry/composed-runtime.md) and
 [habitat measurements](material-habitats.md)
@@ -13,38 +15,41 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Quantity | Current value |
 | --- | --- |
 | World / timestep / founders | 720 × 540 periodic XY / 0.2 model seconds / 48 in two colonies |
-| Controller | 44 inputs, 24 recurrent units, nine outputs |
-| Machinery | Four receptor, four transporter, four unary-enzyme slots; sixteen funded stocks including a photoreceptor |
+| Controller | 59 inputs, 24 recurrent units, 19 outputs |
+| Body | Twenty-two derived capacities expressed from genes at current biomass, including four receptors, four transporters and a photoreceptor; one to eight enzyme programs |
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
 | Compact affinity support / minimum susceptibility | R=3 coordinate units / 0.05 |
 | Renewing reservoirs | 240 initially around 35 unequal regions, spread 18; fixed per-site rate scale 0.2, radius 3, batch duration 600 s, empty wait 2,400 s; accounted external replenishment |
-| Reservoir drift / medium processing | 4 / 0.25; shared material forces move finite owners; shared funded transformations process inventory and evolving renewal mixtures |
+| Reservoir drift / medium processing | 1 / 0.25; shared material forces move finite owners; shared funded transformations process inventory and evolving renewal mixtures |
+| Reservoir repulsion / range | 5 / 30; long-range like-charge repulsion between reservoirs plus circle exclusion |
+| Terrain (new-world preset) | Elevation, conductance effects on movement/transport/processing, overhead transmission, local seasons and feedback on; ceilings off; slope resistance 1, minimum conductance 0.25, season amplitude 1 / period 3,000 s; fractal source placement, contrast 6 |
 | Source bootstrap | Initial IDs0/136; finite8/128 priming; four mutable founder types process0→128→136→8→0 |
 | Extracellular washout | Uniform 0.001 per second; half-life 693 model seconds; no cohesion discount |
-| Field mesh / physiology interval | 2 world units / 0.8 model seconds; active four-species groups, accounted concentration floor1e-6 |
+| Field mesh / physiology interval | 2 world units / 0.8 model seconds; active four-species groups, accounted concentration floor 1e-4 |
 | Weathering rate / local response | 0.025 × positive interaction difference with the bounded medium profile; existing diffusion impedance attenuates exposure; no weather clock |
 | Founder homeostasis | Input-centered membrane, local food response, mild product export; ordinary mutable alleles |
 | Attraction length | 6; one normalized kernel with no separate gain or opposing broad field; local repulsion and nonlinear crowding remain |
 | Illumination contrast / periods | 0.8 / 6,000,18,000,62,000 model seconds (30k/90k/310k ticks) |
 | Movement / diffusion impedance coefficients | 0.5 / 1 |
-| Viscosity | 0.004; no thermal-energy state or temperature solver |
-| Transport turnover / work | 2.5 per installed stock per second / 0.05 per material |
-| Enzyme turnover / downhill capture efficiency | 2.5 per installed stock per second / 0.8 |
-| Construction work / growth rate | 0.5 per material transferred to bound mixture / 0.06 |
+| Viscosity / contact adhesion | 0.004 / 4 per unit membrane compatibility; no thermal-energy state or temperature solver |
+| Transport turnover / work | 2.5 per unit capacity per second / 0.05 per material |
+| Enzyme turnover / downhill capture efficiency | 2.5 per unit capacity per second / 0.8 |
+| Growth rate / growth work | 0.06 of biomass per second / 0.5 per material transferred to bound mixture |
+| Maintenance / aging time | 0.006 / 6,000 model seconds, slowed by core fraction |
 | Founder internal matter / usable energy | 0.8 / 0.5 |
-| Core / motor / storage stock | 1 / 0.08 / 0.08 |
-| Each receptor / transporter / enzyme stock | 0.01 / 0.04 / 0.04 |
+| Birth mass / motor / storage ratio | 1 / 0.08 / 0.08 |
+| Each receptor / transporter / enzyme ratio | 0.01 / 0.04 / 0.04 |
 | Body / inventory density | 4 / 4 |
 | Injury / maximum repair rate / stress K | 0.01 / 0.008 per second / 0.3 |
 | Repair material / energy per injury | 0.3 / 0.8 |
 | Motor power density / efficiency | 0.2 / 0.5 |
 | Behavioral mutation probability / scale | 0.0015 / 0.08 |
-| Physical mutation probability / scale | 0.1 / 0.12; includes fixed-slot chemical alleles |
+| Physical mutation probability / scale | 0.1 / 0.12; includes chemical alleles |
 | Death | Bound and free mixtures retain actual chemical identities; no privileged waste ID |
-| Horizontal transfer / disturbance | Rate zero / absent by default |
+| Living-cell gene transfer / disturbance | Removed; a nonzero setting is rejected / optional, off by default |
 | UI pacing / population ceiling | Requested 30 ticks/s / no population-count ceiling |
-| Field nodes / ended-history budget | 97,200 default; maximum 524,288 under geographic memory reservation / 2,000,000 ended records plus all living records; expiration does not pause |
+| Field nodes / ended-history budget | 97,200 default; maximum 262,144 under geographic memory reservation / 2,000,000 ended records plus all living records; expiration does not pause |
 | Recovery retention | Up to six automatic and two manual saves, expiring older points to fit; 256 MiB compressed total, 192 MiB individual raw |
 
 Potential is stored in chemical matter and generic biomass; usable energy is a separate stock.
@@ -69,9 +74,16 @@ continued access, not evolved pursuit or long-term survival.
 
 ## Measured throughput
 
-Current v32 [capacity fixtures](material-habitats.md) measure63.78/32.00 ticks/s at48/2,000 cells.
-The mature3,774-cell checkpoint measures17.79 headless with measured observation closed and
-15.95 active, below the30-tick target. See [session costs](session-runtime-review.md).
+The newest measurements are the September 28 native performance pass in the
+[archived scaling record](plans/archive/SCALING-PLAN.md#september-28-continuing-world-performance-pass):
+restored v44 checkpoints reach 44.49 ticks/s at 2,040 cells and 30.31 at 3,893 cells with four
+workers, and 20.40 at 2,040 cells with one worker. Terrain-specific costs are in the
+[terrain execution record](plans/archive/TERRAIN-AND-SEASONS-PLAN.md).
+
+Historical v32 (September 20) [capacity fixtures](material-habitats.md) measured 63.78/32.00
+ticks/s at 48/2,000 cells in the serial kernel. The mature 3,774-cell checkpoint measured
+17.79 headless with measured observation closed and 15.95 active, below the 30-tick target.
+See [session costs](session-runtime-review.md).
 
 The historical v15 [mobile-source measurements](design/chemistry/mobile-source-results.md) give
 39.31/24.55/20.18 ticks/s on fully occupied 48/2,000/2,000-growth fixtures, including packed
@@ -79,8 +91,7 @@ render preparation, census and inspection. Large saturated workloads miss the30t
 These source-free capacity fixtures retain the prior environmental limits; brief report
 generation overlapped this check, so small differences do not establish a speedup. Ordinary
 mobile-source confirmations measure131–136ticks/s with recording, without GPU execution.
-Isolated browser operation was checked before this extension; days/weeks endurance remains
-unmeasured. Earlier numerical and TypeScript figures are historical.
+Isolated browser operation was checked before this extension. Earlier numerical and TypeScript figures are historical.
 
 See [continuation](continuing-observation.md) and the validation record for final operating checks.
 Historical A/B throughput figures do not apply to this larger chemical state.

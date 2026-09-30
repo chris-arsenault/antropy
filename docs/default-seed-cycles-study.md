@@ -1,11 +1,13 @@
 # Default-seed turnover: 50,000-tick observation
 
-September 16, 2026. User-authorized observation of the current implementation before correcting
+**Status:** Historical record (physical v15, September 16) — the ecology audit it anticipated was completed by the v18 [coupling audit](physical-coupling-audit.md) and the v19–v22 corrections; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
+September 16, 2026. User-authorized observation of the implementation at that time, before correcting
 its mathematical architecture. Plan: `998e9d6d-82aa-4761-8f36-fc97a5aba184`.
 The user reports interesting cycles from 5,000–50,000 ticks. This study does not accept the
 source-specific or environmental operators as the intended shared mathematical formulation.
-Audit and correction of the ecology implementation remain outstanding; no physical rules are
-changed during this observation.
+Audit and correction of the ecology implementation were outstanding at the time; no physical
+rules are changed during this observation.
 
 ## Question and competing explanations
 

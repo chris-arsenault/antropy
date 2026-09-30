@@ -1,9 +1,9 @@
 # Interactive chemistry performance
 
-> Historical first TypeScript chemistry implementation (v9). Its measurements and decisions
-> remain evidence for that version. The [Rust/WASM numerical contract](numerical-engine.md),
-> [current results](numerical-results.md) and [migration dispositions](numerical-migration.md)
-> supersede its runtime choices and unfinished work order.
+**Status:** Historical record (first TypeScript chemistry implementation, v9, September 13) — measurements remain evidence for that version; current laws are in the [composed runtime](composed-runtime.md).
+
+The later [numerical contract](numerical-engine.md) and [migration dispositions](numerical-migration.md)
+superseded its runtime choices and unfinished work order.
 
 
 The September 13 human review rejected current throughput as unusable. The minimum is 30 ticks

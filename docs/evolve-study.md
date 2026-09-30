@@ -1,5 +1,7 @@
 # De novo evolution in the zoned world
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 11) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 Registered September 11, 2026 as phase 4 of the
 [roadmap to strategic differentiation](design/README.md#design-roadmap), before reading any
 endpoint. Sulion plan `ac1df944-ed66-4d21-8461-9e7f4ab19509`.

@@ -1,29 +1,68 @@
 # Changelog
 
-## Unreleased — Dispersal opportunities
+All notable user-visible changes are recorded here.
 
-- Extend regional reservoir placement with a sparse radial tail while retaining the same
-  source counts, sizes and supply budgets. Keep dense patches and ordinary reservoir motion.
-- Bound total neural input strength, including bias and effective learned recurrence,
-  using one shared row rule and immutable cached norms.
-- Advance physical checkpoints to v44 without migration. Correct single-cell food-access
-  probes to install only their selected diagnostic variant.
+## 2026-09-30 — Fractal terrain, local seasons and integrated landscape view
 
-## Unreleased — Genetic physiology
+- Added persistent fractal elevation, conductance, overhead transmission and optional ceilings,
+  generated once at world creation and saved with the world. Physical checkpoints advanced to
+  v46 without migration (`569f1a0`).
+- Placed reservoirs by an independent fractal density and gave each reservoir local seasonal
+  release and refill clocks.
+- Added controller input 58, the previous paid local motor load, for 59 inputs in total.
+- Exposed terrain creation controls and shared local and remote terrain views.
+- Made the default landscape combine muted conductance ground, elevation contours,
+  received-light shade, translucent chemistry and seasonal reservoir bands with a permanent
+  legend. Diagnostic maps remained available; physics and the checkpoint format were unchanged
+  (`fc016c7`).
 
-- Express inherited physiology directly at current biomass. Remove machinery construction,
-  retirement, controller allocation outputs and category-specific equipment upkeep.
-- Grow the whole body proportionally and apply daughter mutations immediately while conserving
-  biomass, chemical inventories and work accounts. Keep physical action costs and basal metabolism.
-- Advance checkpoints to v43 without migration. Reconstruct body capacities from genetics and
-  biomass; report genetic capacity and biomass growth in inspection and analysis.
+## 2026-09-29 — Birth orientation and aging
 
-## Unreleased — Irregular terrain shade
+- Newborns received random headings and division axes instead of inheriting orientation.
+- Added age-dependent body maintenance slowed by core fraction (`agingTime` 6,000 model
+  seconds), with no lifespan cutoff. Physical checkpoints advanced to v45 (`79ea580`).
 
-- Replace the repeating cosine grids with seeded multiscale noise and smooth coordinate
-  warping at world creation. Retain canonical saved maps and existing optical physics.
-- Correct remote terrain, film and emission selection so changing layers requests the
-  corresponding server projection.
+## 2026-09-28 — Genetic physiology, outlying reservoirs and performance
+
+- Replaced machinery construction with genetic physiology: inherited body proportions are
+  expressed directly at current biomass. Removed machinery construction, retirement,
+  controller allocation outputs and category-specific equipment upkeep (`dc41e40`).
+- The whole body grew proportionally and daughter mutations applied immediately while biomass,
+  chemical inventories and work accounts were conserved. Physical action costs and basal
+  metabolism remained. Checkpoints advanced to v43 without migration; inspection and analysis
+  reported genetic capacity and biomass growth.
+- Extended regional reservoir placement with a sparse radial tail while retaining source
+  counts, sizes and supply budgets (`f6f2a2a`).
+- Bounded total neural input strength, including bias and effective learned recurrence, with
+  one shared row rule and immutable cached norms. Checkpoints advanced to v44 without
+  migration. Single-cell food-access probes installed only their selected diagnostic variant.
+- Reduced optical, exchange and observation overhead. Restored v44 checkpoints stepped
+  27.0% faster at 2,040 cells and 23.8% faster at 3,893 cells with four workers; cold
+  census and environment publication fell from 80.8 to 36.6 ms and 217.2 to 55.9 ms
+  (`b601f92`).
+
+## 2026-09-27 — Continuous worlds
+
+- Ended ancestry records beyond the two-million budget expired instead of stopping
+  reproduction; living records remained and history gaps were labeled (`f754772`).
+- Recovery-save failures warned and kept the last good save while the simulation continued.
+- Phenotype views described current capabilities, bodies and behavior ahead of founder lineage.
+
+## 2026-09-26 — Ecological incentives
+
+- Added crowding costs that let growth displace compressed neighbours, costs for retained and
+  released products, passive membrane exchange and private light-supported metabolism
+  (`3ee29b3`).
+- Published the clustering and movement studies with their diagnostic tools and backlog
+  proposals; pre-incentive measurements were marked historical (`a3a97ee`).
+
+## 2026-09-25 — Irregular terrain shade and larger server memory
+
+- Replaced the repeating cosine shade grids with seeded multiscale noise and smooth coordinate
+  warping at world creation, retaining canonical saved maps and optical physics (`f3521f2`).
+- Remote terrain, film and emission layer changes requested the corresponding server projection.
+- Raised the server container memory limit from 8 to 16 GiB after a 65k-cell world was killed
+  during every save; added a checkpoint anatomy report (`f3dec43`).
 
 ## 2026-09-25 — Terrain shade and organism-built light ecology
 
@@ -36,16 +75,70 @@
 - Preserve negative constructed results: baseline isolated deposits fall below the material
   cutoff, and no whole-cell shelter or lamp payback was established. V41 saves are not migrated.
 
+## 2026-09-24 — Structural reservoir exposure and large server saves
+
+- Reservoirs exposed their persistent composition at full interface whether full or empty, so
+  emptied reservoirs kept cohering while supplying nothing; reservoir repulsion fell from 20
+  to 5 (`9a5fc51`).
+- Raised the server raw checkpoint cap to 2 GiB after a 588 MB world failed every save; saves
+  drop genotypes no live cell, founder or catalog entry references. Added `/api/diagnostics`
+  with heartbeat, panic and boot records on the state volume (`a72d0b7`).
+
+## 2026-09-23 — Material coupling, server persistence and public spectator route
+
+- Coupled dissolved material, reservoirs and cells separately to the shared chemical
+  response in physical v41: crowding pressure acts only on dissolved material, reservoirs add
+  long-range like-charge repulsion and circle exclusion, and cells gain
+  compatibility-weighted contact adhesion that credits no work (`c7220a6`).
+- The native server stored gzip checkpoints on a Docker volume, saved every 30 minutes and on
+  shutdown, restored the newest same-format checkpoint at launch and gained operator
+  save/list/load/delete endpoints (`fe0499c`).
+- Opened the public spectator route `server.biotropy.ahara.io`, forwarding only `/stream` and
+  `/health`; `/api` stayed LAN-only. The public site defaulted to the server world.
+- Removed the remaining serial stages from the live-world step. On the live server checkpoint
+  (2,739 cells) throughput rose from 15.6/21.4/21.9 to 20.1/54.4/64 ticks/s at 1/4/6 workers
+  with matching accounts (`163895d`).
+
+## 2026-09-22 — Model simplification and regional ownership
+
+- Replaced refitting with birth-fixed capabilities, unified finite reservoir state and used
+  one attraction range with ordinary washout (`1cc05e2`). Reservoirs regained independent
+  renewal (`b224525`).
+- Removed the population ceiling and expanded defaults to 720 × 540 with 35 regions and 240
+  reservoirs in physical v40.
+- Installed persistent 8×8 regional material ownership with region-owned parallel commits,
+  shared carrier ownership and persistent contact and delivery membership (`6209b8b`). A
+  populated tick-15,000 world rose from 41.2/64.3 to 51.4/121.3 ticks/s at 1/4 workers.
+
+## 2026-09-21 — Multicore execution, native server and CI deployment
+
+- Executed field, geographic and biological stages on a persistent Rayon pool over shared
+  WASM memory, with a serial fallback and cross-origin isolation for the threaded build
+  (`0016b81`).
+- Added explicit Browser 1/Browser 4 selection and one native server World feeding the same
+  UI through bounded display projections, with a CI deployment path to the private host
+  (`493a4f1`).
+- Added an authenticated HTTP management API with status, controls and physical checkpoint
+  export (`acb51e0`).
+- Removed manual deployment commands and the manual workflow trigger (`f611d3a`); the private
+  deployment succeeded through CI once its `ahara-infra` permissions landed (`d74f1ae`).
+- Unified illumination into one scalar light field across chemistry, sensing and rendering and
+  improved mature closed-panel throughput from 2.44 to 12.77 ticks/s (`431ff72`).
+- Moved experimental data to the local ignored ledger and enforced the artifact storage
+  policy in CI (`119f3a7`).
+
 ## 2026-09-20 — Material habitats, local light and observation
 
 - Integrate shared two-scale attraction, reversible material retention, evolving reservoir
-  replenishment and multiscale public chemistry in physical checkpoint v32. Initial0/136
+  replenishment and multiscale public chemistry in physical checkpoint v32. Initial 0/136
   feedstocks are seed choices, not ordinary renewal resets. Keep negative public-food findings.
-- Compose illumination across spatial axes and30k/90k/310k-tick periods; render darkness over
-  the world. Add paid local photoreception with44 controller inputs and16 funded stocks.
+- Compose illumination across spatial axes and 30k/90k/310k-tick periods; render darkness over
+  the world. Add paid local photoreception with 44 controller inputs and 16 funded stocks.
+- Add one retained intracellular mixture, funded inward sensing and shared field/contact
+  exchange in physical checkpoint v33 (`fad7fa9`).
 - Add bounded measured chemical flows, phenotype comparisons, descendant pins and retained
   history. Preserve borrowed worker rendering and independent map controls.
-- Expire older recovery saves within256MiB instead of pausing when preferred counts do not
+- Expire older recovery saves within 256 MiB instead of pausing when preferred counts do not
   fit. Keep the newest valid save and prioritize older manual points over automatic points.
 - Investigate the reported reload speed gain. Forced JavaScript collection did not improve
   the short mature-state check; WASM allocation and save costs are recorded, with cause unresolved.
@@ -54,18 +147,7 @@
 
 The entries below retain their original implementation versions; they are not current defaults.
 
-## 2026-09-07 — Modular runtime and independent environment controls
-
-- Extract typed deterministic kernel, feature registrations and local controller adapters.
-- Preserve cellular terrain with independent geometry, support, transport and sampling settings.
-- Store immutable per-world chemistry and mechanism identities in checkpoint v8.
-- Validate checkpoint state and automatically fingerprint extracted runtime source.
-- Remove stale worker alias after extinction; retain frozen RNN and current map defaults.
-
-
-All notable user-visible changes are recorded here.
-
-## Unreleased
+## 2026-09-17 — Chemical ecology corrections (checkpoints v14–v19)
 
 - Correct physical coupling: repair work/material scale with funded body mass; growth and birth
   reserves use actual capacities and daughter upkeep. Empty machinery slots cannot slow paid
@@ -107,7 +189,7 @@ Earlier ecology stages (superseded by the correction above):
 - Fix current evolution-report traits and wall-budget options, and retry GPU-backpressured
   redraws while paused. These were the concrete defects from the fresh-context review.
 
-Earlier implementation stages in this unreleased sequence:
+## 2026-09-15 — Rust/WASM kernel and worker rendering (checkpoint v10)
 
 - Enforce the WASM/worker data-sharing contract: scalar ticks, borrowed reply decoding, bounded
   browser queries, incremental chart history, cached genealogy/genomes and acknowledged observation
@@ -131,7 +213,7 @@ Earlier implementation stages in this unreleased sequence:
   at 406 MiB sequential WASM high-water memory. See the
   [current evidence](docs/design/chemistry/numerical-results.md).
 
-Earlier implementation stages in this unreleased sequence:
+## 2026-09-15 — Persisted digital chemistry (checkpoint v9)
 
 - Replace named A/B, toxin, matrix, sharing, prey-yield and carbon/oxygen pathways with a
   persisted 256-species digital chemistry: finite mixtures, funded transport, unary reactions,
@@ -151,6 +233,8 @@ Earlier implementation stages in this unreleased sequence:
   and periodic stats; its slowest 250-tick window is 44.5 ticks/s. Complete final checkpoints match.
   A synthetic 128-cell start reaches 30.7 ticks/s. Default encode/restore takes 82/297 ms.
   Human motion, successful dispersal and days/weeks operation remain unverified.
+
+## 2026-09-13 — Sparse spatial ecology, purpose revision and selection levers
 
 - Seed new sparse worlds with two separated starting colonies of the same founder genotype.
   Existing saved populations retain their placement.
@@ -199,6 +283,8 @@ Earlier implementation stages in this unreleased sequence:
 - Added family chemistry (`toxinTypes: 2`, default 1): a tenth physical locus tints a cell's
   toxin between two types, immunity follows the type produced, and the sensed toxin is what the
   cell is actually susceptible to. Checkpoints are v7; v6 saves are rejected.
+
+## 2026-09-12 — Thick medium, element cycle and evolution harness
 
 - Added an optional cell-mediated element cycle (`config.cycle`): inorganic carbon and oxygen
   fields, a ninth physical locus for light harvesting that fixes carbon into reserve and releases
@@ -258,6 +344,8 @@ Earlier implementation stages in this unreleased sequence:
   bit-identical checkpoints, raising headless throughput about 1.7–1.9×. Bounded the browser
   statistics refresh to 250 ms and widened the maximum-speed frame budget.
 
+## 2026-09-11 — Bacterial ecology, population views and documentation consolidation
+
 - Added recent-family, genealogy and inherited-trait views, source provenance in checkpoints,
   configurable food-composition epochs and reusable short mechanism experiments with typed
   resource accounting. Recorded actual evolved food-access and B-processing benefits alongside
@@ -291,6 +379,8 @@ Earlier implementation stages in this unreleased sequence:
   zoom. Added visible energy fill, heading tips, supply markers, newborn/starvation cues, a scale
   bar and an always-visible population chart. Periodic physics and simulation defaults are unchanged.
 
+## 2026-09-09 — Heritable RNN bacteria with material-funded bodies
+
 - Replaced bacterial allocation tuples with independent construction targets and actual core,
   motor, transporter and storage material. Viscous drag, diffusion-limited uptake, construction
   and machinery maintenance couple capability to physical costs. Stored food and usable energy
@@ -304,6 +394,8 @@ Earlier implementation stages in this unreleased sequence:
   expression, clonal/selfing transmission, crossover, mutation and fission/budding policies.
   Checkpoint v3 preserves complete inherited and acquired state. Run defaults enable physical
   mutation and learning; stats expose both. Seed/fertilize remains a documented lifecycle extension.
+
+## 2026-09-09 — 2D ant colony checkpoint (tag `ant-colony-checkpoint-2026-09-09`)
 
 - Replaced frame-batch speed multipliers with wall-clock tick targets and Maximum. The default
   target is 30 ticks/s; Metrics reports actual throughput and computation cost. Recorded the
@@ -414,6 +506,14 @@ Earlier implementation stages in this unreleased sequence:
 - Reset active documentation, ADRs, tests, checkpoints, and harness commands around the canonical
   2D baseline. The annotated tag `3d-simulation-checkpoint-2026-09-06` and the source archive retain
   the previous implementation and design provenance.
+
+## 2026-09-07 — Modular runtime and independent environment controls
+
+- Extract typed deterministic kernel, feature registrations and local controller adapters.
+- Preserve cellular terrain with independent geometry, support, transport and sampling settings.
+- Store immutable per-world chemistry and mechanism identities in checkpoint v8.
+- Validate checkpoint state and automatically fingerprint extracted runtime source.
+- Remove stale worker alias after extinction; retain frozen RNN and current map defaults.
 
 ## 3D checkpoint — 2026-09-06
 

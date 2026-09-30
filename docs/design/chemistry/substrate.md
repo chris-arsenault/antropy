@@ -1,15 +1,16 @@
 # Chemical substrate and accounting
 
+**Status:** Historical record (substrate reference for the chemistry implementations before the September 15 rebuild, with later notes) — current laws are in the [composed runtime](composed-runtime.md).
+
 Historical substrate/reference description from the previous chemistry implementation. Current
 execution is defined by the [composed runtime](composed-runtime.md), under the
 [computational foundation](computational-foundation.md). The formulas, mesh, checkpoint and
 tick order below preserve earlier choices; they do not govern the fresh production World.
-That World implements v5 chemical definitions, continuous installed machinery and physical checkpoint
-v27. Preserve material identity, finite resources and explicit accounts without reconstructing
+Preserve material identity, finite resources and explicit accounts without reconstructing
 the old conductance, temperature or categorical machinery rules below.
 
-Status: implemented; [numerical design](numerical-engine.md) and [current results](numerical-results.md) record selected
-laws, numerical checks and limitations. The [design overview](README.md) records provenance, scope and
+The historical [numerical design](numerical-engine.md) and [numerical results](numerical-results.md) record the
+laws, numerical checks and limitations selected at the time. The [design overview](README.md) records provenance, scope and
 which decisions were added during review. [Machinery](machinery.md) defines cell capabilities;
 [migration](migration.md) defines the checks needed before adoption into the observation world.
 

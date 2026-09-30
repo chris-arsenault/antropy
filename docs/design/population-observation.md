@@ -1,5 +1,7 @@
 # Population observation
 
+**Status:** Current reference — independent views, grouping and denominators for observing the installed population.
+
 The goal is to observe a world where diverse strategies and adaptation can emerge over days or weeks.
 Hypotheses guide opportunities and diagnose inert mechanisms; proving a prescribed strategy pair
 or identifying each successful mutation is not a gate on development. Existing negative experiments
@@ -15,7 +17,7 @@ the phenotype panel compares actual machinery, inherited targets and measured ac
 founder can support different functions, and separate pedigrees can converge on the same function.
 Sequence identity and ancestry remain optional diagnostics, not counts of ecological types.
 
-The map defaults to usable cell energy over field energy per material. Recent families are a
+The map defaults to usable cell energy over the [integrated landscape](bacterial-display.md#display-integrated-landscape). Recent families are a
 selectable map view and population-share chart. For the initial observation
 scale, a family is an ancestry branch rooted at generation 0, 4, 8, and so on. Membership follows
 parent links to the most recent such root. IDs are the root organism IDs, deterministic across
@@ -72,7 +74,7 @@ they cannot certify coexistence from cluster labels. See [frequency limits](expe
 
 ## Chemical roles and transformation web
 
-The Web window groups living cells by installed enzyme capability. Its default primary view
+The Web window groups living cells by expressed enzyme capability. Its default primary view
 assigns each cell to the strongest nonidentity input→output branch, weighted by funded enzyme
 stock, compiled catalytic coefficient and product weight. Ties prefer smaller chemical IDs;
 cells without funded conversions remain unassigned. Primary counts partition the population.
@@ -81,8 +83,8 @@ Current map defaults remain unchanged.
 
 All supported enzyme routes includes every positive compiled branch from funded machinery.
 It counts each cell once per pair, even when duplicate enzyme slots support that pair. Counts
-across pairs overlap. Installed machinery, rather than inherited targets awaiting paid refit,
-determines both views. These are capabilities, not measured intake, export or cross-feeding.
+across pairs overlap. Enzyme capacity expressed at current biomass determines both views;
+there is no refitting. These are capabilities, not measured intake, export or cross-feeding.
 
 Directed arcs occupy fixed positions on the 16×16 chemical manifold. Selecting a node filters
 incoming/outgoing pairs and can select that chemical on the world map. The graph and table show

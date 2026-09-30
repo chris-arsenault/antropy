@@ -1,5 +1,7 @@
 # Integrated ecology review: 200,000 ticks
 
+**Status:** Historical record (physical v31, September 19) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 ## Registration — September 19, 2026
 
 User requests one long run and analysis across the recent changes. Sulion plan

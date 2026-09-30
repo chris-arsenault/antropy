@@ -1,5 +1,7 @@
 # Plan closeout and migrated requirements
 
+**Status:** Historical record (pre-chemistry plan closeout, September 13) — the [September 30 delivery policy and cleanup](../plans/README.md) supersedes every human-acceptance and verification gate carried forward below; it cannot reopen a delivered plan or assign review work to the user.
+
 September 13, 2026. This record accompanies the user's request to close existing plans, retain
 useful remaining work in a design backlog, and prepare the [spatial ecology plan](spatial-ecology.md).
 OBE means overtaken by events: no longer a task under the current simulation and goals. It does

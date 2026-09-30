@@ -1,8 +1,10 @@
 # Local RNN controller
 
+**Status:** Current contract — the installed controller's observations, actions, topology, founder weights and learning boundary.
+
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 58×24×19 Rust controller, with a physiological evaluation clock in checkpoint v43.
+the 59×24×19 Rust controller with a physiological evaluation clock.
 
 <a id="controller-observation-contract"></a>
 
@@ -11,23 +13,23 @@ the 58×24×19 Rust controller, with a physiological evaluation clock in checkpo
 | Indices | Local readings |
 | --- | --- |
 | 0–15 | Four chemical receptors, each with level, temporal change, forward difference and left difference |
-| 16–27 | Twelve installed receptor/transporter/enzyme stocks divided by themselves plus their genetic targets |
+| 16–27 | Twelve expressed receptor/transporter/enzyme capacities, each divided by itself plus its genetic newborn reference |
 | 28 | Usable energy / actual energy capacity |
-| 29 | Core / genetic newborn core target minus one, clamped to [0,1] |
+| 29 | Core / genetic newborn core reference minus one, clamped to [0,1] |
 | 30–33 | Equal shares of scalar circle crowding; these four slots have no directional meaning |
 | 34 | Opaque private task byte / 255 |
-| 35–36 | Motor/storage stock divided by itself plus reference newborn stock |
+| 35–36 | Motor/storage capacity divided by itself plus its genetic newborn reference |
 | 37 | Internal chemical matter / actual storage capacity |
 | 38 | Injury fraction |
 | 39–42 | Funded optical level, temporal change, forward difference and left difference |
-| 43 | Photoreceptor stock divided by itself plus genetic target |
+| 43 | Photoreceptor capacity divided by itself plus its genetic newborn reference |
 | 44–51 | Four funded inward receptors, each level and temporal change |
-| 52–55 | Enzyme records 4–7 stock relative to their genetic targets |
-| 56–57 | Funded cover-builder and emitter stock relative to genetic targets |
+| 52–55 | Enzyme records 4–7 capacity relative to their genetic newborn references |
+| 56–57 | Cover-builder and emitter capacity relative to their genetic newborn references |
 | 58 | Previous paid local motor load from geographic resistance; zero without effort or with feedback disabled |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
-Actual receptor stock supplies gain. Level is C/(C+K), with K=0.1; directional differences use
+Expressed receptor capacity supplies gain. Level is C/(C+K), with K=0.1; directional differences use
 opposed perimeter samples divided by their sum plus 2K. Samples are bilinear and periodically
 wrapped. They are local contrasts, not bearings to a source. Phasic input is current level minus
 the saved baseline; baseline relaxation uses 1−exp(−dt/2). Birth initializes it locally.
@@ -78,7 +80,7 @@ use float32 storage and SIMD arithmetic. The shared rational activation is
 is below 0.024. This is an explicit modeling approximation, not preserved old trajectories.
 Each cell evaluates its RNN once per existing physiology interval (default 0.8 model seconds).
 Physical owners publish cues at their update boundary: external sensing supplies chemistry
-and light, physiology supplies funded stocks and internal state, and base stepping supplies
+and light, physiology supplies expressed body capacities and internal state, and base stepping supplies
 energy, contact, paid motor load and the private byte. Each channel retains its value and publication time;
 the next evaluation integrates their signed time average, settles paid learning, updates
 hidden state and decodes one held action. Constant channels need no repeated base-step

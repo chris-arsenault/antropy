@@ -1,6 +1,8 @@
 # Parameters, units and retirement owners
 
-## Current design contract
+**Status:** Historical record — M0/M1 specification chapter (September 13–15); current parameters are in the [composed runtime](../../design/chemistry/composed-runtime.md).
+
+## September 15 design contract (historical)
 
 Revised September 15, 2026. [Computable chemistry](../../design/chemistry/computational-foundation.md)
 and [ADR 0022](../../adr/0022-computable-chemistry.md) govern formula selection and acceptance.

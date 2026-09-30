@@ -1,5 +1,7 @@
 # Cellular organization: 180,000-tick analysis
 
+**Status:** Historical record (physical v33, September 20) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 The [deeper cross-system analysis](cellular-180k-connections.md) connects this evidence to the
 retrieved design history. It corrects a post-restore body-signal omission in the inspector's
 derived work examples; recorded simulation flows, ancestry and accounts are unaffected.

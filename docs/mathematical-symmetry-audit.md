@@ -1,5 +1,7 @@
 # Mathematical symmetry audit
 
+**Status:** Historical record (physical v20, September 18) — the v21 corrections are recorded in the archived [symmetry plan](plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md); current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 Date: 2026-09-18. Runtime under review: physical checkpoint v20, commit `f48943c`.
 This is an audit of live simulation rules, not authorization to change them.
 Existing uncommitted bound-material analysis is independent of this audit.

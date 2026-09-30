@@ -1,5 +1,7 @@
 # Bound-material impact: matched seed27 comparison
 
+**Status:** Historical record (physical v19 versus v20, September 17) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 ## Registration, September 17, 2026
 
 Question: did preserving built chemical identity reduce #186 accumulation and change the

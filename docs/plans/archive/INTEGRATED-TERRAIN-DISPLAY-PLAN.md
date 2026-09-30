@@ -1,5 +1,8 @@
 # Integrated default terrain display
 
+**Status:** Delivered plan (archived) — integrated landscape display shipped at `fc016c7`; the
+[display contract](../../design/bacterial-display.md#display-integrated-landscape) owns current behavior.
+
 September 30, 2026. Implements the approved composition without changing physical rules or
 checkpoint format. The ordinary view must show the landscape without display-setting changes.
 

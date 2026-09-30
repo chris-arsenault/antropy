@@ -1,11 +1,13 @@
 # User habitat checkpoint — tick83,980
 
+**Status:** Historical record (physical v32, September 20–21) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 Read-only review of local `antropy-27-83980.antropy.gz`, physical v32, seed27. No new evolutionary
 run was used. Kernel source digest:
 `5c29efb98d60feb457ca0655992213039a5d8d2fe533d8ae1f1be02408849d30`.
 The package is55,419,868 bytes; the physical checkpoint is138,583,671 bytes. Local decoded
 evidence remains in `frontend/harness/artifacts/user-83980-review/`. These findings describe the
-current [material-habitat implementation](material-habitats.md), not the earlier v31 200k world.
+v32 [material-habitat implementation](material-habitats.md), not the earlier v31 200k world.
 
 ## Dense colonies with differentiated chemistry
 

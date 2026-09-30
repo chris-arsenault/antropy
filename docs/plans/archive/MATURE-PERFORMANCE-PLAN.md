@@ -1,12 +1,14 @@
 # Mature-world execution at 120 ticks per second
 
-Historical investigation record. Its future-tense implementation queues are superseded by
-[the structural scaling work order](../../SCALING-PLAN.md). Read targeted findings when needed;
-do not resume this document's patch sequence or treat its selected representations as constraints.
-
-Investigation ended September 21 by user decision. The 120 ticks/s target was not met.
-Retain installed changes and evidence; further execution follows `SCALING-PLAN.md`.
-The final compact product ownership change awaits validation in that implementation.
+**Status:** Abandoned plan (archived) — the Sulion root was canceled September 21 by user
+decision without reaching 120 ticks/s; the single-threaded optimization sequence was replaced by
+the [structural scaling plan](SCALING-PLAN.md). Negative M3 findings (cache and validation
+lifetimes that regressed throughput) are retained in the body and summarized in
+[decisions and evidence](../../design/decisions-and-evidence.md#mature-world-performance-investigation).
+Body is the execution record; its open-gate, "remaining" and pending-validation statements are
+historical and retired by the September 30 delivery policy ([plans README](../README.md)).
+Current laws live in [composed runtime](../../design/chemistry/composed-runtime.md). Do not
+resume this document's patch sequence or treat its selected representations as constraints.
 
 ## Outcome and authority
 
@@ -26,7 +28,7 @@ part of this request. Existing staged local-data cleanup belongs to the precedin
 The six September21 reviews identify repeated interface projection, transaction
 expansion, broad-phase rebuilding, footprint allocations, reaction allocation and
 unchanged material/genotype reductions. Current code and measured costs outrank those
-proposals. [Previous results](../bounded-computation.md) measured 12.77/10.87 ticks/sec
+proposals. [Previous results](../../bounded-computation.md) measured 12.77/10.87 ticks/sec
 with panels closed/active, with 71.74 ms average physical stepping in the closed arm.
 
 Reuse `transport.rs`, `contact_exchange.rs`, `interfaces.rs`, existing sparse field

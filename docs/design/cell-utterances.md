@@ -1,6 +1,8 @@
 # Directional cell utterances
 
-Design specification, September 24, 2026. **Deferred and unimplemented; not the next work item.**
+**Status:** Deferred proposal — specified September 24 and unimplemented; expected to land before the [strategic controller](strategic-controller.md) when selected.
+
+Design specification, September 24, 2026. Not the next work item.
 The user requested coarse directional hearing and implementation followed by natural observation,
 without requiring prior proof of speaker return or evolutionary uptake. This revision supersedes
 the initial directionless proposal and its pre-selection ecological checks. Consider this spec
@@ -20,8 +22,8 @@ supplies no usable work to a recipient.
 or an implemented language. No byte means food, danger, kinship or cooperation in physics.
 
 Chemical export already couples information to transported material and its environmental
-consequences. Proposed optical emission couples information to finite optical work, absorption
-and shelter. Utterances would separate information from those material and work deliveries.
+consequences. Paid optical emission, installed in v42, couples information to finite optical
+work, absorption and shelter. Utterances would separate information from those material and work deliveries.
 Whether this creates a conditional benefit beyond existing cues is a question for observation
 after implementation, not an admission test. It is a deliberate simplification: there is no
 propagation wave, attenuation, echo, occlusion or sound-powered metabolism.
@@ -136,16 +138,16 @@ promised. Reconsider that limit against observed behavior after implementation i
 
 ## Funded machinery, work and reach
 
-Add mouth and ear investment records through the existing optional-stock law. Both consume
-ordinary material, assembly work, space, maintenance and repair. Zero investment is reachable
-and can mutate back. Genes request capacity; only actual installed stock supplies function.
-Ordinary construction allocation and retirement control both records.
+Add mouth and ear genes to the genetic physiology: like other body capacities, each is a
+birth-fixed proportion expressed at current biomass. Both occupy space and pay ordinary
+maintenance and repair. Zero capacity is reachable and can mutate back. There is no construction
+request, allocation output or retirement.
 
 Listening has no additional per-event work charge. It still needs maintained physical ears and
 the existing paid learning mechanism. Reuse receptor gain, with ear stock in place of receptor
 stock, scaled by actual core and the existing receptor reference ratio. Apply the selected common
-damage convention consistently. Freeze this gain when an event arrives: later building an ear
-cannot recover an event missed while deaf. Losing all ear function must prevent subsequent
+damage convention consistently. Freeze this gain when an event arrives: later growth or repair of
+an ear cannot recover an event missed while deaf. Losing all ear function must prevent subsequent
 arrivals, while an already registered input remains private experience until consumed.
 
 Evolve reach through mouth investment and neural work allocation. A stronger mouth enables a larger paid event;
@@ -230,8 +232,9 @@ heavy-tail distribution. No speech-specific mutation probability, semantic mutat
 table or favorable speaker/receiver pairing is introduced. Any later independent reach allele
 would need a declared physical domain and a transform of that same mutation law.
 
-Actual mouth and ear stocks split conservatively at birth. Mutated investments change daughter
-targets immediately without granting machinery; controls can build or retire stock normally.
+Mouth and ear capacity follows biomass, which splits conservatively at birth. A daughter
+expresses its mutated mouth/ear proportions immediately at its inherited biomass; birth grants
+no additional material.
 Newborn pending hearing, hidden state and private byte reset. A budding parent retains its own
 private experience under the existing lifecycle rules. A daughter cannot inherit a queued event
 or a spoken byte as genetic memory. Birth-local assimilation may transmit the existing allowed
@@ -275,9 +278,10 @@ gain, self-exclusion and boundary delivery. No speedup is established.
 
 Checkpoint pending input, its consumption epoch and the once-only emission state. Rebuild derived
 spatial membership on restore. The controller interface owns public input/action shapes; physics
-does not inspect weight layout. With 27 sound inputs and two stock-feedback inputs, a direct
-extension has 85 inputs, beyond the current u64 publication masks. Eight bit outputs, emission
-effort and two stock-allocation outputs would produce 49 outputs. These are real controller,
+does not inspect weight layout. The current controller has 59 inputs and 19 outputs. With 27
+sound inputs and two mouth/ear capacity inputs (matching the builder and emitter capacity
+inputs), a direct extension has 88 inputs, beyond the current u64 publication masks. Eight bit
+outputs and emission effort would produce 28 outputs. These are real controller,
 codec, genetics, diagnostic and clock changes, not just a new field on Cell. Hidden width need
 not change merely because communication ports exist.
 
@@ -310,7 +314,7 @@ to observe after implementation, not reasons to require proof of payoff or evolv
 before delivering the feature. Do not add subsidies, trust rules or cooperation rewards in
 anticipation of those outcomes.
 
-Compare this candidate with paid optical emission on informational purpose, sender return,
+Compare this candidate with the installed paid optical emission on informational purpose, sender return,
 physical accounting and computational cost. Optical emission can also create shade/work niches;
 utterances offer a cleaner discrete information experiment but add an independent carrier and
 alphabet. Terrain/climate can first create differing local knowledge or exposure that gives

@@ -1,10 +1,18 @@
 # Experiments for world design
 
+**Status:** Current reference — evidence levels, comparison method and harness provenance for experiments on the installed runtime.
+
 The objective is a world where diverse survival strategies and adaptation are likely, for the user
 to observe over days or weeks. Experiments support decisions about that world through hypotheses
 and small proof points. They do not precompute a desired community or certify that the user's
 future run has already delivered its value. A lack of certified coexistence does not forbid
 opening a well-motivated world; run length and visual variety alone do not establish adaptation.
+
+Agents run appropriate bounded experiments and automatic checks within implementation, without
+adding verification phases or assigning user-acceptance tasks. Long-running observation informs
+continued refinement while other work proceeds; it is not a delivery or rollback gate. Keep
+results and unresolved explanations here or in their study documents, rather than leaving
+delivered plans open for more evidence. Actual failing code still requires repair.
 
 <a id="experiments-evidence-levels"></a>
 
@@ -34,8 +42,8 @@ are cumulative reproduction, not generation count or frequency advantage.
 
 The existing `invasion` command places both groups in a fresh world on common funded bodies.
 It tests colonization from unequal starting numbers, not entry into an equilibrated resident
-community. Mutation and learning are disabled, but gene transfer remains active if the source
-checkpoint enables it. Results then track descendants whose traits may change. The command runs
+community. Mutation and learning are disabled, and living-cell gene transfer has been removed,
+so descendants keep their group's inherited sequence. The command runs
 one placement per rare type by default; exchanging which type is rare is not replication across
 starting positions. Chosen k-means partitions do not prove separate strategies.
 
@@ -56,7 +64,7 @@ withdraws the false passes; changing the work order does not retroactively valid
 
 | Hypothesis | Causal prediction | Current status / competing explanation |
 | --- | --- | --- |
-| Source-dependent machinery returns | Changing source identity reverses which allocation repays its cost | Constructed equal-matter/equal-potential allocation probes reverse construction advantage; evolved specialization remains open |
+| Source-dependent machinery returns | Changing source identity reverses which allocation repays its cost | Constructed equal-matter/equal-potential allocation probes under pre-v43 machinery construction reversed the construction advantage; evolved specialization remains open |
 | Affordable exploration | Nearby resources repay movement before reserves expire | Current nearby founder survives 300 ticks but does not enter the target; successful colonization is not established |
 | Stress and compatibility | Matched membranes suffer less under the same internal/external exposure | Controlled exposure probes support differential injury, with a positive susceptibility floor |
 | Chemical degradation | Uptake and conversion reduce obstructing material | Conversion reduces return at death; tested alive-cell external clearance did not improve |
@@ -83,8 +91,9 @@ For a specific adaptation claim, use the narrower attribution protocol below.
 
 Choose the hypothesis, candidate-selection rule, contexts, seeds and stopping horizon before
 inspecting the comparison. Preserve ancestor/candidate genotype encodings and source checkpoint
-identity. Swap initial position assignments; use common funded initial stocks and empty private
-state. Let changed targets develop through paid growth. Disable both random mutation blocks and
+identity. Swap initial position assignments; use common initial biomass, inventory and energy
+with empty private state. Each genotype expresses its body proportions immediately at that
+biomass. Disable both random mutation blocks and
 learned-weight retention to compare inherited genotypes; separately specify whether private
 learning remains active.
 
@@ -93,7 +102,7 @@ an established population or neighborhood dependence. Testing that alternative r
 matched setup, not reinterpretation of the same endpoint. No assay score enters living reproduction
 and no diagnostic winner automatically replaces browser founders.
 
-With contact gene transfer also off, mutation-off/retention-zero freezes sequence under clonal transmission but still permits
+Because living-cell gene transfer is removed, mutation-off/retention-zero freezes sequence under clonal transmission but still permits
 private plasticity. Static learning is a different intervention. Environment random streams match;
 body and genetic histories may diverge as a consequence of changed behavior or birth timing.
 
@@ -153,8 +162,8 @@ an explicit budget and stop conditions, and authorization within the task. No fi
 count, strategy count or demand to attribute every adaptation governs handoff.
 
 Vitest covers bounded deterministic mechanics and integration invariants. Ecological behavior belongs
-in short named harness comparisons with falsifiable predictions. Human review judges motion through
-Run and stats; inspect startup configuration instead of launching a browser assay. Long duration alone
+in short named harness comparisons with falsifiable predictions. The user observes motion through
+Run and stats; the September 30 policy retired it as a delivery gate. Inspect startup configuration instead of launching a browser assay. Long duration alone
 cannot certify adaptation, nor should verification become an expanding side project.
 
 Change one mechanism, state its governing inequality and stop on repeated contradictory results.

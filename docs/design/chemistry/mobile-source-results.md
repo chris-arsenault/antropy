@@ -1,5 +1,7 @@
 # Mobile reservoirs: laws and short calibration
 
+**Status:** Historical record (physical v15, September 16) — the human motion review named here was not performed and the gate was retired September 30; current reservoir laws are in the [composed runtime](composed-runtime.md).
+
 September 16, 2026. Ordinary World now moves resource reservoirs through the local chemical
 medium and changes their released mixtures according to that medium. Defaults are
 `sourceDrift=4`, `sourceProcessing=4`. **500 ticks is a useful first inspection window**;

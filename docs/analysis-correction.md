@@ -1,5 +1,7 @@
 # Correction of September 12–13 ecological analysis
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 13) — the withdrawn coexistence passes stay withdrawn; the current work order is in [design/README.md](design/README.md).
+
 Reviewed September 13, 2026 from saved result and manifest bodies. No simulation was advanced.
 The earlier reports confused an increase in descendants with an increase in population share,
 and used the presence of chosen k-means groups as evidence of ecological differentiation.

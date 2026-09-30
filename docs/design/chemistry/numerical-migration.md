@@ -1,5 +1,7 @@
 # Numerical engine migration and retirement
 
+**Status:** Historical record (Rust/WASM cutover, September 14) — human and browser acceptance gates named here were retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
 September 14, 2026. This records the Rust/WASM cutover under plan
 `cad67253-df16-4762-9c69-ec1a9121130b`. The previous [migration audit](migration-audit.md)
 records the earlier TypeScript chemistry implementation and its evidence. Reusing an experiment

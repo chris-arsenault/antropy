@@ -1,8 +1,10 @@
 # Light ecology implementation checks
 
+**Status:** Historical record (physical v42, September 25) — constructed mechanism checks; the review and cutover items named here were retired September 30 and superseded by v46; the design is in [light ecology](design/light-ecology.md).
+
 September 25, 2026. Physical v42. These are constructed mechanism checks, not evolved
 strategies or evidence of sustained coexistence. The
-[plan registration](plans/LIGHT-ECOLOGY-PLAN.md#m4-execution) defines the questions and limits.
+[plan registration](plans/archive/LIGHT-ECOLOGY-PLAN.md#m4-execution) defines the questions and limits.
 
 ## Mechanics
 
@@ -110,7 +112,6 @@ derived-cache distinction; long-term trajectory agreement remains untested.
 Final `make ci` passed: 317 engine tests, 15 server tests (one registered benchmark ignored),
 17 integration tests, 79 Vitest tests, the Python reader check and repository validation.
 The existing 19 ESLint warnings and WASM atomics warning remain. Projection and observation
-checks pass; visible motion and shelter/emission legibility still require human review.
-The existing live v41 checkpoint has not been replaced or migrated. The server's current
-startup policy starts a new seed when no compatible checkpoint exists, so publishing v42
-requires an explicit continuing-world cutover decision.
+checks pass. Human review of visible motion and shelter/emission legibility was not
+performed; the gate was retired September 30. The v41 checkpoint was not migrated; the
+v42 cutover question is superseded by the v46 format.

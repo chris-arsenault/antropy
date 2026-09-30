@@ -1,6 +1,8 @@
 # Funded material life cycle and installed state
 
-## Current design contract
+**Status:** Historical record — M0/M1 specification chapter (September 13–15); the current life cycle is in [funded bodies](../../design/funded-bodies.md) and the [composed runtime](../../design/chemistry/composed-runtime.md).
+
+## September 15 design contract (historical)
 
 Revised September 15, 2026. [Computable chemistry](../../design/chemistry/computational-foundation.md)
 and [ADR 0022](../../adr/0022-computable-chemistry.md) govern formula selection and acceptance.

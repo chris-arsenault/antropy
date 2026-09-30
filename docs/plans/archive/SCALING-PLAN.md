@@ -1,5 +1,27 @@
 # Structural runtime scaling
 
+**Status:** Delivered plan (archived) — persistent 8×8 regional material ownership, local
+scheduling, shared carrier lifetimes, the persistent Rayon pool with shared WASM memory and
+the September 28 production performance pass shipped from `0016b81` through `6209b8b`,
+`163895d` and `b601f92` (root `e3517c4b-b3df-4786-bcf4-10a488a294d1`, closed September 30).
+Body is the execution record; its open-gate, "remaining", "uncommitted/undeployed" and
+human-review statements are historical and retired by the September 30 delivery policy
+([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md). The structural-replacement
+performance rule in [AGENTS.md](../../../AGENTS.md) remains in force.
+
+## September 30 delivery closeout
+
+The P3 measurement/human-review stage was retired, not passed. This does not claim that
+unmeasured 16/32-core targets or long-running ecology passed. P4's static terrain now belongs
+to the [terrain implementation](../TERRAIN-AND-SEASONS-PLAN.md); unselected rotational
+climate remains in the [backlog](../../backlog.md).
+
+The structural principles below still govern future performance changes. The old execution
+stages and measurements are history, not pending acceptance work. Automatic testing and bounded
+performance checks belong to the implementation that needs them; ongoing observation does not
+keep a delivered plan open.
+
 ## September 28 continuing-world performance pass
 
 Execution: `afb1d346-8749-45ba-8f69-49566bab6195`. The user requested repeated
@@ -477,7 +499,7 @@ for tiled execution. No commit, push or deployment in scope.
 Updated September 21, 2026 after the user's repeated structural-first corrections.
 Sulion root: `e3517c4b-b3df-4786-bcf4-10a488a294d1`.
 
-## Current work order
+## Original work order (historical)
 
 Replace the execution structures that make meaningful simulation work unnecessarily expensive.
 Design ownership, interaction representation, spatial reach, numerical participation and update
@@ -490,17 +512,17 @@ work order. Persistent spatial tiles with local update limits are required. Reta
 existing operators inside tiles is insufficient. Address structural costs before tuning loops.
 
 The previous plan is preserved unchanged as
-[historical evidence](docs/sources/history/2026-09-21-scaling-before-structural-correction.md).
+[historical evidence](../../sources/history/2026-09-21-scaling-before-structural-correction.md).
 Its dense-layout-first sequence, unchanged-equation restriction and dated experiment instructions
 are superseded. Read specific historical sections when needed to understand a failed approach;
 do not load or execute the entire old work order by default. The ended
-[mature performance investigation](docs/plans/MATURE-PERFORMANCE-PLAN.md) is also historical.
+[mature performance investigation](MATURE-PERFORMANCE-PLAN.md) is also historical.
 
 ## Requirements and implementation freedom
 
-Preserve the [principles](docs/principles.md), the chemical transformation algebra, explicit
+Preserve the [principles](../../principles.md), the chemical transformation algebra, explicit
 material/work accounts, funded local organisms, evolvable genomes/RNNs and
-[data ownership](docs/design/chemistry/data-ownership.md). Physical and environmental effects
+[data ownership](../../design/chemistry/data-ownership.md). Physical and environmental effects
 must remain conditional opportunities rather than prescribed roles or desired community shapes.
 
 Numerical distance limits, concentration/participation thresholds, temporal resolution and
@@ -578,10 +600,10 @@ and borrowed local rendering. Browser 1/4 and a native 32-thread host are implem
 The private HTTP management API is deployed. Public VPN routing remains disabled.
 
 Historical P0–P2 describe delivered threading components, not completion of structural scaling.
-The Sulion root now carries explicit pending structural implementation before P3 operating
-acceptance. P3 must assess that replacement, not merely remeasure the old dense implementation.
-P4 terrain remains separate future work; the [light ecology design](docs/design/light-ecology.md)
-and other environmental backlogs retain their scope.
+The Sulion root is closed after the structural replacement. P3's measurement-only stage is
+retired; it is not a standing benchmark campaign. P4 terrain has its own implementation owner;
+the [light ecology design](../../design/light-ecology.md) and environmental backlog retain their
+physical scope without acceptance-only plans.
 
 Earlier measurements remain evidence, not acceptance of this replacement: the default-area
 2,000-cell browser fixture reached 124.36 ticks/s with six workers; the sparse 20×-area fixture
@@ -592,7 +614,7 @@ conditions and negative findings. Current server deployment does not establish 3
 ## Context handoff
 
 Start future performance work with the primary structural rule in `AGENTS.md`,
-[principles](docs/principles.md), this current work order and the governing mathematical/ownership
+[principles](../../principles.md), this work order and the governing mathematical/ownership
 contracts. Read source and targeted historical evidence to answer a named design question.
 Past assistant promises, completed threading phases and old patch queues have no authority to
 narrow the user's structural-first direction.

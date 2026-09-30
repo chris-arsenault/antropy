@@ -1,6 +1,6 @@
 # 0017 — Behavioral campaigns live in the harness ledger
 
-- Status: Accepted
+- Status: Accepted; amended September 30, 2026 (visual-review gate retired)
 - Date: 2026-09-06
 
 ## Context
@@ -19,6 +19,11 @@ September 21, 2026 clarification: this SQLite ledger is local experimental data 
 genomes, traces, reports and plots stay ignored. Git preserves authored findings and
 reproduction instructions. This replaces the earlier practice of checking in the database
 and selected raw evidence; it does not discard local records or rewrite repository history.
+
+Amendment (September 30, 2026): the separate human visual-review gate named above is retired
+by the September 30 delivery policy ([plans README](../plans/README.md)). Headless assays
+measure behavior; user feedback about visible motion informs subsequent fixes without being a
+completion gate. Retiring the gate does not mark earlier reviews as passed.
 
 ## Consequences
 

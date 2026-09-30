@@ -1,8 +1,9 @@
 # General-purpose digital chemistry
 
-Status: fresh production World implemented September 15, with environmental chemistry added
-September 16, followed by the September17 composition repair. The [composed runtime](composed-runtime.md)
-owns the current artificial laws and checkpoint v33. [Cellular organization](../cellular-organization-and-exchange.md)
+**Status:** Current reference — index of the chemistry contracts and their historical records; the [composed runtime](composed-runtime.md) owns the current artificial laws and checkpoint v46.
+
+The fresh production World was implemented September 15, with environmental chemistry added
+September 16, followed by the September17 composition repair. [Cellular organization](../cellular-organization-and-exchange.md)
 adds funded regulation, bounded variable enzyme repertoires and shared interfaces.
 [Material-supported habitats](../../material-habitats.md)
 record reversible retention, evolving source composition and multiscale public transformations.
@@ -35,31 +36,48 @@ The runtime replaces named chemical systems with one material-conserving substra
 Food, waste, chemical attack, communication and barriers describe how organisms use that
 substrate. They are not species categories or separate action systems.
 
-## Read this design
+## Current contracts
 
 | Document | Responsibility |
 | --- | --- |
-| [Computational foundation](computational-foundation.md) | Governing design: composed chemical-space computation, accounts, costs and decision ownership |
-| [Transformation algebra white paper](transformation-algebra.md) | Group actions, discrete representation and irreversible dynamics; design contract for the canonical plan's selected v23 implementation |
-| [Regenerative initial ecosystem white paper](regenerative-ecosystem.md) | Implemented v27 design: funded four-founder circulation, shared environmental work and finite-owner pressure; bounded version-specific evidence in the archived math plan |
-| [Current specification responsibilities](../../specs/digital-chemistry/README.md) | Current contracts and explicitly historical M0 equations/evidence |
-| [Substrate and accounting](substrate.md) | Chemical properties, generation constraints, fields, sources, turnover, reactions, construction and death |
-| [Machinery and controllers](machinery.md) | Bounded enzyme programs, funded capacities, local observations/actions, mutation and inheritance |
-| [Migration and proof points](migration.md) | Current-system dispositions, implementation sequence, small experiments, observation and operational limits |
-| [Numerical engine](numerical-engine.md) | Sole Rust/WASM architecture, selected compact laws, clocks, worker/GPU boundary and registrations |
-| [Current habitat measurements](../../material-habitats.md) | V32 mechanisms, cost and negative public-food result |
-| [Rebuild measurements](rebuild-results.md) | Historical fresh-core registrations, mechanisms, capacity and storage |
-| [v27 runtime optimization](runtime-optimization.md) | Exact weathering/stencil work reductions, archived checkpoint equality, matched timings and remaining limits |
-| [Environmental chemistry](environmental-results.md) | Geographic weathering, extracellular conversion, paid shelter, short controls and overnight evidence |
-| [Mobile sources](mobile-source-results.md) | Medium-dependent motion and release, bounded cost and short calibration |
-| [Resource economy](resource-economy.md) | Analytical budgets, delivery-aware supply, turnover calibration and current reproductive checks |
-| [Reliability evidence](reliability-results.md) | Historical browser failures/limits and their repairs; [current session investigation](../../session-runtime-review.md) adds mature-state costs |
-| [Birth-fixed capabilities](installed-machinery.md) | Lifetime chemical configuration, conservative birth and historical refitting findings |
-| [Diagnostic continuity](diagnostic-continuity.md) | Genealogy, inherited/body comparisons and bounded recent/longitudinal observations |
-| [Migration and retirement](numerical-migration.md) | Current commands, reports, retained semantics and removed implementations |
-| [Historical performance and fidelity](performance.md) | Previous TypeScript quantization choices and evidence |
-| [Performance at the retained population scale](population-performance.md) | Restored 48-founder workload, larger synthetic load and exact computation optimizations |
-| [Reproductive viability](viability.md) | Small causal life-cycle probes, founder homeostasis and ordinary-world support |
+| [Composed runtime](composed-runtime.md) | Installed artificial laws, accounts, clocks and checkpoint format |
+| [Computational foundation](computational-foundation.md) | Governing design principles: composed chemical-space computation, accounts, costs and decision ownership |
+| [Transformation algebra](transformation-algebra.md) | Exact finite actions on discrete chemical identities and irreversible kinetic mixtures |
+| [Data ownership](data-ownership.md) | Immutable Rust/WASM ownership, borrowed rendering and bounded observation contract |
+| [Birth-fixed capabilities](installed-machinery.md) | Lifetime chemical configuration and conservative birth; historical refitting findings |
+| [Resource economy](resource-economy.md) | Zero-tick analytical budgets command; historical v9–v38 calibration |
+
+## Historical records
+
+| Document | Era and content |
+| --- | --- |
+| [Regenerative initial ecosystem](regenerative-ecosystem.md) | Implemented v27 design (September 18): funded four-founder circulation, shared environmental work and finite-owner pressure |
+| [v27 runtime optimization](runtime-optimization.md) | v27 (September 18): exact weathering/stencil work reductions and matched timings |
+| [Environmental chemistry](environmental-results.md) | v14 (September 16): geographic weathering, extracellular conversion, paid shelter and overnight evidence |
+| [Mobile sources](mobile-source-results.md) | v15 (September 16): medium-dependent reservoir motion and release, short calibration |
+| [Rebuild measurements](rebuild-results.md) | Fresh-core rebuild (September 15): registrations, mechanisms, capacity and storage |
+| [Digital chemistry specification](../../specs/digital-chemistry/README.md) | Deleted M0/M1 engine specification (September 13–15) |
+| [Machinery and controllers](machinery.md) | v33 funded machinery contract; construction and retirement removed in v43 |
+| [Numerical engine](numerical-engine.md) | First Rust/WASM engine (September 14): compact laws, clocks and worker/GPU boundary |
+| [Numerical results](numerical-results.md) | First Rust/WASM engine measurements (September 14) |
+| [Migration and retirement](numerical-migration.md) | Rust/WASM cutover dispositions (September 14) |
+| [Reliability evidence](reliability-results.md) | Schema 11 (September 14): browser failures/limits and repairs |
+| [Diagnostic continuity](diagnostic-continuity.md) | Schema 11 display audit (September 14): genealogy and observation equivalents |
+| [Substrate and accounting](substrate.md) | Pre-rebuild substrate reference: chemical properties, fields, sources, reactions and death |
+| [Migration and proof points](migration.md) | v9 migration requirements (September 13) |
+| [Migration audit](migration-audit.md) | v9 TypeScript chemistry dispositions (September 13) |
+| [Implementation decisions](decisions.md) | v9 TypeScript chemistry decisions (September 13) |
+| [Physical chemistry validation](validation.md) | v9 property coverage and causal assays (September 13) |
+| [Historical performance and fidelity](performance.md) | v9 TypeScript quantization choices and evidence |
+| [Performance at the retained population scale](population-performance.md) | v9 48-founder workload and computation optimizations |
+| [Reproductive viability](viability.md) | v9 life-cycle probes and founder homeostasis |
+| [v9 implementation plan](../../plans/archive/CHEMISTRY-V9-IMPLEMENTATION-PLAN.md) | Archived v9 implementation sequence (September 13) |
+| [Reliability plan](../../plans/archive/CHEMISTRY-RELIABILITY-PLAN.md) | Archived September 14 reliability plan |
+| [Reliability experiments](../../plans/archive/CHEMISTRY-RELIABILITY-EXPERIMENTS.md) | Archived September 14 reliability experiment registrations |
+
+[Material-supported habitats](../../material-habitats.md) records v32 mechanisms, cost and the
+negative public-food result; the [session investigation](../../session-runtime-review.md)
+records v32 mature-state costs.
 
 The supplied [chemistry proposal](sources/chemistry-proposal.txt) and
 [migration appendix](sources/migration-proposal.txt) are preserved verbatim here. They came from
@@ -138,10 +156,9 @@ will emerge. Measure a missing link before adding a new reaction class.
 The user authorized the complete replacement. It is implemented through one production kernel,
 with short constructed opportunity checks and explicit rejection of old physical checkpoints.
 The [rebuild plan](../../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) is complete; the
-[environmental plan](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md) retains its pending human review.
-The [source plan](../../plans/archive/MOBILE-SOURCES-PLAN.md) owns mobile reservoir implementation and
-short calibration. The restored-resolution saturated workloads remain below the200ticks/s target, and
-large saturated cases also miss30ticks/s. These accepted operating limits remain explicit.
-Isolated browser rendering/save/fault checks have run; human review of the new environmental
-behavior is still separate. Seed27 remains the centered review setup. Supplied reproduction and
-conditional chemical opportunities do not establish sustained ecology or days/weeks persistence.
+[environmental plan](../../plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md) and the
+[source plan](../../plans/archive/MOBILE-SOURCES-PLAN.md) record mobile reservoir implementation and
+short calibration. The September 16 restored-resolution saturated workloads were below the
+200ticks/s target, and large saturated cases also missed 30ticks/s. Isolated browser
+rendering/save/fault checks ran. Supplied reproduction and conditional chemical opportunities
+do not establish sustained ecology.

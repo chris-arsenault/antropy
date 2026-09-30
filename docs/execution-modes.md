@@ -1,10 +1,12 @@
 # Browser and native server execution
 
+**Status:** Current reference — browser 1/4-thread execution, the native server World, its volume persistence and the public spectator route.
+
 The same Biotropy UI can run a local world using one or four compute threads, or observe a
 native World running independently on a server. Execution selection starts a new local world
 or attaches to the server's current world; it does not transfer a simulation or its saves.
-Both modes use the same v42 physical kernel and the existing renderer. The
-[structural scaling record](../SCALING-PLAN.md) separates stepping, observation and display costs.
+Both modes use the same physical kernel and the existing renderer. The
+[structural scaling record](plans/archive/SCALING-PLAN.md) separates stepping, observation and display costs.
 
 ## Browser
 
@@ -15,9 +17,9 @@ borrows typed-array views directly from WASM in the owning worker.
 
 Query parameters are `execution=browser1`, `execution=browser4` or
 `execution=server&server=<WebSocket endpoint>`. They contain no credential. The optional
-same-origin `/execution.json` supplies a default mode and endpoint. Static public hosting
-currently supplies no server default. The native host supplies `server` and `/stream`, so its
-private UI opens directly onto the continuing world.
+same-origin `/execution.json` supplies a default mode and endpoint. The public static site
+supplies the public server stream ([public route](#public-route)). The native host supplies
+`server` and `/stream`, so its private UI opens directly onto the continuing world.
 
 ## Native host
 
@@ -42,7 +44,7 @@ creates a fresh seed.
 
 ## Server persistence
 
-The server stores ordinary physical checkpoints (currently v42), gzip-compressed, with a JSON sidecar
+The server stores ordinary physical checkpoints in the running format, gzip-compressed, with a JSON sidecar
 recording reason, format version, seed, tick, generation, population, creation time and sizes.
 This mirrors browser recovery. It keeps the newest checkpoint, every manual checkpoint (at most
 eight), and the six newest automatic checkpoints within the byte budget. Older automatic ones
@@ -67,7 +69,8 @@ The phenotype observer is not part of a checkpoint and is reconfigured as for a 
 
 `/health` returns the current generation, publication sequence, tick/population, throughput,
 viewer count and projection count. It contains no private cellular state. `/stream` is the
-version-1 WebSocket endpoint. Protocol generations and view revisions reject stale state;
+version-1 JSON WebSocket endpoint, with version-2 binary display packets referencing a separately
+identified static terrain packet. Protocol generations and view revisions reject stale state;
 uncertain commands are never automatically replayed after reconnect.
 
 The independent [HTTP management API](server-management.md) exposes authenticated status/config,
@@ -87,6 +90,12 @@ the physical 256-chemical grid or population-wide genomes. Large-world views use
 padded windows, with bounded display sampling density and visible periodic cell records.
 Physical mesh resolution is unaffected. Client packets stay in the renderer worker; React
 receives bounded reduced observations through the existing ownership guards.
+
+The default landscape combines conductance ground, elevation contours, received-light shade,
+translucent chemistry and seasonal reservoir bands. Static terrain is a separate projection
+of at most 256 × 256 RGBA samples, shared across viewers and transmitted once per connection/world.
+It stays in the rendering worker and uploads once per revision. Stock markings remain separate
+from seasonal supply timing. Diagnostic maps remain available but normal viewing needs no toggles.
 
 Chemical web filters and cell inspection are viewer-local. Phenotype selection, highlighting
 and pinning operate on the existing run-level observer and require operator access. Spectators
@@ -110,7 +119,7 @@ the private host's first socket (CPUs 0–17, NUMA node 0, hyperthread siblings 
 earlier 8 GiB ceiling killed a 65k-cell world during a save (8.2 GB peak): a save holds a full
 raw checkpoint beside the live world. Pinned
 threads keep world memory on one node. Measured scaling flattens well before 16 workers; see
-the [scaling plan](../SCALING-PLAN.md).
+the [scaling plan](plans/archive/SCALING-PLAN.md).
 The same container serves the UI and WebSocket at the private host's port 8095. The
 `biotropy-state` named volume at `/data` holds server checkpoints across redeploys; the image
 creates `/data` for the unprivileged user so a new volume inherits writable ownership. A
@@ -153,6 +162,18 @@ Platform rule 8 in `ahara/INTEGRATION.md` reserves TrueNAS for owner-only worklo
 authorized this public spectator route on 2026-09-23 while intending to revisit the routing
 pattern separately.
 
-The [execution plan](plans/EXECUTION-MODES-PLAN.md) tracks implementation evidence and remaining
-deployment work. The [ownership contract](design/chemistry/data-ownership.md) defines both
+The [ownership contract](design/chemistry/data-ownership.md) defines both
 local borrowing and the authorized network projection boundary.
+
+## Delivery record
+
+The archived [execution plan](plans/archive/EXECUTION-MODES-PLAN.md) records the delivery
+history. Before deployment, a local publication capacity probe on one seed27 fixture with 2,000
+cells (100 ticks per case, kernel stepping plus projection preparation, no network fan-out)
+measured 106.2 ticks/s at four threads without publication, 98.9/99.4/99.0 ticks/s with
+1/4/16 matching views and 80.0 ticks/s with 16 distinct chemical selections. Matching clients
+shared four projections across four samples; distinct selections produced 64. One thread
+measured 72.0 headless, 65.4 with one view and 58.3 with sixteen distinct views. These short
+fixture figures do not establish the TrueNAS operating envelope or mature-world speed. The
+private Komodo deployment succeeded through CI run `35637790565` at commit `d74f1ae`; volume
+persistence and the public route followed at `fe0499c`.

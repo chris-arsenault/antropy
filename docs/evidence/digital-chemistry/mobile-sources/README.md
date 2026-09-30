@@ -1,5 +1,7 @@
 # Short mobile-source study
 
+Physical v15, September 16, 2026. Interpretation: [mobile reservoir results](../../../design/chemistry/mobile-source-results.md).
+
 Short calibration establishes response and access, not evolved strategy or sustained ecology. Prospective output is an instantaneous rate; imports identify chemical IDs, not atom provenance. Memory peaks are sampled.
 
 | Case | Ticks | Stop | Living | Median displacement/radius | Converted release | Built material | Ticks/s |

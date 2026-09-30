@@ -1,5 +1,7 @@
 # Reserve sharing between touching cells
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 13) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 Registered September 13, 2026 as phase 6 of
 [roadmap two](design/README.md#design-roadmap-2), before reading any endpoint. Sulion plan
 `Organism-generated selection`. Artifacts: `frontend/harness/artifacts/evolve-2026-09-13/sharing/`.

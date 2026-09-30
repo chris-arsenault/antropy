@@ -1,18 +1,19 @@
 # Cellular organization and exchange
 
-September28 revision: v43 [genetic physiology](funded-bodies.md) supersedes the construction,
+**Status:** Implemented (v33) — partly superseded by v43 genetic physiology (machinery construction and retirement removed) and by the September 21–22 multicore regional execution; current laws are in the [composed runtime](chemistry/composed-runtime.md).
+
+September 28 revision: v43 [genetic physiology](funded-bodies.md) supersedes the construction,
 retirement, separately inherited stock and core-only division sections below. Capabilities now
 follow birth genetics at current biomass. This v33 design remains the historical derivation of
 retained chemistry, activity regulation, inward sensing and shared interfaces; its original
 development equations must not be reinstated as current requirements.
 
-September 20, 2026. **Implemented feature design, physical checkpoint v33.**
-This is the joint design for intracellular organization and interactions between cells.
+September 20, 2026. This is the joint design for intracellular organization and interactions between cells.
 It develops the [strategic hypothesis](intracellular-organization.md) and supersedes the
 implementation recommendations in the earlier [interaction research](cell-interaction-research.md).
 Their observations and unresolved evidence remain valid. The [backlog](../backlog.md#backlog-cell-interactions)
-records the research context. The [implementation plan](../CELLULAR-ORGANIZATION-PLAN.md)
-tracks the user's authorization to execute all phases. Internal compartments were considered
+records the research context. The archived [implementation plan](../plans/archive/CELLULAR-ORGANIZATION-PLAN.md)
+records the user's authorization to execute all phases. Internal compartments were considered
 and withdrawn before implementation: each cell retains one well-mixed inventory, while
 exchange between cells provides opportunities for larger organizations to evolve.
 
@@ -481,8 +482,8 @@ by silently ignoring competitors or granting incomplete donor reservations.
 
 Choose N_max and observation bounds from complete release-WASM workloads, including controller
 ports, births, changed programs and dense contact, before implementation is accepted. No measured
-speedup or 30-tick/s compliance is claimed by these operation counts. Keep single-threaded
-execution, existing resolution, immutable sharing, Rust ownership and borrowed worker rendering.
+speedup or 30-tick/s compliance is claimed by these operation counts. The v33 delivery kept
+single-threaded execution (later replaced by [regional multicore execution](spatial-execution.md)), existing resolution, immutable sharing, Rust ownership and borrowed worker rendering.
 
 ## 9. Decisions, calibration and evidence boundary
 
@@ -504,7 +505,8 @@ The delivered arena uses N_max=8: enough to duplicate the four starting programs
 unbounded genome or retired-stock list. Complete release costs are in the
 [delivery record](../cellular-organization-results.md), including the below-30-tick/s eight-program
 stress case. This is a measured computational limit, not an optimal ecological repertoire size.
-The controller has 56 inputs, 24 recurrent units and 38 outputs covering the bounded arena.
+The v33 controller had 56 inputs, 24 recurrent units and 38 outputs covering the bounded arena;
+the current [controller](controller.md) has 59 inputs and 19 outputs without allocation outputs.
 Unused records have no catalytic function or free stock; four transporters and receptors remain.
 
 Founders retain four active programs, outward sensing (lambda=0), activity/construction request

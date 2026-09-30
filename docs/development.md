@@ -1,5 +1,7 @@
 # Development
 
+**Status:** Current reference — toolchain, builds, harness command families, persistence and deployment path for development.
+
 ## Prerequisites and checks
 
 Use Node from `.node-version`, pnpm from `frontend/package.json`, Terraform 1.12 or newer,
@@ -8,7 +10,8 @@ Install frontend dependencies with `pnpm install` in `frontend/`. Run `make ci` 
 Rust formatting/Clippy/tests, ESLint, formatting, TypeScript, bounded WASM/React tests,
 documentation and Terraform formatting; `make build`
 produces the SPA and WASM asset. `node frontend/scripts/build-engine.mjs` rebuilds the
-engine for an already-running server without starting another server. Authored changes, including formatting, use native patch operations.
+engine for an already-running server without starting another server. Authored changes use the
+agent's native file-editing tools; formatters may rewrite files.
 
 `cd frontend && pnpm run dev` starts port 26000. Agents start it only on explicit request.
 The browser starts a paused new world; current operation is described in
@@ -30,16 +33,16 @@ serially. A browser without isolation uses the serial asset. Renderer uploads st
 WASM memory directly. Shared-buffer JSON decoding copies only bounded observation replies
 because browsers reject SharedArrayBuffer input to TextDecoder.
 
-The production Terraform consumer requires the new `response_headers_policy_id` option in
-the shared `ahara-tf-patterns` website module. Publish that module change before deploying
-this consumer. Local configuration and browser probes do not establish deployed headers.
+Production CloudFront sets the same headers through a response-headers policy passed to the
+shared `ahara-tf-patterns` website module (`infrastructure/terraform/frontend.tf`).
 No agent should start an additional server to test the pool.
 
-See [the scaling plan](../SCALING-PLAN.md#multicore-design) for boundaries and measurements.
-Geographic admission now permits up to 524,288 mesh nodes within its field reservation.
+See [the scaling plan](plans/archive/SCALING-PLAN.md#multicore-design) for boundaries and measurements.
+Geographic admission permits up to 262,144 mesh nodes within its field reservation.
 This does not enlarge the browser's 192 MiB raw package limit: 20× capacity fixtures can
 step and restore through the engine but cannot use ordinary automatic recovery. Keep the
-default dimensions for continuing browser observation until P3 persistence work lands.
+default dimensions for continuing browser observation; the native server's 2 GiB raw cap
+holds larger worlds. Remaining persistence limits are in the [backlog](backlog.md#backlog-runtime-and-observation-limits).
 
 ## Chemistry and experiment boundaries
 
@@ -55,7 +58,7 @@ Historical raw files under `docs/evidence/` remain local and ignored; only autho
 and are optional for documentation validation. CI rejects tracked experiment payloads.
 Removing them from the current tree does not remove copies in earlier Git commits.
 
-The [digital chemistry contract](design/chemistry/composed-runtime.md) governs current v19 checkpoints and
+The [digital chemistry contract](design/chemistry/composed-runtime.md) governs current v46 checkpoints and
 schema-v3 evidence. Historical studies preserve their original results, not executable current
 registrations. Read [environmental evidence](design/chemistry/environmental-results.md) and
 [rebuild evidence](design/chemistry/rebuild-results.md) before selecting a new comparison.
@@ -90,7 +93,7 @@ evidence schema and reject mixed old/new roots. No hosted artifact service is in
 | `capability-pilots` | Separately justified selection pilots, not a smoke test |
 | `ecology-causal` / `ecology-default` | Generic diagnostics / current-world injury and movement-impedance ablations |
 | `rps --case NAME` | Constructed production, compatibility and susceptible variants; no required cycle |
-| `zones --case NAME --world zones --shares 1,0` | Source-mixture and equal-machinery allocation comparisons |
+| `zones --case NAME --world zones --shares 1,0` | Diet specialists and generalists (genetic capacity split between two source mixtures) in zoned or mixed worlds |
 | `evolve --seed N --ticks T --wall-seconds S --justification REGISTRATION` | Registered de novo run with generic trait samples and checkpoint provenance |
 | `invasion --checkpoint PATH --k 2 --ticks T` | Descriptive-cluster representatives in rare-start comparisons |
 | `bacteria-compare --checkpoint PATH --candidate ID` | Explicit observed genotype versus its ancestor, swapped assignments |
@@ -99,9 +102,11 @@ evidence schema and reject mixed old/new roots. No hosted artifact service is in
 
 Prefix entries with `pnpm harness`; use new output directories for append-only evidence.
 Generic configuration flags include `--chemistry-seed`, `--source-species` (comma-separated IDs),
-`--source-rate`, `--source-drift`, `--source-processing`, `--washout`, `--weathering-rate`, `--habitat-feedback on|off`,
-`--viscosity`, `--damage-rate`, `--transfer-rate` and
-`--disturbance on` on commands that use generic configuration. Named old-chemistry flags fail.
+`--source-rate`, `--source-drift`, `--source-processing`, `--source-lifetime`, `--source-gap`,
+`--source-radius`, `--washout`, `--weathering-rate`, `--habitat-feedback on|off`, `--mesh`,
+`--physiology-interval`, `--viscosity`, `--damage-rate` and `--disturbance on` on commands
+that use generic configuration. The former `--transfer-rate` flag is removed with living-cell
+gene transfer. Named old-chemistry flags fail.
 Read each command's settings before using flags from another family.
 
 `evolve` accepts `--wall-seconds` and the older `--wall` alias; conflicting budgets and
@@ -115,13 +120,13 @@ explicit finite pulse and registered washout; general world configuration uses p
 
 `bacteria` retains ploidy, transmission, crossover, mutation-kind, reproduction, learning and
 learning-retention options. Mutation-off plus retention-zero freezes inheritance under clonal
-transmission only when contact transfer is also off. Static learning is a distinct intervention.
+transmission. Static learning is a distinct intervention.
 No diagnostic or observed winner automatically replaces the browser founder.
 
 ## Studies, cohorts and batches
 
 The retired `--weathering-period` flag fails explicitly; local mixtures now drive conversion.
-All saved-genotype paths require explicit v19 binary checkpoints or browser packages. There is no default historical export,
+All saved-genotype paths require explicit current-format (v46) binary checkpoints or browser packages. There is no default historical export,
 hardcoded successful genotype or old-schema adapter. A short study invocation is:
 
 ```bash
@@ -135,7 +140,8 @@ horizon and stopping criteria. Batch scripts pass their explicit registration th
 The two-tick example checks tooling; it cannot assess adaptation. Use registered durations for
 scientific comparisons. Study mode `contest` takes explicit candidate and optional ancestor ID;
 `--part behavior|physical|whole` selects the inherited component. Resume interventions require
-an explicit living lineage, reset private state and retain installed machinery until paid refitting.
+an explicit living lineage, reset private state and express the replacement genotype immediately
+at current biomass.
 Knockouts are `none`, `damage` and `movement-impedance`; binding is absent.
 
 The observer writes schema-v3 lifecycle, census, body, environment, genotype, exposure and
@@ -144,8 +150,9 @@ mixed physical schemas. Reports include SQL, source hashes and explicit whole-po
 organism-time and resource-flow denominators. A null frequency denominator at extinction stays null.
 
 `harness/study_variants.py` requires checkpoint, ancestor, candidate, part and output. It appends
-diagnostic knock-in/reversion catalog records and leaves observed cells unchanged. Machinery
-alleles include investment and complete coordinates/direction/offset. Provenance gives the new
+diagnostic knock-in/reversion catalog records and leaves observed cells unchanged. Receptor,
+transporter and enzyme alleles include their genetic capacity locus and complete
+coordinates/direction/offset. Provenance gives the new
 comparison IDs. These generated records are not observed mutations.
 
 Standalone `harness/epochRun.ts` takes `--phase-ticks` and runs three phases; `epochAssay.ts`
@@ -161,11 +168,11 @@ chemical injury or motor/scheduled-resource questions. Historical batch defaults
 
 ## Persistence, reporting and verification
 
-Physical checkpoint v32 preserves chemical definitions, source response settings, environmental configuration, inventories,
-installed stocks and identity, immutable genes,
-private state, random streams, ledgers, complete parentage and bounded browser history. Older
-versions are rejected. Recovery retains up to six automatic/two manual points within256MiB, expiring older points to fit and
-pauses on failure; raw snapshots are limited to 192 MiB. Field amounts use float32 with explicit rounding accounts; mesh geometry bounds allocation. Browser suspension, quota behavior and long-run responsiveness remain open.
+Physical checkpoint v46 preserves chemical definitions, terrain, source response settings, environmental configuration, inventories,
+biomass, immutable genes,
+private state, random streams, ledgers, retained parentage and bounded browser history. Older
+versions are rejected. Recovery retains up to six automatic/two manual points within 256 MiB, expiring older points to fit;
+a failed save warns while the simulation continues. Raw snapshots are limited to 192 MiB. Field amounts use float32 with explicit rounding accounts; mesh geometry bounds allocation. Browser suspension, quota and responsiveness limits are tracked in the [backlog](backlog.md#backlog-runtime-and-observation-limits).
 The separately versioned browser observation package remains v11.
 
 The registered environmental investigation reuses `runRecorded`, optional lineage traces and
@@ -186,12 +193,13 @@ These are registered investigation tools; their available parameter values do no
 additional sweeps. Headless source output observations are prospective normal release rates,
 excluding expiration flushes; actual converted/released material is counted separately.
 
-The cell inspector exposes44 local chemical/optical/body inputs, stocks/targets, chemical mixtures, U/D/I/S properties,
+The cell inspector exposes 59 local chemical/optical/body inputs, current and genetic capacities, chemical mixtures, U/D/I/S properties,
 membrane compatibility, actual transfers, private recurrence and task state. Manual interventions
 remain diagnostic and durable. Views never select reproduction or feed hidden information to RNNs.
 
 Rust tests and Vitest verify bounded mechanics and integration; ecological outcomes belong in the ledger.
-Human review judges motion. The user's days/weeks observation is not an agent experiment budget.
+Headless assays measure behavior; user feedback informs subsequent motion fixes. The user's
+days/weeks observation is not an agent experiment budget.
 Historical ant tools remain recoverable from their tag, not executable compatibility paths here.
 
 ## Deployment
@@ -203,4 +211,6 @@ before publishing a dependent app change. See [execution modes](execution-modes.
 
 There is no local deployment command or manual workflow trigger. Publish authorized changes
 through Git; the push starts CI/CD.
-Deployment is separate authorization from local implementation. Public VPN routing remains disabled.
+Deployment is separate authorization from local implementation. The public spectator route
+`server.biotropy.ahara.io` forwards only `/stream` and `/health`; `/api` stays LAN-only
+([public route](execution-modes.md#public-route)).

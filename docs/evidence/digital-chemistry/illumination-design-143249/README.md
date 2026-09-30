@@ -1,4 +1,4 @@
-# Current-world evidence for illumination design
+# User-world evidence for illumination design
 
 September 19, 2026. Read-only analysis of the user's
 `.sulion-paste/antropy-27-143249.antropy.gz`. No ticks advanced, no intervention and no

@@ -1,5 +1,7 @@
 # Food epochs and inherited adaptation
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 11) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 Registered September 11, 2026 before epoch outcomes. Plan
 `42504d5b-d0a9-4b0d-a8c9-5504c8a7a0bc` executes the approved food-composition proposal.
 

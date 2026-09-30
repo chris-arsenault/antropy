@@ -1,8 +1,9 @@
 # September 11 default: 50,000-tick comparison
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 11) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 This record uses the default at execution, before later viscosity, supply and immunity changes.
-Its findings are historical proof points, not measurements of today's Run configuration or
-readiness for days/weeks observation. See the [current work order](design/README.md).
+Its findings are historical proof points, not measurements of the current configuration.
 
 Registered September 11, 2026 before reading endpoints. Plan:
 `d12c4609-52b6-49a8-b739-6f730dd13801`.

@@ -1,12 +1,14 @@
 # Local photoreception
 
+**Status:** Implemented (v31) — paid local light sensing; v43 expresses its capacity directly from genes at current biomass, and the v31 registration and results below are historical.
+
 ## Design
 
 One photoreceptor locus and derived body capacity occupy index 15. Its reference
-capacity is the existing receptor ratio times reference core. In v43, the ordinary genetic
+capacity is the existing receptor ratio times reference core. Since v43, the ordinary genetic
 proportion law expresses it immediately at current biomass. No separate construction or
 receptor ownership charge applies; whole-body growth and basal metabolism remain.
-Chemical machinery keeps its four existing receptor channels and their installed identities.
+The four chemical receptor channels and their genetically fixed identities are unchanged.
 
 The optical stimulus is the single scalar illumination used by
 the environment and display. V34 removes the former independent chemical light components;
@@ -19,14 +21,14 @@ direction oracle, temporal clock, harvesting process or response policy is intro
 
 Inputs 39–42 are brightness, change, front-minus-back and left-minus-right; input 43 is
 photoreceptor capacity relative to the genetic newborn reference. Input indices stay fixed.
-The current v43 controller has 58 inputs, 24 recurrent units and 19 outputs. At introduction, new founder weights started at
+The current controller has 59 inputs, 24 recurrent units and 19 outputs. At introduction, new founder weights started at
 zero; mutation can connect the new cues to behavior. Sensing does not establish evolved use.
-Photoreception introduced checkpoint v31; current physical semantics require v43.
+Photoreception introduced checkpoint v31; the current physical checkpoint format is v46.
 
 ## Verification registration
 
 The following registration and results describe the original v31 construction model.
-Current direct-expression checks are recorded in the [physiology plan](plans/GENETIC-PHYSIOLOGY-PLAN.md).
+Current direct-expression checks are recorded in the [physiology plan](plans/archive/GENETIC-PHYSIOLOGY-PLAN.md).
 
 Question: can paid local light sensing reach ordinary neural actions, with no cue from an
 unbuilt receptor and no change to the imposed illumination or chemical laws?
@@ -99,7 +101,7 @@ over longer distances. Tonic and temporal inputs remain available.
 Start a new world with the rebuilt local application. Selecting a cell shows photoreceptor
 readings directly, with all five inputs under **Local inputs and private recurrent state**.
 **Physiology and inherited genes** shows current capacity alongside its genetic reference.
-The population's body table includes photoreceptor capacity. This feature introduced physical v31. Current v43 accepts its own body/controller and habitat
+The population's body table includes photoreceptor capacity. This feature introduced physical v31. The current format accepts its own body/controller and habitat
 state; older physical versions are rejected rather than migrated or reseeded.
 
 From `frontend`, rerun the registered probes with a new output directory:

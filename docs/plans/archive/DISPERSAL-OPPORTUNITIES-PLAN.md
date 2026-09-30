@@ -1,5 +1,12 @@
 # Dispersal geography and neural response
 
+**Status:** Delivered plan (archived) — heavy-tailed outlying reservoir placement and
+per-row bounded aggregate neural drive shipped as physical v44 at `f6f2a2a`. Body is the
+execution record; its open-gate, "remaining", "uncommitted/undeployed" and human-review
+statements are historical and retired by the September 30 delivery policy
+([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
+
 September 28, 2026. Execute chat recommendations 1 (reservoir placement) and 2 (neural
 drive). The evidence document numbers these in the opposite order; both are in scope.
 Reservoir pulse/refill timing is excluded. No publication, deployment or live reset.

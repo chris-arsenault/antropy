@@ -1,6 +1,12 @@
 # Simplify simulation models
 
-September 22, 2026. M0–M2 and their implementation sub-plans are complete.
+**Status:** Delivered plan (archived) — removal of machinery refitting and installed identities,
+simplified finite renewing reservoirs and simplified binding/retention (M0–M2, physical
+v38–v39) landed at `1cc05e2` (physical v40 with the enlarged resource landscape) and
+`b224525`. Body is the execution record; its open-gate, "remaining", "uncommitted/undeployed"
+and human-review statements are historical and retired by the September 30 delivery policy
+([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
 
 ## Outcome and boundary
 
@@ -19,22 +25,22 @@ Existing behavior and exact trajectories are revisable. Save compatibility is no
 
 Current authorization covers execution of M2 after completed M0 and M1.
 Commit, push and deployment remain outside this request. The unfinished
-[structural performance plan](../../SCALING-PLAN.md) remains separate and open. Tiles, caching,
+[structural performance plan](SCALING-PLAN.md) remains separate and open. Tiles, caching,
 threading and benchmark acceleration do not satisfy this plan's model-simplification outcomes.
 
 ## Evidence and reuse
 
-- [Installed machinery](../design/chemistry/installed-machinery.md) records earlier feeding
+- [Installed machinery](../../design/chemistry/installed-machinery.md) records earlier feeding
   failures after mutation. The user explicitly rejected retaining parental capabilities to
   protect mutants from starvation. Those findings remain history, not a survival requirement.
 - Before this change, `engine/src/refitting.rs` moved installed coordinates and angles every paid
   interval; `chemical_operators.rs` compiled intermediate identities. M0 removes both paths and
   the independent installed identity.
-- [Material habitats](../material-habitats.md) records shared binding, persistent replenishment
+- [Material habitats](../../material-habitats.md) records shared binding, persistent replenishment
   chemistry and bounded results, including negative public-food survival results. Preserve that
   evidence when reviewing the reservoir and binding models.
-- [Composed laws](../design/chemistry/composed-runtime.md),
-  [funded bodies](../design/funded-bodies.md) and [principles](../principles.md) own current behavior
+- [Composed laws](../../design/chemistry/composed-runtime.md),
+  [funded bodies](../../design/funded-bodies.md) and [principles](../../principles.md) own current behavior
   until a milestone replaces its relevant contract. M0–M2 laws are installed and verified;
   results and limitations are recorded below.
 

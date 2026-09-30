@@ -1,6 +1,11 @@
 # Review status
 
-## Current bacterial simulation
+**Status:** Historical record (September 10–11 ant/A-B certification era) — no certification gates apply now; the September 30 delivery policy retired review and acceptance gates, and the [current work order](design/README.md) owns priorities.
+
+## Bacterial simulation at the September 13 purpose revision
+
+This section describes the thick-medium A/B world as of September 13. The current runtime is the
+digital-chemistry kernel described in the [current work order](design/README.md).
 
 The project now prepares conditions for the user's days/weeks observation using hypotheses and
 small proof points. It does not require an agent to produce a certified ecosystem before handoff.

@@ -1,6 +1,8 @@
 # Cell interaction: crowding, antagonism and feeding
 
-September 19, 2026. **Historical research and pre-feature mechanism inventory.** Requested while
+**Status:** Historical record (physical v28–v32, September 19–20) — superseded by the v33 [joint cellular organization and exchange design](cellular-organization-and-exchange.md); current laws are in the [composed runtime](chemistry/composed-runtime.md).
+
+September 19, 2026. Pre-feature mechanism inventory. Requested while
 the user was observing the v28 world and described it as mostly healthy. This document
 records the original investigation direction.
 [Backlog ownership](../backlog.md#backlog-cell-interactions).
@@ -209,9 +211,11 @@ couplings have produced evolved metabolic coordination.
 the whole-cell design hypothesis and conditional incentives. The inventory and questions below
 describe mechanisms and candidate extensions; they do not establish reasons to add each feature.
 
-### Current implementation
+### Pre-v33 implementation
 
-The ordinary runtime connects paid import, private chemical inventory, constitutive enzyme
+This inventory describes the v32 runtime of September 20. Later versions changed it; in
+particular v43 removed construction targets, stock refitting and separately inherited stock.
+The v32 runtime connected paid import, private chemical inventory, constitutive enzyme
 conversion, paid export, repair and body construction. These are real shared-resource
 couplings, with important limits:
 

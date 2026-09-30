@@ -1,10 +1,12 @@
 # Lineage-18 adaptation study
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 10) — findings keep their original context; the current work order is in [design/README.md](design/README.md).
+
 Plan `c98197d7-ee2f-4867-90d9-47ebceeaee59`, authorized September 10. The source is
 `.sulion-paste/bacteria-101-48661.json`, SHA-256
 `30bb38563e761e549295864784462b88eb2b33a584100bdcba9b463e060c271c`.
 It contains the actual 136-cell seed-101 patchy population at tick 48,661, no interventions,
-and the current default configuration. Preserve the input unchanged.
+and the September 10 default configuration. Preserve the input unchanged.
 
 ## Reporting decision
 

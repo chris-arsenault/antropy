@@ -1,5 +1,7 @@
 # Strategic microbial ecology
 
+**Status:** Current reference — the ecological opportunities, boundaries and evidence status of the installed runtime.
+
 Digital chemistry supplies physical opportunities for an unresolved ecological history. A mechanism,
 a constructed benefit and an evolved role remain different claims. Current evidence is in
 [material-habitat measurements](../material-habitats.md) and
@@ -17,6 +19,14 @@ location indefinitely. There is no relocation lottery. The shared chemical opera
 external work can fund uphill changes, with accepted work accounted explicitly. Sources do not respond to organism
 ancestry or select successful genotypes. [Short calibration](chemistry/mobile-source-results.md)
 establishes motion and altered output, not evolved pursuit or a closed resource cycle.
+
+Static fractal geography makes locations differ after their food is consumed. Reservoirs start
+from an independent fractal placement density. Release and refill waiting follow a
+[local seasonal supply clock](local-resource-seasons.md), so nearby reservoirs share slow and
+fast intervals while other regions stay weakly seasonal. Elevation and substrate conductance
+change paid travel, passive transport and public processing time; overhead transmission shades
+sunlight. Cells sense only local consequences, including paid motor load, never the maps or
+phase. See the [geographic laws](chemistry/composed-runtime.md#geographic-composition).
 
 Chemical potential determines possible energy returns. Transporters, enzymes and maintenance determine
 whether obtaining those returns repays their costs. Source schedules and zones specify shares over
@@ -45,9 +55,9 @@ capture this material through ordinary funded transport and metabolism. No kille
 prey-yield transfer grants resources. The current corpse-capture probe acquired released material
 and delayed death; hunting and sustained predation remain unestablished.
 
-The [cell interaction research avenue](cell-interaction-research.md) adds a deferred design for
-crowding, selective chemical injury and conditional damaged-membrane access. It introduces no
-live attack rule and is not selected as the next work item.
+Since v33 the [joint cellular organization design](cellular-organization-and-exchange.md) lets
+injured neighbors expose free inventory at crowded interfaces; other cells capture it only
+through ordinary paid transport. There is no attack rule, and intact neighbors reveal no inventory.
 
 <a id="ecology-disturbance"></a>
 
@@ -60,21 +70,21 @@ is disabled by default. Recolonization after disturbance is an open ecological q
 
 <a id="ecology-gene-transfer"></a>
 
-## Horizontal gene transfer
+## Horizontal gene transfer removed
 
-Optional contact transfer copies a complete expressed physical allele: machinery coordinates,
-direction or offset and investment travel together. Membrane compatibility is also transferable.
-A new immutable genotype records donor and recipient provenance. Retargeting an installed machinery
-slot recycles its stock and requires paid rebuilding. Controller genes are not transferred.
-The default transfer rate is zero; experiments can enable this shared-kernel mechanism.
+Living-cell gene transfer was removed September 22 because it changed capabilities after birth;
+the engine rejects a nonzero transfer setting. Genetic change occurs only at birth through
+mutation and birth-local assimilation. See the
+[decision record](decisions-and-evidence.md#living-cell-gene-transfer-removed).
 
 <a id="ecology-sharing"></a>
 
 ## Export, uptake and recipient benefit
 
 Cells choose transporter efforts. Export moves actual intracellular material into a shared local
-field, paying transport work; another cell may import and use it. There is no reserve equalization,
-adhesion or donor reward. Measure donor expense, recipient benefit and effects on noncontributors
+field, paying transport work; another cell may import and use it. There is no reserve equalization
+or donor reward. Compatibility-weighted contact adhesion couples neighboring bodies mechanically
+without crediting work or moving material. Measure donor expense, recipient benefit and effects on noncontributors
 before describing an interaction as cooperation.
 
 <a id="ecology-signal"></a>
@@ -99,20 +109,22 @@ consumes usable energy and internal material. Division preserves injury.
 <a id="ecology-family-chemistry"></a>
 
 Compatibility is inherited as a chemical coordinate, independently of family labels. Controlled
-internal and external exposures show lower injury for a matched membrane. The current detoxifying
-conversion reduced injury but also reduced construction. Relatedness does not enter physics.
+internal and external exposures show lower injury for a matched membrane. The pre-v43 detoxifying
+conversion probe reduced injury but also reduced machinery construction. Relatedness does not enter physics.
 
 <a id="ecology-porous-matrix"></a>
 
 ## Accumulation, impedance and degradation
 
 Concentration-weighted impedance slows movement and symmetric extracellular diffusion. Paid export
-can build persistent, low-diffusion accumulations. The same cohesion-dependent slow washout law applies to every species. Shared material
+can build persistent, low-diffusion accumulations. The same ordinary fractional washout applies to every species. Shared material
 attraction and retention can concentrate deposits; dilution releases them again. Generic extracellular weathering also changes chemical
 identity and accounts the lost potential. Geographic activity changes its rate; concentration-
-weighted impedance shelters local material. There is no separate matrix material, binding reservoir,
-solid-wall mode or builder action.
+weighted impedance shelters local material. There is no separate matrix material, binding reservoir
+or solid-wall mode. The one builder action is paid transfer to and from the overhead optical
+film ([light ecology](light-ecology.md)), which shades the cell plane.
 
+The probes below predate v43 and measured machinery construction.
 The rebuilt-core paid-barrier probe barely reduced displacement and **failed** its predicted
 reduction in tracer spread. Uptake plus transformation reduced high-impedance material returned
 at death; it did not establish a competitive benefit. The newer environmental comparison found
@@ -127,11 +139,15 @@ evolved builder strategy. The full costs and negative findings remain in the evi
 
 | Capability | Current boundary |
 | --- | --- |
-| Disturbance and horizontal transfer | Shared-kernel experimental paths; disabled in the default |
+| Disturbance | Shared-kernel optional path; disabled in the default |
+| Living-cell gene transfer | Removed; a nonzero setting is rejected |
 | Source zones and epochs | Selectable mixture schedules, with matter and potential tracked separately |
-| Shared material binding and extracellular conversion | Implemented with the same profiles and compiled transformation language; direct adhesion and solid walls remain absent |
+| Shared material binding and extracellular conversion | Implemented with the same profiles and compiled transformation language; solid walls remain absent |
+| Cell contact | Compatibility-weighted contact adhesion is implemented and credits no work; bonded attachment is absent |
 | Illumination and optical sensing | Shared external work and paid local photoreception are implemented |
-| Multiple-substrate reactions and variable genome length | Deferred |
+| Overhead cover and emission | Paid cover building and paid local light emission are implemented, with separate optical accounts |
+| Terrain and local seasons | Static fractal elevation, conductance, overhead transmission, optional ceilings, fractal placement and seasonal supply clocks are implemented; changing terrain is unselected |
+| Multiple-substrate reactions and unrestricted genome structure | Deferred; bounded one-to-eight enzyme repertoires exist |
 | Named toxins, signaling fields, automatic sharing and prey yield | Replaced by generic chemistry; retired controls rejected |
 
 <a id="ecology-consequences-and-boundaries"></a>
@@ -142,4 +158,4 @@ The starting world has two colonies containing four mutable chemical-circuit fou
 no endpoint population target. The authored starting roles are not prescribed eventual species. Sparse geography and ordinary motion are intended to permit local
 history and consequential dispersal. Current short movement and nutrition controls do not
 establish successful founding elsewhere. Long-term divergence, coexistence and extinction belong
-to future observation. Dormancy, adhesion and new life stages still require a reviewed purpose.
+to future observation. Dormancy, bonded attachment and new life stages still require a reviewed purpose.

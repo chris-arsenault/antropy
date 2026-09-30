@@ -1,12 +1,14 @@
 # Composed artificial chemistry runtime
 
-Updated September 30, 2026. This contract governs the fresh implementation under
+**Status:** Current contract — the artificial laws, accounts and checkpoint format of the installed runtime (updated September 30, 2026).
+
+This contract governs the fresh implementation under
 [the canonical math plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
 [funded bodies](../funded-bodies.md) and [data ownership](data-ownership.md) remain binding.
-Implementation and acceptance are tracked separately in the plan; this document does
-not claim that performance, opportunity or human motion gates have passed. The
+Under the September 30 delivery policy, plans contain implementation and deployment only;
+earlier performance, opportunity and human motion gates were retired, not passed. The
 [symmetry correction](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md) records the v21 laws
 and matched measurements. The [enzyme completion](../../symmetry-completion-audit.md)
 records the v22 correction and its omitted founder scope. V23 replaces projected rigid maps
@@ -16,7 +18,6 @@ V25 corrects the privileged potential gradient, separates recognition from the g
 scales chemical mutation in specificity units, and funds environmental return paths. The
 [geometry correction](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#chemical-geometry-correction)
 owns the new evidence; v23 human acceptance does not certify this revision.
-Runtime measurements and human motion review remain separate from implementation.
 V27 implements the [regenerative initial ecosystem](regenerative-ecosystem.md): shared
 local external work for cellular and abiotic conversion, finite-owner self-load subtraction,
 and four mutable founder types. Its evidence is recorded in the canonical plan's R0–R4 section.
@@ -35,9 +36,9 @@ the visible composed pattern and periods remain unchanged. [Light ecology](../li
 records the correction and the future shelter/emission design.
 V35 introduces shared prepared geometry, direct chemical composition and a physiological
 neural clock. The first private chemical-epoch implementation was rejected on measured cost.
-The ended [mature execution investigation](../../plans/MATURE-PERFORMANCE-PLAN.md) records
-integration and measured cost. [Structural scaling](../../../SCALING-PLAN.md) owns current
-performance work; the installed numerical execution choices are not preservation requirements.
+The ended [mature execution investigation](../../plans/archive/MATURE-PERFORMANCE-PLAN.md) records
+integration and measured cost. [Structural scaling](../../plans/archive/SCALING-PLAN.md) records the
+delivered replacement; the installed numerical execution choices are not preservation requirements.
 V36 replaces dense geographic material buffers and global work discovery with compact row
 owners, finite-support mechanical filtering and footprint-local dependency reads. Its initial
 sampled contact replacement was rejected on September 22 for unnecessary complexity and
@@ -46,7 +47,7 @@ no orientation dependence. The scaling plan preserves the rejected measurements 
 the contact correction separately from the still-unfinished tiled execution architecture.
 V39 simplifies binding to one normalized attraction range and ordinary fractional washout.
 It removes the broad opposing convolution, attraction gain and cohesion loss discount.
-The [model simplification record](../../plans/MODEL-SIMPLIFICATION-PLAN.md) explains the retained
+The [model simplification record](../../plans/archive/MODEL-SIMPLIFICATION-PLAN.md) explains the retained
 local repulsion, nonlinear crowding, circle separation and finite reservoir-interface signals.
 V40 removes the population ceiling and its configuration. The default world expands from
 320 × 240 to 720 × 540 at the same resolution. The initial area-only expansion was corrected:
@@ -54,11 +55,11 @@ V40 removes the population ceiling and its configuration. The default world expa
 unchanged local spread, reservoir radius/richness laws, release rates and 48 founders in two colonies.
 The ancestry budget and runtime memory limits remain; no population threshold blocks funded division.
 V41 couples each material class to the shared chemical response separately
-([material coupling plan](../../plans/MATERIAL-COUPLING-PLAN.md)). Dissolved material keeps
+([material coupling plan](../../plans/archive/MATERIAL-COUPLING-PLAN.md)). Dissolved material keeps
 crowding pressure. Reservoirs drop it and gain long-range like-charge repulsion plus circle
 exclusion; cells drop it and gain compatibility-weighted contact adhesion.
 
-September26 adds [ecological incentives](../../plans/ECOLOGICAL-INCENTIVES-PLAN.md):
+September26 adds [ecological incentives](../../plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md):
 private retained chemistry contributes to light-supported work, ordinary membranes allow
 passive concentration exchange, and compression strengthens circle separation. These changes
 retained the v42 durable shape at delivery; v43 subsequently rejected those earlier checkpoints.
@@ -67,10 +68,10 @@ V43 removes machinery development. Genetic proportions directly determine physio
 current biomass; automatic growth and conservative division replace separate capability
 inventories. Construction/retirement control and per-category maintenance charges are removed.
 The [physiology contract](../funded-bodies.md) owns these equations and the
-[execution plan](../../plans/GENETIC-PHYSIOLOGY-PLAN.md) records verification.
+[execution plan](../../plans/archive/GENETIC-PHYSIOLOGY-PLAN.md) records verification.
 
 V44 extends reservoir placement beyond regional disks and bounds total incoming neural
-strength. The [dispersal plan](../../plans/DISPERSAL-OPPORTUNITIES-PLAN.md) records separate
+strength. The [dispersal plan](../../plans/archive/DISPERSAL-OPPORTUNITIES-PLAN.md) records separate
 geometry and behavior checks. Reservoir timing and material budgets are unchanged.
 At boot the existing weighted centers and spread L generate uniform angle and radius
 `L*sqrt(u/(1-u))`, with u uniform on [0,1), followed by periodic wrapping. On the unwrapped
@@ -330,7 +331,7 @@ it does not delete a species by its global abundance. Material and reference-val
 enter the signed numerical error accounts. The September18
 [scaling pass](../../sources/history/2026-09-21-scaling-before-structural-correction.md) raised the preceding1e-9 floor after inspecting
 material and occupied-group distributions and comparing ordinary continuations.
-The ended [mature performance pass](../../plans/MATURE-PERFORMANCE-PLAN.md) evaluated the current
+The ended [mature performance pass](../../plans/archive/MATURE-PERFORMANCE-PLAN.md) evaluated the current
 1e-4 resolution from measured reaction support and explicit truncation accounts.
 Intracellular stocks retain their material. Reactions now use the same 1e-4 concentration
 resolution: a substrate participates only above `amount > volume * resolution`. Below it,
@@ -741,7 +742,7 @@ Geographic admission reserves 8192 bytes/node for the two material owners within
 2 GiB reservation (262,144 nodes). Default 720×540 at mesh 2 fits; larger rejected requests
 must choose their geometry explicitly. No automatic resolution reduction occurs. Empty film
 uses sparse rows. This reservation excludes population/ancestry and is not a measured RSS.
-Physical format v44 rejects earlier worlds without migration; deployment needs an explicit
+Physical format v46 rejects earlier worlds without migration; deployment needs an explicit
 new-world cutover if the continuing server holds an earlier format. Constructed checks and their negative
 payback findings are in [light ecology results](../../light-ecology-results.md).
 
@@ -888,11 +889,13 @@ frames to the UI or add work to the physical steps. Selected-cell inspection use
 circle-overlap and exposed-donor arithmetic as physical sensing. Both queries remain read-only
 and retain the same useful distribution and chemical summaries.
 
-One to eight genetic enzyme programs and retired stock share eight stable records. The first
+One to eight genetic enzyme programs share eight stable records. The first
 four enzyme stocks retain indices11–14; photo remains15; extra enzyme stocks use16–19.
-Neutral duplication divides target/actual stock, copies neural readouts and splits stock-input
-contributions. Deletion disables its program and leaves installed mass/upkeep until paid
-retirement. Counts use the same heavy-tailed mutation in program units, stochastic rounding
+Neutral duplication at birth splits the source program's genetic body weight between source
+and copy, copies neural readouts and splits stock-input contributions, so total capacity and
+neural response are unchanged. Deletion at birth removes the program, its genetic weight and
+its neural connections; biomass, material and work are unchanged and the remaining body
+proportions express at current biomass. Counts use the same heavy-tailed mutation in program units, stochastic rounding
 and reflected bounds. This representation does not add intracellular compartments.
 Event rates, body-unit scales and neural scales are unchanged. The same reflected distribution
 has local and rare large steps. Chemical centers lie in[0,15]; orientation is periodic.
@@ -923,6 +926,7 @@ expression or evolutionary exploitation by itself.
 Production capacity uses 48/2,000/2,000-growth, all 256 channels, distinct genomes and
 learning: ten warmup plus 100 measured ticks, with census, inspection and rendering
 preparation. The target is 200 ticks/s headlessly and at least 30 ticks/s through the
-complete browser. GPU work, accumulated-state recovery and human motion judgment have
-separate acceptance. No population campaign or prescribed evolved ecosystem is a gate.
-Current bounded registrations and outcomes are in the [rebuild evidence](rebuild-results.md).
+complete browser. Implementers run these checks as part of delivery; the September 30 policy
+retired separate observation and human-acceptance gates. No population campaign or prescribed
+evolved ecosystem is a gate. The September 15 [rebuild evidence](rebuild-results.md) is a
+historical record of the first bounded registrations.

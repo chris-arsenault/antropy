@@ -1,9 +1,8 @@
 # Bacterial capability investigation
 
-Historical study, September 11. Its recommendation below was subsequently implemented as food
-zones and investigated in the [evolution study](evolve-study.md). It is not an outstanding work
-order. The current [purpose and preparation](design/README.md) use hypotheses and small proof
-points for the user's days/weeks observation; this study's findings retain their original context.
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 11) — its recommendation was implemented as food zones and investigated in the [evolution study](evolve-study.md); the current work order is in [design/README.md](design/README.md).
+
+This study is not an outstanding work order; its findings retain their original context.
 
 The current model supports two additional useful evolved capabilities: an observed brain improves
 brief-food access with body genes held constant, and an observed physical allele improves funded

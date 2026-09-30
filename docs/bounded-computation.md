@@ -1,5 +1,7 @@
 # Bounded mature-world computation
 
+**Status:** Historical record (physical v33/v34, September 21) — superseded by the [regional execution owner](design/spatial-execution.md).
+
 September 21, 2026. Plan `4a713c00-7da8-46ae-94d7-fff7b61d4807`.
 
 ## Question and decision

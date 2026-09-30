@@ -15,7 +15,7 @@ for (const name of names) {
       name: `ecological-incentives-${name}`,
       hypothesis: "Local compression, chemical exchange and light create conditional returns",
       specification: {
-        registration: "docs/plans/ECOLOGICAL-INCENTIVES-PLAN.md",
+        registration: "docs/plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md",
         path,
         sha256: createHash("sha256").update(bytes).digest("hex"),
         preparation,

@@ -1,10 +1,21 @@
 # 0021 — Integrated physical laws for digital chemistry and embodied evolution
 
-- Status: Amended by ADR 0022; identity and ownership retained, mathematical prescriptions revised
+- Status: Amended by ADR 0022 and September 30, 2026; identity and ownership retained, mathematical prescriptions and fixed machinery arrays revised
 - Date: 2026-09-15
 - Plan: [Integrated digital chemistry](../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 - Preserves: [ADR 0020 ownership](0020-complete-rust-kernel.md) and the
   [immutable sharing contract](../design/chemistry/data-ownership.md)
+
+## Amendment (September 30, 2026)
+
+V43 [genetic physiology](../design/funded-bodies.md) (`dc41e40`, September 28) supersedes the
+fixed heritable machinery arrays, funded investment, gradual paid remodeling and actual-stock
+inheritance described in the original decision. Genes express twenty-two body capacities
+directly at current biomass, with four receptors, four transporters and one to eight enzyme
+programs; there is no machinery construction, retirement, refitting or per-component ownership
+charge. Living-cell gene transfer, listed below as optional, is removed. The user rejected
+construction and equipment ownership costs as substitutes for physical tradeoffs
+([plans README](../plans/README.md#recorded-rejections)).
 
 ## Amendment — computable mathematical design
 

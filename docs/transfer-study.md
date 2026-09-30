@@ -1,5 +1,7 @@
 # Horizontal gene transfer: traits that travel by contact
 
+**Status:** Historical record (pre-chemistry TypeScript A/B-food world, September 13) — living-cell gene transfer has since been removed and the engine rejects a nonzero setting; the current work order is in [design/README.md](design/README.md).
+
 Registered September 13, 2026 as phase 5 of
 [roadmap two](design/README.md#design-roadmap-2), before reading any endpoint. Sulion plan
 `Organism-generated selection`. Artifacts: `frontend/harness/artifacts/evolve-2026-09-13/transfer/`.

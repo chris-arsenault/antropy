@@ -1,10 +1,12 @@
 # Chemistry migration requirements and proof points
 
-Status: requirements retained during implementation. The [implementation plan](implementation-plan.md)
+**Status:** Historical record (v9 chemistry migration requirements, September 13, with a v18 note of September 17) — the review and human-acceptance gates named here were retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
+The [v9 implementation plan](../../plans/archive/CHEMISTRY-V9-IMPLEMENTATION-PLAN.md)
 supersedes the original sequence below; [migration audit](migration-audit.md) gives actual dispositions,
 [decisions](decisions.md) resolves formulas and [validation](validation.md) records new evidence.
 
-## Current evidence and boundaries
+## Evidence and boundaries (September 17)
 
 The September17 local-weathering revision uses physical checkpoint v18 and rejects earlier
 physical bytes. The independent weather clock and `weatheringPeriod`/`--weathering-period`

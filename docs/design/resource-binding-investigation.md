@@ -1,5 +1,7 @@
 # Resource binding investigation
 
+**Status:** Historical record (physical v27, September 19) — the investigation behind the v28 [resource binding proposal](resource-binding-proposal.md); current force laws are in the [composed runtime](chemistry/composed-runtime.md).
+
 September 19, 2026. Investigation only; no production mechanics changes.
 Plan: `c5f6eb03-70f2-4e06-bf31-b9cbb91838a2`.
 

@@ -1,5 +1,7 @@
 # Enzyme correction and symmetry omissions
 
+**Status:** Historical record (physical v22, September 18) — v23 replaced its reflected/interpolated maps with exact finite actions and bounded kinetic mixtures (see [transformation algebra](design/chemistry/transformation-algebra.md)); the human motion review named here was not performed and the gate was retired September 30.
+
 Scope clarification: this records the v22 correction, not completion of the user's
 group-theoretic requirement. The [transformation algebra white paper](design/chemistry/transformation-algebra.md)
 explains why the reflected/interpolated maps below do not represent SE(2) on the actual
@@ -60,7 +62,7 @@ retention/exposure or controller expression; a successful run is not evidence of
   unchanged full mesh2, normal learning/mutation, 120 seconds maximum per run. Stop at
   horizon, terminal outcome or cap. No horizon extension or parameter sweep.
 - Existing complete capacity workload once per version if the analytical/startup checks
-  allow it, plus full `make ci`. Human motion review remains separate and pending.
+  allow it, plus full `make ci`. Human motion review was not performed; the gate was retired September 30.
 
 ## Omission audit
 
@@ -163,6 +165,6 @@ mutation, paid partial/full angular refitting, inherited installed identity and 
 The unpaid-refit check caught a floating-point rewrapping change at zero funding; interpolation
 now returns the original angle exactly for zero progress or an unchanged target.
 
-Human motion review remains pending. Historical v20/v21 evidence retains its original
+Human motion review was not performed; the gate was retired September 30. Historical v20/v21 evidence retains its original
 executable/schema meaning. No long evolutionary campaign was run, and no decrease in
 eventual #186 abundance is guaranteed.

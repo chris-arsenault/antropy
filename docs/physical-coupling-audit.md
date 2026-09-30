@@ -1,6 +1,8 @@
 # Physical coupling audit
 
-Historical v18 audit. The subsequent [v19 correction](physical-coupling-correction.md) implements
+**Status:** Historical record (physical v18, September 17) — the [v19 correction](physical-coupling-correction.md) implemented its fixes; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
+The subsequent [v19 correction](physical-coupling-correction.md) implements
 the user's requested fixes; results below describe the pre-correction laws.
 
 September 17, 2026. Audit plan `b5c173f9-b621-467c-bd3b-71b6020b4593`.

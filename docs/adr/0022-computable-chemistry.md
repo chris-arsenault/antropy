@@ -1,11 +1,22 @@
 # 0022 — Design chemical laws for composed computation
 
-- Status: Accepted; M0 arithmetic selection and core feasibility verified, live integration pending
+- Status: Accepted; integrated in the September 15 production rebuild (checkpoint v13); amended September 30, 2026
 - Date: 2026-09-15
 - Governing design: [Computable chemistry](../design/chemistry/computational-foundation.md)
 - Plan: [Integrated chemistry](../plans/archive/DIGITAL-CHEMISTRY-PLAN.md)
 - Amends: [ADR 0021](0021-integrated-digital-chemistry.md), M0 formula selections and the old M2 expansion
 - Preserves: [ADR 0020](0020-complete-rust-kernel.md) and [immutable sharing](../design/chemistry/data-ownership.md)
+
+## Amendment (September 30, 2026)
+
+The [digital-chemistry rebuild](../plans/archive/DIGITAL-CHEMISTRY-PLAN.md) implemented this
+direction as the production World and checkpoint v13 on September 15; later versions extend it.
+V43 [genetic physiology](../design/funded-bodies.md) (`dc41e40`, September 28) supersedes the
+preserved "fixed heritable slots" and "actual installed and built state": genes express body
+proportions directly at current biomass, with one to eight enzyme programs and no machinery
+construction, retirement or refitting. The September 30 delivery policy
+([plans README](../plans/README.md)) retires the separate human motion-review gate named below.
+The composed-computation decision is otherwise unchanged.
 
 ## Context
 

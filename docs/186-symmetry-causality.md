@@ -1,5 +1,7 @@
 # Causal follow-up: symmetry and #186
 
+**Status:** Historical record (physical v20/v21, September 18) — findings keep their original context; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 Registered September 18, 2026, after the initial
 [flow investigation](186-symmetry-investigation.md). The user explicitly requested continued
 investigation until there is a supported explanation, rather than another description of the gap.

@@ -1,5 +1,7 @@
 # Mature checkpoint cost
 
+**Status:** Historical record (physical v20/v21, September 18) — measurements keep their original binaries; current execution is described in the [regional execution owner](design/spatial-execution.md).
+
 Registered September 18, 2026. Plan `f396acdc-5596-4f7e-82f7-20dcddbb6341`.
 
 Question: does the cost in the user's two new saves come from active chemical support,

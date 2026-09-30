@@ -1,11 +1,17 @@
 # Cellular organization and exchange implementation
 
-September 20, 2026. All implementation milestones completed locally. Root Sulion plan:
-`ec58a567-39b5-49fa-841d-de4da572fa1b`.
+**Status:** Delivered plan (archived) — one well-mixed cellular inventory, funded genetic
+inward sensing and activity control, and shared field/contact exchange (M0–M4, physical v33)
+shipped at `fad7fa9`. Body is the execution record; its open-gate, "remaining",
+"uncommitted/undeployed" and human-review statements are historical and retired by the
+September 30 delivery policy ([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
+
+September 20, 2026. Root Sulion plan: `ec58a567-39b5-49fa-841d-de4da572fa1b`.
 
 ## Contract and decisions
 
-Implement [the joint design](design/cellular-organization-and-exchange.md) in the ordinary
+Implement [the joint design](../../design/cellular-organization-and-exchange.md) in the ordinary
 Rust/WASM world, its observations and persistence. One well-mixed inventory retains access to
 all 256 chemical identities. The user canceled internal compartments before any compartment
 edits; the canceled plan is `60e1c9a1-5a0e-4c61-9ba9-362ed6f97a6f`.
@@ -163,7 +169,7 @@ retaining the SIMD dense path and dynamic private traces. A sparse/dense control
 test covered actions and acquired learning. The repeated panel was slower (27.79 ticks/s), so
 this experiment was removed. Subsequent no-op skips and in-place lifecycle compaction recovered
 the standard mean to30.07; growth/eight-program workloads remain below30. See the
-[delivery record](cellular-organization-results.md) for all corrections, repetitions and limits.
+[delivery record](../../cellular-organization-results.md) for all corrections, repetitions and limits.
 
 ## Current state
 
@@ -171,7 +177,7 @@ M0–M4 completed. `make ci` passes: 168 Rust unit tests, 17 integration tests a
 frontend tests, including shared-memory ownership guards. Clippy, formatting, TypeScript,
 documentation and Terraform format checks pass; 17 existing frontend warnings remain.
 Registered startup/capacity checks completed (ledger4250–4255); the
-[delivery record](cellular-organization-results.md) preserves full costs, negative findings and
+[delivery record](../../cellular-organization-results.md) preserves full costs, negative findings and
 remaining limits. Earlier v32 schema assertions, redundant lifecycle borrows and an oversized
 capacity-runner function were corrected. Native editing was used for source and formatter output.
 No browser session, server, live save modification, commit, push or deployment occurred.

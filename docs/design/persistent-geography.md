@@ -1,22 +1,25 @@
 # Persistent geography and conditional survival
 
-Proposed September 24, 2026; expanded September 30 for integrated terrain and local-season
-design and implementation. The user requests the full terrain direction,
+**Status:** Partly implemented (v46) — static fractal elevation, conductance, overhead transmission, optional ceilings and fractal reservoir placement are installed; dynamic terrain, tectonics, catastrophes and live physical switches are unselected.
+
+First proposed September 24, 2026; expanded September 30 for integrated terrain and local-season
+design and implementation. The user requested the full terrain direction,
 configuration switches and concrete fractal generation/placement algorithms. The static
 substrate and [local resource seasons](local-resource-seasons.md) form one design, implemented
 locally in physical v46. The [composed laws](chemistry/composed-runtime.md#geographic-composition)
-record the installed operations; delivery evidence and remaining acceptance live in the plan.
-Whether slow terrain changes and catastrophes belong in this delivery remains unresolved;
-the earlier static-first recommendation does not settle that scope question. This document
+record the installed operations; the implementation plan owns concrete repairs and delivery.
+Slow terrain changes and catastrophes remain unselected backlog proposals, not a delivery gate.
+The earlier static-first recommendation does not approve or reject that future scope. This document
 does not authorize a live-world cutover.
 
 Design tracking: Sulion `95e0ca28-0f12-459f-9e3b-8b482c8f9488`, a documentation task only.
 Full proposal tracking now lives in the [terrain and seasons plan](../plans/TERRAIN-AND-SEASONS-PLAN.md),
-Sulion `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Static implementation and bounded validation are complete;
-creating the plan does not resolve the open physical/dynamic scope decisions below.
-The [current work order](README.md) and [scaling plan](../../SCALING-PLAN.md) retain priority.
+Sulion `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Static implementation is published; the September 30
+review identified motion/configuration defects now owned by the remaining implementation phase.
+The [original results](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retain their limits.
+The [current work order](README.md) retains priority.
 
-September 25 reconciliation: the [light ecology plan](../plans/LIGHT-ECOLOGY-PLAN.md)
+September 25 reconciliation: the [light ecology plan](../plans/archive/LIGHT-ECOLOGY-PLAN.md)
 incorporates this proposal's permanent shade boundary. Its selected light design supersedes
 the older finite-sun requirement below: sunlight remains externally prescribed and
 non-depleting; only cell-paid emitted work has a finite donor account. Elevation, conductance
@@ -47,8 +50,8 @@ and funded stocks retain ownership; terrain supplies boundary conditions, not co
 
 [Light ecology](light-ecology.md) now implements material shade, finite emitted-work allocation
 and paid emission in v42. Static geographic shade reduces the existing external forcing;
-it does not turn sunlight into a finite donor. This proposal's remaining elevation and
-conductance operators must consume the same geographic boundary, not stack a second sun.
+it does not turn sunlight into a finite donor. The v46 elevation, conductance and overhead
+transmission operators consume the same geographic boundary rather than stacking a second sun.
 
 The September 18 [fixed-basin proposal](spatial-isolation-review.md) was rejected as a remedy
 for reservoir dispersion. This request explicitly introduces geography for survival differences;
@@ -442,15 +445,17 @@ not depend on a later generator implementation. Reconstruct derived face caches.
 format must be explicit; no save migration is proposed. Continuation within that format must
 preserve geography. Check browser and native-server paths, physical caps and rejection behavior.
 
-Provide terrain/elevation/cover views and bounded local readings of slope, conductance,
-transmitted light and movement expenses. Retain legible chemical and cell overlays. Same-worker
+The ordinary view integrates conductance ground, elevation contours, received-light shade,
+translucent chemistry, clear cells and seasonal reservoir bands, with a permanent compact legend.
+Terrain/elevation/cover diagnostic views and bounded local readings of slope, conductance,
+transmitted light and movement expenses remain available. Same-worker
 rendering borrows Rust views; remote spectators receive bounded display projections. No private
 or full physical field messages to React, second renderer, new listener or separate economy.
 
 ## Later changing geography
 
-The earlier recommendation was static geography first; inclusion of dynamics in the requested
-full delivery remains under review. Tectonics could slowly alter h and substrate coefficients;
+The earlier recommendation was static geography first; v46 delivered static geography, and
+dynamics are unselected backlog proposals. Tectonics could slowly alter h and substrate coefficients;
 catastrophes could make local topological changes and displace material and cells. Neither
 belongs in initial calibration or the current optional disturbance implementation by default.
 
@@ -466,8 +471,8 @@ These obligations explain why dynamics should follow an understood static world.
 Settled by this request: persistent pseudorandom geography, macro and micro variation, local
 slope effects on the XY substrate, permanent optical cover, configuration-controlled terrain
 and seasons, and fractal map/placement design. Execution was subsequently authorized through
-the terrain plan. The installed static operators are recorded in the composed laws; the
-dynamic/live-control scope remains unresolved.
+the terrain plan. The installed static operators are recorded in the composed laws; dynamic
+terrain and live physical switches are unselected.
 
 Adopted static model: wet/dry as continuous conductance; directional uphill resistance;
 common external transport/reaction timing; attenuation first, with optional clipping; independent
@@ -475,7 +480,8 @@ but spatially coherent geography layers. The composed laws own their current equ
 the delivery plan owns measurements. The user owns whether water means an actual fluid and whether cliffs,
 impassable land or water-exclusive bodies are wanted; those would change this candidate's scope.
 
-The delivery plan expands these design acceptance milestones:
+The following engineering responsibilities belong within implementation. They are not separate
+verification phases or human-acceptance gates:
 
 1. **Select laws and budgets.** Resolve water meaning, slope/contact composition, the role of
    clipping, observable effort feedback, generation scales and complete accounts. Calculate
@@ -490,9 +496,11 @@ The delivery plan expands these design acceptance milestones:
    ordinary funded diagnostic RNNs, matched resources and explicit mutation/learning settings.
    Include conditions predicted to lose, and separate direct shade effects from public chemistry.
    Follow actual cue, action, delivery, work expense and funded benefit; use swapped placement
-   if progressing to short contests. Measure dense and sparse whole-runtime cost and require
-   human motion review. CI and ownership guards remain mandatory; report misses of 30 ticks/s.
+   if progressing to short contests. Measure dense and sparse whole-runtime cost as appropriate
+   to the change. CI and ownership guards remain mandatory; report misses of 30 ticks/s.
+   User motion feedback informs fixes without blocking plan completion.
 
-No assay runs with this proposal. Mechanism, controller expression, inherited advantage and
+When written, this proposal ran no assay; the bounded checks that later ran are in the
+[execution record](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md). Mechanism, controller expression, inherited advantage and
 long-term ecological diversity are separate claims. Later evolutionary observation is selected
 for its own question; no automatic seed sweep, horizon extension or replacement founder follows.

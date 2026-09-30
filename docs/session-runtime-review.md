@@ -1,5 +1,7 @@
 # Session slowdown and recovery — September 20, 2026
 
+**Status:** Historical record (physical v32, September 20) — measurements keep their original binary; current execution is described in the [regional execution owner](design/spatial-execution.md).
+
 ## Question and bounded investigation
 
 The user reports approximately 8 ticks/second before reloading and 40 ticks/second after

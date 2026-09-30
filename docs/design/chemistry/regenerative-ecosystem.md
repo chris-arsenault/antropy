@@ -1,6 +1,8 @@
 # Initial conditions for a regenerative ecosystem
 
-Mathematical design, September 18, 2026. **Implemented in physical v27; human review pending.**
+**Status:** Implemented (v27) — v41 removed crowding pressure from cell and reservoir motion, v37 removed paid refitting and v43 removed machinery construction; the human review gate was not performed and was retired September 30; current laws are in the [composed runtime](composed-runtime.md).
+
+Mathematical design, September 18, 2026.
 
 [Implementation plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#regenerative-ecosystem-implementation):
 R0–R4 implementation and automated checks are complete; the plan records validation and operating limits. The conditional calculations

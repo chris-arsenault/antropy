@@ -1,8 +1,10 @@
 # Cellular organization: delivery and limits
 
+**Status:** Historical record (physical v33, September 20) — v43 replaced funded machinery construction with genetic body proportions; current laws are in the [composed runtime](design/chemistry/composed-runtime.md).
+
 September 20, 2026. Physical checkpoint v33. Implementation of the
 [joint design](design/cellular-organization-and-exchange.md), tracked by the
-[execution plan](CELLULAR-ORGANIZATION-PLAN.md). These are mechanics and bounded operating
+[execution plan](plans/archive/CELLULAR-ORGANIZATION-PLAN.md). These are mechanics and bounded operating
 measurements, not evidence that a meta-organism has evolved.
 
 Subsequently published as `fad7fa9`. The requested long observation was shortened by the user

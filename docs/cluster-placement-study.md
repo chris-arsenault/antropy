@@ -1,12 +1,14 @@
 # Cluster placement experiment
 
+**Status:** Historical record (physical v42 before the September 26 ecological incentives, September 25) — effect sizes belong to the archived kernel; the current work order is in [design/README.md](design/README.md).
+
 Registered September 25, 2026, before stepping. The user requested the next experiment and
 observation of the running server. This asks whether starting together helps two sampled
 descendants acquire and use resources, compared with starting spread out. It does not change
 the live world or select a replacement founder.
 
 Historical results use the kernel before the September 26
-[ecological incentives](plans/ECOLOGICAL-INCENTIVES-PLAN.md) changes. The driver remains usable
+[ecological incentives](plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md) changes. The driver remains usable
 with the current kernel; such runs are new comparisons, not reproductions of these effect sizes.
 
 ## Question and prior evidence
@@ -109,7 +111,7 @@ fixture overfilled storage, blocking early imports. Its proximity benefit is a r
 that constructed starting state, not evidence that actual saved cells cannot live alone.
 The follow-up retains actual-state transplants and the later scope correction excluding
 chemical-conversion investigation. Current implementation decisions are recorded in the
-[ecological incentives plan](plans/ECOLOGICAL-INCENTIVES-PLAN.md).
+[ecological incentives plan](plans/archive/ECOLOGICAL-INCENTIVES-PLAN.md).
 
 Completed all six registered cases without extending a horizon or changing the conditions.
 Ledger rows 4362–4367 and raw artifacts remain local in

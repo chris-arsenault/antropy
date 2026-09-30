@@ -1,5 +1,11 @@
 # Birth orientation and physiological aging
 
+**Status:** Delivered plan (archived) — randomized birth orientation and core-linked,
+age-dependent body maintenance shipped as physical v45 at `79ea580`. Body is the execution
+record; its open-gate, "remaining", "uncommitted/undeployed" and human-review statements are
+historical and retired by the September 30 delivery policy ([plans README](../README.md)).
+Current laws live in [composed runtime](../../design/chemistry/composed-runtime.md).
+
 Sulion plan: `404e9450-689d-4d1c-91b8-bb0a032e31c0`.
 
 Outcome: daughters do not inherit spatial orientation, and older cells pay progressively

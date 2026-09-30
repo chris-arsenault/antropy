@@ -1,33 +1,39 @@
 # Replace the chemical economy with digital chemistry
 
-> Historical first TypeScript chemistry implementation (v9). Its measurements and decisions
-> remain evidence for that version. The [Rust/WASM numerical contract](numerical-engine.md),
-> [current results](numerical-results.md) and [migration dispositions](numerical-migration.md)
-> supersede its runtime choices and unfinished work order.
-
+**Status:** Superseded plan (archived) — the September 13 first TypeScript digital-chemistry
+implementation (v9): a bounded 16 × 16 chemical space, sparse mixtures, fixed heritable
+machinery, paid transport, unary reactions and explicit matter/energy accounting replacing the
+earlier chemical economy. The September 15 Rust/WASM
+[numerical engine](../../design/chemistry/numerical-engine.md),
+[its results](../../design/chemistry/numerical-results.md) and
+[migration dispositions](../../design/chemistry/numerical-migration.md) superseded its runtime
+choices and unfinished work order. Body is the execution record; its open-gate, "remaining",
+"uncommitted/undeployed" and human-review statements are historical and retired by the
+September 30 delivery policy ([plans README](../README.md)). Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md).
 
 Revised September 13, 2026. Sulion plan `d80ddca6-d78c-4f29-ac65-1164fe8ba5a8`.
-Status: laws/space, the complete chemical cycle and bounded physical-opportunity validation are
-implemented. Product/content migration and removal are implemented locally; phase 4 remains open
-for human motion/operating acceptance. The unusable initial throughput was rejected. The
-[population performance repair](population-performance.md) and [viability repair](viability.md) establish a
-reproducing 48-founder default, every 250-tick window above 30 ticks/s, explicit numerical-loss
-accounting and validated short-run fidelity. Export loss and self-injury were isolated with
-small causal probes; daughter reproduction was checked on ordinary renewing deposits.
-Human motion acceptance and days/weeks endurance remain unverified.
+The unusable initial throughput was rejected. The
+[population performance repair](../../design/chemistry/population-performance.md) and
+[viability repair](../../design/chemistry/viability.md) established a reproducing 48-founder
+default, every 250-tick window above 30 ticks/s, explicit numerical-loss accounting and
+validated short-run fidelity for v9. Export loss and self-injury were isolated with small causal
+probes; daughter reproduction was checked on ordinary renewing deposits.
 This replaces the canceled
 ten-phase plan `fda95ce9-a4a9-41b8-a6d5-58d04756635a`; no implementation was completed or
 requirements discarded. Current implementation choices and executed checks are recorded in
-[decisions](decisions.md). The worktree is an incomplete replacement until all milestones pass.
+[decisions](../../design/chemistry/decisions.md).
 
 The deliverable is a physically coherent replacement of the existing chemical economy, with its
 superseded implementation removed. Chemistry, cell physiology, accounting and the durable state
 shape change together. Completion requires both functioning new behavior and evidence that the
 old chemical economy can no longer execute. This is the execution sequence for the work; earlier
-phase outlines in [migration](migration.md) do not govern its order. The
-[original proposal](sources/chemistry-proposal.txt), [Appendix A](sources/migration-proposal.txt)
+phase outlines in [migration](../../design/chemistry/migration.md) do not govern its order. The
+[original proposal](../../design/chemistry/sources/chemistry-proposal.txt),
+[Appendix A](../../design/chemistry/sources/migration-proposal.txt)
 and the user's four clarifications define the intended system. The detailed
-[substrate](substrate.md) and [machinery](machinery.md) documents supply candidate formulas and
+[substrate](../../design/chemistry/substrate.md) and
+[machinery](../../design/chemistry/machinery.md) documents supply candidate formulas and
 architecture choices to resolve where needed, not additional settled requirements.
 
 ## Outcome and boundaries

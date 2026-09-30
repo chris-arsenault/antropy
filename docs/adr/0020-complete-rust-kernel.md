@@ -1,8 +1,21 @@
 # 0020 — Complete Rust/WASM simulation and worker-owned rendering
 
-- Status: Accepted
+- Status: Accepted; amended September 30, 2026 (shared-memory multicore and native server)
 - Date: 2026-09-14
 - Supersedes: [0019](0019-single-language-kernel.md)
+
+## Amendment (September 30, 2026)
+
+The September 21 multicore work (`0016b81`) reverses this record's statement that shared linear
+memory, isolation headers and a second execution worker are unnecessary. The browser build runs
+a persistent Rayon pool on shared WASM memory and requires cross-origin isolation (COOP/COEP);
+browsers without it use the serial build of the same operators. Parallel phases join before the
+owning worker renders borrowed views, so the borrowed-render and bounded-observation boundary
+stands. The same crate also compiles the native `biotropy-server` (`493a4f1`), whose projections
+follow the [ownership contract](../design/chemistry/data-ownership.md) and
+[execution modes](../execution-modes.md). The September 30 delivery policy
+([plans README](../plans/README.md)) retires the human motion-review and days/weeks operation
+gates named in the consequences below; they were not passed.
 
 ## Context
 
