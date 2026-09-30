@@ -1,44 +1,41 @@
-# antropy
+# Biotropy
 
-Antropy builds a world where diverse ecosystems and evolutionary adaptation are likely to arise.
-The intended use is to run a population for days or weeks and watch its history unfold. Development
-uses hypotheses and small physical proof points to prepare that world, without prescribing species,
-precomputing a winning community or requiring an agent coexistence campaign before handoff.
+Biotropy is an artificial-life simulation: a two-dimensional world of single cells living in an
+accounted artificial chemistry. Each cell inherits a small body and a small recurrent neural
+network, senses only its surroundings and its own condition, and pays usable energy for
+everything it does. Energy comes only from converting chemicals, sometimes helped by light.
+Nothing scores the cells. Those that gain more than they spend grow and divide into mutated
+daughters; those that cannot pay their upkeep die and return their material to the world.
 
-The browser runs [cells with local heritable RNNs](docs/design/bacteria.md) in a
-[digital chemical world](docs/design/chemistry/README.md). A smooth 16 × 16 chemical space supplies
-potential energy, diffusion, impedance and stress. Each cell has four receptors, four transporters,
-one to eight enzyme programs and inherited membrane compatibility. Genes express these
-[capacities directly at current biomass](docs/design/funded-bodies.md); internal chemical
-inventory and usable energy fund movement, reactions, repair, learning, growth and division.
-Maintenance rises with age, more slowly for cells with a larger core fraction.
-No external fitness scorer or named food/toxin/matrix pathway selects ecological roles.
-Shared material attraction and repulsion, reversible retention and public chemical transformations
-support changing local habitats. Finite reservoirs move, evolve their replenishment mixtures and
-release on local seasonal clocks. Persistent fractal terrain sets elevation, conductance and
-overhead shade ([geography](docs/design/persistent-geography.md),
-[seasons](docs/design/local-resource-seasons.md)). Composed illumination funds chemical
-transformations; cells can invest in photoreceptors, overhead film and local emission
-([light ecology](docs/design/light-ecology.md)). External replenishment remains active; the
-world is an open system.
+The aim is a world in which a continuing evolutionary history is likely, and then to watch it
+for days or weeks. No species, strategy or community is prescribed.
 
-[Short constructed probes](docs/material-habitats.md) test physical opportunities and costs.
-They do not prove evolved cooperation, persistent diversity or successful colonization.
-One Rust kernel serves the browser, experiments and a native server. The browser runs it as WASM
-serially or on a four-thread Rayon pool over shared memory; rendering borrows WASM buffers
-in the same worker through OffscreenCanvas/WebGL2, and full chemistry does not cross to React.
-The public site attaches spectators to one continuing native server world
-([execution modes](docs/execution-modes.md)). Throughput figures are in
-[calibration](docs/calibration.md#calibration-throughput).
-The user reports promising dense colonies; the [checkpoint review](docs/material-habitats-review.md)
-records differentiation and continuing feedstock dependence.
-See the [current work order](docs/design/README.md); historical coexistence claims retain their
-[corrections](docs/analysis-correction.md).
-The prior ant implementation is preserved at commit `780fa4e`, annotated tag
-`ant-colony-checkpoint-2026-09-09`.
+Watch the continuing world at [biotropy.ahara.io](https://biotropy.ahara.io). The repository is
+named `antropy`.
 
-The retired 3D simulation is preserved at `3d-simulation-checkpoint-2026-09-06`.
-See the [historical records](docs/sources/history/README.md).
+## Core ideas
+
+- **No fitness function.** Selection is only local survival and division.
+- **Everything is funded.** Material and work are conserved except at declared boundaries;
+  every capability costs biomass, maintenance or action work.
+- **A real chemistry.** 256 chemicals on a smooth 16 × 16 manifold; enzymes transform them
+  through one exact finite algebra; food, waste and poison are not declared.
+- **Shared mathematics, few controls.** Cells, dissolved material and reservoirs obey the same
+  operators; no feature gets a private rule.
+- **Local information only.** Networks never see coordinates, time, lineage or a score.
+
+Read the [white paper](docs/white-paper.md) for the question, philosophy and mathematics, and
+the [outcomes and open directions](docs/outcomes-and-directions.md) for what has emerged so far.
+
+## What you see
+
+A new world starts paused with 48 cells of four mutable founder types in two colonies on a
+720 × 540 periodic plane, with 240 renewing reservoirs spread over fractal terrain. The default
+view shows terrain, contours and received light under translucent chemistry, with cells colored
+by usable energy and reservoirs marked by their seasonal supply. Drag to pan, scroll to zoom and
+select a cell to inspect its body, chemistry, sensors and network state. The Execution menu runs
+the world in the browser on one or four threads, or attaches to the shared server world.
+See the [display guide](docs/design/bacterial-display.md).
 
 ## Quickstart
 
@@ -46,63 +43,32 @@ See the [historical records](docs/sources/history/README.md).
 rustup show
 cd frontend
 pnpm install
-pnpm run dev
-pnpm run build
+pnpm run dev      # build the WASM engine and serve the UI
+pnpm run build    # production build
 ```
 
-Run `make ci` from the repository root before committing.
-
-Press **Run** to begin at tick zero: 48 bacteria in two separated starting colonies in a 720 × 540 world,
-240 mobile renewing reservoirs across 35 regions, with local chemical mixtures and mutation enabled. Four mutable founder types seed a chemical circuit in each colony. The UI requests
-30 ticks/s, with a maximum-speed option; actual throughput depends on workload. The HUD's
-Execution menu selects Browser 1, Browser 4 or a server world.
-
-The default landscape combines terrain ground, elevation contours, received-light shade,
-translucent energy-per-material chemistry, usable-energy cell colors and seasonal reservoir
-bands, with a permanent legend; diagnostic maps and trait colors remain selectable. Drag to pan,
-wheel to zoom and select a cell to inspect its genetic capacities at current biomass, mixtures,
-sensors, recurrent state and private byte. The dock holds observation, phenotype, environment,
-inheritance and persistence windows. See the [display guide](docs/design/bacterial-display.md).
-
-The default is haploid clonal fission with paid plasticity and full learned-weight retention;
-diploidy, selfing, crossover, mutation operators, budding and learning retention are
-configurable. Physical checkpoint v46 rejects older versions; the browser observation package
-remains v11. Recovery saves every 30 seconds while running and on pause; restores start paused.
-Export a file for a separate copy. A failed recovery save warns while the simulation continues.
-
-## Measurement
-
-The bounded test suite checks mechanics and deterministic invariants. Choose a hypothesis and a
-small probe before launching an ecological measurement. Saved measurements belong in the harness
-ledger; they support a configuration decision rather than completing the user's long observation:
-
-```bash
-cd frontend
-pnpm harness chemical-opportunities --case list
-pnpm harness recent --n 5
-```
+Run `make ci` from the repository root before committing. Commands, harness experiments and
+persistence are described in [development](docs/development.md).
 
 ## Documentation
 
-| Topic                    | Link                                                       |
-| ------------------------ | ---------------------------------------------------------- |
-| Documentation index      | [docs/README.md](docs/README.md)                           |
-| Governing principles     | [docs/principles.md](docs/principles.md)                   |
-| Current design and order | [docs/design/README.md](docs/design/README.md)             |
-| Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
-| Browser and server execution | [docs/execution-modes.md](docs/execution-modes.md), [server management](docs/server-management.md) |
-| Architecture             | [docs/architecture.md](docs/architecture.md)               |
-| Development              | [docs/development.md](docs/development.md)                 |
-| Default scales and throughput | [docs/calibration.md](docs/calibration.md)            |
-| Backlog                  | [docs/backlog.md](docs/backlog.md)                         |
-| Changelog                | [CHANGELOG.md](CHANGELOG.md)                               |
-| Architecture decisions   | [docs/adr/README.md](docs/adr/README.md)                   |
-| Historical proof points  | [Habitat results](docs/material-habitats.md), [session costs](docs/session-runtime-review.md), [source results](docs/design/chemistry/mobile-source-results.md) |
-| Historical certification (September 10–13) | [docs/certifications.md](docs/certifications.md) |
-| Preserved sources        | [docs/sources/README.md](docs/sources/README.md)           |
+| Topic | Link |
+| --- | --- |
+| What Biotropy is and why | [White paper](docs/white-paper.md) |
+| Observed outcomes and research directions | [Outcomes and open directions](docs/outcomes-and-directions.md) |
+| Documentation index | [docs/README.md](docs/README.md) |
+| Current work order and design owners | [docs/design/README.md](docs/design/README.md) |
+| Every design direction and its status | [Design directions](docs/design/directions.md) |
+| Exact laws and parameters | [Composed runtime](docs/design/chemistry/composed-runtime.md) |
+| Governing principles | [docs/principles.md](docs/principles.md) |
+| Architecture and execution modes | [Architecture](docs/architecture.md), [execution modes](docs/execution-modes.md) |
+| Backlog and changelog | [Backlog](docs/backlog.md), [changelog](CHANGELOG.md) |
+| Decisions | [Decision record](docs/design/decisions-and-evidence.md), [ADRs](docs/adr/README.md) |
+
+Earlier implementations are preserved at tags `ant-colony-checkpoint-2026-09-09` (ant colony)
+and `3d-simulation-checkpoint-2026-09-06` (3D simulation); see the
+[historical records](docs/sources/history/README.md).
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
-
-The ant substrate is recoverable from its tag; it is not a second selectable runtime.

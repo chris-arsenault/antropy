@@ -106,6 +106,7 @@ and let runtime consumers sample it; this exception does not change physical wor
 
 | Topic                  | Link                                                                             |
 | ---------------------- | -------------------------------------------------------------------------------- |
+| Project primer         | [White paper](docs/white-paper.md), [outcomes and directions](docs/outcomes-and-directions.md) |
 | Governing principles   | [docs/principles.md](docs/principles.md)                                         |
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
