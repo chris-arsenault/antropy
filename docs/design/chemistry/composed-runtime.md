@@ -135,8 +135,15 @@ recoverable height energy. Turning in place retains its paid law. The proposed p
 longer than the accepted path for passive-only corrections; no unseen destination or terrain
 map enters the controller. The motor-load cue uses the solved x, not a separate terrain sample.
 
-Dissolved transport applies the shared geographic coefficient once to each directed transfer;
-matching incoming/outgoing faces preserve donor/recipient accounting. q also scales public
+Dissolved transport applies the shared geographic coefficient once per face, choosing the
+directed coefficient of that face's net exchange (per species, from the frozen pre-step rows):
+net uphill exchange is slowed by the slope term, level or downhill exchange keeps the substrate
+rate. Both nodes of a face see opposite nets and therefore choose the same coefficient, so
+donor/recipient commits stay antisymmetric. A uniform field stays uniform on any terrain.
+Choosing the coefficient by donor instead gave each face a fixed concentration ratio
+`1 + beta*slope`; compounded over faces, basin pooling grew as the mesh was refined (seed 27,
+240 × 180, 1,000 s: lowest-height decile 2.6× the mean at mesh 2 and 4.0× at mesh 1).
+`engine/examples/slope_pooling.rs` reproduces both measurements. q also scales public
 processing time in dissolved material, overhead film and exposed reservoir contents. It does
 not change intracellular kinetics, membrane costs, washout, chemical identity or work per
 conversion. Optical geography remains `min(transmission*external_light, ceiling)` through
@@ -151,7 +158,12 @@ validated parser: omitted configuration, empty objects and partial overrides sta
 ecology preset, independent of JSON whitespace. Nested terrain overrides retain unspecified
 ecology settings. `preset: "diagnostic"` explicitly selects neutral defaults; full effective
 configurations override every field and remain round-trippable. The preset is a request choice,
-not additional checkpoint state. No live map
+not additional checkpoint state. The experiment harness permits no implicit base: each harness
+world or configuration request names `ecology` or `diagnostic`, or supplies a complete
+configuration such as one read from a checkpoint. Constructed contests (`rps`, `zones`,
+`evolve`, epochs, capability and habitat fixtures) default to diagnostic; `bacteria`,
+population and default-world measurements use ecology. Commands built on `chemicalConfig`
+accept `--preset` and record the chosen preset in their config artifacts. No live map
 regeneration or checkpoint migration is provided.
 
 V47 uses the existing periodic fractal generator with distinct physical bands: local height,

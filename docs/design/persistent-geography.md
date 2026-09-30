@@ -334,8 +334,10 @@ motion and contact correction cannot bypass geography. Stationary turning does n
 The exact placement relative to adhesion and exclusion must be resolved with the update order;
 neither free uphill contact displacement nor overlap deadlock is an acceptable shortcut.
 
-For dissolved transport, multiply the existing directed outgoing coefficients by m before
-joint donor allocation; use the same sampled resistance for passive finite-owner translation.
+For dissolved transport, multiply each face's exchange by the m of its net direction (the
+[implemented correction](chemistry/composed-runtime.md#geographic-composition) replaced the
+donor-directed choice, whose per-face asymmetry made basin pooling grow with mesh refinement);
+use the same sampled resistance for passive finite-owner translation.
 Preserve frozen donors, antisymmetric material commits and existing speed limits. Opposite
 directions can have different rates while accepted transfer is still added and subtracted
 exactly once. Do not multiply a transport request and its already-adjusted mobility twice.
@@ -344,6 +346,9 @@ Flat q=1, beta=0 must recover current transport and motion.
 Asymmetric exchange can concentrate material in hollows and impede crossing ridges without
 an extra height-to-density formula. That is a prediction to check with diffusion, crowding,
 binding and supply active, not an assigned concentration or guaranteed basin equilibrium.
+Measured September 30: with net-direction face rates, slope skews spreading from local
+supply only slightly downhill and a uniform field stays uniform; the strong ridge-to-hollow
+pooling seen earlier was the donor-directed discretization, not this law.
 Reservoirs may also redistribute; reject a calibration that merely funnels the entire world
 into one sink. Do not fix that failure by tethering them to initial sites.
 

@@ -77,6 +77,39 @@ fn slope_is_directional_and_height_offset_cannot_supply_energy() {
 }
 
 #[test]
+fn slope_slows_dissolved_exchange_without_pooling_uniform_material() {
+    // Directional face rates follow net exchange, so a uniform field has no drift at any
+    // mesh; choosing by donor would pool material in hollows by a mesh-dependent amount.
+    let mut c = config();
+    c.terrain.slope_resistance = 4.;
+    let mut w = World::new(27, c).unwrap();
+    w.sources.clear();
+    crate::source_medium::project(&mut w);
+    let chemistry = w.chemistry.clone();
+    w.field
+        .replace_material(&chemistry, |i| if i % 256 == 0 { 0.01 } else { 0. });
+    crate::diagnostics::initialize(&mut w);
+    assert!(
+        w.shade
+            .geography
+            .faces
+            .iter()
+            .flatten()
+            .any(|f| f[0] != f[1])
+    );
+    for _ in 0..200 {
+        w.step();
+    }
+    let masses: Vec<f64> = (0..w.field.nx * w.field.ny)
+        .map(|n| w.field.amounts().row(n).iter().map(|&v| v as f64).sum())
+        .collect();
+    let (lo, hi) = masses
+        .iter()
+        .fold((f64::MAX, 0f64), |(lo, hi), &m| (lo.min(m), hi.max(m)));
+    assert!(hi / lo < 1. + 1e-4, "uniform material pooled: {lo} to {hi}");
+}
+
+#[test]
 fn neutral_switches_and_invalid_configs_are_explicit() {
     let mut c = config();
     c.terrain = TerrainConfig::default();
