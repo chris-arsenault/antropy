@@ -1,8 +1,8 @@
 # Full fractal terrain and local resource seasons
 
 Sulion root `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Updated September 30, 2026.
-Static implementation was committed and pushed as `569f1a0`. The root remains open for the
-concrete integration repairs below and their delivery, not for verification or user acceptance.
+Static implementation was committed and pushed as `569f1a0`. The integration corrections below
+are implemented locally; the root remains open for their publication, not verification or user acceptance.
 The [original execution record](archive/TERRAIN-AND-SEASONS-PLAN.md) retains the design baseline,
 registrations, results and negative findings. Its test/review gates are retired.
 
@@ -39,35 +39,36 @@ engineering checks and continuing refinement, not requirements to produce a chos
 | M6 | Local mechanical load input through the controller and genetics boundaries |
 | M7 | World-start controls, terrain display layers and bounded inspection |
 
-The original M8 scope-question stage is retired. Slow changing terrain, catastrophes and live
-physical switches remain unselected and unimplemented in the [backlog](../backlog.md).
+The original M8 scope-question stage is retired. The separate [dynamic terrain direction](../design/dynamic-terrain.md)
+owns gradual change, tectonics and local events, including physical accounts, persistence and display.
+It remains open and unimplemented independently of this plan. Live physical switches remain a
+distinct unselected configuration extension.
 The original M9 testing/acceptance stage and its child review stage are retired. Their retirement
 does not claim the omitted experiments ran or that the user approved a visual result.
 
-## Remaining implementation and delivery
+## Integration corrections and remaining delivery
 
-### Correct terrain motion and configuration integration
+### Correct terrain motion and configuration integration — implemented locally
 
-Resolve combined motor/passive motion so opposing components cannot bypass geographic resistance
-or produce load feedback from the wrong direction. Use shared physical semantics for the combined
-operation rather than independently patching cancellation cases.
+Combined motor/passive motion now solves resistance along the resulting path. Opposing components
+retain local conductance when their sum cancels, and motor-load feedback uses that same solution.
 
-Unify native and command configuration parsing so JSON whitespace cannot select different terrain
-physics. Make preset/override semantics explicit and shared; diagnostic neutral configuration must
-be deliberate rather than an accidental consequence of adding one setting.
+Native startup/restart, commands and resource-budget requests share ecology/diagnostic parsing.
+Whitespace and unrelated partial overrides cannot disable terrain; nested overrides retain the
+chosen preset's unspecified fields. Controlled fixtures explicitly select diagnostic defaults.
 
-The review also identified a possible epoch/zone refill issue: accrued lifecycle transitions use
-the commit's final tick/location. Determine whether event timing loses the applicable mixture and
-correct the owner if needed. This concern is not yet a reproduced defect. The ordinary regression
-coverage and relevant bounded terrain checks are part of implementing these changes, not phases
-or tasks assigned to the user.
+The epoch/zone refill defect was reproduced: a deferred commit could choose a later epoch or
+zone. Lifecycle deadlines now force commits in their own step, and refill composition uses the
+event time and interpolated position. The physical checkpoint remains v46. The
+[correction record](../evidence/terrain-corrections/README.md) owns automatic regression and cost
+results; Sulion `c4b3f43f-1704-44e6-be66-aaed2f2d4688` tracks this repair and the separate direction.
 
 ### Publish terrain corrections
 
 Commit and push authorized corrections through the existing shared CI/CD pipeline and resolve
 actual delivery failures. Preserve the continuing world and existing schema/reset authorization
-boundaries. Record the deployed revision when delivery completes. `569f1a0` is already pushed;
-its deployment result was not inspected during this documentation cleanup.
+boundaries. Record the deployed revision when delivery completes. These corrections are not yet
+committed, pushed or deployed; this repair did not reset or inspect the continuing server world.
 
 Close the root when these implementation and authorized delivery tasks finish. Do not wait for
 human acceptance, additional long-running ecology or optional terrain extensions.

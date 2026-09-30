@@ -36,6 +36,7 @@ them. See the [storage policy](evidence/README.md).
 | Regional execution and multicore ownership | [Spatial execution](design/spatial-execution.md) |
 | Terrain, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md) — static v46 implemented; [active repair plan](plans/TERRAIN-AND-SEASONS-PLAN.md) |
 | Local supply clocks | [Local resource seasons](design/local-resource-seasons.md) — implemented v46 |
+| Changing terrain, tectonics and local events | [Dynamic terrain](design/dynamic-terrain.md) — separate open design direction; not implemented |
 | Shade, overhead film and paid emission | [Light ecology](design/light-ecology.md) — implemented v42; [results](light-ecology-results.md) |
 | Paid local light sensing | [Photoreception](photoreception.md) |
 | Strategic ecology scope | [Strategic microbial ecology](design/strategic-ecology.md) |
@@ -58,6 +59,8 @@ them. See the [storage policy](evidence/README.md).
 | --- | --- |
 | Paid byte broadcasts with coarse listener-relative hearing | [Directional cell utterances](design/cell-utterances.md) |
 | Slow learned strategy layer feeding the reflex RNN | [Strategic controller](design/strategic-controller.md) |
+| Gradual geographic change, tectonics and bounded local events | [Dynamic terrain](design/dynamic-terrain.md) |
+| Rugged chemical interaction: surprising mutations and co-located roles | [Direction](design/rugged-interaction.md), [Kauffman research paper](design/kauffman-landscapes-research.md) |
 
 ## Historical design records
 
@@ -224,6 +227,8 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Light ecology: shelter, emission and conditional activity](backlog.md#backlog-light-ecology)
 - [Directional cell communication: mouths and ears](backlog.md#backlog-cell-utterances)
 - [Strategic controller: a slow learned layer above the reflex RNN](backlog.md#backlog-strategic-controller)
+- [Dynamic terrain: gradual change, tectonics and local events](backlog.md#backlog-dynamic-terrain)
+- [Rugged chemical interaction: surprising mutations and co-located roles](backlog.md#backlog-rugged-interaction)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

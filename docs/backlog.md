@@ -22,19 +22,27 @@ starts with ownership and avoidable work, following the structural-first rule in
 [AGENTS.md](../AGENTS.md). Candidate questions are 16/32-core scaling, larger-world costs and
 persistence limits; these are engineering observations, not open acceptance phases.
 
+<a id="backlog-dynamic-terrain"></a>
+
+## Dynamic terrain
+
+**Status:** Open design direction — separately specified September 30; not implemented.
+
+[Dynamic terrain](design/dynamic-terrain.md) is a separate open design direction for gradual
+geographic change, tectonic deformation and bounded local events. It owns the shared field
+operation, fractal morphology, accounts, local invalidation, persistence and display boundaries.
+It remains unimplemented and survives completion of the static-terrain plan. Live physical
+feature switches are specified separately within that document; display toggles are unaffected.
+
 <a id="backlog-terrain-refinement"></a>
 
-## Terrain extensions and continuing refinement
+## Seasonal ecology and continuing terrain refinement
 
-**Status:** Unselected — recorded September 30; static terrain and seasons are implemented in v46.
-
-[Persistent geography](design/persistent-geography.md) records candidate extensions beyond the
-static v46 terrain: slowly changing geography, tectonics and catastrophic topology changes, and
-live physical feature switches. These have no selection decision.
+**Status:** Unselected — static terrain and seasons are implemented in v46.
 
 Seasonal relocation benefit, affordable default reservoir gaps and long-term specialization
-are refinement questions that longer observation can inform. The concrete motion/configuration
-defects from the September 30 review belong to the active
+are refinement questions that longer observation can inform. Motion, configuration and refill-timing
+corrections are implemented locally; their publication belongs to the active
 [terrain implementation plan](plans/TERRAIN-AND-SEASONS-PLAN.md).
 
 <a id="backlog-cell-interactions"></a>
@@ -113,6 +121,22 @@ over the cell's own history, life history, local light and supply phases, local 
 contact-read neighbor displays and internal noise. Both layers learn; daughters inherit the
 parent's strategic state. At implementation, revisit the private byte's ownership and add
 utterance channels before planning delivery.
+
+<a id="backlog-rugged-interaction"></a>
+
+## Rugged chemical interaction: surprising mutations and co-located roles
+
+**Status:** Deferred — research direction specified September 30; complementarity binding is the leading candidate, not yet selected.
+
+[Rugged chemical interaction](design/rugged-interaction.md) seeks mutations that sometimes change
+qualitatively how a cell relates to chemical space, and distinct roles among cells sharing one
+smooth local mixture. The present genotype-to-interaction map is close to Kauffman's additive
+limit; the [research paper](design/kauffman-landscapes-research.md) derives requirements from
+rugged-landscape theory: reciprocal sign epistasis, one shared ruggedness control, neutral
+networks with abrupt borders, and unchanged accounts, algebra and mutation law. The leading
+candidate replaces radial recognition with an additive per-bit binding energy between genetic
+keys and identity bits, passed through a sigmoid with one shared steepness λ. Calibrate λ, bias
+bounds and support cost in constructed fixtures before any implementation plan.
 
 <a id="backlog-plan-carryover"></a>
 

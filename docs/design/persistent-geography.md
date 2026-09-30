@@ -15,7 +15,7 @@ does not authorize a live-world cutover.
 Design tracking: Sulion `95e0ca28-0f12-459f-9e3b-8b482c8f9488`, a documentation task only.
 Full proposal tracking now lives in the [terrain and seasons plan](../plans/TERRAIN-AND-SEASONS-PLAN.md),
 Sulion `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Static implementation is published; the September 30
-review identified motion/configuration defects now owned by the remaining implementation phase.
+review identified motion/configuration defects; corrections are implemented locally with publication pending.
 The [original results](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retain their limits.
 The [current work order](README.md) retains priority.
 
@@ -453,6 +453,10 @@ rendering borrows Rust views; remote spectators receive bounded display projecti
 or full physical field messages to React, second renderer, new listener or separate economy.
 
 ## Later changing geography
+
+The separate [dynamic terrain direction](dynamic-terrain.md) now owns this future scope,
+including gradual change, tectonics, local events and their accounts, cache invalidation,
+continuation and observation. Closing static-terrain work does not close that direction.
 
 The earlier recommendation was static geography first; v46 delivered static geography, and
 dynamics are unselected backlog proposals. Tectonics could slowly alter h and substrate coefficients;

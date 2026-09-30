@@ -123,12 +123,17 @@ coefficients are derived on creation/restore and shared by field and film owners
 For a directed crossing, `m = harmonic(q_i,q_j)/(1 + beta*max(0,delta_h/distance))`.
 Disabling a coupling substitutes q=1 for that consumer; disabling elevation removes the
 slope term. Adhesion first blends motor and passive intended displacement separately with
-the existing weights. Sample resistance along their combined proposed path at mesh-spaced
-segments and compose it as a path-average resistance. Scale paid motor translation by
-sqrt(m) and passive translation by m. Contact correction and reservoir movement use the same
+the existing weights. Solve `d = x*u + x*x*v`, `x*x = m(position,d)`, where u and v are the
+blended motor and passive proposals and m is path-average geographic mobility. A bounded
+scalar bracket on x in [0,1] evaluates resistance along the resulting path; neutral/uniform
+cases resolve directly. A directional discontinuity can produce a stalled solution at zero
+displacement. Zero displacement retains local conductance instead of bypassing it. This keeps
+the square-root power response and linear passive response without sampling the wrong heading
+when their unscaled sum cancels or reverses. Contact correction and reservoir movement use the same
 passive law. This is a constitutive discrete-step approximation, not a gravity solver or
 recoverable height energy. Turning in place retains its paid law. The proposed path can be
-longer than the accepted path; no unseen destination or terrain map enters the controller.
+longer than the accepted path for passive-only corrections; no unseen destination or terrain
+map enters the controller. The motor-load cue uses the solved x, not a separate terrain sample.
 
 Dissolved transport applies the shared geographic coefficient once to each directed transfer;
 matching incoming/outgoing faces preserve donor/recipient accounting. q also scales public
@@ -142,7 +147,11 @@ conductance, transmission, local seasons, motor-load feedback and fractal reserv
 Ceiling clipping remains off. Typed `terrain` configuration exposes each coupling separately;
 the current-behavior preset disables new couplings and retains the older source layout.
 Browser settings apply at world creation. Native and harness configuration use the same
-validated schema. Explicit partial diagnostic configs retain neutral defaults. No live map
+validated parser: omitted configuration, empty objects and partial overrides start from the
+ecology preset, independent of JSON whitespace. Nested terrain overrides retain unspecified
+ecology settings. `preset: "diagnostic"` explicitly selects neutral defaults; full effective
+configurations override every field and remain round-trippable. The preset is a request choice,
+not additional checkpoint state. No live map
 regeneration or checkpoint migration is provided.
 
 The default grid is h=2 on 720×540 geography: 97,200 possible nodes. Persistent 8×8-node
@@ -378,7 +387,15 @@ Release min(Q,r*d_tau) in composition p. With seasons disabled d_tau=dt. Otherwi
 local multiplier `a=1+c*cos(2*pi*t/P+phase)-d*sin(2*pi*t/P+phase)` gives `d_tau=a*dt`.
 The implementation integrates the temporal sinusoid analytically at the source's actual
 trajectory midpoint for each base step; movement and chemical processing retain ordinary time.
-Persist source-local accrued supply time until the normal release commit. Actual depletion samples an independent exponential wait
+Persist source-local accrued supply time until the normal release commit or the next lifecycle
+boundary, whichever comes first. Depletion and refill deadlines force a local commit so they
+cannot be deferred across source epochs or spatial zones. For each refill, invert the same
+monotone seasonal integral at the trajectory midpoint, then sample its epoch and interpolated
+position at that event time. Release is deposited at the step's final footprint, retaining the
+existing bounded spatial integration. Already accrued v46 intervals contain no historical
+trajectory; an overdue boundary in a pre-correction save uses the first resumed step's start
+condition once, then follows the corrected deadlines. No state migration or new stored fields.
+Actual depletion samples an independent exponential wait
 `W=-sourceGap*ln(1-U)`, with U uniform on [0,1). sourceGap is the mean empty interval;
 the draw occurs once per exhaustion from that source's persisted renewal stream. Waiting also
 uses supply time. When the wait has elapsed, a refill imports Q=r*sourceLifetime and its full

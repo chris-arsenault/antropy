@@ -4,7 +4,7 @@
 
 Proposed September 25, 2026, backlogged September 26 and implemented with persistent
 geography in physical v46 (`569f1a0`). The active [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md)
-owns remaining integration repairs and delivery; the
+owns publication of the locally implemented integration corrections; the
 [original execution record](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retains bounded results.
 The seasonal clock is not evidence of evolved migration. Earlier documentation tracking: Sulion
 `1eb5b783-638b-4ac5-9034-b4d970eda46e`.
@@ -100,6 +100,12 @@ Apply this one clock to both parts of the reservoir lifecycle:
 - Account for refill and release through the existing material and work ledgers.
   Carry remaining elapsed supply time through a within-step lifecycle transition;
   do not apply the same interval once to waiting and again to release.
+
+Lifecycle deadlines force a local commit even between scheduled field updates. Within that
+step, refill time is recovered from the same seasonal integral and refill composition uses
+the source's interpolated event position and epoch. Thus deferred supply accounting cannot
+silently move a refill into a later resource zone or epoch. Release parcels retain their own
+compositions and use the final step footprint, as the existing spatial integrator does.
 
 Both consumers matter. Modulating refill alone can leave stocked neighbors supplying
 a supposedly quiet area. Applying a common clock reduces their release together while

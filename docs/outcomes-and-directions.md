@@ -182,6 +182,10 @@ the [backlog](backlog.md) holds the unimplemented work list.
 - **Strategic controller** — a slow heritable Elman RNN whose outputs become reflex-RNN inputs and
   a learning gain; it issues no actions. Deferred, specified September 30, expected after
   utterances ([specification](design/strategic-controller.md), [backlog](backlog.md#backlog-strategic-controller)).
+- **Rugged chemical interaction** — non-smooth genotype-to-chemical interaction so mutations can
+  change a cell's chemical relationships qualitatively and co-located cells can occupy distinct
+  roles. Deferred research direction, September 30; no mechanism selected
+  ([specification](design/rugged-interaction.md), [research paper](design/kauffman-landscapes-research.md)).
 
 ### Unselected extensions
 

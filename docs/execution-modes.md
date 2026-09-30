@@ -42,6 +42,13 @@ creates a fresh seed.
 | `BIOTROPY_STATE_BYTES` | `4294967296` | Compressed byte budget for automatic checkpoints |
 | `BIOTROPY_AUTOSAVE_SECONDS` | `1800` | Automatic save period; `0` keeps only shutdown and operator saves |
 
+New-world JSON uses the same parser as browser and harness requests. `{}`, `{ }` and omitted
+configuration select the ecology preset; partial fields override it without disabling terrain.
+For example, `{"terrain":{"seasons":false}}` disables only seasons. Diagnostic fixtures can
+request `{"preset":"diagnostic"}` and override that neutral baseline deliberately. Complete
+effective configurations retain all their explicit values. Restoring a checkpoint uses its
+saved configuration rather than reapplying startup overrides.
+
 ## Server persistence
 
 The server stores ordinary physical checkpoints in the running format, gzip-compressed, with a JSON sidecar

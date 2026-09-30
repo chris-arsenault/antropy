@@ -25,8 +25,9 @@ in the [plan index](../plans/README.md).
 Physical v46 implements persistent elevation, conductance, overhead transmission and optional
 ceilings, independent fractal source placement and local seasonal release/refill clocks.
 World-start configuration exposes each coupling and current-behavior/integrated presets.
-The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns remaining motion/configuration
-repairs and delivery. Changing terrain and live physical switches are unselected backlog ideas. The
+The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns publication of the locally implemented
+motion, configuration and refill-timing corrections. [Dynamic terrain](dynamic-terrain.md) is a separate open design direction
+for gradual change, tectonics and local events; it is not implemented or a static-delivery gate. The
 [composed laws](chemistry/composed-runtime.md#geographic-composition) own the physical operations.
 Format v46 rejects older checkpoints without migration. The static implementation is pushed to
 main as `569f1a0`.
@@ -222,6 +223,7 @@ changes improved it; this historical diagnosis is not the current work order.
 | [Light ecology](light-ecology.md) | Implemented v42: scalar illumination, geographic shade, overhead film, paid emission and shared optical accounting |
 | [Directional cell utterances](cell-utterances.md) | Deferred specification for paid bytes, coarse listener-relative bearing, funded inheritance and natural observation after implementation; no prior payoff or evolution gate |
 | [Strategic controller](strategic-controller.md) | Deferred specification for a slow learned strategy layer: history transform, local rhythm phases, neighbor display, reflex context inputs and learning gain |
+| [Rugged chemical interaction](rugged-interaction.md) | Deferred research direction for surprising mutations and co-located roles; [Kauffman research paper](kauffman-landscapes-research.md) |
 | [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
 | [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
 | [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
