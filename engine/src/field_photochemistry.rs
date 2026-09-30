@@ -49,7 +49,7 @@ impl Field {
                         region.row_mut(site),
                         mask,
                         (signal, load),
-                        dt,
+                        dt * illumination.shade.geography.processing_node(n),
                         exposure,
                     );
                     paid += (weather.work - before) * exposure.paid_fraction();

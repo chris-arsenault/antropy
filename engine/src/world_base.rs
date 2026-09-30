@@ -21,7 +21,7 @@ impl World {
         let motion = &self.contact_cache.motion;
         let genomes = &self.genomes;
         let config = &self.config;
-        let mut displacements = vec![[0.; 2]; self.cells.len()];
+        let mut displacements = vec![[0.; 4]; self.cells.len()];
         let mut jobs: Vec<_> = self.cells.iter_mut().zip(&mut displacements).collect();
         let cost = crate::parallel::cost::CELL_STEP;
         crate::parallel::for_each(&mut jobs, cost, |i, (cell, d)| {
@@ -32,18 +32,22 @@ impl World {
             **d = motion.displacement(i, cell, config);
         });
         drop(jobs);
-        crate::adhesion::blend(
-            &mut displacements,
-            &self.cells,
+        let geography = &self.field.illumination.shade.geography;
+        crate::movement::prepared::blend_apply(
+            &mut self.cells,
+            displacements,
             &local.contacts,
-            config.adhesion,
+            config,
+            geography,
         );
-        let mut jobs: Vec<_> = self.cells.iter_mut().zip(&displacements).collect();
         let cost = crate::parallel::cost::CELL_READ;
-        crate::parallel::for_each(&mut jobs, cost, |i, (cell, d)| {
-            crate::movement::prepared::apply(cell, **d, config);
-            cell.x = (cell.x + pressure[i].shift[0] * dt).rem_euclid(config.width);
-            cell.y = (cell.y + pressure[i].shift[1] * dt).rem_euclid(config.height);
+        crate::parallel::for_each(&mut self.cells, cost, |i, cell| {
+            crate::movement::prepared::passive_apply(
+                cell,
+                pressure[i].shift.map(|v| v * dt),
+                config,
+                geography,
+            );
         });
         self.contact_cache.motion.contact_preparations += self.cells.len() as u64;
         if !physiology {

@@ -1,33 +1,25 @@
 //! Canonical geographic shade. Generation never reads organisms or reservoir placement.
 use crate::config::Config;
+pub use crate::terrain_placement::density as resource_density;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
+#[path = "terrain_generation.rs"]
+pub(crate) mod generation;
 #[path = "terrain_noise.rs"]
-mod noise;
+pub(crate) mod noise;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Shade {
     pub transmission: Vec<f64>,
     /// Empty means unrestricted; otherwise one nonnegative light ceiling per node.
     pub ceiling: Vec<f64>,
+    pub geography: crate::geography::Geography,
 }
 
 impl Shade {
     pub fn generate(seed: u64, c: &Config, nx: usize, ny: usize) -> Arc<Self> {
-        let generator = noise::Generator::new(seed, [c.width, c.height], c.shade_scale, c.mesh);
-        let transmission = (0..nx * ny)
-            .map(|node| {
-                let x = (node % nx) as f64 + 0.5;
-                let y = (node / nx) as f64 + 0.5;
-                let signal = generator.sample([x * c.width / nx as f64, y * c.height / ny as f64]);
-                1. - c.shade_strength * (0.5 + 0.5 * signal).powi(2)
-            })
-            .collect();
-        Arc::new(Self {
-            transmission,
-            ceiling: Vec::new(),
-        })
+        Arc::new(generation::generate(seed, c, nx, ny))
     }
 
     pub fn apply(&self, node: usize, sun: f64) -> f64 {
@@ -67,6 +59,7 @@ mod tests {
         let shade = Shade {
             transmission: vec![0.5, 1.],
             ceiling: vec![0.3, 0.8],
+            ..Default::default()
         };
         let mut light = crate::illumination::Illumination::default();
         light.shade = Arc::new(shade);

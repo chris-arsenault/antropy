@@ -3,6 +3,7 @@ export interface SourceSchedule {
   mixtures: number[][];
 }
 export interface EngineConfig extends Record<string, unknown> {
+  terrain: import("./terrainConfig").TerrainConfig;
   width: number;
   height: number;
   mesh: number;
@@ -240,6 +241,7 @@ export interface Inspection {
   mobility: number | null;
   weathering: [number, number, number] | null;
   illumination: number | null;
+  terrain: import("./terrainConfig").LocalTerrain | null;
   optics: {
     solar: number;
     emitted: number;

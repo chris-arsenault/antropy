@@ -1,14 +1,19 @@
 # Persistent geography and conditional survival
 
-Proposed September 24, 2026; expanded September 30 for **integrated terrain and local-season
-design review, before implementation planning**. The user requests the full terrain direction,
+Proposed September 24, 2026; expanded September 30 for integrated terrain and local-season
+design and implementation. The user requests the full terrain direction,
 configuration switches and concrete fractal generation/placement algorithms. The static
-substrate and [local resource seasons](local-resource-seasons.md) form one proposed design.
+substrate and [local resource seasons](local-resource-seasons.md) form one design, implemented
+locally in physical v46. The [composed laws](chemistry/composed-runtime.md#geographic-composition)
+record the installed operations; delivery evidence and remaining acceptance live in the plan.
 Whether slow terrain changes and catastrophes belong in this delivery remains unresolved;
 the earlier static-first recommendation does not settle that scope question. This document
-authorizes no runtime implementation, live-world change or experiment campaign.
+does not authorize a live-world cutover.
 
 Design tracking: Sulion `95e0ca28-0f12-459f-9e3b-8b482c8f9488`, a documentation task only.
+Full proposal tracking now lives in the [terrain and seasons plan](../plans/TERRAIN-AND-SEASONS-PLAN.md),
+Sulion `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Static implementation and bounded validation are complete;
+creating the plan does not resolve the open physical/dynamic scope decisions below.
 The [current work order](README.md) and [scaling plan](../../SCALING-PLAN.md) retain priority.
 
 September 25 reconciliation: the [light ecology plan](../plans/LIGHT-ECOLOGY-PLAN.md)
@@ -91,8 +96,9 @@ Do not add an erosion simulation, drainage network or biome classifier merely to
 The existing [noise generator](../../engine/src/terrain_noise.rs) already supplies periodic
 hashed value noise, independently offset octaves and domain warping. Extend that implementation
 into one shared boot generator. Existing [reservoir placement](../../engine/src/sources.rs)
-instead chooses weighted random centers and radial offsets; it is not the fractal density
-placement specified here. These are proposed changes, not claims about the running world.
+retains weighted random centers and radial offsets in the current-behavior preset. V46's
+integrated preset uses the fractal density placement below. This describes local code, not
+the continuing live world's configuration.
 
 ### Seed ownership and generation order
 
@@ -404,7 +410,7 @@ a shade specialist or invent sunlight damage to guarantee one.
 
 These are hypotheses, not organism classes. Existing motor investment, storage, receptors,
 transporters, enzyme repertoires, membranes and neural allocation provide initial axes of
-variation. Stronger motors need not defeat steep terrain if their construction/upkeep costs
+variation. Stronger motors need not defeat steep terrain if their body allocation, drag and paid effort
 exceed the additional access. Dense stationary colonies remain a legitimate outcome.
 
 Local light and chemistry are already sensed. Height, map coordinates, region labels, absolute
@@ -459,17 +465,17 @@ These obligations explain why dynamics should follow an understood static world.
 
 Settled by this request: persistent pseudorandom geography, macro and micro variation, local
 slope effects on the XY substrate, permanent optical cover, configuration-controlled terrain
-and seasons, and fractal map/placement design before an
-implementation plan. Review has advanced beyond the original backlog-only request; the
-runtime laws and unresolved dynamic/live-control scope are not thereby accepted.
+and seasons, and fractal map/placement design. Execution was subsequently authorized through
+the terrain plan. The installed static operators are recorded in the composed laws; the
+dynamic/live-control scope remains unresolved.
 
-Provisional recommendations: wet/dry as continuous conductance; directional uphill resistance;
+Adopted static model: wet/dry as continuous conductance; directional uphill resistance;
 common external transport/reaction timing; attenuation first, with optional clipping; independent
-but spatially coherent geography layers. Their formulas are reviewable candidates, not additional
-governing equations. The user owns whether water means an actual fluid and whether cliffs,
+but spatially coherent geography layers. The composed laws own their current equations and
+the delivery plan owns measurements. The user owns whether water means an actual fluid and whether cliffs,
 impassable land or water-exclusive bodies are wanted; those would change this candidate's scope.
 
-If selected, create implementation phases from these acceptance milestones:
+The delivery plan expands these design acceptance milestones:
 
 1. **Select laws and budgets.** Resolve water meaning, slope/contact composition, the role of
    clipping, observable effort feedback, generation scales and complete accounts. Calculate

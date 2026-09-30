@@ -9,6 +9,13 @@ export interface ChemicalDisplay {
     | "terrain"
     | "cover"
     | "emission"
+    | "height"
+    | "conductance"
+    | "slope"
+    | "supply"
+    | "seasonAmplitude"
+    | "seasonPhase"
+    | "ceiling"
     | "none";
   impedance: boolean;
   illumination: boolean;
@@ -36,6 +43,13 @@ export function chemicalLayers(view: ChemicalDisplay) {
     view.base === "terrain",
     view.base === "cover",
     view.base === "emission",
+    view.base === "height",
+    view.base === "conductance",
+    view.base === "slope",
+    view.base === "supply",
+    view.base === "seasonAmplitude",
+    view.base === "seasonPhase",
+    view.base === "ceiling",
   ];
 }
 export const quantity = (n: number) => (n === 0 ? "0" : n.toPrecision(3));

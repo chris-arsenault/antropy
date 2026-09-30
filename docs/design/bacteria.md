@@ -12,6 +12,10 @@ physical opportunities and operating limits; no evolved community is supplied.
 One periodic 720 × 540 XY plane contains continuous circular organisms and a mesh-2 chemical
 field. Neither axis is height. Sampling, motion, contact, offspring placement and rendering
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
+V46 adds static fractal height, conductance, optical cover and circular seasonal maps on this
+same plane. Shared resistance changes travel and external-material transport; conductance also
+changes public processing time. A paid local motor-load reading joins the controller's 59
+inputs. See the [geographic laws](chemistry/composed-runtime.md#geographic-composition).
 Funded reproduction has no population-count ceiling. The ancestry budget and runtime memory
 limits remain independent operating limits; they do not kill cells or select parents.
 
@@ -28,10 +32,11 @@ temperature, Brownian rule or fluid solver.
 ## Fields and finite deposits
 
 The world persists a constrained 16×16 chemical manifold. Every ID has potential, diffusivity,
-impedance and stress. IDs have no privileged food, toxin, signal or matrix role. Dense node-major float32 arrays store all 256 species per mesh node. Conservative SIMD
-destination-row diffusion plus shared-profile drift and a shared slow washout law apply to all chemicals. Float32 rounding
-has explicit matter/energy accounts. Active chemical groups skip empty stencil work; concentrations
-below 1e-6 are rounded to zero with signed numerical accounts. Storage remains dense. See the
+impedance and stress. IDs have no privileged food, toxin, signal or matrix role. Persistent
+8×8-node regions own compact occupied float32 chemical rows. Conservative SIMD destination-row
+diffusion plus shared-profile drift and uniform fractional washout apply to all chemicals.
+Active chemical groups skip empty stencil work; omitted material and float32 rounding have
+explicit signed matter/reference-value accounts. Geographic coefficients preserve these owners. See the
 [selected numerical laws](chemistry/composed-runtime.md).
 
 Local mixture profiles favor compatible chemical transformations through a compact compiled
@@ -41,11 +46,14 @@ attenuates conversion. Paid exports can change both product selection and exposu
 remain available to neighbors and subject to transport, washout, weathering and uptake.
 Controllers receive the resulting chemistry through their ordinary local sensors.
 
-Two hundred forty reservoirs start around 35 unequal abiotic neighborhoods. Local chemical gradients
-move occupied reservoirs with impedance-dependent drag; empty sites do not move. Richness and radii
+Two hundred forty reservoirs start from a separate fractal density in the integrated preset;
+the current-behavior preset retains 35 unequal neighborhoods. Local chemical gradients
+move full and empty reservoirs with material and geographic resistance. Richness and radii
 persist; renewal uses the current location and a persisted mixture that changes with local processing. Independent renewals
-continue indefinitely, importing accounted matter and potential. Release is an internal transfer
-from an inventory processed through the shared chemical operator. Accounted external work can
+continue indefinitely, importing accounted matter and potential. Release and refill waiting
+advance on a shared local seasonal supply clock. It does not
+alter chemical or cellular time. Pending supply time and private renewal draws survive saves.
+Release transfers from an inventory processed through the shared chemical operator. Accounted external work can
 fund uphill changes. Empty sites retain their evolving renewal mixture; no ordinary renewal
 reinstates a hardcoded food ID. See [current source laws](chemistry/composed-runtime.md) and
 [material-habitat evidence](../material-habitats.md).

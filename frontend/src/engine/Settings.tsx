@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type Bridge } from "./bridge";
 import { type Definition, type EngineConfig } from "./types";
+import { TerrainSettings } from "./TerrainSettings";
 
 const policies = {
   learning: ["plastic", "static"],
@@ -27,7 +28,7 @@ const fields = [
   ["sourceProcessing", "Stored-resource weathering multiplier", 0],
   ["illuminationContrast", "Illumination contrast (0–1)", 0],
   ["shadeStrength", "Permanent shade strength (0–1)", 0],
-  ["shadeScale", "Terrain shade scale (world units)", 0.01],
+  ["shadeScale", "Terrain region scale (world units)", 0.01],
   ["opticalColumn", "Film mass / area for optical depth 1", 0.00001],
   ["opticalReach", "Emission spread (world units)", 0.01],
   ["opticalPowerDensity", "Work / area / time for 1× emitted light", 0.00001],
@@ -98,6 +99,7 @@ export function Settings({
           Seed <input value={seed} onChange={(e) => setSeed(e.target.value)} />
         </label>
         <SourceComposition config={config} setConfig={setConfig} />
+        <TerrainSettings config={config} change={setConfig} />
         <details>
           <summary>Ecology and mutation settings</summary>
           {fields.map(([key, label, min]) => (

@@ -2,6 +2,7 @@
 pub struct Work {
     pub mask: u64,
     pub floor: f32,
+    pub geography: [[f32; 2]; 4],
 }
 
 pub fn redistribute(
@@ -11,7 +12,11 @@ pub fn redistribute(
     rows: &[[f32; 256]; 4],
     coefficients: [[f32; 4]; 4],
     decay: f32,
-    Work { mut mask, floor }: Work,
+    Work {
+        mut mask,
+        floor,
+        geography,
+    }: Work,
 ) -> u64 {
     let mut active = 0;
     #[cfg(target_arch = "wasm32")]
@@ -39,12 +44,21 @@ pub fn redistribute(
                 let forward = v128_and(drift, f32x4_gt(drift, zero));
                 let reverse = f32x4_neg(drift);
                 let backward = v128_and(reverse, f32x4_gt(reverse, zero));
-                outgoing = f32x4_add(outgoing, f32x4_add(diffusion, forward));
+                outgoing = f32x4_add(
+                    outgoing,
+                    f32x4_mul(
+                        f32x4_add(diffusion, forward),
+                        f32x4_splat(geography[face][0]),
+                    ),
+                );
                 incoming = f32x4_add(
                     incoming,
                     f32x4_mul(
                         v128_load(adjacent[face].as_ptr().add(s).cast()),
-                        f32x4_add(diffusion, backward),
+                        f32x4_mul(
+                            f32x4_add(diffusion, backward),
+                            f32x4_splat(geography[face][1]),
+                        ),
                     ),
                 );
             }
@@ -73,8 +87,8 @@ pub fn redistribute(
                 let c = coefficients[face];
                 let diffusion = rows[0][s] * c[0];
                 let drift = rows[1][s] * c[1] + rows[2][s] * c[2] + rows[3][s] * c[3];
-                outgoing += diffusion + drift.max(0.);
-                incoming += adjacent[face][s] * (diffusion + (-drift).max(0.));
+                outgoing += (diffusion + drift.max(0.)) * geography[face][0];
+                incoming += adjacent[face][s] * (diffusion + (-drift).max(0.)) * geography[face][1];
             }
             out[s] = (center[s] * (1. - outgoing) + incoming) * decay;
             if out[s] < floor {

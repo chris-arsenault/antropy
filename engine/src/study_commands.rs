@@ -132,6 +132,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         material: Default::default(),
         interface: 0.,
         pending: 0.,
+        renewal_rng: crate::random::Random::new(w.environment_rng.next_u64()),
     };
     for &id in &w.config.source_species {
         let q = s.duration * s.rate / w.config.source_species.len() as f64;

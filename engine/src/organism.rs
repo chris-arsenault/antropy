@@ -45,6 +45,8 @@ pub struct Cell {
     pub inward_receptors: [f64; 4],
     pub photoreceptor: f64,
     pub contacts: [f64; 4],
+    /// Last paid motor load, a local physical signal rather than a terrain map reading.
+    pub motor_load: f64,
     #[serde(skip)]
     pub interface: crate::interfaces::Reading,
     pub inputs: Vec<f32>,
@@ -126,6 +128,7 @@ impl Cell {
             inward_receptors: [0.; 4],
             photoreceptor: 0.,
             contacts: [0.; 4],
+            motor_load: 0.,
             interface: Default::default(),
             inputs: vec![0.; INPUTS],
             action: Action::default(),
@@ -211,6 +214,8 @@ impl Cell {
             || self.y >= c.height
             || !self.heading.is_finite()
             || self.damage > 1.
+            || !self.motor_load.is_finite()
+            || !(0. ..=1.).contains(&self.motor_load)
             || self
                 .brain
                 .hidden

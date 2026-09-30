@@ -39,6 +39,7 @@ const INPUTS = [
   ...Array.from({ length: 4 }, (_, i) => `Built enzyme ${i + 4}`),
   "Built cover builder",
   "Built light emitter",
+  "Paid motor load",
 ];
 interface Props {
   bridge: Bridge;
@@ -152,6 +153,13 @@ function CellDetails({
       <Chemistry inspection={p} definition={definition} />
       <CellOrganization inspection={p} />
       <Photoreception cell={c} />
+      {p.terrain && (
+        <p>
+          Terrain height {n(p.terrain.height)} · grade {n(p.terrain.slope)} · conductance{" "}
+          {n(p.terrain.conductance)}. Local supply clock {n(p.terrain.supplyMultiplier)}× · seasonal
+          amplitude {n(p.terrain.seasonAmplitude)}. Paid motor load {n(c.inputs[58])}.
+        </p>
+      )}
       {p.optics && (
         <p>
           Sunlight {n(p.optics.solar)}× · emitted light {n(p.optics.emitted)}×. Terrain transmission{" "}

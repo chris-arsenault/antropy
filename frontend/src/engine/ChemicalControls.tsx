@@ -23,6 +23,13 @@ export function ChemicalControls({
           <option value="terrain">Terrain transmission</option>
           <option value="cover">Constructed cover</option>
           <option value="emission">Received emission</option>
+          <option value="height">Terrain elevation</option>
+          <option value="conductance">Substrate conductance</option>
+          <option value="slope">Terrain slope</option>
+          <option value="supply">Local supply season</option>
+          <option value="seasonAmplitude">Season strength</option>
+          <option value="seasonPhase">Season phase</option>
+          <option value="ceiling">Light ceiling</option>
           <option value="none">No background field</option>
         </select>
       </label>
@@ -67,6 +74,8 @@ export function ChemicalControls({
 }
 
 function baseLegend(value: ChemicalDisplay) {
+  const terrain = terrainLegend[value.base];
+  if (terrain) return terrain;
   const half = quantity(Math.log(2) / value.exposure);
   const name = value.base === "chemical" ? `Chemical #${value.species}` : "Dissolved amount";
   let legend =
@@ -91,6 +100,21 @@ function baseLegend(value: ChemicalDisplay) {
   return legend;
 }
 
+const terrainLegend: Partial<Record<ChemicalDisplay["base"], string>> = {
+  height:
+    "Blue → sand: low → high terrain. Height changes resistance; cells remain on the XY plane.",
+  conductance:
+    "Brown → turquoise: low → high conductance (0–1). Enabled couplings affect travel, spreading and public processing.",
+  slope: "Dark → amber: grade, shown as grade / (1 + grade). A high flat plateau has no slope.",
+  supply:
+    "Brown → ivory → turquoise: 0× → 1× → 2× local supply clock. This is release/refill timing, not food already present.",
+  seasonAmplitude: "Dark → turquoise: seasonal amplitude (0–1). Weak regions have steadier supply.",
+  seasonPhase:
+    "Cyclic colors show local seasonal phase; weak seasons fade to gray. Phase is not a cell sensory input.",
+  ceiling:
+    "Dark → ivory: light ceiling, shown as ceiling / (1 + ceiling). White means unrestricted.",
+};
+
 export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
   return (
     <div className="chemical-legend">
@@ -112,13 +136,14 @@ export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
           depends on membrane compatibility and repair.
         </p>
       )}
-      {value.illumination && value.base !== "illumination" && (
-        <p>
-          Translucent shadow dims fields, cells and sources together, with a soft boundary around
-          the mean 1× illumination. Detail remains visible in shadow. Cells sense the same
-          illumination shown here.
-        </p>
-      )}
+      {value.illumination &&
+        ["matter", "potential", "chemical", "weathering", "none"].includes(value.base) && (
+          <p>
+            Translucent shadow dims fields, cells and sources together, with a soft boundary around
+            the mean 1× illumination. Detail remains visible in shadow. Cells sense the same
+            illumination shown here.
+          </p>
+        )}
     </div>
   );
 }

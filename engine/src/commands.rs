@@ -15,8 +15,7 @@ fn number(v: &Value, name: &str) -> Result<u64, String> {
         .ok_or_else(|| format!("Missing unsigned integer: {name}"))
 }
 pub fn configuration(v: &Value) -> Result<Value, String> {
-    let mut config: Config = serde_json::from_value(v.get("config").cloned().unwrap_or(json!({})))
-        .map_err(|e| e.to_string())?;
+    let mut config = requested_config(v)?;
     config.validate()?;
     let chemistry = crate::chemistry::Chemistry::new(config.chemistry_seed)?;
     if config.source_species.is_empty() {
@@ -562,7 +561,14 @@ pub fn create(v: &Value) -> Result<World, String> {
         ));
     }
     let seed = v.get("seed").and_then(Value::as_u64).unwrap_or(27);
-    let config: Config = serde_json::from_value(v.get("config").cloned().unwrap_or(json!({})))
-        .map_err(|e| e.to_string())?;
+    let config = requested_config(v)?;
     World::new(seed, config)
+}
+
+fn requested_config(v: &Value) -> Result<Config, String> {
+    match v.get("config") {
+        None => Ok(Config::ecology()),
+        Some(Value::Object(c)) if c.is_empty() => Ok(Config::ecology()),
+        Some(c) => serde_json::from_value(c.clone()).map_err(|e| e.to_string()),
+    }
 }

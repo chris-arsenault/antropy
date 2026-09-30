@@ -225,6 +225,7 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     result["weathering"] = json!(cell.map(|c| crate::climate::local(w, c.x, c.y)));
     result["illumination"] = json!(cell.map(|c| crate::illumination::at(w, c.x, c.y)));
     result["optics"] = json!(cell.map(|c| crate::illumination::inspect(w, c)));
+    result["terrain"] = json!(cell.map(|c| crate::terrain_observation::local(w, [c.x, c.y])));
     result["coverLocal"] = json!(cell.map(|c| {
         let sites = w.cover.stencil(c.x, c.y);
         (0..256)

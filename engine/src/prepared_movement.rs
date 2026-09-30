@@ -90,15 +90,18 @@ impl Motion {
         contacts: &super::geometry::Contacts,
     ) {
         self.prepare_all(cells, c, field, sites);
-        let mut displacements: Vec<_> = cells
+        let displacements: Vec<_> = cells
             .iter_mut()
             .enumerate()
             .map(|(i, cell)| self.displacement(i, cell, c))
             .collect();
-        crate::adhesion::blend(&mut displacements, cells, contacts, c.adhesion);
-        for (cell, d) in cells.iter_mut().zip(displacements) {
-            apply(cell, d, c);
-        }
+        blend_apply(
+            cells,
+            displacements,
+            contacts,
+            c,
+            &field.illumination.shade.geography,
+        );
     }
     /// Refreshes shared footprint dependencies by region, then each cell's coefficients.
     pub(crate) fn prepare_all(&mut self, cells: &[Cell], c: &Config, field: &Field, sites: &[Row]) {
@@ -150,7 +153,7 @@ impl Motion {
         false
     }
     /// Pays motor work and turns the cell; returns its intended displacement for this step.
-    pub(crate) fn displacement(&self, i: usize, cell: &mut Cell, c: &Config) -> [f64; 2] {
+    pub(crate) fn displacement(&self, i: usize, cell: &mut Cell, c: &Config) -> [f64; 4] {
         Self::intend(&self.coefficients[i], cell, c)
     }
     fn prepare_cell(
@@ -169,7 +172,7 @@ impl Motion {
         coefficients.passive = super::passive(profile, gradient, 0., mobility, field.drift);
         coefficients.position = [cell.x, cell.y];
     }
-    fn intend(coefficients: &Coefficients, cell: &mut Cell, c: &Config) -> [f64; 2] {
+    fn intend(coefficients: &Coefficients, cell: &mut Cell, c: &Config) -> [f64; 4] {
         let cost = super::motor_work_rate(
             &cell.body,
             cell.damage,
@@ -187,8 +190,10 @@ impl Motion {
         let swimming = speed * cell.action.swim * fraction;
         let (sin, cos) = cell.heading.sin_cos();
         [
-            (swimming * cos + coefficients.passive[0]) * c.dt,
-            (swimming * sin + coefficients.passive[1]) * c.dt,
+            swimming * cos * c.dt,
+            swimming * sin * c.dt,
+            coefficients.passive[0] * c.dt,
+            coefficients.passive[1] * c.dt,
         ]
     }
     pub fn contacts(
@@ -196,10 +201,11 @@ impl Motion {
         cells: &mut [Cell],
         c: &Config,
         local: &mut super::geometry::prepared::Local,
+        geography: &crate::geography::Geography,
     ) {
         let rows = local.pressure_at(c.dt);
         for (cell, row) in cells.iter_mut().zip(rows) {
-            self.contact_one(cell, c, row);
+            self.contact_one(cell, c, row, geography);
         }
     }
     pub(crate) fn contact_one(
@@ -207,11 +213,53 @@ impl Motion {
         cell: &mut Cell,
         c: &Config,
         row: &super::geometry::prepared::pressure::Row,
+        geography: &crate::geography::Geography,
     ) {
         self.contact_preparations += 1;
         cell.contacts = row.contacts();
-        apply(cell, row.shift.map(|v| v * c.dt), c);
+        passive_apply(cell, row.shift.map(|v| v * c.dt), c, geography);
     }
+}
+
+/// Adhesion transfers motor and passive motion with the same weights. Apply geographic
+/// resistance in the resulting direction, retaining the distinct power/velocity relations.
+pub(crate) fn blend_apply(
+    cells: &mut [Cell],
+    intents: Vec<[f64; 4]>,
+    contacts: &super::geometry::Contacts,
+    c: &Config,
+    g: &crate::geography::Geography,
+) {
+    let mut motor: Vec<_> = intents.iter().map(|v| [v[0], v[1]]).collect();
+    let mut passive: Vec<_> = intents.iter().map(|v| [v[2], v[3]]).collect();
+    crate::adhesion::blend(&mut motor, cells, contacts, c.adhesion);
+    crate::adhesion::blend(&mut passive, cells, contacts, c.adhesion);
+    for ((cell, swim), drift) in cells.iter_mut().zip(motor).zip(passive) {
+        let m = g.movement([cell.x, cell.y], [swim[0] + drift[0], swim[1] + drift[1]]);
+        cell.motor_load = if c.terrain.feedback && cell.flows.motors > 0. {
+            (1. - m.sqrt()) * cell.action.swim.abs() * (1. - cell.damage)
+        } else {
+            0.
+        };
+        apply(
+            cell,
+            [
+                swim[0] * m.sqrt() + drift[0] * m,
+                swim[1] * m.sqrt() + drift[1] * m,
+            ],
+            c,
+        );
+    }
+}
+
+pub(crate) fn passive_apply(
+    cell: &mut Cell,
+    d: [f64; 2],
+    c: &Config,
+    g: &crate::geography::Geography,
+) {
+    let m = g.movement([cell.x, cell.y], d);
+    apply(cell, d.map(|v| v * m), c);
 }
 
 /// Moves a cell by its blended displacement; the travelled distance is what actually moved.

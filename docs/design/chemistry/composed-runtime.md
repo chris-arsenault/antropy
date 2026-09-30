@@ -1,6 +1,6 @@
 # Composed artificial chemistry runtime
 
-Updated September 28, 2026. This contract governs the fresh implementation under
+Updated September 30, 2026. This contract governs the fresh implementation under
 [the canonical math plan](../../plans/archive/MATHEMATICAL-SYMMETRY-PLAN.md#canonical-work-order). It supersedes the removed
 runtime's numerical formulas and the candidate-only integration sequence. The
 [computational foundation](computational-foundation.md), [principles](../../principles.md),
@@ -78,6 +78,12 @@ plane the radial median is L and the 90th percentile is 3L. The former disk cuto
 removed; source count, size, richness, composition and random draw counts are retained.
 There are no stored center anchors or runtime relocation rules.
 
+V46 implements static [fractal geography](../persistent-geography.md) and
+[local resource seasons](../local-resource-seasons.md). Canonical maps, configuration,
+source-local supply accrual and renewal RNG state survive checkpoints. The
+[terrain delivery plan](../../plans/TERRAIN-AND-SEASONS-PLAN.md) records local validation and
+the unresolved dynamic-terrain and live-switch scope. This is not a live-world cutover.
+
 ## Meaning and owners
 
 This is an artificial material and work system. It has no temperature, entropy,
@@ -89,7 +95,7 @@ signed profiles supply geographic transport signals. They store no usable work.
 
 Rust owns compact occupied f32 geographic rows, f64 free and biomass mixtures, twenty-two derived
 body capacities, usable work, damage, private controllers and bounded compact ancestry.
-The same worker renders borrowed WASM views. Checkpoint v44 persists one birth genome identity per cell
+The same worker renders borrowed WASM views. Checkpoint v46 persists one birth genome identity per cell
 and one reservoir composition plus amount; it rejects earlier physical bytes.
 Chemical capabilities are fixed for the cell's lifetime; compiled operators are derived and shared.
 There is no exporter allele or thermal-energy setting in this version.
@@ -104,6 +110,39 @@ laws. Those surfaces describe different physical roles; their retained gradient 
 universal energy ordering. No organism outcome selects a landscape.
 
 ## Geographic composition
+
+One Rust-owned substrate stores periodic f64 height, conductance and circular seasonal
+components alongside overhead transmission and an optional ceiling. These are boundary
+conditions, not extra material inventories. Independent named streams generate area-averaged
+warped octave fields at boot. Persisted provenance includes seed, generator version, retained
+full/seasonal wavelengths and quadrature counts. Unresolved finest octaves are omitted;
+runtime mesh resolution is unchanged. Canonical arrays are saved once; directed f32 face
+coefficients are derived on creation/restore and shared by field and film owners.
+
+For a directed crossing, `m = harmonic(q_i,q_j)/(1 + beta*max(0,delta_h/distance))`.
+Disabling a coupling substitutes q=1 for that consumer; disabling elevation removes the
+slope term. Adhesion first blends motor and passive intended displacement separately with
+the existing weights. Sample resistance along their combined proposed path at mesh-spaced
+segments and compose it as a path-average resistance. Scale paid motor translation by
+sqrt(m) and passive translation by m. Contact correction and reservoir movement use the same
+passive law. This is a constitutive discrete-step approximation, not a gravity solver or
+recoverable height energy. Turning in place retains its paid law. The proposed path can be
+longer than the accepted path; no unseen destination or terrain map enters the controller.
+
+Dissolved transport applies the shared geographic coefficient once to each directed transfer;
+matching incoming/outgoing faces preserve donor/recipient accounting. q also scales public
+processing time in dissolved material, overhead film and exposed reservoir contents. It does
+not change intracellular kinetics, membrane costs, washout, chemical identity or work per
+conversion. Optical geography remains `min(transmission*external_light, ceiling)` through
+the installed illumination owner. Material shade and paid emission retain their own accounts.
+
+The default new-world preset enables elevation, movement/transport/public-processing
+conductance, transmission, local seasons, motor-load feedback and fractal reservoir placement.
+Ceiling clipping remains off. Typed `terrain` configuration exposes each coupling separately;
+the current-behavior preset disables new couplings and retains the older source layout.
+Browser settings apply at world creation. Native and harness configuration use the same
+validated schema. Explicit partial diagnostic configs retain neutral defaults. No live map
+regeneration or checkpoint migration is provided.
 
 The default grid is h=2 on 720×540 geography: 97,200 possible nodes. Persistent 8×8-node
 regions own contiguous 256-chemical rows and reusable current/destination buffers. Missing
@@ -317,7 +356,9 @@ same-event exports cannot fund imports. Inactive rows do not allocate256-species
 
 ### Mobile resource reservoirs
 
-Two hundred forty externally renewing reservoirs start around 35 uneven neighborhoods. Independently timed renewals
+Two hundred forty externally renewing reservoirs start from an independent fractal density
+in the v46 integrated preset. The current-behavior preset retains 35 uneven neighborhoods.
+Independently timed renewals
 continue to import accounted material and reference value. Defaults are sourceDrift1
 (reservoir mobility), reservoirRepulsion5, reservoirRange30, sourceProcessing0.25 and
 sourceGap2400; sourceProcessing multiplies the common weathering rate.
@@ -332,16 +373,25 @@ material. The operator screens changes below f32::EPSILON in p, equivalent to
 `Q * f32::EPSILON` for the finite inventory. It retains unprocessed tiny shares. Applying the
 dissolved concentration floor times interface area would prevent useful small-owner conversions.
 
-Release min(Q,r*dt) in composition p. Actual depletion samples an independent exponential wait
+Release min(Q,r*d_tau) in composition p. With seasons disabled d_tau=dt. Otherwise the bounded
+local multiplier `a=1+c*cos(2*pi*t/P+phase)-d*sin(2*pi*t/P+phase)` gives `d_tau=a*dt`.
+The implementation integrates the temporal sinusoid analytically at the source's actual
+trajectory midpoint for each base step; movement and chemical processing retain ordinary time.
+Persist source-local accrued supply time until the normal release commit. Actual depletion samples an independent exponential wait
 `W=-sourceGap*ln(1-U)`, with U uniform on [0,1). sourceGap is the mean empty interval;
-the draw occurs once per exhaustion, not every tick. On the first subsequent update when the
-wait has elapsed, a refill imports Q=r*sourceLifetime and its full potential. There is no lifetime countdown or
+the draw occurs once per exhaustion from that source's persisted renewal stream. Waiting also
+uses supply time. When the wait has elapsed, a refill imports Q=r*sourceLifetime and its full
+potential. Consume any remaining interval through release and further transitions exactly once;
+release parcels retain their own mixtures if a boundary override changes the next batch.
+There is no lifetime countdown or
 forced dump. sourceLifetime denotes nominal batch duration at rate r. Initialization sets
 r=sourceRate*habitat.richness and Q=r*sourceLifetime*(0.5+U), with one uniform initial draw U.
 This staggers initial depletion; independent renewal waits retain the prior system's asynchronous
 return of supply without its random lifetime/rate coupling. Rates remain fixed after creation.
 A zero release rate neither empties a deposit nor creates supply. Ignoring tick rounding, mean
-ongoing release remains r*T/(T+G), where T=sourceLifetime and G=sourceGap. This aggregate budget
+ongoing release at a stationary source remains r*T/(T+G), where T=sourceLifetime and G=sourceGap.
+Moving sources can experience a different time-average multiplier; actual imported material
+and potential remain recorded without population-based normalization. This aggregate budget
 does not guarantee local food availability. The earlier fixed-gap simplification imposed a shared
 minimum outage after startup depletion and caused extinction; that timing choice is superseded.
 
@@ -534,9 +584,14 @@ receptor supplies tonic, temporal, body-forward and body-left readings. Capacity
 gain vanishes with absent genetic capacity. A photoreceptor samples mean local
 illumination through those same rows and supplies the same four cues; its genetic reference
 uses the existing receptor mass scale. See [photoreception](../../photoreception.md).
-The 58-input, 24-recurrent-unit, 19-output private RNN
+The 59-input, 24-recurrent-unit, 19-output private RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
+
+Input58 is previous-step paid local motor load: `(1-sqrt(m))*abs(swim)*(1-damage)` when
+motor work was paid, otherwise zero. It vanishes when geographic feedback is disabled and
+is refreshed at the ordinary base-input cadence. This bounded effort-relative resistance
+reading exposes neither height nor slope direction, coordinates, seasonal phase or a route.
 
 Each neural row uses the same incoming-strength budget. For its augmented coefficient
 vector a and bounded inputs x (including constant one for bias), preactivation is

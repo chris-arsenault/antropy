@@ -70,6 +70,13 @@ void main() {
     if(illuminationMode==2) light=solarGround(clamp(amount.x,0.0,1.0));
     if(illuminationMode==3) light=mix(vec3(0.008,0.01,0.016),vec3(0.2,0.8,0.7),clamp(amount.x,0.0,1.0));
     if(illuminationMode==4) light=mix(vec3(0.008,0.01,0.016),vec3(1.0,0.8,0.3),presence);
+    if(illuminationMode==5) light=mix(vec3(0.08,0.2,0.4),vec3(0.9,0.8,0.5),clamp(amount.x,0.0,1.0));
+    if(illuminationMode==6) light=mix(vec3(0.3,0.16,0.08),vec3(0.12,0.8,0.7),clamp(amount.x,0.0,1.0));
+    if(illuminationMode==7) light=mix(vec3(0.04,0.07,0.1),vec3(1.0,0.65,0.2),clamp(amount.x,0.0,1.0));
+    if(illuminationMode==8) light=amount.x<0.5 ? mix(vec3(0.35,0.12,0.06),vec3(0.8,0.8,0.65),amount.x*2.0) : mix(vec3(0.8,0.8,0.65),vec3(0.1,0.8,0.65),amount.x*2.0-1.0);
+    if(illuminationMode==9) light=mix(vec3(0.04,0.07,0.1),vec3(0.1,0.8,0.65),clamp(amount.x,0.0,1.0));
+    if(illuminationMode==10) light=mix(vec3(0.25),0.5+0.5*cos(6.2831853*(amount.x+vec3(0.0,0.3333333,0.6666667))),clamp(amount.y,0.0,1.0));
+    if(illuminationMode==11) light=solarGround(clamp(amount.x,0.0,1.0));
   }
   // Screen-space patterns keep hazards distinguishable at every zoom.
   float band=1.0-smoothstep(0.025,0.075,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/12.0)-0.5));

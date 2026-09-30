@@ -86,6 +86,7 @@ pub struct Config {
     pub illumination_contrast: f64,
     pub shade_strength: f64,
     pub shade_scale: f64,
+    pub terrain: crate::terrain_config::TerrainConfig,
     pub optical_column: f64,
     pub optical_reach: f64,
     pub optical_power_density: f64,
@@ -184,6 +185,7 @@ impl Default for Config {
             illumination_contrast: 0.8,
             shade_strength: 0.8,
             shade_scale: 32.,
+            terrain: Default::default(),
             optical_column: 0.1,
             optical_reach: 2.,
             optical_power_density: 0.01,
@@ -214,6 +216,16 @@ impl Default for Config {
             learning: "plastic".into(),
             plasticity_cost: 0.002,
             learning_retention: 1.,
+        }
+    }
+}
+
+impl Config {
+    /// Production new-world preset. Explicit diagnostic configs retain neutral operators.
+    pub fn ecology() -> Self {
+        Self {
+            terrain: crate::terrain_config::TerrainConfig::integrated(),
+            ..Self::default()
         }
     }
 }
@@ -344,6 +356,7 @@ impl Config {
         if self.transmission == "selfing" && self.ploidy != "diploid" {
             return Err("Selfing requires diploidy".into());
         }
+        self.terrain.validate()?;
         self.validate_sources()
     }
     fn validate_sources(&self) -> Result<(), String> {

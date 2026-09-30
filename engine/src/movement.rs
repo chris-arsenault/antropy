@@ -88,7 +88,12 @@ pub fn advance_prepared(
     cache
         .motion
         .advance(cells, c, field, sites, &cache.local.contacts);
-    cache.motion.contacts(cells, c, &mut cache.local);
+    cache.motion.contacts(
+        cells,
+        c,
+        &mut cache.local,
+        &field.illumination.shade.geography,
+    );
 }
 pub struct Spatial {
     nx: usize,

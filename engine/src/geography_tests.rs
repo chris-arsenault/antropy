@@ -1,0 +1,68 @@
+use crate::{config::Config, terrain::Shade, terrain_config::TerrainConfig, world::World};
+
+fn config() -> Config {
+    Config {
+        width: 32.,
+        height: 24.,
+        founders: 0,
+        source_count: 0,
+        terrain: TerrainConfig::integrated(),
+        ..Config::default()
+    }
+}
+
+#[test]
+fn geographic_maps_are_bounded_periodic_and_restore_cached_faces() {
+    let c = config();
+    let w = World::new(27, c.clone()).unwrap();
+    let g = &w.shade.geography;
+    g.validate(&c).unwrap();
+    for p in [[0., 0.], [31.8, 12.2], [-2.3, 25.]] {
+        let a = g.sample(p);
+        let b = g.sample([p[0] + c.width, p[1] - c.height]);
+        for i in 0..4 {
+            assert!((a[i] - b[i]).abs() < 1e-12);
+        }
+        assert!((0.25..=1.).contains(&a[1]));
+        assert!((0. ..=2.).contains(&g.season(p, 137.)));
+        assert!(
+            (g.supply_time(p, 0., c.terrain.season_period) - c.terrain.season_period).abs() < 1e-9
+        );
+    }
+    let restored = World::restore(&w.snapshot().unwrap()).unwrap();
+    assert_eq!(g.height, restored.shade.geography.height);
+    assert_eq!(g.faces, restored.shade.geography.faces);
+}
+
+#[test]
+fn slope_is_directional_and_height_offset_cannot_supply_energy() {
+    let c = config();
+    let mut shade = Shade::generate(27, &c, 16, 12).as_ref().clone();
+    let g = &mut shade.geography;
+    for n in 0..g.height.len() {
+        g.height[n] = (n % g.nx) as f64 * c.mesh;
+    }
+    g.conductance.fill(0.5);
+    let up = g.movement([5., 5.], [1., 0.]);
+    let down = g.movement([5., 5.], [-1., 0.]);
+    assert!((up - 0.25).abs() < 1e-12);
+    assert!((down - 0.5).abs() < 1e-12);
+    for h in &mut g.height {
+        *h += 100.;
+    }
+    assert!((g.movement([5., 5.], [1., 0.]) - up).abs() < 1e-12);
+}
+
+#[test]
+fn neutral_switches_and_invalid_configs_are_explicit() {
+    let mut c = config();
+    c.terrain = TerrainConfig::default();
+    let s = Shade::generate(27, &c, 16, 12);
+    assert_eq!(s.geography.movement([1., 2.], [3., 4.]), 1.);
+    assert_eq!(s.geography.supply_time([1., 2.], 17., 0.2), 0.2);
+    c.terrain.minimum_conductance = 0.;
+    assert!(c.validate().is_err());
+    c.terrain = TerrainConfig::integrated();
+    c.terrain.season_period = f64::NAN;
+    assert!(c.validate().is_err());
+}

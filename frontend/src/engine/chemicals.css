@@ -76,7 +76,8 @@
   background: linear-gradient(90deg, #091f3b, #b8661f);
 }
 .field-ramp.illumination,
-.field-ramp.terrain {
+.field-ramp.terrain,
+.field-ramp.ceiling {
   background: linear-gradient(90deg, #020304 15%, #77766a 50%, #b8b39e 85%);
 }
 .field-ramp.cover {
@@ -84,6 +85,24 @@
 }
 .field-ramp.emission {
   background: linear-gradient(90deg, #020304, #ffcc4d);
+}
+.field-ramp.height {
+  background: linear-gradient(90deg, #143366, #e6cc80);
+}
+.field-ramp.conductance {
+  background: linear-gradient(90deg, #4d2914, #1fccb3);
+}
+.field-ramp.slope {
+  background: linear-gradient(90deg, #0a121a, #ffa633);
+}
+.field-ramp.supply {
+  background: linear-gradient(90deg, #591f0f, #cccca6, #1fcca6);
+}
+.field-ramp.seasonAmplitude {
+  background: linear-gradient(90deg, #0a121a, #1fcca6);
+}
+.field-ramp.seasonPhase {
+  background: linear-gradient(90deg, #ff4040, #bfbf00, #40ff40, #00bfbf, #4040ff, #bf00bf, #ff4040);
 }
 .map-context {
   display: flex;

@@ -53,8 +53,9 @@ fn finite_release_depletes_then_waits_and_refills_with_accounted_composition() {
         assert_eq!(w.sources[0].amount, 0.);
         assert_eq!(w.ledger.supplied, 0.);
     }
+    let remaining_wait = w.sources[0].wait;
     source_medium::advance(&mut w);
-    assert_eq!(w.sources[0].amount, 1.5);
+    assert!((w.sources[0].amount - (2. - 2. * (w.config.dt - remaining_wait))).abs() < 1e-12);
     assert_eq!(w.sources[0].rate, 2.);
     assert_eq!(w.sources[0].wait, 0.);
     assert_eq!(w.ledger.supplied, 2.);
@@ -72,6 +73,10 @@ fn simultaneous_exhaustion_schedules_independent_renewals_each_cycle() {
     let mut w = fixture();
     w.config.source_gap = 10.;
     w.sources = vec![w.sources[0].clone(); 128];
+    // Distinct sites own distinct persisted renewal streams, including in authored fixtures.
+    for (i, s) in w.sources.iter_mut().enumerate() {
+        s.renewal_rng = crate::random::Random::new(i as u64 + 100);
+    }
     let mut previous = vec![0.; w.sources.len()];
     for _ in 0..2 {
         for source in &mut w.sources {
@@ -184,4 +189,50 @@ fn explicit_boundary_override_changes_only_the_next_empty_batch() {
     assert_eq!(w.sources[0].mixture[0], 0.);
     assert_eq!(w.sources[0].mixture[80], 1.);
     assert!((w.ledger.supplied_energy - 2. * w.chemistry.properties[80].potential).abs() < 1e-12);
+}
+
+#[test]
+fn seasonal_clock_consumes_multiple_refills_and_preserves_each_released_mixture() {
+    let mut w = fixture();
+    w.config.source_gap = 0.;
+    w.config.source_lifetime = 0.05;
+    w.config.source_zones = Some(vec![vec![0., 1.]]);
+    w.config.terrain.seasons = true;
+    w.config.terrain.season_period = std::f64::consts::TAU;
+    w.shade = crate::terrain::Shade::generate(27, &w.config, w.field.nx, w.field.ny);
+    let g = &mut std::sync::Arc::make_mut(&mut w.shade).geography;
+    g.seasons.fill([1., 0.]);
+    g.phase = 0.;
+    w.field.illumination.shade = w.shade.clone();
+    w.sources[0].amount = 0.1;
+    crate::diagnostics::initialize(&mut w);
+    let before = w.held();
+    let tau = w.config.dt + w.config.dt.sin();
+    source_medium::advance(&mut w);
+    assert!((w.ledger.source_released - 2. * tau).abs() < 1e-12);
+    let first: f64 = w.field.amounts().rows().map(|(_, r)| r[0] as f64).sum();
+    assert!((first - 0.02).abs() < 1e-7);
+    assert!((w.held().0 + w.ledger.numerical_material - before.0 - w.ledger.supplied).abs() < 1e-8);
+}
+
+#[test]
+fn seasonal_accrual_and_renewal_stream_survive_noncommit_checkpoint() {
+    let mut c = fixture().config;
+    c.dt = 0.2;
+    c.terrain.seasons = true;
+    let mut w = World::new(27, c).unwrap();
+    w.step();
+    assert!(w.sources[0].pending > 0.);
+    let mut restored = World::restore(&w.snapshot().unwrap()).unwrap();
+    assert_eq!(w.sources[0].pending, restored.sources[0].pending);
+    for _ in 0..20 {
+        w.step();
+        restored.step();
+    }
+    assert!((w.ledger.source_released - restored.ledger.source_released).abs() < 1e-10);
+    assert_eq!(
+        w.sources[0].renewal_rng.0,
+        restored.sources[0].renewal_rng.0
+    );
+    assert!((w.sources[0].wait - restored.sources[0].wait).abs() < 1e-10);
 }

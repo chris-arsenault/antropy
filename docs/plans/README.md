@@ -1,5 +1,11 @@
 # Plan ownership and disposition — September20, 2026
 
+[Full fractal terrain and local resource seasons](TERRAIN-AND-SEASONS-PLAN.md), Sulion
+`0ac08ebd-3a5c-4b83-912b-f4303d4267be`, tracks the complete September 30 terrain proposal:
+generation, placement, physical couplings, seasons, local feedback, configuration, durability
+and observation. M0–M7 are implemented and locally checked in v46; dynamic-terrain scope,
+live switches and final human acceptance remain open. Publication is separate.
+
 [Birth orientation and physiological aging](BIRTH-AND-AGING-PLAN.md), Sulion
 `404e9450-689d-4d1c-91b8-bb0a032e31c0`, delivers independent newborn orientations and
 core-protected age-dependent maintenance in v45. Local implementation; live delivery is separate.

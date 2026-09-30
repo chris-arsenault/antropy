@@ -28,7 +28,9 @@ it("starts the larger default world at mesh 2 and advances with valid accounts",
     expect(config.founders).toBe(48);
     expect(config.sourceCount).toBe(240);
     expect(sources).toHaveLength(240);
-    expect(patchCenters).toHaveLength(35);
+    expect(patchCenters).toHaveLength(0);
+    expect(config.terrain.placement).toBe("fractal");
+    expect(config.terrain.seasons).toBe(true);
     expect(config.landscapeSpread).toBe(18);
     expect(config.sourceRadius).toBe(3);
     expect(config.sourceRate).toBe(0.2);
@@ -51,7 +53,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(45);
+  expect(definition.version).toBe(46);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -67,7 +69,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v45 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v46 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });

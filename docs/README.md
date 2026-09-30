@@ -25,7 +25,7 @@ them. See the [storage policy](evidence/README.md).
 | Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |
 | Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
 | Deferred paid byte communication, coarse relative hearing and natural observation | [Directional cell utterances](design/cell-utterances.md) — design specification, not implemented |
-| Terrain design review, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md#fractal-map-generation-and-placement) — shade implemented; integrated terrain design awaits review and planning |
+| Terrain design, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md#fractal-map-generation-and-placement) — static v46 implementation; [delivery and remaining acceptance](plans/TERRAIN-AND-SEASONS-PLAN.md) |
 | Local supply fluctuations, reservoir clocks and movement opportunities | [Local resource seasons](design/local-resource-seasons.md) — integrated terrain proposal, circular fractal fields and explicit supply accounts; [movement evidence](movement-opportunity-study.md) |
 | 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
 | Scalar illumination, day/night opportunities and future shelter/emission | [Light ecology](design/light-ecology.md); earlier [illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k findings](evidence/digital-chemistry/illumination-design-143249/README.md) retain their original versions |
@@ -106,6 +106,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Enzyme transformation correction and symmetry omissions](symmetry-completion-audit.md)
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
 - [Birth orientation and physiological aging](design/README.md#design-birth-and-aging)
+- [Fractal terrain and local resource seasons](design/README.md#design-terrain-seasons)
 - [Dispersal geography and bounded neural drive](design/README.md#design-dispersal-opportunities)
 - [Genetic physiology without machinery construction](design/README.md#design-genetic-physiology)
 - [Crowding, waste and independent light metabolism](design/README.md#design-ecological-incentives)

@@ -1,9 +1,10 @@
 # Local resource seasons
 
 Proposed September 25, 2026; backlogged September 26 and **included in the terrain design
-review September 30**, before implementation planning. This unimplemented candidate authorizes
-no runtime changes, live-world reset or experiment campaign. The [current work
-order](README.md) retains priority. Documentation tracking: Sulion
+review September 30**. The static supply-clock design is implemented locally in v46;
+the [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns delivery and bounded evidence.
+This is not a live-world reset or evidence of evolved migration. The [current work
+order](README.md) retains priority. Earlier documentation tracking: Sulion
 `1eb5b783-638b-4ac5-9034-b4d970eda46e`.
 
 The subsequent [ecological incentives delivery](../plans/ECOLOGICAL-INCENTIVES-PLAN.md)
@@ -181,4 +182,4 @@ coexistence. Reject or revise the mechanism if diffusion erases local difference
 downturns cause widespread starvation without reachable alternatives, or cells simply
 follow the same persistent source clump. Preservation of colonies, useful mobile
 behavior, storage-based endurance and evolutionary uptake remain observation questions.
-No implementation, new assay or live-server change accompanies this design update.
+The terrain plan records implementation checks separately from these open ecological questions.

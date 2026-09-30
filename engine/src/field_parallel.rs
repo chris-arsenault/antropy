@@ -60,6 +60,14 @@ impl Pass<'_> {
             crate::field_vector::Work {
                 mask: candidates,
                 floor: self.floor,
+                geography: f
+                    .illumination
+                    .shade
+                    .geography
+                    .faces
+                    .get(n)
+                    .copied()
+                    .unwrap_or([[1.; 2]; 4]),
             },
         );
         let mut lost = [0.; 2];
@@ -85,7 +93,7 @@ impl Pass<'_> {
                 next,
                 mask,
                 (signal, features[3]),
-                self.dt,
+                self.dt * f.illumination.shade.geography.processing_node(n),
                 f.illumination.node(n),
             );
         }

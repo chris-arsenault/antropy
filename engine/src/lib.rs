@@ -71,6 +71,7 @@ mod genealogy;
 #[cfg(test)]
 mod genealogy_tests;
 pub mod genetics;
+pub mod geography;
 pub mod illumination;
 #[cfg(test)]
 mod illumination_tests;
@@ -144,6 +145,11 @@ mod study_trace;
 #[cfg(test)]
 mod symmetry_tests;
 pub mod terrain;
+pub mod terrain_config;
+mod terrain_observation;
+#[cfg(test)]
+mod terrain_physics_tests;
+mod terrain_placement;
 mod trace;
 pub mod transformation_work;
 #[cfg(test)]

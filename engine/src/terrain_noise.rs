@@ -3,7 +3,7 @@
 use crate::random::Random;
 
 struct Octave {
-    seed: u64,
+    values: Vec<f64>,
     extent: [f64; 2],
     shape: [usize; 2],
     offset: [f64; 2],
@@ -12,22 +12,28 @@ struct Octave {
 
 impl Octave {
     fn new(rng: &mut Random, extent: [f64; 2], scale: f64, amplitude: f64) -> Self {
+        let seed = rng.next_u64();
+        let shape = extent.map(|v| (v / scale).round().max(2.) as usize);
+        let values = (0..shape[0] * shape[1])
+            .map(|n| {
+                Random::new(
+                    seed ^ ((n % shape[0]) as u64).wrapping_mul(0x9e3779b97f4a7c15)
+                        ^ ((n / shape[0]) as u64).wrapping_mul(0xd1b54a32d192ed03),
+                )
+                .signed()
+            })
+            .collect();
         Self {
-            seed: rng.next_u64(),
+            values,
             extent,
-            shape: extent.map(|v| (v / scale).round().max(2.) as usize),
+            shape,
             offset: [rng.unit(), rng.unit()],
             amplitude,
         }
     }
 
     fn corner(&self, x: usize, y: usize) -> f64 {
-        let x = (x % self.shape[0]) as u64;
-        let y = (y % self.shape[1]) as u64;
-        Random::new(
-            self.seed ^ x.wrapping_mul(0x9e3779b97f4a7c15) ^ y.wrapping_mul(0xd1b54a32d192ed03),
-        )
-        .signed()
+        self.values[(y % self.shape[1]) * self.shape[0] + x % self.shape[0]]
     }
 
     fn sample(&self, point: [f64; 2]) -> f64 {
@@ -69,7 +75,7 @@ fn sample(octaves: &[Octave], point: [f64; 2]) -> f64 {
     value / octaves.iter().map(|o| o.amplitude).sum::<f64>()
 }
 
-pub(super) struct Generator {
+pub(crate) struct Generator {
     detail: Vec<Octave>,
     warp: [Vec<Octave>; 2],
     displacement: f64,
@@ -94,11 +100,98 @@ impl Generator {
             std::array::from_fn(|k| point[k] + self.displacement * sample(&self.warp[k], point));
         sample(&self.detail, warped)
     }
+
+    pub fn coarse(mut self, minimum: f64) -> Self {
+        self.detail.retain(|o| {
+            (o.extent[0] / o.shape[0] as f64).min(o.extent[1] / o.shape[1] as f64) >= minimum
+        });
+        self
+    }
+
+    pub fn wavelengths(&self) -> Vec<[f64; 2]> {
+        self.detail
+            .iter()
+            .map(|o| std::array::from_fn(|k| o.extent[k] / o.shape[k] as f64))
+            .collect()
+    }
+
+    /// Quintic interpolation has derivative <= 1.875 and corner differences <= 2.
+    /// Bound the warp Jacobian globally and retain detail resolved by at most 8x8 quadrature.
+    pub fn quadrature(&mut self, mesh: f64) -> usize {
+        if self.detail.is_empty() {
+            return 1;
+        }
+        let derivative = |octaves: &[Octave]| {
+            let weight: f64 = octaves.iter().map(|o| o.amplitude).sum();
+            octaves
+                .iter()
+                .map(|o| {
+                    o.amplitude
+                        * 3.75
+                        * (o.shape[0] as f64 / o.extent[0]).hypot(o.shape[1] as f64 / o.extent[1])
+                })
+                .sum::<f64>()
+                / weight
+        };
+        let stretch =
+            1. + self.displacement * derivative(&self.warp[0]).hypot(derivative(&self.warp[1]));
+        loop {
+            let o = self.detail.last().unwrap();
+            let wavelength = (o.extent[0] / o.shape[0] as f64).min(o.extent[1] / o.shape[1] as f64);
+            let steps = (4. * mesh * stretch / wavelength).ceil().max(1.) as usize;
+            if steps <= 8 {
+                return steps;
+            }
+            self.detail.pop();
+            if self.detail.is_empty() {
+                return 1;
+            }
+        }
+    }
+
+    pub fn average(
+        &self,
+        center: [f64; 2],
+        mesh: f64,
+        steps: usize,
+        transform: impl Fn(f64) -> f64,
+    ) -> f64 {
+        if self.detail.is_empty() {
+            return transform(0.);
+        }
+        let mut total = 0.;
+        for y in 0..steps {
+            for x in 0..steps {
+                let p = [
+                    center[0] + mesh * ((x as f64 + 0.5) / steps as f64 - 0.5),
+                    center[1] + mesh * ((y as f64 + 0.5) / steps as f64 - 0.5),
+                ];
+                total += transform(self.sample(p));
+            }
+        }
+        total / (steps * steps) as f64
+    }
+}
+
+/// Stable named environment streams; adding a consumer cannot advance another stream.
+pub(crate) fn channel(seed: u64, name: &str) -> u64 {
+    let hash = name.bytes().fold(seed ^ 0x100000001b3, |h, b| {
+        (h ^ b as u64).wrapping_mul(0x100000001b3)
+    });
+    Random::new(hash).next_u64()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unresolved_worlds_use_uniform_values_instead_of_aliasing() {
+        let mut generator = Generator::new(27, [4., 4.], 32., 2.).coarse(8.);
+        let steps = generator.quadrature(2.);
+        assert!(generator.wavelengths().is_empty());
+        assert_eq!(generator.average([1., 1.], 2., steps, |v| v), 0.);
+    }
 
     #[test]
     fn irregular_field_wraps_in_value_and_slope_without_repeating_inner_tiles() {

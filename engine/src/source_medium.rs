@@ -200,7 +200,11 @@ fn advance_interval(w: &mut World, release: bool, chemical_dt: f64) {
             r.load,
             config.habitat_feedback,
             config.diffusion_impedance,
-        );
+        ) * field
+            .illumination
+            .shade
+            .geography
+            .processing(&source.footprint);
         let step = Step {
             tick,
             config,
@@ -219,7 +223,11 @@ fn advance_interval(w: &mut World, release: bool, chemical_dt: f64) {
         .iter()
         .zip(&outcomes)
         .filter(|(_, o)| o.released > 0.)
-        .map(|(s, o)| (s.footprint.as_slice(), s.mixture.as_slice(), o.released))
+        .flat_map(|(s, o)| {
+            o.parcels
+                .iter()
+                .map(move |(mix, q)| (s.footprint.as_slice(), mix.as_slice(), *q))
+        })
         .collect();
     if !releases.is_empty() {
         let loss = w.field.release_mixtures(&releases, &w.chemistry);
@@ -251,7 +259,14 @@ pub fn photochemistry(w: &mut World, dt: f64, light: &[([f64; 2], f64, crate::op
         let account = source.convert_medium(
             operators,
             crate::reaction_medium::Medium::funded(signal, exposure),
-            dt * config.weathering_rate * config.source_processing * shelter,
+            dt * config.weathering_rate
+                * config.source_processing
+                * shelter
+                * w.field
+                    .illumination
+                    .shade
+                    .geography
+                    .processing(&source.footprint),
         );
         let [converted, heat, work] = account.map(|v| source.amount * v);
         let paid = work * exposure.paid_fraction();
@@ -285,10 +300,12 @@ pub fn observe(w: &World) -> serde_json::Value {
     let couplings = crate::reservoir_coupling::prepare(&w.sources, &w.config, &w.chemistry);
     let rows: Vec<_> = w.sources.iter().zip(couplings).map(|(s, coupling)| {
         let r = coupled_response(s, &w.config, &w.field, &w.chemistry, coupling);
-        let rate = s.rate.min(s.amount / w.config.dt);
+        let supply = w.shade.geography.season([s.habitat.x,s.habitat.y],w.tick as f64*w.config.dt);
+        let rate = (s.rate*supply).min(s.amount / w.config.dt);
         let output: Vec<_> = (0..SPECIES).filter(|&id| s.mixture[id] > 0. && rate > 0.)
             .map(|id| (id, rate * s.mixture[id])).collect();
-        serde_json::json!({"velocity":r.velocity,"signal":r.signal,"load":r.load,"outputRate":output})
+        serde_json::json!({"velocity":r.velocity,"signal":r.signal,"load":r.load,"outputRate":output,
+            "supplyMultiplier":supply,"accruedSupplyTime":s.pending,"nominalRate":s.rate})
     }).collect();
     serde_json::json!(rows)
 }

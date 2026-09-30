@@ -24,6 +24,7 @@ the 58×24×19 Rust controller, with a physiological evaluation clock in checkpo
 | 44–51 | Four funded inward receptors, each level and temporal change |
 | 52–55 | Enzyme records 4–7 stock relative to their genetic targets |
 | 56–57 | Funded cover-builder and emitter stock relative to genetic targets |
+| 58 | Previous paid local motor load from geographic resistance; zero without effort or with feedback disabled |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
 Actual receptor stock supplies gain. Level is C/(C+K), with K=0.1; directional differences use
@@ -62,9 +63,9 @@ The task byte has no task semantics in physics; manual writes are recorded diagn
 
 ## Topology and founder
 
-The network has 58 inputs, 24 recurrent saturating units and 19 output logits: 1,392 input weights,
+The network has 59 inputs, 24 recurrent saturating units and 19 output logits: 1,416 input weights,
 576 recurrent weights, 24 hidden biases, 456 output weights and 19 output biases, totaling
-2,467 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
+2,491 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
 belong to program records; inactive records have no function. Neutral duplication copies
 activity readouts and divides incoming capacity contributions. Deletion removes the program's
 ports and the daughter immediately expresses the resulting genetic body proportions.
@@ -78,7 +79,7 @@ is below 0.024. This is an explicit modeling approximation, not preserved old tr
 Each cell evaluates its RNN once per existing physiology interval (default 0.8 model seconds).
 Physical owners publish cues at their update boundary: external sensing supplies chemistry
 and light, physiology supplies funded stocks and internal state, and base stepping supplies
-energy, contact and the private byte. Each channel retains its value and publication time;
+energy, contact, paid motor load and the private byte. Each channel retains its value and publication time;
 the next evaluation integrates their signed time average, settles paid learning, updates
 hidden state and decodes one held action. Constant channels need no repeated base-step
 normalization or accumulation. New cues never act during the interval already elapsed.

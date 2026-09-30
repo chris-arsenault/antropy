@@ -1,5 +1,18 @@
 # Current design and work order
 
+<a id="design-terrain-seasons"></a>
+
+## Fractal terrain and local resource seasons — September 30
+
+Physical v46 implements persistent elevation, conductance, overhead transmission and optional
+ceilings, independent fractal source placement and local seasonal release/refill clocks.
+World-start configuration exposes each coupling and current-behavior/integrated presets.
+The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns acceptance, measurements and the
+still-open scope of changing terrain and live physical switches. The
+[composed laws](chemistry/composed-runtime.md#geographic-composition) own the physical operations.
+Local implementation does not deploy or reset the continuing world. Format v46 rejects older
+checkpoints without migration. Human map/motion acceptance remains separate from automated checks.
+
 <a id="design-birth-and-aging"></a>
 
 ## Birth orientation and aging — September 29
@@ -43,7 +56,7 @@ compression-driven separation, passive membrane exchange and private light-suppo
 metabolism. Short probes show mobile growth in dilute material and receptor-driven reduction
 of harmful exposure. Avoidance also sacrifices nutrient income; no evolved dispersal outcome
 is claimed. Current equations belong to the [composed laws](chemistry/composed-runtime.md).
-Local resource seasons remain deferred. The continuing live world has not been changed by
+Local resource seasons are now implemented through the terrain delivery above. The continuing live world has not been changed by
 this local implementation; publication and human motion review remain separate.
 
 <a id="design-model-simplification"></a>

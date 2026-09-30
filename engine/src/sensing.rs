@@ -193,6 +193,11 @@ fn observe_stocks(cell: &mut Cell, g: &Compiled, c: &Config) {
 
 /// Energy, scalar crowding shares and the private byte advance on the base clock.
 pub fn observe_base(cell: &mut Cell, c: &Config) {
+    cell.inputs[crate::controller::MOTOR_LOAD_INPUT] = if c.terrain.feedback {
+        cell.motor_load as f32
+    } else {
+        0.
+    };
     cell.inputs[28] = (cell.energy / cell.energy_capacity(c).max(1e-30)).clamp(0., 1.) as f32;
     for i in 0..4 {
         cell.inputs[30 + i] = cell.contacts[i] as f32;

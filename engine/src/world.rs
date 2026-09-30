@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 45;
+pub const VERSION: u32 = 46;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -83,10 +83,15 @@ impl World {
         field
             .illumination
             .prepare(seed, 0, &config, field.nx, field.ny);
-        let (patch_centers, habitats) = crate::sources::landscape(&config, &mut environment_rng);
+        let (patch_centers, habitats) =
+            crate::terrain_placement::landscape(seed, &config, &mut environment_rng);
+        let mut source_rng = Random::new(crate::terrain::noise::channel(
+            seed,
+            "source-initialization",
+        ));
         let mut sources: Vec<_> = habitats
             .into_iter()
-            .map(|h| Source::new(h, 0, &config, &mut environment_rng, &field))
+            .map(|h| Source::new(h, 0, &config, &mut source_rng, &field))
             .collect();
         let mut ledger = Ledger::default();
         for s in &mut sources {
@@ -452,12 +457,13 @@ impl World {
         crate::lifecycle::release(self, cell, cause);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
-        postcard::to_extend(self, b"ANTROPY45\0".to_vec()).map_err(|e| e.to_string())
+        postcard::to_extend(self, format!("ANTROPY{VERSION}\0").into_bytes())
+            .map_err(|e| e.to_string())
     }
     pub fn restore(bytes: &[u8]) -> Result<Self, String> {
         let bytes = bytes
-            .strip_prefix(b"ANTROPY45\0")
-            .ok_or("Unsupported physical checkpoint; v45 required")?;
+            .strip_prefix(format!("ANTROPY{VERSION}\0").as_bytes())
+            .ok_or_else(|| format!("Unsupported physical checkpoint; v{VERSION} required"))?;
         let (mut world, tail): (Self, &[u8]) =
             postcard::take_from_bytes(bytes).map_err(|e| e.to_string())?;
         if !tail.is_empty() || world.version != VERSION {
@@ -490,6 +496,9 @@ impl World {
             world.stop_reason = None;
         }
         world.field.pressure_strength = world.config.pressure_strength;
+        std::sync::Arc::make_mut(&mut world.shade)
+            .geography
+            .rebuild();
         world.field.illumination.shade = world.shade.clone();
         world.field.illumination.prepare(
             world.seed,
@@ -502,12 +511,7 @@ impl World {
         world.climate = crate::climate::Climate::new(&world.config, &world.chemistry);
         for s in &mut world.sources {
             s.rebuild(&world.config, &world.field);
-            // Release accrues with the medium interval; checkpoints carry that shared clock.
-            s.pending = if s.amount > 0. {
-                world.field_elapsed
-            } else {
-                0.
-            };
+            // Local seasonal accrual and renewal randomness are canonical source state.
         }
         crate::source_medium::project(&mut world);
         Ok(world)
@@ -521,6 +525,7 @@ impl World {
         self.field.validate()?;
         self.field.validate_reductions(&self.chemistry)?;
         self.shade.validate(self.field.nx * self.field.ny)?;
+        self.shade.geography.validate(&self.config)?;
         self.incident.validate(self.field.nx * self.field.ny)?;
         self.cover.validate()?;
         self.cover.validate_reductions(&self.chemistry)?;

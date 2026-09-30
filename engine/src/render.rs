@@ -36,7 +36,7 @@ impl Buffers {
         window: crate::render_window::Window,
     ) -> Result<(), String> {
         let (kind, species, color, field, selected) = selection;
-        if kind > 9 || species >= 256 || color > 15 {
+        if kind > 16 || species >= 256 || color > 15 {
             return Err("Invalid render selection".into());
         }
         self.colors.prepare(w, color, selected);
@@ -145,6 +145,7 @@ impl Buffers {
                 });
             }
             self.field.clear();
+            let season_angle = crate::terrain_observation::season_angle(w);
             for n in 0..window.nx * window.ny {
                 let i = window.node(w, n);
                 // One regional read gives the row and its feature projection.
@@ -160,6 +161,7 @@ impl Buffers {
                         7 => [w.shade.transmission[i], 0.],
                         8 => [opacity, 0.],
                         9 => [w.incident.lateral.get(&i).copied().unwrap_or(0.), 0.],
+                        10..=16 => crate::terrain_observation::map(w, i, kind, season_angle),
                         _ => [p[0] / area, p[1] / area],
                     };
                     self.field.extend([

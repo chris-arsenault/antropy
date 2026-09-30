@@ -63,6 +63,7 @@ fn active_vector_matches_full_rows_and_cutoff_error_is_bounded_per_value() {
         crate::field_vector::Work {
             mask: u64::MAX,
             floor: 0.,
+            geography: [[1.; 2]; 4],
         },
     );
     crate::field_vector::redistribute(
@@ -72,7 +73,11 @@ fn active_vector_matches_full_rows_and_cutoff_error_is_bounded_per_value() {
         &rows,
         coefficients,
         0.9,
-        crate::field_vector::Work { mask, floor: 4e-24 },
+        crate::field_vector::Work {
+            mask,
+            floor: 4e-24,
+            geography: [[1.; 2]; 4],
+        },
     );
     let mut loss = 0.;
     for s in 0..256 {

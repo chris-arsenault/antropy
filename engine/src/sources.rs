@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(test)]
 #[path = "source_landscape_tests.rs"]
 mod landscape_tests;
+#[path = "source_lifecycle.rs"]
+mod lifecycle;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Habitat {
@@ -34,18 +36,19 @@ pub struct Source {
     pub material: crate::source_medium::Material,
     #[serde(skip)]
     pub interface: f64,
-    /// Stocked time not yet released; restore derives it from the shared medium clock.
-    #[serde(skip)]
+    /// Accrued local supply time, consumed at the next material commit.
     pub pending: f64,
+    pub renewal_rng: Random,
 }
 /// One reservoir's step results that touch shared state: ledger flows and medium release.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Outcome {
     pub changed: bool,
     pub conversion: [f64; 3],
     pub distance: f64,
     pub supplied: [f64; 2],
     pub released: f64,
+    pub parcels: Vec<(Vec<f64>, f64)>,
 }
 impl Source {
     pub fn new(habitat: Habitat, tick: u64, c: &Config, rng: &mut Random, field: &Field) -> Self {
@@ -67,6 +70,7 @@ impl Source {
             material: Default::default(),
             interface: 0.,
             pending: 0.,
+            renewal_rng: Random::new(rng.next_u64()),
         };
         source.rebuild(c, field);
         source
@@ -118,7 +122,11 @@ impl Source {
         let outcome = self.advance_local(step, field);
         if outcome.released > 0. {
             let loss = field.release_mixtures(
-                &[(&self.footprint, &self.mixture, outcome.released)],
+                &outcome
+                    .parcels
+                    .iter()
+                    .map(|(mix, q)| (self.footprint.as_slice(), mix.as_slice(), *q))
+                    .collect::<Vec<_>>(),
                 step.chemistry,
             );
             ledger.numerical_material += loss[0];
@@ -143,7 +151,18 @@ impl Source {
             ..Outcome::default()
         };
         let r = &step.response;
-        let [dx, dy] = [0, 1].map(|k| (r.velocity[k] + r.shift[k]) * c.dt);
+        let intended = [0, 1].map(|k| (r.velocity[k] + r.shift[k]) * c.dt);
+        let mobility = field
+            .illumination
+            .shade
+            .geography
+            .movement([self.habitat.x, self.habitat.y], intended);
+        let [dx, dy] = intended.map(|v| v * mobility);
+        let supply_time = field.illumination.shade.geography.supply_time(
+            [self.habitat.x + dx / 2., self.habitat.y + dy / 2.],
+            step.tick as f64 * c.dt,
+            c.dt,
+        );
         outcome.changed = dx != 0. || dy != 0. || (self.amount > 0. && conversion[0] > 0.);
         if dx != 0. || dy != 0. {
             self.habitat.x = (self.habitat.x + dx).rem_euclid(c.width);
@@ -151,37 +170,24 @@ impl Source {
             outcome.distance = dx.hypot(dy);
             self.rebuild(c, field);
         }
-        if self.amount == 0. {
-            self.pending = 0.;
-            self.wait = (self.wait - c.dt).max(0.);
-            if self.wait > 0. || self.rate == 0. {
-                return outcome;
-            }
-            self.renew(step.tick, c);
-            outcome.changed = true;
-            for (s, q) in self.inventory().enumerate() {
-                outcome.supplied[0] += q;
-                outcome.supplied[1] += q * chemistry.properties[s].potential;
-            }
+        self.pending += supply_time;
+        if step.release {
+            self.advance_supply(step, &mut outcome);
         }
-        if self.rate > 0. && self.amount > 0. {
-            self.pending += c.dt;
-        }
-        if step.release && self.pending > 0. && self.amount > 0. {
-            // The medium diffuses, is sensed and exchanges only at its interval; release
-            // accrues until then and commits the same rate-times-time supply in one pass.
-            outcome.changed = true;
-            let elapsed = std::mem::take(&mut self.pending);
-            outcome.released =
-                self.withdraw((self.rate * elapsed / self.amount).min(1.), chemistry);
-        } else if outcome.changed || !self.material.valid {
+        if outcome.changed || !self.material.valid {
             self.refresh_material(chemistry);
         }
         outcome
     }
 
     /// Ledger accounts and, at exhaustion, the ordered renewal draw.
-    pub fn finish(&mut self, outcome: &Outcome, c: &Config, rng: &mut Random, ledger: &mut Ledger) {
+    pub fn finish(
+        &mut self,
+        outcome: &Outcome,
+        _c: &Config,
+        _rng: &mut Random,
+        ledger: &mut Ledger,
+    ) {
         ledger.source_converted += outcome.conversion[0];
         ledger.source_heat += outcome.conversion[1];
         ledger.source_work += outcome.conversion[2];
@@ -189,10 +195,6 @@ impl Source {
         ledger.supplied += outcome.supplied[0];
         ledger.supplied_energy += outcome.supplied[1];
         ledger.source_released += outcome.released;
-        if outcome.released > 0. && self.amount == 0. {
-            // Independent renewal with mean source_gap; sample only at exhaustion.
-            self.wait = -(1. - rng.unit()).ln() * c.source_gap;
-        }
     }
 
     fn convert(&mut self, step: &crate::source_medium::Step<'_>) -> [f64; 3] {

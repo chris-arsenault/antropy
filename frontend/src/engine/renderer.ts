@@ -42,7 +42,7 @@ function shader(gl: WebGL2RenderingContext, type: number, source: string) {
   return value;
 }
 function illuminationMode(layers: boolean[]) {
-  return [6, 8, 9, 10].findIndex((i) => layers[i]) + 1;
+  return [6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].findIndex((i) => layers[i]) + 1;
 }
 function program(gl: WebGL2RenderingContext, vertex: string, fragment: string) {
   const p = gl.createProgram()!;
