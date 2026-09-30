@@ -9,6 +9,7 @@ import { type Message, type Request } from "./protocol";
 import { type Inspection } from "./types";
 import { observationDelta, type ObservationView } from "./observationDelta";
 
+// This complete UI journey includes WASM startup and all panels under CI coverage.
 it("preserves the world, display controls and drafts through panel navigation", async () => {
   const session = new Session(
     await Engine.load(new Uint8Array(readFileSync("public/antropy-engine.wasm")))
@@ -65,7 +66,7 @@ it("preserves the world, display controls and drafts through panel navigation", 
     vi.unstubAllGlobals();
     restoreCanvas();
   }
-});
+}, 15_000);
 
 function button(container: HTMLElement, name: string) {
   const found = Array.from(container.querySelectorAll<HTMLButtonElement>("button")).find(
