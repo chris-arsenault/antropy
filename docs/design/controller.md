@@ -38,6 +38,38 @@ Controllers receive no coordinates, compass, clock, chemical ID, route, lineage 
 or reproductive score. Body inputs describe capacity at current biomass relative to the
 genetic newborn reference; zero genetic capabilities have zero readings.
 
+**Proposed, awaiting approval (September 30): realized-activity body inputs.**
+
+**Problem.** Since v43, every capacity is an exact proportion of biomass, so each
+`capacity/(capacity+reference)` input equals `M/(M+B)`, or zero when the capability is absent.
+Twenty-one slots (16–27, 35, 36, 43, 52–57) repeat input 29 plus a birth-fixed presence bit.
+Under the v44 row budget, weights on them also dilute informative inputs. Conditional
+specialization needs cues that vary with local conditions; these carry none.
+
+**Replacement.** Each capability that acts on the world reports what it achieved in the
+latest physiology interval relative to what its current capacity allows:
+
+| Slots | Reading | Range |
+| --- | --- | --- |
+| 20–23 | Transporter i: accepted net transfer over the interval ÷ its full-effort capacity over the interval (import positive, export negative). Accepted per-species transfer is apportioned to slots by each slot's share of that species' request | −1…1 |
+| 24–27, 52–55 | Enzyme program j: accepted turnover over the interval ÷ its full-activity genetic turnover over the interval (from the executor's accepted routes) | 0…1 |
+| 56 | Builder: net deposited or recovered cover ÷ full-effort builder capacity | −1…1 |
+| 57 | Emitter: paid emission ÷ full-effort emitter capacity | 0…1 |
+
+The values change with local availability, storage headroom, usable energy, injury and the
+controller's own effort, and are zero for absent capabilities. They add no coordinates,
+bearings or lineage information, and they are computed from accepted physical transfers only.
+
+**Retired slots.** Receptors (16–19), motor (35), storage (36) and photoreceptor (43) already
+have condition-dependent cues (inputs 0–15, 58, 37 and 39). The recommended treatment removes
+these seven inputs (59 → 52). Keeping them at constant zero would leave dead weights that the
+row budget still counts and mutation still drifts.
+
+**Consequences.** Genome layout and controller parameter count change, and per-slot interval
+accumulators become checkpoint state. That requires a physical format bump and a fresh world
+without migration. Founder weights do not use any affected slot, so they need no retune.
+Harness diagnostic controllers that index inputs by number must be updated.
+
 <a id="controller-action-contract"></a>
 
 ## Action contract
