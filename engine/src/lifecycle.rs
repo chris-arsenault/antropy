@@ -61,6 +61,7 @@ fn child(w: &mut World, parent: &Cell, offset: [f64; 2]) -> Cell {
     cell.brain = controller::State::default();
     cell.action = controller::Action::default();
     cell.contacts = [0.; 4];
+    cell.activity = Default::default();
     cell.interface = Default::default();
     cell.flows = Default::default();
     cell.chemical_flows = Default::default();

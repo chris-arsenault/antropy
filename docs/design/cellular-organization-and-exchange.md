@@ -506,7 +506,7 @@ unbounded genome or retired-stock list. Complete release costs are in the
 [delivery record](../cellular-organization-results.md), including the below-30-tick/s eight-program
 stress case. This is a measured computational limit, not an optimal ecological repertoire size.
 The v33 controller had 56 inputs, 24 recurrent units and 38 outputs covering the bounded arena;
-the current [controller](controller.md) has 59 inputs and 19 outputs without allocation outputs.
+the current [controller](controller.md) has 52 inputs and 19 outputs without allocation outputs.
 Unused records have no catalytic function or free stock; four transporters and receptors remain.
 
 Founders retain four active programs, outward sensing (lambda=0), activity/construction request

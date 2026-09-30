@@ -2,7 +2,9 @@
 use crate::{
     chemistry::Chemistry,
     config::Config,
-    controller::LIGHT_INPUT,
+    controller::{
+        ACTIVITY_INPUT, BUILDER_INPUT, EMITTER_INPUT, FILL_INPUT, INJURY_INPUT, LIGHT_INPUT,
+    },
     field::Field,
     genetics::Compiled,
     organism::{Cell, PHOTO_STOCK},
@@ -145,14 +147,15 @@ fn observe_inward(cell: &mut Cell, c: &Config) {
 
 /// Body and private-byte cues share the base clock; geographic recognition owns its refresh.
 pub fn observe_body(cell: &mut Cell, g: &Compiled, c: &Config) {
-    observe_stocks(cell, g, c);
+    observe_condition(cell, g, c);
     observe_base(cell, c);
     crate::controller::publish_inputs(&mut cell.brain, &cell.inputs, u64::MAX);
 }
 
 /// Publish after transport, reactions and funded body changes have completed.
 pub fn observe_physiology(cell: &mut Cell, g: &Compiled, c: &Config) {
-    observe_stocks(cell, g, c);
+    observe_condition(cell, g, c);
+    publish_activity(cell);
     observe_inward(cell, c);
     crate::controller::publish_inputs(
         &mut cell.brain,
@@ -161,34 +164,22 @@ pub fn observe_physiology(cell: &mut Cell, g: &Compiled, c: &Config) {
     );
 }
 
-fn observe_stocks(cell: &mut Cell, g: &Compiled, c: &Config) {
-    let stock = |q: f64, reference: f64| (q / (q + reference).max(1e-30)) as f32;
-    for i in 0..12 {
-        cell.inputs[16 + i] = stock(cell.body[3 + i], g.body[3 + i]);
-    }
-    for slot in 0..crate::organism::MAX_ENZYMES {
-        let i = crate::organism::enzyme_stock(slot);
-        cell.inputs[crate::controller::programs::stock_input(slot)] =
-            if cell.chemistry().programs[slot] {
-                stock(cell.body[i], g.body[i])
-            } else {
-                0.
-            };
-    }
+/// Growth toward division, internal fill and injury.
+fn observe_condition(cell: &mut Cell, g: &Compiled, c: &Config) {
     cell.inputs[29] = ((cell.body[0] / g.body[0] - 1.).clamp(0., 1.)) as f32;
-    cell.inputs[35] = stock(cell.body[1], g.body[1]);
-    cell.inputs[36] = stock(cell.body[2], g.body[2]);
-    cell.inputs[37] = (cell.material() / cell.capacity(c).max(1e-30)).clamp(0., 1.) as f32;
-    cell.inputs[38] = cell.damage as f32;
-    cell.inputs[LIGHT_INPUT + 4] = stock(cell.body[PHOTO_STOCK], g.body[PHOTO_STOCK]);
-    cell.inputs[crate::controller::BUILDER_INPUT] = stock(
-        cell.body[crate::organism::BUILDER_STOCK],
-        g.body[crate::organism::BUILDER_STOCK],
-    );
-    cell.inputs[crate::controller::EMITTER_INPUT] = stock(
-        cell.body[crate::organism::EMITTER_STOCK],
-        g.body[crate::organism::EMITTER_STOCK],
-    );
+    cell.inputs[FILL_INPUT] = (cell.material() / cell.capacity(c).max(1e-30)).clamp(0., 1.) as f32;
+    cell.inputs[INJURY_INPUT] = cell.damage as f32;
+}
+
+/// Actuator readings cover everything accepted since the previous physiology publication.
+fn publish_activity(cell: &mut Cell) {
+    use crate::activity::{BUILDER, EMITTER, ENZYMES};
+    for actuator in 0..ENZYMES + crate::organism::MAX_ENZYMES {
+        cell.inputs[ACTIVITY_INPUT + actuator] = cell.activity.reading(actuator);
+    }
+    cell.inputs[BUILDER_INPUT] = cell.activity.reading(BUILDER);
+    cell.inputs[EMITTER_INPUT] = cell.activity.reading(EMITTER);
+    cell.activity.reset();
 }
 
 /// Energy, scalar crowding shares and the private byte advance on the base clock.

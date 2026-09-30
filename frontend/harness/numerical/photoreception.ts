@@ -5,6 +5,7 @@ import { type QuickScenario } from "../lib/quickScenario";
 import { chemicalContext } from "../lib/chemicalGenotypes";
 import { frozen, install } from "../lib/engineFixtures";
 import { type EngineConfig } from "../../src/engine/types";
+import { LIGHT_INPUT } from "../../src/engine/controllerInputs";
 
 const output = process.argv[2];
 if (!output) throw new Error("Expected new output directory");
@@ -37,7 +38,7 @@ for (const [name, stock, gain, contrast] of [
         c.physical[15] = stock;
         c.behavior = world.command("diagnosticController", {
           logits: [0.08, 0, 0, 0, -1, 0, 0, 0, 0],
-          response: [42, 1, gain],
+          response: [LIGHT_INPUT + 3, 1, gain],
         });
       }
       install(

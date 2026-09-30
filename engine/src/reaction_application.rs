@@ -38,6 +38,7 @@ impl Executor {
             if record {
                 self.work.routes.push((r.slot, r.row, amount));
             }
+            self.turnover[slot] += amount;
             self.accepted += 1;
             accumulate(
                 &mut self.consumed[r.substrate],

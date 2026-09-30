@@ -63,14 +63,17 @@ fn inward_sensing_requires_stock_and_allocation_and_tracks_free_material() {
     cell.inventory.fill(0.);
     cell.inventory.set(w.config.source_species[0], 0.1);
     sensing::observe(cell, g, &w.config, &w.field);
-    assert_eq!(cell.inputs[44], 0.);
+    assert_eq!(cell.inputs[controller::INWARD_INPUT], 0.);
     let mut machinery = cell.chemistry().clone();
     machinery.inward[0] = 1.;
     cell.operators = Some(Operators::compile(&machinery, &w.config, &w.chemistry));
     sensing::observe(cell, g, &w.config, &w.field);
-    assert!(cell.inputs[44] > 0. && cell.inputs[45] > 0.);
+    assert!(
+        cell.inputs[controller::INWARD_INPUT] > 0.
+            && cell.inputs[controller::INWARD_INPUT + 1] > 0.
+    );
     assert_eq!(cell.inputs[0], 0.);
-    let controller = controller::diagnostic([0.; 9], Some((44, 0, 2.)));
+    let controller = controller::diagnostic([0.; 9], Some((controller::INWARD_INPUT, 0, 2.)));
     let action = controller::act(
         &controller,
         &cell.inputs,
@@ -81,7 +84,7 @@ fn inward_sensing_requires_stock_and_allocation_and_tracks_free_material() {
     assert!(action.swim > 0.);
     cell.body[3] = 0.;
     sensing::observe(cell, g, &w.config, &w.field);
-    assert_eq!(cell.inputs[44], 0.);
+    assert_eq!(cell.inputs[controller::INWARD_INPUT], 0.);
 }
 
 #[test]

@@ -219,7 +219,7 @@ fn owner_publications_preserve_transient_cues_and_paid_private_learning() {
         inputs[0] = if (2..5).contains(&step) { -0.8 } else { 0.2 };
         inputs[28] = 0.2 + step as f32 * 0.04;
         inputs[30] = if step == 4 { 0.9 } else { 0. };
-        inputs[38] = if step >= 6 { 0.7 } else { 0. };
+        inputs[INJURY_INPUT] = if step >= 6 { 0.7 } else { 0. };
         let paid = step % 3 != 0;
         let publication = Config {
             dt: 0.,

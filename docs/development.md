@@ -193,7 +193,7 @@ These are registered investigation tools; their available parameter values do no
 additional sweeps. Headless source output observations are prospective normal release rates,
 excluding expiration flushes; actual converted/released material is counted separately.
 
-The cell inspector exposes 59 local chemical/optical/body inputs, current and genetic capacities, chemical mixtures, U/D/I/S properties,
+The cell inspector exposes 52 local chemical/optical/body/actuator-activity inputs, current and genetic capacities, chemical mixtures, U/D/I/S properties,
 membrane compatibility, actual transfers, private recurrence and task state. Manual interventions
 remain diagnostic and durable. Views never select reproduction or feed hidden information to RNNs.
 

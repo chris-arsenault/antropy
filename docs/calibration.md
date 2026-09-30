@@ -15,7 +15,7 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Quantity | Current value |
 | --- | --- |
 | World / timestep / founders | 720 × 540 periodic XY / 0.2 model seconds / 48 in two colonies |
-| Controller | 59 inputs, 24 recurrent units, 19 outputs |
+| Controller | 52 inputs, 24 recurrent units, 19 outputs |
 | Body | Twenty-two derived capacities expressed from genes at current biomass, including four receptors, four transporters and a photoreceptor; one to eight enzyme programs |
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |

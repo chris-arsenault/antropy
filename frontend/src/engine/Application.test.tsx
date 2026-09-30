@@ -161,7 +161,7 @@ async function checkLineage(container: HTMLElement) {
   expect(container.textContent).not.toContain("Retirement effort");
   expect(container.textContent).toContain("Photoreceptor: level");
   expect(container.textContent).toContain("Light left − right");
-  expect(container.textContent).toContain("Built photoreceptor capacity");
+  expect(container.textContent).toContain("Light emitter realized activity");
   expect(container.textContent).toContain("Family and ancestry");
   expect(container.querySelector('.genealogy-tree [aria-current="true"]')?.textContent).toContain(
     "Cell 1"

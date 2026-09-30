@@ -278,9 +278,9 @@ gain, self-exclusion and boundary delivery. No speedup is established.
 
 Checkpoint pending input, its consumption epoch and the once-only emission state. Rebuild derived
 spatial membership on restore. The controller interface owns public input/action shapes; physics
-does not inspect weight layout. The current controller has 59 inputs and 19 outputs. With 27
-sound inputs and two mouth/ear capacity inputs (matching the builder and emitter capacity
-inputs), a direct extension has 88 inputs, beyond the current u64 publication masks. Eight bit
+does not inspect weight layout. The current controller has 52 inputs and 19 outputs. With 27
+sound inputs and two mouth/ear realized-activity inputs (matching the builder and emitter
+activity inputs), a direct extension has 81 inputs, beyond the current u64 publication masks. Eight bit
 outputs and emission effort would produce 28 outputs. These are real controller,
 codec, genetics, diagnostic and clock changes, not just a new field on Cell. Hidden width need
 not change merely because communication ports exist.

@@ -18,6 +18,14 @@ permanent legend removes the need to select diagnostic layers. This presentation
 to main as `fc016c7`, changes no physical rule or checkpoint format. Its completed plan is listed
 in the [plan index](../plans/README.md).
 
+**Realized-activity controller inputs — September 30.** Physical v48 replaces the v43
+biomass-proportional stock inputs, which all equalled `M/(M+B)`, with one reading per paid
+actuator: accepted signed effect against full-effort capacity since the previous physiology
+publication, `a/(|a|+C)`, for transporters, enzyme programs, builder and emitter. Seven
+capacity-only slots were removed (59 → 52 inputs). Founder weights used none of the replaced
+slots. The [controller contract](controller.md#controller-observation-contract) lists the
+layout; v48 rejects older checkpoints without migration.
+
 <a id="design-terrain-seasons"></a>
 
 ## Fractal terrain and local resource seasons — September 30
@@ -254,12 +262,12 @@ Finite initial8/128 priming starts delivery; later processing follows ordinary l
 bound material retain actual identities through repair and death. No chemical has a privileged
 waste role. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
-The controller has 59 inputs, 24 recurrent units and 19 outputs. Genes express twenty-two derived
+The controller has 52 inputs, 24 recurrent units and 19 outputs. Genes express twenty-two derived
 body capacities directly at current biomass, including four chemical receptors, four transporters,
 one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v47; the outer observation package remains v11.
+checkpoints use v48; the outer observation package remains v11.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping

@@ -47,6 +47,8 @@ pub struct Cell {
     pub contacts: [f64; 4],
     /// Last paid motor load, a local physical signal rather than a terrain map reading.
     pub motor_load: f64,
+    /// Accepted actuator effects since the last physiology publication.
+    pub activity: crate::activity::Activity,
     #[serde(skip)]
     pub interface: crate::interfaces::Reading,
     pub inputs: Vec<f32>,
@@ -129,6 +131,7 @@ impl Cell {
             photoreceptor: 0.,
             contacts: [0.; 4],
             motor_load: 0.,
+            activity: Default::default(),
             interface: Default::default(),
             inputs: vec![0.; INPUTS],
             action: Action::default(),
@@ -233,6 +236,7 @@ impl Cell {
             .chain([&self.photoreceptor])
             .any(|x| !x.is_finite() || *x < 0.)
             || self.contacts.iter().any(|x| !(0. ..=1.).contains(x))
+            || !self.activity.validate()
             || self.brain.last_energy.is_some_and(|x| !x.is_finite())
             || self
                 .action

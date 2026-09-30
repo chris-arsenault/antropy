@@ -19,11 +19,11 @@ Illumination is dimensionless with unit mean; its saturation reference is theref
 The shared receptor adaptation time produces recent change. No additional sensing radius,
 direction oracle, temporal clock, harvesting process or response policy is introduced.
 
-Inputs 39–42 are brightness, change, front-minus-back and left-minus-right; input 43 is
-photoreceptor capacity relative to the genetic newborn reference. Input indices stay fixed.
-The current controller has 59 inputs, 24 recurrent units and 19 outputs. At introduction, new founder weights started at
+Inputs 37–40 are brightness, change, front-minus-back and left-minus-right. The former
+photoreceptor-capacity input was removed in v48; capacity already sets the level's gain.
+The current controller has 52 inputs, 24 recurrent units and 19 outputs. At introduction, new founder weights started at
 zero; mutation can connect the new cues to behavior. Sensing does not establish evolved use.
-Photoreception introduced checkpoint v31; the current physical checkpoint format is v46.
+Photoreception introduced checkpoint v31; the current physical checkpoint format is v48.
 
 ## Verification registration
 

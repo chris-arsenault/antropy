@@ -2,8 +2,11 @@ use super::*;
 type RequestRow<'a> = (
     usize,
     (
-        ((&'a mut [f64; 256], &'a mut [f64; 256]), &'a mut u64),
-        &'a mut Vec<(usize, f64)>,
+        (
+            ((&'a mut [f64; 256], &'a mut [f64; 256]), &'a mut u64),
+            &'a mut Vec<(usize, f64)>,
+        ),
+        &'a mut Vec<Share>,
     ),
 );
 
@@ -11,8 +14,8 @@ fn requests(
     cell: &Cell,
     c: &Config,
     local: &[f64; 256],
-    imports: &mut [f64; 256],
-    exports: &mut [f64; 256],
+    (imports, exports): (&mut [f64; 256], &mut [f64; 256]),
+    shares: &mut Vec<Share>,
 ) -> u64 {
     if cell.damage == 1. || (cell.energy == 0. && c.transport_energy > 0.) {
         return 0;
@@ -63,6 +66,7 @@ fn requests(
             if q > 0. {
                 destination[a.species] += q;
                 mask |= 1 << (a.species / 4);
+                shares.push((slot as u8, a.species as u8, effort.signum() * q));
             }
         }
     }
@@ -109,12 +113,14 @@ impl Exchange {
         let exposed = graph.exposed && !self.passive;
         self.contact.begin(if exposed { cells.len() } else { 0 });
         self.contact_support.resize_with(cells.len(), Vec::new);
+        self.shares.resize_with(cells.len(), Vec::new);
         let passive = self.passive;
-        let request = |(i, (((imports, exports), mask), support)): RequestRow<'_>| {
+        let request = |(i, ((((imports, exports), mask), support), shares)): RequestRow<'_>| {
             let cell = &cells[i];
             clear(imports, *mask);
             clear(exports, *mask);
             support.clear();
+            shares.clear();
             if passive {
                 *mask = super::passive::requests(
                     cell, c, field, chemistry, &sites[i], imports, exports,
@@ -124,7 +130,7 @@ impl Exchange {
             let active = import_support(cell, c);
             let field_local = crate::numeric::mixture_masked(field, &sites[i], active);
             let local = graph.local_masked(i, cells, c, &field_local, active);
-            *mask = requests(cell, c, &local, imports, exports);
+            *mask = requests(cell, c, &local, (imports, exports), shares);
             if exposed {
                 for s in species(*mask) {
                     if imports[s] > 0. && local[s] > 0. {
@@ -144,6 +150,7 @@ impl Exchange {
                 .zip(self.exports.par_iter_mut())
                 .zip(self.masks.par_iter_mut())
                 .zip(self.contact_support.par_iter_mut())
+                .zip(self.shares.par_iter_mut())
                 .enumerate()
                 .with_min_len(grain)
                 .for_each(request);
@@ -153,6 +160,7 @@ impl Exchange {
                 .zip(self.exports.iter_mut())
                 .zip(self.masks.iter_mut())
                 .zip(self.contact_support.iter_mut())
+                .zip(self.shares.iter_mut())
                 .enumerate()
                 .for_each(request);
         }

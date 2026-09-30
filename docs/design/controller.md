@@ -4,7 +4,7 @@
 
 One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 59×24×19 Rust controller with a physiological evaluation clock.
+the 52×24×19 Rust controller with a physiological evaluation clock.
 
 <a id="controller-observation-contract"></a>
 
@@ -13,20 +13,19 @@ the 59×24×19 Rust controller with a physiological evaluation clock.
 | Indices | Local readings |
 | --- | --- |
 | 0–15 | Four chemical receptors, each with level, temporal change, forward difference and left difference |
-| 16–27 | Twelve expressed receptor/transporter/enzyme capacities, each divided by itself plus its genetic newborn reference |
+| 16–19 | Realized activity of transporters 0–3 (import positive, export negative) |
+| 20–27 | Realized activity of enzyme programs 0–7 |
 | 28 | Usable energy / actual energy capacity |
 | 29 | Core / genetic newborn core reference minus one, clamped to [0,1] |
 | 30–33 | Equal shares of scalar circle crowding; these four slots have no directional meaning |
 | 34 | Opaque private task byte / 255 |
-| 35–36 | Motor/storage capacity divided by itself plus its genetic newborn reference |
-| 37 | Internal chemical matter / actual storage capacity |
-| 38 | Injury fraction |
-| 39–42 | Funded optical level, temporal change, forward difference and left difference |
-| 43 | Photoreceptor capacity divided by itself plus its genetic newborn reference |
-| 44–51 | Four funded inward receptors, each level and temporal change |
-| 52–55 | Enzyme records 4–7 capacity relative to their genetic newborn references |
-| 56–57 | Cover-builder and emitter capacity relative to their genetic newborn references |
-| 58 | Previous paid local motor load from geographic resistance; zero without effort or with feedback disabled |
+| 35 | Internal chemical matter / actual storage capacity |
+| 36 | Injury fraction |
+| 37–40 | Funded optical level, temporal change, forward difference and left difference |
+| 41–48 | Four funded inward receptors, each level and temporal change |
+| 49 | Realized cover-builder activity (deposit positive, recovery negative) |
+| 50 | Realized emitter activity |
+| 51 | Previous paid local motor load from geographic resistance; zero without effort or with feedback disabled |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
 Expressed receptor capacity supplies gain. Level is C/(C+K), with K=0.1; directional differences use
@@ -35,40 +34,24 @@ wrapped. They are local contrasts, not bearings to a source. Phasic input is cur
 the saved baseline; baseline relaxation uses 1−exp(−dt/2). Birth initializes it locally.
 
 Controllers receive no coordinates, compass, clock, chemical ID, route, lineage label, destination
-or reproductive score. Body inputs describe capacity at current biomass relative to the
-genetic newborn reference; zero genetic capabilities have zero readings.
+or reproductive score.
 
-**Proposed, awaiting approval (September 30): realized-activity body inputs.**
+Every paid actuator reports one shared reading: its accepted signed effect `a` since the
+previous physiology publication against its full-effort capacity `C` over the same time,
+`a/(|a|+C)`. C is `dt × turnover × current stock` for transporters and enzyme programs,
+`dt × growth_rate × builder` and `dt × motor_power_density × emitter`; damage and chosen
+effort stay in the numerator, so injury, low effort, missing substrate, full storage, depleted
+surroundings and unpaid energy all lower the reading. Accepted per-species transfer is shared
+among transporter slots by their share of that species' request, including contact receipts.
+Absent capabilities read zero. The reading uses the same bounded `q/(q+reference)` form the
+v43 stock inputs used and needs no clamp. Accumulators are checkpoint state and restart at
+birth and at each publication.
 
-**Problem.** Since v43, every capacity is an exact proportion of biomass, so each
-`capacity/(capacity+reference)` input equals `M/(M+B)`, or zero when the capability is absent.
-Twenty-one slots (16–27, 35, 36, 43, 52–57) repeat input 29 plus a birth-fixed presence bit.
-Under the v44 row budget, weights on them also dilute informative inputs. Conditional
-specialization needs cues that vary with local conditions; these carry none.
-
-**Replacement.** Each capability that acts on the world reports what it achieved in the
-latest physiology interval relative to what its current capacity allows:
-
-| Slots | Reading | Range |
-| --- | --- | --- |
-| 20–23 | Transporter i: accepted net transfer over the interval ÷ its full-effort capacity over the interval (import positive, export negative). Accepted per-species transfer is apportioned to slots by each slot's share of that species' request | −1…1 |
-| 24–27, 52–55 | Enzyme program j: accepted turnover over the interval ÷ its full-activity genetic turnover over the interval (from the executor's accepted routes) | 0…1 |
-| 56 | Builder: net deposited or recovered cover ÷ full-effort builder capacity | −1…1 |
-| 57 | Emitter: paid emission ÷ full-effort emitter capacity | 0…1 |
-
-The values change with local availability, storage headroom, usable energy, injury and the
-controller's own effort, and are zero for absent capabilities. They add no coordinates,
-bearings or lineage information, and they are computed from accepted physical transfers only.
-
-**Retired slots.** Receptors (16–19), motor (35), storage (36) and photoreceptor (43) already
-have condition-dependent cues (inputs 0–15, 58, 37 and 39). The recommended treatment removes
-these seven inputs (59 → 52). Keeping them at constant zero would leave dead weights that the
-row budget still counts and mutation still drifts.
-
-**Consequences.** Genome layout and controller parameter count change, and per-slot interval
-accumulators become checkpoint state. That requires a physical format bump and a fresh world
-without migration. Founder weights do not use any affected slot, so they need no retune.
-Harness diagnostic controllers that index inputs by number must be updated.
+Since v43, each stock input `capacity/(capacity+reference)` had equalled `M/(M+B)` for every
+component, repeating input 29 plus a birth-fixed presence bit. V48 replaced them: actuators now
+report achieved effect, which conditional specialization needs, and receptor, photoreceptor,
+motor and storage stocks were removed because inputs 0–15, 37–40, 51 and 35 already carry
+their condition-dependent readings. Under the row budget a constant input only costs gain.
 
 <a id="controller-action-contract"></a>
 
@@ -97,9 +80,9 @@ The task byte has no task semantics in physics; manual writes are recorded diagn
 
 ## Topology and founder
 
-The network has 59 inputs, 24 recurrent saturating units and 19 output logits: 1,416 input weights,
+The network has 52 inputs, 24 recurrent saturating units and 19 output logits: 1,248 input weights,
 576 recurrent weights, 24 hidden biases, 456 output weights and 19 output biases, totaling
-2,491 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
+2,323 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
 belong to program records; inactive records have no function. Neutral duplication copies
 activity readouts and divides incoming capacity contributions. Deletion removes the program's
 ports and the daughter immediately expresses the resulting genetic body proportions.
@@ -112,7 +95,7 @@ use float32 storage and SIMD arithmetic. The shared rational activation is
 is below 0.024. This is an explicit modeling approximation, not preserved old trajectories.
 Each cell evaluates its RNN once per existing physiology interval (default 0.8 model seconds).
 Physical owners publish cues at their update boundary: external sensing supplies chemistry
-and light, physiology supplies expressed body capacities and internal state, and base stepping supplies
+and light, physiology supplies realized actuator activity and internal state, and base stepping supplies
 energy, contact, paid motor load and the private byte. Each channel retains its value and publication time;
 the next evaluation integrates their signed time average, settles paid learning, updates
 hidden state and decodes one held action. Constant channels need no repeated base-step

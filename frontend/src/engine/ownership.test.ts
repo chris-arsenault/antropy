@@ -4,6 +4,7 @@ import { expect, it, vi } from "vitest";
 import { Engine } from "./client";
 import { SelectedObservation } from "./selectedObservation";
 import { type Inspection, type Summary } from "./types";
+import { INPUT_COUNT } from "./controllerInputs";
 import { expectNumericallyEqual } from "../../harness/lib/physicalAssertions";
 
 const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
@@ -50,6 +51,8 @@ it("reuses genealogy and chromosomes until a relevant change, with full display 
   const summary = () => world.command<Summary>("summary");
   const first = observer.read(world, summary(), 1)!;
   expect(first).toEqual(world.command<Inspection>("inspect", { cell: 1 }));
+  // The TypeScript input layout mirrors the kernel's controller inputs.
+  expect(first.cell!.inputs).toHaveLength(INPUT_COUNT);
   expect(observer.read(world, summary(), 1)).toBe(first);
   world.step();
   const next = observer.read(world, summary(), 1)!;

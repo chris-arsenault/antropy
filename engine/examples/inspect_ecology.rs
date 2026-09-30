@@ -44,17 +44,18 @@ fn optical_response(w: &World, c: &Cell) -> Value {
     let g = w.genomes[&c.genome].compiled.as_ref().unwrap();
     sensing::observe(&mut probe, g, &w.config, &w.field);
     let normal = infer(w, c, &probe.inputs);
+    let light = controller::LIGHT_INPUT;
     let mut absent = probe.inputs.clone();
-    absent[39..43].fill(0.);
+    absent[light..light + 4].fill(0.);
     let mut reverse = probe.inputs.clone();
-    reverse[41] *= -1.;
-    reverse[42] *= -1.;
+    reverse[light + 2] *= -1.;
+    reverse[light + 3] *= -1.;
     let gain = c.body[15] / (c.body[15] + w.config.receptor_ratio * c.body[0]).max(1e-30);
     let mut brighter = probe.inputs.clone();
-    brighter[39] = (brighter[39] as f64 + 0.05 * gain).min(gain) as f32;
+    brighter[light] = (brighter[light] as f64 + 0.05 * gain).min(gain) as f32;
     json!({"normal":normal,"absent":infer(w,c,&absent),
         "reverse":infer(w,c,&reverse),"brighter":infer(w,c,&brighter),
-        "inputs":&probe.inputs[39..44]})
+        "inputs":&probe.inputs[light..light + 4]})
 }
 
 fn diet(c: &Cell) -> Value {

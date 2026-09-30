@@ -80,7 +80,7 @@ Motor work uses `power × (swim² + 0.25 × turn²)` and velocity scales with th
 of available-work funding. At fixed biomass, more motor capacity occupies a larger body share;
 it carries no separate ownership tax or operating penalty at the same actual speed and radius.
 Geographic resistance scales paid motor translation by `sqrt(m)`, so the same motor work moves a
-cell less on resistant or uphill ground; the previous paid local motor load is controller input 58
+cell less on resistant or uphill ground; the previous paid local motor load is controller input 51
 ([geographic composition](chemistry/composed-runtime.md#geographic-composition)).
 
 Each transporter divides finite funded throughput among its recognized local mixture.

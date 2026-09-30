@@ -6,16 +6,15 @@ import { Table, numberText as n } from "./Table";
 import { CellGenealogy } from "./CellGenealogy";
 import { BODY_PARTS, enzymeStock, machineryLabel } from "./bodyParts";
 import { CellOrganization } from "./CellOrganization";
+import { LIGHT_INPUT, MOTOR_LOAD_INPUT } from "./controllerInputs";
 
-const MACHINERY = ["Receptor", "Transporter", "Enzyme"].flatMap((part) =>
-  Array.from({ length: 4 }, (_, i) => part + " " + i)
-);
 const PARTS = BODY_PARTS;
 const INPUTS = [
   ...Array.from({ length: 4 }, (_, i) =>
     ["level", "change", "forward", "left"].map((v) => "Receptor " + i + " " + v)
   ).flat(),
-  ...MACHINERY.map((p) => "Built " + p),
+  ...Array.from({ length: 4 }, (_, i) => `Transporter ${i} realized activity`),
+  ...Array.from({ length: 8 }, (_, i) => `Enzyme ${i} realized activity`),
   "Usable energy",
   "Growth",
   "Crowding share 1",
@@ -23,22 +22,18 @@ const INPUTS = [
   "Crowding share 3",
   "Crowding share 4",
   "Task byte",
-  "Built motor capacity",
-  "Built storage capacity",
   "Internal inventory fill",
   "Damage",
   "Light level",
   "Light change",
   "Light front − back",
   "Light left − right",
-  "Built photoreceptor capacity",
   ...Array.from({ length: 4 }, (_, i) => [
     `Inward receptor ${i} level`,
     `Inward receptor ${i} change`,
   ]).flat(),
-  ...Array.from({ length: 4 }, (_, i) => `Built enzyme ${i + 4}`),
-  "Built cover builder",
-  "Built light emitter",
+  "Cover builder realized activity",
+  "Light emitter realized activity",
   "Paid motor load",
 ];
 interface Props {
@@ -157,7 +152,7 @@ function CellDetails({
         <p>
           Terrain height {n(p.terrain.height)} · grade {n(p.terrain.slope)} · conductance{" "}
           {n(p.terrain.conductance)}. Local supply clock {n(p.terrain.supplyMultiplier)}× · seasonal
-          amplitude {n(p.terrain.seasonAmplitude)}. Paid motor load {n(c.inputs[58])}.
+          amplitude {n(p.terrain.seasonAmplitude)}. Paid motor load {n(c.inputs[MOTOR_LOAD_INPUT])}.
         </p>
       )}
       {p.optics && (
@@ -211,8 +206,9 @@ function transportDirection(effort: number) {
 function Photoreception({ cell: c }: { cell: CellState }) {
   return (
     <p>
-      Photoreceptor: level {n(c.inputs[39])} · change {n(c.inputs[40])} · front − back{" "}
-      {n(c.inputs[41])} · left − right {n(c.inputs[42])}. Capacity {n(c.body[15])}.
+      Photoreceptor: level {n(c.inputs[LIGHT_INPUT])} · change {n(c.inputs[LIGHT_INPUT + 1])} ·
+      front − back {n(c.inputs[LIGHT_INPUT + 2])} · left − right {n(c.inputs[LIGHT_INPUT + 3])}.
+      Capacity {n(c.body[15])}.
     </p>
   );
 }

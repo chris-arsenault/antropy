@@ -7,6 +7,7 @@ mod parallel_tests;
 #[cfg(all(target_arch = "wasm32", feature = "threads"))]
 pub use wasm_bindgen_rayon::init_thread_pool;
 pub mod accounting;
+pub mod activity;
 pub mod adhesion;
 #[cfg(test)]
 mod adhesion_tests;

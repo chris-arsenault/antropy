@@ -81,6 +81,8 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
     }
     let mut changes = BTreeMap::<usize, (u64, [f64; 256])>::new();
     for (i, cell) in w.cells.iter_mut().enumerate() {
+        let capacity = dt * c.growth_rate * cell.body[BUILDER_STOCK];
+        cell.activity.add(crate::activity::BUILDER, 0., capacity);
         if requests[i] == 0. {
             continue;
         }
@@ -134,6 +136,7 @@ pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
         if let Some(observer) = w.observer.as_mut().filter(|o| o.active()) {
             observer.transfers(cell.id, mask, |s| ((-moved[s]).max(0.), moved[s].max(0.)));
         }
+        cell.activity.add(crate::activity::BUILDER, amount, 0.);
         cell.flows.cover_work += cell.pay(amount.abs() * c.growth_energy);
         cell.flows.cover_deposited += amount.max(0.);
         cell.flows.cover_recovered += (-amount).max(0.);

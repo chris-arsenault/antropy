@@ -10,7 +10,7 @@ installed behavior; this document defines a future extension.
 ## Purpose
 
 Each cell currently inherits two constructs: a physical genotype (body proportions, chemical
-machinery, membrane) and one 59-input Elman RNN. The RNN evaluates every physiology interval
+machinery, membrane) and one 52-input Elman RNN. The RNN evaluates every physiology interval
 (0.8 model seconds) and maps local, immediate readings to efforts. It is a physiological reflex
 layer, with a private byte as its only explicit persistent register.
 
@@ -117,12 +117,12 @@ One operation supplies expectation, novelty and uncertainty for every channel. R
 | --- | --- |
 | Net energy balance | (income − upkeep − action costs) / energy capacity over the interval |
 | Energy fill | reflex input 28 |
-| Injury | reflex input 38 |
+| Injury | reflex input 36 |
 | Growth rate | biomass growth / biomass |
 | Receptor level | mean of the four outward receptor levels |
 | Realized net uptake | net transported material / storage capacity |
 | Crowding | scalar circle crowding (reflex inputs 30–33) |
-| Motor load | reflex input 58 per unit swim effort |
+| Motor load | reflex input 51 per unit swim effort |
 | Received light | funded optical level; zero without photoreceptors |
 
 These contribute 27 inputs.

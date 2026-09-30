@@ -6,6 +6,7 @@ import { chemicalContext } from "../lib/chemicalGenotypes";
 import { frozen, install } from "../lib/engineFixtures";
 import { type EngineConfig, type Genotype } from "../../src/engine/types";
 import { type EngineWorld } from "../../src/engine/client";
+import { LIGHT_INPUT } from "../../src/engine/controllerInputs";
 
 const output = process.argv[2];
 const followup = process.argv[3] === "followup";
@@ -31,7 +32,7 @@ function variant(world: EngineWorld, template: Genotype, name: string, i: number
     "diagnosticController",
     {
       logits: logits(steering ? 0.08 : 0, name.endsWith("builder") ? 3 : 0, emission),
-      response: steering ? [42, 1, gain] : null,
+      response: steering ? [LIGHT_INPUT + 3, 1, gain] : null,
     }
   );
   for (const chromosome of genotype.chromosomes) {

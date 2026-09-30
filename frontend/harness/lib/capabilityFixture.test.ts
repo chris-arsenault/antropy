@@ -7,6 +7,7 @@ import { capabilityScreens } from "./capabilityCases";
 import { capabilityScenario } from "./capabilityFixture";
 import { behaviorChange } from "./engineFixtures";
 import { chemicalContext } from "./chemicalGenotypes";
+import { INPUT_COUNT } from "../../src/engine/controllerInputs";
 let engine: Engine;
 beforeAll(async () => {
   engine = await loadEngine();
@@ -44,7 +45,8 @@ it("recurrent ablation preserves feed-forward weights and its source genome", ()
   const before = base.chromosomes[0].behavior.weights,
     after = changed.chromosomes[0].behavior.weights;
   expect(base).toEqual(copy);
-  expect(after.slice(0, 56 * 24)).toEqual(before.slice(0, 56 * 24));
-  expect(after.slice(56 * 24, 56 * 24 + 24 * 24).every((w) => w === 0)).toBe(true);
-  expect(after.slice(56 * 24 + 24 * 24)).toEqual(before.slice(56 * 24 + 24 * 24));
+  const recurrent = INPUT_COUNT * 24;
+  expect(after.slice(0, recurrent)).toEqual(before.slice(0, recurrent));
+  expect(after.slice(recurrent, recurrent + 24 * 24).every((w) => w === 0)).toBe(true);
+  expect(after.slice(recurrent + 24 * 24)).toEqual(before.slice(recurrent + 24 * 24));
 });

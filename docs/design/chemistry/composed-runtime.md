@@ -627,11 +627,19 @@ receptor supplies tonic, temporal, body-forward and body-left readings. Capacity
 gain vanishes with absent genetic capacity. A photoreceptor samples mean local
 illumination through those same rows and supplies the same four cues; its genetic reference
 uses the existing receptor mass scale. See [photoreception](../../photoreception.md).
-The 59-input, 24-recurrent-unit, 19-output private RNN
+The 52-input, 24-recurrent-unit, 19-output private RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
 
-Input58 is previous-step paid local motor load: `(1-sqrt(m))*abs(swim)*(1-damage)` when
+Each paid actuator (transporters, enzyme programs, builder, emitter) accumulates accepted
+signed effect `a` and full-effort capacity `C` from its own execution step and publishes
+`a/(|a|+C)` at the physiology boundary, then restarts. C uses current stock times the
+actuator's turnover, growth or power density and the elapsed step; damage and effort are not
+in C. Transporter slots share accepted per-species transfer, including contact receipts,
+by their requested shares. The [controller contract](../controller.md#controller-observation-contract)
+lists the slots.
+
+Input51 is previous-step paid local motor load: `(1-sqrt(m))*abs(swim)*(1-damage)` when
 motor work was paid, otherwise zero. It vanishes when geographic feedback is disabled and
 is refreshed at the ordinary base-input cadence. This bounded effort-relative resistance
 reading exposes neither height nor slope direction, coordinates, seasonal phase or a route.

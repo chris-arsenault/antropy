@@ -1,12 +1,16 @@
 use crate::{config::Config, random::Random};
 use serde::{Deserialize, Serialize};
 
-pub const LIGHT_INPUT: usize = 39;
-pub const INWARD_INPUT: usize = 44;
-pub const BUILDER_INPUT: usize = 56;
-pub const EMITTER_INPUT: usize = 57;
-pub const MOTOR_LOAD_INPUT: usize = 58;
-pub const INPUTS: usize = 59;
+/// Realized activity of transporters 0–3, then enzyme programs 0–7.
+pub const ACTIVITY_INPUT: usize = 16;
+pub const FILL_INPUT: usize = 35;
+pub const INJURY_INPUT: usize = 36;
+pub const LIGHT_INPUT: usize = 37;
+pub const INWARD_INPUT: usize = 41;
+pub const BUILDER_INPUT: usize = 49;
+pub const EMITTER_INPUT: usize = 50;
+pub const MOTOR_LOAD_INPUT: usize = 51;
+pub const INPUTS: usize = 52;
 pub const BASE_INPUTS: u64 = (1 << 28) | (0b11111 << 30) | (1 << MOTOR_LOAD_INPUT);
 pub const ENVIRONMENT_INPUTS: u64 = ((1 << 16) - 1) | (0b1111 << LIGHT_INPUT);
 pub const PHYSIOLOGY_INPUTS: u64 = ((1_u64 << INPUTS) - 1) & !(BASE_INPUTS | ENVIRONMENT_INPUTS);
@@ -110,7 +114,14 @@ pub fn seed() -> Genome {
     for i in [3, 7] {
         w[i * INPUTS + i] = 8.;
     }
-    for (h, i) in [(16, 28), (17, 30), (18, 31), (19, 33), (20, 37), (21, 38)] {
+    for (h, i) in [
+        (16, 28),
+        (17, 30),
+        (18, 31),
+        (19, 33),
+        (20, FILL_INPUT),
+        (21, INJURY_INPUT),
+    ] {
         w[h * INPUTS + i] = 1.5;
     }
     w[OUTPUT_BIAS] = 0.7;

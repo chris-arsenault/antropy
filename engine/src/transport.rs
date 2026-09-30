@@ -28,6 +28,8 @@ pub struct Exchange {
     imports: Vec<[f64; 256]>,
     exports: Vec<[f64; 256]>,
     contact_support: Vec<Vec<(usize, f64)>>,
+    /// Signed request of each transporter slot for each species (import positive).
+    shares: Vec<Vec<Share>>,
     /// Receivers of every donor node, contiguous per node; `offsets` has one extra entry.
     delivery: Vec<(usize, f64)>,
     offsets: Vec<usize>,
@@ -37,6 +39,33 @@ pub struct Exchange {
     preparations: u64,
     pub profile: bool,
     pub preparation_ms: f64,
+}
+
+/// Transporter slot, species and signed requested amount.
+pub(crate) type Share = (u8, u8, f64);
+
+/// Accepted transfer of each species is shared among slots in proportion to their requests;
+/// each slot also accrues its full-effort capacity for this step.
+fn attribute(cell: &mut Cell, c: &Config, shares: &[Share], accepted: impl Fn(usize, bool) -> f64) {
+    for slot in 0..4 {
+        let capacity = c.dt * c.transporter_turnover * cell.body[7 + slot];
+        cell.activity
+            .add(crate::activity::TRANSPORTERS + slot, 0., capacity);
+    }
+    for &(slot, s, q) in shares {
+        let import = q > 0.;
+        let requested: f64 = shares
+            .iter()
+            .filter(|e| e.1 == s && (e.2 > 0.) == import)
+            .map(|e| e.2.abs())
+            .sum();
+        let fraction = (accepted(s as usize, import) / requested).min(1.);
+        cell.activity.add(
+            crate::activity::TRANSPORTERS + slot as usize,
+            q * fraction,
+            0.,
+        );
+    }
 }
 
 /// Only funded inward machinery can consume an external chemical projection.
@@ -230,6 +259,14 @@ impl Exchange {
             cell.flows.exported += outgoing;
             if !passive {
                 cell.flows.transport += cell.pay((incoming + outgoing) * c.transport_energy);
+                let received = self.contact.received.get(i);
+                attribute(cell, c, &self.shares[i], |s, import| {
+                    if import {
+                        accepted[s] + received.map_or(0., |row| row[s])
+                    } else {
+                        self.exports[i][s]
+                    }
+                });
             }
         });
         if let Some(o) = observer {

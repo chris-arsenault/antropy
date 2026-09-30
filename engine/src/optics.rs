@@ -100,15 +100,15 @@ fn radiate(w: &mut World, sites: &[Row], dt: f64) -> (Plane, Plane) {
     let kernel = &mut w.incident.kernel;
     let mut spread = Vec::new();
     for (cell, footprint) in w.cells.iter_mut().zip(sites) {
-        let requested = dt
-            * w.config.motor_power_density
-            * cell.body[crate::organism::EMITTER_STOCK]
-            * (1. - cell.damage)
-            * cell.action.emission;
+        let capacity =
+            dt * w.config.motor_power_density * cell.body[crate::organism::EMITTER_STOCK];
+        let requested = capacity * (1. - cell.damage) * cell.action.emission;
+        cell.activity.add(crate::activity::EMITTER, 0., capacity);
         if requested == 0. {
             continue;
         }
         let paid = cell.pay(requested);
+        cell.activity.add(crate::activity::EMITTER, paid, 0.);
         if paid > 0. {
             w.incident.emitters.insert(cell.id, paid / dt);
         }

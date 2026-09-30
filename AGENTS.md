@@ -132,7 +132,7 @@ paused with 48 cells of four mutable founder types across two colonies and 240 f
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
-Current physiology has 59 local RNN inputs, 24 recurrent units and 19 outputs, twenty-two derived
+Current physiology has 52 local RNN inputs, 24 recurrent units and 19 outputs, twenty-two derived
 body capacities, four receptors/transporters, one to eight enzyme programs, membrane compatibility
 and paid photoreception. Cells retain one internal mixture; internal compartments were rejected.
 Retained composition modulates rates without changing per-conversion work. Genetic inward sensing,
@@ -152,7 +152,9 @@ lineage label or reproductive score enters the controller. V44 adds sparse-tail 
 reservoirs and one shared incoming-strength budget on every neural row. V45 randomizes newborn
 headings and division axes and adds age-dependent maintenance slowed by core fraction. V46 adds
 persistent fractal terrain, fractal source placement and local seasonal release/refill clocks;
-input 58 reports the previous paid local motor load.
+input 51 reports the previous paid local motor load. V48 replaces the biomass-proportional
+stock inputs with one realized-activity reading per paid actuator (transporters, enzyme
+programs, builder, emitter): accepted effect against full-effort capacity.
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
 washout, evolving source renewal and multiscale public transformations are implemented.
@@ -351,8 +353,8 @@ expensive ecological panels merely for formatting or documentation changes.
 - The top-down periodic XY plane is the only runtime substrate. Do not add a spatial depth coordinate, a
   compatibility mode, an old-checkpoint adapter, or a second renderer. Recover the retired system
   from the annotated tag if historical code is needed.
-- Author physical pressures and local carriers. Controllers receive fifty-nine local chemical,
-  light, body, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
+- Author physical pressures and local carriers. Controllers receive fifty-two local chemical,
+  light, body, actuator-activity, contact and private-byte inputs. They may not receive coordinates, a compass bearing,
   destination, hidden route, lineage identity or reproductive score.
 - RNN weights alone choose physical efforts and register writes. Diagnostic competition summaries
   never select parents, filter mutants or promote a replacement founder automatically.

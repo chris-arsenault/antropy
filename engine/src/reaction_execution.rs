@@ -34,6 +34,8 @@ pub struct Executor {
     marked: [bool; 256],
     touched: Vec<usize>,
     work: Work,
+    /// Accepted turnover per enzyme program in the current interval.
+    turnover: [f64; crate::organism::MAX_ENZYMES],
     applications: u64,
     candidates: u64,
     accepted: u64,
@@ -51,6 +53,7 @@ impl Default for Executor {
             marked: [false; 256],
             touched: Vec::new(),
             work: Work::default(),
+            turnover: [0.; crate::organism::MAX_ENZYMES],
             applications: 0,
             candidates: 0,
             accepted: 0,
@@ -68,6 +71,7 @@ impl Executor {
             self.marked[s] = false;
         }
         self.requests.clear();
+        self.turnover = [0.; crate::organism::MAX_ENZYMES];
         self.work.routes.clear();
         self.work.enzymes = None;
     }
@@ -211,8 +215,20 @@ impl Executor {
             let funding = self.fund(cell, dt);
             self.apply(cell, funding, record, observer);
             self.applications += 1;
+            self.report_activity(cell, c, dt);
         }
         &self.work
+    }
+    /// Accepted turnover against the program's full-activity genetic turnover.
+    fn report_activity(&self, cell: &mut Cell, c: &Config, dt: f64) {
+        for slot in 0..crate::organism::MAX_ENZYMES {
+            if cell.chemistry().programs[slot] {
+                let stock = cell.body[crate::organism::enzyme_stock(slot)];
+                let capacity = dt * c.enzyme_turnover * stock;
+                let actuator = crate::activity::ENZYMES + slot;
+                cell.activity.add(actuator, self.turnover[slot], capacity);
+            }
+        }
     }
     pub(crate) fn drain_counts_to(&mut self, other: &mut Self) {
         other.applications += std::mem::take(&mut self.applications);

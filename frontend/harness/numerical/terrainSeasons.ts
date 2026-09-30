@@ -5,6 +5,7 @@ import { frozen, install, pulse } from "../lib/engineFixtures";
 import { runQuick } from "../lib/quickRun";
 import { type QuickScenario } from "../lib/quickScenario";
 import { type Definition, type Genotype } from "../../src/engine/types";
+import { MOTOR_LOAD_INPUT } from "../../src/engine/controllerInputs";
 
 type Question = "travel" | "feedback" | "shade" | "seasons";
 const root = process.argv[2];
@@ -65,7 +66,7 @@ function scenario(question: Question, enabled: boolean): QuickScenario {
           "diagnosticController",
           {
             logits,
-            response: question === "feedback" && enabled ? [58, 1, 4] : null,
+            response: question === "feedback" && enabled ? [MOTOR_LOAD_INPUT, 1, 4] : null,
           }
         );
         for (const chromosome of g.chromosomes) chromosome.behavior = behavior;

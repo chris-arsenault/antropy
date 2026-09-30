@@ -99,7 +99,7 @@ favored functions, and separately tuned mixtures presented as a model.
 
 ### 2.5 Local information only
 
-A controller receives fifty-nine local readings through the cell's own funded sensors and body
+A controller receives fifty-two local readings through the cell's own funded sensors and body
 state. It never receives coordinates, a compass bearing, a destination, a route, time of day,
 a lineage label or a reproductive score. Receptor gain comes from the capacity the cell
 actually has; a cell without photoreceptors sees no light.
@@ -391,7 +391,7 @@ neighbors expose their inventory to paid uptake through contact.
 
 ### 3.12 Cells: control
 
-Each cell runs an Elman recurrent network with 59 inputs, 24 recurrent units and 19 outputs,
+Each cell runs an Elman recurrent network with 52 inputs, 24 recurrent units and 19 outputs,
 evaluated once per 0.8-second physiology interval on the time-average of its inputs:
 
 ```text

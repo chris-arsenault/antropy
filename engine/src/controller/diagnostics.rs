@@ -74,7 +74,7 @@ pub fn change(base: &Genome, c: &Changes) -> Result<Genome, String> {
     }
     if let Some(brake) = c.inventory_brake {
         w[20 * INPUTS..21 * INPUTS].fill(0.);
-        w[20 * INPUTS + 37] = 1.5;
+        w[20 * INPUTS + FILL_INPUT] = 1.5;
         w[OUTPUT + 20] = -brake;
     }
     if let Some(gain) = c.motor_gain {
