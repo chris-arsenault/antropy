@@ -60,11 +60,12 @@ void main() {
   }
   vec4 detail=mix(mix(sampleSelected(base,n),sampleSelected(base+ivec2(1,0),n),f.x),mix(sampleSelected(base+ivec2(0,1),n),sampleSelected(base+ivec2(1,1),n),f.x),f.y);
   float presence=1.0-exp(-exposure*amount.x);
-  vec3 background=landscape ? landscapeGround(world) : vec3(0.09,0.17,0.21);
+  vec3 background=landscape ? landscapeGround(world,amount.z) : vec3(0.09,0.17,0.21);
   vec3 light=mix(background,vec3(0.36,0.68,0.65),presence*layers.x);
   float quality=clamp((amount.y/max(amount.x,1e-20)-0.5)/7.5,0.0,1.0);
   vec3 energy=mix(vec3(0.22,0.4,0.8),vec3(0.93,0.69,0.3),quality);
-  light=mix(light,energy,presence*layers.y*(landscape ? 0.52 : 1.0));
+  if(landscape) energy=mix(vec3(0.16,0.39,1.0),vec3(1.0,0.66,0.10),quality);
+  light=mix(light,energy,presence*layers.y*(landscape ? 0.72 : 1.0));
   light=mix(light,mix(vec3(0.035,0.12,0.23),vec3(0.72,0.4,0.12),clamp(detail.w,0.0,1.0)),weatheringLayer);
   light=mix(light,vec3(0.83,0.64,0.93),selectedLayer*(1.0-exp(-exposure*max(0.0,detail.x))));
   if(illuminationMode>0) {
@@ -80,7 +81,6 @@ void main() {
     if(illuminationMode==10) light=mix(vec3(0.25),0.5+0.5*cos(6.2831853*(amount.x+vec3(0.0,0.3333333,0.6666667))),clamp(amount.y,0.0,1.0));
     if(illuminationMode==11) light=solarGround(clamp(amount.x,0.0,1.0));
   }
-  if(landscape && showLight) light=receivedShade(light,amount.z);
   // Optional diagnostic patterns remain available outside the default composition.
   float band=1.0-smoothstep(0.025,0.075,abs(fract((gl_FragCoord.x+gl_FragCoord.y)/12.0)-0.5));
   float dotMark=1.0-smoothstep(0.13,0.23,length(fract(gl_FragCoord.xy/8.0)-0.5));

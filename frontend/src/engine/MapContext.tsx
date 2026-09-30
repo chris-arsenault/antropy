@@ -14,8 +14,8 @@ const cues = [
 const landscapeKey = [
   [
     "ground",
-    "Ground: resistant → conductive",
-    "Earth → teal shows substrate conductance. Fine contours show height; closer lines mean steeper ground.",
+    "Ground: rough → conductive",
+    "Earth → teal shows substrate conductance. More short diagonal marks mean greater substrate resistance; contours separately show slopes. Chemical drag has its own optional diagnostic overlay.",
   ],
   [
     "contours",
@@ -24,13 +24,13 @@ const landscapeKey = [
   ],
   [
     "illumination",
-    "Shade: received light",
-    "Ground brightness follows actual received light, including terrain shade, constructed cover and paid emission.",
+    "Ground brightness: light",
+    "Smooth light and dark areas show actual received light, including terrain shade, constructed cover and paid emission. Chemical colors remain readable in shade.",
   ],
   [
     "chemistry",
-    "Chemistry: low → high energy",
-    "Blue → amber shows energy per material. Concentration controls opacity; the terrain remains visible.",
+    "Colored clouds: chemistry",
+    "Blue → amber shows low → high energy per material. Stronger color means more material; shade does not dim the chemical colors. The terrain remains visible through the clouds.",
   ],
   [
     "season",

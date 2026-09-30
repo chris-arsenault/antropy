@@ -149,10 +149,19 @@
 }
 .context-swatch.ground,
 .field-ramp.landscape {
-  background: linear-gradient(90deg, #3d2e21, #1f524d);
+  background: linear-gradient(90deg, #5c331f, #135c52);
+}
+.context-swatch.ground {
+  background:
+    repeating-linear-gradient(135deg, transparent 0 4px, #c2ad82 4px 5px, transparent 5px 8px)
+      left / 50% 100% no-repeat,
+    linear-gradient(90deg, #5c331f, #135c52);
+}
+.landscape-key .context-swatch.illumination {
+  background: linear-gradient(100deg, #718682, #142823);
 }
 .context-swatch.chemistry {
-  background: linear-gradient(90deg, #3966cb, #ecb04c);
+  background: linear-gradient(90deg, #2963ff, #ffa81a);
 }
 .context-swatch.contours {
   background: repeating-linear-gradient(155deg, transparent 0 4px, #7f8c78 4px 5px);

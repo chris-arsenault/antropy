@@ -34,7 +34,8 @@ it("preserves the world, display controls and drafts through panel navigation", 
     expect(container.textContent).toContain("Tick 0");
     expect(container.querySelector("dialog[open]")).toBeNull();
     expect(container.querySelector('[aria-label="Landscape legend"]')).not.toBeNull();
-    expect(container.textContent).toContain("Ground: resistant → conductive");
+    expect(container.textContent).toContain("Ground: rough → conductive");
+    expect(container.textContent).toContain("Colored clouds: chemistry");
     expect(container.textContent).toContain("Reservoir band: slow → fast");
     await click(container, "Population");
     expect(container.querySelector(".population-totals dd")?.textContent).toBe("48");
