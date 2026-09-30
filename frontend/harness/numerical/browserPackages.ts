@@ -9,7 +9,7 @@ mkdirSync(output);
 const engine = await loadEngine(),
   binaryDigest = captureEngine(output, engine);
 for (const growth of [false, true]) {
-  const world = engine.create(101, { founders: 0, sourceCount: 0 });
+  const world = engine.create(101, { preset: "ecology", founders: 0, sourceCount: 0 });
   world.command("loadFixture", { population: 2000, growth });
   const spatial = emptySpatial();
   observe(world, spatial);

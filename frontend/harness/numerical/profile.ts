@@ -1,7 +1,7 @@
 import { loadEngine } from "./engine";
 
 const engine = await loadEngine();
-const world = engine.create(101, { founders: 0, sourceCount: 0 });
+const world = engine.create(101, { preset: "ecology", founders: 0, sourceCount: 0 });
 world.command("loadFixture", { population: 2000, growth: process.argv.includes("--growth") });
 world.step(10);
 const totals = Array<number>(9).fill(0);

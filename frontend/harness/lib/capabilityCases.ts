@@ -103,7 +103,8 @@ function protectionCases(c: ChemicalContext): CapabilityCase[] {
   ]);
 }
 export function capabilityScreens(engine: Engine): CapabilityCase[] {
-  const c = chemicalContext(engine);
+  const c = chemicalContext(engine, { preset: "diagnostic" });
   return [...movementCases(c), ...processingCases(c), ...protectionCases(c)];
 }
-export const founderGenotype = (engine: Engine) => chemicalContext(engine).genotype;
+export const founderGenotype = (engine: Engine) =>
+  chemicalContext(engine, { preset: "diagnostic" }).genotype;

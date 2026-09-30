@@ -12,7 +12,7 @@ if (!study || process.argv.length !== 3) throw new Error("Expected a new study d
 mkdirSync(study);
 const directory = join(study, "seed27"),
   engine = await loadEngine(),
-  world = engine.create(),
+  world = engine.create(27, { preset: "ecology" }),
   definition = world.command<Definition>("definition"),
   deadline = Date.now() + 1800 * 1000;
 let nextCheck = 0;

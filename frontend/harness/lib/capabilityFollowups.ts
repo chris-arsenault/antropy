@@ -17,7 +17,7 @@ function access(s: Source): CapabilityCase[] {
   }));
 }
 function processing(s: Source, engine: Engine): CapabilityCase[] {
-  const c = chemicalContext(engine, s.config);
+  const c = chemicalContext(engine, { preset: "diagnostic", ...s.config });
   return (["uniform0", "uniform1"] as const).flatMap((context) => [
     {
       key: `evolved-processing-${context}`,

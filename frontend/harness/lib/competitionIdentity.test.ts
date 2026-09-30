@@ -2,9 +2,10 @@
 import { expect, it } from "vitest";
 import { loadEngine } from "../numerical/engine";
 import { prepareCompetition } from "./competitionIdentity";
+const small = { preset: "diagnostic", width: 24, height: 24, sourceCount: 0, founders: 4 };
 it("embeds exact genomes, checkpoint identity and retained interventions", async () => {
   const engine = await loadEngine(),
-    world = engine.create(101, { width: 24, height: 24, sourceCount: 0, founders: 4 });
+    world = engine.create(101, small);
   try {
     world.command("task", { cell: 1, value: 19 });
     const { identity, ancestor } = prepareCompetition(world, 1);
@@ -22,7 +23,7 @@ it("embeds exact genomes, checkpoint identity and retained interventions", async
 });
 it("uses the declared lineage and birth-order representative rule", async () => {
   const engine = await loadEngine(),
-    world = engine.create(101, { width: 24, height: 24, sourceCount: 0, founders: 4 });
+    world = engine.create(101, small);
   try {
     expect(prepareCompetition(world, "representative").identity.selection).toMatchObject({
       genome: 1,

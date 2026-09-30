@@ -8,7 +8,7 @@ import { runRecorded, requireRegistration } from "./lib/longRun";
 async function run() {
   const flags = parseFlags(process.argv.slice(2)),
     engine = await loadEngine(),
-    config = chemicalConfig(flags, engine);
+    config = chemicalConfig(flags, engine, "diagnostic");
   const seed = integerFlag(flags, "seed", 101),
     frozen = flag(flags, "frozen", "false") === "true",
     phase = integerFlag(flags, "phase-ticks", 50000);

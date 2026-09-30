@@ -24,7 +24,7 @@ import { runResourceEconomy } from "./numerical/resourceEconomy";
 
 async function bacteria(flags: Flags) {
   const engine = await loadEngine(),
-    config = chemicalConfig(flags, engine),
+    config = chemicalConfig(flags, engine, "ecology"),
     ticks = integerFlag(flags, "ticks", 3000);
   const justification = requireRegistration(flags, ticks);
   for (const [key, name] of Object.entries({

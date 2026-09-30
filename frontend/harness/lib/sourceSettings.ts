@@ -1,6 +1,6 @@
 import { type Engine } from "../../src/engine/client";
 import { type EngineConfig } from "../../src/engine/types";
-import { chemicalContext } from "./chemicalGenotypes";
+import { chemicalContext, type HarnessConfig, type Preset } from "./chemicalGenotypes";
 import { type Flags, flag } from "./flags";
 
 export const CHEMICAL_OPTIONS = {
@@ -19,8 +19,12 @@ export const CHEMICAL_OPTIONS = {
   sourceProcessing: "source-processing",
 };
 
-export function chemicalConfig(flags: Flags, engine: Engine): EngineConfig {
-  const overrides: Partial<EngineConfig> = {};
+/** `--preset` overrides the command's declared physical preset; either is recorded in config. */
+export function chemicalConfig(flags: Flags, engine: Engine, preset: Preset): EngineConfig {
+  const chosen = flag(flags, "preset", preset);
+  if (chosen !== "ecology" && chosen !== "diagnostic")
+    throw new Error("--preset must be ecology or diagnostic");
+  const overrides: HarnessConfig = { preset: chosen };
   for (const [key, name] of Object.entries(CHEMICAL_OPTIONS))
     if (flags.values.has(name)) overrides[key] = Number(flag(flags, name, ""));
   if (flags.values.has("source-species"))

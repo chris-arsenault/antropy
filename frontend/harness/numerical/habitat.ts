@@ -23,7 +23,13 @@ if (
 mkdirSync(output);
 if (stage === "probe" || stage === "medium") {
   const engine = await loadEngine(),
-    world = engine.create(27, { founders: 0, sourceCount: 0, width: 24, height: 24 }),
+    world = engine.create(27, {
+      preset: "diagnostic",
+      founders: 0,
+      sourceCount: 0,
+      width: 24,
+      height: 24,
+    }),
     db = openLedger();
   try {
     const started = performance.now(),

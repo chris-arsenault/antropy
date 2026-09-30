@@ -15,7 +15,10 @@ if (![600, 3000].includes(horizon) || !["on", "off"].includes(weathering))
 mkdirSync(output);
 const wasmDigest = captureEngine(output);
 const engine = await loadEngine(),
-  world = engine.create(seed, weathering === "off" ? { weatheringRate: 0 } : {}),
+  world = engine.create(seed, {
+    preset: "ecology",
+    ...(weathering === "off" ? { weatheringRate: 0 } : {}),
+  }),
   db = openLedger();
 try {
   const definition = world.command<{ seed: number }>("definition"),

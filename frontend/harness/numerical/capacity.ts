@@ -17,7 +17,14 @@ const organizationWorkloads: readonly Workload[] = [
 ];
 const CAPACITY_LABEL =
   "256 channels, distinct genomes, learning, packed five-layer render preparation, census and inspection; constructed load";
-const GEOMETRY = { width: 720, height: 540, mesh: 2, dt: 0.2, physiologyInterval: 0.8 };
+const GEOMETRY = {
+  preset: "ecology",
+  width: 720,
+  height: 540,
+  mesh: 2,
+  dt: 0.2,
+  physiologyInterval: 0.8,
+};
 
 function storageSummary(storage: ReturnType<typeof measureStorage>) {
   return {

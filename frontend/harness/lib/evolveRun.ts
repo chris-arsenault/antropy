@@ -29,6 +29,7 @@ export function evolveSettings(flags: Flags, engine: Engine): EvolveSettings {
     ...Object.values(CHEMICAL_OPTIONS),
     ...Object.values(mutations),
     "world",
+    "preset",
     "seed",
     "ticks",
     "checkpoint-every",
@@ -42,7 +43,7 @@ export function evolveSettings(flags: Flags, engine: Engine): EvolveSettings {
   ]);
   const wallSeconds = wallSecondsFlag(flags, 3600);
   const world = flag(flags, "world", "mixed"),
-    config = chemicalConfig(flags, engine),
+    config = chemicalConfig(flags, engine, "diagnostic"),
     ticks = integerFlag(flags, "ticks", 500000);
   if (world !== "zones" && world !== "mixed") throw new Error("--world must be zones or mixed");
   for (const [key, name] of Object.entries(mutations))

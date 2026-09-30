@@ -7,7 +7,13 @@ import { sampleCohort, cohortWorld, cohortCounts } from "./epochCohort";
 
 it("samples individuals reproducibly without changing source physics or filtering genotypes", async () => {
   const engine = await loadEngine(),
-    w = engine.create(1, { width: 24, height: 24, founders: 4, sourceCount: 0 });
+    w = engine.create(1, {
+      preset: "diagnostic",
+      width: 24,
+      height: 24,
+      founders: 4,
+      sourceCount: 0,
+    });
   try {
     const before = w.snapshot(),
       a = sampleCohort(w, 2, 200);
@@ -20,7 +26,12 @@ it("samples individuals reproducibly without changing source physics or filterin
 });
 it("swaps inherited cohorts on common biomass and keeps descendant assignments", async () => {
   const engine = await loadEngine(),
-    context = chemicalContext(engine, { width: 24, height: 24, sourceCount: 0 });
+    context = chemicalContext(engine, {
+      preset: "diagnostic",
+      width: 24,
+      height: 24,
+      sourceCount: 0,
+    });
   const a = context.genotype,
     b = structuredClone(a);
   b.chromosomes[0].physical[0] = Math.fround(0.1);

@@ -9,7 +9,7 @@ import { runRecorded, requireRegistration } from "./longRun";
 async function run() {
   const flags = parseFlags(process.argv.slice(2)),
     engine = await loadEngine(),
-    config = chemicalConfig(flags, engine);
+    config = chemicalConfig(flags, engine, "ecology");
   const seed = integerFlag(flags, "seed", 101),
     ticks = integerFlag(flags, "ticks", 50000),
     frozen = flag(flags, "frozen", "false") === "true";

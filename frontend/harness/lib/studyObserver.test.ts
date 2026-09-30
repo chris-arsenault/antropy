@@ -55,7 +55,7 @@ it("retains descendant births, terminal deaths and division expenses across drai
 });
 it("streams kernel facts without changing physics and reconciles applied reaction and expense totals", async () => {
   const engine = await loadEngine(),
-    config = { width: 24, height: 24, sourceCount: 2, founders: 4 };
+    config = { preset: "diagnostic", width: 24, height: 24, sourceCount: 2, founders: 4 };
   const observed = engine.create(101, config),
     plain = engine.create(101, config),
     directory = mkdtempSync(join(tmpdir(), "antropy-study-"));

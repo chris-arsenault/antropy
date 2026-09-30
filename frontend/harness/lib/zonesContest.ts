@@ -33,7 +33,7 @@ export interface ZoneSettings {
 }
 export function zoneSettings(flags: Flags, engine: Engine): ZoneSettings {
   const world = flag(flags, "world", "zones"),
-    config = chemicalConfig(flags, engine);
+    config = chemicalConfig(flags, engine, "diagnostic");
   if (world !== "zones" && world !== "mixed") throw new Error("--world must be zones or mixed");
   const shares = flag(flags, "shares", "0.9,0.1").split(",").map(Number);
   twoSourceMixtures(shares, config);

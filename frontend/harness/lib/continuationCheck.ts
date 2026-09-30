@@ -13,9 +13,10 @@ function budget(start: number) {
   if (elapsed(start) > 60000) throw new Error("Registered 60-second storage case budget reached");
 }
 function makeWorld(engine: Engine, name: string) {
-  if (name === "default") return engine.create();
+  if (name === "default") return engine.create(27, { preset: "ecology" });
   const history = name.startsWith("ancestry-");
   const world = engine.create(101, {
+    preset: "diagnostic",
     width: history ? 24 : 64,
     height: history ? 24 : 64,
     founders: 1,

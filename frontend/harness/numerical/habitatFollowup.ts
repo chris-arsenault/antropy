@@ -49,7 +49,10 @@ if (!selected) {
               world,
               [
                 { label: "candidate", genotype: candidate.genotype },
-                { label: "founder", genotype: chemicalContext(engine).genotype },
+                {
+                  label: "founder",
+                  genotype: chemicalContext(engine, { preset: "diagnostic" }).genotype,
+                },
               ],
               [16, 48].map((center, i) => ({
                 cell: i + 1,

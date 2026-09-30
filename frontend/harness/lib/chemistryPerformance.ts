@@ -20,7 +20,7 @@ export async function runChemistryPerformance(flags: Flags): Promise<void> {
   mkdirSync(output);
   const engine = await loadEngine(),
     source = path ? await checkpointSource(engine, path) : null,
-    world = source?.world ?? engine.create();
+    world = source?.world ?? engine.create(27, { preset: "ecology" });
   const binaryDigest = captureEngine(output, engine);
   try {
     writeFileSync(join(output, "initial.bin"), world.snapshot());

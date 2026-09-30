@@ -85,8 +85,17 @@ export class Engine {
     }
   }
 
+  private guard?: (op: string, payload: Record<string, unknown>) => void;
+
+  /** Adds a caller-owned request precondition, such as the harness preset requirement. */
+  guardCommands(guard: (op: string, payload: Record<string, unknown>) => void) {
+    this.guard = guard;
+    return this;
+  }
+
   command<T>(op: string, payload: Record<string, unknown> = {}): T {
     if (this.browser) checkBrowserCommand(op, payload);
+    this.guard?.(op, payload);
     return this.invoke(encoder.encode(JSON.stringify({ ...payload, op })), (reply) => {
       if (this.browser && reply.byteLength > browserReplyLimit(op))
         throw new Error(`Data ownership reply budget exceeded: ${op}`);

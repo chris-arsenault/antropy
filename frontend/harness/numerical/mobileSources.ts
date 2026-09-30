@@ -13,7 +13,13 @@ if (!["probe", "case"].includes(stage) || !root)
 const engine = await loadEngine();
 if (stage === "probe") {
   mkdirSync(root);
-  const world = engine.create(27, { founders: 0, sourceCount: 0, width: 24, height: 24 });
+  const world = engine.create(27, {
+    preset: "diagnostic",
+    founders: 0,
+    sourceCount: 0,
+    width: 24,
+    height: 24,
+  });
   const db = openLedger();
   try {
     writeFileSync(join(root, "registration.json"), JSON.stringify({ started: Date.now() }));
@@ -58,7 +64,11 @@ if (stage === "probe") {
   if (Date.now() >= deadline) throw new Error("Registered study wall budget exhausted");
   const name = `seed${seed}-d${drift}-p${processing}-t${ticks}`;
   const directory = join(root, name);
-  const world = engine.create(seed, { sourceDrift: drift, sourceProcessing: processing });
+  const world = engine.create(seed, {
+    preset: "ecology",
+    sourceDrift: drift,
+    sourceProcessing: processing,
+  });
   try {
     const definition = world.command<Definition>("definition");
     world.command("traceStart");

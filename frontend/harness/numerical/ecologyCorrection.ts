@@ -31,7 +31,10 @@ if (stage === "budget") {
     );
   }
   const directory = join(root, stage);
-  const config = stage.startsWith("renewal") ? { sourceGap: Number(stage.slice(7)) } : {};
+  const config = {
+    preset: "ecology",
+    ...(stage.startsWith("renewal") ? { sourceGap: Number(stage.slice(7)) } : {}),
+  };
   const world = checkpoint ? engine.restore(readFileSync(checkpoint)) : engine.create(27, config);
   const definition = world.command<Definition>("definition");
   const study = checkpoint ? dirname(dirname(checkpoint)) : root;

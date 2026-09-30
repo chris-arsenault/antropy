@@ -8,7 +8,10 @@ const [contrastText, directory] = process.argv.slice(2);
 if (!["0", "0.8"].includes(contrastText) || !directory)
   throw new Error("Expected contrast 0|0.8 and new output directory");
 const engine = await loadEngine();
-const world = engine.create(27, { illuminationContrast: Number(contrastText) });
+const world = engine.create(27, {
+  preset: "ecology",
+  illuminationContrast: Number(contrastText),
+});
 try {
   const result = runRecorded(engine, world, {
     directory,

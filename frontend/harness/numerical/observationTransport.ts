@@ -108,7 +108,13 @@ export async function runObservationTransport(output: string) {
   mkdirSync(output);
   const engine = await loadEngine(),
     wasmDigest = captureEngine(output, engine);
-  const original = engine.create(101, { width: 24, height: 24, founders: 1, sourceCount: 0 });
+  const original = engine.create(101, {
+    preset: "diagnostic",
+    width: 24,
+    height: 24,
+    founders: 1,
+    sourceCount: 0,
+  });
   original.command("historyFixture", { count: 100000 });
   const initial = original.snapshot(),
     base = displayFixture(original);

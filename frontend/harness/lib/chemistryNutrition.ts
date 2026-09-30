@@ -24,7 +24,11 @@ export function nutritionProbe(
     },
     target: { x: 8, y: 8, radius: 2 },
     create(engine, seed) {
-      const context = chemicalContext(engine, { ...overrides, sourceSpecies }),
+      const context = chemicalContext(engine, {
+          preset: "diagnostic",
+          ...overrides,
+          sourceSpecies,
+        }),
         genotype = structuredClone(context.genotype);
       for (const c of genotype.chromosomes) c.behavior = structuredClone(context.stationary);
       const w = engine.create(seed, {

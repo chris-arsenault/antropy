@@ -25,7 +25,7 @@ export type Strategy = "producer" | "resistant" | "sensitive" | "family-a" | "fa
 export const STRATEGIES: Strategy[] = ["producer", "resistant", "sensitive"];
 export const FAMILIES: Strategy[] = ["family-a", "family-b", "sensitive"];
 export function rpsSettings(flags: Flags, engine: Engine): RpsSettings {
-  const config = chemicalConfig(flags, engine),
+  const config = chemicalConfig(flags, engine, "diagnostic"),
     space = chemicalContext(engine, config).chemistry;
   const ranked = space.properties
     .map((p, s) => ({ s, stress: p.stress }))

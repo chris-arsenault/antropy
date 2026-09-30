@@ -11,7 +11,7 @@ function genome(
   handle: number,
   byproduct: boolean
 ): Genotype {
-  const g = chemicalContext(engine).genotype;
+  const g = chemicalContext(engine, { preset: "diagnostic" }).genotype;
   const emitted = byproduct ? 245 : 15;
   const baseline = byproduct ? 240 : 0;
   const depositProduct = idle ? baseline : emitted;

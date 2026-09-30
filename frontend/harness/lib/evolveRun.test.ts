@@ -14,6 +14,7 @@ import { resourceStop, studyLimits, validateAccounts } from "./studyBudget";
 import { type Summary } from "../../src/engine/types";
 
 vi.mock("./ledger", () => ({ openLedger: () => ({ close() {} }), recordRun: () => 1 }));
+const small = { preset: "diagnostic", width: 24, height: 24, sourceCount: 0 };
 let engine: Engine;
 beforeAll(async () => {
   engine = await loadEngine();
@@ -33,7 +34,7 @@ it("honors evolution wall budgets and rejects conflicting, invalid and unknown f
 
 it("feeds current producer artifacts to the Python reader without an ecological run", () => {
   const root = mkdtempSync(join(tmpdir(), "antropy-report-"));
-  const world = engine.create(101, { width: 24, height: 24, sourceCount: 0 });
+  const world = engine.create(101, small);
   try {
     runRecorded(engine, world, {
       directory: join(root, "evolution"),
@@ -61,7 +62,7 @@ it("feeds current producer artifacts to the Python reader without an ecological 
 
 it("stops at a resource boundary and preserves a restorable partial run", () => {
   const root = mkdtempSync(join(tmpdir(), "antropy-budget-"));
-  const world = engine.create(101, { width: 24, height: 24, sourceCount: 0 });
+  const world = engine.create(101, small);
   let checks = 0;
   try {
     const result = runRecorded(engine, world, {

@@ -38,7 +38,7 @@ it("funds mature targets without genotype-dependent grants", () => {
   }
 });
 it("recurrent ablation preserves feed-forward weights and its source genome", () => {
-  const base = chemicalContext(engine).genotype,
+  const base = chemicalContext(engine, { preset: "diagnostic" }).genotype,
     copy = structuredClone(base);
   const changed = behaviorChange(engine, base, { recurrence: "zero" });
   const before = base.chromosomes[0].behavior.weights,

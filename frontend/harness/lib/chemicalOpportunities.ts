@@ -69,6 +69,7 @@ function kernelCase(name: string, diagnostic: string): QuickScenario {
 }
 function allocationCases(engine: Engine): QuickScenario[] {
   const context = chemicalContext(engine, {
+    preset: "diagnostic",
     ...frozen,
     width: 24,
     height: 24,

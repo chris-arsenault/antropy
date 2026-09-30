@@ -13,7 +13,7 @@ if ((stage === "continuation") !== Boolean(checkpoint))
 const engine = await loadEngine();
 const world = checkpoint
   ? engine.restore(new Uint8Array(readFileSync(checkpoint)))
-  : engine.create(27, {});
+  : engine.create(27, { preset: "ecology" });
 try {
   if (!(checkpoint ? [1000, 4000] : [0]).includes(world.command<Summary>("summary").tick))
     throw new Error("Unexpected start tick");

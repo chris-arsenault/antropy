@@ -12,8 +12,15 @@ export interface ChemicalContext {
   genotype: Genotype;
   stationary: Genotype["chromosomes"][number]["behavior"];
 }
-export const chemicalContext = (engine: Engine, config: Partial<EngineConfig> = {}) =>
-  engine.command<ChemicalContext>("configuration", { config });
+export type Preset = "ecology" | "diagnostic";
+/** Partial overrides on an explicitly named physical preset, or a complete configuration. */
+export type HarnessConfig = (Partial<EngineConfig> & { preset: Preset }) | EngineConfig;
+/** A named preset stays in the returned config so artifacts and later worlds record it. */
+export function chemicalContext(engine: Engine, config: HarnessConfig): ChemicalContext {
+  const context = engine.command<ChemicalContext>("configuration", { config });
+  if (config.preset === undefined) return context;
+  return { ...context, config: { ...context.config, preset: config.preset } };
+}
 export const coordinate = (species: number) => ({ x: Math.floor(species / 16), y: species % 16 });
 export const enzymeBetween = (from: Target, to: Target) => ({
   ...from,

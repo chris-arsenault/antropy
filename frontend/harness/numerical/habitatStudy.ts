@@ -23,7 +23,7 @@ const seed = Number(seedText),
   },
   deadline = registration.started + 5.5 * 60 * 60 * 1000,
   engine = await loadEngine(),
-  world = engine.create(seed, { chemistrySeed: 101, habitatFeedback: coupled });
+  world = engine.create(seed, { preset: "ecology", chemistrySeed: 101, habitatFeedback: coupled });
 try {
   const definition = world.command<Definition>("definition");
   world.command("traceStart");

@@ -12,7 +12,7 @@ const engine = await loadEngine();
 const wasmDigest = captureEngine(output, engine);
 const results = [];
 for (const population of [48, 2000]) {
-  const world = engine.create(101);
+  const world = engine.create(101, { preset: "ecology" });
   try {
     if (population === 2000) world.command("loadFixture", { population, growth: false });
     const initial = world.snapshot();

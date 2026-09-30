@@ -38,6 +38,7 @@ it("runs family and allocation contests through the same strict numerical checkp
 it("preserves source dimensions, chemistry and population settings in invasion", async () => {
   const engine = await loadEngine(),
     world = engine.create(101, {
+      preset: "diagnostic",
       width: 32,
       height: 16,
       founders: 4,

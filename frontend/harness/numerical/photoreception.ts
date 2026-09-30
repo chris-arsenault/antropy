@@ -32,7 +32,7 @@ for (const [name, stock, gain, contrast] of [
     target: { x: 7.4, y: 9.2, radius: 1 },
     create(engine, seed) {
       const world = engine.create(seed, { preset: "diagnostic", ...config });
-      const genotype = chemicalContext(engine, config).genotype;
+      const genotype = chemicalContext(engine, { preset: "diagnostic", ...config }).genotype;
       for (const c of genotype.chromosomes) {
         c.physical[15] = stock;
         c.behavior = world.command("diagnosticController", {

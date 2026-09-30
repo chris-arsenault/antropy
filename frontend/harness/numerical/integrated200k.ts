@@ -18,7 +18,7 @@ if (!directory || !registration)
   throw new Error("Expected a new output directory and registration");
 mkdirSync(directory);
 const engine = await loadEngine(),
-  world = engine.create(27, {}),
+  world = engine.create(27, { preset: "ecology" }),
   flowFile = openSync(join(directory, "flows.jsonl"), "wx"),
   started = performance.now();
 const version = world.command<{ version: number }>("definition").version;

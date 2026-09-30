@@ -21,7 +21,7 @@ export async function runDefaultEcology(
   ];
   for (const seed of seeds)
     for (const [label, overrides] of arms) {
-      const world = engine.create(seed, overrides);
+      const world = engine.create(seed, { preset: "ecology", ...overrides });
       try {
         recordMeasurement(engine, world, ticks, output, label, "default-ecology");
       } finally {
