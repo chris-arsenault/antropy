@@ -152,8 +152,7 @@ impl Runtime {
             }
             "restart" => {
                 let seed = payload["seed"].as_u64().ok_or("Invalid seed")?;
-                let config =
-                    serde_json::from_value(payload["config"].clone()).map_err(|e| e.to_string())?;
+                let config = antropy_engine::configuration::parse(&payload["config"])?;
                 self.replace(World::new(seed, config)?)?;
             }
             "phenotype" => return self.phenotype(payload),

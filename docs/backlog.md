@@ -40,9 +40,14 @@ feature switches are specified separately within that document; display toggles 
 
 **Status:** Unselected — static terrain and seasons are implemented in v46.
 
+The [spatial hierarchy revision](design/spatial-scale.md) is specified following the September 30
+scale review. It restores explicit resource-neighborhood geometry and separates local terrain
+from regional seasonal variation. Its design task is complete; implementation remains unselected.
+It replaces the old single-scale recommendation without reopening the static delivery plan.
+
 Seasonal relocation benefit, affordable default reservoir gaps and long-term specialization
 are refinement questions that longer observation can inform. Motion, configuration and refill-timing
-corrections are implemented locally; their publication belongs to the active
+corrections are implemented; their delivery is recorded in the
 [terrain implementation plan](plans/TERRAIN-AND-SEASONS-PLAN.md).
 
 <a id="backlog-cell-interactions"></a>

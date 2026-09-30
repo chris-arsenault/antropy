@@ -36,6 +36,7 @@ function uniform(
   overrides: Partial<EngineConfig>
 ): EngineWorld {
   const world = engine.create(seed, {
+    preset: "diagnostic",
     ...overrides,
     ...frozen,
     learning: overrides.learning ?? "static",

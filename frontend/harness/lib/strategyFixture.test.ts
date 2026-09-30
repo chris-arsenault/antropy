@@ -8,7 +8,13 @@ it("matches total scheduled supply and conserves material through source replace
   const engine = await loadEngine(),
     supplied = [];
   for (const lifetime of [5, 25]) {
-    const world = engine.create(301, { width: 16, height: 16, sourceCount: 0, founders: 0 });
+    const world = engine.create(301, {
+      preset: "diagnostic",
+      width: 16,
+      height: 16,
+      sourceCount: 0,
+      founders: 0,
+    });
     try {
       const fixture = strategyFixture(
         world,

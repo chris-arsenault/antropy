@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("BIOTROPY_THREADS must be 1..32".into());
     }
     let config = match std::env::var("BIOTROPY_CONFIG") {
-        Ok(text) if text.trim() != "{}" => serde_json::from_str(&text)?,
+        Ok(text) => antropy_engine::configuration::text(&text)?,
         _ => antropy_engine::config::Config::ecology(),
     };
     let persistence = match std::env::var("BIOTROPY_STATE_DIR")

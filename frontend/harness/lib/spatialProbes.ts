@@ -30,6 +30,7 @@ export function spatialProbe(name: keyof typeof CASES): QuickScenario {
     create(engine, seed, swap) {
       const context = chemicalContext(engine);
       const w = engine.create(seed, {
+        preset: "diagnostic",
         ...frozen,
         width: 208,
         height: 64,

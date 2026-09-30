@@ -235,20 +235,13 @@ pub(crate) fn blend_apply(
     crate::adhesion::blend(&mut motor, cells, contacts, c.adhesion);
     crate::adhesion::blend(&mut passive, cells, contacts, c.adhesion);
     for ((cell, swim), drift) in cells.iter_mut().zip(motor).zip(passive) {
-        let m = g.movement([cell.x, cell.y], [swim[0] + drift[0], swim[1] + drift[1]]);
+        let (displacement, motor_fraction) = g.combined_motion([cell.x, cell.y], swim, drift);
         cell.motor_load = if c.terrain.feedback && cell.flows.motors > 0. {
-            (1. - m.sqrt()) * cell.action.swim.abs() * (1. - cell.damage)
+            (1. - motor_fraction) * cell.action.swim.abs() * (1. - cell.damage)
         } else {
             0.
         };
-        apply(
-            cell,
-            [
-                swim[0] * m.sqrt() + drift[0] * m,
-                swim[1] * m.sqrt() + drift[1] * m,
-            ],
-            c,
-        );
+        apply(cell, displacement, c);
     }
 }
 

@@ -2,6 +2,13 @@
 
 **Status:** Partly implemented (v46) — static fractal elevation, conductance, overhead transmission, optional ceilings and fractal reservoir placement are installed; dynamic terrain, tectonics, catastrophes and live physical switches are unselected.
 
+**September 30 scale revision:** [Spatial hierarchy](spatial-scale.md) specifies the proposed
+replacement of shared shade-scale generation and center-free resource placement. It restores
+explicit neighborhood size and area per neighborhood, with finer local terrain and regional
+seasons. Design work is complete; the replacement is not implemented. Its generator/configuration
+sections supersede the corresponding future recommendations below. Existing v46 descriptions
+remain accurate records of the installed generator.
+
 First proposed September 24, 2026; expanded September 30 for integrated terrain and local-season
 design and implementation. The user requested the full terrain direction,
 configuration switches and concrete fractal generation/placement algorithms. The static
@@ -15,7 +22,7 @@ does not authorize a live-world cutover.
 Design tracking: Sulion `95e0ca28-0f12-459f-9e3b-8b482c8f9488`, a documentation task only.
 Full proposal tracking now lives in the [terrain and seasons plan](../plans/TERRAIN-AND-SEASONS-PLAN.md),
 Sulion `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Static implementation is published; the September 30
-review identified motion/configuration defects; corrections are implemented locally with publication pending.
+review identified motion/configuration defects; corrections are implemented with delivery tracked in that plan.
 The [original results](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retain their limits.
 The [current work order](README.md) retains priority.
 
@@ -88,6 +95,11 @@ threshold alone would collapse several ecological axes into height. Correlated l
 can be considered later; no independent per-biome rules are needed.
 
 ## Fractal map generation and placement
+
+This section records the installed v46 generator. For the next generator, use the
+[spatial hierarchy revision](spatial-scale.md): distinct D/R/F lengths, bounded fractal resource
+envelopes and their normalized mixture. In particular, the single shared L and prohibition on
+boot regional centers below do not govern that revision. No persistent source homes are proposed.
 
 Generate the environment once at world creation. Boot may use denser sampling, filtering and
 weighted placement tables; none belongs in the tick loop. Here **fractalized** means a finite
@@ -162,7 +174,7 @@ the retained scales; do not silently lower the physical mesh resolution. Filter 
 deriving slopes, and filter bounded seasonal components together. Runtime interpolation must
 be periodic and preserve bounds. Avoid cubic overshoot for q, transmission and seasonal length.
 
-Select L against measured affordable travel, source spacing and material spreading lengths;
+The v46 design intended to select L against measured affordable travel, source spacing and material spreading lengths;
 the current shade scale is a starting value, not validated terrain calibration. Smaller
 features supply local alternatives; broad regions supply persistent differences. Do not force
 their boundaries onto execution tiles or require a particular number of islands or colonies.
@@ -267,6 +279,9 @@ and period, and placement contrast. Each has a distinct domain or physical meani
 additional octave, warp, per-region gain, favorable-area quota or noise-mixture controls.
 Old center-count/spread settings apply only to current placement, never secretly to fractal
 placement. All effective choices must appear in browser, native and harness configuration.
+
+The [scale revision](spatial-scale.md#scale-contract-and-starting-values) replaces these generation
+controls in a future schema. It does not reinterpret settings or maps in a saved v46 world.
 
 World-start switches are required. Live changes remain a review decision: changing a seed,
 scale or placement method requires a new world, not regeneration beneath existing cells.

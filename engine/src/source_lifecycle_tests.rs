@@ -236,3 +236,72 @@ fn seasonal_accrual_and_renewal_stream_survive_noncommit_checkpoint() {
     );
     assert!((w.sources[0].wait - restored.sources[0].wait).abs() < 1e-10);
 }
+
+#[test]
+fn refill_deadline_commits_before_a_later_epoch_even_without_scheduled_release() {
+    let mut w = fixture();
+    w.config.source_epochs = Some(crate::config::SourceSchedule {
+        phase_ticks: 2,
+        mixtures: vec![vec![1., 0.], vec![0., 1.]],
+    });
+    w.sources[0].amount = 0.;
+    w.sources[0].wait = 0.375;
+    for tick in 0..2 {
+        w.tick = tick;
+        source_medium::advance_scheduled(&mut w, false);
+    }
+    assert_eq!(w.sources[0].mixture[0], 1.);
+    assert_eq!(w.ledger.supplied, 2.);
+    w.tick = 2;
+    source_medium::advance_scheduled(&mut w, true);
+    assert_eq!(w.sources[0].mixture[0], 1.);
+    assert_eq!(w.ledger.supplied, 2.);
+}
+
+#[test]
+fn moving_refill_uses_event_position_instead_of_the_end_of_step() {
+    for (elapsed, expected, seasonal) in [
+        (0.05, 1., false),
+        (0.2, 0., false),
+        (0.05, 1., true),
+        (0.2, 0., true),
+    ] {
+        let mut w = fixture();
+        w.config.source_zones = Some(vec![vec![1., 0.], vec![0., 1.]]);
+        w.config.terrain.seasons = seasonal;
+        w.config.terrain.season_period = std::f64::consts::TAU;
+        w.shade = crate::terrain::Shade::generate(27, &w.config, w.field.nx, w.field.ny);
+        let g = &mut std::sync::Arc::make_mut(&mut w.shade).geography;
+        g.seasons.fill([1., 0.]);
+        g.phase = 0.;
+        w.field.illumination.shade = w.shade.clone();
+        let s = &mut w.sources[0];
+        s.habitat.x = 11.5;
+        s.amount = 0.;
+        let midpoint = [12., s.habitat.y];
+        let g = &w.shade.geography;
+        s.wait = g.supply_time(midpoint, 0., elapsed);
+        let remaining = g.supply_time(midpoint, 0., w.config.dt) - s.wait;
+        let step = source_medium::Step {
+            tick: 0,
+            config: &w.config,
+            chemistry: &w.chemistry,
+            operators: w.climate.operators.as_ref().unwrap(),
+            exposure: 1.,
+            response: source_medium::Response {
+                velocity: [4., 0.],
+                shift: [0.; 2],
+                signal: [0.; 2],
+                light: 1.,
+                load: 0.,
+            },
+            release: false,
+            chemical_dt: 0.,
+        };
+        let outcome = s.advance_local(&step, &w.field);
+        assert_eq!(s.habitat.x, 12.5);
+        assert_eq!(s.mixture[0], expected);
+        assert_eq!(outcome.supplied[0], 2.);
+        assert!((outcome.released - 2. * remaining).abs() < 1e-12);
+    }
+}

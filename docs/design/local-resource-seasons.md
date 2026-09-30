@@ -2,9 +2,13 @@
 
 **Status:** Implemented (v46) — static circular seasonal maps drive local release and refill-waiting clocks for every reservoir; the [composed runtime](chemistry/composed-runtime.md) owns the installed equations.
 
+The proposed [spatial hierarchy revision](spatial-scale.md) separates local terrain wavelength
+from regional seasonal wavelength. It changes future map generation, not the supply-clock law
+below, and has not been implemented.
+
 Proposed September 25, 2026, backlogged September 26 and implemented with persistent
 geography in physical v46 (`569f1a0`). The active [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md)
-owns publication of the locally implemented integration corrections; the
+records publication and deployment of the integration corrections; the
 [original execution record](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retains bounded results.
 The seasonal clock is not evidence of evolved migration. Earlier documentation tracking: Sulion
 `1eb5b783-638b-4ac5-9034-b4d970eda46e`.
@@ -76,7 +80,9 @@ For interpretation, `A = sqrt(c*c+d*d)` and `phi = atan2(d,c) + theta_0`, where 
 is a seeded uniform global phase stored at world creation. Phase is irrelevant where A=0.
 Runtime evaluates `a = 1 + c cos(2 pi t/P + theta_0) - d sin(2 pi t/P + theta_0)`;
 the amplitude/phase form below expresses the same law. Persist the components, phase origin
-and generator provenance. Calibration remains open; the map-generation algorithm does not.
+and generator provenance. V46 uses this map-generation algorithm. Its replacement is specified
+in the spatial hierarchy revision; installed maps remain unchanged until an explicitly
+authorized new-world cutover.
 
 Use the bounded environmental multiplier
 
@@ -142,6 +148,14 @@ The default period is P = T + G = 3000 model seconds, reusing the existing
 supply timescale. This is a calibration hypothesis, not a validated period. Spatial
 correlation length has distinct units and must be selected from reservoir spacing,
 food spreading and affordable travel. It cannot be inferred from P alone.
+
+The proposed revision starts from regional spacing D≈105.4, neighborhood spread R=18 and local
+terrain wavelength F=36. Seasonal components use the shared fractal generator over wavelengths
+D down to F, starting near 105 and 53 units; local terrain starts at 36. Correlation therefore
+operates across several nearby reservoir opportunities without making shade and ground features
+as large as the seasonal region. D is area-per-neighborhood spacing, not a claimed correlation
+length; actual seasonal correlation and phase differences remain map measurements. The field
+does not receive center labels and nearby sites are never forced to share an exact phase.
 
 An alternative patch at distance d needs an availability window longer than d / v,
 where v is realized travel speed. Transit must fit reserves plus income encountered

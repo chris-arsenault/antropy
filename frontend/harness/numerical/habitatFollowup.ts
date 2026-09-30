@@ -34,6 +34,7 @@ if (!selected) {
         target: { x: 16, y: 16, radius: 2 },
         create(engine, seed) {
           const world = engine.create(seed, {
+            preset: "diagnostic",
             ...frozen,
             width: 64,
             height: 64,

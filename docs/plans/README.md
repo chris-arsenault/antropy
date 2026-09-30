@@ -24,7 +24,7 @@ work stays explicit in an implementation phase.
 
 | Plan | Sulion | Scope |
 | --- | --- | --- |
-| [Full fractal terrain and local resource seasons](TERRAIN-AND-SEASONS-PLAN.md) | `0ac08ebd-3a5c-4b83-912b-f4303d4267be` | Static v46 terrain pushed as `569f1a0`; integration corrections implemented locally, publication pending. [Dynamic terrain](../design/dynamic-terrain.md) is a separate open direction |
+| [Full fractal terrain and local resource seasons](TERRAIN-AND-SEASONS-PLAN.md) | `0ac08ebd-3a5c-4b83-912b-f4303d4267be` | Static v46 terrain pushed as `569f1a0`; integration corrections implemented, with publication/deployment recorded in the delivery phase. [Dynamic terrain](../design/dynamic-terrain.md) is a separate open direction |
 
 ## Archived plans
 

@@ -158,6 +158,7 @@ impl Source {
             .geography
             .movement([self.habitat.x, self.habitat.y], intended);
         let [dx, dy] = intended.map(|v| v * mobility);
+        let start = [self.habitat.x, self.habitat.y];
         let supply_time = field.illumination.shade.geography.supply_time(
             [self.habitat.x + dx / 2., self.habitat.y + dy / 2.],
             step.tick as f64 * c.dt,
@@ -170,9 +171,24 @@ impl Source {
             outcome.distance = dx.hypot(dy);
             self.rebuild(c, field);
         }
+        let carried = self.pending;
         self.pending += supply_time;
-        if step.release {
-            self.advance_supply(step, &mut outcome);
+        let deadline = if self.amount > 0. {
+            self.amount / self.rate
+        } else {
+            self.wait
+        };
+        // A lifecycle boundary owns a commit even between scheduled medium updates.
+        // Never carry a past refill into another epoch or spatial zone.
+        if step.release || self.pending >= deadline {
+            self.advance_supply(
+                step,
+                &mut outcome,
+                carried,
+                start,
+                [dx, dy],
+                &field.illumination.shade.geography,
+            );
         }
         if outcome.changed || !self.material.valid {
             self.refresh_material(chemistry);
@@ -230,14 +246,15 @@ impl Source {
         accounts
     }
 
-    fn renew(&mut self, tick: u64, c: &Config) {
+    fn renew(&mut self, tick: u64, position: [f64; 2], c: &Config) {
         if c.source_epochs.is_some() || c.source_zones.is_some() {
             self.mixture.fill(0.);
-            for (&s, q) in c
-                .source_species
-                .iter()
-                .zip(composition(&self.habitat, tick, c))
-            {
+            let habitat = Habitat {
+                x: position[0],
+                y: position[1],
+                ..self.habitat.clone()
+            };
+            for (&s, q) in c.source_species.iter().zip(composition(&habitat, tick, c)) {
                 self.mixture[s] += q;
             }
         }

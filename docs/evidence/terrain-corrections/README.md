@@ -1,6 +1,6 @@
 # Terrain integration corrections
 
-**Status:** Implemented locally, September 30, 2026; publication pending. No live-world reset or format change.
+**Status:** Implemented September 30, 2026; delivery through the shared CI/CD pipeline. No live-world reset or format change.
 
 The September 30 review found combined-motion and configuration defects and questioned
 reservoir refill timing. The implementation uses a scalar constitutive solve for combined

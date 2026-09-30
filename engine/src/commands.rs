@@ -568,7 +568,6 @@ pub fn create(v: &Value) -> Result<World, String> {
 fn requested_config(v: &Value) -> Result<Config, String> {
     match v.get("config") {
         None => Ok(Config::ecology()),
-        Some(Value::Object(c)) if c.is_empty() => Ok(Config::ecology()),
-        Some(c) => serde_json::from_value(c.clone()).map_err(|e| e.to_string()),
+        Some(c) => crate::configuration::parse(c),
     }
 }

@@ -66,3 +66,32 @@ fn neutral_switches_and_invalid_configs_are_explicit() {
     c.terrain.season_period = f64::NAN;
     assert!(c.validate().is_err());
 }
+
+#[test]
+fn opposing_motion_uses_actual_path_and_resistance_survives_cancellation() {
+    let c = config();
+    let mut shade = Shade::generate(27, &c, 16, 12).as_ref().clone();
+    let g = &mut shade.geography;
+    g.height.fill(0.);
+    g.conductance.fill(0.25);
+    let (d, x) = g.combined_motion([5., 5.], [1., 0.], [-1., 0.]);
+    assert_eq!(x, 0.5);
+    assert_eq!(d, [0.25, 0.]);
+    for n in 0..g.height.len() {
+        g.height[n] = (n % g.nx) as f64 * c.mesh;
+    }
+    // The unscaled vector points downhill, but differing power/force responses
+    // produce uphill travel. Evaluate the uphill path, not the cancelled proposal.
+    let (d, x) = g.combined_motion([5., 5.], [1., 0.], [-1.5, 0.]);
+    assert!(d[0] > 0.);
+    assert!((x * x - 0.125).abs() < 1e-8);
+    assert!((x * x - g.movement([5., 5.], d)).abs() < 1e-8);
+    // Oblique motion must also solve the same law, not only a collinear special case.
+    let (d, x) = g.combined_motion([5., 5.], [1., 0.3], [-1.5, 0.4]);
+    assert!((x * x - g.movement([5., 5.], d)).abs() < 1e-8);
+    assert!((d[1] - (0.3 * x + 0.4 * x * x)).abs() < 1e-12);
+    // Opposite one-sided slope responses can balance at a stall.
+    let (d, x) = g.combined_motion([5., 5.], [-1., 0.], [2.5, 0.]);
+    assert!(d[0].hypot(d[1]) < 1e-8);
+    assert!((x - 0.4).abs() < 1e-8);
+}

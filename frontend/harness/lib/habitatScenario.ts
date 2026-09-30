@@ -57,6 +57,7 @@ export function habitatScenario(name: string, contest = false): QuickScenario {
     target: { x: centers[0], y: centers[0], radius: 2 },
     create(engine, seed, swap) {
       const world = engine.create(seed, {
+        preset: "diagnostic",
         ...frozen,
         width: contest ? 64 : 24,
         height: contest ? 64 : 24,

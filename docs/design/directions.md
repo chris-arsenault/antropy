@@ -14,7 +14,7 @@ unselected work belongs to the [backlog](../backlog.md); plans are listed in the
 | Direction | Status | Owning document | Decision/evidence |
 | --- | --- | --- | --- |
 | Integrated default terrain display | Implemented September 30, `fc016c7`; presentation only, no format change | [Display](bacterial-display.md), [work order](README.md#design-terrain-display) | [Plan](../plans/archive/INTEGRATED-TERRAIN-DISPLAY-PLAN.md) |
-| Fractal terrain and local resource seasons | Implemented v46, September 30, `569f1a0`; motion, configuration and refill-timing corrections implemented locally, publication pending | [Persistent geography](persistent-geography.md), [local resource seasons](local-resource-seasons.md), [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) | [Decision](decisions-and-evidence.md#fractal-terrain-and-local-resource-seasons) |
+| Fractal terrain and local resource seasons | Implemented v46, September 30, `569f1a0`; motion, configuration and refill-timing corrections implemented, with delivery tracked in the terrain plan | [Persistent geography](persistent-geography.md), [local resource seasons](local-resource-seasons.md), [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) | [Decision](decisions-and-evidence.md#fractal-terrain-and-local-resource-seasons) |
 | Birth orientation and core-linked aging | Implemented v45, September 29, `79ea580` | [Composed laws](chemistry/composed-runtime.md), [plan](../plans/archive/BIRTH-AND-AGING-PLAN.md) | [Decision](decisions-and-evidence.md#birth-orientation-and-physiological-aging) |
 | Neural row budget and outlying reservoirs | Implemented v44, September 28, `f6f2a2a` | [Bodies](funded-bodies.md), [plan](../plans/archive/DISPERSAL-OPPORTUNITIES-PLAN.md) | [Decision](decisions-and-evidence.md#dispersal-geography-and-bounded-neural-drive) |
 | Genetic physiology | Implemented v43, September 28, `dc41e40`; replaces machinery construction/retirement | [Bodies and inheritance](funded-bodies.md), [plan](../plans/archive/GENETIC-PHYSIOLOGY-PLAN.md) | [Decision](decisions-and-evidence.md#genetic-physiology-replaces-machinery-development) |
@@ -54,6 +54,7 @@ unselected work belongs to the [backlog](../backlog.md); plans are listed in the
 
 | Direction | Status | Owning document | Decision/evidence |
 | --- | --- | --- | --- |
+| Spatial scale and resource neighborhoods | Proposed revision, September 30; design specified, not implemented | [Spatial hierarchy](spatial-scale.md) | [Terrain refinement](../backlog.md#backlog-terrain-refinement) |
 | Directional cell utterances | Deferred proposal, September 24 | [Specification](cell-utterances.md) | [Backlog](../backlog.md#backlog-cell-utterances) |
 | Strategic controller | Deferred proposal, September 30; expected after utterances | [Specification](strategic-controller.md) | [Backlog](../backlog.md#backlog-strategic-controller) |
 | Rugged chemical interaction | Deferred proposal, September 30; complementarity binding is the leading candidate | [Specification](rugged-interaction.md), [research paper](kauffman-landscapes-research.md) | [Backlog](../backlog.md#backlog-rugged-interaction) |

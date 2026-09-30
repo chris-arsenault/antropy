@@ -3,8 +3,17 @@ use super::{Outcome, Source};
 use crate::source_medium::Step;
 
 impl Source {
-    pub(super) fn advance_supply(&mut self, step: &Step<'_>, outcome: &mut Outcome) {
+    pub(super) fn advance_supply(
+        &mut self,
+        step: &Step<'_>,
+        outcome: &mut Outcome,
+        carried: f64,
+        start: [f64; 2],
+        delta: [f64; 2],
+        geography: &crate::geography::Geography,
+    ) {
         let mut remaining = std::mem::take(&mut self.pending);
+        let total = remaining;
         if self.rate == 0. {
             return;
         }
@@ -16,7 +25,19 @@ impl Source {
                 if self.wait > 0. {
                     break;
                 }
-                self.renew(step.tick, step.config);
+                let elapsed = renewal_time(
+                    geography,
+                    step,
+                    start,
+                    delta,
+                    (total - remaining - carried).max(0.),
+                );
+                let c = step.config;
+                let position = [
+                    (start[0] + delta[0] * elapsed / c.dt).rem_euclid(c.width),
+                    (start[1] + delta[1] * elapsed / c.dt).rem_euclid(c.height),
+                ];
+                self.renew(step.tick + u64::from(elapsed >= c.dt), position, c);
                 if self.amount == 0. {
                     break;
                 }
@@ -55,4 +76,36 @@ impl Source {
             }
         }
     }
+}
+
+/// Invert the same monotone seasonal integral used for this movement interval.
+/// Only actual renewals need a location; ordinary accrual remains one scalar per source.
+fn renewal_time(
+    g: &crate::geography::Geography,
+    step: &Step<'_>,
+    start: [f64; 2],
+    delta: [f64; 2],
+    supply: f64,
+) -> f64 {
+    let c = step.config;
+    if !g.config.seasons {
+        return supply.min(c.dt);
+    }
+    let midpoint = [0, 1].map(|k| start[k] + delta[k] / 2.);
+    if supply == 0. {
+        return 0.;
+    }
+    if supply >= g.supply_time(midpoint, step.tick as f64 * c.dt, c.dt) {
+        return c.dt;
+    }
+    let (mut lo, mut hi) = (0., c.dt);
+    for _ in 0..40 {
+        let t = (lo + hi) / 2.;
+        if g.supply_time(midpoint, step.tick as f64 * c.dt, t) < supply {
+            lo = t;
+        } else {
+            hi = t;
+        }
+    }
+    (lo + hi) / 2.
 }

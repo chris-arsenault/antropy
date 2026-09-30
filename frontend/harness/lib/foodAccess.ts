@@ -25,6 +25,7 @@ export function foodAccess(
     target: { x: 16, y: 16, radius: 2 },
     create(engine, seed, swap, probe) {
       const world = engine.create(seed, {
+        preset: "diagnostic",
         ...overrides,
         ...frozen,
         width: 32,

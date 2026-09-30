@@ -221,7 +221,7 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Production new-world preset. Explicit diagnostic configs retain neutral operators.
+    /// Production new-world preset. Request parsing explicitly selects diagnostic defaults.
     pub fn ecology() -> Self {
         Self {
             terrain: crate::terrain_config::TerrainConfig::integrated(),

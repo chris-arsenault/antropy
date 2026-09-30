@@ -15,6 +15,7 @@ function configuration(question: Question, enabled: boolean) {
   const seasonal = question === "seasons";
   const moving = question === "travel" || question === "feedback";
   return {
+    preset: "diagnostic",
     ...frozen,
     width: 64,
     height: 48,

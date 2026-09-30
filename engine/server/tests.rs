@@ -68,6 +68,7 @@ fn controls_apply_between_ticks_and_restart_replaces_generation() {
     .unwrap();
     assert_eq!(r.generation, 2);
     assert_eq!(r.world.tick, 0);
+    assert!(r.world.config.terrain.elevation && r.world.config.terrain.seasons);
     let after = r.publish(vec![ViewKey::default()], 0.).unwrap();
     assert_ne!(before.terrain_revision, after.terrain_revision);
     assert_eq!(

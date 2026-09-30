@@ -61,11 +61,15 @@ impl Geography {
     }
     pub fn movement(&self, p: [f64; 2], d: [f64; 2]) -> f64 {
         let length = d[0].hypot(d[1]);
-        if self.height.is_empty()
-            || length == 0.
-            || (!self.config.movement && !self.config.elevation)
-        {
+        if self.height.is_empty() || (!self.config.movement && !self.config.elevation) {
             return 1.;
+        }
+        if length == 0. {
+            return if self.config.movement {
+                self.sample(p)[1]
+            } else {
+                1.
+            };
         }
         let steps = (length / self.spacing).ceil().max(1.) as usize;
         let mut previous = self.sample(p);
@@ -78,6 +82,34 @@ impl Geography {
             previous = next;
         }
         steps as f64 / resistance
+    }
+    /// Solve d = sqrt(m(d)) motor + m(d) passive, so the resistance follows the
+    /// resulting path. The scalar bracket also resolves a directional stall without
+    /// dividing by a cancelled displacement or crediting additional motor work.
+    pub fn combined_motion(
+        &self,
+        p: [f64; 2],
+        motor: [f64; 2],
+        passive: [f64; 2],
+    ) -> ([f64; 2], f64) {
+        let displacement = |x: f64| [0, 1].map(|k| x * motor[k] + x * x * passive[k]);
+        let mut x = self.movement(p, displacement(1.)).sqrt();
+        let (mut lo, mut hi) = (0., 1.);
+        // A 2^-32 bracket is tighter than the engine's physical spatial resolution.
+        // Uniform terrain and neutral operators converge on the first evaluation.
+        for _ in 0..32 {
+            let m = self.movement(p, displacement(x));
+            if (x * x - m).abs() <= f64::EPSILON * 8. {
+                break;
+            }
+            if x * x > m {
+                hi = x;
+            } else {
+                lo = x;
+            }
+            x = (lo + hi) / 2.;
+        }
+        (displacement(x), x)
     }
     pub fn processing(&self, sites: &[(usize, f64)]) -> f64 {
         if !self.config.processing || self.conductance.is_empty() {

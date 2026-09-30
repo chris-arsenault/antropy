@@ -41,6 +41,7 @@ pub mod climate;
 mod climate_tests;
 pub mod commands;
 pub mod config;
+pub mod configuration;
 pub mod contact_exchange;
 pub mod controller;
 #[cfg(test)]

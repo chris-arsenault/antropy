@@ -25,12 +25,18 @@ in the [plan index](../plans/README.md).
 Physical v46 implements persistent elevation, conductance, overhead transmission and optional
 ceilings, independent fractal source placement and local seasonal release/refill clocks.
 World-start configuration exposes each coupling and current-behavior/integrated presets.
-The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns publication of the locally implemented
+The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) records delivery of the implemented
 motion, configuration and refill-timing corrections. [Dynamic terrain](dynamic-terrain.md) is a separate open design direction
 for gradual change, tectonics and local events; it is not implemented or a static-delivery gate. The
 [composed laws](chemistry/composed-runtime.md#geographic-composition) own the physical operations.
 Format v46 rejects older checkpoints without migration. The static implementation is pushed to
 main as `569f1a0`.
+
+The September 30 [spatial hierarchy revision](spatial-scale.md) addresses the loss of distinct
+resource neighborhoods: explicit regional density and neighborhood spread, bounded fractal
+placement, finer local terrain and separate regional seasonal bands. This is completed design
+work, not an installed generator or authorization to reset the continuing world. The previous
+single shade-scale calibration remains installed until that revision is implemented.
 
 <a id="design-birth-and-aging"></a>
 

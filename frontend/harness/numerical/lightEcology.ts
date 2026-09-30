@@ -75,7 +75,7 @@ for (const name of cases) {
     },
     target: { x: 12, y: 12, radius: 1 },
     create(engine, seed) {
-      const world = engine.create(seed, config);
+      const world = engine.create(seed, { preset: "diagnostic", ...config });
       const template = chemicalContext(engine, config).genotype;
       const variants = Array.from({ length: lamp ? 2 : 1 }, (_, i) =>
         variant(world, template, name, i)
