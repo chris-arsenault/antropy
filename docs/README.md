@@ -25,8 +25,8 @@ them. See the [storage policy](evidence/README.md).
 | Shared binding, reversible deposits, evolving supply and public regeneration | [Material-supported habitats](material-habitats.md) |
 | Funded local light sensing, neural inputs and short probes | [Photoreception](photoreception.md) |
 | Deferred paid byte communication, coarse relative hearing and natural observation | [Directional cell utterances](design/cell-utterances.md) — design specification, not implemented |
-| Static geography, proposed slope resistance and optical cover | [Persistent geography](design/persistent-geography.md) — shade implemented; elevation and conductance deferred |
-| Deferred local supply fluctuations, reservoir clocks and movement opportunities | [Local resource seasons](design/local-resource-seasons.md) — proposal and open budget/calibration questions; [movement evidence](movement-opportunity-study.md) |
+| Terrain design review, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md#fractal-map-generation-and-placement) — shade implemented; integrated terrain design awaits review and planning |
+| Local supply fluctuations, reservoir clocks and movement opportunities | [Local resource seasons](design/local-resource-seasons.md) — integrated terrain proposal, circular fractal fields and explicit supply accounts; [movement evidence](movement-opportunity-study.md) |
 | 200k default run: evolved bodies, light responses, chemistry and source dispersion | [Integrated ecology review](integrated-200k-review.md) |
 | Scalar illumination, day/night opportunities and future shelter/emission | [Light ecology](design/light-ecology.md); earlier [illumination plan](plans/archive/ENVIRONMENTAL-ECOLOGY-PLAN.md#local-illumination) and [143k findings](evidence/digital-chemistry/illumination-design-143249/README.md) retain their original versions |
 | Joint design for intracellular organization, specialization and cell interactions | [Cellular organization and exchange](design/cellular-organization-and-exchange.md) — implemented v33 laws |

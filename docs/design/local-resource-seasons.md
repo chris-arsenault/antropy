@@ -1,14 +1,15 @@
 # Local resource seasons
 
-Proposed September 25, 2026; **backlogged September 26 at the user's request**.
-Deferred, unimplemented candidate for later prioritization. This document authorizes
+Proposed September 25, 2026; backlogged September 26 and **included in the terrain design
+review September 30**, before implementation planning. This unimplemented candidate authorizes
 no runtime changes, live-world reset or experiment campaign. The [current work
 order](README.md) retains priority. Documentation tracking: Sulion
 `1eb5b783-638b-4ac5-9034-b4d970eda46e`.
 
 The subsequent [ecological incentives delivery](../plans/ECOLOGICAL-INCENTIVES-PLAN.md)
 addresses crowding, byproduct exchange and off-reservoir light metabolism first. This supply
-timing proposal remains deferred; its earlier movement evidence predates that delivery.
+timing proposal is now reviewed with persistent geography; its earlier movement evidence
+predates that delivery.
 
 ## Purpose and evidence
 
@@ -58,11 +59,20 @@ that proposal's remaining elevation/conductance operators nor changes static sha
 
 ## Proposed common operation
 
-Generate two static periodic maps: fluctuation amplitude A(x) in [0,1] and local
-phase phi(x). Both vary smoothly over irregular regions, with broad structure and
-resolved finer variation. Interpret phase circularly when interpolating, so crossing
-the phase wrap introduces no artificial border. Their exact generation and calibration
-remain to be selected; reusing a generator does not require reusing the shade values.
+Generate two static periodic component maps c(x), d(x) using the concrete
+[fractal generation and placement algorithms](persistent-geography.md#fractal-map-generation-and-placement).
+Independent warped octave fields, restricted to the shared coarse scale subset, produce
+`(c,d) = A_max * (N_cos,N_sin) / sqrt(2)`. Since each N is in [-1,1] and A_max is in
+[0,1], vector length A is bounded by one. Broad irregular regions contain resolved finer
+variation; the seasonal channels are independent of shade, elevation and resource placement.
+Interpolate components with convex weights, not wrapped angles or normalized unit vectors.
+Cancellation creates weakly seasonal regions without singularities or a separate patch rule.
+
+For interpretation, `A = sqrt(c*c+d*d)` and `phi = atan2(d,c) + theta_0`, where theta_0
+is a seeded uniform global phase stored at world creation. Phase is irrelevant where A=0.
+Runtime evaluates `a = 1 + c cos(2 pi t/P + theta_0) - d sin(2 pi t/P + theta_0)`;
+the amplitude/phase form below expresses the same law. Persist the components, phase origin
+and generator provenance. Calibration remains open; the map-generation algorithm does not.
 
 Use the bounded environmental multiplier
 
@@ -112,10 +122,11 @@ does not imply identical supplied chemical potential.
 For a moving reservoir, integrate a along its actual trajectory. A mean-one map at
 each fixed point does not guarantee mean-one exposure along that path. Preferential
 residence in productive areas could alter total supply. Measure actual external input
-and address any material budget drift before interpreting a population response as
-a timing benefit. Do not silently renormalize against population or add a second
-unaccounted food inventory. The moving-source budget treatment remains an open design
-decision, not a solved property of the proposed formula.
+before interpreting a population response as a timing benefit. The integrated design
+recommends accepting this path-dependent change in externally supplied material and reporting
+it through the ordinary input ledger. It does not promise invariant moving-source income.
+Do not silently renormalize against population or add a second unaccounted food inventory.
+This explicit budget choice remains a reviewable recommendation.
 
 Initially consider P = T + G, currently 3000 model seconds, to reuse the existing
 supply timescale. This is a calibration hypothesis, not a validated period. Spatial
@@ -141,8 +152,11 @@ Measure runtime cost rather than assume it is negligible.
 Changing the meaning of stored waits and accrued release needs an explicit checkpoint
 version and consistent native/WASM restoration. Preserve pending release across saves;
 do not reinterpret an ongoing world's state silently or add a save migration. The
-initial stocked state and phase distribution need an explicit initialization decision
-to avoid an accidental worldwide starting pulse.
+initial stocked state and finite priming remain those of the existing initializer. Draw the
+independent global phase once; do not force all regions to begin at a peak or backdate source
+history to manufacture an equilibrium. Initial priming can still create a starting transient,
+which must be distinguished from seasonal supply. No map rejection or automatic phase balancing
+is proposed. Setting A_max=0 or disabling seasons recovers the ordinary source clock.
 
 Expose the local supply multiplier and actual reservoir release/refill through bounded
 inspection. A supply overlay should distinguish environmental opportunity from food
@@ -167,4 +181,4 @@ coexistence. Reject or revise the mechanism if diffusion erases local difference
 downturns cause widespread starvation without reachable alternatives, or cells simply
 follow the same persistent source clump. Preservation of colonies, useful mobile
 behavior, storage-based endurance and evolutionary uptake remain observation questions.
-No implementation, new assay or live-server change accompanies this backlog entry.
+No implementation, new assay or live-server change accompanies this design update.

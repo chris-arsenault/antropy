@@ -1,10 +1,12 @@
 # Persistent geography and conditional survival
 
-Proposed September 24, 2026. **Backlog candidate, not an accepted runtime law or the next
-work item.** The user requests seeded map variation beyond initial reservoir placement:
-local elevation differences, permanent shade, and broad terrain regions with finer variation.
-Start static so their effects can be judged. Later tectonics and catastrophes remain separate
-extensions. This document authorizes no runtime implementation or experiment campaign.
+Proposed September 24, 2026; expanded September 30 for **integrated terrain and local-season
+design review, before implementation planning**. The user requests the full terrain direction,
+configuration switches and concrete fractal generation/placement algorithms. The static
+substrate and [local resource seasons](local-resource-seasons.md) form one proposed design.
+Whether slow terrain changes and catastrophes belong in this delivery remains unresolved;
+the earlier static-first recommendation does not settle that scope question. This document
+authorizes no runtime implementation, live-world change or experiment campaign.
 
 Design tracking: Sulion `95e0ca28-0f12-459f-9e3b-8b482c8f9488`, a documentation task only.
 The [current work order](README.md) and [scaling plan](../../SCALING-PLAN.md) retain priority.
@@ -65,24 +67,225 @@ Generate a bounded periodic field vector on the existing XY mesh:
 | `q(x)` | Positive dimensionless substrate conductance, at most one | Motion, material exchange across geographic faces and public reaction timing |
 | `t(x)` | External-light transmittance in [0,1] | The shared illumination evaluator |
 | `k(x)` | Optional illumination ceiling, in existing mean-one light units | The same evaluator; unrestricted by default |
+| `c(x), d(x)` | Dimensionless circular seasonal components, with length at most one | The reservoir release/refill clock; no direct cellular cue |
 
 Height has no absolute reward. Adding a constant to h must change nothing. Neither elevation
 nor conductance changes chemical identity, chemical reference potential, mesh volume, birth
 requirements or enzyme maps. Keep the existing material-dependent resistance and responses;
 geography composes with them instead of replacing cell-made habitats.
 
-Use one seeded, periodic multiscale generator with an environment random stream independent
-of biology and source renewal. Broad correlated modes define terrain regions; smaller modes
-provide local relief and cover. Share the generator and scale conventions, but not identical
-values: low terrain must not automatically be wet, shaded and rich. A sea-level threshold alone
-would collapse several ecological axes into height. Correlated low/wet areas can be considered
-later if they leave meaningful exceptions; no independent per-biome rules are needed.
+The generation algorithms below share scale conventions and numerical machinery, but not
+identical values: low terrain must not automatically be wet, shaded and rich. A sea-level
+threshold alone would collapse several ecological axes into height. Correlated low/wet areas
+can be considered later; no independent per-biome rules are needed.
 
-Choose region widths from travel-before-reserve-exhaustion and chemical spreading lengths.
-Keep fine variation resolved by the existing mesh and cell footprints; pixel noise is not an
-ecological opportunity. Scaling world area should add regions at comparable physical scales.
-Generator seed/version and chosen coefficients are physical configuration. A seed is a
-reproduction identifier, not another ecological tuning parameter.
+## Fractal map generation and placement
+
+Generate the environment once at world creation. Boot may use denser sampling, filtering and
+weighted placement tables; none belongs in the tick loop. Here **fractalized** means a finite
+hierarchy of irregular, correlated features across resolved physical scales: broad regions
+contain smaller ridges, pockets, cover and resource clusters. It does not mean independent
+pixel noise, repeated tiles, a stack of visible sine grids or an infinite mathematical fractal.
+Do not add an erosion simulation, drainage network or biome classifier merely to obtain it.
+
+The existing [noise generator](../../engine/src/terrain_noise.rs) already supplies periodic
+hashed value noise, independently offset octaves and domain warping. Extend that implementation
+into one shared boot generator. Existing [reservoir placement](../../engine/src/sources.rs)
+instead chooses weighted random centers and radial offsets; it is not the fractal density
+placement specified here. These are proposed changes, not claims about the running world.
+
+### Seed ownership and generation order
+
+Derive each random stream from `(world seed, generator version, stable channel name)` using a
+specified stable integer hash. Channels include height, conductance, cover, seasonal cosine,
+seasonal sine, resource density, resource positions, resource attributes and founder placement.
+Each map channel owns its octave and warp substreams. Do not use language-dependent hashes or
+a single sequential random stream whose position changes when a feature is disabled.
+
+1. Validate dimensions, mesh, physical scales and parameter domains.
+2. Generate independent scalar terrain fields and the paired seasonal field.
+3. Transform/filter them onto the canonical periodic mesh; derive local operator caches.
+4. Generate a separate fractal resource-density map and sample exactly the configured sources.
+5. Assign source properties, then place and fund founders through the existing initialization.
+6. Persist canonical physical maps, positions, configuration and generation provenance.
+
+No stage reads population density, phenotype, lineage or future survival. Changing a shade
+switch must not reshuffle sources or consume mutation draws. Changing source count may change
+founder locations through their existing dependency on sources, but must not change terrain.
+
+### Periodic warped octave field
+
+Use world dimensions W,H, mesh spacing delta and one shared region scale L in world units.
+Retain the existing shade convention: the largest detail wavelength is
+`ell_0 = min(4 L, min(W,H)/2)`. Subsequent wavelengths and amplitudes are
+`ell_j = ell_0 / 2^j` and `w_j = 2^-j`. Stop before a wavelength falls below four mesh
+spacings. On undersized diagnostic worlds, use only resolved octaves or a uniform field;
+never invent submesh detail. Hold L fixed when enlarging the world so enlargement adds regions
+instead of stretching the same few features. The domain cap only constrains small worlds.
+
+For each octave, choose integer lattice counts `n_x = max(2, round(W/ell_j))` and likewise
+for y. Actual wavelengths are W/n_x and H/n_y; check their resolution after rounding. Hash
+wrapped lattice indices to values in [-1,1]. Interpolate with
+`s(u) = 6u^5 - 15u^4 + 10u^3` independently along each axis, with independent seed and
+offset per octave. Integer periodic lattices preserve value and derivative continuity across
+the torus. Reuse neither an interior tile nor a common octave offset. Arbitrarily rotating a
+rectangular periodic image is not a valid way to remove its grid because it breaks its seam.
+
+Before sampling detail, bend coordinates with two independent coarse octave fields:
+
+```text
+p'(p) = p + (ell_0 / 2) * [warp_x(p), warp_y(p)]
+N(p) = sum_j w_j * noise_j(p'(p)) / sum_j w_j
+```
+
+Each warp component uses the same periodic construction, spanning nominal scales `2 ell_0`
+down to `max(ell_0/2, 4 delta)`, as in the current generator. Its lattice counts still obey
+the domain and resolution rules. N remains in [-1,1], and periodic warp plus periodic detail
+preserves wrapping. Coarse bending makes boundaries meander; finer independent octaves add
+irregular edges and internal structure. The octave falloff and warp ratio are generator
+constants, versioned together, rather than separate ecological tuning controls.
+
+Warping can compress wavelengths. Four-mesh lattice spacing alone is therefore not an
+anti-alias guarantee. At boot, use the analytic noise derivatives to bound the local warp
+Jacobian, oversample the transformed maps accordingly and area-average into mesh cells.
+If the required sampling exceeds the boot budget, omit unresolved finest octaves and record
+the retained scales; do not silently lower the physical mesh resolution. Filter height before
+deriving slopes, and filter bounded seasonal components together. Runtime interpolation must
+be periodic and preserve bounds. Avoid cubic overshoot for q, transmission and seasonal length.
+
+Select L against measured affordable travel, source spacing and material spreading lengths;
+the current shade scale is a starting value, not validated terrain calibration. Smaller
+features supply local alternatives; broad regions supply persistent differences. Do not force
+their boundaries onto execution tiles or require a particular number of islands or colonies.
+
+### Transform noise into physical maps
+
+For each independent map channel use `u = (N + 1)/2`. Fixed domain transforms give the fields
+their physical meaning; there are no per-biome lookup rules or seed-specific histogram edits.
+
+| Field | Proposed transform | Physical control |
+| --- | --- | --- |
+| Elevation | `h = L * N_height` | The proposed beta below controls resistance to slope; no second relief-strength knob |
+| Conductance | `q = exp(log(q_min) * u_conductance)` | `0 < q_min <= 1` sets maximum substrate resistance |
+| Transmission | `t = 1 - shadeStrength * u_cover^2` | Existing shade strength in [0,1] |
+| Optional ceiling | `k = k_min + (k_max-k_min) * (1-u_cover^2)` | Finite ordered endpoints in light units; disabled means unrestricted |
+| Seasons | `(c,d) = A_max * (N_cos,N_sin) / sqrt(2)` | `A_max` in [0,1]; period P remains a time control |
+
+The height convention gives comparable grades as L changes; beta is the independent strength
+control. Increasing octave count can still change the slope distribution, so report actual
+grade quantiles rather than claiming resolution invariance. q is generated in log space
+because its meaning is multiplicative resistance and it must remain positive. The transmission
+transform preserves the current shade law. Ceiling and transmission share cover morphology
+deliberately: clipping is another optical property of cover, not another independent biome.
+Do not normalize final light or conductance against the map mean.
+
+Seasonal channels use the same warped octave generator with only scales from ell_0 through
+`max(ell_0/4, 4 delta)`. This fixed coarse subset retains fractal regional structure while
+avoiding unresolvable alternating seasons at individual sources. It is not another tunable
+noise recipe. Independent signed components give different regional phases and weak seasons
+where they cancel. Their vector length cannot exceed A_max. Interpolate components directly;
+never interpolate wrapped angles or normalize a near-zero vector to full strength. Define
+`a(x,t) = 1 + c(x) cos(omega*t+theta_0) - d(x) sin(omega*t+theta_0)`, with `omega=2 pi/P`.
+This is the [seasonal clock](local-resource-seasons.md#proposed-common-operation), with
+amplitude `sqrt(c*c+d*d)` and total phase `atan2(d,c)+theta_0`. At zero length phase is
+irrelevant. A_max is a ceiling, not the typical amplitude: octave averaging and filtering
+reduce contrast. Report the realized amplitude distribution and quiet-interval lengths;
+this construction does not by itself establish substantial regional supply downturns.
+
+The global phase theta_0 is a seeded uniform draw, persisted with the world. It avoids an
+explicit world-start peak; a finite random map can still be temporarily synchronized. Retain
+the existing finite source priming and stocked initialization as declared initial conditions,
+and do not interpret their transient as a seasonal result. No automatic phase balancing,
+map rejection or source relocation is used to obtain a desired population outcome.
+
+### Fractal reservoir placement
+
+Use an independent full-octave field N_resource to define positive placement intensity
+`rho(x) = exp(kappa * N_resource(x))`, with finite `kappa >= 0`. kappa replaces the old
+center-count/spread description in this placement mode: zero is uniform, larger values give
+denser clusters within larger clusters while retaining nonzero probability between them.
+It changes positions, not source richness or total configured resource income. The theoretical
+maximum/minimum density ratio is `exp(2*kappa)`; validate representability before generation.
+
+1. Integrate rho over each mesh cell using the boot sampling above. Normalize these masses
+   to a cumulative distribution (or alias table). This normalization chooses positions only;
+   it does not normalize any physical supply or illumination.
+2. For each of exactly `sourceCount` sites, sample a cell from that distribution and a uniform
+   subcell position, then wrap XY. This defines a deliberate piecewise-constant placement
+   density at mesh resolution. It is not a claim of exact continuous-density sampling.
+3. Assign existing source radius, richness and mixture distributions from the independent
+   source-attribute stream. Preserve configured counts, initial stock and priming accounts.
+   Do not turn low-q, sunny or favorable-season locations into automatically richer sites.
+4. Release the temporary sampling table after initialization. Initial density creates no
+   persistent anchor, restoring force or source home; subsequent movement and renewal use
+   ordinary physics at the source's actual position.
+
+Do not use Poisson-disc spacing, a fixed number of regional centers, a minimum source count
+per region or repeated rejection until all gaps are crossable. Those would suppress the
+irregular clusters and sparse gaps this algorithm is intended to generate. Overlapping
+reservoir footprints use ordinary circle exclusion; do not add a terrain-specific packing
+force. Report starting overlaps and displacement during settling so they cannot masquerade
+as terrain-induced migration. Dense placement can be a poor calibration without being an
+excuse to install a hidden spacing law.
+
+Explicit source-zone fixtures retain their configured membership and counts by sampling the
+same density conditioned on each allowed zone. Do not sample globally and then remap x, which
+would detach placement from its density map. Uniform/handcrafted diagnostic placement remains
+available through configuration. These are boot choices, not separate runtime economies.
+
+### Founder placement and feature switches
+
+Preserve the present biological initialization: two founder groups near the first and the
+most toroidally distant source, uniform disk offsets of radius three, existing genotype
+allocation and funding, and independently random headings. For no-source fixtures retain the
+existing quarter/three-quarter-world fallback centers. Their circular starting footprints
+are deliberate controlled initial conditions; fractal environmental placement does not imply
+fractalizing every cell's initial offset. Do not place different genotypes into hand-picked
+terrain niches or change starting endowments to make the map succeed.
+
+Expose typed configuration for elevation, conductance, transmission, ceiling and seasons,
+plus reservoir placement mode (`current`, `fractal`, or the existing diagnostic fixture).
+Keep independent conductance coupling switches for movement, external material transport and
+public processing so each causal effect can be isolated. Disabled operators use h=constant,
+q=1, t=1, no ceiling and c=d=0 as appropriate. Turning off transmission need not turn off
+clipping. A current-behavior preset preserves installed shade and current source placement
+while leaving new physical couplings off. The integrated preset selects fractal placement
+and the reviewed terrain/seasonal operators; values remain subject to budget calibration.
+
+The exposed generation controls are seed/version, shared physical scale, slope sensitivity,
+minimum conductance, existing shade strength, optional ceiling endpoints, seasonal amplitude
+and period, and placement contrast. Each has a distinct domain or physical meaning. Avoid
+additional octave, warp, per-region gain, favorable-area quota or noise-mixture controls.
+Old center-count/spread settings apply only to current placement, never secretly to fractal
+placement. All effective choices must appear in browser, native and harness configuration.
+
+World-start switches are required. Live changes remain a review decision: changing a seed,
+scale or placement method requires a new world, not regeneration beneath existing cells.
+If live coupling switches are selected, retain the canonical generated maps and persist the
+switch transition with correct cache invalidation. This proposal does not authorize them.
+
+### Generation checks and review evidence
+
+Verify periodic seams in values and slopes, deterministic named streams, field bounds,
+uniform disabled limits, circular phase continuity, exact source counts and conditional zone
+membership. Check that toggling unrelated maps leaves source positions, initial genotypes and
+funding unchanged; initial sensory state and later physical outcomes may legitimately change.
+For density placement, compare sampled counts with integrated density using declared sampling
+uncertainty; do not demand equal counts in each region. Inspect source-attribute independence.
+
+Produce local map previews at whole-world and close-up scales, including resource density,
+actual positions, slope, cover and seasonal amplitude/phase. Inspect horizontal/vertical
+autocorrelation and directional power for repeated tiles or visible grid preference; inspect
+multiscale variance to establish that detail is present beyond a single broad blob. Domain
+warping is a proposed remedy, not proof that lattice artifacts are gone. A failed visual check
+requires correcting the generator, not covering the pattern with another renderer texture.
+
+Report regional source occupancy, nearest-neighbor/gap distributions, map cross-correlations,
+terrain grades and reachable neighboring supply over a seasonal transition. A finite seed may
+correlate independent fields by chance; report that rather than reseeding until they decorrelate.
+Use measurements to choose scale/contrast and identify unreachable or nearly uniform maps,
+not to certify evolved diversity or require successful colonization. Record boot time, peak
+temporary memory and retained map/cache bytes separately from ordinary tick performance.
 
 ## Elevation: local directional resistance
 
@@ -219,10 +422,14 @@ arrays. Ordinary operators sample cached local coefficients. Crossing a region o
 footprint invalidates relevant sampled conditions, even when no chemical state changed.
 Static geography must not wake empty chemical support or add per-tick full-map work.
 
-At 720x540 and mesh2 there are 97,200 nodes. Four f32 scalar fields use 1,555,200 bytes
-(about 1.48 MiB); every additional scalar cache adds 388,800 bytes. This is a lower-bound
-storage calculation, excluding face coefficients, renderer buffers and metadata. Budget these
-and local arithmetic before implementation. Do not add N-by-256 terrain or light arrays.
+At 720x540 and mesh2 there are 97,200 nodes. Six f32 scalar fields, including optional ceiling
+and seasonal components, use 2,332,800 bytes (about 2.22 MiB); every additional f32 scalar
+cache adds 388,800 bytes. The installed shade arrays currently use f64: retaining that type
+for all six doubles the estimate to about 4.45 MiB. Select precision explicitly and check its
+effect on slopes; the smaller figure is not measured current storage. These estimates exclude
+face coefficients, boot sampling tables, renderer buffers and metadata. Disabled optional maps
+may use implicit constants. Budget caches and local arithmetic before implementation. Do not
+add N-by-256 terrain or light arrays.
 
 Persist canonical field values plus generation provenance/configuration so restoration does
 not depend on a later generator implementation. Reconstruct derived face caches. A new physical
@@ -236,8 +443,8 @@ or full physical field messages to React, second renderer, new listener or separ
 
 ## Later changing geography
 
-Static geography comes first as the complete selected candidate, not a promise that every
-future mechanism ships with it. Tectonics could slowly alter h and substrate coefficients;
+The earlier recommendation was static geography first; inclusion of dynamics in the requested
+full delivery remains under review. Tectonics could slowly alter h and substrate coefficients;
 catastrophes could make local topological changes and displace material and cells. Neither
 belongs in initial calibration or the current optional disturbance implementation by default.
 
@@ -251,8 +458,10 @@ These obligations explain why dynamics should follow an understood static world.
 ## Decisions and eventual selection
 
 Settled by this request: persistent pseudorandom geography, macro and micro variation, local
-slope effects on the XY substrate, permanent optical cover, initially static behavior, and
-backlog placement without changing active priorities.
+slope effects on the XY substrate, permanent optical cover, configuration-controlled terrain
+and seasons, and fractal map/placement design before an
+implementation plan. Review has advanced beyond the original backlog-only request; the
+runtime laws and unresolved dynamic/live-control scope are not thereby accepted.
 
 Provisional recommendations: wet/dry as continuous conductance; directional uphill resistance;
 common external transport/reaction timing; attenuation first, with optional clipping; independent
