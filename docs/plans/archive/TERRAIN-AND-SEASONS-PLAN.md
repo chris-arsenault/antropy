@@ -2,7 +2,7 @@
 
 Historical September 30 execution record. The user's delivery-policy correction retires the
 verification and human-acceptance stages below. They are provenance, not instructions to resume.
-The [current implementation plan](../TERRAIN-AND-SEASONS-PLAN.md) owns remaining code and delivery.
+The [delivery record](TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) completes the code and delivery.
 Recorded results and omissions retain their original scope; no missing review is marked passed.
 
 Created September 30, 2026. Sulion root: `0ac08ebd-3a5c-4b83-912b-f4303d4267be`.

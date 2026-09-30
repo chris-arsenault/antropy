@@ -26,4 +26,4 @@ make ci
 
 Choose fresh output paths when repeating; preview and report refuse overwrites. Generated
 maps, raw metrics and checkpoint bytes remain local and ignored. The scope and bounds are
-recorded in the [terrain delivery plan](../../plans/TERRAIN-AND-SEASONS-PLAN.md).
+recorded in the [terrain delivery plan](../../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md).

@@ -8,6 +8,23 @@ their observation/backlog owners while development continues. The
 [design directions registry](directions.md) lists every past and future direction with its
 status, owner and decision record.
 
+<a id="design-actuator-feedback"></a>
+
+## Actuator feedback and review corrections — September 30
+
+Physical v48 gives every paid actuator one controller reading: accepted signed effect against
+full-effort capacity since the previous physiology publication, `a/(|a|+C)`, for transporters,
+enzyme programs, builder and emitter. The controller has 52 inputs; the
+[controller contract](controller.md#controller-observation-contract) lists the layout. V48
+rejects older checkpoints without migration. Pushed as `ff175da` and live in a fresh world.
+
+The same review corrected three defects: dissolved slope transport now uses each face's net
+exchange direction, so drift is independent of mesh spacing (`e754743`); harness worlds name
+their physical preset or supply a complete configuration (`7ab52b8`); and the server keeps its
+newest living checkpoint and refuses to replace unrestorable same-format saves (`20e564d`).
+The [decision record](decisions-and-evidence.md#review-corrections-and-actuator-feedback) holds
+the evidence.
+
 <a id="design-terrain-display"></a>
 
 ## Integrated terrain display — September 30
@@ -18,14 +35,6 @@ permanent legend removes the need to select diagnostic layers. This presentation
 to main as `fc016c7`, changes no physical rule or checkpoint format. Its completed plan is listed
 in the [plan index](../plans/README.md).
 
-**Realized-activity controller inputs — September 30.** Physical v48 replaces the v43
-biomass-proportional stock inputs, which all equalled `M/(M+B)`, with one reading per paid
-actuator: accepted signed effect against full-effort capacity since the previous physiology
-publication, `a/(|a|+C)`, for transporters, enzyme programs, builder and emitter. Seven
-capacity-only slots were removed (59 → 52 inputs). Founder weights used none of the replaced
-slots. The [controller contract](controller.md#controller-observation-contract) lists the
-layout; v48 rejects older checkpoints without migration.
-
 <a id="design-terrain-seasons"></a>
 
 ## Fractal terrain and local resource seasons — September 30
@@ -33,7 +42,7 @@ layout; v48 rejects older checkpoints without migration.
 Physical v46 implements persistent elevation, conductance, overhead transmission and optional
 ceilings, independent fractal source placement and local seasonal release/refill clocks.
 World-start configuration exposes each coupling and current-behavior/integrated presets.
-The [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) records delivery of the implemented
+The [terrain delivery record](../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) records the
 motion, configuration and refill-timing corrections. [Dynamic terrain](dynamic-terrain.md) is a separate open design direction
 for gradual change, tectonics and local events; it is not implemented or a static-delivery gate. The
 [composed laws](chemistry/composed-runtime.md#geographic-composition) own the physical operations.
@@ -43,8 +52,8 @@ main as `569f1a0`.
 The September 30 [spatial hierarchy revision](spatial-scale.md) addresses the loss of distinct
 resource neighborhoods: explicit regional density and neighborhood spread, bounded fractal
 placement, finer local terrain and separate regional seasonal bands. This is implemented in v47
-through the existing generator, configuration, persistence and observation paths. Sulion
-`0d03350f-9bc9-4c9f-a703-8f611940afe9` tracks publication and the user-authorized live-world reset.
+through the existing generator, configuration, persistence and observation paths, published as
+`4f3d324` with a fresh live world.
 
 <a id="design-birth-and-aging"></a>
 

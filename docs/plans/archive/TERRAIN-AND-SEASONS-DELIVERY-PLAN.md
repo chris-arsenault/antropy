@@ -1,9 +1,12 @@
 # Full fractal terrain and local resource seasons
 
-Sulion root `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Updated September 30, 2026.
-Static implementation was committed and pushed as `569f1a0`. The integration corrections below
-are implemented; the root tracks their authorized publication and deployment, not user acceptance.
-The [original execution record](archive/TERRAIN-AND-SEASONS-PLAN.md) retains the design baseline,
+**Status:** Delivered plan (archived) — static v46 terrain `569f1a0`, integration corrections
+`4c7a270` and the v47 spatial hierarchy `4f3d324`, live in a fresh v47 server world on September 30.
+Sulion root `0ac08ebd-3a5c-4b83-912b-f4303d4267be` is closed. Body is the execution record; its
+"remaining" and publication statements are historical. The dissolved slope-transport law was
+later corrected at `e754743`. Current laws live in
+[composed runtime](../../design/chemistry/composed-runtime.md#geographic-composition).
+The [original execution record](TERRAIN-AND-SEASONS-PLAN.md) retains the design baseline,
 registrations, results and negative findings. Its test/review gates are retired.
 
 ## Outcome and principles
@@ -17,8 +20,8 @@ world-start configuration, durable continuation and the existing observation pat
   actions. Sunlight is overhead and non-depleting. No prescribed community or machinery building.
 - Rust owns physical maps and clocks. Keep local rendering borrowed and remote observations
   bounded. Generate terrain once at boot; reuse regional execution during ordinary stepping.
-- Keep mathematical laws in [geography](../design/persistent-geography.md),
-  [seasons](../design/local-resource-seasons.md) and the composed runtime, not in this plan.
+- Keep mathematical laws in [geography](../../design/persistent-geography.md),
+  [seasons](../../design/local-resource-seasons.md) and the composed runtime, not in this plan.
 - Run appropriate automatic checks while implementing and deploying. Detailed results belong
   outside the plan phases. Continuing observation guides refinement without blocking completion.
 
@@ -39,12 +42,12 @@ engineering checks and continuing refinement, not requirements to produce a chos
 | M6 | Local mechanical load input through the controller and genetics boundaries |
 | M7 | World-start controls, terrain display layers and bounded inspection |
 
-The original M8 scope-question stage is retired. The separate [dynamic terrain direction](../design/dynamic-terrain.md)
+The original M8 scope-question stage is retired. The separate [dynamic terrain direction](../../design/dynamic-terrain.md)
 owns gradual change, tectonics and local events, including physical accounts, persistence and display.
 It remains open and unimplemented independently of this plan. Live physical switches remain a
 distinct unselected configuration extension.
 
-The subsequent [spatial hierarchy revision](../design/spatial-scale.md) is now implemented in
+The subsequent [spatial hierarchy revision](../../design/spatial-scale.md) is now implemented in
 v47 under Sulion `0d03350f-9bc9-4c9f-a703-8f611940afe9`. The user explicitly requested completion
 of the specified runtime and a new live world after the documentation-only task. Its phases are
 spatial configuration/placement, consumer/display integration, and publication/live activation.
@@ -66,7 +69,7 @@ chosen preset's unspecified fields. Controlled fixtures explicitly select diagno
 The epoch/zone refill defect was reproduced: a deferred commit could choose a later epoch or
 zone. Lifecycle deadlines now force commits in their own step, and refill composition uses the
 event time and interpolated position. The physical checkpoint remains v46. The
-[correction record](../evidence/terrain-corrections/README.md) owns automatic regression and cost
+[correction record](../../evidence/terrain-corrections/README.md) owns automatic regression and cost
 results; Sulion `c4b3f43f-1704-44e6-be66-aaed2f2d4688` tracks this repair and the separate direction.
 
 ### Publish terrain corrections

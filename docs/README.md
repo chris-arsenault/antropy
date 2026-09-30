@@ -35,9 +35,9 @@ them. See the [storage policy](evidence/README.md).
 | Local RNN controller inputs, actions and learning | [Controller](design/controller.md) |
 | Genetic physiology, bodies and inheritance | [Funded bodies](design/funded-bodies.md), [birth-fixed capabilities](design/chemistry/installed-machinery.md) |
 | Regional execution and multicore ownership | [Spatial execution](design/spatial-execution.md) |
-| Terrain, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md) — static v46 implemented; [active repair plan](plans/TERRAIN-AND-SEASONS-PLAN.md) |
+| Terrain, fractal maps and resource placement | [Persistent geography](design/persistent-geography.md) — implemented v46; [delivery record](plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) |
 | Local supply clocks | [Local resource seasons](design/local-resource-seasons.md) — implemented v46 |
-| Reservoir neighborhoods, intervening gaps and local terrain scale | [Spatial hierarchy revision](design/spatial-scale.md) — implemented v47; terrain plan tracks deployment |
+| Reservoir neighborhoods, intervening gaps and local terrain scale | [Spatial hierarchy revision](design/spatial-scale.md) — implemented and live in v47 |
 | Changing terrain, tectonics and local events | [Dynamic terrain](design/dynamic-terrain.md) — separate open design direction; not implemented |
 | Shade, overhead film and paid emission | [Light ecology](design/light-ecology.md) — implemented v42; [results](light-ecology-results.md) |
 | Paid local light sensing | [Photoreception](photoreception.md) |
@@ -112,6 +112,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 ## Current design and work order
 
 - [Goal and present evidence](design/README.md#design-goal-and-present-evidence)
+- [Actuator feedback and review corrections](design/README.md#design-actuator-feedback)
 - [Birth orientation and physiological aging](design/README.md#design-birth-and-aging)
 - [Integrated terrain display](design/README.md#design-terrain-display)
 - [Fractal terrain and local resource seasons](design/README.md#design-terrain-seasons)

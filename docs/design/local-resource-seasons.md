@@ -7,7 +7,7 @@ from regional seasonal wavelength. It changes map generation; the supply-clock l
 the same. Publication and live activation are tracked by the terrain delivery plan.
 
 Proposed September 25, 2026, backlogged September 26 and implemented with persistent
-geography in physical v46 (`569f1a0`). The active [terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md)
+geography in physical v46 (`569f1a0`). The [terrain delivery record](../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md)
 records publication and deployment of the integration corrections; the
 [original execution record](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retains bounded results.
 The seasonal clock is not evidence of evolved migration. Earlier documentation tracking: Sulion

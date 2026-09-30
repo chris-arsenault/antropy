@@ -48,7 +48,7 @@ fresh live world; continued ecological observation does not block implementation
 Seasonal relocation benefit, affordable default reservoir gaps and long-term specialization
 are refinement questions that longer observation can inform. Motion, configuration and refill-timing
 corrections are implemented; their delivery is recorded in the
-[terrain implementation plan](plans/TERRAIN-AND-SEASONS-PLAN.md).
+[terrain delivery record](plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md).
 
 <a id="backlog-cell-interactions"></a>
 

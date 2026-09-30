@@ -14,7 +14,7 @@ performance rule in [AGENTS.md](../../../AGENTS.md) remains in force.
 
 The P3 measurement/human-review stage was retired, not passed. This does not claim that
 unmeasured 16/32-core targets or long-running ecology passed. P4's static terrain now belongs
-to the [terrain implementation](../TERRAIN-AND-SEASONS-PLAN.md); unselected rotational
+to the [terrain implementation](TERRAIN-AND-SEASONS-DELIVERY-PLAN.md); unselected rotational
 climate remains in the [backlog](../../backlog.md).
 
 The structural principles below still govern future performance changes. The old execution

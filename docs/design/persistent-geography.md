@@ -19,9 +19,9 @@ The earlier static-first recommendation does not approve or reject that future s
 does not authorize a live-world cutover.
 
 Design tracking: Sulion `95e0ca28-0f12-459f-9e3b-8b482c8f9488`, a documentation task only.
-Full proposal tracking now lives in the [terrain and seasons plan](../plans/TERRAIN-AND-SEASONS-PLAN.md),
-Sulion `0ac08ebd-3a5c-4b83-912b-f4303d4267be`. Static implementation is published; the September 30
-review identified motion/configuration defects; corrections are implemented with delivery tracked in that plan.
+The [terrain delivery record](../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) holds the
+execution history. Static terrain, its integration corrections and the v47 spatial hierarchy are
+published and live.
 The [original results](../plans/archive/TERRAIN-AND-SEASONS-PLAN.md) retain their limits.
 The [current work order](README.md) retains priority.
 
@@ -334,10 +334,9 @@ motion and contact correction cannot bypass geography. Stationary turning does n
 The exact placement relative to adhesion and exclusion must be resolved with the update order;
 neither free uphill contact displacement nor overlap deadlock is an acceptable shortcut.
 
-For dissolved transport, multiply each face's exchange by the m of its net direction (the
-[implemented correction](chemistry/composed-runtime.md#geographic-composition) replaced the
-donor-directed choice, whose per-face asymmetry made basin pooling grow with mesh refinement);
-use the same sampled resistance for passive finite-owner translation.
+For dissolved transport, multiply each face's exchange by the m of its net direction
+([composed laws](chemistry/composed-runtime.md#geographic-composition)); use the same sampled
+resistance for passive finite-owner translation.
 Preserve frozen donors, antisymmetric material commits and existing speed limits. Opposite
 directions can have different rates while accepted transfer is still added and subtracted
 exactly once. Do not multiply a transport request and its already-adjusted mobility twice.
@@ -346,9 +345,8 @@ Flat q=1, beta=0 must recover current transport and motion.
 Asymmetric exchange can concentrate material in hollows and impede crossing ridges without
 an extra height-to-density formula. That is a prediction to check with diffusion, crowding,
 binding and supply active, not an assigned concentration or guaranteed basin equilibrium.
-Measured September 30: with net-direction face rates, slope skews spreading from local
-supply only slightly downhill and a uniform field stays uniform; the strong ridge-to-hollow
-pooling seen earlier was the donor-directed discretization, not this law.
+With net-direction face rates a uniform field stays uniform and slope skews spreading from
+local supply only slightly downhill ([measurement](decisions-and-evidence.md#review-corrections-and-actuator-feedback)).
 Reservoirs may also redistribute; reject a calibration that merely funnels the entire world
 into one sink. Do not fix that failure by tethering them to initial sites.
 

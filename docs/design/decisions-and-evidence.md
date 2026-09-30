@@ -1,6 +1,6 @@
 # Design decisions and evidence
 
-This is the decision record for the current [work order](README.md), through physical v46. The
+This is the decision record for the current [work order](README.md), through physical v48. The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
 original versions, controls and failures. Completed implementation does not guarantee a
 particular evolved community. Execution records remain in the [plan archive](../plans/README.md).
@@ -238,9 +238,54 @@ refill waiting. Controllers gain one input, the previous paid local motor load. 
 remedy stays rejected: terrain adds no source anchors. Slowly changing terrain, tectonics,
 catastrophes and live physical switches were not selected; they remain
 [backlog](../backlog.md#backlog-terrain-refinement) proposals. The
-[active plan](../plans/TERRAIN-AND-SEASONS-PLAN.md) owns remaining repairs. The integrated
-default display (`fc016c7`) presents ground, contours, received-light shade and seasonal
-reservoir markers without changing physics.
+[delivery record](../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) holds the integration
+corrections and v47 spatial hierarchy. The integrated default display (`fc016c7`) presents
+ground, contours, received-light shade and seasonal reservoir markers without changing physics.
+
+## Review corrections and actuator feedback
+
+September 30, after a goal-referenced review of the September 23–30 directions. Four defects
+failed a stated contract; each was fixed and deployed.
+
+**Server continuity** (`20e564d`). An extinct world keeps advancing and autosaving, and retention
+kept only the newest six automatic saves, so the last living state aged out within hours. A
+sidecar that failed to parse caused its data file to be deleted as an orphan, and a restore
+failure silently seeded a new world whose saves then pruned the old ones. Retention now always
+keeps the newest checkpoint with living cells; launch deletes data only when no sidecar exists;
+when current-format checkpoints exist but none restores, launch fails with the reasons.
+Resetting at a format bump remains the accepted cost of no migration.
+
+**Harness presets** (`7ab52b8`). After the ecology preset became the parsing default, harness
+contests built from partial overrides silently gained terrain, seasons and fractal placement.
+The harness loader now requires each world or configuration request to name `ecology` or
+`diagnostic`, or to supply a complete configuration. Archived kernels without presets are exempt.
+
+**Dissolved slope transport** (`e754743`). The per-face uphill factor `1/(1+beta*slope)` applied
+by donor fixed each face's steady concentration ratio at `1+beta*slope`, so pooling compounded
+with face count and drift grew as 1/Δx. Seed 27 at 240 × 180 after 1,000 s: lowest-height decile
+2.6× the mean at mesh 2 and 4.0× at mesh 1; a spreading front's downhill bias −0.70 versus −1.27
+height units at 200 s. A resolution-independent potential would need a new length scale and
+would act as gravity, which the geography design rejects. Choosing each face's coefficient by
+its net exchange direction keeps beta's grade meaning and the cell law: a uniform field stays
+uniform at both meshes and the front bias became −0.007 versus −0.004. The strong ridge-to-hollow
+pooling previously visible was the discretization, not the stated law.
+`engine/examples/slope_pooling.rs` reproduces these measurements.
+
+**Actuator feedback** (v48, `ff175da`). Since v43 each body-stock input
+`capacity/(capacity+reference)` equalled `M/(M+B)` for every component, repeating input 29 plus a
+birth-fixed presence bit, while the row budget charged gain for weights on them. Conditional
+specialization needs to know whether a chosen effort pays off where the cell is. Motor load
+already reported this for motors; the same reading now applies to every paid actuator: accepted
+effect against full-effort capacity. Seven capacity-only slots were removed rather than zeroed,
+because a constant input only costs gain under the row budget (59 → 52 inputs). Founder weights
+used none of the affected slots. Interleaved single-thread WASM measurements at 2,000 loaded
+cells: 15.0 → 14.4 ticks/s for this change; the slope correction cost nothing measurable. That
+workload was already below the 30 ticks/s target.
+
+Other review observations were checked against recorded decisions and not acted on: the
+non-depleting overhead sun, fission age reset, contact adhesion that credits no work, the
+unnormalized conductance mean, input 51 as the terrain load cue and the weaker founder turning
+under the row budget are each recorded user choices or accepted measurements.
 
 ## Cellular organization and shared interfaces
 

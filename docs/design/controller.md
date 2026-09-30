@@ -43,15 +43,13 @@ previous physiology publication against its full-effort capacity `C` over the sa
 effort stay in the numerator, so injury, low effort, missing substrate, full storage, depleted
 surroundings and unpaid energy all lower the reading. Accepted per-species transfer is shared
 among transporter slots by their share of that species' request, including contact receipts.
-Absent capabilities read zero. The reading uses the same bounded `q/(q+reference)` form the
-v43 stock inputs used and needs no clamp. Accumulators are checkpoint state and restart at
+Absent capabilities read zero. The reading stays within (−1, 1) without a clamp. Accumulators are checkpoint state and restart at
 birth and at each publication.
 
-Since v43, each stock input `capacity/(capacity+reference)` had equalled `M/(M+B)` for every
-component, repeating input 29 plus a birth-fixed presence bit. V48 replaced them: actuators now
-report achieved effect, which conditional specialization needs, and receptor, photoreceptor,
-motor and storage stocks were removed because inputs 0–15, 37–40, 51 and 35 already carry
-their condition-dependent readings. Under the row budget a constant input only costs gain.
+Receptor, photoreceptor, motor and storage capacity reach the controller through the gain of
+inputs 0–15 and 37–40, the motor load (51) and internal fill (35). The
+[decision record](decisions-and-evidence.md#review-corrections-and-actuator-feedback) explains
+the v48 layout.
 
 <a id="controller-action-contract"></a>
 

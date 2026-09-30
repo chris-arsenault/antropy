@@ -82,7 +82,7 @@ There are no stored center anchors or runtime relocation rules.
 V46 implements static [fractal geography](../persistent-geography.md) and
 [local resource seasons](../local-resource-seasons.md). Canonical maps, configuration,
 source-local supply accrual and renewal RNG state survive checkpoints. The
-[terrain delivery plan](../../plans/TERRAIN-AND-SEASONS-PLAN.md) records local validation and
+[terrain delivery plan](../../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) records local validation and
 the unresolved dynamic-terrain and live-switch scope. This is not a live-world cutover.
 
 ## Meaning and owners
@@ -139,11 +139,8 @@ Dissolved transport applies the shared geographic coefficient once per face, cho
 directed coefficient of that face's net exchange (per species, from the frozen pre-step rows):
 net uphill exchange is slowed by the slope term, level or downhill exchange keeps the substrate
 rate. Both nodes of a face see opposite nets and therefore choose the same coefficient, so
-donor/recipient commits stay antisymmetric. A uniform field stays uniform on any terrain.
-Choosing the coefficient by donor instead gave each face a fixed concentration ratio
-`1 + beta*slope`; compounded over faces, basin pooling grew as the mesh was refined (seed 27,
-240 × 180, 1,000 s: lowest-height decile 2.6× the mean at mesh 2 and 4.0× at mesh 1).
-`engine/examples/slope_pooling.rs` reproduces both measurements. q also scales public
+donor/recipient commits stay antisymmetric. A uniform field stays uniform on any terrain, and
+drift does not depend on mesh spacing ([decision](../decisions-and-evidence.md#review-corrections-and-actuator-feedback)). q also scales public
 processing time in dissolved material, overhead film and exposed reservoir contents. It does
 not change intracellular kinetics, membrane costs, washout, chemical identity or work per
 conversion. Optical geography remains `min(transmission*external_light, ceiling)` through

@@ -45,7 +45,7 @@ function scenario(question: Question, enabled: boolean): QuickScenario {
     hypothesis:
       "Local physical exposure changes measured access, paid effort or supply; feedback can express a response",
     specification: {
-      registration: "docs/plans/TERRAIN-AND-SEASONS-PLAN.md",
+      registration: "docs/plans/archive/TERRAIN-AND-SEASONS-PLAN.md",
       question,
       enabled,
       mutation: "frozen",

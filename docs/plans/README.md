@@ -22,9 +22,8 @@ work stays explicit in an implementation phase.
 
 ## Active plans
 
-| Plan | Sulion | Scope |
-| --- | --- | --- |
-| [Full fractal terrain and local resource seasons](TERRAIN-AND-SEASONS-PLAN.md) | `0ac08ebd-3a5c-4b83-912b-f4303d4267be` | Static v46 terrain pushed as `569f1a0`; integration corrections implemented, with publication/deployment recorded in the delivery phase. [Dynamic terrain](../design/dynamic-terrain.md) is a separate open direction |
+None. Open design directions without an active plan are listed in the
+[design directions registry](../design/directions.md).
 
 ## Archived plans
 
@@ -34,8 +33,10 @@ original-version acceptance into passes.
 
 | Plan | Status | Sulion | Outcome |
 | --- | --- | --- | --- |
+| September 30 review corrections (no plan document; see the [decision record](../design/decisions-and-evidence.md#review-corrections-and-actuator-feedback)) | Delivered | `a6a84982` | Server checkpoint retention/restore safety `20e564d`, explicit harness presets `7ab52b8`, mesh-independent slope transport `e754743`, realized-activity controller inputs v48 `ff175da` |
+| [Full fractal terrain and local resource seasons](archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) | Delivered | `0ac08ebd` | Static v46 terrain `569f1a0`, integration corrections `4c7a270` and v47 spatial hierarchy `4f3d324`, live in a fresh v47 world |
 | [Integrated default terrain display](archive/INTEGRATED-TERRAIN-DISPLAY-PLAN.md) | Delivered | `c6e3d1b6` | Ordinary ground, contours, received-light shade, translucent chemistry and seasonal source markers through the shared renderer, `fc016c7`; no physical-rule or v46 checkpoint change |
-| [Terrain and seasons execution record](archive/TERRAIN-AND-SEASONS-PLAN.md) | Superseded | `0ac08ebd` | Original September 30 design baseline, registrations, results and negative findings; the active terrain plan owns remaining work |
+| [Terrain and seasons execution record](archive/TERRAIN-AND-SEASONS-PLAN.md) | Superseded | `0ac08ebd` | Original September 30 design baseline, registrations, results and negative findings; the [delivery record](archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md) completes it |
 | [Birth orientation and physiological aging](archive/BIRTH-AND-AGING-PLAN.md) | Delivered | `404e9450` | Random newborn orientation and core-linked age-dependent maintenance, v45, `79ea580` |
 | [Genetic physiology](archive/GENETIC-PHYSIOLOGY-PLAN.md) | Delivered | `ea4b2307` | Genetic body proportions at current biomass replace machinery construction/retirement, v43, `dc41e40` |
 | [Dispersal geography and neural response](archive/DISPERSAL-OPPORTUNITIES-PLAN.md) | Delivered | `a153cfca` | Heavy-tailed outlying reservoir placement and bounded aggregate neural drive, v44, `f6f2a2a` |

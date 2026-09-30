@@ -2,6 +2,20 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-09-30 — Actuator feedback and review corrections
+
+- Replaced the biomass-proportional body-stock controller inputs with realized activity for
+  every paid actuator (transporters, enzyme programs, builder, emitter). Removed seven
+  capacity-only inputs, leaving 52. Physical checkpoints advanced to v48 without migration
+  (`ff175da`).
+- Made dissolved slope transport use each face's net exchange direction, so drift no longer
+  grows with mesh refinement and uniform material no longer pools in hollows (`e754743`).
+- Required every harness world to name the `ecology` or `diagnostic` preset or supply a
+  complete configuration; commands built on `chemicalConfig` accept `--preset` (`7ab52b8`).
+- Kept the newest server checkpoint with living cells through pruning, kept data whose sidecar
+  fails to parse, and made launch fail instead of replacing unrestorable same-format saves
+  (`20e564d`).
+
 ## 2026-09-30 — Resource neighborhoods and terrain scale
 
 - Restored uneven resource neighborhoods using normalized regional envelopes with bounded

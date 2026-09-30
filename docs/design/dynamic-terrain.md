@@ -2,7 +2,7 @@
 
 **Status:** Open design direction — specified separately September 30, 2026. No dynamic
 terrain is implemented or enabled. This direction survives completion of the static
-[terrain plan](../plans/TERRAIN-AND-SEASONS-PLAN.md); it is not an acceptance stage for that plan.
+[terrain plan](../plans/archive/TERRAIN-AND-SEASONS-DELIVERY-PLAN.md); it is not an acceptance stage for that plan.
 
 ## Purpose and scope
 
