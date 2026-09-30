@@ -1,8 +1,7 @@
-/** Presentation only: periodic interpolation, height contours and bounded received-light contrast. */
+/** Presentation only: periodic interpolation, height contours and substrate texture. */
 export const landscapeShader = `
 uniform sampler2D terrain;
 uniform bool landscape;
-uniform bool showLight;
 vec2 terrainAt(ivec2 p, ivec2 n) {
   return texelFetch(terrain,(p+n)%n,0).xy;
 }
@@ -34,14 +33,10 @@ float substrateMarks(vec2 world, float resistance) {
   float density=smoothstep(random.x*0.8,random.x*0.8+0.2,resistance);
   return stroke*density*resistance;
 }
-vec3 landscapeGround(vec2 world, float drive) {
+vec3 landscapeGround(vec2 world) {
   vec2 ground=landscapeAt(world);
   float q=clamp(ground.y,0.0,1.0);
   vec3 earth=mix(vec3(0.36,0.20,0.12),vec3(0.075,0.36,0.32),q);
-  if(showLight) {
-    float light=max(0.0,drive)/(1.0+max(0.0,drive));
-    earth*=0.40+0.95*light;
-  }
   // Four height units per contour. Fade subpixel contours instead of aliasing steep slopes.
   float h=ground.x/4.0;
   float width=fwidth(h);

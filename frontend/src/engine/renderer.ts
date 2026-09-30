@@ -207,7 +207,7 @@ export class Renderer {
   }
 
   private drawShadow(size: [number, number], o: ViewOptions) {
-    if (!o.layers[7] || o.layers[18] || illuminationMode(o.layers) > 0) return;
+    if (!o.layers[7] || illuminationMode(o.layers) > 0) return;
     this.drawField(size, o, true);
   }
 
@@ -233,7 +233,6 @@ export class Renderer {
     gl.uniform1i(gl.getUniformLocation(p, "shadowPass"), Number(shadow));
     gl.uniform1f(gl.getUniformLocation(p, "exposure"), o.exposure);
     gl.uniform1i(gl.getUniformLocation(p, "terrain"), 2);
-    gl.uniform1i(gl.getUniformLocation(p, "showLight"), Number(o.layers[7] ?? false));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 

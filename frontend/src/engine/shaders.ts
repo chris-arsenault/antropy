@@ -55,12 +55,13 @@ void main() {
   if(shadowPass) {
     // A translucent night layer shades the finished map, including organisms and markers.
     float night=1.0-daylight(amount.z);
-    color=vec4(0.008,0.015,0.028,0.72*night);
+    // Keep terrain texture and chemical color legible beneath the integrated shadow.
+    color=vec4(0.008,0.015,0.028,(landscape ? 0.50 : 0.72)*night);
     return;
   }
   vec4 detail=mix(mix(sampleSelected(base,n),sampleSelected(base+ivec2(1,0),n),f.x),mix(sampleSelected(base+ivec2(0,1),n),sampleSelected(base+ivec2(1,1),n),f.x),f.y);
   float presence=1.0-exp(-exposure*amount.x);
-  vec3 background=landscape ? landscapeGround(world,amount.z) : vec3(0.09,0.17,0.21);
+  vec3 background=landscape ? landscapeGround(world) : vec3(0.09,0.17,0.21);
   vec3 light=mix(background,vec3(0.36,0.68,0.65),presence*layers.x);
   float quality=clamp((amount.y/max(amount.x,1e-20)-0.5)/7.5,0.0,1.0);
   vec3 energy=mix(vec3(0.22,0.4,0.8),vec3(0.93,0.69,0.3),quality);

@@ -37,6 +37,7 @@ it("preserves the world, display controls and drafts through panel navigation", 
     expect(container.textContent).toContain("Ground: rough → conductive");
     expect(container.textContent).toContain("Colored clouds: chemistry");
     expect(container.textContent).toContain("Reservoir band: slow → fast");
+    await checkDefaultLayers(container);
     await click(container, "Population");
     expect(container.querySelector(".population-totals dd")?.textContent).toBe("48");
     expect(container.querySelector(".genealogy-panel")).toBeNull();
@@ -116,6 +117,32 @@ async function checkMapSelection(container: HTMLElement) {
   expect(button(container, "Light").getAttribute("aria-pressed")).toBe("true");
   expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("true");
   expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("false");
+}
+async function checkDefaultLayers(container: HTMLElement) {
+  expect(button(container, "Light").getAttribute("aria-pressed")).toBe("true");
+  expect(button(container, "Resistance").getAttribute("aria-pressed")).toBe("false");
+  expect(button(container, "Stress").getAttribute("aria-pressed")).toBe("false");
+  await click(container, "Light");
+  await click(container, "Resistance");
+  await click(container, "Map");
+  expect(control<HTMLSelectElement>(container, "Environment").value).toBe("landscape");
+  expect(control<HTMLInputElement>(container, "Light and shadow").checked).toBe(false);
+  expect(control<HTMLInputElement>(container, "Movement resistance").checked).toBe(true);
+  const environment = control<HTMLSelectElement>(container, "Environment");
+  await act(async () => {
+    environment.value = "terrain";
+    environment.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(container.querySelector('[aria-label="Landscape legend"]')).toBeNull();
+  await act(async () => {
+    environment.value = "landscape";
+    environment.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await click(container, "Close Esc");
+  expect(container.querySelector('[aria-label="Landscape legend"]')).not.toBeNull();
+  expect(button(container, "Light").getAttribute("aria-pressed")).toBe("false");
+  await click(container, "Light");
+  await click(container, "Resistance");
 }
 async function checkLineage(container: HTMLElement) {
   await click(container, "Lineage");

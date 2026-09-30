@@ -103,7 +103,7 @@ function baseLegend(value: ChemicalDisplay) {
 
 const terrainLegend: Partial<Record<ChemicalDisplay["base"], string>> = {
   landscape:
-    "Earth → teal: resistant → conductive substrate, reinforced by short diagonal marks where substrate resistance is higher. Contours show height every four units; closer lines mean steeper slopes. Smooth ground brightness shows received light. Blue → amber chemical clouds show 0.5 → 8 energy / material; concentration controls color strength independently of shade. Reservoir outer bands show the local supply clock: copper 0×, pale 1×, teal 2×; inner solid/cross or dashed rings still mean stocked or empty. Cells retain their energy colors.",
+    "Earth → teal: resistant → conductive substrate, reinforced by short diagonal marks where substrate resistance is higher. Contours show height every four units; closer lines mean steeper slopes. Blue → amber chemical clouds show 0.5 → 8 energy / material; concentration controls color strength. Reservoir outer bands show the local supply clock: copper 0×, pale 1×, teal 2×; inner solid/cross or dashed rings still mean stocked or empty. Cells retain their energy colors. The optional Light overlay shades the entire map together.",
   height:
     "Blue → sand: low → high terrain. Height changes resistance; cells remain on the XY plane.",
   conductance:
@@ -140,7 +140,9 @@ export function ChemicalLegend({ value }: { value: ChemicalDisplay }) {
         </p>
       )}
       {value.illumination &&
-        ["matter", "potential", "chemical", "weathering", "none"].includes(value.base) && (
+        ["landscape", "matter", "potential", "chemical", "weathering", "none"].includes(
+          value.base
+        ) && (
           <p>
             Translucent shadow dims fields, cells and sources together, with a soft boundary around
             the mean 1× illumination. Detail remains visible in shadow. Cells sense the same

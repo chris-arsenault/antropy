@@ -24,13 +24,13 @@ const landscapeKey = [
   ],
   [
     "illumination",
-    "Ground brightness: light",
-    "Smooth light and dark areas show actual received light, including terrain shade, constructed cover and paid emission. Chemical colors remain readable in shade.",
+    "Shade: received light",
+    "Translucent shadow follows received light across ground, chemistry, cells and reservoirs, including terrain shade, constructed cover and paid emission. Toggle it with Light.",
   ],
   [
     "chemistry",
     "Colored clouds: chemistry",
-    "Blue → amber shows low → high energy per material. Stronger color means more material; shade does not dim the chemical colors. The terrain remains visible through the clouds.",
+    "Blue → amber shows low → high energy per material. Stronger color means more material. The terrain remains visible through the clouds; the Light overlay shades all layers together.",
   ],
   [
     "season",
@@ -47,30 +47,31 @@ export function MapContext({
   value: ChemicalDisplay;
   change: (v: ChemicalDisplay) => void;
 }) {
-  if (value.base === "landscape")
-    return (
-      <div className="map-context landscape-key" aria-label="Landscape legend">
-        {landscapeKey.map(([key, label, hint]) => (
-          <span className="landscape-key-item" key={key} title={hint}>
+  return (
+    <>
+      {value.base === "landscape" && (
+        <div className="map-context landscape-key" aria-label="Landscape legend">
+          {landscapeKey.map(([key, label, hint]) => (
+            <span className="landscape-key-item" key={key} title={hint}>
+              <span className={`context-swatch ${key}`} aria-hidden="true" />
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="map-context" aria-label="Map context layers">
+        {cues.map(([key, label, hint]) => (
+          <button
+            key={key}
+            aria-pressed={value[key]}
+            title={hint}
+            onClick={() => change({ ...value, [key]: !value[key] })}
+          >
             <span className={`context-swatch ${key}`} aria-hidden="true" />
             {label}
-          </span>
+          </button>
         ))}
       </div>
-    );
-  return (
-    <div className="map-context" aria-label="Map context layers">
-      {cues.map(([key, label, hint]) => (
-        <button
-          key={key}
-          aria-pressed={value[key]}
-          title={hint}
-          onClick={() => change({ ...value, [key]: !value[key] })}
-        >
-          <span className={`context-swatch ${key}`} aria-hidden="true" />
-          {label}
-        </button>
-      ))}
-    </div>
+    </>
   );
 }
