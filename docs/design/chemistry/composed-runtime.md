@@ -434,9 +434,12 @@ renewal waits retain the prior system's asynchronous
 return of supply without its random lifetime/rate coupling. Rates remain fixed after creation.
 A zero release rate neither empties a deposit nor creates supply. Ignoring tick rounding, mean
 external input at a stationary source remains r*T/(T+G), where T=sourceLifetime and G=sourceGap.
-Current defaults are sourceRate=0.1 and T=G=600 model seconds. The reduction from0.2 halves
-the release ceiling, nominal refill amount, initial reservoir stock and its priming allocation;
-the priming fraction remains0.1. Nominal mean input is0.05*habitat.richness per supply second.
+Current defaults are sourceRate=0.1, T=1200 and G=600 model seconds. Relative to the prior
+rate0.2/T600 baseline, the release ceiling halves while nominal refill amounts and initial
+reservoir stock remain the same. Their priming fraction remains0.1; secondary8/128 priming
+still depends on interface area. Nominal mean input is(1/15)*habitat.richness per supply second,
+one-third below the former0.1*richness. The [startup correction](../../mortality-startup-correction.md)
+records the failed rate0.1/T600 rollout and bounded ordinary-founder comparison.
 Actual release can also include recovered internal material; the ledger separates it from imports.
 Moving sources can experience a different time-average multiplier; actual imported material
 and potential remain recorded without population-based normalization. This aggregate budget

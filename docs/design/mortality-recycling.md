@@ -118,8 +118,10 @@ live physical settings controls. Installed defaults are tau=60 model seconds and
 recovery is enabled by default in both presets. Founder maintenance-only reserves are about
 45.5 seconds. The fixed scales have no claimed ecological optimum; balanced turnover cancels
 algebraically, while short checks test substantial loss. SourceRate is reduced from0.2 to0.1;
-sourceGap remains600. This halves the release ceiling and nominal stock, including initial
-stock and its priming allocation. The priming fraction remains0.1.
+sourceGap remains600. SourceLifetime is1200 model seconds to retain nominal stock and its
+startup priming while halving the release ceiling. The priming fraction remains0.1. The first
+rate0.1/T600 rollout starved; the [startup correction](../mortality-startup-correction.md) records
+the ordinary-founder comparison and revised duration.
 
 ## Conservative local material transfer
 
@@ -188,7 +190,7 @@ For optional zones/epochs, the existing policy supplies the incoming batch's pro
 batch into retained stock rather than resetting the retained chemicals at a boundary. This is
 a necessary conservation correction once nonempty sources can receive scheduled imports.
 Initial amounts follow the same `rate*duration*(0.5+U)` law and priming fraction0.1.
-The new default rate0.1 halves both initial stock and its priming allocation.
+The new defaults rate0.1/duration1200 retain initial stock and its reservoir-derived priming.
 
 ## Accounts and runtime ownership
 
@@ -248,6 +250,11 @@ of a wider extinction boundary. Actual recovered chemistry, paid uptake and fund
 provide that plausible path. Recovery is enabled by default with sourceRate0.1; one short
 paired check covers the reduced release rate. No seed sweep or horizon extension is required.
 Useful ecological range and evolved dispersal remain unmeasured.
+
+The deployed seed27 world later reached starvation extinction at tick12,412. The short feeding
+fixture did not check establishment with ordinary founders and halved startup stock. The duration
+correction retains full batches at the lower ceiling; its bounded startup result supports delivery
+without establishing long-term survival. The extinct live world requires an authorized restart.
 
 ## Relationship to earlier proposals
 

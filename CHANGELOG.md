@@ -4,6 +4,11 @@ All notable user-visible changes are recorded here.
 
 ## 2026-10-01 — Mortality driven reservoir recycling (local delivery)
 
+- Corrected the rollout's reduced startup supply: sourceRate stays0.1 with recovery enabled,
+  while sourceLifetime increases from600 to1200 to retain full finite batches and their initial
+  release. Mean external supply remains one-third below the earlier baseline. The first v50
+  server world starved at tick12,412; the [bounded startup comparison](docs/mortality-startup-correction.md)
+  supports this correction without claiming continued survival.
 - Added nonlinear recovery of actual dead body chemistry into locally overlapping
   reservoirs. One physical-time net-loss history drives each complete death batch; free
   inventory spills and divisions create no mortality signal.
@@ -12,10 +17,11 @@ All notable user-visible changes are recorded here.
 - Added world-start controls, bounded recovery and selected-reservoir inspection, and distinct
   recovery/output cues in the existing markers and legend. Physical checkpoints use v50.
 - Enabled recovery by default and reduced sourceRate from0.2 to0.1, halving the reservoir
-  release ceiling and nominal refill amount. SourceGap remains600. Mirrored constructed checks
+  release ceiling; the startup correction above retains nominal refill amounts. SourceGap remains600.
+  Mirrored constructed checks
   found higher growth but earlier survivor death; [findings](docs/mortality-recycling-results.md)
-  preserve that result without making ecological proof a delivery gate. The live server world
-  is unchanged.
+  preserve that result without making ecological proof a delivery gate. The shared server now
+  runs v50; its extinct world and earlier incompatible saves remain preserved.
 
 ## 2026-10-01 — Utterances and strategic control (local delivery)
 

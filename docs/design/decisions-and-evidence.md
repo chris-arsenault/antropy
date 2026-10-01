@@ -392,7 +392,12 @@ by default and sourceRate is reduced from0.2 to0.1, halving release and nominal 
 startup stock and its priming allocation. SourceGap600 and the priming fraction remain installed.
 The conditional supply panel was not run, so a wider extinction boundary and evolved dispersal
 remain unmeasured. This negative result does not authorize chemistry changes or extra rate gains.
-The native/WASM/browser feature is delivered locally; the continuing server world is unchanged.
+The native/WASM/browser feature was subsequently deployed. The first v50 seed27 world starved
+at tick12,412, with56 actual deaths and eight divisions. The ordinary-founder establishment check
+was missing from the initial delivery. A bounded comparison at the same rate0.1 improved paid
+uptake and growth when full batches were retained; sourceLifetime is now1200 rather than600.
+The [startup correction](../mortality-startup-correction.md) records the evidence and limits.
+The existing extinct state and earlier incompatible saves remain preserved.
 
 ## Operational limits and remaining direction
 

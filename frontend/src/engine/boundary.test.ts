@@ -36,6 +36,7 @@ it("starts the larger default world at mesh 2 and advances with valid accounts",
     expect(config.terrain.featureWavelength).toBe(36);
     expect(config.sourceRadius).toBe(3);
     expect(config.sourceRate).toBe(0.1);
+    expect(config.sourceLifetime).toBe(1200);
     expect(config.mortalityRecovery).toBe(true);
     world.step(4);
     const summary = world.command<Summary>("summary");

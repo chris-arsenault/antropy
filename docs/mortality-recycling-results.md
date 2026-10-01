@@ -1,6 +1,6 @@
 # Mortality recovery delivery and bounded checks
 
-**Status:** Local v50 delivery complete, October 1. Recovery is enabled by default and sourceRate is 0.1, reduced from 0.2. Earlier negative survival findings remain recorded.
+**Status:** V50 deployed October 1. The first server world starved at tick12,412. Recovery stays enabled with sourceRate0.1; the [startup correction](mortality-startup-correction.md) retains full batches using sourceLifetime1200. Earlier negative survival findings remain recorded.
 
 ## Registration
 
@@ -100,11 +100,17 @@ decision and its burden of proof. Working physics, non-breaking integration and 
 path to the intended effect suffice for delivery; a single fixed-controller survival result
 does not justify disabling the requested feature.
 
-Current decision: enable recovery in both presets and reduce sourceRate from0.2 to0.1.
+Initial lower-rate decision: enable recovery in both presets and reduce sourceRate from0.2 to0.1.
 This halves the discharge ceiling and nominal refill amount, including initial source stock
 and its priming allocation. SourceGap600, sourceLifetime600, priming fraction0.1, tau60 and
 h_star0.25 remain. Actual chemical recovery, paid uptake and funded growth establish the
 plausible opportunity. Wider extinction boundaries remain a research question.
+
+After the deployed world starved, the ordinary-founder startup comparison exposed the omitted
+establishment check. Current defaults retain rate0.1 but increase sourceLifetime from600 to1200,
+preserving full batches and reservoir-derived priming. Secondary8/128 priming was never halved.
+The [startup correction](mortality-startup-correction.md) records the observed improvement;
+the deployed empty world still needs an authorized restart to apply new configuration.
 
 ## Default-rate check registration
 

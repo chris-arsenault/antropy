@@ -185,8 +185,12 @@ recovery, independent nominal refill allowance and conservative retained-stock m
 is enabled by default with sourceRate=0.1, reduced from0.2. Tau=60 model seconds,
 h_star=0.25 and sourceGap600 remain fixed. Bound-body chemistry alone can recover; free inventory
 spills and no additional work is credited. See [mortality findings](docs/mortality-recycling-results.md).
-The live server remains v48 until a separately
-authorized cutover. See [delivery evidence](docs/utterances-and-strategy-results.md).
+SourceLifetime is1200 model seconds, preserving full finite batches and their reservoir-derived
+priming while lowering the release ceiling. A rate change also changes batch and startup amounts
+through `rate*duration`; check the ordinary production founders rather than relying only on a
+handcrafted feeding fixture. The live server is v50; its first world starved at tick12,412.
+See the [startup correction](docs/mortality-startup-correction.md) and
+[strategic delivery evidence](docs/utterances-and-strategy-results.md).
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
 washout, evolving source renewal and multiscale public transformations are implemented.

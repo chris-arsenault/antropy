@@ -16,9 +16,11 @@ or evolved benefit.
 
 The September30 correction retained T=600 model seconds and reduced G to600. Its nominal
 mean supply became0.5r, 2.5 times the former0.2r, with full batches and finite startup priming.
-V50 enables mortality recovery and reduces sourceRate from0.2 to0.1. T=G=600 remains, so
-nominal mean external input is0.05*habitat.richness per supply second. Initial stock and its
-priming allocation also halve under the same law; the priming fraction stays0.1.
+V50 enables mortality recovery and reduces sourceRate from0.2 to0.1. The first rollout retained
+T=G=600, which also halved startup stock and reservoir-derived priming and failed to establish.
+The [startup correction](../../mortality-startup-correction.md) sets T=1200 with G=600: nominal
+mean input becomes(1/15)*habitat.richness per supply second, one-third below the old baseline.
+Full batches, initial stock and their priming allocation are retained; the priming fraction stays0.1.
 The shorter gap is comparable to the field's693-second washout half-life.
 The [extinction comparison](../../extinction-correction.md) records the decision, rejected
 equal-average-supply candidate and limits of the observed outcomes. The older numerical

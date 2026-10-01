@@ -142,7 +142,7 @@ impl Default for Config {
             source_priming: 0.1,
             source_rate: 0.1,
             source_radius: 3.,
-            source_lifetime: 600.,
+            source_lifetime: 1200.,
             source_gap: 600.,
             mortality_recovery: true,
             mortality_memory: 60.,

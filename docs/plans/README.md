@@ -32,7 +32,8 @@ No active implementation plan.
 
 | Plan | Scope | Sulion |
 | --- | --- | --- |
-| [Mortality driven reservoir recycling](MORTALITY-RECYCLING-PLAN.md) | Complete local v50 implementation; independent renewal, conservative recovery and bounded consumers. Enabled by default with sourceRate0.1; live world unchanged | `4ae0191b-e4f5-4161-9ebf-757b84247e8e`; default correction `1c9d8687-a477-486a-a294-8da8d34cc0b9` |
+| [Mortality startup correction](../mortality-startup-correction.md) | Retained full finite batches at release rate0.1 using sourceLifetime1200; recovery enabled. Ordinary-founder comparison and CI pass. Live restart requires explicit authorization | `1d4b3e3a-5250-43a0-a382-57266cd843bd` |
+| [Mortality driven reservoir recycling](MORTALITY-RECYCLING-PLAN.md) | Published v50 as9a4f497; independent renewal, conservative recovery and bounded consumers. The first world starved; the startup correction above supersedes the original T600 defaults | `4ae0191b-e4f5-4161-9ebf-757b84247e8e`; default correction `1c9d8687-a477-486a-a294-8da8d34cc0b9` |
 | [Utterances and strategic control](UTTERANCES-AND-STRATEGY-PLAN.md) | Complete funded carrier and inherited slow controller, local v49; CI/builds and bounded checks pass. Existing server world unchanged; no publication or deployment | `d0cb3e6d-df30-49aa-aa81-0690040f8dae` |
 
 Open design directions without an active plan are listed in the

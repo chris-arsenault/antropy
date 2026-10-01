@@ -2,6 +2,12 @@
 
 **Status:** Completed locally in v50, October 1, 2026. Recovery enabled by default with sourceRate0.1; live world unchanged.
 
+**Subsequent rollout:** Published as `9a4f497`; the first v50 server world starved at tick12,412.
+The [startup correction](../mortality-startup-correction.md), tracked by Sulion
+`1d4b3e3a-5250-43a0-a382-57266cd843bd`, retains full batches using sourceLifetime1200 while
+keeping rate0.1 and enabled recovery. This supersedes the earlier T600/halved-startup default
+below. The historical registrations and their negative findings remain unchanged.
+
 ## Outcome and authorization
 
 Implement [mortality driven reservoir recycling](../design/mortality-recycling.md):

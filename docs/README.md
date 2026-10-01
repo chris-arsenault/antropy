@@ -68,8 +68,10 @@ checks, calibration and operating costs; the existing server world is unchanged.
 [Mortality recovery](design/mortality-recycling.md) returns actual body chemistry
 through local reservoir overlap with independent refill timing, world-start controls and bounded
 observation. [Findings](mortality-recycling-results.md) record the negative survival comparison;
-recovery is enabled by default and sourceRate is reduced from0.2 to0.1. SourceGap600 and the
-continuing server world are unchanged.
+recovery is enabled by default and sourceRate is reduced from0.2 to0.1. SourceGap600 and
+the priming fraction remain unchanged. SourceLifetime1200 retains full batches at the lower
+ceiling. The first deployed world starved; the [startup correction](mortality-startup-correction.md)
+records the diagnosis and ordinary-founder comparison.
 
 ## Deferred proposals
 

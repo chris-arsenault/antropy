@@ -14,7 +14,7 @@ proximity, the questions about inter-colony exchange and new colony founding, an
 approximately 30-tick/s goal at 2,000 cells with its current low priority.
 
 October 1 local delivery adds funded directional utterances and inherited slow strategic
-control in physical v49. The running v48 server world is unchanged. The complete
+control in physical v49, subsequently deployed before v50. The complete
 [controller](controller.md) has 83 reflex inputs and 28 outputs; mouth and ear bring derived
 body capacities to 24. [Delivery evidence](../utterances-and-strategy-results.md) records
 bounded mechanics, cost calibration and reproduction. No language or dispersal policy is seeded.
@@ -26,8 +26,11 @@ integration. All three milestones are locally delivered. Recovery is enabled by 
 sourceRate is reduced from0.2 to0.1. The [bounded feeding comparison](../mortality-recycling-results.md)
 demonstrated funded uptake and growth, but shortened survivor life in that fixture. This finding
 does not block delivery. Tau=60 model seconds and h_star=0.25 are installed; sourceGap remains600
-and the live world is unchanged. The earlier reservoir-storage
-proposal is not a dependency.
+with sourceLifetime1200 preserving full finite batches at the reduced release ceiling.
+The first deployed v50 seed27 world starved at tick12,412. The
+[startup correction](../mortality-startup-correction.md) records its diagnosis and the bounded
+ordinary-founder comparison; a live restart remains separately authorized. The earlier
+reservoir-storage proposal is not a dependency.
 
 <a id="design-actuator-feedback"></a>
 
@@ -300,8 +303,8 @@ one to eight enzyme programs, core, motor, storage and [photoreception](../photo
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
 checkpoints use v50; the outer observation package remains v11. Local delivery rejects older
-physical formats without migration; the existing live server remains v48 until a separately
-authorized deployment and new-world cutover.
+physical formats without migration; the live server now runs v50. Its initial world starved;
+the [startup correction](../mortality-startup-correction.md) records the lower-rate batch correction.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. The area expansion retained local spread and reservoir sizes rather than
