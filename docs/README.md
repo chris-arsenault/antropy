@@ -62,6 +62,8 @@ them. See the [storage policy](evidence/README.md).
 | Paid byte broadcasts with coarse listener-relative hearing | [Directional cell utterances](design/cell-utterances.md) |
 | Slow learned strategy layer feeding the reflex RNN | [Strategic controller](design/strategic-controller.md) |
 | Gradual geographic change, tectonics and bounded local events | [Dynamic terrain](design/dynamic-terrain.md) |
+| Nonlinear recovery of dead biomass into reservoirs during die-offs | [Mortality recycling](design/mortality-recycling.md) — open design direction, not implemented |
+| Finite resource storage, local depletion and seasonal recharge | [Reservoir storage](design/reservoir-storage.md) |
 | Rugged chemical interaction: surprising mutations and co-located roles | [Direction](design/rugged-interaction.md), [Kauffman research paper](design/kauffman-landscapes-research.md) |
 
 ## Historical design records
@@ -231,6 +233,8 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Directional cell communication: mouths and ears](backlog.md#backlog-cell-utterances)
 - [Strategic controller: a slow learned layer above the reflex RNN](backlog.md#backlog-strategic-controller)
 - [Dynamic terrain: gradual change, tectonics and local events](backlog.md#backlog-dynamic-terrain)
+- [Reservoir storage and local depletion](backlog.md#backlog-reservoir-storage)
+- [Mortality driven reservoir recycling](backlog.md#backlog-mortality-recycling)
 - [Rugged chemical interaction: surprising mutations and co-located roles](backlog.md#backlog-rugged-interaction)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)

@@ -22,6 +22,36 @@ starts with ownership and avoidable work, following the structural-first rule in
 [AGENTS.md](../AGENTS.md). Candidate questions are 16/32-core scaling, larger-world costs and
 persistence limits; these are engineering observations, not open acceptance phases.
 
+<a id="backlog-reservoir-storage"></a>
+
+## Reservoir storage and local depletion
+
+**Status:** Unselected buffering proposal — September 30; not implemented; lower-bound work proceeds through mortality recycling.
+
+[Reservoir storage](design/reservoir-storage.md) proposes finite continuous recharge and
+concentration-driven discharge in place of fixed drains and random empty waits. Existing stock,
+footprint and timescales define the rates; local consumption affects delivery and seasons affect
+recharge. The intended opportunity is buffered resident supply plus stored food at rested sites,
+with less abrupt dependence on replenishment. It does not guarantee dispersal or survival below
+the maintenance budget, add population feedback, or change cell chemistry. The document owns
+the equations, conservative composition handling, execution boundaries and unresolved questions.
+It is insufficient as the primary answer to the narrow useful replenishment range; the subsequent
+[mortality recycling direction](design/mortality-recycling.md) does not depend on this replacement.
+
+<a id="backlog-mortality-recycling"></a>
+
+## Mortality driven reservoir recycling
+
+**Status:** Open design direction — agreed for documentation October 1; not implemented.
+
+[Mortality recycling](design/mortality-recycling.md) targets the lower supply boundary with
+a normally weak, nonlinear recovery of dead body material into nearby reservoirs during
+substantial die-offs. External replenishment and growth continue without a biomass ceiling or
+population target. The design owns mortality normalization, conservative chemical mixing,
+delivery during empty waits, independent normal refill timing, runtime ownership and unresolved
+questions. Healthy turnover should receive little support; temporary crisis support is an
+accepted tradeoff. It does not claim to raise the upper boundary or guarantee dispersal.
+
 <a id="backlog-dynamic-terrain"></a>
 
 ## Dynamic terrain

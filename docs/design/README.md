@@ -247,6 +247,7 @@ changes improved it; this historical diagnosis is not the current work order.
 | [Directional cell utterances](cell-utterances.md) | Deferred specification for paid bytes, coarse listener-relative bearing, funded inheritance and natural observation after implementation; no prior payoff or evolution gate |
 | [Strategic controller](strategic-controller.md) | Deferred specification for a slow learned strategy layer: history transform, local rhythm phases, neighbor display, reflex context inputs and learning gain |
 | [Rugged chemical interaction](rugged-interaction.md) | Deferred research direction for surprising mutations and co-located roles; [Kauffman research paper](kauffman-landscapes-research.md) |
+| [Mortality recycling](mortality-recycling.md) | Open design direction: nonlinear recovery of dead body material aims to lower the extinction boundary while preserving external growth; not implemented |
 | [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
 | [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
 | [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
