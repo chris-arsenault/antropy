@@ -55,7 +55,11 @@ the current-behavior preset retains 35 unequal neighborhoods. Local chemical gra
 move full and empty reservoirs with material and geographic resistance. Richness and radii
 persist; renewal uses the current location and a persisted mixture that changes with local processing. Independent renewals
 continue indefinitely, importing accounted matter and potential. Release and refill waiting
-advance on a shared local seasonal supply clock. It does not
+advance on a shared local seasonal supply clock. V50 separates nominal batch allowance from
+physical inventory, so conservative recovery and scheduled imports mix without delaying renewal.
+[Mortality recovery](mortality-recycling.md) routes finite bound-body chemistry at
+local overlap; free inventory spills. It is enabled by default; sourceRate is0.1 rather than0.2.
+The source clock does not
 alter chemical or cellular time. Pending supply time and private renewal draws survive saves.
 Release transfers from an inventory processed through the shared chemical operator. Accounted external work can
 fund uphill changes. Empty sites retain their evolving renewal mixture; no ordinary renewal

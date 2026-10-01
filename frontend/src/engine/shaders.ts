@@ -158,6 +158,12 @@ void main() {
       float sourceD=d*(landscape ? 1.25 : 1.0);
       if(sourceD>1.0) discard;
       stroke=max(step(0.92,sourceD),step(min(abs(local.x),abs(local.y)),0.035)*step(sourceD,0.25));
+      if(sourceD>0.68 && sourceD<0.82 && details.w>0.0) {
+        color=vec4(0.90,0.55,0.95,details.w*0.85); return;
+      }
+      if(sourceD<0.12 && details.y < -1.0) {
+        color=vec4(0.70,0.98,0.86,clamp(-1.0-details.y,0.0,1.0)*0.9); return;
+      }
       if(shade.a<0.5) {
         float dash=step(0.45,fract(atan(local.y,local.x)*3.82));
         stroke=step(0.92,sourceD)*dash*0.38;

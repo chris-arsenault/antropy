@@ -36,6 +36,10 @@ pub struct Config {
     /// Nominal refill amount divided by release rate; not an independent expiry clock.
     pub source_lifetime: f64,
     pub source_gap: f64,
+    pub mortality_recovery: bool,
+    /// Physical model seconds of exponential loss history.
+    pub mortality_memory: f64,
+    pub mortality_half_response: f64,
     /// Reservoir passive mobility (the reservoir class's own drift scale).
     pub source_drift: f64,
     /// Long-range like-charge repulsion strength between reservoirs, relative to cohesion.
@@ -136,10 +140,13 @@ impl Default for Config {
             landscape_region_spacing: (720_f64 * 540. / 35.).sqrt(),
             landscape_spread: 18.,
             source_priming: 0.1,
-            source_rate: 0.2,
+            source_rate: 0.1,
             source_radius: 3.,
             source_lifetime: 600.,
             source_gap: 600.,
+            mortality_recovery: true,
+            mortality_memory: 60.,
+            mortality_half_response: 0.25,
             source_drift: 1.,
             reservoir_repulsion: 5.,
             reservoir_range: 30.,
@@ -276,6 +283,8 @@ impl Config {
             ("transportEnergy", self.transport_energy),
             ("growthEnergy", self.growth_energy),
             ("sourceLifetime", self.source_lifetime),
+            ("mortalityMemory", self.mortality_memory),
+            ("mortalityHalfResponse", self.mortality_half_response),
             ("illuminationFastPeriod", self.illumination_fast_period),
             ("landscapeRegionSpacing", self.landscape_region_spacing),
             ("landscapeSpread", self.landscape_spread),

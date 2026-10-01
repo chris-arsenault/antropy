@@ -35,11 +35,13 @@ it("starts the larger default world at mesh 2 and advances with valid accounts",
     expect(config.landscapeRegionSpacing).toBeCloseTo(Math.sqrt((720 * 540) / 35));
     expect(config.terrain.featureWavelength).toBe(36);
     expect(config.sourceRadius).toBe(3);
-    expect(config.sourceRate).toBe(0.2);
+    expect(config.sourceRate).toBe(0.1);
+    expect(config.mortalityRecovery).toBe(true);
     world.step(4);
     const summary = world.command<Summary>("summary");
     expect(summary.tick).toBe(4);
     expect(summary.stopReason).toBeNull();
+    expect(summary.mortality?.enabled).toBe(true);
     validateAccounts(summary);
     const render = world.render();
     expect(render.field.buffer).toBe(render.cells.buffer);
@@ -55,7 +57,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(49);
+  expect(definition.version).toBe(50);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -71,7 +73,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v49 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v50 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });

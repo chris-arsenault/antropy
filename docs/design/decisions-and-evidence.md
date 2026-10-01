@@ -372,6 +372,28 @@ inside the work. Verification, observation, human-acceptance and visual-review s
 retired, not passed; historical measurements and missing experiments keep their meaning.
 Unselected optional features move to the [backlog](../backlog.md).
 
+## Mortality driven reservoir recycling
+
+October1 local v50 delivery ([contract](mortality-recycling.md),
+[findings](../mortality-recycling-results.md), [plan](../plans/MORTALITY-RECYCLING-PLAN.md)).
+An independent nominal allowance keeps scheduled imports unchanged when actual corpse chemistry
+enters the single source stock. One exact physical-time history subtracts funded growth from
+dead bound mass; the complete death batch uses a fixed quadratic response. Installed finite
+footprint overlap routes all species together, with no distant fallback, food selection,
+population target, reseeding or work grant. Explicit population interventions rebase history.
+
+The implementer selected tau60 model seconds from a45.5-second maintenance-only founder reserve
+and h_star0.25 as substantial recent net loss. These are fixed scales, not an ecological optimum.
+Mirrored finite-food assays showed higher growth but extinction71 ticks earlier with recovery.
+The initial decision disabled recovery because of that survival result. The user rejected this
+delivery standard: research directions need bounded non-breaking checks and a plausible path
+to their intended effect, not proof of long-term ecological success. Recovery is now enabled
+by default and sourceRate is reduced from0.2 to0.1, halving release and nominal stock, including
+startup stock and its priming allocation. SourceGap600 and the priming fraction remain installed.
+The conditional supply panel was not run, so a wider extinction boundary and evolved dispersal
+remain unmeasured. This negative result does not authorize chemistry changes or extra rate gains.
+The native/WASM/browser feature is delivered locally; the continuing server world is unchanged.
+
 ## Operational limits and remaining direction
 
 The prior React development timing leak was reproduced and repaired. One injected graphics

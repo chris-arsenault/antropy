@@ -114,6 +114,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
     w.ledger.flows.grown += built;
     w.ledger.flows.growth += heat;
     w.event("authored-founders", 0, ids.clone());
+    crate::mortality::rebase(w);
     Ok(json!({"genomes":ids,"grown":built,"growthHeat":heat}))
 }
 

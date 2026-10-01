@@ -15,6 +15,7 @@ export type Operation =
   | "step"
   | "pick"
   | "inspect"
+  | "inspectReservoir"
   | "task"
   | "strategyAblation"
   | "save"

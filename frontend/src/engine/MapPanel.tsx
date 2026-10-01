@@ -102,9 +102,10 @@ function MapLegend({
         chemistry, ancestry or state; it does not establish adaptation.
       </p>
       <p>
-        Source rings: bright with a center cross while releasing; dim and dashed while dormant.
-        Rings mark source size, not resource boundaries. White cell rims mark selection or a recent
-        birth; close-up crosses mark recent deaths.
+        Source rings: solid with stored material; dashed when physically empty. Violet inner rings
+        show recent recovery admissions; green center dots show measured recent release. Rings mark
+        source size, not resource boundaries. White cell rims mark selection or a recent birth;
+        close-up crosses mark recent deaths.
       </p>
     </div>
   );

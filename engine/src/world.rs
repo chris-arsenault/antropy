@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 49;
+pub const VERSION: u32 = 50;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -39,6 +39,9 @@ pub struct World {
     pub incident: crate::optics::Incident,
     pub cells: Vec<Cell>,
     pub sources: Vec<Source>,
+    pub mortality: crate::mortality::History,
+    #[serde(skip)]
+    pub(crate) recovery_recipients: crate::mortality_recovery::Recipients,
     pub patch_centers: Vec<[f64; 2]>,
     pub genomes: GenotypeStore,
     pub ancestry: Vec<Ancestor>,
@@ -166,6 +169,8 @@ impl World {
         let next_genome = genomes.len() as u64 + 1;
         let cover = Field::new(config.width, config.height, config.mesh);
         let mut world = Self {
+            mortality: crate::mortality::History::new(cells.iter().map(|c| c.mass()).sum()),
+            recovery_recipients: Default::default(),
             version: VERSION,
             seed,
             tick: 0,
@@ -295,6 +300,8 @@ impl World {
         stages[0] = now() - started;
         started = now();
         self.field_elapsed += self.config.dt;
+        self.mortality
+            .advance(self.config.dt, self.config.mortality_memory);
         let physiology = self.field_elapsed + 1e-12 >= self.config.physiology_interval;
         let mut sites = std::mem::take(&mut self.sites);
         self.footprints
@@ -370,6 +377,8 @@ impl World {
             let signals = crate::optics::prepare(self, &sites, self.field_elapsed);
             let lit = now();
             self.physiology(self.field_elapsed, &signals);
+            let grown = self.cells.iter().map(|c| c.flows.grown).sum();
+            self.mortality.grow(grown, self.config.mortality_memory);
             stages[9] = covered - started;
             stages[10] = lit - covered;
             stages[11] = now() - lit;
@@ -386,6 +395,7 @@ impl World {
         }
         self.tick += 1;
         crate::lifecycle::advance(self);
+        self.mortality.living = self.cells.iter().map(|c| c.mass()).sum();
         if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
             o.finish(self.tick);
         }
@@ -465,6 +475,7 @@ impl World {
     }
     pub fn release_cell(&mut self, cell: &Cell, cause: crate::ancestry::Cause) {
         crate::lifecycle::release(self, cell, cause);
+        crate::mortality::rebase(self);
     }
     pub fn snapshot(&self) -> Result<Vec<u8>, String> {
         postcard::to_extend(self, format!("ANTROPY{VERSION}\0").into_bytes())

@@ -33,10 +33,23 @@ it("steps through the scalar ABI without serialization and matches command stepp
 it("blocks bulk and harness exports in the browser engine while permitting reduced observations", async () => {
   const engine = await Engine.load(bytes, true),
     world = engine.create(101, compact);
-  for (const op of ["frame", "field", "inspect", "environment", "assayFrame", "step", "intervene"])
+  for (const op of [
+    "frame",
+    "field",
+    "inspect",
+    "environment",
+    "assayFrame",
+    "step",
+    "intervene",
+    "mortalityAssay",
+  ])
     expect(() => world.command(op)).toThrow("Data ownership contract");
   world.step();
   expect(world.command<Summary>("summary").population).toBe(2);
+  const before = world.snapshot();
+  const inspection = world.command("inspectReservoir", { source: 0 });
+  expect(JSON.stringify(inspection).length).toBeLessThan(1024);
+  expect(world.snapshot()).toEqual(before);
   expect(world.render().cells.buffer).toBe(world.render().field.buffer);
   const restored = engine.restore(world.snapshot());
   expect(restored.snapshot()).toEqual(world.snapshot());

@@ -160,7 +160,9 @@ impl Runtime {
                 self.query(op, payload)?;
                 self.queries.clear();
             }
-            "pick" | "inspectSelected" | "chemicalWeb" => return self.query(op, payload),
+            "pick" | "inspectSelected" | "inspectReservoir" | "chemicalWeb" => {
+                return self.query(op, payload);
+            }
             _ => return Err("Operation is not available on the server".into()),
         }
         Ok(Value::Null)

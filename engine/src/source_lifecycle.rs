@@ -15,13 +15,14 @@ impl Source {
         let mut remaining = std::mem::take(&mut self.pending);
         let total = remaining;
         if self.rate == 0. {
+            self.admission_pending = 0.;
             return;
         }
         while remaining > 0. {
-            if self.amount == 0. {
+            if self.allowance == 0. {
                 let waited = remaining.min(self.wait);
+                self.discharge(waited, outcome);
                 self.wait -= waited;
-                self.empty_elapsed += waited;
                 remaining -= waited;
                 if self.wait > 0. {
                     break;
@@ -38,45 +39,67 @@ impl Source {
                     (start[0] + delta[0] * elapsed / c.dt).rem_euclid(c.width),
                     (start[1] + delta[1] * elapsed / c.dt).rem_euclid(c.height),
                 ];
-                self.renew(step.tick + u64::from(elapsed >= c.dt), position, c);
-                self.empty_elapsed = 0.;
-                if self.amount == 0. {
+                let supplied = self.renew(
+                    step.tick + u64::from(elapsed >= c.dt),
+                    position,
+                    c,
+                    step.chemistry,
+                );
+                for (total, q) in outcome.supplied.iter_mut().zip(supplied) {
+                    *total += q;
+                }
+                if self.allowance == 0. {
                     break;
                 }
                 outcome.changed = true;
-                for (s, q) in self.inventory().enumerate() {
-                    outcome.supplied[0] += q;
-                    outcome.supplied[1] += q * step.chemistry.properties[s].potential;
-                }
             }
-            let exhausted = self.amount <= self.rate * remaining;
-            let duration = (self.amount / self.rate).min(remaining);
-            let q = if exhausted {
-                self.amount
+            let exhausted = self.allowance <= self.rate * remaining;
+            let duration = (self.allowance / self.rate).min(remaining);
+            self.discharge(duration, outcome);
+            self.allowance = if exhausted {
+                0.
             } else {
-                duration * self.rate
+                (self.allowance - duration * self.rate).max(0.)
             };
-            if q > 0. {
-                // Parcels retain composition if an epoch/zone refill changes it within this step.
-                if let Some((mix, quantity)) = outcome
-                    .parcels
-                    .last_mut()
-                    .filter(|(mix, _)| *mix == self.mixture)
-                {
-                    let _ = mix;
-                    *quantity += q;
-                } else {
-                    outcome.parcels.push((self.mixture.clone(), q));
-                }
-                self.amount = (self.amount - q).max(0.);
-                outcome.released += q;
-                outcome.changed = true;
-            }
             remaining = (remaining - duration).max(0.);
-            if self.amount == 0. {
-                self.empty_elapsed = 0.;
+            if self.allowance == 0. {
                 self.wait = -(1. - self.renewal_rng.unit()).ln() * step.config.source_gap;
             }
+        }
+    }
+
+    fn discharge(&mut self, duration: f64, outcome: &mut Outcome) {
+        let preceding = duration.min(self.admission_pending);
+        self.admission_pending -= preceding;
+        let duration = (duration - preceding).max(0.);
+        let exhausted = self.amount <= self.rate * duration;
+        let q = if exhausted {
+            self.amount
+        } else {
+            self.rate * duration
+        };
+        if q > 0. {
+            if let Some((_, quantity)) = outcome
+                .parcels
+                .last_mut()
+                .filter(|(mix, _)| *mix == self.mixture)
+            {
+                *quantity += q;
+            } else {
+                outcome.parcels.push((self.mixture.clone(), q));
+            }
+            self.amount = if exhausted {
+                0.
+            } else {
+                (self.amount - q).max(0.)
+            };
+            outcome.released += q;
+            outcome.changed = true;
+        }
+        if self.amount == 0. {
+            self.empty_elapsed += (duration - q / self.rate).max(0.);
+        } else {
+            self.empty_elapsed = 0.;
         }
     }
 }

@@ -19,6 +19,16 @@ control in physical v49. The running v48 server world is unchanged. The complete
 body capacities to 24. [Delivery evidence](../utterances-and-strategy-results.md) records
 bounded mechanics, cost calibration and reproduction. No language or dispersal policy is seeded.
 
+Physical v50 adds [mortality driven reservoir recycling](mortality-recycling.md).
+Its [execution plan](../plans/MORTALITY-RECYCLING-PLAN.md) covers independent reservoir refill
+timing, nonlinear recovery of actual dead body material and complete observable runtime
+integration. All three milestones are locally delivered. Recovery is enabled by default and
+sourceRate is reduced from0.2 to0.1. The [bounded feeding comparison](../mortality-recycling-results.md)
+demonstrated funded uptake and growth, but shortened survivor life in that fixture. This finding
+does not block delivery. Tau=60 model seconds and h_star=0.25 are installed; sourceGap remains600
+and the live world is unchanged. The earlier reservoir-storage
+proposal is not a dependency.
+
 <a id="design-actuator-feedback"></a>
 
 ## Actuator feedback and review corrections — September 30
@@ -234,36 +244,36 @@ changes improved it; this historical diagnosis is not the current work order.
 
 ## Design owners
 
-| Document | Owns |
-| --- | --- |
-| [Design directions](directions.md) | Registry of every design direction with its status, owning document and decision record |
-| [Computational foundation](chemistry/computational-foundation.md) | Governing mathematical design, composed manifold operations and cost-first selection |
-| [Transformation algebra white paper](chemistry/transformation-algebra.md) | Group-theoretic direction, finite-state constraints and evidence contract; selected v23 implementation tracked in the canonical plan |
-| [Digital chemistry](chemistry/README.md) | Chemical identity, funded machinery, implementation records and replacement decisions |
-| [Cellular organization](cellular-organization-and-exchange.md) | Implemented v33: retained-mixture response, activity regulation, variable enzyme programs and shared interfaces; construction sections superseded by v43; [delivery evidence](../cellular-organization-results.md) |
-| [Intracellular organization](intracellular-organization.md) | Historical strategic rationale for v33; internal compartments rejected |
-| [Cell interaction research](cell-interaction-research.md) | Historical September 19 mechanism inventory; recommendations superseded by v33 |
-| [Sparse spatial ecology](spatial-ecology.md) | Historical pre-chemistry world hypothesis, movement retuning, spatial populations and observation structure |
-| [Persistent geography](persistent-geography.md) | Implemented v46 static fractal terrain; changing terrain and live switches unselected |
-| [Local resource seasons](local-resource-seasons.md) | Implemented v46 local seasonal release/refill clocks |
-| [Regional execution](spatial-execution.md) | Current contract for persistent 8×8 regional ownership, private commits and shared carriers |
-| [Spatial isolation review](spatial-isolation-review.md) | Historical September 18 study; fixed basins rejected, directional climate unselected |
-| [Resource binding investigation](resource-binding-investigation.md), [proposal](resource-binding-proposal.md) | Historical September 19 record of shared-attraction binding, implemented v28 and modified in v32, v39 and v41 |
-| [World and lifecycle](bacteria.md) | Substrate, resources, turn order and persistence |
-| [Controller](controller.md) | Local sensors/actions, recurrence, private byte and controller boundary |
-| [Bodies and inheritance](funded-bodies.md) | Physical costs, genes and lifetime/inherited learning |
-| [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
-| [Composed runtime](chemistry/composed-runtime.md) | Current shared operators, illumination, material habitat laws and execution bounds |
-| [Light ecology](light-ecology.md) | Implemented v42: scalar illumination, geographic shade, overhead film, paid emission and shared optical accounting |
-| [Directional cell utterances](cell-utterances.md) | Local v49 delivery: paid bytes, coarse listener-relative bearing, funded inheritance and exactly-once hearing |
-| [Strategic controller](strategic-controller.md) | Local v49 delivery: slow learned history, local rhythms, contact display, inherited context and paid learning gain |
-| [Rugged chemical interaction](rugged-interaction.md) | Deferred research direction for surprising mutations and co-located roles; [Kauffman research paper](kauffman-landscapes-research.md) |
-| [Mortality recycling](mortality-recycling.md) | Open design direction: nonlinear recovery of dead body material aims to lower the extinction boundary while preserving external growth; not implemented |
-| [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
-| [Experimentation](experimentation.md) | Small proof points, diagnostic comparisons and limits of inference |
-| [Population observation](population-observation.md) | Families, traits, grouping conventions and retained history |
-| [Evidence](bacteria-results.md) | Recorded findings and version-specific limits |
-| [Display](bacterial-display.md) | Run defaults, visible meanings and observation limits |
+| Document                                                                                                      | Owns                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Design directions](directions.md)                                                                            | Registry of every design direction with its status, owning document and decision record                                                                                                                            |
+| [Computational foundation](chemistry/computational-foundation.md)                                             | Governing mathematical design, composed manifold operations and cost-first selection                                                                                                                               |
+| [Transformation algebra white paper](chemistry/transformation-algebra.md)                                     | Group-theoretic direction, finite-state constraints and evidence contract; selected v23 implementation tracked in the canonical plan                                                                               |
+| [Digital chemistry](chemistry/README.md)                                                                      | Chemical identity, funded machinery, implementation records and replacement decisions                                                                                                                              |
+| [Cellular organization](cellular-organization-and-exchange.md)                                                | Implemented v33: retained-mixture response, activity regulation, variable enzyme programs and shared interfaces; construction sections superseded by v43; [delivery evidence](../cellular-organization-results.md) |
+| [Intracellular organization](intracellular-organization.md)                                                   | Historical strategic rationale for v33; internal compartments rejected                                                                                                                                             |
+| [Cell interaction research](cell-interaction-research.md)                                                     | Historical September 19 mechanism inventory; recommendations superseded by v33                                                                                                                                     |
+| [Sparse spatial ecology](spatial-ecology.md)                                                                  | Historical pre-chemistry world hypothesis, movement retuning, spatial populations and observation structure                                                                                                        |
+| [Persistent geography](persistent-geography.md)                                                               | Implemented v46 static fractal terrain; changing terrain and live switches unselected                                                                                                                              |
+| [Local resource seasons](local-resource-seasons.md)                                                           | Implemented v46 local seasonal release/refill clocks                                                                                                                                                               |
+| [Regional execution](spatial-execution.md)                                                                    | Current contract for persistent 8×8 regional ownership, private commits and shared carriers                                                                                                                        |
+| [Spatial isolation review](spatial-isolation-review.md)                                                       | Historical September 18 study; fixed basins rejected, directional climate unselected                                                                                                                               |
+| [Resource binding investigation](resource-binding-investigation.md), [proposal](resource-binding-proposal.md) | Historical September 19 record of shared-attraction binding, implemented v28 and modified in v32, v39 and v41                                                                                                      |
+| [World and lifecycle](bacteria.md)                                                                            | Substrate, resources, turn order and persistence                                                                                                                                                                   |
+| [Controller](controller.md)                                                                                   | Local sensors/actions, recurrence, private byte and controller boundary                                                                                                                                            |
+| [Bodies and inheritance](funded-bodies.md)                                                                    | Physical costs, genes and lifetime/inherited learning                                                                                                                                                              |
+| [Strategic ecology](strategic-ecology.md)                                                                     | Mechanisms, ecological hypotheses and active/disabled settings                                                                                                                                                     |
+| [Composed runtime](chemistry/composed-runtime.md)                                                             | Current shared operators, illumination, material habitat laws and execution bounds                                                                                                                                 |
+| [Light ecology](light-ecology.md)                                                                             | Implemented v42: scalar illumination, geographic shade, overhead film, paid emission and shared optical accounting                                                                                                 |
+| [Directional cell utterances](cell-utterances.md)                                                             | Local v49 delivery: paid bytes, coarse listener-relative bearing, funded inheritance and exactly-once hearing                                                                                                      |
+| [Strategic controller](strategic-controller.md)                                                               | Local v49 delivery: slow learned history, local rhythms, contact display, inherited context and paid learning gain                                                                                                 |
+| [Rugged chemical interaction](rugged-interaction.md)                                                          | Deferred research direction for surprising mutations and co-located roles; [Kauffman research paper](kauffman-landscapes-research.md)                                                                              |
+| [Mortality recycling](mortality-recycling.md) | Local v50 delivery, enabled by default with sourceRate0.1; [findings](../mortality-recycling-results.md) |
+| [Material habitats](../material-habitats.md)                                                                  | Two-scale binding, retention, renewal, public chemistry and bounded evidence                                                                                                                                       |
+| [Experimentation](experimentation.md)                                                                         | Small proof points, diagnostic comparisons and limits of inference                                                                                                                                                 |
+| [Population observation](population-observation.md)                                                           | Families, traits, grouping conventions and retained history                                                                                                                                                        |
+| [Evidence](bacteria-results.md)                                                                               | Recorded findings and version-specific limits                                                                                                                                                                      |
+| [Display](bacterial-display.md)                                                                               | Run defaults, visible meanings and observation limits                                                                                                                                                              |
 
 [Principles](../principles.md) govern decisions. [Architecture](../architecture.md) maps owners;
 [calibration](../calibration.md) records scales; [backlog](../backlog.md) owns unresolved work.
@@ -289,13 +299,14 @@ body capacities directly at current biomass, including four chemical receptors, 
 one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v49; the outer observation package remains v11. Local delivery rejects older
+checkpoints use v50; the outer observation package remains v11. Local delivery rejects older
 physical formats without migration; the existing live server remains v48 until a separately
 authorized deployment and new-world cutover.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
-the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping
-resource density comparable instead of stretching seven neighborhoods across the larger map.
+the preceding counts. The area expansion retained local spread and reservoir sizes rather than
+stretching seven neighborhoods across the larger map. V50 now halves default per-site release
+from0.2 to0.1 with mortality recovery enabled.
 Reproduction has no population-count or historical-record ceiling. History retains living cells
 and bounded recent ended records; old parentage expires without pausing. Recoverable save failures
 warn while stepping continues. Current bodies, capabilities and behavior describe diversity;
@@ -365,14 +376,14 @@ Current operational and ecological limits remain explicit in [continuing observa
 The September 11 roadmap used prescribed coexistence gates. That work order is superseded by the
 purpose above; its studies remain evidence for particular configurations:
 
-| Work | Retained finding | Limit |
-| --- | --- | --- |
-| Kernel and stats performance | Faster headless execution and less frequent UI statistics | Pre-chemistry measurement; not a current throughput figure |
-| Toxin immunity/contact injury | Damage and protection can change payoffs in constructed contests | No required producer/resistant/sensitive cycle; persistence was overstated |
-| A/B regions | Constructed diet choices respond differently to food layout | An authored regional opportunity, not a target species count |
-| Thick medium and evolution | Slower dispersal supports residency; recorded diet differences correlate with region | Several world parameters changed together; no isolated attribution of the whole result to viscosity |
-| Trait grouping and contests | Saved genotypes can be compared and distributions viewed | Chosen k-means groups are not evidence of distinct strategies |
-| Behavioral mutation experiment | More variation alone did not produce the proposed split in the older world | No instruction to continue tuning until it does |
+| Work                           | Retained finding                                                                     | Limit                                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Kernel and stats performance   | Faster headless execution and less frequent UI statistics                            | Pre-chemistry measurement; not a current throughput figure                                          |
+| Toxin immunity/contact injury  | Damage and protection can change payoffs in constructed contests                     | No required producer/resistant/sensitive cycle; persistence was overstated                          |
+| A/B regions                    | Constructed diet choices respond differently to food layout                          | An authored regional opportunity, not a target species count                                        |
+| Thick medium and evolution     | Slower dispersal supports residency; recorded diet differences correlate with region | Several world parameters changed together; no isolated attribution of the whole result to viscosity |
+| Trait grouping and contests    | Saved genotypes can be compared and distributions viewed                             | Chosen k-means groups are not evidence of distinct strategies                                       |
+| Behavioral mutation experiment | More variation alone did not produce the proposed split in the older world           | No instruction to continue tuning until it does                                                     |
 
 See the [toxin](../rps-study.md), [zone](../zones-study.md) and [evolution](../evolve-study.md)
 records. The former 20-generation invasion and 200-generation persistence requirements were not
@@ -387,15 +398,15 @@ The seven mechanisms are candidates for world design, not seven mandatory stages
 Their saved results are corrected in the [audit](../analysis-correction.md). Mixed deposits have
 spatially varying positions and compositions; the experiments were not spatially uniform worlds.
 
-| Mechanism | Opportunity to consider | What the studies leave open |
-| --- | --- | --- |
-| [Element cycle](../cycle-study.md) | Light versus organic food acquisition; organisms change local gases | Most evolve mixotrophy; the reported harvester/consumer coexistence is unsupported and used since-removed costs |
-| [Typed toxin](../family-study.md) | Chemical compatibility changes the costs of neighboring producers | Tint did not split into separate modes; kin cooperation was not established |
-| [Predation](../predation-study.md) | Material from damaged neighbors can repay toxin investment | Two endpoint pairs gained share both ways; active hunting and persistent prey roles were not shown |
-| [Disturbance](../disturbance-study.md) | Open space could favor recolonization in some circumstances | Mortality occurs; a colonizer/holder tradeoff was not shown |
-| [Gene transfer](../transfer-study.md) | Physical traits can spread through contact as well as descent | Ancestry-group counts cannot show persistence of unchanged strategies; no pair gained share both ways. Living-cell transfer was removed September 22 |
-| [Reserve sharing](../sharing-study.md) | Transfers could change the value of gathering and contact | Food moves, but no adhesion or division of labor was demonstrated |
-| [Neutral signal](../signal-study.md) | Local chemical information could support conditional behavior | Secretion stayed low; communication and the cause of its absence are unresolved |
+| Mechanism                              | Opportunity to consider                                             | What the studies leave open                                                                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Element cycle](../cycle-study.md)     | Light versus organic food acquisition; organisms change local gases | Most evolve mixotrophy; the reported harvester/consumer coexistence is unsupported and used since-removed costs                                      |
+| [Typed toxin](../family-study.md)      | Chemical compatibility changes the costs of neighboring producers   | Tint did not split into separate modes; kin cooperation was not established                                                                          |
+| [Predation](../predation-study.md)     | Material from damaged neighbors can repay toxin investment          | Two endpoint pairs gained share both ways; active hunting and persistent prey roles were not shown                                                   |
+| [Disturbance](../disturbance-study.md) | Open space could favor recolonization in some circumstances         | Mortality occurs; a colonizer/holder tradeoff was not shown                                                                                          |
+| [Gene transfer](../transfer-study.md)  | Physical traits can spread through contact as well as descent       | Ancestry-group counts cannot show persistence of unchanged strategies; no pair gained share both ways. Living-cell transfer was removed September 22 |
+| [Reserve sharing](../sharing-study.md) | Transfers could change the value of gathering and contact           | Food moves, but no adhesion or division of labor was demonstrated                                                                                    |
+| [Neutral signal](../signal-study.md)   | Local chemical information could support conditional behavior       | Secretion stayed low; communication and the cause of its absence are unresolved                                                                      |
 
 Small tests should address the missing physical or behavioral link when that link matters to a
 configuration choice. A hypothesis that fails on its named mechanism stays negative even if another

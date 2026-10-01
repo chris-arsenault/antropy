@@ -50,6 +50,18 @@ mechanism checks, performance checks and deployment checks as part of doing the 
 asking the user to run them or approve routine results. Substantial bounded checks are still
 the implementer's responsibility; record their detail in test/results documents, not plan stages.
 
+Keep verification proportionate to the change and the decision it can affect. Research-direction
+delivery requires a working implementation, bounded checks that it does not break the runtime,
+and a plausible path to its intended effect. Do not require proof of long-term ecological success,
+exhaustive parameter sweeps or repeated campaigns before declaring the work complete and ready
+to push. Once appropriate checks pass, stop adding proof obligations unless a concrete defect or
+contradictory result needs resolution. Report the implementation status and any actual blocker plainly.
+
+Preserve negative findings without making one unsuccessful fixture an automatic disablement rule.
+Requested features must be enabled in ordinary startup; a diagnostic ablation is not a substitute
+for active delivery. For documentation-only changes, check the changed text and links rather than
+rerunning runtime suites, production builds or ecological panels.
+
 Close each plan and its children when the scoped implementation and authorized deployment are
 finished. Never leave a delivered plan open solely for visual review, the user's acknowledgment,
 more measurements, or a long-running world. Retire obsolete review phases as skipped with a
@@ -104,21 +116,21 @@ and let runtime consumers sample it; this exception does not change physical wor
 
 ## Read first
 
-| Topic                  | Link                                                                             |
-| ---------------------- | -------------------------------------------------------------------------------- |
-| Project primer         | [White paper](docs/white-paper.md), [outcomes and directions](docs/outcomes-and-directions.md) |
-| Governing principles   | [docs/principles.md](docs/principles.md)                                         |
-| Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
-| Live-world and research-direction reviews | [Ecology review guide](docs/ecology-review-guide.md) — read before every review |
-| Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
-| Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
-| Dated measurements | [Light ecology checks (v42)](docs/light-ecology-results.md), [cellular delivery (v33)](docs/cellular-organization-results.md), [habitat evidence (v32)](docs/material-habitats.md), [runtime investigation (v32)](docs/session-runtime-review.md), [September 28 performance pass](docs/plans/archive/SCALING-PLAN.md#september-28-continuing-world-performance-pass) |
-| Historical ant certification | [docs/certifications.md](docs/certifications.md) |
-| Documentation index    | [docs/README.md](docs/README.md)                                                 |
-| Source archive         | [docs/sources/README.md](docs/sources/README.md)                                 |
-| Architecture decisions | [docs/adr/README.md](docs/adr/README.md)                                         |
-| Platform integration   | [../ahara/INTEGRATION.md](../ahara/INTEGRATION.md)                               |
-| Ahara standards        | [../ahara-standards/standards/README.md](../ahara-standards/standards/README.md) |
+| Topic                                     | Link                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project primer                            | [White paper](docs/white-paper.md), [outcomes and directions](docs/outcomes-and-directions.md)                                                                                                                                                                                                                                                                        |
+| Governing principles                      | [docs/principles.md](docs/principles.md)                                                                                                                                                                                                                                                                                                                              |
+| Current work order                        | [docs/design/README.md](docs/design/README.md)                                                                                                                                                                                                                                                                                                                        |
+| Live-world and research-direction reviews | [Ecology review guide](docs/ecology-review-guide.md) — read before every review                                                                                                                                                                                                                                                                                       |
+| Current runtime contract                  | [docs/design/bacteria.md](docs/design/bacteria.md)                                                                                                                                                                                                                                                                                                                    |
+| Current evolutionary contract             | [docs/design/funded-bodies.md](docs/design/funded-bodies.md)                                                                                                                                                                                                                                                                                                          |
+| Dated measurements                        | [Light ecology checks (v42)](docs/light-ecology-results.md), [cellular delivery (v33)](docs/cellular-organization-results.md), [habitat evidence (v32)](docs/material-habitats.md), [runtime investigation (v32)](docs/session-runtime-review.md), [September 28 performance pass](docs/plans/archive/SCALING-PLAN.md#september-28-continuing-world-performance-pass) |
+| Historical ant certification              | [docs/certifications.md](docs/certifications.md)                                                                                                                                                                                                                                                                                                                      |
+| Documentation index                       | [docs/README.md](docs/README.md)                                                                                                                                                                                                                                                                                                                                      |
+| Source archive                            | [docs/sources/README.md](docs/sources/README.md)                                                                                                                                                                                                                                                                                                                      |
+| Architecture decisions                    | [docs/adr/README.md](docs/adr/README.md)                                                                                                                                                                                                                                                                                                                              |
+| Platform integration                      | [../ahara/INTEGRATION.md](../ahara/INTEGRATION.md)                                                                                                                                                                                                                                                                                                                    |
+| Ahara standards                           | [../ahara-standards/standards/README.md](../ahara-standards/standards/README.md)                                                                                                                                                                                                                                                                                      |
 
 ## Current goal and runtime boundary
 
@@ -135,7 +147,7 @@ population exchange (cross-pollination) and new colony founding over time. Unive
 confinement and absent exchange or founding are concerns; a near/far snapshot cannot establish
 them. Report insufficient temporal coverage as unmeasured, not absent.
 
-The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v49 uses one
+The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v50 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
@@ -168,7 +180,12 @@ V49 adds funded mouths/ears, once-only directional byte impulses and a 61×8×5 
 on an eight-physiology-interval clock. It reads own history, present local rhythms and contact
 displays; held context and paid learning gain affect only the reflex layer. Strategic memory
 copies at birth; newborn reflex memory, private byte and pending hearing reset. No language,
-signaling reward or dispersal policy is seeded. The live server remains v48 until a separately
+signaling reward or dispersal policy is seeded. V50 adds mortality-driven local reservoir
+recovery, independent nominal refill allowance and conservative retained-stock mixing. Recovery
+is enabled by default with sourceRate=0.1, reduced from0.2. Tau=60 model seconds,
+h_star=0.25 and sourceGap600 remain fixed. Bound-body chemistry alone can recover; free inventory
+spills and no additional work is credited. See [mortality findings](docs/mortality-recycling-results.md).
+The live server remains v48 until a separately
 authorized cutover. See [delivery evidence](docs/utterances-and-strategy-results.md).
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
@@ -389,7 +406,8 @@ expensive ecological panels merely for formatting or documentation changes.
   long-horizon results belong in ignored `frontend/harness/artifacts/ledger.db` and local artifacts.
 - Use Rust/WASM, pnpm, TypeScript, React, worker WebGL2, Rust tests and Vitest. ESLint limits complexity to 10, files to 400
   lines, and functions to 75 lines.
-- Run `make ci` before handoff after changing files. Start a development server only when the user
+- Run `make ci` before handoff after code or build-configuration changes. For documentation-only
+  changes, check the changed text and links. Start a development server only when the user
   explicitly asks.
 - Browser persistence is client-side through IndexedDB and file export. The native server's
   volume checkpoints and its public route are the only server-side exceptions. Do not add a
@@ -399,28 +417,28 @@ expensive ecological panels merely for formatting or documentation changes.
 
 ## Code map
 
-| Path                        | Purpose                                                               |
-| --------------------------- | --------------------------------------------------------------------- |
-| `engine/src/` | Sole Rust kernel: bodies, fields, local RNN, resource economy, inheritance and binary state |
-| `frontend/src/engine/` | WASM client, worker, WebGL2, React observation and recovery |
-| `frontend/src/persist/`, `frontend/src/ui/pacing.ts` | Local identity, retention policy and bounded pacing only |
-| `frontend/harness/`         | Experiment tooling; ignored `artifacts/` owns the local ledger and data |
-| `infrastructure/terraform/` | Static website deployment                                             |
-| `docs/`                     | Current design, evidence, decisions, and archived source material     |
+| Path                                                 | Purpose                                                                                     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `engine/src/`                                        | Sole Rust kernel: bodies, fields, local RNN, resource economy, inheritance and binary state |
+| `frontend/src/engine/`                               | WASM client, worker, WebGL2, React observation and recovery                                 |
+| `frontend/src/persist/`, `frontend/src/ui/pacing.ts` | Local identity, retention policy and bounded pacing only                                    |
+| `frontend/harness/`                                  | Experiment tooling; ignored `artifacts/` owns the local ledger and data                     |
+| `infrastructure/terraform/`                          | Static website deployment                                                                   |
+| `docs/`                                              | Current design, evidence, decisions, and archived source material                           |
 
 ## Commands
 
-| Command                                          | Purpose                                                                  |
-| ------------------------------------------------ | ------------------------------------------------------------------------ |
-| `make ci`                                        | Lint, format check, typecheck, bounded tests, docs, and Terraform format |
-| `make build`                                     | Production SPA build                                                     |
-| `cd frontend && pnpm harness bacteria` | Run live bacterial ecology and save evidence |
-| `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id` | Assess ancestor/descendant competition |
-| `cd frontend && pnpm harness bacteria-capacity` | Fixed 48/2000/2000-growth loads with census, inspection and render preparation |
-| `cd frontend && pnpm harness rps --case pairwise` | Constructed chemical production/compatibility contests |
-| `cd frontend && pnpm harness zones --case three-way --shares 1,0` | Constructed diet-specialist/generalist contests (genetic capacity split between two source mixtures) in zoned or mixed worlds |
-| `cd frontend && pnpm harness evolve --world zones --seed 101 --justification REGISTRATION` | De novo evolution with trait samples and checkpoints |
-| `cd frontend && pnpm harness invasion --checkpoint path` | Rare-start comparisons of descriptive current-checkpoint clusters |
-| `cd frontend && pnpm harness recent`             | Read recent ledger rows                                                  |
-| `cd frontend && pnpm harness sql "..."`          | Query the measurement ledger                                             |
-| `cd frontend && pnpm run dev`                    | Local server, only when explicitly requested                             |
+| Command                                                                                    | Purpose                                                                                                                       |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `make ci`                                                                                  | Lint, format check, typecheck, bounded tests, docs, and Terraform format                                                      |
+| `make build`                                                                               | Production SPA build                                                                                                          |
+| `cd frontend && pnpm harness bacteria`                                                     | Run live bacterial ecology and save evidence                                                                                  |
+| `cd frontend && pnpm harness bacteria-compare --checkpoint path --candidate id`            | Assess ancestor/descendant competition                                                                                        |
+| `cd frontend && pnpm harness bacteria-capacity`                                            | Fixed 48/2000/2000-growth loads with census, inspection and render preparation                                                |
+| `cd frontend && pnpm harness rps --case pairwise`                                          | Constructed chemical production/compatibility contests                                                                        |
+| `cd frontend && pnpm harness zones --case three-way --shares 1,0`                          | Constructed diet-specialist/generalist contests (genetic capacity split between two source mixtures) in zoned or mixed worlds |
+| `cd frontend && pnpm harness evolve --world zones --seed 101 --justification REGISTRATION` | De novo evolution with trait samples and checkpoints                                                                          |
+| `cd frontend && pnpm harness invasion --checkpoint path`                                   | Rare-start comparisons of descriptive current-checkpoint clusters                                                             |
+| `cd frontend && pnpm harness recent`                                                       | Read recent ledger rows                                                                                                       |
+| `cd frontend && pnpm harness sql "..."`                                                    | Query the measurement ledger                                                                                                  |
+| `cd frontend && pnpm run dev`                                                              | Local server, only when explicitly requested                                                                                  |

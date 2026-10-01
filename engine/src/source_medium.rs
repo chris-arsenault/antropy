@@ -106,7 +106,7 @@ pub fn project(w: &mut World) {
         .prepare(w.seed, w.tick, &w.config, w.field.nx, w.field.ny);
 }
 
-fn project_current(w: &mut World) {
+pub(crate) fn project_current(w: &mut World) {
     let area = w.field.spacing.powi(2);
     let current = w
         .sources

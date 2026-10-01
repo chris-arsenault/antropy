@@ -89,6 +89,7 @@ pub fn replace(w: &mut World, v: &Value) -> Result<Value, String> {
         w.genomes.insert(g.id, g);
     }
     w.event("counterfactual", r.lineage, vec![]);
+    crate::mortality::rebase(w);
     Ok(json!({}))
 }
 #[derive(Deserialize)]
@@ -99,6 +100,8 @@ struct Supply {
     radius: f64,
     rate: f64,
     duration: f64,
+    /// Explicit waiting-source assay condition, with no initial grant.
+    wait: Option<f64>,
 }
 pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
     let s: Supply = serde_json::from_value(v.get("source").cloned().ok_or("Missing source")?)
@@ -111,10 +114,16 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         || s.radius <= 0.
         || s.duration <= 0.
         || s.duration * s.rate > 1e9
+        || s.wait.is_some_and(|t| !t.is_finite() || t < 0.)
         || w.sources.len() >= 10000
     {
         return Err("Invalid scheduled source".into());
     }
+    let amount = if s.wait.is_some() {
+        0.
+    } else {
+        s.duration * s.rate
+    };
     let mut source = Source {
         habitat: Habitat {
             x: s.x,
@@ -123,8 +132,12 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
             richness: 1.,
             share: 0.5,
         },
-        amount: s.duration * s.rate,
-        wait: 0.,
+        amount,
+        allowance: amount,
+        recent_recovery: 0.,
+        recent_output: 0.,
+        total_released: 0.,
+        wait: s.wait.unwrap_or(0.),
         empty_elapsed: 0.,
         rate: s.rate,
         mixture: vec![0.; 256],
@@ -133,10 +146,11 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         material: Default::default(),
         interface: 0.,
         pending: 0.,
+        admission_pending: 0.,
         renewal_rng: crate::random::Random::new(w.environment_rng.next_u64()),
     };
     for &id in &w.config.source_species {
-        let q = s.duration * s.rate / w.config.source_species.len() as f64;
+        let q = amount / w.config.source_species.len() as f64;
         source.mixture[id] += 1. / w.config.source_species.len() as f64;
         w.ledger.supplied += q;
         w.ledger.supplied_energy += q * w.chemistry.properties[id].potential;

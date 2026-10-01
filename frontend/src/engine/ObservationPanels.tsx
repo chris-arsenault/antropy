@@ -10,6 +10,7 @@ import { Settings } from "./Settings";
 import { StatsPanel } from "./StatsPanel";
 import { ChemicalWebPanel } from "./ChemicalWebPanel";
 import { PhenotypePanel } from "./PhenotypePanel";
+import { RecoveryPanel } from "./RecoveryPanel";
 
 interface Props {
   bridge: Bridge;
@@ -95,7 +96,7 @@ function PanelContent({
         />
       );
     case "population":
-      return <StatsPanel status={status} definition={definition} />;
+      return <PopulationPanel view={view} bridge={bridge} error={error} />;
     case "lineage":
       return <GenealogyPanel status={status} bridge={bridge} error={error} onInspect={inspect} />;
     case "cell":
@@ -110,6 +111,25 @@ function PanelContent({
     default:
       return null;
   }
+}
+
+function PopulationPanel({ view, bridge, error }: Pick<Props, "view" | "bridge" | "error">) {
+  const { status, definition } = view;
+  if (!status || !definition) return null;
+  return (
+    <>
+      <StatsPanel status={status} definition={definition} />
+      {status.summary.mortality && (
+        <RecoveryPanel
+          key={definition.seed + JSON.stringify(definition.config)}
+          recovery={status.summary.mortality}
+          count={definition.sources.length}
+          bridge={bridge}
+          error={error}
+        />
+      )}
+    </>
+  );
 }
 
 function SavePanel({ view, bridge }: Pick<Props, "view" | "bridge">) {

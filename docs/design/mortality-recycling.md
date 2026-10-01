@@ -1,6 +1,10 @@
 # Mortality driven reservoir recycling
 
-**Status:** Open design direction — agreed for documentation October 1, 2026; not implemented.
+**Status:** Implemented locally (v50), October 1, 2026; enabled by default with sourceRate0.1. Live server unchanged.
+
+The [execution plan](../plans/MORTALITY-RECYCLING-PLAN.md) records the implementation
+milestones and source owners. [Delivery findings](../mortality-recycling-results.md) record the
+chosen scales, conservative transfer checks and negative survival result.
 
 Lower the baseline resource supply at which the world can persist by returning a nonlinear
 fraction of dead body material to nearby reservoirs during substantial die-offs. Ordinary
@@ -9,9 +13,9 @@ Normal external replenishment continues. There is no fixed world biomass, target
 population ceiling or automatic resurrection.
 
 The purpose is to widen the useful replenishment range while retaining growth, evolution,
-persistent colonies and opportunities for dispersal. This document records the selected design
-direction, a candidate mathematical realization and the remaining implementation choices.
-It does not change the installed [composed laws](chemistry/composed-runtime.md).
+persistent colonies and opportunities for dispersal. The installed mechanism conserves and
+delivers material, but the bounded survivor comparison did not improve survival. The
+[composed laws](chemistry/composed-runtime.md) include this optional feedback.
 
 ## The problem and intended feedback
 
@@ -38,18 +42,18 @@ is an accepted tradeoff. Permanently subsidizing that colony through ordinary tu
 the intended behavior. This mechanism does not claim to raise the upper boundary or guarantee
 an evolved mixture of stationary and mobile strategies.
 
-## What changes from the current implementation
+## Installed lifecycle changes
 
-[Lifecycle release](../../engine/src/lifecycle.rs) currently deposits every chemical in a dead
-cell's bound body and free internal inventory into its local field footprint. Remaining usable
-energy becomes heat. Material is already conserved; it may be consumed, transported or lost
-through ordinary washout. Fission endings are separate from actual deaths.
+[Lifecycle release](../../engine/src/lifecycle.rs) deposits free internal inventory and
+unrecovered bound-body chemicals into the local field footprint. Remaining usable energy
+becomes heat. Fission endings are separate from actual deaths.
 
 [Reservoir lifecycle](../../engine/src/source_lifecycle.rs) currently drains a finite batch at
-the site's rate, waits after exhaustion, then imports a new batch. The source owns one chemical
-composition and one physical amount. The same amount currently also determines cycle transitions.
+the site's rate and imports batches on an independent nominal exhaustion/wait clock. The
+source owns one chemical composition and one physical amount. A separate scalar allowance
+determines cycle transitions without owning material.
 
-The proposed change redirects part of the dead body's existing mixture into local reservoir
+When enabled, recovery redirects part of the dead body's existing mixture into local reservoir
 inventory. Free internal inventory and unrecovered body material still enter the field. The
 body/inventory distinction already exists; it needs no new independently tuned split ratio.
 Recovered stock can supply a reservoir during its ordinary empty wait. Subsequent delivery
@@ -62,7 +66,7 @@ without creating body material. Use bound-body mass for the severity signal and 
 Every actual death contributes, independent of cause, genotype or lineage; division contributes
 nothing. No claim is made that food can remedy every cause of death.
 
-The candidate severity estimator uses one physical-time memory tau. Maintain exponentially
+The severity estimator uses one physical-time memory tau. Maintain exponentially
 weighted rates of dead body material d and funded body growth g, together with recent living
 body mass b. Rates have units material/time; b has units material. With event measures D and G:
 
@@ -76,12 +80,14 @@ f(h) = h² / (h² + h_star²)
 ```
 
 B is actual living bound biomass. Death and growth are event measures: in an interval dt,
-rates use the actual transferred amounts divided by dt, or equivalent exponential event
-updates. Use exact decay for held values. Initialize b to the founding biomass and d=g=0;
+rates decay exactly at the start of each physical interval. The joined physiology reduction
+adds actual funded growth divided by tau; the combined natural/disturbance death batch adds
+actual dead body material divided by tau after the tick advances. Living biomass is held from
+the preceding physical boundary through the interval. Initialize b to founding biomass and d=g=0;
 founder creation is not growth. There is no sensitivity to render frequency or observer sampling.
 
 Subtracting funded growth distinguishes loss of living material from healthy replacement
-turnover. It is the proposed refinement of the conversation's mortality-fraction signal, not
+turnover. It refines the original mortality-fraction signal, without
 a second population target or a separate controller. A high death rate balanced by growth
 does not activate substantial recycling under this definition. The tradeoff is that growth
 elsewhere can mask a failing colony; the first design targets widespread decline, not every
@@ -107,8 +113,13 @@ without coupling the response back to the parameter being made less sensitive. S
 initial scales from ordinary turnover and survivor reserve duration, and retain them across
 supply comparisons. A new narrow tuning window in either control would undermine the goal.
 An enable switch in world configuration should restore the ordinary death path when disabled;
-initialize the history at world creation or an explicit diagnostic intervention. This proposal
-does not add live physical settings controls. No numerical defaults are selected here.
+initialize the history at world creation or an explicit diagnostic intervention. There are no
+live physical settings controls. Installed defaults are tau=60 model seconds and h_star=0.25;
+recovery is enabled by default in both presets. Founder maintenance-only reserves are about
+45.5 seconds. The fixed scales have no claimed ecological optimum; balanced turnover cancels
+algebraically, while short checks test substantial loss. SourceRate is reduced from0.2 to0.1;
+sourceGap remains600. This halves the release ceiling and nominal stock, including initial
+stock and its priming allocation. The priming fraction remains0.1.
 
 ## Conservative local material transfer
 
@@ -126,9 +137,11 @@ reservoir j receives a_j * c
 local field receives i + m - sum_j(a_j * c)
 ```
 
-This guarantees componentwise conservation. Reuse existing footprints and local source lookup;
-the precise geometric overlap implementation must be checked against those owners before code
-is written. Do not introduce a new catchment radius or persistent map of corpse provenance.
+This guarantees componentwise conservation. Routing uses the dot product of the existing
+finite body and source footprints, `sum_node(cell_weight * source_weight)`. A derived node
+membership index identifies local sources; duplicate recipients aggregate before normalization.
+The index rebuilds from current footprints when a death batch needs it and after restore.
+There is no new catchment radius or persistent map of corpse provenance.
 The local capture rule is a proposed coarse model of material recovery, not resolved fluid
 transport. A distant death cannot trigger teleportation of its body to an occupied colony.
 
@@ -149,9 +162,8 @@ still becomes heat. There is no biochemical resurrection or machinery reconstruc
 
 ## Preserve normal replenishment while admitting recovered stock
 
-Adding material to the current amount alone is insufficient. It would delay exhaustion and
-therefore delay the next external refill. The current refill also assigns a new amount instead
-of adding to a nonempty inventory. Both behaviors must be addressed in an implementation.
+Before v50, adding material to the physical amount would delay exhaustion and the next import;
+refill overwrote inventory. V50 separates these operations and admits imports conservatively.
 
 Keep the ordinary batch and wait schedule advancing independently of recovered stock, in the
 existing seasonal supply time. When its normal refill event arrives, import the ordinary batch
@@ -175,7 +187,8 @@ For normal source composition policy, a fresh batch uses the current evolving co
 For optional zones/epochs, the existing policy supplies the incoming batch's profile. Mix that
 batch into retained stock rather than resetting the retained chemicals at a boundary. This is
 a necessary conservation correction once nonempty sources can receive scheduled imports.
-Initial priming and ordinary startup amounts remain unchanged.
+Initial amounts follow the same `rate*duration*(0.5+U)` law and priming fraction0.1.
+The new default rate0.1 halves both initial stock and its priming allocation.
 
 ## Accounts and runtime ownership
 
@@ -194,14 +207,18 @@ The Rust World owns the mortality history, routing and commits. The world-wide s
 is an explicit environmental feedback rule, not a local cue supplied to controllers and not an
 observation panel controlling physics. Reservoir recipients remain local. Reuse spatial regions,
 frozen reads and per-source aggregate commits; avoid a cells-times-reservoirs scan. Persist the
-small history and lifecycle-clock state with a physical format revision if implemented. Do not
+small history and lifecycle-clock state in physical format v50. Older formats are rejected. Do not
 add checkpoint migration, a backend or full-state exports to React. The
 [data ownership contract](chemistry/data-ownership.md) remains unchanged.
 
-Bounded observations should distinguish dead body material, recovered material, local spill,
+Bounded observations distinguish dead body material, recovered material, local spill,
 severity, response fraction and actual reservoir output. Recovery is not external supply and
 an admitted deposit is not yet feeding a survivor. Integrate any recovery cue into existing
-reservoir display marks and inspection; preserve the layer selector and normal default view.
+reservoir display marks and inspection. A violet inner ring reports recent admissions and a
+green center reports measured recent release, while solid/dashed stock and seasonal bands
+retain their meanings. Population details expose scalars and an explicit selected-reservoir
+read; no full state crosses to React. Mortality counters rebase with population interventions;
+source release totals retain their lifetime meaning.
 
 ## Competing priorities and decision changing questions
 
@@ -223,14 +240,14 @@ Important uncertainties remain:
 - A response that starts after all useful survivors are lost cannot prevent extinction. An
   empty world remains empty; increased reservoir stock does not authorize reseeding.
 
-During implementation, use bounded cases with matched startup state to compare ordinary spill
-and recovery under ordinary turnover and a finite die-off. Include deaths beside empty, waiting,
-full and absent reservoirs; check simultaneous mixing and unchanged scheduled external input.
-Then compare a small declared range of baseline supply with fixed feedback settings. Measure
-survivor feeding and recovery as well as stationary/diffuse behavior in healthy periods. Do not
-equate a larger final population with a wider useful range or expand runs to find a desired result.
-These are implementer-owned questions, not user-acceptance phases or prerequisites for closing
-the documentation task. Continuing ecological observation informs subsequent refinement.
+The registered matched-startup probes and mirrored survivor comparisons are complete.
+Recovery delivered actual chemistry and increased growth, but the survivor died earlier in
+both placements. The conditional lower-supply campaign was not run. The user's delivery
+clarification requires bounded correctness and a plausible intended effect, rather than proof
+of a wider extinction boundary. Actual recovered chemistry, paid uptake and funded growth
+provide that plausible path. Recovery is enabled by default with sourceRate0.1; one short
+paired check covers the reduced release rate. No seed sweep or horizon extension is required.
+Useful ecological range and evolved dispersal remain unmeasured.
 
 ## Relationship to earlier proposals
 

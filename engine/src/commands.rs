@@ -64,6 +64,14 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
                 .ok_or("Missing field kind")?,
         ),
         "environment" => Ok(observation::environment(w)),
+        "mortalityAssay" => {
+            w.intervention_budget()?;
+            let ids: Vec<u64> =
+                serde_json::from_value(v.get("cells").cloned().ok_or("Missing mortality cells")?)
+                    .map_err(|e| e.to_string())?;
+            crate::mortality_recovery::assay(w, &ids)?;
+            Ok(observation::summary(w))
+        }
         "weatheringProbe" => Ok(crate::weathering_probe::run(w)),
         "sourceProbe" => Ok(crate::source_probe::run(w.chemistry.seed)),
         "census" => crate::census::observe(w, v),
@@ -123,6 +131,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             v.get("species").and_then(Value::as_u64).unwrap_or(0) as usize,
         ),
         "inspect" => observation::inspect(w, number(v, "cell")?),
+        "inspectReservoir" => crate::recovery_observation::source(w, number(v, "source")? as usize),
         "inspectSelected" => observation::selected(w, number(v, "cell")?, v),
         "genotype" => {
             Ok(json!(w.genomes.get(&number(v, "id")?).ok_or(
@@ -448,6 +457,7 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
         + w.ledger.numerical_energy
         - rounding_before.1;
     w.event("intervention", target.unwrap_or(0), vec![]);
+    crate::mortality::rebase(w);
     Ok(observation::summary(w))
 }
 pub fn load_fixture(w: &mut World, population: usize) -> Result<(), String> {

@@ -118,6 +118,7 @@ export class QuickObserver {
     };
     return {
       tick: frame.tick,
+      mortality: this.world.command<Summary>("summary").mortality,
       cells: frame.cells.map(({ cell, local, ...probe }) => ({
         id: cell.id,
         parent: cell.parent,

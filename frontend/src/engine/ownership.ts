@@ -9,6 +9,7 @@ const BROWSER_COMMANDS = new Set([
   "stepStatus",
   "census",
   "inspectSelected",
+  "inspectReservoir",
   "pick",
   "task",
   "dispose",

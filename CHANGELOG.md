@@ -2,6 +2,21 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-01 — Mortality driven reservoir recycling (local delivery)
+
+- Added nonlinear recovery of actual dead body chemistry into locally overlapping
+  reservoirs. One physical-time net-loss history drives each complete death batch; free
+  inventory spills and divisions create no mortality signal.
+- Separated nominal refill timing from physical stock, admitted imports conservatively and
+  retained the existing discharge ceiling during waits. Recovery cannot delay external input.
+- Added world-start controls, bounded recovery and selected-reservoir inspection, and distinct
+  recovery/output cues in the existing markers and legend. Physical checkpoints use v50.
+- Enabled recovery by default and reduced sourceRate from0.2 to0.1, halving the reservoir
+  release ceiling and nominal refill amount. SourceGap remains600. Mirrored constructed checks
+  found higher growth but earlier survivor death; [findings](docs/mortality-recycling-results.md)
+  preserve that result without making ecological proof a delivery gate. The live server world
+  is unchanged.
+
 ## 2026-10-01 — Utterances and strategic control (local delivery)
 
 - Added funded mouths and ears, explicit eight-bit speech and bounded listener-relative hearing

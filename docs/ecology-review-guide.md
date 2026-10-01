@@ -56,6 +56,11 @@ execution or recovery failures remain reportable independently of throughput.
 
 ## Research-direction review
 
+Deliver requested research directions enabled in ordinary startup after bounded correctness
+checks and evidence of a plausible intended effect. Do not require proof of long-term ecological
+success to declare implementation complete or ready to push. Preserve unsuccessful fixtures
+as findings; they do not automatically require disabling a feature or launching more campaigns.
+
 Read the current work order, complete open proposals and relevant negative findings. Separate
 what a mechanism could make possible from what controllers express, descendants inherit and
 populations exploit. Reservoir dependence and seed-feedstock dependence are different claims;

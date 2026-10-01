@@ -6,6 +6,7 @@ export interface QuickScenario {
   readonly hypothesis: string;
   readonly specification: Record<string, unknown>;
   readonly target: { x: number; y: number; radius: number };
+  readonly stopOnExtinction?: boolean;
   create(engine: Engine, seed: number, swap: boolean, probe?: "fast" | "slow"): EngineWorld;
   /** Registered external intervention, never an alternate stepping law. */
   beforeStep?(world: EngineWorld, tick: number): void;

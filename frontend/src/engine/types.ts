@@ -28,6 +28,9 @@ export interface EngineConfig extends Record<string, unknown> {
   sourceRate: number;
   sourceLifetime: number;
   sourceGap: number;
+  mortalityRecovery: boolean;
+  mortalityMemory: number;
+  mortalityHalfResponse: number;
   sourceDrift: number;
   reservoirRepulsion: number;
   reservoirRange: number;
@@ -101,6 +104,7 @@ export interface Flows {
   distance: number;
 }
 export interface Summary {
+  mortality?: import("./recoveryTypes").RecoverySummary;
   tick: number;
   modelSeconds: number;
   population: number;

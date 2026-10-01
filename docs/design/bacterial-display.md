@@ -38,6 +38,14 @@ energy colors and outlines. Each reservoir keeps its stocked/empty inner marker 
 outer band for its local supply clock: copper 0×, pale 1×, teal 2×. A permanent key explains
 these cues without opening controls.
 
+V50 adds a violet inner ring for exponentially recent recovery admissions and a green center
+for measured recent release. Solid/dashed still means physically stocked/empty, including
+stock discharging during a nominal wait. Population details show scalar loss, response,
+dead/recovered/spilled material and total actual output. One explicit reservoir read shows its
+stock, recent admission/output and physical-empty duration; it has no automatic polling or hidden
+refill countdown. Stock and release are distinct from survivor uptake. Both local borrowed
+rendering and bounded native display packets use the existing twelve-float marker records.
+
 Diagnostic backgrounds remain optional: dissolved amount, energy per material, a selected
 chemical, weathering, received light, terrain transmission, constructed cover, received emission,
 elevation, conductance, slope, local supply season, season strength and phase, and light ceiling.
@@ -53,24 +61,24 @@ these boundaries.
 
 ## Visual meanings
 
-| Cue | Meaning |
-| --- | --- |
-| Dissolved amount | Total extracellular material concentration; fixed exponential brightness with explicit sensitivity |
-| Energy per material | Concentration-weighted mean chemical potential, blue to amber on the fixed 0.5–8 energy/material scale; brightness masks empty or trace-only regions |
-| Movement resistance | Amber diagonal bands for mobility lost to chemical impedance, `1 - 1/(1 + movementImpedance × load)`; viscosity remains separate |
-| Stress exposure | Rose dots for abiotic reference saturation, `stress/(stressK + stress)`; actual injury also depends on membrane compatibility and paid repair |
-| Selected chemical layer | Concentration of one explicit chemical ID |
-| Chemical weathering | Blue-to-amber local interaction activity, attenuated by impedance; actual conversion also depends on the chemical present |
-| Source marks | Persistent source-size marks: bright ring and center cross while releasing, dim dashed ring while dormant; one Gaussian width, not a resource boundary. In the landscape view an outer band shows the local supply clock |
-| Soft population region | Nearby actual cells, each contributing its own color; a viewing aggregate with no biological authority |
-| Small isolated mark | An actual ungrouped cell, kept visible at world scale |
-| Colored body rim / population color | Usable-energy fraction by default; selectable enzyme input/output, membrane, ancestry, distance or other trait view |
-| Day/night context | Cool darkness composited over chemistry, cells and sources, with warm daylight; a physical illumination reading, not an extra food or energy layer |
-| Body brightness | Usable-energy fraction; damage also darkens the body |
-| Darkened interior | Increasing functional damage |
-| White tip | Heading |
-| White body rim | Selected cell or newborn within 50 ticks |
-| Brief cross | Observed death at last rendered position |
+| Cue                                 | Meaning                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dissolved amount                    | Total extracellular material concentration; fixed exponential brightness with explicit sensitivity                                                                                                                       |
+| Energy per material                 | Concentration-weighted mean chemical potential, blue to amber on the fixed 0.5–8 energy/material scale; brightness masks empty or trace-only regions                                                                     |
+| Movement resistance                 | Amber diagonal bands for mobility lost to chemical impedance, `1 - 1/(1 + movementImpedance × load)`; viscosity remains separate                                                                                         |
+| Stress exposure                     | Rose dots for abiotic reference saturation, `stress/(stressK + stress)`; actual injury also depends on membrane compatibility and paid repair                                                                            |
+| Selected chemical layer             | Concentration of one explicit chemical ID                                                                                                                                                                                |
+| Chemical weathering                 | Blue-to-amber local interaction activity, attenuated by impedance; actual conversion also depends on the chemical present                                                                                                |
+| Source marks                        | Persistent source-size marks: bright ring and center cross while releasing, dim dashed ring while dormant; one Gaussian width, not a resource boundary. In the landscape view an outer band shows the local supply clock |
+| Soft population region              | Nearby actual cells, each contributing its own color; a viewing aggregate with no biological authority                                                                                                                   |
+| Small isolated mark                 | An actual ungrouped cell, kept visible at world scale                                                                                                                                                                    |
+| Colored body rim / population color | Usable-energy fraction by default; selectable enzyme input/output, membrane, ancestry, distance or other trait view                                                                                                      |
+| Day/night context                   | Cool darkness composited over chemistry, cells and sources, with warm daylight; a physical illumination reading, not an extra food or energy layer                                                                       |
+| Body brightness                     | Usable-energy fraction; damage also darkens the body                                                                                                                                                                     |
+| Darkened interior                   | Increasing functional damage                                                                                                                                                                                             |
+| White tip                           | Heading                                                                                                                                                                                                                  |
+| White body rim                      | Selected cell or newborn within 50 ticks                                                                                                                                                                                 |
+| Brief cross                         | Observed death at last rendered position                                                                                                                                                                                 |
 
 Regions fade as screen scale approaches six pixels per world unit. Cells retain a minimum
 1.2-pixel radius; closer views resolve actual body geometry. Population selection and zoom-to-population are independent of color and
@@ -106,18 +114,18 @@ are excluded from this ranking.
 
 ### Map audit, September 14
 
-| Existing display | Decision and current meaning |
-| --- | --- |
-| Five additive concentration overlays | Replace the color mixture with one background field and two independent hazard patterns; potential becomes energy per material |
-| Selected ID guesswork | Add ranked, directly selectable dissolved chemicals and property tables; retain explicit ID access |
-| Sources appearing/disappearing | Keep the site footprint visible and distinguish releasing/dormant state |
-| “Inherited chemical strategy” color | Relabel “Transporter / membrane coordinates”: it projects transporter slot 0 X/Y and membrane Y, not a demonstrated strategy |
-| Other thirteen cell colors | Retain: ancestry, genotype, energy, task, recent family, membrane coordinates, machinery investment and selected-cell comparisons read current Rust state |
-| Soft regions and individual cells | Retain the zoom hierarchy and physical-cell contributions; groups do not become organisms or species |
-| Camera, scale, clipping and seam copies | Retain the single periodic XY world and world-unit scale |
-| Heading, damage, selection, birth and death marks | Retain and explain their meanings beside the map |
-| Spatial history and genealogy | Retain both, including selected-cell inspection and population focus |
-| Full chemical atlas | Move the population-level atlas into the chemical panel; retain the selected-cell machinery atlas in the inspector |
+| Existing display                                  | Decision and current meaning                                                                                                                              |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Five additive concentration overlays              | Replace the color mixture with one background field and two independent hazard patterns; potential becomes energy per material                            |
+| Selected ID guesswork                             | Add ranked, directly selectable dissolved chemicals and property tables; retain explicit ID access                                                        |
+| Sources appearing/disappearing                    | Keep the site footprint visible and distinguish releasing/dormant state                                                                                   |
+| “Inherited chemical strategy” color               | Relabel “Transporter / membrane coordinates”: it projects transporter slot 0 X/Y and membrane Y, not a demonstrated strategy                              |
+| Other thirteen cell colors                        | Retain: ancestry, genotype, energy, task, recent family, membrane coordinates, machinery investment and selected-cell comparisons read current Rust state |
+| Soft regions and individual cells                 | Retain the zoom hierarchy and physical-cell contributions; groups do not become organisms or species                                                      |
+| Camera, scale, clipping and seam copies           | Retain the single periodic XY world and world-unit scale                                                                                                  |
+| Heading, damage, selection, birth and death marks | Retain and explain their meanings beside the map                                                                                                          |
+| Spatial history and genealogy                     | Retain both, including selected-cell inspection and population focus                                                                                      |
+| Full chemical atlas                               | Move the population-level atlas into the chemical panel; retain the selected-cell machinery atlas in the inspector                                        |
 
 This changes observation only. Source scheduling, physical chemistry, locomotion and heredity
 are unchanged. Similar field footprints may remain when the actual chemistry co-occurs;

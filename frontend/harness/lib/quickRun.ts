@@ -59,6 +59,7 @@ function advance(
     while (
       summary.tick < options.ticks &&
       !summary.stopReason &&
+      !(scenario.stopOnExtinction && summary.population === 0) &&
       performance.now() - started < options.wallSeconds * 1000
     ) {
       scenario.beforeStep?.(world, summary.tick);
@@ -169,7 +170,7 @@ async function runBounded(
     const result = {
       ticks: s.tick,
       completed: s.tick === options.ticks && !measured.error,
-      stop: measured.error ?? s.stopReason ?? (s.tick < options.ticks ? "wall cap" : "horizon"),
+      stop: measured.error ?? s.stopReason ?? stoppingReason(scenario, s, options),
       wallMs: measured.wallMs,
       groups: observer.result(),
       final: s,
@@ -207,6 +208,11 @@ async function runBounded(
     observer?.close();
     world.dispose();
   }
+}
+
+function stoppingReason(scenario: QuickScenario, summary: Summary, options: QuickOptions) {
+  if (scenario.stopOnExtinction && summary.population === 0) return "extinction";
+  return summary.tick < options.ticks ? "wall cap" : "horizon";
 }
 
 function validateSeed(seed: number) {

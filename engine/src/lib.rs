@@ -89,6 +89,10 @@ mod medium_response;
 #[cfg(test)]
 mod medium_response_tests;
 pub mod metabolism;
+pub mod mortality;
+pub mod mortality_recovery;
+#[cfg(test)]
+mod mortality_tests;
 pub mod movement;
 mod numeric;
 pub mod observation;
@@ -112,6 +116,7 @@ mod population_diagnostics;
 mod presentation;
 pub mod random;
 pub mod reaction_medium;
+pub mod recovery_observation;
 mod relationships;
 pub mod render;
 pub mod render_window;
@@ -126,6 +131,8 @@ pub mod source_footprint;
 mod source_lifecycle_tests;
 pub mod source_medium;
 mod source_probe;
+#[cfg(test)]
+mod source_recovery_tests;
 #[cfg(test)]
 mod source_tests;
 pub mod sources;

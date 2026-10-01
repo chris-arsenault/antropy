@@ -97,6 +97,10 @@ impl Buffers {
                 continue;
             }
             let active = s.amount > 0.;
+            let recovery =
+                s.recent_recovery / (s.recent_recovery + s.amount).max(f64::MIN_POSITIVE);
+            let output = s.recent_output
+                / (s.recent_output + s.rate * w.config.mortality_memory).max(f64::MIN_POSITIVE);
             let h = &s.habitat;
             self.markers.extend([
                 h.x as f32,
@@ -110,8 +114,8 @@ impl Buffers {
                 0.67,
                 if active { 1. } else { 0. },
                 0.,
-                -1.,
-                0.,
+                (-1. - output) as f32,
+                recovery as f32,
                 u8::from(w.config.terrain.seasons) as f32,
             ]);
         }

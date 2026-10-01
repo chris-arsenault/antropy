@@ -82,8 +82,10 @@ pub fn authenticated(expected: Option<&str>, supplied: &str) -> bool {
         == 0
 }
 pub fn read_only(op: &str, payload: &Value) -> bool {
-    matches!(op, "view" | "pick" | "inspectSelected" | "chemicalWeb")
-        || op == "phenotype" && payload["action"] == "panel"
+    matches!(
+        op,
+        "view" | "pick" | "inspectSelected" | "inspectReservoir" | "chemicalWeb"
+    ) || op == "phenotype" && payload["action"] == "panel"
 }
 #[derive(Deserialize)]
 struct Request {

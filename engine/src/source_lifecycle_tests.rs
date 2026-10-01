@@ -81,6 +81,7 @@ fn simultaneous_exhaustion_schedules_independent_renewals_each_cycle() {
     for _ in 0..2 {
         for source in &mut w.sources {
             source.amount = source.rate * w.config.dt;
+            source.rebase_supply();
         }
         source_medium::advance(&mut w);
         let waits: Vec<_> = w.sources.iter().map(|s| s.wait).collect();
@@ -109,6 +110,7 @@ fn empty_reservoir_keeps_its_structural_projection_and_response() {
     let load: Vec<f64> = w.field.source_load().iter().copied().collect();
     assert!(occupied.velocity[0].hypot(occupied.velocity[1]) > 1e-8);
     w.sources[0].amount = 0.;
+    w.sources[0].rebase_supply();
     w.sources[0].wait = 10.;
     source_medium::project(&mut w);
     // Exposure follows composition and interface, not fill: emptying changes neither.
@@ -245,6 +247,7 @@ fn refill_deadline_commits_before_a_later_epoch_even_without_scheduled_release()
         mixtures: vec![vec![1., 0.], vec![0., 1.]],
     });
     w.sources[0].amount = 0.;
+    w.sources[0].rebase_supply();
     w.sources[0].wait = 0.375;
     for tick in 0..2 {
         w.tick = tick;
@@ -278,6 +281,7 @@ fn moving_refill_uses_event_position_instead_of_the_end_of_step() {
         let s = &mut w.sources[0];
         s.habitat.x = 11.5;
         s.amount = 0.;
+        s.rebase_supply();
         let midpoint = [12., s.habitat.y];
         let g = &w.shade.geography;
         s.wait = g.supply_time(midpoint, 0., elapsed);

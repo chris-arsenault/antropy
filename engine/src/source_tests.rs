@@ -29,6 +29,7 @@ fn composition_keeps_local_history_through_empty_interval_and_restore() {
     c.source_priming = 0.;
     let mut w = World::new(27, c).unwrap();
     w.sources[0].amount = 0.;
+    w.sources[0].rebase_supply();
     w.sources[0].wait = 10.;
     let seed = w.sources[0].mixture.clone();
     for n in 0..w.field.nx * w.field.ny {

@@ -275,6 +275,8 @@ async function handle(r: Request): Promise<unknown> {
       return inspect(await connection.call<number | null>("pick", p));
     case "inspect":
       return inspect(Number(p.cell));
+    case "inspectReservoir":
+      return connection.call("inspectReservoir", p);
     default:
       return control(r);
   }

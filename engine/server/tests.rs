@@ -94,11 +94,25 @@ fn spectator_allowlist_excludes_physical_and_cohort_mutations() {
         assert!(!read_only(op, &json!({})), "{op}");
     }
     assert!(read_only("chemicalWeb", &json!({})));
+    assert!(read_only("inspectReservoir", &json!({"source":0})));
+    assert!(!read_only("mortalityAssay", &json!({"cells":[1]})));
     assert!(read_only("phenotype", &json!({"action":"panel"})));
     assert!(!read_only("phenotype", &json!({"action":"select"})));
     assert!(!authenticated(None, ""));
     assert!(!authenticated(Some("secret"), "wrong"));
     assert!(authenticated(Some("secret"), "secret"));
+}
+
+#[test]
+fn reservoir_queries_and_recovery_publication_are_bounded_and_read_only() {
+    let mut r = fixture();
+    let before = r.world.snapshot().unwrap();
+    let source = r.command("inspectReservoir", json!({"source":0})).unwrap();
+    assert!(source.to_string().len() < 1024);
+    assert_eq!(source["tick"], 0);
+    let p = r.publish(vec![ViewKey::default()], 0.).unwrap();
+    assert_eq!(p.status["summary"]["mortality"]["response"], 0.);
+    assert_eq!(r.world.snapshot().unwrap(), before);
 }
 
 #[tokio::test]

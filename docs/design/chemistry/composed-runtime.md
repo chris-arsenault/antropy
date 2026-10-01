@@ -397,8 +397,9 @@ shorter-outage decision and its 2.5-fold increase in nominal mean supply.
 The world remains open. Environmental transformations now have an explicit external work
 account modulated by the composed local illumination field.
 
-Each reservoir owns one normalized composition p, material amount Q, release rate r and an
-empty-interval countdown. Actual inventory is Q*p. The shared public operator transforms p once
+Each reservoir owns one normalized composition p, material amount Q, release rate r, nominal
+batch allowance A and wait W. A and W are schedule clocks, not material owners. Actual inventory
+is Q*p. The shared public operator transforms p once
 per source update; multiply its converted amount, heat and external work by Q for the physical
 accounts. At Q=0, p remains an evolving external supply condition with zero physical work or
 material. The operator screens changes below f32::EPSILON in p, equivalent to
@@ -414,22 +415,29 @@ boundary, whichever comes first. Depletion and refill deadlines force a local co
 cannot be deferred across source epochs or spatial zones. For each refill, invert the same
 monotone seasonal integral at the trajectory midpoint, then sample its epoch and interpolated
 position at that event time. Release is deposited at the step's final footprint, retaining the
-existing bounded spatial integration. Already accrued v46 intervals contain no historical
-trajectory; an overdue boundary in a pre-correction save uses the first resumed step's start
-condition once, then follows the corrected deadlines. No state migration or new stored fields.
-Actual depletion samples an independent exponential wait
-`W=-sourceGap*ln(1-U)`, with U uniform on [0,1). sourceGap is the mean empty interval;
+existing bounded spatial integration. V50 stores allowance and a pending-time
+offset so new stock at a physically empty source cannot use release time accrued before admission.
+Nominal allowance exhaustion samples an independent exponential wait
+`W=-sourceGap*ln(1-U)`, with U uniform on [0,1). sourceGap is the mean nominal wait;
 the draw occurs once per exhaustion from that source's persisted renewal stream. Waiting also
-uses supply time. When the wait has elapsed, a refill imports Q=r*sourceLifetime and its full
-potential. Consume any remaining interval through release and further transitions exactly once;
+uses supply time. Available physical stock can discharge during that wait at the same ceiling.
+When the wait elapses, an import admits r*sourceLifetime and its full incoming potential,
+mixing with retained stock and resetting A to that nominal batch. Incoming zones/epochs set
+the imported profile without overwriting retained chemistry; otherwise the current evolving
+profile supplies the batch. Consume any remaining interval through release and transitions exactly once;
 release parcels retain their own mixtures if a boundary override changes the next batch.
 There is no lifetime countdown or
 forced dump. sourceLifetime denotes nominal batch duration at rate r. Initialization sets
 r=sourceRate*habitat.richness and Q=r*sourceLifetime*(0.5+U), with one uniform initial draw U.
-This staggers initial depletion; independent renewal waits retain the prior system's asynchronous
+After ordinary priming, A equals remaining Q. This staggers initial depletion; independent
+renewal waits retain the prior system's asynchronous
 return of supply without its random lifetime/rate coupling. Rates remain fixed after creation.
 A zero release rate neither empties a deposit nor creates supply. Ignoring tick rounding, mean
-ongoing release at a stationary source remains r*T/(T+G), where T=sourceLifetime and G=sourceGap.
+external input at a stationary source remains r*T/(T+G), where T=sourceLifetime and G=sourceGap.
+Current defaults are sourceRate=0.1 and T=G=600 model seconds. The reduction from0.2 halves
+the release ceiling, nominal refill amount, initial reservoir stock and its priming allocation;
+the priming fraction remains0.1. Nominal mean input is0.05*habitat.richness per supply second.
+Actual release can also include recovered internal material; the ledger separates it from imports.
 Moving sources can experience a different time-average multiplier; actual imported material
 and potential remain recorded without population-based normalization. This aggregate budget
 does not guarantee local food availability. The earlier fixed-gap simplification imposed a shared
@@ -465,9 +473,38 @@ ticks. With cells at 60k ticks, that run held 5,799 cells (1,112 before), 92% in
 0.1% isolated; its longer-run behaviour is observed on the server. Their composition continues
 evolving in the local medium, preserving supply history without a second mixture. Renewal uses
 that composition instead of resetting to the initial seed species. Explicit experimental source
-zones or epochs can replace the composition at an empty refill, never overwrite held material.
+zones or epochs select the incoming batch profile, never overwrite held material.
 No runtime rule privileges chemical 0. Earlier v32-v37 renewal and motion measurements used
 two mixtures and randomized batches; they do not establish the behavior of this simpler law.
+
+### Optional mortality recovery — v50
+
+The [mortality contract](../mortality-recycling.md) uses one physical-time exponential history
+of actual dead bound material d, funded growth g and living bound biomass b. Decay rates and
+relax held biomass exactly each base interval; growth and the complete natural/disturbance
+death batch add material/tau impulses at their joined boundaries. Founding biomass initializes
+b with zero rates. Division creates no loss; explicit population changes rebase the history.
+The common batch response is `h=tau*max(d-g,0)/b`, `f=h²/(h²+h_star²)`; empty biomass with no
+deaths has h=0, and positive deaths require a positive pre-removal reference. The current death
+batch contributes to its own response. Defaults tau=60 model seconds and h_star=0.25 use no
+sourceGap coupling. Recovery is enabled by default. The
+[bounded feeding checks](../../mortality-recycling-results.md) establish actual material delivery
+and funded growth while preserving a negative survivor-lifetime result; sourceGap remains600.
+
+When enabled, each dead cell routes f times its actual bound mixture to intersecting reservoir
+footprints, weighting by `sum_node(cell_weight*source_weight)` and normalizing once across
+recipients for every species. No overlap means ordinary local spill. Free inventory and
+unrecovered body chemistry enter the field; remaining usable energy becomes death heat.
+Aggregate all incoming vectors per source, then admit q with
+`Q_new=Q+q`, `p_new=(Q*p+incoming)/Q_new`. Recovery changes neither imported supply nor work,
+extends no allowance or wait, and discharges only at later ordinary source commits. Spills
+precede disturbance mixing. Derived membership and source carrier changes use existing spatial
+owners; no global cue enters a controller.
+
+Physical history, allowance, admission-time offset and recent source admission/output reductions
+persist in v50 without migration. Scalar observations and selected-reservoir inspection report
+recovery separately from external input and actual release; neither stock nor release proves
+survivor feeding. Rendering uses existing marker lanes and bounded native packets.
 
 For finite owners, gather the shared features and their centered gradients through the same W.
 The shared response is `a*grad(A)-b*grad(B)-χ*i*Lother*grad(L)` at that footprint scale, with

@@ -20,6 +20,8 @@ const fields = [
   ["sourceRate", "Source release rate", 0],
   ["sourceLifetime", "Reservoir batch duration", 0.01],
   ["sourceGap", "Source renewal gap", 0],
+  ["mortalityMemory", "Recent loss memory (model seconds)", 0.01],
+  ["mortalityHalfResponse", "Net body-loss severity at half recovery", 0.00001],
   ["sourceRadius", "Source radius", 0.01],
   ["sourceDrift", "Reservoir mobility", 0],
   ["reservoirRepulsion", "Reservoir like-charge repulsion", 0],
@@ -105,6 +107,14 @@ export function Settings({
         <TerrainSettings config={config} change={setConfig} />
         <details>
           <summary>Ecology and mutation settings</summary>
+          <label>
+            Mortality-driven reservoir recovery{" "}
+            <input
+              type="checkbox"
+              checked={config.mortalityRecovery}
+              onChange={(e) => setConfig((c) => ({ ...c, mortalityRecovery: e.target.checked }))}
+            />
+          </label>
           {fields.map(([key, label, min]) => (
             <label key={key}>
               {label}{" "}
@@ -122,7 +132,8 @@ export function Settings({
         <p>
           Reservoirs contain finite deposits and receive external replenishment after a wait. They
           drift while holding material. Local chemistry changes their composition, which persists
-          through empty periods and determines the next refill.
+          through empty periods and determines the next refill. Recovered body material joins stored
+          chemistry without changing the external renewal schedule.
         </p>
         <p>
           Changes take effect on restart. Selfing uses two gametes from one diploid parent. Zero

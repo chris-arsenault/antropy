@@ -49,6 +49,9 @@ pub fn nutrition(interval: f64, mesh: f64, supply: bool, moving: bool) -> World 
 }
 
 pub fn initialize(w: &mut World) {
+    for source in &mut w.sources {
+        source.rebase_supply();
+    }
     for cell in &mut w.cells {
         if w.tick == 0 {
             let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
@@ -61,6 +64,7 @@ pub fn initialize(w: &mut World) {
             &w.field,
         );
     }
+    crate::mortality::rebase(w);
     w.ledger = crate::accounting::Ledger::default();
     let (matter, energy) = w.held();
     w.ledger.initial_material = matter;

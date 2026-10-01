@@ -65,6 +65,7 @@ pub fn numeric_record(v: &impl serde::Serialize) -> Result<(), String> {
 }
 pub fn environment(w: &World) -> Result<(), String> {
     numeric_record(&w.ledger)?;
+    w.mortality.validate()?;
     let position = |x: f64, y: f64| {
         x.is_finite()
             && y.is_finite()
@@ -84,9 +85,23 @@ pub fn environment(w: &World) -> Result<(), String> {
             || !h.richness.is_finite()
             || h.richness < 0.
             || !(0. ..=1.).contains(&h.share)
-            || [s.amount, s.wait, s.rate, s.pending, s.empty_elapsed]
-                .iter()
-                .any(|v| !v.is_finite() || *v < 0.)
+            || [
+                s.amount,
+                s.allowance,
+                s.wait,
+                s.rate,
+                s.pending,
+                s.admission_pending,
+                s.empty_elapsed,
+                s.recent_recovery,
+                s.recent_output,
+                s.total_released,
+            ]
+            .iter()
+            .any(|v| !v.is_finite() || *v < 0.)
+            || (s.allowance > 0. && s.wait > 0.)
+            || s.admission_pending > s.pending
+            || (s.amount > 0. && s.empty_elapsed > 0.)
             || s.mixture.len() != 256
             || s.mixture.iter().any(|q| !q.is_finite() || *q < 0.)
             || (s.mixture.iter().sum::<f64>() - 1.).abs() > 1e-10

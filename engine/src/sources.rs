@@ -24,6 +24,12 @@ pub struct Habitat {
 pub struct Source {
     pub habitat: Habitat,
     pub amount: f64,
+    /// Remaining nominal release allowance; a lifecycle clock, not owned material.
+    pub allowance: f64,
+    /// Exponentially decayed admitted body material; a display reduction, not provenance.
+    pub recent_recovery: f64,
+    pub recent_output: f64,
+    pub total_released: f64,
     pub wait: f64,
     /// Accrued elapsed empty time in the same local supply clock, never the remaining wait.
     pub empty_elapsed: f64,
@@ -40,6 +46,8 @@ pub struct Source {
     pub interface: f64,
     /// Accrued local supply time, consumed at the next material commit.
     pub pending: f64,
+    /// Accrued time preceding admission to an empty source cannot discharge the new stock.
+    pub admission_pending: f64,
     pub renewal_rng: Random,
 }
 /// One reservoir's step results that touch shared state: ledger flows and medium release.
@@ -64,6 +72,10 @@ impl Source {
         let mut source = Self {
             habitat,
             amount,
+            allowance: amount,
+            recent_recovery: 0.,
+            recent_output: 0.,
+            total_released: 0.,
             wait: 0.,
             empty_elapsed: 0.,
             rate,
@@ -73,6 +85,7 @@ impl Source {
             material: Default::default(),
             interface: 0.,
             pending: 0.,
+            admission_pending: 0.,
             renewal_rng: Random::new(rng.next_u64()),
         };
         source.rebuild(c, field);
@@ -95,7 +108,10 @@ impl Source {
         ledger: &mut Ledger,
     ) {
         let released = self.withdraw(fraction, chemistry);
+        self.allowance = self.amount;
         ledger.source_released += released;
+        self.recent_output += released;
+        self.total_released += released;
         let loss = field.release_mixtures(&[(&self.footprint, &self.mixture, released)], chemistry);
         ledger.numerical_material += loss[0];
         ledger.numerical_energy += loss[1];
@@ -147,6 +163,8 @@ impl Source {
         field: &Field,
     ) -> Outcome {
         let c = step.config;
+        self.recent_recovery *= (-c.dt / c.mortality_memory).exp();
+        self.recent_output *= (-c.dt / c.mortality_memory).exp();
         let chemistry = step.chemistry;
         let conversion = self.convert(step);
         let mut outcome = Outcome {
@@ -176,8 +194,8 @@ impl Source {
         }
         let carried = self.pending;
         self.pending += supply_time;
-        let deadline = if self.amount > 0. {
-            self.amount / self.rate
+        let deadline = if self.allowance > 0. {
+            self.allowance / self.rate
         } else {
             self.wait
         };
@@ -214,6 +232,8 @@ impl Source {
         ledger.supplied += outcome.supplied[0];
         ledger.supplied_energy += outcome.supplied[1];
         ledger.source_released += outcome.released;
+        self.recent_output += outcome.released;
+        self.total_released += outcome.released;
     }
 
     fn convert(&mut self, step: &crate::source_medium::Step<'_>) -> [f64; 3] {
@@ -249,21 +269,74 @@ impl Source {
         accounts
     }
 
-    fn renew(&mut self, tick: u64, position: [f64; 2], c: &Config) {
+    fn renew(
+        &mut self,
+        tick: u64,
+        position: [f64; 2],
+        c: &Config,
+        chemistry: &Chemistry,
+    ) -> [f64; 2] {
+        let mut incoming = self.mixture.clone();
         if c.source_epochs.is_some() || c.source_zones.is_some() {
-            self.mixture.fill(0.);
+            incoming.fill(0.);
             let habitat = Habitat {
                 x: position[0],
                 y: position[1],
                 ..self.habitat.clone()
             };
             for (&s, q) in c.source_species.iter().zip(composition(&habitat, tick, c)) {
-                self.mixture[s] += q;
+                incoming[s] += q;
             }
         }
-        self.amount = c.source_lifetime * self.rate;
+        self.allowance = c.source_lifetime * self.rate;
+        let profile = incoming.clone();
+        for q in &mut incoming {
+            *q *= self.allowance;
+        }
+        let potential = incoming
+            .iter()
+            .zip(&chemistry.properties)
+            .map(|(q, p)| q * p.potential)
+            .sum();
+        if self.amount == 0. {
+            self.amount = self.allowance;
+            self.mixture = profile;
+            self.empty_elapsed = 0.;
+        } else {
+            self.admit(&incoming);
+        }
         self.wait = 0.;
         self.material.valid = false;
+        [self.allowance, potential]
+    }
+
+    /// Mix one aggregate vector into the sole physical inventory without changing renewal.
+    pub fn admit(&mut self, incoming: &[f64]) -> f64 {
+        let q: f64 = incoming.iter().sum();
+        if q > 0. {
+            if self.amount == 0. {
+                self.admission_pending = self.pending;
+            }
+            let total = self.amount + q;
+            for (share, added) in self.mixture.iter_mut().zip(incoming) {
+                *share = (self.amount * *share + added) / total;
+            }
+            self.amount = total;
+            self.empty_elapsed = 0.;
+            self.material.valid = false;
+        }
+        q
+    }
+
+    /// Explicit stock replacement also declares a new nominal schedule reference.
+    pub fn rebase_supply(&mut self) {
+        self.allowance = self.amount;
+        self.pending = 0.;
+        self.admission_pending = 0.;
+        if self.amount > 0. {
+            self.wait = 0.;
+            self.empty_elapsed = 0.;
+        }
     }
 }
 pub(crate) fn composition(h: &Habitat, tick: u64, c: &Config) -> Vec<f64> {

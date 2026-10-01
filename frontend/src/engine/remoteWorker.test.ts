@@ -92,6 +92,24 @@ it("publishes remote status through the existing budget and keeps binary frames 
   session.world.dispose();
 });
 
+it("forwards selected reservoir inspection without publishing physical arrays", async () => {
+  const worker = {
+    postMessage: vi.fn(),
+    onmessage: null as ((e: MessageEvent<Request>) => void) | null,
+  };
+  vi.stubGlobal("self", worker);
+  await import("./remoteWorker");
+  worker.onmessage!({
+    data: { id: 1, op: "initialize", payload: { endpoint: "ws://localhost/stream", canvas: {} } },
+  } as MessageEvent<Request>);
+  worker.onmessage!({
+    data: { id: 2, op: "inspectReservoir", payload: { source: 3 } },
+  } as MessageEvent<Request>);
+  await vi.waitFor(() =>
+    expect(transport.call).toHaveBeenCalledWith("inspectReservoir", { source: 3 })
+  );
+});
+
 it("requests fresh remote projections when switching terrain, film and emitted light", async () => {
   const worker = {
     postMessage: vi.fn(),

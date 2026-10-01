@@ -5,9 +5,12 @@ use crate::{
     world::World,
 };
 pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
+    release_fraction(w, cell, cause, 1.);
+}
+pub(crate) fn release_fraction(w: &mut World, cell: &Cell, cause: Cause, body_fraction: f64) {
     let row = crate::footprint::sites(cell, &w.config, &w.field);
     for s in 0..256 {
-        let q = cell.inventory.value(s) + cell.bound_material.value(s);
+        let q = cell.inventory.value(s) + body_fraction * cell.bound_material.value(s);
         for &(node, weight) in &row {
             let loss = w.field.add(node, s, q * weight, &w.chemistry);
             w.ledger.rounding(loss, s, &w.chemistry);
@@ -147,12 +150,10 @@ pub fn reproduce(w: &mut World) {
     w.cells.sort_unstable_by_key(|c| c.id);
     crate::ancestry::compact(w);
 }
-pub fn disturb(w: &mut World) {
-    let Some(d) = w.config.disturbance.clone() else {
-        return;
-    };
+fn select_disturbance(w: &mut World, dead: &mut Vec<(Cell, Cause)>) -> Option<[f64; 2]> {
+    let d = w.config.disturbance.clone()?;
     if w.environment_rng.unit() >= 1. - (-w.config.dt / d.mean_interval).exp() {
-        return;
+        return None;
     }
     let center = [
         w.environment_rng.unit() * w.config.width,
@@ -163,11 +164,15 @@ pub fn disturb(w: &mut World) {
         if crate::movement::distance([cell.x, cell.y], center, &w.config) < d.radius
             && w.environment_rng.unit() < d.mortality
         {
-            release(w, &cell, Cause::Disturbance);
+            dead.push((cell, Cause::Disturbance));
         } else {
             w.cells.push(cell);
         }
     }
+    Some(center)
+}
+fn mix_disturbance(w: &mut World, center: [f64; 2]) {
+    let d = w.config.disturbance.as_ref().unwrap();
     let nodes: Vec<_> = (0..w.field.nx * w.field.ny)
         .filter(|i| {
             crate::movement::distance(
@@ -200,21 +205,36 @@ pub fn disturb(w: &mut World) {
     }
 }
 pub fn advance(w: &mut World) {
-    let mut cells = std::mem::take(&mut w.cells);
-    cells.retain(|cell| {
+    let reference = w.cells.iter().map(|c| c.mass()).sum();
+    let mut dead = vec![];
+    let cells = std::mem::take(&mut w.cells);
+    for cell in cells {
         if cell.energy <= 0. || cell.damage >= 1. {
             let cause = if cell.damage >= 1. {
                 Cause::Damage
             } else {
                 Cause::Starvation
             };
-            release(w, cell, cause);
-            false
+            dead.push((cell, cause));
         } else {
-            true
+            w.cells.push(cell);
         }
-    });
-    w.cells = cells;
-    disturb(w);
+    }
+    let disturbance = select_disturbance(w, &mut dead);
+    crate::mortality_recovery::batch(w, dead, reference);
+    if let Some(center) = disturbance {
+        mix_disturbance(w, center);
+    }
     reproduce(w);
+}
+
+/// Isolated disturbance checks use the same batch and mixing path as ordinary lifecycle.
+pub fn disturb(w: &mut World) {
+    let reference = w.cells.iter().map(|c| c.mass()).sum();
+    let mut dead = vec![];
+    let center = select_disturbance(w, &mut dead);
+    crate::mortality_recovery::batch(w, dead, reference);
+    if let Some(center) = center {
+        mix_disturbance(w, center);
+    }
 }

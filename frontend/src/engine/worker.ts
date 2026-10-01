@@ -307,6 +307,9 @@ const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => un
   inspect(p) {
     return select(Number(p.cell));
   },
+  inspectReservoir(p) {
+    return requireSession().world.command("inspectReservoir", p);
+  },
   task(p) {
     requireSession().world.command("task", p);
     inspection.invalidate();
