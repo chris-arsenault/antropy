@@ -15,7 +15,7 @@ fn traits(body: &crate::organism::Body, membrane: [f64; 2]) -> [f64; 5] {
 
 #[derive(Default)]
 struct Group {
-    actual: [Vec<f64>; 7],
+    actual: [Vec<f64>; 15],
     target: [Vec<f64>; 5],
     light: f64,
     count: usize,
@@ -33,6 +33,15 @@ impl Group {
         }
         self.actual[5].push(cell.energy / cell.energy_capacity(&w.config).max(1e-30));
         self.actual[6].push(cell.damage);
+        self.actual[7].push(cell.body[crate::organism::MOUTH_STOCK] / cell.mass());
+        self.actual[8].push(cell.body[crate::organism::EAR_STOCK] / cell.mass());
+        for (i, value) in cell.brain.strategy.displayed().into_iter().enumerate() {
+            self.actual[9 + i].push(value as f64);
+        }
+        self.actual[13].push(cell.brain.strategy.learning_gain);
+        self.actual[14].push(crate::controller::observation::retention_mean(
+            &compiled.chromosome.behavior,
+        ));
         for (i, value) in b.into_iter().enumerate() {
             self.target[i].push(value);
         }

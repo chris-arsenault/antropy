@@ -312,6 +312,11 @@ const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => un
     inspection.invalidate();
     publish();
   },
+  strategyAblation(p) {
+    requireSession().world.command("strategyAblation", p);
+    inspection.invalidate();
+    publish();
+  },
 };
 async function handle(request: Request): Promise<unknown> {
   if (request.op === "initialize") return initialize(request.payload);

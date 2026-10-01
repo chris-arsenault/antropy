@@ -57,8 +57,8 @@ unselected work belongs to the [backlog](../backlog.md); plans are listed in the
 
 | Direction | Status | Owning document | Decision/evidence |
 | --- | --- | --- | --- |
-| Directional cell utterances | Deferred proposal, September 24 | [Specification](cell-utterances.md) | [Backlog](../backlog.md#backlog-cell-utterances) |
-| Strategic controller | Deferred proposal, September 30; expected after utterances | [Specification](strategic-controller.md) | [Backlog](../backlog.md#backlog-strategic-controller) |
+| Directional cell utterances | Delivered locally, v49, October 1; live world unchanged | [Specification](cell-utterances.md) | [Evidence](../utterances-and-strategy-results.md) |
+| Strategic controller | Delivered locally with utterances, v49, October 1 | [Specification](strategic-controller.md) | [Evidence](../utterances-and-strategy-results.md) |
 | Rugged chemical interaction | Deferred proposal, September 30; complementarity binding is the leading candidate | [Specification](rugged-interaction.md), [research paper](kauffman-landscapes-research.md) | [Backlog](../backlog.md#backlog-rugged-interaction) |
 | Dynamic terrain: gradual change, tectonics and local events | Open design direction, September 30; separately specified, not implemented | [Dynamic terrain](dynamic-terrain.md) | [Backlog](../backlog.md#backlog-dynamic-terrain) |
 | Mortality driven reservoir recycling | Open design direction, October 1; agreed nonlinear recovery of dead body material to lower the extinction boundary, not implemented | [Mortality recycling](mortality-recycling.md) | [Backlog](../backlog.md#backlog-mortality-recycling) |

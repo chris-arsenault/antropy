@@ -150,6 +150,15 @@ it("validates retained distributions and pin roots without widening the hot repl
   expect(() => validateObservation(wrong, 0)).toThrow(/phenotype/);
   const observed = session.status().phenotype!;
   expect(new TextEncoder().encode(JSON.stringify(observed)).length).toBeLessThan(16384);
+  const serverReport = structuredClone(observed);
+  for (const group of serverReport.groups) group.actual = group.actual.slice(0, 7);
+  const delta = observationDelta(
+    { status: null, inspection: null },
+    { status: { ...session.status(), phenotype: serverReport }, inspection: null }
+  );
+  expect(() => checkObservationBudget(delta)).not.toThrow();
+  serverReport.groups[0].actual.push(null);
+  expect(() => checkObservationBudget(delta)).toThrow(/display shape/);
   session.restart(28, { width: 24, height: 24, founders: 2, sourceCount: 2 });
   expect(session.status().phenotype!.pin).toBeNull();
   session.world.dispose();

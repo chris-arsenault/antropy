@@ -72,6 +72,9 @@ export interface Definition {
   patchCenters: [number, number][];
 }
 export interface Flows {
+  speechWork: number;
+  utterances: number;
+  heard: number;
   emission: number;
   recycledWork: number;
   coverDeposited: number;
@@ -201,19 +204,12 @@ export interface CellState {
   photoreceptor: number;
   contacts: number[];
   brain: { hidden: number[]; traces: number[]; task: number; lastEnergy: number | null };
-  action: {
-    swim: number;
-    turn: number;
-    repair: number;
-    transport: number[];
-    activity: number[];
-    cover: number;
-    emission: number;
-  };
+  action: import("./controlTypes").CellAction;
   flows: Flows;
   chemicalFlows: { imported: number[]; exported: number[]; consumed: number[]; produced: number[] };
 }
 export interface Inspection {
+  control: import("./controlTypes").ControlView | null;
   upkeep: { ageSeconds: number; bodyMultiplier: number; maintenancePerSecond: number } | null;
   fieldInterface: number | null;
   genealogy: {

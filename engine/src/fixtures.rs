@@ -73,6 +73,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
     }
     // Validate and fund copies before publishing any initial-condition change.
     let mut cells = w.cells.clone();
+    let mut environmental = w.environment_rng.clone();
     let mut seen = BTreeSet::new();
     let (mut built, mut heat) = (0., 0.);
     for a in f.assignments {
@@ -89,7 +90,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
         c.x = a.x;
         c.y = a.y;
         c.heading = a.heading;
-        c.brain = controller::State::default();
+        c.brain = controller::strategic::seed_state(environmental.next_u64());
         if f.mature {
             let funded = fund(c, g, w)?;
             built += funded.0;
@@ -104,6 +105,7 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
     }
     w.next_genome += ids.len() as u64;
     w.cells = cells;
+    w.environment_rng = environmental;
     for c in &w.cells {
         crate::ancestry::get_mut(&mut w.ancestry, c.id)
             .unwrap()

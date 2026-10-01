@@ -25,6 +25,8 @@ pub struct Source {
     pub habitat: Habitat,
     pub amount: f64,
     pub wait: f64,
+    /// Accrued elapsed empty time in the same local supply clock, never the remaining wait.
+    pub empty_elapsed: f64,
     pub rate: f64,
     /// Inventory is amount * mixture; at zero amount this is only the supply condition.
     pub mixture: Vec<f64>,
@@ -63,6 +65,7 @@ impl Source {
             habitat,
             amount,
             wait: 0.,
+            empty_elapsed: 0.,
             rate,
             mixture,
             footprint: vec![],

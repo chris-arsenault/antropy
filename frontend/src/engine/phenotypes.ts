@@ -63,6 +63,14 @@ export const PHENOTYPE_TRAITS = [
   "Membrane Y",
   "Usable energy / capacity",
   "Damage",
+  "Mouth / mass",
+  "Ear / mass",
+  "Strategic context 0",
+  "Strategic context 1",
+  "Strategic context 2",
+  "Strategic context 3",
+  "Reflex learning gain",
+  "Strategic hidden retention",
 ];
 
 export function selectionLabel(selection: PhenotypeSelection): string {

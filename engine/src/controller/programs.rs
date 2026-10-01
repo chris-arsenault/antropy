@@ -19,6 +19,19 @@ pub fn optical(g: &mut Genome, cover: f32, emission: f32, response: Option<(usiz
         g.weights[OUTPUT + output * HIDDEN] = gain;
     }
 }
+/// Registered fixtures author symbols and effort without reaching into controller layout.
+pub fn speech(g: &mut Genome, byte: u8, effort: f32) {
+    for output in SPEECH_BITS..TOTAL_OUTPUTS {
+        g.weights[OUTPUT + output * HIDDEN..OUTPUT + (output + 1) * HIDDEN].fill(0.);
+        g.weights[OUTPUT_BIAS + output] = if output == SPEECH_EFFORT {
+            effort
+        } else if byte & (1 << (output - SPEECH_BITS)) != 0 {
+            3.
+        } else {
+            -3.
+        };
+    }
+}
 pub fn duplicate(g: &mut Genome, source: usize, destination: usize) {
     let (from, to) = (activity_input(source), activity_input(destination));
     for h in 0..HIDDEN {

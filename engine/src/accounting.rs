@@ -14,7 +14,9 @@ pub fn interval_reserve(
     let motors =
         crate::movement::motor_work_rate(body, cell.damage, cell.action.swim, cell.action.turn, c);
     let learning = if c.learning == "plastic" {
-        body[0] * c.plasticity_cost
+        body[0]
+            * c.plasticity_cost
+            * crate::controller::strategic::learning_rate(cell.brain.strategy.learning_gain)
     } else {
         0.
     };
@@ -37,7 +39,9 @@ pub fn division_requirements(
     let maintenance =
         crate::organism::maintenance_rate(&daughter, cell.damage, age + duration / 2., c);
     let learning = if c.learning == "plastic" {
-        daughter[0] * c.plasticity_cost
+        daughter[0]
+            * c.plasticity_cost
+            * crate::controller::strategic::learning_rate(cell.brain.strategy.learning_gain)
     } else {
         0.
     };
@@ -88,6 +92,7 @@ impl Ledger {
         let f = &self.flows;
         f.maintenance
             + f.motors
+            + f.speech_work
             + f.learning
             + f.transport
             + f.reaction_heat
@@ -113,6 +118,9 @@ impl Ledger {
             cover_deposited,
             cover_recovered,
             emission,
+            speech_work,
+            utterances,
+            heard,
             recycled_work,
             contact_imported,
             contact_lost,

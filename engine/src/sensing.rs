@@ -149,7 +149,7 @@ fn observe_inward(cell: &mut Cell, c: &Config) {
 pub fn observe_body(cell: &mut Cell, g: &Compiled, c: &Config) {
     observe_condition(cell, g, c);
     observe_base(cell, c);
-    crate::controller::publish_inputs(&mut cell.brain, &cell.inputs, u64::MAX);
+    crate::controller::publish_inputs(&mut cell.brain, &cell.inputs, u128::MAX);
 }
 
 /// Publish after transport, reactions and funded body changes have completed.

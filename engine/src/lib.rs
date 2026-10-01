@@ -140,6 +140,8 @@ mod spatial_slots;
 mod spatial_tests;
 mod startup_probe;
 mod storage_diagnostics;
+pub mod strategic_local;
+mod strategic_physiology;
 #[cfg(test)]
 mod structural_tests;
 mod study_commands;
@@ -157,6 +159,7 @@ pub mod transformation_work;
 #[cfg(test)]
 mod transformation_work_tests;
 pub mod transport;
+pub mod utterances;
 pub mod weathering;
 mod weathering_budget;
 mod weathering_probe;

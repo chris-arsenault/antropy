@@ -244,6 +244,31 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             w.event("override", id, vec![before as u64, value]);
             Ok(json!({"tick":w.tick}))
         }
+        "strategyAblation" => {
+            w.intervention_budget()?;
+            let enabled = v
+                .get("enabled")
+                .and_then(Value::as_bool)
+                .ok_or("Missing ablation setting")?;
+            let id = v
+                .get("cell")
+                .map(|v| v.as_u64().ok_or("Invalid cell"))
+                .transpose()?;
+            if id.is_some_and(|id| !w.cells.iter().any(|c| c.id == id)) {
+                return Err("Cell is no longer alive".into());
+            }
+            for cell in &mut w.cells {
+                if id.is_none_or(|id| id == cell.id) {
+                    cell.brain.strategy.clamp_context = enabled;
+                }
+            }
+            w.event(
+                "strategy-ablation",
+                id.unwrap_or(0),
+                vec![u64::from(enabled)],
+            );
+            Ok(json!({"tick":w.tick,"enabled":enabled,"cell":id}))
+        }
         "intervene" => {
             w.intervention_budget()?;
             intervene(w, v)
@@ -263,6 +288,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
             crate::source_medium::project(w);
             Ok(json!({}))
         }
+        "speechLoad" => crate::diagnostics::speech_load(w, number(v, "every")? as usize),
         "loadFixture" => {
             let count = number(v, "population")? as usize;
             let programs = v.get("programs").and_then(Value::as_u64).unwrap_or(4) as usize;
@@ -496,6 +522,7 @@ fn load_program_fixture(
             rng.unit() * std::f64::consts::TAU,
         );
         cell.energy = cell.energy_capacity(&w.config);
+        cell.brain = crate::controller::strategic::seed_state(w.environment_rng.next_u64());
         cell.inventory.fill(0.001);
         if dense {
             cell.damage = 0.5;

@@ -15,7 +15,7 @@ deposits; source replenishment timing is unchanged.
 
 ## Physiology and physical genes
 
-Each chromosome has twenty-two bounded float32 investment records plus chemical alleles:
+Each chromosome has twenty-four bounded float32 investment records plus chemical alleles:
 
 | Loci | Physiological component / allele | Reference newborn capacity |
 | --- | --- | ---: |
@@ -29,6 +29,8 @@ Each chromosome has twenty-two bounded float32 investment records plus chemical 
 | 16–19 | Additional enzyme program records 4–7 | 0.04 each when present |
 | 20 | Cover builder, paid transfer to/from overhead film | 0.04 |
 | 21 | Light emitter, paid optical power | 0.04 |
+| 22 | Mouth, funded explicit byte impulses | Existing transporter ratio, 0.04 |
+| 23 | Ear, reception gain | Existing receptor ratio, 0.01 |
 
 A membrane coordinate controls chemical compatibility, protection and passive solute retention.
 The existing susceptibility law scales bidirectional diffusion; unmatched products escape
@@ -166,7 +168,7 @@ step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
 P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
 Default behavioral probability/scale is0.0015/0.08; physical probability/scale is0.1/0.12.
 Chemical coordinates and reflection centers multiply scale by the existing specificity radius R.
-Scalar neural and twenty-two investment loci retain independent opportunities.
+Scalar neural and twenty-four investment loci retain independent opportunities.
 Each of25 chemical coordinate pairs has Binomial(2,p) vector events: each event uses the same
 absolute-step law and a uniform direction. Four inward fractions also mutate on [0,1].
 The bounded arena includes dormant alleles, which do not confer a physical function.

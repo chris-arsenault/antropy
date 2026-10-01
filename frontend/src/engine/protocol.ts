@@ -16,6 +16,7 @@ export type Operation =
   | "pick"
   | "inspect"
   | "task"
+  | "strategyAblation"
   | "save"
   | "export"
   | "import"

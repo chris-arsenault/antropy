@@ -125,6 +125,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         },
         amount: s.duration * s.rate,
         wait: 0.,
+        empty_elapsed: 0.,
         rate: s.rate,
         mixture: vec![0.; 256],
         footprint: vec![],

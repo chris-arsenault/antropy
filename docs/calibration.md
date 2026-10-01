@@ -15,7 +15,7 @@ The [pre-chemistry calibration](sources/history/2026-09-13-pre-chemistry/calibra
 | Quantity | Current value |
 | --- | --- |
 | World / timestep / founders | 720 × 540 periodic XY / 0.2 model seconds / 48 in two colonies |
-| Controller | 52 inputs, 24 recurrent units, 19 outputs |
+| Controller | Reflex 83 inputs, 24 recurrent units, 28 outputs; strategy 61 inputs, 8 recurrent units, 5 outputs |
 | Body | Twenty-two derived capacities expressed from genes at current biomass, including four receptors, four transporters and a photoreceptor; one to eight enzyme programs |
 | Chemical definition | 16 × 16 coordinates; independent chemistry seed 101 |
 | Potential U / diffusion D / impedance I / stress S ranges | 0.5–8 / 0.005–0.5 / 0–12 / 0–1 |
@@ -74,6 +74,10 @@ continued access, not evolved pursuit or long-term survival.
 
 ## Measured throughput
 
+The current goal is approximately 30 ticks/s at 2,000 cells, with low priority. It does not
+apply at 20,000 cells. Use the [ecology review guide](ecology-review-guide.md) when interpreting
+the dated measurements below; older targets do not define current research priorities.
+
 The newest measurements are the September 28 native performance pass in the
 [archived scaling record](plans/archive/SCALING-PLAN.md#september-28-continuing-world-performance-pass):
 restored v44 checkpoints reach 44.49 ticks/s at 2,040 cells and 30.31 at 3,893 cells with four
@@ -82,12 +86,12 @@ workers, and 20.40 at 2,040 cells with one worker. Terrain-specific costs are in
 
 Historical v32 (September 20) [capacity fixtures](material-habitats.md) measured 63.78/32.00
 ticks/s at 48/2,000 cells in the serial kernel. The mature 3,774-cell checkpoint measured
-17.79 headless with measured observation closed and 15.95 active, below the 30-tick target.
+17.79 headless with measured observation closed and 15.95 active, below the then-stated 30-tick target.
 See [session costs](session-runtime-review.md).
 
 The historical v15 [mobile-source measurements](design/chemistry/mobile-source-results.md) give
 39.31/24.55/20.18 ticks/s on fully occupied 48/2,000/2,000-growth fixtures, including packed
-render preparation, census and inspection. Large saturated workloads miss the30ticks/s floor.
+render preparation, census and inspection. These missed the then-stated 30-tick/s floor at the larger loads.
 These source-free capacity fixtures retain the prior environmental limits; brief report
 generation overlapped this check, so small differences do not establish a speedup. Ordinary
 mobile-source confirmations measure131–136ticks/s with recording, without GPU execution.

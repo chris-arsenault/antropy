@@ -8,6 +8,17 @@ their observation/backlog owners while development continues. The
 [design directions registry](directions.md) lists every past and future direction with its
 status, owner and decision record.
 
+Read the [ecology review guide](../ecology-review-guide.md) before sampling the live world or
+comparing research directions. It records accepted pruning quantization, expected reservoir
+proximity, the questions about inter-colony exchange and new colony founding, and the
+approximately 30-tick/s goal at 2,000 cells with its current low priority.
+
+October 1 local delivery adds funded directional utterances and inherited slow strategic
+control in physical v49. The running v48 server world is unchanged. The complete
+[controller](controller.md) has 83 reflex inputs and 28 outputs; mouth and ear bring derived
+body capacities to 24. [Delivery evidence](../utterances-and-strategy-results.md) records
+bounded mechanics, cost calibration and reproduction. No language or dispersal policy is seeded.
+
 <a id="design-actuator-feedback"></a>
 
 ## Actuator feedback and review corrections — September 30
@@ -244,8 +255,8 @@ changes improved it; this historical diagnosis is not the current work order.
 | [Strategic ecology](strategic-ecology.md) | Mechanisms, ecological hypotheses and active/disabled settings |
 | [Composed runtime](chemistry/composed-runtime.md) | Current shared operators, illumination, material habitat laws and execution bounds |
 | [Light ecology](light-ecology.md) | Implemented v42: scalar illumination, geographic shade, overhead film, paid emission and shared optical accounting |
-| [Directional cell utterances](cell-utterances.md) | Deferred specification for paid bytes, coarse listener-relative bearing, funded inheritance and natural observation after implementation; no prior payoff or evolution gate |
-| [Strategic controller](strategic-controller.md) | Deferred specification for a slow learned strategy layer: history transform, local rhythm phases, neighbor display, reflex context inputs and learning gain |
+| [Directional cell utterances](cell-utterances.md) | Local v49 delivery: paid bytes, coarse listener-relative bearing, funded inheritance and exactly-once hearing |
+| [Strategic controller](strategic-controller.md) | Local v49 delivery: slow learned history, local rhythms, contact display, inherited context and paid learning gain |
 | [Rugged chemical interaction](rugged-interaction.md) | Deferred research direction for surprising mutations and co-located roles; [Kauffman research paper](kauffman-landscapes-research.md) |
 | [Mortality recycling](mortality-recycling.md) | Open design direction: nonlinear recovery of dead body material aims to lower the extinction boundary while preserving external growth; not implemented |
 | [Material habitats](../material-habitats.md) | Two-scale binding, retention, renewal, public chemistry and bounded evidence |
@@ -272,12 +283,15 @@ Finite initial8/128 priming starts delivery; later processing follows ordinary l
 bound material retain actual identities through repair and death. No chemical has a privileged
 waste role. Haploid clonal fission, mutation and paid inheritable plasticity are active.
 
-The controller has 52 inputs, 24 recurrent units and 19 outputs. Genes express twenty-two derived
+The reflex controller has 83 inputs, 24 recurrent units and 28 outputs, alongside a 61×8×5
+strategic layer. Genes express twenty-four derived
 body capacities directly at current biomass, including four chemical receptors, four transporters,
 one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v48; the outer observation package remains v11.
+checkpoints use v49; the outer observation package remains v11. Local delivery rejects older
+physical formats without migration; the existing live server remains v48 until a separately
+authorized deployment and new-world cutover.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. Local spread, reservoir sizes and per-site release are unchanged, keeping

@@ -7,4 +7,6 @@ export const INWARD_INPUT = 41;
 export const BUILDER_INPUT = 49;
 export const EMITTER_INPUT = 50;
 export const MOTOR_LOAD_INPUT = 51;
-export const INPUT_COUNT = 52;
+export const HEARING_INPUT = 52;
+export const CONTEXT_INPUT = 79;
+export const INPUT_COUNT = 83;

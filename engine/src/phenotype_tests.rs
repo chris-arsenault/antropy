@@ -41,7 +41,7 @@ fn actual_flows_reconcile_without_changing_physical_continuation() {
     assert_eq!(report["groups"][0], report["groups"][1]);
     assert_eq!(
         report["groups"][2]["actual"],
-        serde_json::to_value([None::<f64>; 7]).unwrap()
+        serde_json::to_value([None::<f64>; 15]).unwrap()
     );
     let web = execute(
         &mut w,

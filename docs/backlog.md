@@ -120,13 +120,13 @@ differentiation. Dormancy is a separate extension.
 
 ## Directional cell communication: mouths and ears
 
-**Status:** Deferred — specified September 24; not the next work item.
+**Status:** Delivered locally in v49, October 1. Natural use and sender return remain open observation questions.
 
 [Directional cell utterances](design/cell-utterances.md) specifies paid byte broadcasts through
 mouths and ears: finite periodic reach, no distance falloff inside the disk, no material
 deposit or usable-work delivery, and a brief input to the ordinary RNN. Ears report coarse
 listener-relative bearing in 16 sectors (22.5 degrees), with no distance or absolute compass input.
-Reach follows mouth capacity and paid work. Mouths and ears would be genetic body capacities
+Reach follows mouth capacity and paid work. Mouths and ears are genetic body capacities
 expressed at current biomass under the v43 physiology; ears carry ordinary body maintenance
 without a per-event charge.
 
@@ -147,15 +147,16 @@ questions raised by actual observation.
 
 ## Strategic controller: a slow learned layer above the reflex RNN
 
-**Status:** Deferred — specified September 30; expected after utterances.
+**Status:** Delivered locally with utterances in v49, October 1. Evolved use remains an observation question.
 
 [Strategic controller](design/strategic-controller.md) adds a third heritable construct: a small
 Elman RNN on a slower clock whose outputs become four reflex-RNN inputs and a reflex learning
 gain. It issues no physical actions. Inputs combine a shared level/surprise/volatility transform
 over the cell's own history, life history, local light and supply phases, local reservoir state,
 contact-read neighbor displays and internal noise. Both layers learn; daughters inherit the
-parent's strategic state. At implementation, revisit the private byte's ownership and add
-utterance channels before planning delivery.
+parent's strategic state. The private byte remains reflex-owned and strategic read-only;
+heard activity and byte diversity use the shared history transform. The
+[delivery evidence](utterances-and-strategy-results.md) records calibration and bounded checks.
 
 <a id="backlog-rugged-interaction"></a>
 
@@ -288,7 +289,7 @@ are separate from ecological experiments:
 | Bounded storage and memory | History retains every living record plus up to two million ended records; oldest ended records expire without pausing. Recovery caps are 256 MiB total and 192 MiB per uncompressed checkpoint. Failed saves warn while execution continues. The [v33 observation](cellular-200k-review.md#demonstrated-browser-persistence-limit) reaches 243.28 MiB at 180k and 6,975 cells. Removing unreferenced genotype slack still leaves 215.03 MiB. Save/export for necessary live state remains a separate boundary; bounded history does not certify that every population fits. |
 | Preserve observation | Browser checkpoints retain 240 thinned spatial frames, 2,048 recent spatial events and the current population census. Dropped events are counted. The kernel retains 512 ordinary events and up to 4,096 explicit interventions; reaching the intervention limit rejects further manual changes. Complete replay and unobserved history remain unavailable. |
 | Sustained execution | A worker owns physics and rendering. One queued task yields simulation work; the main animation loop permits one unanswered presentation request. GPU completion fences bound outstanding frames. Background throttling and sleep can still stop execution. |
-| Useful throughput | Pre-multicore measurement, September 21: [continued optimization](bounded-computation.md) raised the matched v33 180k world from 8.14 to 12.77 ticks/s (10.87 with measured panels active). Physical stepping averaged 71.74 ms; census added 4.77 ms per measured tick. Stage costs were exchange 18.30, physiology 17.42, sensing/controller 12.25 and movement 12.33 ms/tick. The regional multicore runtime replaced that structure; the 30 ticks/s mature-world target has no current matched measurement. The separate earlier 8→40 reload difference remains unattributed in the [runtime investigation](session-runtime-review.md). |
+| Useful throughput | The current goal is approximately 30 ticks/s at 2,000 cells, with low priority; it is not a target at 20,000 cells. See the [ecology review guide](ecology-review-guide.md). Pre-multicore measurement, September 21: [continued optimization](bounded-computation.md) raised the matched v33 180k world from 8.14 to 12.77 ticks/s (10.87 with measured panels active). Physical stepping averaged 71.74 ms; census added 4.77 ms per measured tick. Stage costs were exchange 18.30, physiology 17.42, sensing/controller 12.25 and movement 12.33 ms/tick. The regional multicore runtime replaced that structure. The separate earlier 8→40 reload difference remains unattributed in the [runtime investigation](session-runtime-review.md). |
 | Honest visual interpretation | Default usable-energy colors and independent context layers describe current cells. The user reports promising dense colonies; that review does not establish indefinite diversity. Measured-flow route keys can repeat after zero-amount observations. The v33 study deduplicates exact copies and reconciles accepted totals, but the runtime observer still needs correction. Its full route sorting per page also makes exhaustive recording expensive. |
 | Meaningful continuation | Preserve physical state, random streams, conservation, ancestry semantics and source provenance across saves and future performance changes. |
 

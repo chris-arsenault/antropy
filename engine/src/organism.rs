@@ -10,10 +10,12 @@ mod chemical_flow_counter;
 use chemical_flow_counter::Counter;
 
 pub const MAX_ENZYMES: usize = 8;
-pub const STOCKS: usize = 14 + MAX_ENZYMES;
+pub const STOCKS: usize = 16 + MAX_ENZYMES;
 pub const PHOTO_STOCK: usize = 15;
 pub const BUILDER_STOCK: usize = 20;
 pub const EMITTER_STOCK: usize = 21;
+pub const MOUTH_STOCK: usize = 22;
+pub const EAR_STOCK: usize = 23;
 pub const fn enzyme_stock(slot: usize) -> usize {
     if slot < 4 { 11 + slot } else { 12 + slot }
 }
@@ -75,6 +77,9 @@ pub struct Flows {
     pub cover_deposited: f64,
     pub cover_recovered: f64,
     pub emission: f64,
+    pub speech_work: f64,
+    pub utterances: f64,
+    pub heard: f64,
     pub recycled_work: f64,
     pub contact_imported: f64,
     pub contact_lost: f64,
@@ -186,7 +191,8 @@ impl Cell {
         if (self.bound_material.material() - self.mass()).abs() > 1e-10 * (1. + self.mass()) {
             return Err("Bound material does not fund body stocks".into());
         }
-        if self.inventory.len() != SPECIES
+        if self.brain.strategy.elapsed >= crate::controller::strategic::interval(c)
+            || self.inventory.len() != SPECIES
             || self.inputs.len() != INPUTS
             || self.brain.hidden.len() != 24
             || self.brain.traces.len() != 576
@@ -244,6 +250,7 @@ impl Cell {
                 .iter()
                 .chain(&self.action.activity)
                 .chain([&self.action.emission])
+                .chain([&self.action.speech_effort])
                 .chain([&self.action.swim, &self.action.repair])
                 .any(|x| !(0. ..=1.).contains(x))
             || !(-1. ..=1.).contains(&self.action.turn)
@@ -263,7 +270,9 @@ pub fn aging_multiplier(body: &Body, age: f64, c: &Config) -> f64 {
 
 pub fn maintenance_rate(body: &Body, damage: f64, age: f64, c: &Config) -> f64 {
     let mass = body.iter().sum::<f64>();
-    (1. + damage) * (mass * c.maintenance * aging_multiplier(body, age, c) + c.controller_cost)
+    (1. + damage)
+        * (mass * c.maintenance * aging_multiplier(body, age, c)
+            + c.controller_cost * crate::controller::strategic::upkeep_multiplier())
 }
 
 #[cfg(test)]

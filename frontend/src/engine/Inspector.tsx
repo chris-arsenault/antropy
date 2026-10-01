@@ -6,6 +6,7 @@ import { Table, numberText as n } from "./Table";
 import { CellGenealogy } from "./CellGenealogy";
 import { BODY_PARTS, enzymeStock, machineryLabel } from "./bodyParts";
 import { CellOrganization } from "./CellOrganization";
+import { CellControl } from "./CellControl";
 import { LIGHT_INPUT, MOTOR_LOAD_INPUT } from "./controllerInputs";
 
 const PARTS = BODY_PARTS;
@@ -35,6 +36,12 @@ const INPUTS = [
   "Cover builder realized activity",
   "Light emitter realized activity",
   "Paid motor load",
+  ...Array.from({ length: 9 }, (_, i) =>
+    ["mean", "forward moment", "left moment"].map(
+      (v) => (i === 0 ? "Hearing activity" : "Hearing bit " + (i - 1)) + " " + v
+    )
+  ).flat(),
+  ...Array.from({ length: 4 }, (_, i) => `Strategic context ${i}`),
 ];
 interface Props {
   bridge: Bridge;
@@ -60,6 +67,7 @@ export function Inspector({ bridge, inspection: p, definition, error }: Props) {
       {p.cell ? (
         <>
           <CellDetails inspection={p} definition={definition} />
+          <CellControl inspection={p} bridge={bridge} error={error} />
           <p>
             Physiology is specified at birth. Activity, biomass and condition can change;
             descendants may inherit mutated capabilities.
@@ -176,14 +184,7 @@ function CellDetails({
           depends on the chemical present.
         </p>
       )}
-      <details>
-        <summary>Local inputs and private recurrent state</summary>
-        <Table
-          columns={["Input", "Value"]}
-          rows={INPUTS.map((name, i) => [name, n(c.inputs[i])])}
-        />
-        <pre>{JSON.stringify({ hidden: c.brain.hidden, events: p.events }, null, 2)}</pre>
-      </details>
+      <LocalInputs inspection={p} cell={c} />
       <details>
         <summary>Physiology and inherited genes</summary>
         <p>
@@ -197,6 +198,21 @@ function CellDetails({
         <pre>{JSON.stringify({ inherited: p.genotype, acquired: c.brain.traces }, null, 2)}</pre>
       </details>
     </>
+  );
+}
+function LocalInputs({ inspection: p, cell: c }: { inspection: Inspection; cell: CellState }) {
+  return (
+    <details>
+      <summary>Local inputs and private recurrent state</summary>
+      <Table
+        columns={["Input", "Value"]}
+        rows={INPUTS.map((name, i) => [
+          name,
+          n(i >= 52 && i < 79 ? p.control?.hearing[i - 52] : c.inputs[i]),
+        ])}
+      />
+      <pre>{JSON.stringify({ hidden: c.brain.hidden, events: p.events }, null, 2)}</pre>
+    </details>
   );
 }
 function transportDirection(effort: number) {

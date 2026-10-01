@@ -10,19 +10,29 @@ function identity(s: unknown): s is string {
 }
 function distributions(values: Quantiles[], size: number, population: number) {
   check(Array.isArray(values) && values.length === size);
-  for (const v of values) {
+  for (const [index, v] of values.entries()) {
     if (population === 0) {
       check(v === null);
       continue;
     }
-    check(Array.isArray(v) && v.length === 3 && v.every((q) => Number.isFinite(q) && q >= 0));
+    const signedContext = size === 15 && index >= 9 && index <= 12;
+    check(
+      Array.isArray(v) &&
+        v.length === 3 &&
+        v.every(
+          (q) =>
+            Number.isFinite(q) &&
+            (q >= 0 || (signedContext && q >= -1)) &&
+            (!signedContext || q <= 1)
+        )
+    );
     check(v[0] <= v[1] && v[1] <= v[2]);
   }
 }
 export function validatePhenotypePoint(p: PhenotypePoint | undefined, population: number) {
   if (p === undefined) return;
   check(!!p && identity(p.id) && count(p.count) && p.count <= population);
-  distributions(p.actual, 7, p.count);
+  distributions(p.actual, 15, p.count);
   distributions(p.target, 5, p.count);
 }
 export function validatePin(p: SavedPin | null | undefined, tick: number) {

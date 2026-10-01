@@ -104,6 +104,8 @@ pub struct Config {
     /// Contact adhesion: weight per unit membrane compatibility when blending contact motion.
     pub adhesion: f64,
     pub motor_power_density: f64,
+    /// Work per geographic area for a finite information-only utterance.
+    pub utterance_work_density: f64,
     pub motor_efficiency: f64,
     pub mutation_rate: f64,
     pub mutation_scale: f64,
@@ -201,6 +203,7 @@ impl Default for Config {
             viscosity: 0.004,
             adhesion: 4.,
             motor_power_density: 0.2,
+            utterance_work_density: 0.0002,
             motor_efficiency: 0.5,
             mutation_rate: 0.0015,
             mutation_scale: 0.08,
@@ -279,6 +282,7 @@ impl Config {
             ("opticalColumn", self.optical_column),
             ("opticalReach", self.optical_reach),
             ("opticalPowerDensity", self.optical_power_density),
+            ("utteranceWorkDensity", self.utterance_work_density),
             ("illuminationSlowPeriod", self.illumination_slow_period),
             (
                 "illuminationModulationPeriod",

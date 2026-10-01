@@ -88,6 +88,26 @@ pub fn optical_load(w: &mut World) {
     w.event("optical-load-fixture", 0, vec![]);
 }
 
+/// Fixed operating fixture: every nth genotype speaks; zero selects a silent control.
+pub fn speech_load(w: &mut World, every: usize) -> Result<serde_json::Value, String> {
+    if w.tick != 0 || every > w.cells.len() {
+        return Err("Speech load requires tick zero and a bounded stride".into());
+    }
+    for (i, g) in w.genomes.values_mut().enumerate() {
+        for ch in &mut g.chromosomes {
+            controller::programs::speech(
+                &mut ch.behavior,
+                i as u8,
+                if every > 0 && i % every == 0 { 3. } else { -3. },
+            );
+        }
+        g.compile(&w.config, &w.chemistry);
+    }
+    initialize(w);
+    w.event("speech-load-fixture", 0, vec![every as u64]);
+    Ok(crate::observation::summary(w))
+}
+
 pub fn retarget(g: &mut crate::genetics::Genotype, slot: usize, from: usize, to: usize) {
     let a = Target::species(from);
     let b = Target::species(to);

@@ -124,7 +124,10 @@ Only release and refill waiting use tau. Chemical conversion, reservoir movement
 cell physiology, propulsion, decay and optical forcing continue on ordinary time.
 Chemical conversion and performance thresholds are explicitly outside this proposal.
 Sunlight remains overhead and non-depleting. Cells receive existing local physical
-readings, not the supply clock, phase, coordinates or a destination cue.
+readings. The reflex layer receives no supply clock or phase. V49's
+[strategic layer](strategic-controller.md) additionally receives present local circular light
+and supply phases, reservoir stocked fraction and past empty time. Coordinates, destination
+cues and drawn remaining refill waits remain excluded.
 
 ## Budget and scale selection
 

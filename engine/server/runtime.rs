@@ -156,7 +156,7 @@ impl Runtime {
                 self.replace(World::new(seed, config)?)?;
             }
             "phenotype" => return self.phenotype(payload),
-            "task" => {
+            "task" | "strategyAblation" => {
                 self.query(op, payload)?;
                 self.queries.clear();
             }
@@ -223,7 +223,7 @@ impl Runtime {
         if value.to_string().len() > 256 * 1024 {
             return Err("Observation exceeds reply budget".into());
         }
-        if op != "task" {
+        if !matches!(op, "task" | "strategyAblation") {
             self.queries.insert(key, value.clone());
         }
         Ok(value)

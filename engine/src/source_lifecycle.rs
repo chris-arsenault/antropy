@@ -21,6 +21,7 @@ impl Source {
             if self.amount == 0. {
                 let waited = remaining.min(self.wait);
                 self.wait -= waited;
+                self.empty_elapsed += waited;
                 remaining -= waited;
                 if self.wait > 0. {
                     break;
@@ -38,6 +39,7 @@ impl Source {
                     (start[1] + delta[1] * elapsed / c.dt).rem_euclid(c.height),
                 ];
                 self.renew(step.tick + u64::from(elapsed >= c.dt), position, c);
+                self.empty_elapsed = 0.;
                 if self.amount == 0. {
                     break;
                 }
@@ -72,6 +74,7 @@ impl Source {
             }
             remaining = (remaining - duration).max(0.);
             if self.amount == 0. {
+                self.empty_elapsed = 0.;
                 self.wait = -(1. - self.renewal_rng.unit()).ln() * step.config.source_gap;
             }
         }

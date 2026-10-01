@@ -1,16 +1,16 @@
 # Directional cell utterances
 
-**Status:** Deferred proposal — specified September 24 and unimplemented; expected to land before the [strategic controller](strategic-controller.md) when selected.
+**Status:** Implemented locally with the [strategic controller](strategic-controller.md), physical v49, October 1. The running v48 world is unchanged.
 
-Design specification, September 24, 2026. Not the next work item.
+Design specification, September 24, 2026; selected for local delivery October 1.
 The user requested coarse directional hearing and implementation followed by natural observation,
 without requiring prior proof of speaker return or evolutionary uptake. This revision supersedes
 the initial directionless proposal and its pre-selection ecological checks. Consider this spec
 alongside [light ecology](light-ecology.md), terrain/climate and the other
-[backlog candidates](../backlog.md). Writing the spec does not start implementation or experiments.
+[backlog candidates](../backlog.md).
 The [composed runtime](chemistry/composed-runtime.md) still owns installed laws. The mechanisms
-below define this future feature; dimensional calibration and implementation checks remain work
-for delivery when it is selected.
+below define the delivered feature. [Delivery evidence](../utterances-and-strategy-results.md)
+records calibration, bounded checks and reproduction.
 
 ## Purpose and distinction
 
@@ -263,9 +263,9 @@ of dialect, cooperation or adaptive signaling.
 
 ## Ownership and execution budget
 
-Rust owns the emission batch and per-cell pending reductions. Use existing persistent regional
-geometry to find occupied listener regions intersecting event disks, with exact periodic distance
-checks at boundary candidates. A mouth with no accepted event and an ear with no stock do no
+Rust owns the emission batch and per-cell pending reductions. Persistent dyadic event bins reuse
+the regional geometry/membership primitives. Listener-owned jobs gather nearby frozen events
+with exact periodic distance checks at boundary candidates. A mouth with no accepted event and an ear with no stock do no
 delivery work. Silent space needs no new dense grid, acoustic solver or chemical row.
 
 Regional jobs gather frozen events and commit only their own listeners. Retain fixed-size
@@ -278,10 +278,11 @@ gain, self-exclusion and boundary delivery. No speedup is established.
 
 Checkpoint pending input, its consumption epoch and the once-only emission state. Rebuild derived
 spatial membership on restore. The controller interface owns public input/action shapes; physics
-does not inspect weight layout. The current controller has 52 inputs and 19 outputs. With 27
-sound inputs and two mouth/ear realized-activity inputs (matching the builder and emitter
-activity inputs), a direct extension has 81 inputs, beyond the current u64 publication masks. Eight bit
-outputs and emission effort would produce 28 outputs. These are real controller,
+does not inspect weight layout. The complete reflex controller has 83 inputs: the existing 52,
+27 hearing moments and four strategic context values. Hearing activity already records ear
+participation; accepted speech work enters strategic energy history and bounded flow observation,
+so two redundant machinery activity ports are not added. Publication masks use u128. Eight bit
+outputs and emission effort bring the total to 28 outputs. These are real controller,
 codec, genetics, diagnostic and clock changes, not just a new field on Cell. Hidden width need
 not change merely because communication ports exist.
 

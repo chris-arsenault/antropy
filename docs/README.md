@@ -23,6 +23,7 @@ them. See the [storage policy](evidence/README.md).
 | --- | --- |
 | What Biotropy is: question, philosophy and mathematics | [White paper](white-paper.md) |
 | Observed outcomes, negative results and open research directions | [Outcomes and open directions](outcomes-and-directions.md) |
+| Mandatory review interpretation: pruning, habitat exchange and performance scope | [Ecology review guide](ecology-review-guide.md) |
 | September 30 starvation investigation and renewal correction | [Extinction correction](extinction-correction.md) |
 | Work order, installed runtime and design owners | [Current design](design/README.md) |
 | Every design direction and its status | [Design directions registry](design/directions.md) |
@@ -55,12 +56,16 @@ them. See the [storage policy](evidence/README.md).
 | Active and archived plans | [Plan index](plans/README.md) |
 | Shipped changes by date | [Changelog](../CHANGELOG.md) |
 
+## Local v49 delivery
+
+Paid [utterances](design/cell-utterances.md) and the [strategic controller](design/strategic-controller.md)
+are implemented locally. [Delivery evidence](utterances-and-strategy-results.md) records bounded
+checks, calibration and operating costs; the existing server world is unchanged.
+
 ## Deferred proposals
 
 | Direction | Document |
 | --- | --- |
-| Paid byte broadcasts with coarse listener-relative hearing | [Directional cell utterances](design/cell-utterances.md) |
-| Slow learned strategy layer feeding the reflex RNN | [Strategic controller](design/strategic-controller.md) |
 | Gradual geographic change, tectonics and bounded local events | [Dynamic terrain](design/dynamic-terrain.md) |
 | Nonlinear recovery of dead biomass into reservoirs during die-offs | [Mortality recycling](design/mortality-recycling.md) — open design direction, not implemented |
 | Finite resource storage, local depletion and seasonal recharge | [Reservoir storage](design/reservoir-storage.md) |

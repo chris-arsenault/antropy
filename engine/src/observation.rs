@@ -215,6 +215,13 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
     if let Some(cell) = cell {
         result["cell"]["body"] = json!(cell.body);
         result["cell"]["brain"] = json!(crate::controller::observed_state(&cell.brain));
+        result["control"] = crate::controller::observation::inspect(
+            &expressed.unwrap().behavior,
+            &cell.brain,
+            &w.config,
+        );
+    } else {
+        result["control"] = Value::Null;
     }
     result["upkeep"] = json!(cell.map(|c| {
         let age = c.age(&w.config, w.tick);

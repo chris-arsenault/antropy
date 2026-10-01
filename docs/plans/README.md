@@ -22,7 +22,15 @@ work stays explicit in an implementation phase.
 
 ## Active plans
 
-None. Open design directions without an active plan are listed in the
+No active implementation plan.
+
+## Local deliveries
+
+| Plan | Scope | Sulion |
+| --- | --- | --- |
+| [Utterances and strategic control](UTTERANCES-AND-STRATEGY-PLAN.md) | Complete funded carrier and inherited slow controller, local v49; CI/builds and bounded checks pass. Existing server world unchanged; no publication or deployment | `d0cb3e6d-df30-49aa-aa81-0690040f8dae` |
+
+Open design directions without an active plan are listed in the
 [design directions registry](../design/directions.md).
 
 ## Archived plans

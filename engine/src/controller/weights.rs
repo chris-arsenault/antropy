@@ -11,12 +11,15 @@ struct Owner {
     values: Vec<f32>,
     #[serde(skip)]
     program: OnceLock<Program>,
+    #[serde(skip)]
+    strategic_program: OnceLock<strategic::Program>,
 }
 impl Clone for Owner {
     fn clone(&self) -> Self {
         Self {
             values: self.values.clone(),
             program: OnceLock::new(),
+            strategic_program: OnceLock::new(),
         }
     }
 }
@@ -29,6 +32,7 @@ impl From<Vec<f32>> for WeightStore {
         Self(Arc::new(Owner {
             values,
             program: OnceLock::new(),
+            strategic_program: OnceLock::new(),
         }))
     }
 }
@@ -47,6 +51,7 @@ impl DerefMut for WeightStore {
     fn deref_mut(&mut self) -> &mut Self::Target {
         let owner = Arc::make_mut(&mut self.0);
         owner.program.take();
+        owner.strategic_program.take();
         &mut owner.values
     }
 }
@@ -72,6 +77,11 @@ impl<'a> IntoIterator for &'a mut WeightStore {
     }
 }
 impl WeightStore {
+    pub(super) fn strategic_program(&self) -> &strategic::Program {
+        self.0
+            .strategic_program
+            .get_or_init(|| strategic::Program::compile(self))
+    }
     pub(super) fn program(&self) -> &Program {
         self.0.program.get_or_init(|| Program {
             input: Projection::compile(&self[..RECURRENT], INPUTS),
@@ -106,7 +116,7 @@ pub(super) struct Projection {
     all_dense: bool,
 }
 impl Projection {
-    fn compile(weights: &[f32], width: usize) -> Self {
+    pub(super) fn compile(weights: &[f32], width: usize) -> Self {
         let mut result = Self {
             rows: Vec::with_capacity(weights.len() / width),
             columns: Vec::new(),

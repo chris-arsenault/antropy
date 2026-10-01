@@ -84,7 +84,7 @@ pub fn environment(w: &World) -> Result<(), String> {
             || !h.richness.is_finite()
             || h.richness < 0.
             || !(0. ..=1.).contains(&h.share)
-            || [s.amount, s.wait, s.rate, s.pending]
+            || [s.amount, s.wait, s.rate, s.pending, s.empty_elapsed]
                 .iter()
                 .any(|v| !v.is_finite() || *v < 0.)
             || s.mixture.len() != 256

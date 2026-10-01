@@ -83,6 +83,7 @@ fn spectator_allowlist_excludes_physical_and_cohort_mutations() {
         "step",
         "restart",
         "task",
+        "strategyAblation",
         "save",
         "intervene",
         "frame",

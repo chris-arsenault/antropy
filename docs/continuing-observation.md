@@ -6,6 +6,12 @@ The Rust/WASM system supports a continuing local run with worker rendering, chec
 and bounded observation history. Development establishes physical opportunities; it does not
 precompute the user's future community.
 
+Live-world interpretation follows the [ecology review guide](ecology-review-guide.md).
+Reservoir proximity is expected; departures, inter-colony population exchange and new colony
+founding require observations linked over time. Low-volume pruning is accepted quantization.
+The current operating goal is approximately 30 ticks/s at 2,000 cells, with low priority;
+it does not apply at 20,000 cells. The dated targets below retain their historical scope.
+
 The September 15 unattended tab crash prompted a separate
 [memory investigation and repair](plans/archive/LONG-RUN-RELIABILITY-PLAN.md). Active development-page
 checks reproduced retained React performance records and rapid renderer-process growth.
@@ -37,8 +43,8 @@ inspection are included.
 | 2,000 varied cells | 59.9 | 59.3 |
 | 2,000 cells with funded growth/division | 33.4 | 31.0 |
 
-All pass the 30-tick minimum. The 60-tick target is narrowly missed at the resting 2,000-cell
-load and not met during growth. GPU uploads/execution and browser rendering are excluded.
+All passed the then-stated 30-tick minimum. The historical 60-tick target was narrowly missed
+at the resting 2,000-cell load and not met during growth. GPU uploads/execution and browser rendering are excluded.
 The growth fixture is an explicitly funded computation load, not a viable ecosystem.
 Default startup separately retained 36 of 48 cells at tick 600 with one division
 (ledger 3663). After [resource-economy calibration](design/chemistry/resource-economy.md),

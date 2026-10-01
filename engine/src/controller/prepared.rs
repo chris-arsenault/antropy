@@ -55,7 +55,7 @@ pub fn act_owned(
     learn: bool,
     owner: u64,
 ) -> Action {
-    advance_with(g, inputs, state, config, learn, (Some(owner), u64::MAX))
+    advance_with(g, inputs, state, config, learn, (Some(owner), u128::MAX))
 }
 
 /// Physical owners publish the other channels when their local state changes.
@@ -71,11 +71,11 @@ pub fn act_published(
     advance_with(g, inputs, state, config, learn, (Some(owner), 0))
 }
 
-pub fn publish_inputs(state: &mut State, inputs: &[f32], mut channels: u64) {
+pub fn publish_inputs(state: &mut State, inputs: &[f32], mut channels: u128) {
     let Some(epoch) = &mut state.epoch else {
         return;
     };
-    channels &= (1_u64 << INPUTS) - 1;
+    channels &= CONTINUOUS_INPUTS;
     while channels != 0 {
         let i = channels.trailing_zeros() as usize;
         channels &= channels - 1;
@@ -93,7 +93,7 @@ pub(super) fn advance(
     learn: bool,
     owner: Option<u64>,
 ) -> Action {
-    advance_with(g, inputs, state, c, learn, (owner, u64::MAX))
+    advance_with(g, inputs, state, c, learn, (owner, u128::MAX))
 }
 
 fn advance_with(
@@ -102,7 +102,7 @@ fn advance_with(
     state: &mut State,
     c: &Config,
     learn: bool,
-    publication: (Option<u64>, u64),
+    publication: (Option<u64>, u128),
 ) -> Action {
     let (owner, channels) = publication;
     let plastic = c.learning == "plastic";
@@ -119,7 +119,7 @@ fn advance_with(
         let span = remaining.min(epoch.tau - epoch.elapsed);
         epoch.elapsed += span;
         if plastic && learn {
-            epoch.flow.paid_elapsed += span;
+            epoch.flow.paid_elapsed += span * state.strategy.learning_gain;
         }
         remaining -= span;
         if epoch.elapsed + 1e-12 >= epoch.tau {
@@ -130,7 +130,7 @@ fn advance_with(
                     / epoch.elapsed as f32;
             }
             epoch.expiry_counts[2] += 1;
-            evaluate(g, &values, state);
+            evaluate(g, &values, state, true);
         }
     }
     // Newly observed cues belong to the next interval, never the elapsed one.
@@ -159,14 +159,19 @@ fn initialize(g: &Genome, inputs: &[f32], state: &mut State, c: &Config, owner: 
         preparations: count,
         expiry_counts: reasons,
     });
-    evaluate(g, inputs, state);
+    evaluate(g, inputs, state, false);
 }
 
-fn evaluate(g: &Genome, inputs: &[f32], state: &mut State) {
+fn evaluate(g: &Genome, inputs: &[f32], state: &mut State, genuine: bool) {
     let epoch = state.epoch.as_mut().unwrap();
     epoch.flow.apply(&mut state.traces, &epoch.hidden);
     let mut values = [0.; INPUTS];
     values.copy_from_slice(inputs);
+    values[HEARING_INPUT..CONTEXT_INPUT].copy_from_slice(&if genuine {
+        state.hearing.consume()
+    } else {
+        [0.; hearing::CHANNELS]
+    });
     values[34] = state.task as f32 / 255.;
     let baseline = *state.last_energy.get_or_insert(values[28]);
     let baseline = values[28] + (baseline - values[28]) * (-epoch.elapsed / epoch.tau).exp() as f32;
@@ -219,11 +224,19 @@ fn evaluate(g: &Genome, inputs: &[f32], state: &mut State) {
     epoch.preparations += 1;
     state.hidden.copy_from_slice(&next);
     let action = decode(&logits, state);
+    if genuine {
+        state.pending_speech = Some((action.speech, action.speech_effort));
+    }
     state.epoch.as_mut().unwrap().action = action;
 }
 
 pub fn validate_state(state: &State) -> Result<(), String> {
-    if state.hidden.len() != HIDDEN
+    if !state.strategy.validate()
+        || !state.hearing.validate()
+        || state
+            .pending_speech
+            .is_some_and(|(_, effort)| !effort.is_finite() || !(0. ..=1.).contains(&effort))
+        || state.hidden.len() != HIDDEN
         || state.traces.len() != HIDDEN * HIDDEN
         || state
             .hidden
@@ -267,6 +280,7 @@ pub fn validate_state(state: &State) -> Result<(), String> {
                 action.repair,
                 action.cover,
                 action.emission,
+                action.speech_effort,
             ]
             .iter()
             .chain(&action.transport)

@@ -2,9 +2,10 @@
 
 **Status:** Current contract — the installed controller's observations, actions, topology, founder weights and learning boundary.
 
-One heritable Elman RNN chooses each organism's efforts. No fallback, task dispatcher, oracle
+The heritable reflex Elman RNN chooses each organism's efforts. A slow inherited
+[strategic controller](strategic-controller.md) supplies context and learning gain. No fallback, task dispatcher, oracle
 or external optimizer runs in the population. The controller identity is
-the 52×24×19 Rust controller with a physiological evaluation clock.
+the 83×24×28 Rust reflex controller with a physiological evaluation clock, plus a 61×8×5 slow layer.
 
 <a id="controller-observation-contract"></a>
 
@@ -26,6 +27,8 @@ the 52×24×19 Rust controller with a physiological evaluation clock.
 | 49 | Realized cover-builder activity (deposit positive, recovery negative) |
 | 50 | Realized emitter activity |
 | 51 | Previous paid local motor load from geographic resistance; zero without effort or with feedback disabled |
+| 52–78 | Exactly-once hearing: activity and eight signed bits, each with scalar, forward and left moments |
+| 79–82 | Four held strategic context values |
 
 Each receptor uses a heritable coordinate and shared compact affinity `max(0,1-d²/R²)²`, R=3, over the local mixture.
 Expressed receptor capacity supplies gain. Level is C/(C+K), with K=0.1; directional differences use
@@ -33,8 +36,9 @@ opposed perimeter samples divided by their sum plus 2K. Samples are bilinear and
 wrapped. They are local contrasts, not bearings to a source. Phasic input is current level minus
 the saved baseline; baseline relaxation uses 1−exp(−dt/2). Birth initializes it locally.
 
-Controllers receive no coordinates, compass, clock, chemical ID, route, lineage label, destination
-or reproductive score.
+Controllers receive no coordinates, compass, raw clock, chemical ID, route, lineage label,
+destination or reproductive score. The slow layer may receive present local circular rhythms
+and elapsed lifecycle state under its explicit perception boundary.
 
 Every paid actuator reports one shared reading: its accepted signed effect `a` since the
 previous physiology publication against its full-effort capacity `C` over the same time,
@@ -66,6 +70,8 @@ the v48 layout.
 | 9–16 | Positive saturation: activity of each enzyme program |
 | 17 | Signed saturation: deposit/recover overhead material with genetic builder capacity |
 | 18 | Positive saturation: paid light emission with genetic emitter capacity |
+| 19–26 | Signs decode the explicit eight-bit utterance; no automatic disclosure of the private byte |
+| 27 | Positive saturation: paid once-only utterance effort with genetic mouth capacity |
 
 A transporter's allele selects its chemical target. Neural output selects direction and effort:
 0 exports fully, 0.5 holds, and 1 imports fully. Actual transport requires machinery, available species, storage, conductance and
@@ -78,23 +84,27 @@ The task byte has no task semantics in physics; manual writes are recorded diagn
 
 ## Topology and founder
 
-The network has 52 inputs, 24 recurrent saturating units and 19 output logits: 1,248 input weights,
-576 recurrent weights, 24 hidden biases, 456 output weights and 19 output biases, totaling
-2,323 parameters. Eleven additional inherited loci define private plasticity. Bounded ports
+The reflex network has 83 inputs, 24 recurrent saturating units and 28 output logits: 1,992 input weights,
+576 recurrent weights, 24 hidden biases, 672 output weights and 28 output biases, totaling
+3,292 parameters. Eleven additional inherited loci define private plasticity. The slow controller
+has 605 neural parameters, eleven plasticity loci and ten retention/timescale/assimilation loci.
+Bounded ports
 belong to program records; inactive records have no function. Neutral duplication copies
 activity readouts and divides incoming capacity contributions. Deletion removes the program's
 ports and the daughter immediately expresses the resulting genetic body proportions.
 
 Private state includes 24 hidden values, 576 bounded traces, the private byte, a physiological
 execution epoch and previous
-energy fill. Four outward, four inward and one optical receptor baselines belong to body state. Weights/traces/hidden values
+energy fill, fixed pending/consumed hearing moments and checkpointed strategic integrals,
+long memories, context, noise and birth-local retained state. Four outward, four inward and one
+optical receptor baselines belong to body state. Weights/traces/hidden values
 use float32 storage and SIMD arithmetic. The shared rational activation is
 `x*(27+x²)/(27+9x²)` within [-3,3], saturated outside. Its maximum checked difference from tanh
 is below 0.024. This is an explicit modeling approximation, not preserved old trajectories.
 Each cell evaluates its RNN once per existing physiology interval (default 0.8 model seconds).
 Physical owners publish cues at their update boundary: external sensing supplies chemistry
 and light, physiology supplies realized actuator activity and internal state, and base stepping supplies
-energy, contact, paid motor load and the private byte. Each channel retains its value and publication time;
+energy, contact, paid motor load, context and the private byte. Continuous channels retain their value and publication time;
 the next evaluation integrates their signed time average, settles paid learning, updates
 hidden state and decodes one held action. Constant channels need no repeated base-step
 normalization or accumulation. New cues never act during the interval already elapsed.
@@ -105,6 +115,10 @@ the following atomic evaluation. Birth and interventions initialize a fresh loca
 Private traces retain an affine-flow epoch and paid elapsed time, materialized for evaluation,
 inspection or assimilation. Checkpoints retain cue integrals, publication times, clock remainder
 and held action.
+Hearing is an event measure: arrivals accumulate once, the next genuine scheduled evaluation
+consumes their bounded reduction and clears pending state. Initialization and cache invalidation
+neither consume arrivals nor propose speech. Event batches join after evaluations and current
+motor debits, before movement; no same-batch neural relay is possible.
 The [composed runtime](chemistry/composed-runtime.md#prepared-execution-and-physical-time)
 owns the equations. Controller matrices use SIMD and reuse storage; an earlier sparse-support
 cache increased complete workload cost and was rejected. Static learning advances no trace clock.
@@ -113,7 +127,10 @@ Ordinary mutable founder weights encode local chemical-gradient steering, reduce
 the first two receptor levels rise, contact turns, damage-dependent repair and active transport.
 Four mutable founder types start the circuit 0→128→136→8→0, six of each type in each colony.
 They recognize their input, use input-centered membrane compatibility, and express mild product
-export. Optical connections begin at zero and can mutate; there is no seeded light-seeking policy.
+export. Optical, hearing and context connections begin at zero and can mutate; there is no seeded
+light-seeking or speech-response policy. Mouth and ear start at the existing transporter/receptor
+reference ratios (0.04/0.01), with zero speech effort. The slow founder relays balance surprise
+and crowding to context, with neutral learning gain and no seeded context motor response.
 The [initial ecosystem design](chemistry/regenerative-ecosystem.md) explains their paid budgets. This seed is a declared initial
 condition, not an evolved discovery or an authored final community.
 

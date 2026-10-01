@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 48;
+pub const VERSION: u32 = 49;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -60,6 +60,12 @@ pub struct World {
     reactions: crate::metabolism::Executor,
     #[serde(skip)]
     physiology_jobs: Vec<physiology::Job>,
+    #[serde(skip)]
+    utterances: crate::utterances::Delivery,
+    #[serde(skip)]
+    pub(crate) strategy_sources: crate::strategic_local::Reservoirs,
+    #[serde(skip)]
+    step_positions: Vec<[f64; 2]>,
     #[serde(skip)]
     sites: Vec<crate::footprint::Row>,
     #[serde(skip)]
@@ -152,6 +158,7 @@ impl World {
                 ended: crate::ancestry::ALIVE,
                 cause: crate::ancestry::Cause::Alive,
             });
+            cell.brain = crate::controller::strategic::seed_state(environment_rng.next_u64());
             cells.push(cell);
         }
         let next_cell = cells.len() as u64 + 1;
@@ -188,6 +195,9 @@ impl World {
             contact_cache: Default::default(),
             reactions: Default::default(),
             physiology_jobs: Vec::new(),
+            utterances: Default::default(),
+            strategy_sources: Default::default(),
+            step_positions: Vec::new(),
             sites: Vec::new(),
             footprints: Default::default(),
             climate,
@@ -590,6 +600,7 @@ fn durable(kind: &str) -> bool {
     matches!(
         kind,
         "override"
+            | "strategy-ablation"
             | "intervention"
             | "authored-founders"
             | "external-pulse"

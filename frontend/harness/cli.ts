@@ -21,6 +21,7 @@ import { runChemistryPerformance } from "./lib/chemistryPerformance";
 import { runViability } from "./lib/viability";
 import { requireRegistration } from "./lib/longRun";
 import { runResourceEconomy } from "./numerical/resourceEconomy";
+import { runUtteranceStrategyCost } from "./numerical/utteranceStrategyCost";
 
 async function bacteria(flags: Flags) {
   const engine = await loadEngine(),
@@ -51,6 +52,11 @@ async function bacteria(flags: Flags) {
     );
 }
 const handlers: Record<string, (flags: Flags) => Promise<unknown>> = {
+  "utterance-strategy-cost": (f) =>
+    runUtteranceStrategyCost(
+      flag(f, "output", "harness/artifacts/utterance-strategy-cost"),
+      flag(f, "case", "all")
+    ),
   "resource-economy-check": runResourceEconomy,
   viability: runViability,
   "chemistry-performance": runChemistryPerformance,

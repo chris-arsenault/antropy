@@ -2,6 +2,18 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-01 — Utterances and strategic control (local delivery)
+
+- Added funded mouths and ears, explicit eight-bit speech and bounded listener-relative hearing
+  consumed once at the next reflex evaluation. Speech dissipates paid work and delivers no energy.
+- Added inherited slow context, shared history/surprise/volatility, local rhythm and contact
+  readings, and learning gain that scales reflex trace updates and paid work together.
+- Added selected-cell hearing/context inspection, bounded phenotype event/work reports and
+  checkpointed context-mean ablation through existing operator controls.
+- Advanced the complete physical format once to v49 without migration. The running v48 server
+  world remains unchanged; [delivery evidence](docs/utterances-and-strategy-results.md) records
+  bounded checks and costs.
+
 ## 2026-09-30 — Actuator feedback and review corrections
 
 - Replaced the biomass-proportional body-stock controller inputs with realized activity for

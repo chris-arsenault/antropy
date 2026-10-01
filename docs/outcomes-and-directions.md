@@ -159,7 +159,8 @@ feedstock dependence and weak public exchange remain.
 - A food web built on exchanged products: private recycling carries the large v33 colonies, and
   direct neighbour transfer stays near 2% of uptake.
 - Evolved cooperation, obligate multicellularity or profitable deliberate injury.
-- Communication: pre-chemistry neutral-signal secretion stayed low, and utterances are unimplemented.
+- Evolved communication: pre-chemistry neutral-signal secretion stayed low. Local v49 supplies
+  paid utterances; evolved conventions and sender return have not been measured.
 - A profitable shelter, lamp or public-food strategy in any probe.
 - Evolved dispersal or colonization: no observed v43 crossing founded a new colony.
 - Useful directional light navigation, beyond neural sensitivity to optical inputs.
@@ -174,13 +175,13 @@ feedstock dependence and weak public exchange remain.
 The [design directions registry](design/directions.md) lists every direction with its status;
 the [backlog](backlog.md) holds the unimplemented work list.
 
-### Deferred proposals
+### Selected local delivery and deferred proposals
 
 - **Directional cell utterances** — paid byte broadcasts with coarse 16-sector listener-relative
-  bearing, no material or work delivery. Deferred, specified September 24
+  bearing, no material or work delivery. Delivered locally in v49, October 1
   ([specification](design/cell-utterances.md), [backlog](backlog.md#backlog-cell-utterances)).
 - **Strategic controller** — a slow heritable Elman RNN whose outputs become reflex-RNN inputs and
-  a learning gain; it issues no actions. Deferred, specified September 30, expected after
+  a learning gain; it issues no actions. Delivered locally in v49, October 1, together with
   utterances ([specification](design/strategic-controller.md), [backlog](backlog.md#backlog-strategic-controller)).
 - **Rugged chemical interaction** — non-smooth genotype-to-chemical interaction so mutations can
   change a cell's chemical relationships qualitatively and co-located cells can occupy distinct

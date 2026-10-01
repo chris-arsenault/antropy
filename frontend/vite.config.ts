@@ -20,6 +20,8 @@ export default defineConfig({
   worker: { format: "es", plugins: () => [sourceIdentity()] },
   test: {
     environment: "happy-dom",
+    // Each file can own a WASM world; bound CPU and memory on shared development hosts.
+    maxWorkers: 1,
     exclude: [...configDefaults.exclude, "harness/artifacts/**"],
   },
 });

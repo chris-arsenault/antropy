@@ -16,12 +16,14 @@ field. Neither axis is height. Sampling, motion, contact, offspring placement an
 use the same periodic geometry. There is no map oracle, compass or alternate substrate.
 V46 adds static fractal height, conductance, optical cover and circular seasonal maps on this
 same plane. Shared resistance changes travel and external-material transport; conductance also
-changes public processing time. A paid local motor-load reading joins the controller's 59
-inputs. See the [geographic laws](chemistry/composed-runtime.md#geographic-composition).
+changes public processing time. The complete reflex has 83 inputs, including paid local motor
+load, 27 hearing moments and four slow context values. See the
+[geographic laws](chemistry/composed-runtime.md#geographic-composition) and
+[strategic controller](strategic-controller.md).
 Funded reproduction has no population-count ceiling. The ancestry budget and runtime memory
 limits remain independent operating limits; they do not kill cells or select parents.
 
-A cell owns position, heading, twenty-two body capacities derived from birth genes at current biomass, a 256-element float64 intracellular chemical
+A cell owns position, heading, twenty-four body capacities derived from birth genes at current biomass, a 256-element float64 intracellular chemical
 mixture, usable energy, injury, four outward/four inward chemical and one optical adaptive receptor baselines, contact state, private brain
 state and immutable-genotype/ancestry references. Stored chemical matter contributes volume and
 drag. Circular footprints use radius sqrt(occupied area/π). Paid movement and passive profile

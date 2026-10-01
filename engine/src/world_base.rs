@@ -8,6 +8,10 @@ mod tests;
 
 impl World {
     pub(super) fn advance_local(&mut self, sites: &[Row], physiology: bool) {
+        crate::strategic_local::publish(self, physiology);
+        self.step_positions.clear();
+        self.step_positions
+            .extend(self.cells.iter().map(|cell| [cell.x, cell.y]));
         if !self.cells.is_empty() {
             self.field.prepare_attraction();
         }
@@ -32,6 +36,7 @@ impl World {
             **d = motion.displacement(i, cell, config);
         });
         drop(jobs);
+        self.utterances.advance(&mut self.cells, config, self.tick);
         let geography = &self.field.illumination.shade.geography;
         crate::movement::prepared::blend_apply(
             &mut self.cells,
@@ -64,7 +69,14 @@ impl World {
             let paid = cell.pay(cell.basal(config, tick));
             cell.flows.maintenance += paid;
         });
-        for cell in &mut self.cells {
+        for (i, cell) in self.cells.iter_mut().enumerate() {
+            let start = self
+                .step_positions
+                .get(i)
+                .copied()
+                .unwrap_or([cell.x, cell.y]);
+            let g = self.genomes[&cell.genome].compiled.as_ref().unwrap();
+            crate::strategic_physiology::capture(cell, g, config, tick, start);
             record(
                 cell,
                 config.dt,
@@ -82,8 +94,10 @@ fn control(cell: &mut Cell, g: &Compiled, c: &Config) {
         crate::sensing::observe_physiology(cell, g, c);
     }
     crate::sensing::observe_base(cell, c);
+    cell.inputs[crate::controller::CONTEXT_INPUT..]
+        .copy_from_slice(&cell.brain.strategy.displayed());
     let cost = if c.learning == "plastic" {
-        c.plasticity_cost * c.dt * cell.body[0]
+        c.plasticity_cost * c.dt * cell.body[0] * cell.brain.strategy.learning_gain
     } else {
         0.
     };

@@ -40,21 +40,54 @@ impl Flow {
             return;
         }
         for i in 0..HIDDEN {
-            let lambda = self.decay[i] as f64;
-            let change = (-lambda * self.paid_elapsed).exp_m1();
-            let integrated = if lambda == 0. {
-                self.paid_elapsed
-            } else {
-                -change / lambda
-            };
-            arithmetic::trace_row(
+            apply_row(
                 &mut trace[i * HIDDEN..(i + 1) * HIDDEN],
                 pre,
-                (1. + change) as f32,
-                (self.gain[i] as f64 * integrated) as f32,
-                (self.offset[i] as f64 * integrated) as f32,
+                [self.decay[i], self.gain[i], self.offset[i]],
+                self.paid_elapsed,
             );
         }
+    }
+}
+
+fn apply_row(trace: &mut [f32], pre: &[f32], [decay, gain, offset]: [f32; 3], elapsed: f64) {
+    let lambda = decay as f64;
+    let change = (-lambda * elapsed).exp_m1();
+    let integrated = if lambda == 0. {
+        elapsed
+    } else {
+        -change / lambda
+    };
+    arithmetic::trace_row(
+        trace,
+        pre,
+        (1. + change) as f32,
+        (gain as f64 * integrated) as f32,
+        (offset as f64 * integrated) as f32,
+    );
+}
+
+pub(super) fn update(
+    trace: &mut [f32],
+    pre: &[f32],
+    next: &[f32],
+    p: &[f32],
+    modulation: f32,
+    elapsed: f64,
+) {
+    let eta = p[1].abs();
+    for (i, &y) in next.iter().enumerate() {
+        let flow = [
+            eta * y * y,
+            eta * modulation * (p[2] * y + p[3]),
+            eta * modulation * (p[4] * y + p[5]),
+        ];
+        apply_row(
+            &mut trace[i * pre.len()..(i + 1) * pre.len()],
+            pre,
+            flow,
+            elapsed,
+        );
     }
 }
 

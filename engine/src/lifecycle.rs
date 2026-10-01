@@ -58,7 +58,7 @@ fn child(w: &mut World, parent: &Cell, offset: [f64; 2]) -> Cell {
     crate::physiology::express(&mut cell, compiled);
     cell.born = w.tick;
     cell.generation += 1;
-    cell.brain = controller::State::default();
+    cell.brain = controller::strategic::daughter(&parent.brain, w.environment_rng.next_u64());
     cell.action = controller::Action::default();
     cell.contacts = [0.; 4];
     cell.activity = Default::default();
@@ -117,6 +117,8 @@ pub fn reproduce(w: &mut World) {
             o.division(cell, paid);
         }
         w.ledger.divisions += 1;
+        cell.brain.strategy.divisions += 1;
+        cell.brain.strategy.last_division_age = cell.age(&w.config, w.tick);
         if let Some(t) = &mut w.trace {
             t.life(cell, "division", w.tick);
         }

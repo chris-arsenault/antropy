@@ -1,11 +1,10 @@
 # Strategic controller
 
-**Status:** Deferred proposal — design specification of September 30, 2026; unimplemented and not the next work item.
+**Status:** Implemented locally with utterances, physical v49, October 1, 2026. The running v48 world is unchanged.
 
-[Directional cell utterances](cell-utterances.md) are expected to land first. When implementation
-is selected, revisit the open items at the end of this document before planning delivery. The
+[Directional cell utterances](cell-utterances.md) and strategy share one delivery. The
 [local RNN controller](controller.md) and [composed runtime](chemistry/composed-runtime.md) own
-installed behavior; this document defines a future extension.
+installed behavior; [delivery evidence](../utterances-and-strategy-results.md) records the bounded checks and costs.
 
 ## Purpose
 
@@ -56,7 +55,7 @@ every k physiology intervals (initial k = 8, 6.4 model s; calibrated at implemen
   y   = act(budget(W_o h_s + b_o))
   c   = y[0..4]                  context values in [-1, 1], held until the next evaluation
   g   = 1 + y[4]                 reflex learning gain in [0, 2]
-reflex RNN inputs 0–58 unchanged; c becomes inputs 59–62
+reflex RNN inputs 0–51 unchanged; hearing occupies 52–78; c becomes inputs 79–82
 ```
 
 `r` is a heritable per-unit retention in [0, 1), so evolution selects memory from one strategic
@@ -116,7 +115,7 @@ One operation supplies expectation, novelty and uncertainty for every channel. R
 | Channel | Source |
 | --- | --- |
 | Net energy balance | (income − upkeep − action costs) / energy capacity over the interval |
-| Energy fill | reflex input 28 |
+| Energy fill | actual usable work / actual capacity |
 | Injury | reflex input 36 |
 | Growth rate | biomass growth / biomass |
 | Receptor level | mean of the four outward receptor levels |
@@ -125,7 +124,9 @@ One operation supplies expectation, novelty and uncertainty for every channel. R
 | Motor load | reflex input 51 per unit swim effort |
 | Received light | funded optical level; zero without photoreceptors |
 
-These contribute 27 inputs.
+Utterance activity and signed-bit diversity use the same transform, adding six inputs.
+The eleven raw channels therefore contribute 33 inputs. Diversity is zero without heard
+activity; otherwise it is the mean `1 − mean(bit)²` over the eight signed bit components.
 
 ### Life history and self
 
@@ -162,8 +163,7 @@ Elapsed time is past state; the drawn remaining wait is never exposed.
 | Display coverage | total contact weight, saturated |
 | Noise | one uniform value in [-1, 1] per evaluation from the cell's environmental stream |
 
-These contribute 6 inputs; the total is 55. When utterances exist, add their received activity
-and byte diversity as raw channels of the shared history transform.
+These contribute 6 inputs; the complete total is 61.
 
 <a id="strategic-neighbor-display"></a>
 
@@ -212,7 +212,8 @@ controllerUpkeep = controllerCost × (1 + (P_s / T_strategic) / (P_f / T_physiol
 ```
 
 where P_s and P_f are strategic and reflex parameter counts. At the initial sizes this adds
-about 3% to controller upkeep.
+2.30% to controller upkeep: 605 strategic parameters against 3,292 reflex parameters,
+evaluated at one eighth of the reflex frequency.
 
 <a id="strategic-founder"></a>
 
@@ -228,8 +229,7 @@ authored. This is a declared initial condition.
 ## Observation
 
 The phenotype panel reports a selected cell's c, g, retention summary and neighbor display
-through bounded revisioned observations. An optional map layer colors cells by context vector
-from borrowed WASM views. The [data-ownership contract](chemistry/data-ownership.md) applies
+through bounded revisioned observations. The [data-ownership contract](chemistry/data-ownership.md) applies
 unchanged.
 
 <a id="strategic-implementation-checks"></a>
@@ -248,13 +248,27 @@ These are ordinary implementation work, recorded in a results document:
 
 <a id="strategic-open-items"></a>
 
-## Open items at implementation
+## Implementation choices
 
-- **Private byte:** decide whether the strategic layer should own or replace it, after
-  utterances define whether the byte is broadcast.
-- **Utterance channels:** add received activity and byte diversity to the shared history
-  transform.
-- **Contract amendments:** [local resource seasons](local-resource-seasons.md) states that cells
-  receive no supply phase; this design supersedes that for the strategic layer. Reflex inputs
-  grow to 63 and the physical checkpoint version advances without migration.
-- **Calibration:** strategic interval k, hidden size, λ range and founder relay magnitudes.
+The private byte remains reflex-owned and strategic read-only. Speaking has separate explicit
+byte outputs. The complete reflex layout is 83 inputs, 24 hidden units and 28 outputs.
+Physical format v49 advances once for both features, without migration. The previously running
+world is not changed by local delivery.
+
+The interval is eight physiology intervals; hidden width is eight; λ spans [2,8] with default
+5. Retention alleles map to [0,1), initially 0.5. Founder relays use unit weights, with zero
+reflex context connections and neutral learning gain. Strategic learning pays one ordinary
+physiology-update price per strategic evaluation. Reflex gain multiplies both paid trace time
+and its price. Basal upkeep, future motors and both learning layers are protected through the
+shared interval reserve before optional speech or growth.
+
+[Local resource seasons](local-resource-seasons.md) retains its reflex information boundary;
+the strategic layer additionally receives present local circular phases and past empty time.
+Checkpoint state retains the interval integrals, long memories, context, noise stream and
+ablation setting; derived spatial reductions rebuild on restore.
+
+The ordinary `strategyAblation` command takes `enabled: true` to clamp displayed context to
+each cell's long mean and `enabled: false` to restore generated context. An optional living
+`cell` ID selects one cell; omitting it applies the setting to every current cell. The selected
+cell inspector exposes the same control. Native execution requires the existing operator
+authentication. The intervention and each cell's setting survive checkpoints.

@@ -42,7 +42,7 @@ export function GroupComparison({ report }: { report: PhenotypeReport }) {
             </tr>
           </thead>
           <tbody>
-            {PHENOTYPE_TRAITS.map((label, i) => (
+            {PHENOTYPE_TRAITS.slice(0, report.groups[0].actual.length).map((label, i) => (
               <tr key={label}>
                 <th>{label}</th>
                 {groups.map((g, j) => (
@@ -74,7 +74,7 @@ export function GroupComparison({ report }: { report: PhenotypeReport }) {
 function WorkComparison({ groups }: { groups: PhenotypeGroup[] }) {
   return (
     <>
-      <h3>Recent work per living-cell second</h3>
+      <h3>Recent work and events per living-cell second</h3>
       <div className="phenotype-table-scroll">
         <table className="phenotype-table">
           <thead>
@@ -110,6 +110,9 @@ const ACCOUNTS: [string, (a: Activity) => number][] = [
   ["External work supplied", (a) => a.flows.externalWork],
   ["Maintenance", (a) => a.flows.maintenance],
   ["Movement", (a) => a.flows.motors],
+  ["Utterance work", (a) => a.flows.speechWork ?? 0],
+  ["Funded utterances (events)", (a) => a.flows.utterances ?? 0],
+  ["Received utterances (events)", (a) => a.flows.heard ?? 0],
   ["Transport", (a) => a.flows.transport],
   ["Reaction heat", (a) => a.flows.reactionHeat],
   ["Growth / division", (a) => a.flows.growth + a.division],

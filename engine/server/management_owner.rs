@@ -114,7 +114,13 @@ fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
         Operation::Control(c) => {
             if !matches!(
                 c.op.as_str(),
-                "running" | "step" | "speed" | "restart" | "task" | "phenotype"
+                "running"
+                    | "step"
+                    | "speed"
+                    | "restart"
+                    | "task"
+                    | "strategyAblation"
+                    | "phenotype"
             ) {
                 return Err(Error::Invalid("Unsupported management operation".into()));
             }

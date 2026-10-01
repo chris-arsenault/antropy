@@ -109,6 +109,7 @@ and let runtime consumers sample it; this exception does not change physical wor
 | Project primer         | [White paper](docs/white-paper.md), [outcomes and directions](docs/outcomes-and-directions.md) |
 | Governing principles   | [docs/principles.md](docs/principles.md)                                         |
 | Current work order     | [docs/design/README.md](docs/design/README.md)                                   |
+| Live-world and research-direction reviews | [Ecology review guide](docs/ecology-review-guide.md) — read before every review |
 | Current runtime contract | [docs/design/bacteria.md](docs/design/bacteria.md) |
 | Current evolutionary contract | [docs/design/funded-bodies.md](docs/design/funded-bodies.md) |
 | Dated measurements | [Light ecology checks (v42)](docs/light-ecology-results.md), [cellular delivery (v33)](docs/cellular-organization-results.md), [habitat evidence (v32)](docs/material-habitats.md), [runtime investigation (v32)](docs/session-runtime-review.md), [September 28 performance pass](docs/plans/archive/SCALING-PLAN.md#september-28-continuing-world-performance-pass) |
@@ -126,13 +127,21 @@ over long periods. Clusters, migration and a particular number of strategies are
 outcomes. A homeostatic colony is valid; new mechanisms need a physical opportunity and an
 accounted cost, not a long campaign certifying the user's future ecosystem.
 
-The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v46 uses one
+For every ecology review, follow the [review guide](docs/ecology-review-guide.md). Low-volume
+pruning loss is an accepted computational quantization artifact; do not repeatedly reopen it
+as a defect or research direction. Reservoir neighborhoods are habitable islands separated by
+inhospitable space, so reservoir proximity is expected. Assess departures, inter-colony
+population exchange (cross-pollination) and new colony founding over time. Universal permanent
+confinement and absent exchange or founding are concerns; a near/far snapshot cannot establish
+them. Report insufficient temporal coverage as unmeasured, not absent.
+
+The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v49 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
 mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
 
-Current physiology has 52 local RNN inputs, 24 recurrent units and 19 outputs, twenty-two derived
+Current physiology has 83 reflex RNN inputs, 24 recurrent units and 28 outputs, twenty-four derived
 body capacities, four receptors/transporters, one to eight enzyme programs, membrane compatibility
 and paid photoreception. Cells retain one internal mixture; internal compartments were rejected.
 Retained composition modulates rates without changing per-conversion work. Genetic inward sensing,
@@ -155,6 +164,12 @@ persistent fractal terrain, fractal source placement and local seasonal release/
 input 51 reports the previous paid local motor load. V48 replaces the biomass-proportional
 stock inputs with one realized-activity reading per paid actuator (transporters, enzyme
 programs, builder, emitter): accepted effect against full-effort capacity.
+V49 adds funded mouths/ears, once-only directional byte impulses and a 61×8×5 strategic RNN
+on an eight-physiology-interval clock. It reads own history, present local rhythms and contact
+displays; held context and paid learning gain affect only the reflex layer. Strategic memory
+copies at birth; newborn reflex memory, private byte and pending hearing reset. No language,
+signaling reward or dispersal policy is seeded. The live server remains v48 until a separately
+authorized cutover. See [delivery evidence](docs/utterances-and-strategy-results.md).
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
 washout, evolving source renewal and multiscale public transformations are implemented.
@@ -238,7 +253,9 @@ lineage counts or exact genotype counts. Genealogy is an optional historical dia
 [Continuing observation](docs/continuing-observation.md) records measured limits.
 
 Implementers own numerical methods, resolution, sparse thresholds and tuning within the stated
-semantics. Target at least 30 ticks/second and report workloads that miss it. Byte identity,
+semantics. The operating goal is approximately 30 ticks/second at approximately 2,000 cells,
+not at 20,000 cells. Performance currently has low priority; do not make large-population
+throughput a routine review concern, research priority or release gate. Byte identity,
 save compatibility and replayability are not optimization goals in themselves. Preserve physical
 meaning, accounts, ownership and the user's continuing world. Do not silently lower resolution.
 

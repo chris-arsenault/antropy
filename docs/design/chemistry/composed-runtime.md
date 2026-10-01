@@ -624,9 +624,28 @@ receptor supplies tonic, temporal, body-forward and body-left readings. Capacity
 gain vanishes with absent genetic capacity. A photoreceptor samples mean local
 illumination through those same rows and supplies the same four cues; its genetic reference
 uses the existing receptor mass scale. See [photoreception](../../photoreception.md).
-The 52-input, 24-recurrent-unit, 19-output private RNN
+The 83-input, 24-recurrent-unit, 28-output reflex RNN
 has no coordinates, property table, route, ancestry or reproductive score. Four-lane
 controller arithmetic is deterministic within each supported runtime.
+
+V49 adds funded [directional utterances](../cell-utterances.md) and a 61-input, eight-hidden,
+five-output [strategic layer](../strategic-controller.md). Hearing adds 27 exactly-once
+message/bearing moments; four held context values complete the reflex inputs. Speech uses
+separate eight-bit signs and effort, pays existing mouth power over the physiology interval,
+and reaches `sqrt((E/q − A0)/π)` only when `E > q A0`, with `q = 0.0002 work/area` and
+`A0 = birthMass/bodyDensity`. The half-shorter-world radius and shared interval reserves bound
+each affordable batch; work dissipates once, with no recipient work credit. Arrival ear gain
+and bearing freeze before movement; pending moments consume at the next genuine evaluation.
+
+The slow layer applies the same row budget, rational activation and paid bounded trace law
+every eight physiology intervals. Its eleven raw history channels share level, surprise and
+volatility transforms with a common genetic long-memory timescale. Present local rhythms and
+elapsed reservoir state are permitted only under its explicit perception boundary. Frozen
+previous contact displays prevent evaluation-order feedback. Its context influences only
+reflex inputs, and gain in [0,2] scales reflex learning rate and work together. Strategic memory
+and context copy at birth; newborn reflex memory, private byte and hearing reset. Strategy adds
+`605/(3292 × 8)` to controller upkeep and pays one physiology-update learning price per slow
+evaluation. Both layers' birth-local assimilation remains behind the controller boundary.
 
 Each paid actuator (transporters, enzyme programs, builder, emitter) accumulates accepted
 signed effect `a` and full-effort capacity `C` from its own execution step and publishes
