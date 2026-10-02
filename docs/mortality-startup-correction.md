@@ -63,6 +63,11 @@ plausible establishment improvement and closes the configured startup correction
 campaign or sweep was run. The current empty world requires an explicitly authorized restart
 to use the revised configuration; changing defaults does not change a saved world's parameters.
 
+October2: the user explicitly authorizes tuning and restarting and does not require preservation
+of old worlds. The [operating tuning](mortality-configuration-tuning.md) applies full batches to
+the native server and checks turnover beyond startup. No further restart-permission gate applies
+within that tuning request; the paragraph above records the earlier delivery boundary.
+
 `make ci` passes with 398 kernel tests, the native and persistence suites, 85 Vitest cases,
 both WASM builds, lint/type/format checks, documentation and experiment-storage guards.
 No physical format change is needed; existing v50 saves retain their stored configuration.

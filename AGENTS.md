@@ -62,6 +62,14 @@ Requested features must be enabled in ordinary startup; a diagnostic ablation is
 for active delivery. For documentation-only changes, check the changed text and links rather than
 rerunning runtime suites, production builds or ecological panels.
 
+When the user asks to tune or stabilize the world, choosing configurations and restarting runs
+are authorized parts of that work. Do not ask again to replace an empty or unsuitable run, and
+do not turn saved-world preservation into a prerequisite; the user explicitly does not require
+it for tuning. Stop measuring an extinct trial and start the next justified configuration rather
+than leaving an empty world running. Keep negative results. Improved startup alone does not
+establish a sustaining configuration: examine funded growth and birth/death replacement through
+ordinary renewals. Use bounded comparisons, then leave the selected populated world running.
+
 Close each plan and its children when the scoped implementation and authorized deployment are
 finished. Never leave a delivered plan open solely for visual review, the user's acknowledgment,
 more measurements, or a long-running world. Retire obsolete review phases as skipped with a
@@ -189,6 +197,8 @@ SourceLifetime is1200 model seconds, preserving full finite batches and their re
 priming while lowering the release ceiling. A rate change also changes batch and startup amounts
 through `rate*duration`; check the ordinary production founders rather than relying only on a
 handcrafted feeding fixture. The live server is v50; its first world starved at tick12,412.
+October2 operating tuning applies full batches to a restarted ordinary seed27 world, with
+turnover measured through source renewals. The user's tuning request authorizes restarts.
 See the [startup correction](docs/mortality-startup-correction.md) and
 [strategic delivery evidence](docs/utterances-and-strategy-results.md).
 

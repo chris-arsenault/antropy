@@ -110,7 +110,8 @@ After the deployed world starved, the ordinary-founder startup comparison expose
 establishment check. Current defaults retain rate0.1 but increase sourceLifetime from600 to1200,
 preserving full batches and reservoir-derived priming. Secondary8/128 priming was never halved.
 The [startup correction](mortality-startup-correction.md) records the observed improvement;
-the deployed empty world still needs an authorized restart to apply new configuration.
+configuration changes apply through a new-world restart. The user subsequently authorized
+[operating tuning and restarts](mortality-configuration-tuning.md), removing that permission gate.
 
 ## Default-rate check registration
 

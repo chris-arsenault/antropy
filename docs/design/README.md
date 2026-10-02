@@ -29,8 +29,13 @@ does not block delivery. Tau=60 model seconds and h_star=0.25 are installed; sou
 with sourceLifetime1200 preserving full finite batches at the reduced release ceiling.
 The first deployed v50 seed27 world starved at tick12,412. The
 [startup correction](../mortality-startup-correction.md) records its diagnosis and the bounded
-ordinary-founder comparison; a live restart remains separately authorized. The earlier
+ordinary-founder comparison. The October2 [operating tuning](../mortality-configuration-tuning.md)
+applies full batches to the native server under the user's explicit restart authorization. The earlier
 reservoir-storage proposal is not a dependency.
+
+The operating comparison reached30,252 ticks with472 living cells. Its late interval had1594
+divisions and1591 deaths, rather than continued starvation collapse. Keep rate0.1/T1200/G600
+with recovery enabled and leave the selected world running; no extra configuration trials were needed.
 
 <a id="design-actuator-feedback"></a>
 

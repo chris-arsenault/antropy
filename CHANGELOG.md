@@ -2,6 +2,15 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-02 — Sustaining configuration applied to the server
+
+- Restarted the extinct server world with ordinary seed27 and the delivered full-batch defaults:
+  rate0.1, duration1200, gap600 and enabled mortality recovery. The
+  [operating comparison](docs/mortality-configuration-tuning.md) reached30,252 ticks with472
+  living cells and sustained late-window replacement; the selected world remains running.
+- Made tuning requests authorize configuration choices and world restarts without repeated
+  permission questions or saved-world preservation gates. No physical law or format changed.
+
 ## 2026-10-01 — Mortality driven reservoir recycling (local delivery)
 
 - Corrected the rollout's reduced startup supply: sourceRate stays0.1 with recovery enabled,

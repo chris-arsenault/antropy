@@ -254,7 +254,8 @@ Useful ecological range and evolved dispersal remain unmeasured.
 The deployed seed27 world later reached starvation extinction at tick12,412. The short feeding
 fixture did not check establishment with ordinary founders and halved startup stock. The duration
 correction retains full batches at the lower ceiling; its bounded startup result supports delivery
-without establishing long-term survival. The extinct live world requires an authorized restart.
+without establishing long-term survival. The user subsequently authorized restarts and
+[operating tuning](../mortality-configuration-tuning.md); the selected populated world is left running.
 
 ## Relationship to earlier proposals
 

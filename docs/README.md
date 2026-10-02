@@ -73,6 +73,10 @@ the priming fraction remain unchanged. SourceLifetime1200 retains full batches a
 ceiling. The first deployed world starved; the [startup correction](mortality-startup-correction.md)
 records the diagnosis and ordinary-founder comparison.
 
+The October2 [operating tuning](mortality-configuration-tuning.md) applies those defaults to
+the native server: the ordinary world reached30,252 ticks with472 cells and ongoing replacement
+through renewals. It remains running. Tuning requests authorize restarts without another prompt.
+
 ## Deferred proposals
 
 | Direction                                                              | Document                                                                                                     |

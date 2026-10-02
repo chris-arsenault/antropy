@@ -66,6 +66,11 @@ object and send it with `restart`. Configuration changes start a new world; this
 mutate physical parameters mid-run. Invalid restart configuration leaves the old world intact.
 Restart resets speed to maximum and returns its new generation and tick zero before stepping.
 
+For an explicit request to tune or stabilize the world, selecting configurations and restarting
+unsuitable or empty runs are already authorized. The user does not require old-world preservation
+for that work. Keep bounded operating evidence, apply the selected configuration and leave the
+populated world running; do not ask for separate restart permission within that scope.
+
 ## Checkpoint cost and format
 
 Export captures the ordinary versioned Rust physical checkpoint, including cells, genomes,
