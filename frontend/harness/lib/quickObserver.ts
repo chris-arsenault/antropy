@@ -7,6 +7,10 @@ interface TraceGroup {
   initialGenome: number;
   initialCells: number;
   living: number;
+  initialBiomass: number;
+  livingBiomass: number;
+  livingInventory: number;
+  livingEnergy: number;
   founders: { id: number; firstUptake: number | null; arrival: number | null }[];
   ledger: Summary["ledger"];
   chemical: CellState["chemicalFlows"];
@@ -41,6 +45,10 @@ function combine(groups: TraceGroup[]): TraceGroup[] {
     for (const key of [
       "initialCells",
       "living",
+      "initialBiomass",
+      "livingBiomass",
+      "livingInventory",
+      "livingEnergy",
       "organismSeconds",
       "damageSeconds",
       "slowedSeconds",
@@ -76,6 +84,12 @@ function result(group: TraceGroup, definition: Definition) {
     genome: group.initialGenome,
     initialCells: group.initialCells,
     living: group.living,
+    initialBiomass: group.initialBiomass,
+    livingBiomass: group.livingBiomass,
+    livingInventory: group.livingInventory,
+    livingEnergy: group.livingEnergy,
+    deaths: group.ledger.deaths,
+    births: group.ledger.births,
     flows,
     organismSeconds: group.organismSeconds,
     meanDamagePercent: percent(group.damageSeconds, group.organismSeconds),
@@ -130,6 +144,7 @@ export class QuickObserver {
         y: cell.y,
         heading: cell.heading,
         body: cell.body,
+        boundBiomass: cell.boundMaterial.material,
         energy: cell.energy,
         damage: cell.damage,
         action: cell.action,

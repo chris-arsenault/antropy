@@ -57,12 +57,33 @@ pub fn habitat(w: &crate::world::World) -> serde_json::Value {
 mod tests {
     use super::*;
     #[test]
+    fn conservative_fission_does_not_increase_observed_biomass() {
+        let mut w = crate::diagnostics::nutrition(0.8, 2., false, false);
+        let body = w.cells[0].body.map(|q| q * 2.);
+        w.cells[0].set_fixture_body(body);
+        w.cells[0].energy = 1.;
+        w.trace = Some(Trace::new(&w.cells, None));
+        let before = w.cells[0].mass();
+        crate::lifecycle::reproduce(&mut w);
+        assert_eq!(w.cells.len(), 2);
+        w.trace
+            .as_mut()
+            .unwrap()
+            .finish(&w.cells, &w.config, w.tick);
+        let g = &w.trace.as_ref().unwrap().groups[&1];
+        assert_eq!(g.living, 2);
+        assert_eq!(g.initial_cells, 1);
+        assert!((g.living_biomass - before).abs() < 1e-12);
+        assert_eq!(g.initial_biomass, before);
+    }
+    #[test]
     fn observers_preserve_physics_and_capture_descendants_and_reaction_edges() {
         let mut observed = crate::diagnostics::nutrition(0.8, 2., true, false);
         let body = observed.cells[0].body.map(|q| q * 2.);
         observed.cells[0].set_fixture_body(body);
         observed.cells[0].energy = 1.;
         crate::diagnostics::initialize(&mut observed);
+        let initial_biomass = observed.cells[0].mass();
         let mut control = observed.clone();
         observed.trace = Some(Trace::new(&observed.cells, Some([12., 12., 4.])));
         for _ in 0..16 {
@@ -78,6 +99,15 @@ mod tests {
         assert!(g.ledger.divisions > 0);
         assert_eq!(g.ledger.births, observed.ledger.births);
         assert_eq!(g.living, observed.cells.len());
+        assert_eq!(g.initial_biomass, initial_biomass);
+        assert_eq!(
+            g.living_biomass,
+            observed.cells.iter().map(Cell::mass).sum::<f64>()
+        );
+        assert_eq!(
+            g.living_inventory,
+            observed.cells.iter().map(Cell::material).sum::<f64>()
+        );
         assert!((g.ledger.flows.imported - observed.ledger.flows.imported).abs() < 1e-12);
         assert!(
             (g.reactions.iter().map(|r| r.amount).sum::<f64>() - observed.ledger.flows.reacted)
@@ -105,6 +135,9 @@ mod tests {
         assert_eq!(observed.snapshot().unwrap(), control.snapshot().unwrap());
         let g = &observed.trace.as_ref().unwrap().groups[&1];
         assert_eq!(g.living, 0);
+        assert_eq!(g.living_biomass, 0.);
+        assert_eq!(g.living_inventory, 0.);
+        assert_eq!(g.living_energy, 0.);
         assert_eq!(g.ledger.deaths, observed.ledger.deaths);
     }
 }
@@ -115,6 +148,10 @@ pub struct Group {
     pub initial_genome: u64,
     pub initial_cells: usize,
     pub living: usize,
+    pub initial_biomass: f64,
+    pub living_biomass: f64,
+    pub living_inventory: f64,
+    pub living_energy: f64,
     pub founders: Vec<Founder>,
     pub ledger: Ledger,
     pub chemical: ChemicalFlows,
@@ -148,6 +185,10 @@ impl Trace {
             let g = trace.group(c);
             g.initial_cells += 1;
             g.living += 1;
+            g.initial_biomass += c.mass();
+            g.living_biomass += c.mass();
+            g.living_inventory += c.material();
+            g.living_energy += c.energy;
             g.founders.push(Founder {
                 id: c.id,
                 first_uptake: None,
@@ -163,6 +204,10 @@ impl Trace {
             initial_genome: c.genome,
             initial_cells: 0,
             living: 0,
+            initial_biomass: 0.,
+            living_biomass: 0.,
+            living_inventory: 0.,
+            living_energy: 0.,
             founders: vec![],
             ledger: Ledger::default(),
             chemical: ChemicalFlows::default(),
@@ -261,11 +306,17 @@ impl Trace {
     pub fn finish(&mut self, cells: &[Cell], config: &Config, tick: u64) {
         for g in self.groups.values_mut() {
             g.living = 0;
+            g.living_biomass = 0.;
+            g.living_inventory = 0.;
+            g.living_energy = 0.;
         }
         let target = self.target;
         for c in cells {
             let g = self.group(c);
             g.living += 1;
+            g.living_biomass += c.mass();
+            g.living_inventory += c.material();
+            g.living_energy += c.energy;
             if target.is_some_and(|t| distance([c.x, c.y], [t[0], t[1]], config) <= t[2])
                 && let Some(f) = g
                     .founders

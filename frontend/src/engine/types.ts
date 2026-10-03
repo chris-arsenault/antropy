@@ -9,6 +9,8 @@ export interface EngineConfig extends Record<string, unknown> {
   mesh: number;
   dt: number;
   physiologyInterval: number;
+  bindingLambda: number;
+  radialFounders: boolean;
   agingTime: number;
   weatheringRate: number;
   illuminationContrast: number;
@@ -164,18 +166,7 @@ export interface Ancestor {
   ended: number | null;
   cause: string;
 }
-export interface Target {
-  x: number;
-  y: number;
-}
-export interface Machinery {
-  receptors: Target[];
-  inward: number[];
-  programs: boolean[];
-  transporters: Target[];
-  enzymes: (Target & { centerX: number; centerY: number; angle: number })[];
-  membrane: Target;
-}
+export type { Target, Machinery } from "./bindingTypes";
 export interface Genotype {
   id: number;
   parent: number | null;
@@ -185,7 +176,7 @@ export interface Genotype {
   chromosomes: {
     behavior: { weights: number[]; plasticity: number[] };
     physical: number[];
-    chemistry: Machinery;
+    chemistry: import("./bindingTypes").Machinery;
   }[];
 }
 export interface CellState {
@@ -237,6 +228,7 @@ export interface Inspection {
   ancestor: Ancestor;
   genotype: Genotype | null;
   blueprint: number[] | null;
+  recognition?: import("./bindingTypes").RecognitionProfile | null;
   exposure: number | null;
   impedance: number | null;
   mobility: number | null;

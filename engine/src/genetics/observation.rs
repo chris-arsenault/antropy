@@ -7,9 +7,15 @@ pub(super) struct Cache {
     identity: Arc<()>,
     distance: OnceLock<(Weak<()>, f64)>,
     traits: OnceLock<[f64; 9]>,
+    recognition: Arc<OnceLock<serde_json::Value>>,
 }
 
 impl Compiled {
+    pub(crate) fn recognition(&self, c: &crate::config::Config) -> &serde_json::Value {
+        self.observation
+            .recognition
+            .get_or_init(|| crate::recognition_observation::report(self, c))
+    }
     pub(crate) fn controller_distance(&self, reference: &Self) -> f64 {
         if Arc::ptr_eq(&self.observation.identity, &reference.observation.identity) {
             return 0.;
@@ -33,13 +39,14 @@ impl Compiled {
     pub(crate) fn census_traits(&self, birth_mass: f64) -> [f64; 9] {
         let mut traits = *self.observation.traits.get_or_init(|| {
             let b = self.body;
-            let m = &self.chromosome.chemistry;
+            let membrane = crate::recognition_observation::preferred(&self.operators.membrane);
             let import = b[7..11].iter().sum::<f64>();
             let weighted = |axis: usize| {
-                m.transporters
+                self.operators
+                    .transporters
                     .iter()
                     .enumerate()
-                    .map(|(i, t)| b[7 + i] * [t.x, t.y][axis])
+                    .map(|(i, t)| b[7 + i] * crate::recognition_observation::preferred(t)[axis])
                     .sum::<f64>()
                     / import.max(1e-30)
             };
@@ -52,8 +59,8 @@ impl Compiled {
                     .map(|s| b[crate::organism::enzyme_stock(s)])
                     .sum::<f64>()
                     / b[0],
-                m.membrane.x,
-                m.membrane.y,
+                membrane[0],
+                membrane[1],
                 weighted(0),
                 weighted(1),
             ]

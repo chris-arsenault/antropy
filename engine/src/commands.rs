@@ -50,6 +50,8 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         "assayFrame" => Ok(crate::trace::frame(w)),
         "habitatSample" => Ok(crate::trace::habitat(w)),
         "summary" => Ok(observation::summary(w)),
+        "bindingBudget" => crate::binding_observation::budget(w, v),
+        "recognitionProbe" => crate::recognition_probe::run(w, v),
         "chemicalOverview" => Ok(crate::chemical_observation::overview(w)),
         "phenotype" => crate::phenotype_commands::execute(w, v),
         "chemicalWeb" => Ok(crate::chemical_roles::overview(
@@ -162,7 +164,8 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
                 })
                 .collect();
             Ok(
-                json!({"expressed":compiled.chromosome,"blueprint":compiled.body,"sourceImportCapacity":capacity}),
+                json!({"expressed":compiled.chromosome,"blueprint":compiled.body,"sourceImportCapacity":capacity,
+                    "recognition":compiled.recognition(&w.config)}),
             )
         }
         "assimilatedGenotype" => {
@@ -511,6 +514,9 @@ fn load_program_fixture(
             }
             a.chemistry.membrane.x = rng.unit() * 15.;
             a.chemistry.membrane.y = rng.unit() * 15.;
+            if a.chemistry.keys.is_some() {
+                a.chemistry.keys = Some(crate::binding::Keys::founders(&a.chemistry));
+            }
             crate::controller::diagnostics::perturb_weights(&mut a.behavior, &mut rng);
         }
         g.compile(&w.config, &w.chemistry);

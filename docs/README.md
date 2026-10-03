@@ -83,7 +83,7 @@ through renewals. It remains running. Tuning requests authorize restarts without
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Gradual geographic change, tectonics and bounded local events          | [Dynamic terrain](design/dynamic-terrain.md)                                                                 |
 | Finite resource storage, local depletion and seasonal recharge         | [Reservoir storage](design/reservoir-storage.md)                                                             |
-| Rugged chemical interaction: surprising mutations and co-located roles | [Direction](design/rugged-interaction.md), [Kauffman research paper](design/kauffman-landscapes-research.md) |
+| Rugged chemical interaction: surprising mutations and co-located roles | Local v52 [direction](design/rugged-interaction.md), [inherited ecological consequences and tuning](rugged-ecology-results.md), [delivery findings](rugged-interaction-results.md), [constructed food chain and harm](rugged-community-results.md), [ordinary descendants and dependency](rugged-ordinary-calibration-results.md), [Kauffman research paper](design/kauffman-landscapes-research.md) |
 
 ## Historical design records
 

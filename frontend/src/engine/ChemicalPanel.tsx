@@ -73,7 +73,7 @@ export function ChemicalPanel({
         Amounts exclude material inside cells and unreleased source reserves. Peak is the highest
         mesh concentration.
       </p>
-      <ChemicalAtlas definition={definition} machinery={null} />
+      <ChemicalAtlas definition={definition} machinery={null} recognition={null} />
     </section>
   );
 }

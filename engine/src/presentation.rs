@@ -67,16 +67,28 @@ fn physical(g: &Chromosome) -> Vec<f64> {
     let m = &g.chemistry;
     out.extend(m.inward);
     out.extend(m.programs.map(f64::from));
-    for r in &m.receptors {
-        out.extend([r.x / 15., r.y / 15.]);
-    }
-    for t in &m.transporters {
-        out.extend([t.x / 15., t.y / 15.]);
+    out.push(f64::from(m.keys.is_some()));
+    for (site, point) in m
+        .receptors
+        .iter()
+        .map(|p| p.point())
+        .chain(m.transporters.iter().map(|p| [p.x, p.y]))
+        .chain(m.enzymes.iter().map(|p| [p.x, p.y]))
+        .chain([m.membrane.point()])
+        .enumerate()
+    {
+        if let Some(keys) = &m.keys {
+            let key = keys.site(site);
+            out.extend(key.weights);
+            out.push(key.bias / crate::binding::BIAS_BOUND);
+        } else {
+            out.extend([point[0] / 15., point[1] / 15.]);
+            out.extend([0.; 7]);
+        }
     }
     for e in &m.enzymes {
-        out.extend([e.x / 15., e.y / 15., e.center_x / 15., e.center_y / 15.]);
+        out.extend([e.center_x / 15., e.center_y / 15.]);
     }
-    out.extend([m.membrane.x / 15., m.membrane.y / 15.]);
     out
 }
 pub fn physical_distance(a: &Chromosome, b: &Chromosome) -> f64 {
@@ -103,9 +115,11 @@ pub fn physical_distance(a: &Chromosome, b: &Chromosome) -> f64 {
 fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32; 3] {
     let m = &g.chromosome.chemistry;
     let b = &g.body;
+    let membrane = crate::recognition_observation::preferred(&g.operators.membrane);
+    let import = crate::recognition_observation::preferred(&g.operators.transporters[0]);
     let fraction = match mode {
-        6 => m.membrane.x / 15.,
-        7 => m.membrane.y / 15.,
+        6 => membrane[0] / 15.,
+        7 => membrane[1] / 15.,
         8 => b[1] / b[0] / 0.16,
         9 => {
             m.transporters
@@ -136,10 +150,7 @@ fn genotype_color(g: &Compiled, reference: Option<&Compiled>, mode: u32) -> [f32
         }
         _ => {
             return hue_rgb(
-                (m.transporters[0].x / 15. * 0.65
-                    + m.transporters[0].y / 15. * 0.25
-                    + m.membrane.y / 15. * 0.1)
-                    .fract(),
+                (import[0] / 15. * 0.65 + import[1] / 15. * 0.25 + membrane[1] / 15. * 0.1).fract(),
             );
         }
     };

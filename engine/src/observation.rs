@@ -26,12 +26,9 @@ pub struct CellView {
     pub task: u8,
 }
 fn cell_view(cell: &Cell, w: &World) -> CellView {
-    let g = &w.genomes[&cell.genome]
-        .compiled
-        .as_ref()
-        .unwrap()
-        .chromosome
-        .chemistry;
+    let g = w.genomes[&cell.genome].compiled.as_ref().unwrap();
+    let import = crate::recognition_observation::preferred(&g.operators.transporters[0]);
+    let membrane = crate::recognition_observation::preferred(&g.operators.membrane);
     CellView {
         id: cell.id,
         parent: cell.parent,
@@ -49,12 +46,7 @@ fn cell_view(cell: &Cell, w: &World) -> CellView {
         mass: cell.mass(),
         damage: cell.damage,
         born: cell.born,
-        phenotype: [
-            g.transporters[0].x,
-            g.transporters[0].y,
-            g.membrane.x,
-            g.membrane.y,
-        ],
+        phenotype: [import[0], import[1], membrane[0], membrane[1]],
         task: cell.brain.task,
     }
 }
@@ -247,6 +239,8 @@ pub fn selected(w: &World, id: u64, request: &Value) -> Result<Value, String> {
         result["genotype"] = json!(genome);
         result["expressed"] = json!(expressed);
         result["blueprint"] = json!(genome.map(|g| g.compiled.as_ref().unwrap().body));
+        result["recognition"] =
+            json!(genome.map(|g| g.compiled.as_ref().unwrap().recognition(&w.config)));
     }
     Ok(result)
 }

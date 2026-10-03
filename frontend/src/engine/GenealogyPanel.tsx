@@ -236,7 +236,7 @@ function FamilyTraits({ status }: { status: LiveStatus }) {
           <tr>
             <th>Family</th>
             <th>Motor / core</th>
-            <th>Membrane X, Y</th>
+            <th>Strongest membrane identity X, Y</th>
           </tr>
         </thead>
         <tbody>

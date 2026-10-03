@@ -54,6 +54,29 @@ pub fn budget(
     inventory: f64,
     swim: f64,
 ) -> Budget {
+    budget_with_action(
+        c,
+        chemistry,
+        g,
+        scale,
+        local,
+        inventory,
+        crate::controller::Action {
+            swim,
+            transport: [1.; 4],
+            ..Default::default()
+        },
+    )
+}
+pub fn budget_with_action(
+    c: &Config,
+    chemistry: &Chemistry,
+    g: &Compiled,
+    scale: f64,
+    local: &[f64; 256],
+    inventory: f64,
+    action: crate::controller::Action,
+) -> Budget {
     let external = std::array::from_fn(|k| {
         local
             .iter()
@@ -69,14 +92,17 @@ pub fn budget(
         let r = &g.operators.transporters[slot];
         let total = r.iter().map(|a| a.value * local[a.species]).sum::<f64>();
         for a in r.iter() {
-            imports[a.species] +=
-                cell.body[7 + slot] * c.transporter_turnover * a.value * local[a.species]
-                    / (c.receptor_k + total);
+            imports[a.species] += cell.body[7 + slot]
+                * c.transporter_turnover
+                * (2. * action.transport[slot] - 1.).max(0.)
+                * a.value
+                * local[a.species]
+                / (c.receptor_k + total);
         }
     }
     let maintenance = maintenance_rate(&cell.body, 0., 0., c);
     let transport = imports.iter().sum::<f64>() * c.transport_energy;
-    let motor = crate::movement::motor_work_rate(&cell.body, 0., swim, 0., c);
+    let motor = crate::movement::motor_work_rate(&cell.body, 0., action.swim, 0., c);
     // Conditional internal mixture: the imported proportions, with no accumulated products.
     // Product feedback in a live cell can lower this bound further.
     let total_import = imports.iter().sum::<f64>();
@@ -110,7 +136,9 @@ pub fn budget(
             .iter()
             .map(|a| a.value * inside[a.species])
             .sum::<f64>();
-        let rate = cell.body[crate::organism::enzyme_stock(slot)] * c.enzyme_turnover
+        let rate = cell.body[crate::organism::enzyme_stock(slot)]
+            * c.enzyme_turnover
+            * action.activity[slot]
             / (c.receptor_k * cell.volume(c) + occupancy).max(1e-30);
         for edge in &e.conversions {
             let q = rate

@@ -40,6 +40,7 @@ const fields = [
   ["illuminationSlowPeriod", "Illumination cross cycle (model seconds)", 1],
   ["illuminationModulationPeriod", "Illumination modulation (model seconds)", 1],
   ["viscosity", "Viscosity", 0.00001],
+  ["bindingLambda", "Chemical recognition steepness", 0.00001],
   ["mutationRate", "Controller mutation probability", 0],
   ["physicalMutationRate", "Physical mutation probability", 0],
   ["learningRetention", "Learned change inherited", 0],
@@ -107,14 +108,7 @@ export function Settings({
         <TerrainSettings config={config} change={setConfig} />
         <details>
           <summary>Ecology and mutation settings</summary>
-          <label>
-            Mortality-driven reservoir recovery{" "}
-            <input
-              type="checkbox"
-              checked={config.mortalityRecovery}
-              onChange={(e) => setConfig((c) => ({ ...c, mortalityRecovery: e.target.checked }))}
-            />
-          </label>
+          <EcologySwitches config={config} change={setConfig} />
           {fields.map(([key, label, min]) => (
             <label key={key}>
               {label}{" "}
@@ -144,6 +138,29 @@ export function Settings({
       </fieldset>
     </details>
   );
+}
+
+function EcologySwitches({
+  config,
+  change,
+}: {
+  config: EngineConfig;
+  change: React.Dispatch<React.SetStateAction<EngineConfig>>;
+}) {
+  const switches = [
+    ["radialFounders", "Radial founder recognition (diagnostic ablation)"],
+    ["mortalityRecovery", "Mortality-driven reservoir recovery"],
+  ] as const;
+  return switches.map(([key, label]) => (
+    <label key={key}>
+      {label}{" "}
+      <input
+        type="checkbox"
+        checked={config[key]}
+        onChange={(e) => change((c) => ({ ...c, [key]: e.target.checked }))}
+      />
+    </label>
+  ));
 }
 
 function Policies({

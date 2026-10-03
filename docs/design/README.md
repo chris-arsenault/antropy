@@ -13,6 +13,22 @@ comparing research directions. It records accepted pruning quantization, expecte
 proximity, the questions about inter-colony exchange and new colony founding, and the
 approximately 30-tick/s goal at 2,000 cells with its current low priority.
 
+October2 local physical v52 enables inherited [complementarity recognition](rugged-interaction.md)
+for ordinary founders, descendants, sensing, transport, enzymes and membranes. Compiled profiles
+and susceptibility are observable in the inspector/atlas; strongest-identity summaries replace
+obsolete recognition coordinates. The [delivery comparison](../rugged-interaction-results.md)
+records bounded full-space and ordinary-world findings. The live v50 world is unchanged.
+October3 [causal iteration](../rugged-community-results.md) demonstrates constructed cross-feeding
+and genotype-dependent harm from the same intermediate. Subsequent
+[ordinary calibration](../rugged-ordinary-calibration-results.md) observes inherited binding
+jumps and isolates a changed chemical dependency in an actual descendant. The subsequent
+[ecology iteration](../rugged-ecology-results.md) preserves actual neighborhoods and private
+experience: restoring one inherited weight removes reproduction; restoring another bias
+changes a neighbor's movement and survival. Ordinary worlds cover renewals and descendant
+replacement. Shared recognition steepness6 is selected for new worlds; spontaneous
+complementary cross-feeding and permanent roles remain unestablished. The
+[ecology plan](../plans/RUGGED-ECOLOGY-PLAN.md) records these criteria for future decisions.
+
 October 1 local delivery adds funded directional utterances and inherited slow strategic
 control in physical v49, subsequently deployed before v50. The complete
 [controller](controller.md) has 83 reflex inputs and 28 outputs; mouth and ear bring derived
@@ -275,7 +291,7 @@ changes improved it; this historical diagnosis is not the current work order.
 | [Light ecology](light-ecology.md)                                                                             | Implemented v42: scalar illumination, geographic shade, overhead film, paid emission and shared optical accounting                                                                                                 |
 | [Directional cell utterances](cell-utterances.md)                                                             | Local v49 delivery: paid bytes, coarse listener-relative bearing, funded inheritance and exactly-once hearing                                                                                                      |
 | [Strategic controller](strategic-controller.md)                                                               | Local v49 delivery: slow learned history, local rhythms, contact display, inherited context and paid learning gain                                                                                                 |
-| [Rugged chemical interaction](rugged-interaction.md)                                                          | Deferred research direction for surprising mutations and co-located roles; [Kauffman research paper](kauffman-landscapes-research.md)                                                                              |
+| [Rugged chemical interaction](rugged-interaction.md) | Local v52 complementarity enabled in ordinary startup; [ecological consequences and tuning](../rugged-ecology-results.md), [initial findings](../rugged-interaction-results.md), [research paper](kauffman-landscapes-research.md) |
 | [Mortality recycling](mortality-recycling.md) | Local v50 delivery, enabled by default with sourceRate0.1; [findings](../mortality-recycling-results.md) |
 | [Material habitats](../material-habitats.md)                                                                  | Two-scale binding, retention, renewal, public chemistry and bounded evidence                                                                                                                                       |
 | [Experimentation](experimentation.md)                                                                         | Small proof points, diagnostic comparisons and limits of inference                                                                                                                                                 |
@@ -307,7 +323,7 @@ body capacities directly at current biomass, including four chemical receptors, 
 one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v50; the outer observation package remains v11. Local delivery rejects older
+checkpoints use v52; the outer observation package remains v11. Local delivery rejects older
 physical formats without migration; the live server now runs v50. Its initial world starved;
 the [startup correction](../mortality-startup-correction.md) records the lower-rate batch correction.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,

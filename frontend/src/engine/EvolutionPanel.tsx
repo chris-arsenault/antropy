@@ -137,14 +137,15 @@ function PhenotypeHistory({ status }: { status: LiveStatus }) {
     <section>
       <h3>Chemical phenotype over time</h3>
       <p>
-        Membrane X bins 0–15, bottom to top. Brighter marks mean a greater living share. Marks use
-        actual sample times; gaps reflect thinning. This projection does not identify species.
+        Strongest membrane identity X bins 0–15, bottom to top. Brighter marks mean a greater living
+        share. Marks use actual sample times; gaps reflect thinning. This projection does not
+        identify species.
       </p>
       <svg
         viewBox="0 0 320 190"
         width="100%"
         role="img"
-        aria-label="Membrane X shares over retained history"
+        aria-label="Strongest membrane identity X shares over retained history"
       >
         {points.flatMap((p) =>
           p.membrane.map((count, x) => (
@@ -157,7 +158,7 @@ function PhenotypeHistory({ status }: { status: LiveStatus }) {
               fill={`hsl(140,40%,${8 + (65 * count) / Math.max(1, p.population)}%)`}
             >
               <title>
-                Tick {p.tick}, membrane X {x}: {count}/{p.population} cells
+                Tick {p.tick}, strongest membrane identity X {x}: {count}/{p.population} cells
               </title>
             </rect>
           ))

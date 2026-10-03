@@ -8,6 +8,8 @@ import { BODY_PARTS, enzymeStock, machineryLabel } from "./bodyParts";
 import { CellOrganization } from "./CellOrganization";
 import { CellControl } from "./CellControl";
 import { LIGHT_INPUT, MOTOR_LOAD_INPUT } from "./controllerInputs";
+import { RecognitionDetails } from "./RecognitionDetails";
+import { recognitionLabel } from "./recognition";
 
 const PARTS = BODY_PARTS;
 const INPUTS = [
@@ -238,53 +240,45 @@ function Chemistry({
   const c = p.cell!,
     genes = p.expressed!.chemistry;
   const slots = [...genes.receptors, ...genes.transporters, ...genes.enzymes];
-  const operation = (i: number) => {
-    if (i < 4) return `sense · ${(100 * genes.inward[i]).toFixed(0)}% inward`;
-    if (i < 8)
-      return (
-        transportDirection(c.action.transport[i - 4]) +
-        " · effort " +
-        n(Math.abs(2 * c.action.transport[i - 4] - 1))
-      );
-    const e = genes.enzymes[i - 8];
-    return (
-      "reflection center " +
-      n(e.centerX) +
-      ", " +
-      n(e.centerY) +
-      " · orientation " +
-      n((e.angle * 180) / Math.PI) +
-      "°"
-    );
-  };
   const species = c.inventory.amounts
     .map((inside, s) => ({ inside, s, outside: p.local![s], cover: p.coverLocal?.[s] ?? 0 }))
     .filter((v) => v.inside + v.outside + v.cover > 0);
   return (
     <div>
       <h3>Chemistry</h3>
-      <p>
-        Membrane ({n(genes.membrane.x)}, {n(genes.membrane.y)})
-      </p>
+      <p>Membrane recognition: {recognitionLabel(p.recognition, 16)}</p>
       <Table
-        columns={["Slot", "Birth coordinate", "Operation", "Stock"]}
-        rows={slots.map((g, i) => [
+        columns={["Slot", "Birth recognition", "Operation", "Stock"]}
+        rows={slots.map((_g, i) => [
           machineryLabel(i),
-          n(g.x) + ", " + n(g.y),
-          operation(i),
+          recognitionLabel(p.recognition, i),
+          chemistryOperation(p, i),
           n(c.body[i < 8 ? i + 3 : enzymeStock(i - 8)]),
         ])}
       />
-      <ChemicalAtlas definition={definition} machinery={genes} />
+      {p.recognition && <RecognitionDetails profile={p.recognition} />}
+      <ChemicalAtlas
+        definition={definition}
+        machinery={genes}
+        recognition={p.recognition ?? null}
+      />
       <details>
         <summary>Local and internal mixtures · {species.length} species</summary>
         <Table
-          columns={["ID", "Inside · amount", "Dissolved / area", "Film / area", "U / D / I / S"]}
+          columns={[
+            "ID",
+            "Inside · amount",
+            "Dissolved / area",
+            "Film / area",
+            "Susceptibility",
+            "U / D / I / S",
+          ]}
           rows={species.map((v) => [
             v.s,
             n(v.inside),
             n(v.outside),
             n(v.cover),
+            n(p.recognition?.susceptibility[v.s]),
             (["potential", "diffusion", "impedance", "stress"] as const)
               .map((key) => n(definition.chemistry.properties[v.s][key]))
               .join(" / "),
@@ -293,6 +287,24 @@ function Chemistry({
       </details>
       <Transfers cell={c} />
     </div>
+  );
+}
+function chemistryOperation(p: Inspection, i: number) {
+  const genes = p.expressed!.chemistry;
+  if (i < 4) return `sense · ${(100 * genes.inward[i]).toFixed(0)}% inward`;
+  if (i < 8) {
+    const effort = p.cell!.action.transport[i - 4];
+    return transportDirection(effort) + " · effort " + n(Math.abs(2 * effort - 1));
+  }
+  const e = genes.enzymes[i - 8];
+  return (
+    "reflection center " +
+    n(e.centerX) +
+    ", " +
+    n(e.centerY) +
+    " · orientation " +
+    n((e.angle * 180) / Math.PI) +
+    "°"
   );
 }
 function Transfers({ cell }: { cell: CellState }) {

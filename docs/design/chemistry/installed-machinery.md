@@ -5,7 +5,10 @@
 Physical checkpoint v37 removed machinery refitting; v43 also removes machinery construction.
 Each cell uses its complete birth
 genotype throughout its lifetime: four receptors, four transporters, one to eight enzyme
-programs and a membrane coordinate. Recognition neighborhoods and the existing transformation
+programs and a membrane key. V52 enables [complementarity recognition](../rugged-interaction.md)
+in ordinary startup. Its seventeen inherited keys compile sparse receptor, transporter, enzyme
+and membrane profiles; the diagnostic radial startup ablation retains coordinate recognition.
+Recognition sets and the existing transformation
 algebra still allow several chemicals and transformations per cell.
 
 ## Current ownership and inheritance
@@ -19,7 +22,7 @@ Division conservatively partitions biomass, free material and usable
 energy after the existing division cost. Each daughter immediately uses its own mutated
 configuration and derived body proportions. Mutation grants no additional biomass. Program
 duplication splits genetic capacity weights; deletion immediately removes that capacity. Small chemical edits retain
-the smooth affinity law, but no rule protects a mutant's access to its parent's food.
+the shared key/sigmoid law; no rule protects a mutant's access to its parent's food.
 
 During life, neural activity, automatic biomass growth, chemistry, damage and private learning
 remain dynamic. The capability repertoire and its chemical

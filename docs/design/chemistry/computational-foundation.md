@@ -34,7 +34,7 @@ Preserve these functions through coherent implementation changes:
   validated property coverage independent of organism success.
 - Individual cells with internal mixtures, usable energy, biomass, damage and directly
   inherited physiology. Four receptor and transporter slots, one to eight enzyme programs,
-  and a membrane coordinate. Any internal chemical can fund paid generic biomass growth.
+  and a membrane recognition key. Any internal chemical can fund paid generic biomass growth.
 - Local genome/RNN control, mutation, paid private learning, birth-local assimilation,
   conservative biomass inheritance and bounded genealogy. Genetic capabilities are expressed
   immediately; changes in their proportions do not create material or usable energy.
@@ -54,17 +54,20 @@ impedance×viscosity and stars/solar systems motivate reasoning, not mandatory f
 ## Two domains with different jobs
 
 The chemical manifold is a computational domain, not just an atlas used at world generation.
-Nearby coordinates support related properties, recognition and transformations. The geographic
+Nearby coordinates support related properties and transformations. V52 recognition reads the
+same identities through their eight-bit spins and inherited keys followed by one shared sigmoid;
+bit neighbors need not be manifold neighbors. The geographic
 plane locates material, cells and sources. Chemical-space differences determine relatedness and
 response; geographic differences determine direction, delivery and encounter. A chemical-space
 axis is neither a geographic compass nor an additional spatial dimension.
 
-Use smooth basis functions, compact neighborhood kernels and weighted coordinate mappings over
-chemical space throughout the system. Preserve all 256 material identities. A small feature basis
+Use shared basis functions, compiled sparse recognition and weighted coordinate mappings over
+chemical space. Property surfaces remain smooth; recognition deliberately admits sharper genetic
+changes through [complementarity](../rugged-interaction.md). Preserve all 256 material identities. A small feature basis
 summarizes selected effects; it does not replace inventories with a few anonymous substances or
 discard rare compounds. Chemical boundary handling remains explicit and distinct from periodic
-geographic wrapping. Existing reflected coordinates are reusable, not an excuse for byte-distance
-or accidental chemical torus behavior.
+geographic wrapping. Identity-bit recognition does not impose byte-distance transport or an
+accidental chemical torus.
 
 The two-dimensional structure supports reusable separable filters, coordinate transforms and
 local product stencils where their assumptions fit the mechanism. Evaluate static property

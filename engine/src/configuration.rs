@@ -44,12 +44,15 @@ mod tests {
         for input in ["{}", "{ }", "\n{\n}\n", "{\"founders\":12}"] {
             let c = text(input).unwrap();
             assert_eq!(c.terrain, Config::ecology().terrain);
+            assert!(!c.radial_founders);
             let request = json!({"config":serde_json::from_str::<Value>(input).unwrap()});
             let command = crate::commands::configuration(&request).unwrap();
             assert_eq!(
                 command["config"]["terrain"],
                 serde_json::to_value(c.terrain).unwrap()
             );
+            assert_eq!(command["config"]["radialFounders"], false);
+            assert!(!command["genotype"]["chromosomes"][0]["chemistry"]["keys"].is_null());
         }
         let c = parse(&json!({"terrain":{"seasons":false}})).unwrap();
         assert!(!c.terrain.seasons);

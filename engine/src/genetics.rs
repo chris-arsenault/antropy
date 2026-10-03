@@ -64,6 +64,8 @@ impl Enzyme {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Machinery {
+    #[serde(default)]
+    pub keys: Option<crate::binding::Keys>,
     pub receptors: [Target; 4],
     pub inward: [f64; 4],
     pub transporters: [Transporter; 4],
@@ -99,6 +101,9 @@ pub struct Compiled {
 
 impl Machinery {
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(keys) = &self.keys {
+            keys.validate()?;
+        }
         let points = self
             .receptors
             .iter()
@@ -153,6 +158,7 @@ impl Machinery {
                 .unwrap(),
         );
         Self {
+            keys: None,
             receptors: [from[0], from[1], to, stress],
             inward: [0.; 4],
             programs: std::array::from_fn(|i| i < 4),
@@ -176,21 +182,25 @@ impl Machinery {
     fn mutate(&mut self, rng: &mut Random, c: &Config) -> bool {
         // Specificity changes over R, not over the entire chemical domain.
         let chemical_scale = c.physical_mutation_scale * c.affinity_radius;
-        let points = self
-            .receptors
-            .iter_mut()
-            .map(|p| [&mut p.x, &mut p.y])
-            .chain(self.transporters.iter_mut().map(|p| [&mut p.x, &mut p.y]))
-            .chain(self.enzymes.iter_mut().map(|p| [&mut p.x, &mut p.y]))
-            .chain([[&mut self.membrane.x, &mut self.membrane.y]]);
-        let points_changed = mutation::mutate_pairs(
-            points,
-            rng,
-            c.physical_mutation_rate,
-            chemical_scale,
-            0.,
-            15.,
-        );
+        let points_changed = if let Some(keys) = &mut self.keys {
+            keys.mutate(rng, c)
+        } else {
+            let points = self
+                .receptors
+                .iter_mut()
+                .map(|p| [&mut p.x, &mut p.y])
+                .chain(self.transporters.iter_mut().map(|p| [&mut p.x, &mut p.y]))
+                .chain(self.enzymes.iter_mut().map(|p| [&mut p.x, &mut p.y]))
+                .chain([[&mut self.membrane.x, &mut self.membrane.y]]);
+            mutation::mutate_pairs(
+                points,
+                rng,
+                c.physical_mutation_rate,
+                chemical_scale,
+                0.,
+                15.,
+            )
+        };
         let centers_changed = mutation::mutate_pairs(
             self.enzymes
                 .iter_mut()
@@ -220,6 +230,11 @@ impl Machinery {
     fn express(a: &Self, b: &Self) -> Self {
         let mean = |x: f64, y: f64| ((x + y) * 0.5) as f32 as f64;
         Self {
+            keys: a
+                .keys
+                .as_ref()
+                .zip(b.keys.as_ref())
+                .map(|(a, b)| crate::binding::Keys::express(a, b)),
             inward: std::array::from_fn(|i| mean(a.inward[i], b.inward[i])),
             programs: std::array::from_fn(|i| a.programs[i] || b.programs[i]),
             receptors: std::array::from_fn(|i| Target {
@@ -246,6 +261,11 @@ impl Machinery {
     fn combine(a: &Self, b: &Self, rng: &mut Random, kind: &str) -> Self {
         let mask = controller::combine(&[true; 13], &[false; 13], rng, kind);
         Self {
+            keys: a
+                .keys
+                .as_ref()
+                .zip(b.keys.as_ref())
+                .map(|(a, b)| crate::binding::Keys::combine(a, b, &mask)),
             inward: std::array::from_fn(|i| if mask[i] { a.inward[i] } else { b.inward[i] }),
             programs: a.programs,
             receptors: std::array::from_fn(|i| {

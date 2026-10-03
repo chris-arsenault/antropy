@@ -28,7 +28,7 @@ export function PhenotypePanel({ bridge, status, error }: Props) {
   return (
     <section className="phenotype-panel">
       <p>
-        Compare built bodies, inherited targets and recent chemical activity. Chemical roles
+        Compare built bodies, inherited recognition and recent chemical activity. Chemical roles
         describe installed enzymes; they are not species or evidence of a feeding relationship.
       </p>
       {status.execution?.operator === false && (

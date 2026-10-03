@@ -6,7 +6,7 @@ import { Engine } from "./client";
 import { Session } from "./session";
 import { encodePackage, decodePackage } from "./package";
 import { listRecoveries, loadRecovery, storeRecovery } from "./recovery";
-import { type Definition, type Summary } from "./types";
+import { type Definition, type Summary, type Genotype } from "./types";
 import { validateAccounts } from "../../harness/lib/studyBudget";
 
 const bytes = new Uint8Array(
@@ -38,6 +38,11 @@ it("starts the larger default world at mesh 2 and advances with valid accounts",
     expect(config.sourceRate).toBe(0.1);
     expect(config.sourceLifetime).toBe(1200);
     expect(config.mortalityRecovery).toBe(true);
+    expect(config.radialFounders).toBe(false);
+    for (const id of [1, 2, 3, 4]) {
+      const genotype = world.command<Genotype>("genotype", { id });
+      expect(genotype.chromosomes.every((a) => a.chemistry.keys !== null)).toBe(true);
+    }
     world.step(4);
     const summary = world.command<Summary>("summary");
     expect(summary.tick).toBe(4);
@@ -58,7 +63,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
   );
   session.restart(101, compact);
   const definition = session.world.command<Definition>("definition");
-  expect(definition.version).toBe(50);
+  expect(definition.version).toBe(52);
   expect(definition.chemistry.version).toBe(5);
   expect(definition.chemistry.properties).toHaveLength(256);
   expect(definition.chemistry.properties.every((p) => p.interaction.length === 2)).toBe(true);
@@ -74,7 +79,7 @@ it("keeps v5 chemical metadata bounded and rejects old physical bytes inside the
     tick: 0,
     observation: session.observation,
   });
-  await expect(session.restore(incompatible)).rejects.toThrow("v50 required");
+  await expect(session.restore(incompatible)).rejects.toThrow("v52 required");
   expect(session.world.snapshot()).toEqual(before);
   session.world.dispose();
 });

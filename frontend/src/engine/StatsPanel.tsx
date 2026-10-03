@@ -8,10 +8,10 @@ const TRAITS = [
   "Receptor investment · % core",
   "Import investment · % core",
   "Enzyme investment · % core",
-  "Membrane X",
-  "Membrane Y",
-  "Import target X",
-  "Import target Y",
+  "Strongest membrane identity X",
+  "Strongest membrane identity Y",
+  "Capacity-weighted strongest pump identity X",
+  "Capacity-weighted strongest pump identity Y",
 ];
 const EFFORTS = [
   "Swim",

@@ -55,6 +55,10 @@ pub struct Config {
     pub weathering_rate: f64,
     pub habitat_feedback: bool,
     pub affinity_radius: f64,
+    /// Shared complementarity steepness in logits per binding-score unit.
+    pub binding_lambda: f64,
+    /// Explicit diagnostic startup ablation; ecology founders carry inherited keys.
+    pub radial_founders: bool,
     pub movement_impedance: f64,
     pub diffusion_impedance: f64,
     pub susceptibility_floor: f64,
@@ -159,6 +163,8 @@ impl Default for Config {
             weathering_rate: crate::weathering::DEFAULT_RATE,
             habitat_feedback: true,
             affinity_radius: 3.,
+            binding_lambda: 6.,
+            radial_founders: true,
             movement_impedance: 0.5,
             diffusion_impedance: 1.,
             susceptibility_floor: 0.05,
@@ -243,6 +249,7 @@ impl Config {
     /// Production new-world preset. Request parsing explicitly selects diagnostic defaults.
     pub fn ecology() -> Self {
         Self {
+            radial_founders: false,
             terrain: crate::terrain_config::TerrainConfig::integrated(),
             ..Self::default()
         }
@@ -269,6 +276,7 @@ impl Config {
             ("dt", self.dt),
             ("physiologyInterval", self.physiology_interval),
             ("affinityRadius", self.affinity_radius),
+            ("bindingLambda", self.binding_lambda),
             ("stressK", self.stress_k),
             ("receptorK", self.receptor_k),
             ("receptorTau", self.receptor_tau),
@@ -355,6 +363,7 @@ impl Config {
         }
         if self.conversion_efficiency >= 1.
             || self.affinity_radius > 6.
+            || self.binding_lambda > 64.
             || self.max_ancestry_records == 0
             || self.max_ancestry_records > 5000000
             || self.landscape_region_count() > 10000

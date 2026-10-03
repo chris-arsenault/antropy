@@ -24,6 +24,7 @@ pub struct EnzymeOperator {
 }
 #[derive(Clone, Debug)]
 pub struct Operators {
+    scales: [f64; 2],
     configuration: Arc<Machinery>,
     pub receptors: [Arc<Vec<Affinity>>; 4],
     pub transporters: [Arc<Vec<Affinity>>; 4],
@@ -31,9 +32,32 @@ pub struct Operators {
     pub membrane: Arc<Vec<Affinity>>,
     pub profile: [f64; 3],
 }
-fn enzyme(e: crate::genetics::Enzyme, c: &Config, chemistry: &Chemistry) -> EnzymeOperator {
+fn recognition(m: &Machinery, site: usize, point: [f64; 2], c: &Config) -> Vec<Affinity> {
+    match &m.keys {
+        Some(keys) => keys.site(site).compile(c.binding_lambda),
+        None => chemistry::compile_affinity(point, c.affinity_radius),
+    }
+}
+fn profile(membrane: &[Affinity], chemistry: &Chemistry) -> [f64; 3] {
+    let total = membrane.iter().map(|a| a.value).sum::<f64>();
+    std::array::from_fn(|k| {
+        if total == 0. {
+            return 0.;
+        }
+        membrane
+            .iter()
+            .map(|a| a.value * crate::medium_response::profile(&chemistry.properties[a.species])[k])
+            .sum::<f64>()
+            / total
+    })
+}
+fn enzyme(
+    e: crate::genetics::Enzyme,
+    affinities: Vec<Affinity>,
+    c: &Config,
+    chemistry: &Chemistry,
+) -> EnzymeOperator {
     let transform = Transform::new(e);
-    let affinities = chemistry::compile_affinity([e.x, e.y], c.affinity_radius);
     let (product_data, ranges) =
         ProductPool::compile(&transform, affinities.iter().map(|a| a.species));
     let product_data = Arc::new(product_data);
@@ -108,37 +132,30 @@ impl Operators {
         &self.configuration
     }
     pub fn compile(m: &Machinery, c: &Config, chemistry: &Chemistry) -> Self {
-        let membrane = Arc::new(chemistry::compile_affinity(
-            m.membrane.point(),
-            c.affinity_radius,
-        ));
-        let total = membrane.iter().map(|a| a.value).sum::<f64>();
-        let profile = std::array::from_fn(|k| {
-            membrane
-                .iter()
-                .map(|a| {
-                    a.value * crate::medium_response::profile(&chemistry.properties[a.species])[k]
-                })
-                .sum::<f64>()
-                / total
-        });
+        let membrane = Arc::new(recognition(m, 16, m.membrane.point(), c));
+        let profile = profile(&membrane, chemistry);
         Self {
+            scales: [c.affinity_radius, c.binding_lambda],
             configuration: Arc::new(m.clone()),
             receptors: std::array::from_fn(|i| {
-                Arc::new(chemistry::compile_affinity(
-                    m.receptors[i].point(),
-                    c.affinity_radius,
-                ))
+                Arc::new(recognition(m, i, m.receptors[i].point(), c))
             }),
             transporters: std::array::from_fn(|i| {
-                Arc::new(chemistry::compile_affinity(
+                Arc::new(recognition(
+                    m,
+                    4 + i,
                     [m.transporters[i].x, m.transporters[i].y],
-                    c.affinity_radius,
+                    c,
                 ))
             }),
             enzymes: std::array::from_fn(|i| {
                 Arc::new(if m.programs[i] {
-                    enzyme(m.enzymes[i], c, chemistry)
+                    enzyme(
+                        m.enzymes[i],
+                        recognition(m, 8 + i, [m.enzymes[i].x, m.enzymes[i].y], c),
+                        c,
+                        chemistry,
+                    )
                 } else {
                     EnzymeOperator::default()
                 })
@@ -155,48 +172,47 @@ impl Operators {
         c: &Config,
         chemistry: &Chemistry,
     ) {
+        if self.scales != [c.affinity_radius, c.binding_lambda] {
+            *self = Self::compile(after, c, chemistry);
+            return;
+        }
+        let key_changed = |site| {
+            before.keys.as_ref().map(|k| k.site(site)) != after.keys.as_ref().map(|k| k.site(site))
+        };
         self.configuration = Arc::new(after.clone());
         for i in 0..4 {
-            if before.receptors[i] != after.receptors[i] {
-                self.receptors[i] = Arc::new(chemistry::compile_affinity(
-                    after.receptors[i].point(),
-                    c.affinity_radius,
-                ));
+            if before.receptors[i] != after.receptors[i] || key_changed(i) {
+                self.receptors[i] = Arc::new(recognition(after, i, after.receptors[i].point(), c));
             }
-            if before.transporters[i] != after.transporters[i] {
-                self.transporters[i] = Arc::new(chemistry::compile_affinity(
+            if before.transporters[i] != after.transporters[i] || key_changed(4 + i) {
+                self.transporters[i] = Arc::new(recognition(
+                    after,
+                    4 + i,
                     [after.transporters[i].x, after.transporters[i].y],
-                    c.affinity_radius,
+                    c,
                 ));
             }
         }
         for i in 0..crate::organism::MAX_ENZYMES {
             if before.programs[i] != after.programs[i]
                 || (after.programs[i] && before.enzymes[i] != after.enzymes[i])
+                || (after.programs[i] && key_changed(8 + i))
             {
                 self.enzymes[i] = Arc::new(if after.programs[i] {
-                    enzyme(after.enzymes[i], c, chemistry)
+                    enzyme(
+                        after.enzymes[i],
+                        recognition(after, 8 + i, [after.enzymes[i].x, after.enzymes[i].y], c),
+                        c,
+                        chemistry,
+                    )
                 } else {
                     EnzymeOperator::default()
                 });
             }
         }
-        if before.membrane != after.membrane {
-            self.membrane = Arc::new(chemistry::compile_affinity(
-                after.membrane.point(),
-                c.affinity_radius,
-            ));
-            let total = self.membrane.iter().map(|a| a.value).sum::<f64>();
-            self.profile = std::array::from_fn(|k| {
-                self.membrane
-                    .iter()
-                    .map(|a| {
-                        a.value
-                            * crate::medium_response::profile(&chemistry.properties[a.species])[k]
-                    })
-                    .sum::<f64>()
-                    / total
-            });
+        if before.membrane != after.membrane || key_changed(16) {
+            self.membrane = Arc::new(recognition(after, 16, after.membrane.point(), c));
+            self.profile = profile(&self.membrane, chemistry);
         }
     }
 }

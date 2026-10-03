@@ -22,9 +22,9 @@ Each chromosome has twenty-four bounded float32 investment records plus chemical
 | 0 | Core | 1 |
 | 1 | Motor | 0.08 |
 | 2 | Storage | 0.08 |
-| 3–6 | Four receptors, each with a chemical target coordinate | 0.01 each |
-| 7–10 | Four transporters, each with a target; neural effort chooses direction | 0.04 each |
-| 11–14 | Four unary enzymes, each with recognition target, independent reflection center and orientation mixture | 0.04 each |
+| 3–6 | Four receptors, each with an inherited recognition key | 0.01 each |
+| 7–10 | Four transporters, each with a key; neural effort chooses direction | 0.04 each |
+| 11–14 | Four unary enzymes, each with a recognition key, independent reflection center and orientation mixture | 0.04 each |
 | 15 | Photoreceptor, sampling local mean illumination | 0.01 |
 | 16–19 | Additional enzyme program records 4–7 | 0.04 each when present |
 | 20 | Cover builder, paid transfer to/from overhead film | 0.04 |
@@ -32,7 +32,7 @@ Each chromosome has twenty-four bounded float32 investment records plus chemical
 | 22 | Mouth, funded explicit byte impulses | Existing transporter ratio, 0.04 |
 | 23 | Ear, reception gain | Existing receptor ratio, 0.01 |
 
-A membrane coordinate controls chemical compatibility, protection and passive solute retention.
+A membrane key controls chemical compatibility, protection and passive solute retention.
 The existing susceptibility law scales bidirectional diffusion; unmatched products escape
 more readily, while the same pathway can lose useful material. Paid pumps remain independently
 controlled. Free and bound chemistry provides the private light-reaction environment, and
@@ -156,7 +156,7 @@ diploidy and uses two gametes from one parent; outcrossing and multi-parent ance
 
 Diploid linear alleles average, including enzyme reflection centers. Angles use the circular mean;
 antipodal alleles use a declared zero-angle convention because no unique mean exists.
-Chemical coordinates and reflection centers mutate with reflection, while angles wrap periodically;
+Recognition weights and biases and exact reflection centers mutate with reflection, while angles wrap periodically;
 parameters compile mixtures of exact bounded chemical permutations with at most eight
 product species per substrate. These mixtures are not group elements; component actions
 have exact composition and inverses. Neural effort can reverse any transporter. Enzyme program
@@ -167,9 +167,13 @@ All mutations use the same heavy-tail law: for signed uniform u, the proposed sc
 step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
 P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
 Default behavioral probability/scale is0.0015/0.08; physical probability/scale is0.1/0.12.
-Chemical coordinates and reflection centers multiply scale by the existing specificity radius R.
+V52 recognition keys have eight weights in[-1,1] and bias in[-9,9]; their scales are respectively
+physicalMutationScale and9 times that scale. One common sigmoid steepness controls all seventeen
+sites. Keyed alleles do not mutate unused recognition coordinates. Exact reflection centers and
+diagnostic radial coordinates multiply scale by the existing specificity radius R.
 Scalar neural and twenty-four investment loci retain independent opportunities.
-Each of25 chemical coordinate pairs has Binomial(2,p) vector events: each event uses the same
+Each of eight exact reflection-center pairs (plus seventeen diagnostic radial pairs when enabled)
+has Binomial(2,p) vector events: each event uses the same
 absolute-step law and a uniform direction. Four inward fractions also mutate on [0,1].
 The bounded arena includes dormant alleles, which do not confer a physical function.
 Eight enzyme-angle loci use
@@ -181,7 +185,7 @@ rates and realized magnitudes separately. Reflection respects the finite square'
 arbitrary-angle covariance applies to interior proposals, not the square itself.
 
 Mutation reflects weights within [-16,16], plasticity within [-1,1], investments within [-3,3],
-chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
-No score selects parents or filters mutants. Checkpoint v46 preserves alleles, birth ticks and biomass and
+diagnostic chemical coordinates and reflection centers within [0,15]; angles wrap into [-pi,pi).
+No score selects parents or filters mutants. Checkpoint v52 preserves alleles, birth ticks and biomass and
 reconstructs derived physiology; earlier checkpoints are rejected without migration.
 Unavailable pruned genotype payloads remain labeled provenance.

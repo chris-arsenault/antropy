@@ -5,14 +5,14 @@ import { type ChemicalDisplay } from "./chemicalDisplay";
 import { ChemicalControls, ChemicalLegend } from "./ChemicalControls";
 
 const COLORS = [
-  "Transporter / membrane coordinates",
+  "Strongest pump / membrane identities",
   "Founder ancestry",
   "Genotype",
   "Usable energy",
   "Task byte",
   "Recent families",
-  "Membrane compatibility X",
-  "Membrane compatibility Y",
+  "Strongest membrane identity X",
+  "Strongest membrane identity Y",
   "Inherited motor investment",
   "Inherited import investment",
   "Inherited enzyme investment",

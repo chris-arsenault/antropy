@@ -26,12 +26,17 @@ negative results without treating one unsuccessful fixture as automatic grounds 
 
 ## Active plans
 
-No active implementation plan.
+No active plan is listed here. Open research questions remain with their design owners.
 
 ## Local deliveries
 
 | Plan | Scope | Sulion |
 | --- | --- | --- |
+| [Rugged chemical ecology](RUGGED-ECOLOGY-PLAN.md) | Local v52 implementation and ordinary-world tuning; [inherited reproductive function and neighbor consequences](../rugged-ecology-results.md) through renewals/replacement. Shared default6; no publication/deployment | `ab2dbd97-c26c-48b9-8f02-a20966ed7dbc` |
+| [Rugged interaction causal iteration](RUGGED-INTERACTION-ITERATION.md) | Local v52 held-light and single-locus diagnostics; [constructed shared-world result](../rugged-community-results.md) links exported intermediate to funded growth, parent-key failure and competition-free harm. No publication/deployment | `a48f005f-102f-491a-bd79-f5a8a67ecca8` |
+| [Rugged ordinary calibration](RUGGED-ORDINARY-CALIBRATION.md) | Local v52 ordinary mutation produces binding jumps; [actual descendant attribution](../rugged-ordinary-calibration-results.md) isolates a changed chemical dependency. Keep lambda3; no production parameter change/publication/deployment | `0a0243c7-b056-4d89-b16b-49b7e7c81b5f` |
+| [Rugged interaction delivery](RUGGED-INTERACTION-PLAN.md) | Local v52 ordinary keyed startup, inherited physical consumers, compiled inspector/atlas and full-space/ordinary-world [comparison](../rugged-interaction-results.md). No publication/deployment; new roles remain unestablished | `1222d642-c9b6-42e0-8a5d-a2617fe52dbe` |
+| [Rugged binding candidate](RUGGED-BINDING-CANDIDATE-PLAN.md) | Local v51 inherited compiler and [bounded results](../rugged-binding-results.md): reciprocal square at lambda3, negative lambda0.25 control and two shared-access checks. Fourteen runs/5,600 ticks; no production selection or deployment | `28a473a1-8fcd-476f-aa7f-0c3f3b6f9e0c` |
 | [Sustaining configuration tuning](../mortality-configuration-tuning.md) | Applied rate0.1/T1200/G600 with recovery enabled to the native server; ordinary world reached30,252 ticks with472 cells and balanced late-window replacement. Left populated world running; standing tuning/restart authorization recorded | `bf90f127-ff7f-48a0-95b2-68dd976dcfb7` |
 | [Mortality startup correction](../mortality-startup-correction.md) | Retained full finite batches at release rate0.1 using sourceLifetime1200; recovery enabled. Ordinary-founder comparison and CI pass. Live restart requires explicit authorization | `1d4b3e3a-5250-43a0-a382-57266cd843bd` |
 | [Mortality driven reservoir recycling](MORTALITY-RECYCLING-PLAN.md) | Published v50 as9a4f497; independent renewal, conservative recovery and bounded consumers. The first world starved; the startup correction above supersedes the original T600 defaults | `4ae0191b-e4f5-4161-9ebf-757b84247e8e`; default correction `1c9d8687-a477-486a-a294-8da8d34cc0b9` |

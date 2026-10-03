@@ -622,20 +622,24 @@ by `sqrt(paid/requested)`. The same work-rate function prices growth reserves an
 
 ## Local recognition and paid operators
 
-Recognition uses max(0, 1 − distance²/R²)² with Euclidean distance, initially R=3.
-The kernel samples each existing discrete species once, without edge normalization; corners
-therefore have less total recognition support. Product mixtures instead preserve unit-sum
-material weights. These operators have different roles and need not share normalization.
+Ordinary v52 recognition uses an inherited eight-weight key and bias at each site:
+`A(s)=sigmoid(lambda*(sum_j k_j*beta_j(s)+b))`, with identity-bit spins beta in {-1,1},
+weights in[-1,1], bias in[-9,9] and shared lambda6. Stable sigmoid evaluation and a relative
+row cutoff1e-4 compile sparse coefficients once at birth. Broad keys distribute existing
+capacity through ordinary occupancy; no extra cost or chemical role is assigned.
+The explicit `radialFounders` startup ablation retains max(0,1-distance²/R²)², R=3,
+without edge normalization. Existing genotypes always use their own stored representation.
+Product mixtures preserve unit-sum material weights; recognition has no such normalization.
 Each cell retains four receptor,
-four transporter and one to eight enzyme programs plus a membrane coordinate. Enzymes carry continuous
-recognition center a, global reflection center c and periodic orientation theta. Exact chemical actions
+four transporter and one to eight enzyme programs plus a membrane key. Enzymes carry a recognition
+key, global reflection center c and periodic orientation theta. Exact chemical actions
 belong to `(S16 × S16) semidirect C2`, represented by two 16-entry permutations and an axis
 exchange bit. Bounded interval reflections and axis exchange generate this closed group;
 composition and inverse act exactly on the stored IDs, including boundaries.
 
 The continuous parameters compile a mixture of at most eight such actions. Theta interpolates
 adjacent quarter turns Qq; reflection parameters2cx and2cy interpolate neighboring integers.
-Each component is `J_(kx,ky) Qq`. Recognition a never enters this action. At zero orientation,
+Each component is `J_(kx,ky) Qq`. Recognition never enters this action. At zero orientation,
 the midpoint center(a+b)/2 exchanges any two discrete endpoints a,b exactly; moving recognition
 to the product can retain the same operation and express its reverse. Products undergo
 no clipping, reflection or projection after the exact action. Component maps are bijective;
@@ -901,7 +905,12 @@ An empty world keeps advancing without reseeding. Unused genetic payloads can be
 retaining living birth genotypes, diagnostic catalogs and founder roots. Ended ancestry expires
 within its retention budget; every living record remains available.
 
-All chemical point coordinates use the common heavy-tail vector mutation with scale
+Recognition keys use the existing reflected heavy-tail scalar mutation: weight scale
+`physicalMutationScale`, bias scale `9*physicalMutationScale`, with independent physical-rate
+opportunities. Bias scale follows its domain relative to weights. Keys average in diploid
+expression, cross as whole sites and copy with duplicated programs. Unused recognition
+coordinates do not mutate in keyed alleles. Exact action centers and diagnostic radial
+recognition coordinates use the common heavy-tail vector mutation with scale
 `R × physicalMutationScale`; orientation uses the corresponding arc length divided by R.
 R is the existing recognition radius: a local specificity change is measured against this
 radius, not the full chemical-domain width. The initial v25 width15 multiplier caused excessive

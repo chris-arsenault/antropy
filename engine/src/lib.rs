@@ -12,6 +12,12 @@ pub mod adhesion;
 #[cfg(test)]
 mod adhesion_tests;
 pub mod ancestry;
+pub mod binding;
+mod binding_observation;
+#[cfg(test)]
+mod keyed_binding_tests;
+mod recognition_observation;
+mod recognition_probe;
 pub(crate) use field::attraction;
 #[cfg(test)]
 mod attraction_tests;

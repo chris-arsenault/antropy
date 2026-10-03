@@ -155,7 +155,7 @@ population exchange (cross-pollination) and new colony founding over time. Unive
 confinement and absent exchange or founding are concerns; a near/far snapshot cannot establish
 them. Report insufficient temporal coverage as unmeasured, not absent.
 
-The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v50 uses one
+The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v52 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
@@ -201,6 +201,21 @@ October2 operating tuning applies full batches to a restarted ordinary seed27 wo
 turnover measured through source renewals. The user's tuning request authorizes restarts.
 See the [startup correction](docs/mortality-startup-correction.md) and
 [strategic delivery evidence](docs/utterances-and-strategy-results.md).
+
+V52 enables inherited complementarity recognition in ordinary native/browser startup: seventeen
+keys of eight bounded weights and bias compile sparse receptor, transporter, enzyme-substrate
+and membrane coefficients at birth. One shared bindingLambda=6 applies to all sites. Exact
+actions, potentials, costs and spatial rules remain unchanged. Existing heavy-tailed mutation
+acts on weights with physicalMutationScale and bias with9 times that scale; unused recognition
+coordinates do not mutate. `radialFounders` is an explicit diagnostic startup ablation, not the
+ordinary default. Inspector/atlas show compiled profiles and susceptibility; strongest-identity
+summaries do not describe a full recognized set. The [bounded comparison](docs/rugged-interaction-results.md)
+preserves the negative new-fuel fixture. The [ecology iteration](docs/rugged-ecology-results.md)
+records inherited reproductive function and changed neighbor movement/survival in preserved
+ordinary neighborhoods through renewal and replacement. Permanent roles and sustained
+complementary cross-feeding remain unestablished. The [ecology plan](docs/plans/RUGGED-ECOLOGY-PLAN.md)
+owns the simulation-level judgment criteria. These findings preceded publication; the
+October3 pre-publication live server remained v50.
 
 Shared one-range material attraction, local repulsion, nonlinear crowding, ordinary fractional
 washout, evolving source renewal and multiscale public transformations are implemented.

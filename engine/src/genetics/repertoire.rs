@@ -55,6 +55,9 @@ pub fn duplicate(g: &mut Genotype, source: usize, destination: usize) {
     let (a, b) = (enzyme_stock(source), enzyme_stock(destination));
     for allele in &mut g.chromosomes {
         allele.chemistry.enzymes[destination] = allele.chemistry.enzymes[source];
+        if let Some(keys) = &mut allele.chemistry.keys {
+            keys.enzymes[destination] = keys.enzymes[source];
+        }
         allele.chemistry.programs[destination] = allele.chemistry.programs[source];
         let half = (1. + allele.physical[a]).max(0.) * 0.5 - 1.;
         allele.physical[a] = half;
@@ -70,12 +73,16 @@ mod tests {
     fn program_reordering_preserves_controller_and_reaction_outputs() {
         let w = crate::diagnostics::nutrition(0.8, 2., false, false);
         let mut g = w.genomes[&1].clone();
+        for a in &mut g.chromosomes {
+            a.chemistry.keys = Some(crate::binding::Keys::founders(&a.chemistry));
+        }
         controller::diagnostics::perturb_weights(
             &mut g.chromosomes[0].behavior,
             &mut Random::new(91),
         );
         g.compile(&w.config, &w.chemistry);
         let mut a = w.cells[0].clone();
+        a.operators = Some(g.compiled.as_ref().unwrap().operators.clone());
         crate::sensing::initialize(&mut a, g.compiled.as_ref().unwrap(), &w.config, &w.field);
         let order = [7, 6, 5, 4, 3, 2, 1, 0];
         let mut reordered = g.clone();
@@ -84,6 +91,9 @@ mod tests {
             for (to, from) in order.into_iter().enumerate() {
                 target.chemistry.enzymes[to] = source.chemistry.enzymes[from];
                 target.chemistry.programs[to] = source.chemistry.programs[from];
+                if let Some(keys) = &mut target.chemistry.keys {
+                    keys.enzymes[to] = source.chemistry.keys.as_ref().unwrap().enzymes[from];
+                }
                 target.physical[enzyme_stock(to)] = source.physical[enzyme_stock(from)];
             }
         }

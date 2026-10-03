@@ -167,17 +167,27 @@ heard activity and byte diversity use the shared history transform. The
 
 ## Rugged chemical interaction: surprising mutations and co-located roles
 
-**Status:** Deferred — research direction specified September 30; complementarity binding is the leading candidate, not yet selected.
+**Status:** Runtime delivered locally in v52 October2. Long-run discovery and persistence remain research questions.
 
 [Rugged chemical interaction](design/rugged-interaction.md) seeks mutations that sometimes change
 qualitatively how a cell relates to chemical space, and distinct roles among cells sharing one
-smooth local mixture. The present genotype-to-interaction map is close to Kauffman's additive
+smooth local mixture. The preceding radial map was close to Kauffman's additive
 limit; the [research paper](design/kauffman-landscapes-research.md) derives requirements from
 rugged-landscape theory: reciprocal sign epistasis, one shared ruggedness control, neutral
-networks with abrupt borders, and unchanged accounts, algebra and mutation law. The leading
-candidate replaces radial recognition with an additive per-bit binding energy between genetic
-keys and identity bits, passed through a sigmoid with one shared steepness λ. Calibrate λ, bias
-bounds and support cost in constructed fixtures before any implementation plan.
+networks with abrupt borders, and unchanged accounts, algebra and mutation law. The selected
+law replaces radial recognition with an additive per-bit binding energy between genetic
+keys and identity bits, passed through a sigmoid with one shared steepness λ. Ordinary startup
+uses keys; the [delivery findings](rugged-interaction-results.md) distinguish available capabilities,
+actual physical expression and unestablished ecological outcomes. No long campaign is selected.
+The October3 [causal iteration](rugged-community-results.md) establishes a constructed shared-world
+food chain and competition-free harm from the same intermediate. Discovery and persistence remain
+open questions.
+The subsequent [ordinary ecology iteration](rugged-ecology-results.md) records an inherited
+reproductive opportunity and a causal change in a neighbor's movement/survival while preserving
+actual neighborhoods and private experience. Shared steepness6 is selected for new ordinary
+worlds after renewal/replacement comparisons. Sustained complementary cross-feeding and
+permanent roles remain unestablished; the [ecology plan](plans/RUGGED-ECOLOGY-PLAN.md) preserves
+the governing criteria.
 
 <a id="backlog-plan-carryover"></a>
 

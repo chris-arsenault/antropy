@@ -23,8 +23,9 @@ pub(crate) fn add_profile(
     entry.0 += 1;
     entry.1 = c.generation - c.generation % 4;
     entry.2[0] += 100. * g.body[1] / g.body[0];
-    entry.2[1] += g.chromosome.chemistry.membrane.x;
-    entry.2[2] += g.chromosome.chemistry.membrane.y;
+    let membrane = crate::recognition_observation::preferred(&g.operators.membrane);
+    entry.2[1] += membrane[0];
+    entry.2[2] += membrane[1];
 }
 
 #[cfg(test)]

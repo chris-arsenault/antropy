@@ -71,6 +71,15 @@ it("records the causal trace without changing physics or neural memory", () => {
       total = a.command<Summary>("summary").ledger.flows;
     expect(groups.reduce((n, g) => n + g.flows.imported, 0)).toBeCloseTo(total.imported, 10);
     expect(groups.reduce((n, g) => n + g.flows.motors, 0)).toBeCloseTo(total.motors, 10);
+    const cells = a.command<{ cells: { cell: CellState }[] }>("assayFrame").cells;
+    expect(groups.reduce((n, g) => n + g.livingBiomass, 0)).toBeCloseTo(
+      cells.reduce((n, { cell }) => n + cell.boundMaterial.material, 0),
+      10
+    );
+    expect(groups.reduce((n, g) => n + g.livingInventory, 0)).toBeCloseTo(
+      cells.reduce((n, { cell }) => n + cell.inventory.material, 0),
+      10
+    );
   } finally {
     observer.close();
     a.dispose();

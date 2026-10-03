@@ -7,6 +7,12 @@ The current runtime uses [digital chemistry](chemistry/README.md). The
 preserves the replaced A/B economy. [Environmental evidence](chemistry/environmental-results.md) records constructed
 physical opportunities and operating limits; no evolved community is supplied.
 
+Local physical v52 initializes ordinary founders with seventeen inherited complementarity keys.
+Birth-compiled affinities govern local receptors, transport, enzyme substrates and membrane
+protection/compatibility; exact transformations and physical accounts remain unchanged.
+The [rugged interaction direction](rugged-interaction.md) owns this law. Checkpoints advance
+without migration; the deployed v50 world remains separate.
+
 <a id="world-substrate-and-embodied-state"></a>
 
 ## Substrate and embodied state

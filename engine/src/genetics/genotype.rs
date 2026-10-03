@@ -2,11 +2,14 @@ use super::*;
 
 impl Genotype {
     pub fn seed(c: &Config, chemistry: &Chemistry) -> Self {
-        let allele = Chromosome {
+        let mut allele = Chromosome {
             behavior: controller::seed(),
             physical: [0.; crate::organism::STOCKS],
             chemistry: Machinery::seed(chemistry, &c.source_species),
         };
+        if !c.radial_founders {
+            allele.chemistry.keys = Some(crate::binding::Keys::founders(&allele.chemistry));
+        }
         let mut g = Self {
             id: 1,
             parent: None,
@@ -169,6 +172,9 @@ impl Genotype {
             return Err("Invalid chromosome count".into());
         }
         for a in &self.chromosomes {
+            if a.chemistry.keys.is_some() != self.chromosomes[0].chemistry.keys.is_some() {
+                return Err("Keyed and radial alleles cannot mix".into());
+            }
             controller::validate(&a.behavior)?;
             if a.physical.iter().any(|x| !x.is_finite() || x.abs() > 3.) {
                 return Err("Invalid physical loci".into());
