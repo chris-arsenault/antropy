@@ -1,6 +1,7 @@
 """Apply a run-start configuration patch through the existing native operator API."""
 import argparse
 import json
+import math
 import os
 import urllib.request
 from pathlib import Path
@@ -12,6 +13,26 @@ def merge(target, patch):
             merge(target[key], value)
         else:
             target[key] = value
+
+
+def config_matches(requested, effective):
+    if isinstance(requested, dict):
+        return (isinstance(effective, dict) and requested.keys() == effective.keys()
+                and all(config_matches(value, effective[key])
+                        for key, value in requested.items()))
+    if isinstance(requested, list):
+        return (isinstance(effective, list) and len(requested) == len(effective)
+                and all(config_matches(a, b) for a, b in zip(requested, effective)))
+    if isinstance(requested, bool) or isinstance(effective, bool):
+        return type(requested) is type(effective) and requested == effective
+    if isinstance(requested, (int, float)) and isinstance(effective, (int, float)):
+        if isinstance(requested, int) and isinstance(effective, int):
+            return requested == effective
+        # Permit only floating-point serialization roundoff, not changed settings.
+        return (math.isfinite(requested) and math.isfinite(effective)
+                and abs(requested - effective)
+                <= 2 * max(math.ulp(requested), math.ulp(effective)))
+    return type(requested) is type(effective) and requested == effective
 
 
 def main():
@@ -60,7 +81,7 @@ def main():
     record("after.json", after)
     if after["generation"] != before["generation"] + 1 or after["seed"] != seed:
         raise RuntimeError("restart outcome disagrees with the requested generation or seed")
-    if any(after["config"].get(key) != value for key, value in config.items()):
+    if not config_matches(config, after["config"]):
         raise RuntimeError("effective configuration disagrees with the requested configuration")
     print(json.dumps({"generation": after["generation"], "tick": after["tick"],
                       "population": after["population"], "running": after["running"],
