@@ -57,6 +57,19 @@ growth but shorter survivor life in both mirrored placements. The
 [execution plan](plans/MORTALITY-RECYCLING-PLAN.md) is locally delivered; useful supply-range
 widening and evolved dispersal remain unmeasured. No additional mechanism or campaign is selected.
 
+<a id="backlog-local-mortality-feeding"></a>
+
+## Local mortality feeding
+
+**Status:** Exploratory direction, October 5 — design remains to be completed.
+
+The [local mortality feeding direction](design/local-mortality-feeding.md) records the user's
+request for a more consequential death-to-feeding cycle, probably with a local term. The current
+global loss signal can be masked by growth elsewhere; local recipient routing alone does not
+address that limitation. Design local distress, conservative delivery and useful survivor access
+together, judged through paid feeding, growth and replacement. Local/global composition and
+delivery changes remain open; the installed mortality mechanism remains the baseline.
+
 <a id="backlog-dynamic-terrain"></a>
 
 ## Dynamic terrain
@@ -111,8 +124,8 @@ consumption of living structure and larger reaction arity. No evolutionary campa
 
 ## Light ecology: shelter, emission and conditional activity
 
-**Status:** Unselected research questions — the v42 implementation (September 25) and its plan
-are closed.
+**Status:** Open usefulness direction, October 2 — actual design remains to be completed.
+The v42 implementation (September 25) and its plan are closed.
 
 The [light ecology design](design/light-ecology.md) owns the installed shade, overhead film and
 paid emission. The [constructed checks](light-ecology-results.md) establish sensory agency and
@@ -120,6 +133,11 @@ physical effects but no positive whole-cell shelter or lamp return. Default isol
 lose small deposits to the existing numerical cutoff; larger funded investment can accumulate
 film. Open questions: ecological payoff of shelter and emission, nocturnal endurance and evolved
 differentiation. Dormancy is a separate extension.
+
+The [light, shade and emission usefulness direction](design/light-usefulness.md) owns the next
+design work: conditional chemical returns, cover investment, optical information and the poor
+realized capture of paid emission. It records the overnight v50 motivation and unresolved
+physical/controller links without selecting new equations or reopening accepted pruning.
 
 <a id="backlog-cell-utterances"></a>
 
@@ -163,6 +181,19 @@ parent's strategic state. The private byte remains reflex-owned and strategic re
 heard activity and byte diversity use the shared history transform. The
 [delivery evidence](utterances-and-strategy-results.md) records calibration and bounded checks.
 
+<a id="backlog-vocalization-and-strategy-usefulness"></a>
+
+## Vocalization and strategic controller usefulness
+
+**Status:** Open research direction, October 2 — actual design remains to be completed.
+
+The [joint usefulness direction](design/vocalization-and-strategy-usefulness.md) asks what paid
+messages add beyond existing local cues, what can repay a speaker's costs, and when slow history,
+inherited context and paid learning improve reflex decisions. Overnight v50 observation showed
+activity but did not identify those returns. The direction owns the unresolved information,
+timing, representation, coupling and cost decisions; the installed utterance and strategic
+controller specifications above remain the baseline. No revision or campaign is selected yet.
+
 <a id="backlog-rugged-interaction"></a>
 
 ## Rugged chemical interaction: surprising mutations and co-located roles
@@ -188,6 +219,19 @@ actual neighborhoods and private experience. Shared steepness6 is selected for n
 worlds after renewal/replacement comparisons. Sustained complementary cross-feeding and
 permanent roles remain unestablished; the [ecology plan](plans/RUGGED-ECOLOGY-PLAN.md) preserves
 the governing criteria.
+
+<a id="backlog-chemical-key-specialization"></a>
+
+## Chemical keys and broad processing
+
+**Status:** Exploratory direction, October 5 — investigation and design remain incomplete.
+
+The [chemical-key direction](design/chemical-key-specialization.md) records the user's concern
+that ordinary cells process broad mixtures instead of the expected distinct relationships to
+shared chemistry. Investigate active recognition, composed private cycles, mutation accessibility,
+physical tradeoffs, controller expression and neighbor consequences. Assess inherited returns
+through replacement; different keys or intake alone do not establish complementary roles.
+No narrowing rule, breadth penalty, mutation revision or campaign is selected.
 
 <a id="backlog-plan-carryover"></a>
 

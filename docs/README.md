@@ -81,6 +81,10 @@ through renewals. It remains running. Tuning requests authorize restarts without
 
 | Direction                                                              | Document                                                                                                     |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Local mortality feeding; consequential death-to-feeding cycle, probably through a local term | [Exploratory direction](design/local-mortality-feeding.md) |
+| Chemical keys and broad processing; investigate distinct inherited chemical relationships | [Exploratory direction](design/chemical-key-specialization.md) |
+| Light, shade and emission usefulness; actual design incomplete         | [Open direction](design/light-usefulness.md)                                                                  |
+| Vocalization and strategic controller usefulness; actual design incomplete | [Open direction](design/vocalization-and-strategy-usefulness.md)                                            |
 | Gradual geographic change, tectonics and bounded local events          | [Dynamic terrain](design/dynamic-terrain.md)                                                                 |
 | Finite resource storage, local depletion and seasonal recharge         | [Reservoir storage](design/reservoir-storage.md)                                                             |
 | Rugged chemical interaction: surprising mutations and co-located roles | Local v52 [direction](design/rugged-interaction.md), [inherited ecological consequences and tuning](rugged-ecology-results.md), [delivery findings](rugged-interaction-results.md), [constructed food chain and harm](rugged-community-results.md), [ordinary descendants and dependency](rugged-ordinary-calibration-results.md), [Kauffman research paper](design/kauffman-landscapes-research.md) |
@@ -251,10 +255,13 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Light ecology: shelter, emission and conditional activity](backlog.md#backlog-light-ecology)
 - [Directional cell communication: mouths and ears](backlog.md#backlog-cell-utterances)
 - [Strategic controller: a slow learned layer above the reflex RNN](backlog.md#backlog-strategic-controller)
+- [Vocalization and strategic controller usefulness](backlog.md#backlog-vocalization-and-strategy-usefulness)
 - [Dynamic terrain: gradual change, tectonics and local events](backlog.md#backlog-dynamic-terrain)
 - [Reservoir storage and local depletion](backlog.md#backlog-reservoir-storage)
 - [Mortality driven reservoir recycling](backlog.md#backlog-mortality-recycling)
+- [Local mortality feeding](backlog.md#backlog-local-mortality-feeding)
 - [Rugged chemical interaction: surprising mutations and co-located roles](backlog.md#backlog-rugged-interaction)
+- [Chemical keys and broad processing](backlog.md#backlog-chemical-key-specialization)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

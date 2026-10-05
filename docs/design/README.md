@@ -361,6 +361,22 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
+The October 5 review opens two exploratory directions:
+[local mortality feeding](local-mortality-feeding.md), to make death-derived feeding more
+consequential during local declines, probably through a local term; and
+[chemical keys and broad processing](chemical-key-specialization.md), to investigate why
+ordinary cells broadly process mixtures instead of expressing the expected distinct inherited
+chemical relationships. Both designs remain incomplete. Local/global recovery composition,
+delivery changes and any chemical-law revision are unresolved; the existing runtime remains
+the baseline. These records select no experiment campaign or implementation.
+
+The October 2 review opens two usefulness directions:
+[light, shade and emission](light-usefulness.md), and
+[vocalization and strategic control](vocalization-and-strategy-usefulness.md).
+Both actual designs remain to be completed. They record underwhelming realized returns or
+unresolved usefulness in the installed mechanisms, the intended opportunities and the decisions
+still needed; neither selects new equations, runtime changes or an experiment campaign.
+
 The structural replacement is delivered; [the scaling record](../plans/archive/SCALING-PLAN.md)
 records the circle simplification and installed tiled execution. The September 21 sampled-contact
 implementation produced the following historical results, superseded for contact behavior. At 20× area,

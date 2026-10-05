@@ -8,6 +8,8 @@ mod bottleneck;
 mod cellular;
 #[path = "inspection/connections.rs"]
 mod connections;
+#[path = "inspection/full.rs"]
+mod full;
 #[path = "inspection/public_floor.rs"]
 mod public_floor;
 
@@ -225,10 +227,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     | "--chemistry"
                     | "--bottleneck"
                     | "--public-floor"
+                    | "--full"
             ))
     {
         return Err(
-            "Expected checkpoint, new output JSON path and optional --ancestry, --storage, --connections, --light, --chemistry, --bottleneck, --public-floor or --motion TICKS".into(),
+            "Expected checkpoint, new output JSON path and optional --ancestry, --storage, --connections, --light, --chemistry, --bottleneck, --public-floor, --full or --motion TICKS".into(),
         );
     }
     let raw = fs::read(&args[0])?;
@@ -256,6 +259,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .collect();
         json!({"tick":w.tick,"ticks":ticks,"width":w.config.width,"height":w.config.height,
             "cells":cells})
+    } else if args.get(2).is_some_and(|arg| arg == "--full") {
+        let (cells, groups) = cells(&w);
+        json!({"tick":w.tick,"seed":w.seed,"config":w.config,"chemistry":w.chemistry,
+            "summary":antropy_engine::observation::summary(&w),"cells":cells,
+            "survivorLifetimeGroups":groups,"geography":geography(&w),
+            "ancestry":w.ancestry,"factors":full::inspect(&w)})
     } else if args.get(2).is_some_and(|arg| arg == "--public-floor") {
         public_floor::inspect(&w)
     } else if args.get(2).is_some_and(|arg| arg == "--bottleneck") {
@@ -305,9 +314,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "summary":antropy_engine::observation::summary(&w),"cells":cells,
             "survivorLifetimeGroups":groups,"geography":geography(&w)})
     };
-    assert_eq!(
-        before,
-        w.snapshot()?,
+    assert!(
+        before == w.snapshot()?,
         "Read-only inspection changed physical state"
     );
     let mut out = fs::OpenOptions::new()
