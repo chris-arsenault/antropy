@@ -21,7 +21,7 @@ pub fn mutate(g: &mut Genome, rng: &mut Random, c: &Config) -> bool {
         c.mutation_scale,
         1.,
     );
-    let strategy = g.strategy.mutate(rng, c);
+    let strategy = c.features.strategy && g.strategy.mutate(rng, c);
     weights || plasticity || strategy
 }
 pub fn express(a: &Genome, b: &Genome) -> Genome {

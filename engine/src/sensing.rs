@@ -57,7 +57,10 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
     let nodes = sample_rows(cell, c, field);
     std::array::from_fn(|slot| {
         let stock = if slot == 4 { PHOTO_STOCK } else { 3 + slot };
-        if cell.body[stock] == 0. || (slot < 4 && cell.chemistry().inward[slot] == 1.) {
+        if cell.body[stock] == 0.
+            || (slot == 4 && !c.features.photoreception)
+            || (slot < 4 && cell.chemistry().inward[slot] == 1.)
+        {
             return [0.; 3];
         }
         let mut readings = [0.; 5];

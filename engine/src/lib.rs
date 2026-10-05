@@ -68,6 +68,7 @@ pub mod execution;
 pub mod execution_budget;
 #[cfg(test)]
 mod execution_schedule_tests;
+pub mod features;
 pub mod field;
 mod field_activity;
 #[cfg(test)]

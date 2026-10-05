@@ -55,6 +55,9 @@ impl Reservoirs {
 }
 
 pub fn publish(w: &mut World, physiology: bool) {
+    if !w.config.features.strategy {
+        return;
+    }
     if physiology || w.tick == 0 || !w.strategy_sources.ready() {
         w.strategy_sources.prepare(&w.sources, &w.field, &w.config);
     }

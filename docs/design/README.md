@@ -13,11 +13,17 @@ comparing research directions. It records accepted pruning quantization, expecte
 proximity, the questions about inter-colony exchange and new colony founding, and the
 approximately 30-tick/s goal at 2,000 cells with its current low priority.
 
+October5 physical v53 adds native run-start switches for optional optical machinery,
+vocalization and strategic control. The [four-exploration ablation](../exploration-ablation.md)
+combines them with existing mortality and radial-recognition controls for a fresh all-off
+server world. Default mechanisms remain available; no browser settings interface is added.
+
 October2 local physical v52 enables inherited [complementarity recognition](rugged-interaction.md)
 for ordinary founders, descendants, sensing, transport, enzymes and membranes. Compiled profiles
 and susceptibility are observable in the inspector/atlas; strongest-identity summaries replace
 obsolete recognition coordinates. The [delivery comparison](../rugged-interaction-results.md)
 records bounded full-space and ordinary-world findings. The live v50 world is unchanged.
+
 October3 [causal iteration](../rugged-community-results.md) demonstrates constructed cross-feeding
 and genotype-dependent harm from the same intermediate. Subsequent
 [ordinary calibration](../rugged-ordinary-calibration-results.md) observes inherited binding

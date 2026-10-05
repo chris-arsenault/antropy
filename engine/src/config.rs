@@ -19,6 +19,7 @@ pub struct Disturbance {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct Config {
+    pub features: crate::features::Features,
     pub chemistry_seed: u64,
     pub width: f64,
     pub height: f64,
@@ -132,6 +133,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            features: Default::default(),
             chemistry_seed: 101,
             width: 720.,
             height: 540.,

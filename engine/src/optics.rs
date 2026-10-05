@@ -93,6 +93,9 @@ pub fn work_bound(w: &World) -> f64 {
 
 fn radiate(w: &mut World, sites: &[Row], dt: f64) -> (Plane, Plane) {
     w.incident.emitters.clear();
+    if !w.config.features.emission {
+        return Default::default();
+    }
     let geometry = crate::spatial::Geometry::new(w.field.nx, w.field.ny);
     let [lateral, upward] = &mut w.incident.deposits;
     lateral.reset(geometry);

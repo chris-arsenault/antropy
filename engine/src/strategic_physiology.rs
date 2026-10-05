@@ -2,6 +2,9 @@
 use crate::{config::Config, controller::strategic, genetics::Compiled, organism::Cell};
 
 pub fn capture(cell: &mut Cell, g: &Compiled, c: &Config, tick: u64, start: [f64; 2]) {
+    if !c.features.strategy {
+        return;
+    }
     crate::strategic_local::self_readings(cell, c, tick);
     let history = history(cell, c);
     let displacement = [

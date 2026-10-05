@@ -1,0 +1,15 @@
+{
+  "mortalityRecovery": false,
+  "radialFounders": true,
+  "terrain": {
+    "transmission": false,
+    "ceiling": false
+  },
+  "features": {
+    "photoreception": false,
+    "cover": false,
+    "emission": false,
+    "vocalization": false,
+    "strategy": false
+  }
+}

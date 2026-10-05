@@ -76,6 +76,7 @@ impl Genotype {
                 body[crate::organism::enzyme_stock(slot)] = 0.;
             }
         }
+        c.features.constrain_body(&mut body);
         let operators = if let Some(previous) = &self.compiled {
             let mut op = previous.operators.clone();
             op.update(&previous.chromosome.chemistry, m, c, chemistry);

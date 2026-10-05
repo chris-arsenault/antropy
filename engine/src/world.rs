@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 52;
+pub const VERSION: u32 = 53;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,

@@ -16,7 +16,7 @@ pub fn interval_reserve(
     let learning = if c.learning == "plastic" {
         body[0]
             * c.plasticity_cost
-            * crate::controller::strategic::learning_rate(cell.brain.strategy.learning_gain)
+            * crate::controller::strategic::learning_rate(cell.brain.strategy.learning_gain, c)
     } else {
         0.
     };
@@ -41,7 +41,7 @@ pub fn division_requirements(
     let learning = if c.learning == "plastic" {
         daughter[0]
             * c.plasticity_cost
-            * crate::controller::strategic::learning_rate(cell.brain.strategy.learning_gain)
+            * crate::controller::strategic::learning_rate(cell.brain.strategy.learning_gain, c)
     } else {
         0.
     };
