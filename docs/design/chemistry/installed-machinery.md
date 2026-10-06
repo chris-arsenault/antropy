@@ -22,7 +22,7 @@ Division conservatively partitions biomass, free material and usable
 energy after the existing division cost. Each daughter immediately uses its own mutated
 configuration and derived body proportions. Mutation grants no additional biomass. Program
 duplication splits genetic capacity weights; deletion immediately removes that capacity. Small chemical edits retain
-the shared key/sigmoid law; no rule protects a mutant's access to its parent's food.
+the shared competitive binding law; no rule protects a mutant's access to its parent's food.
 
 During life, neural activity, automatic biomass growth, chemistry, damage and private learning
 remain dynamic. The capability repertoire and its chemical

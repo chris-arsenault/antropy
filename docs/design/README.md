@@ -13,6 +13,11 @@ comparing research directions. It records accepted pruning quantization, expecte
 proximity, the questions about inter-colony exchange and new colony founding, and the
 approximately 30-tick/s goal at 2,000 cells with its current low priority.
 
+October6 corrects inherited keys to use [one finite binding partition](../key-binding-correction.md)
+across chemical identities and an unbound state. Positive bias can increase binding strength
+but cannot grant full recognition and protection to every chemical. The correction preserves
+the shared mutation law, all seventeen consumers and the selected all-off operating configuration.
+
 October5 physical v53 adds native run-start switches for optional optical machinery,
 vocalization and strategic control. The [four-exploration ablation](../exploration-ablation.md)
 combines them with existing mortality and radial-recognition controls for a fresh all-off

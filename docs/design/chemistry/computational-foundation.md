@@ -54,9 +54,11 @@ impedance×viscosity and stars/solar systems motivate reasoning, not mandatory f
 ## Two domains with different jobs
 
 The chemical manifold is a computational domain, not just an atlas used at world generation.
-Nearby coordinates support related properties and transformations. V52 recognition reads the
-same identities through their eight-bit spins and inherited keys followed by one shared sigmoid;
-bit neighbors need not be manifold neighbors. The geographic
+Nearby coordinates support related properties and transformations. Keyed recognition reads the
+same identities through their eight-bit spins and inherited keys followed by one shared
+competitive binding partition, including an unbound state. Chemical identities share finite
+recognition capacity; a positive bias cannot grant full affinity to every identity.
+Bit neighbors need not be manifold neighbors. The geographic
 plane locates material, cells and sources. Chemical-space differences determine relatedness and
 response; geographic differences determine direction, delivery and encounter. A chemical-space
 axis is neither a geographic compass nor an additional spatial dimension.

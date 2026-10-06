@@ -211,7 +211,11 @@ See the [startup correction](docs/mortality-startup-correction.md) and
 
 V52 enables inherited complementarity recognition in ordinary native/browser startup: seventeen
 keys of eight bounded weights and bias compile sparse receptor, transporter, enzyme-substrate
-and membrane coefficients at birth. One shared bindingLambda=6 applies to all sites. Exact
+and membrane coefficients at birth. One shared bindingLambda=6 applies to all sites.
+October6 corrects independent sigmoid coefficients to one competing binding partition with an
+unbound state: total affinity per keyed site cannot exceed one. Bias controls binding strength;
+weights control relative chemical preference. Broad recognition divides finite capacity, including
+membrane protection. See [binding correction](docs/key-binding-correction.md). Exact
 actions, potentials, costs and spatial rules remain unchanged. Existing heavy-tailed mutation
 acts on weights with physicalMutationScale and bias with9 times that scale; unused recognition
 coordinates do not mutate. `radialFounders` is an explicit diagnostic startup ablation, not the

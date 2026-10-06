@@ -1,12 +1,14 @@
 # Chemical keys and broad processing
 
-**Status:** Exploratory design direction — investigation and design incomplete, October 5, 2026.
+**Status:** Exploratory ecology direction. October6 corrects the installed binding law's
+universal-saturation defect; sustained ecological differentiation remains unestablished.
 
 Continue investigating the consequences of inherited chemical keys. The user's specific
 concern is that cells generally process broad chemical mixtures, contrary to the expected
 sharply different relationships to shared chemistry. The installed
-[rugged interaction](rugged-interaction.md) remains the baseline. This direction does not
-select a narrower recognition law, new cost, mutation revision or experiment campaign.
+[rugged interaction](rugged-interaction.md) now uses the
+[finite binding partition](../key-binding-correction.md) selected by the October6 correction.
+The broader ecological investigation does not assign roles, change mutation or require a campaign.
 
 ## Intended consequence
 
@@ -24,6 +26,12 @@ not the goal. The concern is the apparent convergence toward broadly similar che
 relationships despite a mechanism intended to make distinct relationships accessible.
 
 ## Why this direction is open
+
+The October6 saved-state diagnosis finds near-universal binding in funded enzyme/transporter
+keys and broad membrane protection under independent sigmoids. The corrected partition
+shares finite affinity among identities, eliminating full-strength universal recognition.
+Its bounded comparisons test physical access and protection, not spontaneous ecological roles.
+Earlier evidence below describes the superseded independent-sigmoid law.
 
 The [constructed food-chain comparison](../rugged-community-results.md) established a funded
 chemical dependency and genotype-dependent harm. The

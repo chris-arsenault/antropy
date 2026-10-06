@@ -1,4 +1,4 @@
-//! Birth-compiled complementarity; live consumers borrow ordinary affinity rows.
+//! Birth-compiled competing recognition states; live consumers borrow affinity rows.
 use crate::{chemistry::Affinity, config::Config, genetics::mutation, random::Random};
 use serde::{Deserialize, Serialize};
 
@@ -41,17 +41,25 @@ impl Key {
     }
 
     pub fn affinity(&self, species: usize, lambda: f64) -> f64 {
-        let z = lambda * self.score(species);
-        if z >= 0. {
-            1. / (1. + (-z).exp())
-        } else {
-            let e = z.exp();
-            e / (1. + e)
-        }
+        (lambda * self.score(species) - self.log_partition(lambda))
+            .min(0.)
+            .exp()
+    }
+
+    /// One unbound state and 256 competing identities share one site's capacity.
+    /// The complete bit alphabet factors the bound partition into eight two-state sums.
+    fn log_partition(&self, lambda: f64) -> f64 {
+        let bound = self.weights.iter().fold(lambda * self.bias, |sum, w| {
+            let z = (lambda * w).abs();
+            sum + z + (-2. * z).exp().ln_1p()
+        });
+        bound.max(0.) + (-bound.abs()).exp().ln_1p()
     }
 
     pub fn compile(&self, lambda: f64) -> Vec<Affinity> {
-        let values: [f64; 256] = std::array::from_fn(|s| self.affinity(s, lambda));
+        let partition = self.log_partition(lambda);
+        let values: [f64; 256] =
+            std::array::from_fn(|s| (lambda * self.score(s) - partition).min(0.).exp());
         let cutoff = values.iter().copied().fold(0., f64::max) * SUPPORT_FRACTION;
         values
             .into_iter()

@@ -622,14 +622,24 @@ by `sqrt(paid/requested)`. The same work-rate function prices growth reserves an
 
 ## Local recognition and paid operators
 
-Ordinary v52 recognition uses an inherited eight-weight key and bias at each site:
-`A(s)=sigmoid(lambda*(sum_j k_j*beta_j(s)+b))`, with identity-bit spins beta in {-1,1},
-weights in[-1,1], bias in[-9,9] and shared lambda6. Stable sigmoid evaluation and a relative
-row cutoff1e-4 compile sparse coefficients once at birth. Broad keys distribute existing
-capacity through ordinary occupancy; no extra cost or chemical role is assigned.
+Ordinary recognition uses an inherited eight-weight key and bias at each site. The October6
+correction replaces independent per-identity sigmoids with competing binding states:
+`E(s)=sum_j k_j*beta_j(s)+b`, `Z=1+sum_t exp(lambda*E(t))`,
+`A(s)=exp(lambda*E(s))/Z`. The unit term represents the unbound state; all256 chemical states
+share one site's recognition, so `sum_s A(s)<=1`. Identity-bit spins beta are in {-1,1},
+weights in[-1,1], bias in[-9,9] and shared lambda6. Bias changes total binding strength;
+relative chemical preference depends on the weights. Broad binding therefore divides finite
+recognition instead of creating universal full-strength protection or access. The bound
+partition factors exactly as `exp(lambda*b)*product_j(2*cosh(lambda*k_j))` over the complete
+eight-bit alphabet. Log-domain evaluation prevents overflow at allowed extremes. A relative
+row cutoff1e-4 removes small coefficients without redistributing their capacity; sparse rows
+compile once at birth. Ordinary occupancy and paid operators still govern actual throughput.
+No extra charge or chemical role is assigned. The [correction record](../../key-binding-correction.md)
+owns the diagnosis, bounded physical comparison and limits.
 The explicit `radialFounders` startup ablation retains max(0,1-distance²/R²)², R=3,
 without edge normalization. Existing genotypes always use their own stored representation.
-Product mixtures preserve unit-sum material weights; recognition has no such normalization.
+Product mixtures preserve unit-sum material weights. Keyed recognition shares at most one
+unit of binding, with any remainder unbound; radial recognition keeps its diagnostic kernel.
 Each cell retains four receptor,
 four transporter and one to eight enzyme programs plus a membrane key. Enzymes carry a recognition
 key, global reflection center c and periodic orientation theta. Exact chemical actions

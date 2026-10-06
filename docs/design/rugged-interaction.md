@@ -1,10 +1,11 @@
 # Rugged chemical interaction
 
-**Status:** Complementarity is selected and integrated locally in physical v52, October2,2026,
-following the user's request to finish the feature. Ordinary native/browser startup uses inherited
-keys at all seventeen sites. The [delivery plan](../plans/RUGGED-INTERACTION-PLAN.md) and
-[simulation comparison](../rugged-interaction-results.md) record scope and evidence. The live
-server remains v50; this local change has not been published or deployed. The
+**Status:** Complementarity is integrated in ordinary native/browser startup at all seventeen
+sites. The October6 [binding correction](../key-binding-correction.md) replaces independent
+sigmoids with competing binding states. Earlier v52 [delivery](../plans/RUGGED-INTERACTION-PLAN.md)
+and [simulation comparisons](../rugged-interaction-results.md) describe the superseded law.
+The live server's selected four-group ablation has keys disabled; this correction does not
+change that operating configuration. The
 [research paper](kauffman-landscapes-research.md) supplies the literature and analysis.
 
 The [chemical-consequence follow-up](../chemical-consequence-results.md) failed its funded
@@ -112,13 +113,14 @@ Two structural observations guide selection:
   deposits. By Kauffman and Johnsen's order parameter, adding interaction ruggedness shifts the
   balance from continual chasing toward mutually determined roles; too much freezes the ecosystem.
 
-## Selected law: complementarity binding
+## Selected law: competing complementarity binding
 
-Derived September 30, selected for complete local implementation October2,2026. It replaces the
-radial recognition kernel with an additive binding energy over identity bits followed by one
-nonlinearity, the form that describes transcription-factor binding (Berg and von Hippel 1987;
-Gerland, Moroz and Hwa 2002) and much measured protein epistasis (Otwinowski, McCandlish and
-Plotkin 2018; Sailer and Harms 2017).
+The September30 additive score and October2 independent sigmoid are superseded by the
+October6 finite-site partition. The correction preserves inherited bit complementarity and
+the existing shared steepness while making the chemical states compete for one site's
+recognition capacity. The [correction record](../key-binding-correction.md) explains the
+observed saturation defect, derivation and bounded physical checks. Earlier cited literature
+motivates binding-energy models; it does not establish this corrected simulation's behavior.
 
 ### Operation
 
@@ -128,13 +130,17 @@ weights `κ_j ∈ [−1, 1]` and a bias `b`. Its binding energy and affinity for
 
 ```text
 E(s) = Σ_j κ_j β_j(s) + b
-A(s) = 1 / (1 + exp(−λ E(s)))
+Z = 1 + Σ_t exp(λ E(t))
+A(s) = exp(λ E(s)) / Z
 ```
 
-λ is the single shared ruggedness control, measured in logits per unit energy. One full-weight
-bit mismatch changes E by 2, so it moves affinity by 2λ logits. Weight sign says which bit value
-the site prefers; weight magnitude says how much that bit position matters; the bias sets how
-many mismatches the site tolerates.
+The unit term is the unbound state. All256 bound states share one capacity, so
+`sum_s A(s)<=1`. λ is the single shared ruggedness control. One full-weight bit mismatch
+changes relative binding weight by `exp(-2λ)`. Weight sign selects a preferred bit value;
+magnitude sets its importance. Bias changes total binding against the unbound state while
+preserving the relative preferences. Strong positive bias cannot erase those preferences.
+The bound partition factors into `exp(λb)*product_j(2*cosh(λκ_j))`; stable logarithms evaluate
+it once per compiled key, without live nonlinear per-species work.
 
 A(s) replaces the radial kernel `k_a(s)` wherever the runtime compiles recognition rows:
 
@@ -152,11 +158,10 @@ ranked by S; what becomes cell-relative is which chemicals a membrane protects a
 
 ### What keys can express
 
-The v52 runtime fixes bias to[-9,9] and compiles affinities below1e-4 of a row's
-maximum out of sparse support. Its earlier lambda3 lock has37 participating identities;
-the selected lambda6 lock has9,
-although only the exact target exceeds half affinity. The sets below describe thresholded
-recognition; finite sigmoid tails remain physical whenever they pass the shared sparse cutoff.
+Bias remains bounded to[-9,9]. Affinities below1e-4 of a row's maximum leave sparse support
+without renormalizing survivors. A full-weight target lock has9 participating identities at
+lambda3 and one at the ordinary lambda6. These counts describe sparse support rather than
+external fuels; small coefficients remain physical when they pass the cutoff.
 Ordinary founders initialize all seventeen keys with the same target-spin encoding and bias-7,
 preserving the four declared founder circuit actions and physical starting packets. Evolving keys
 never round back to coordinates. Explicit `radialFounders` enables the diagnostic startup ablation;
@@ -165,36 +170,34 @@ See the [earlier candidate results](../rugged-binding-results.md) for the fixed 
 
 | Key                  | Weights and bias                       | Recognized set                                                                          |
 | -------------------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
-| Single-identity lock | `κ_j = ±1` matching a target, `b = −7` | `E = 1 − 2h` for Hamming distance h: only the target                                    |
-| Tolerant lock        | Same weights, `b = −5`                 | `h ≤ 1`: the target plus 8 identities, a cross along its row and column of the manifold |
-| Row reader           | Weights on x bits only                 | Affinity constant along y: the cell reads only the X coordinate                         |
-| Periodic reader      | Weight on x0 only                      | Alternating columns: periodic faster than any property surface                          |
-| Generalist           | Weights near zero, `b > 0`             | Nearly every identity, weakly specific                                                  |
+| Single-identity lock | `κ_j = ±1` matching a target, `b = −7` | At lambda6 the target receives almost all bound capacity; mismatches fall outside sparse support |
+| Wider lock           | Matching weights of magnitude0.5, `b = −3` | At lambda6 one-bit mismatches participate weakly; total recognition still cannot exceed one |
+| Row reader           | Weights on x bits only, `b > 0` | Sixteen identities with the preferred X coordinate share the dominant binding capacity |
+| Periodic reader      | Weight on x0 only, `b > 0` | Alternating chemical columns share capacity; this is not geographic movement |
+| Generalist           | Weights zero, `b > 0` | Every identity shares equal weak affinity, approaching1/256 each as total binding saturates |
 
-For example, a tolerant lock on 180 (`1011 0100`, x = 11, y = 4) recognizes 180 and
+For example, a wider lock on 180 (`1011 0100`, x = 11, y = 4) recognizes 180 and
 (3, 4), (15, 4), (9, 4), (10, 4), (11, 12), (11, 0), (11, 6) and (11, 5). Neighbors on the
 manifold, such as (7, y) and (8, y), differ in four x bits and can fall on opposite sides of a
 threshold.
 
 ### How it meets the requirements
 
-- **Sign epistasis.** Affinity is a sigmoid of an additive trait, which gives magnitude epistasis
-  within one chemical. One weight shifts the affinity of half of identity space together, so a
-  mutation's net value depends on whether the chemicals it moves across threshold are food or
-  harm for this cell, which the other weights and bias decide. Such pleiotropy across chemicals
-  of opposite value produces sign epistasis, and reciprocal sign epistasis when two weights are
-  needed together to reach or exclude a pattern.
-- **One control.** λ sets ruggedness for every site. As λ → 0 affinity becomes uniform; large λ
-  gives step-like locks.
-- **Neutral networks with abrupt borders.** Many keys produce the same recognized set: any
-  weights with the same signs and margins. Steps inside that set change little; a step that moves
-  some identity across `E = 0` changes the set abruptly.
+- **Coupled chemical consequences.** Changing one weight changes relative affinity across half
+  the identity space and reallocates capacity. The value of that change depends on the other
+  weights, available material, exact products, protection and costs. Reciprocal sign epistasis
+  must be measured through physical returns; the binding formula alone does not prove it.
+- **One control.** λ sets ruggedness for every site. As λ approaches zero identities share
+  almost uniform weak affinity; large λ concentrates binding on preferred bit patterns.
+- **Nearly neutral regions with sharp transitions.** When preferred bits have large margins,
+  modest changes retain dominant support. A weight crossing its preference transition can
+  exchange which chemical identities receive strong binding. No hard genetic rounding is used.
 - **Mutation law unchanged.** κ and b are ordinary bounded scalar genes, mutated with the shared
   heavy-tailed law and reflection. A median step moves every affected energy by a fraction of one
-  mismatch; rare large steps flip a weight's sign or a lock's tolerance.
-- **Generalist cost from existing physics.** Transporter and enzyme capacity is already divided
-  among recognized species by the shared occupancy denominator, so broad keys spread throughput
-  thinly. No new charge is needed for a specialist/generalist tradeoff.
+  mismatch; rare large steps flip a weight's sign or change total binding strength.
+- **Finite recognition at every site.** Broad profiles divide one unit of affinity, including
+  membrane protection. Existing occupancy still constrains actual pump/enzyme throughput.
+  There is no added breadth charge or guarantee that every mixture favors a specialist.
 
 ### Coherence with the existing chemistry
 
@@ -202,11 +205,13 @@ The manifold keeps its role for property surfaces, transport and enzyme actions;
 reads bit space. Environmental chemistry already moves identities by single-bit flips, so a public
 conversion moves a chemical exactly one mismatch relative to every key. The founder circuit
 0 → 128 → 136 → 8 → 0 is a square of single-bit flips (bits x3 and y3); tolerance-zero founder
-keys recognize only their input, while tolerance-one keys would also recognize their product.
+keys recognize only their input at lambda6, while wider keys can also recognize their product
+weakly by sharing their finite capacity.
 
 ### Costs
 
-Each changed birth compiles at most17 sites ×256 identities of affinity. Unchanged rows retain
+Each changed birth compiles at most17 sites ×256 identities of affinity and one factorized
+partition per site. Unchanged rows retain
 immutable sharing. This cost is bounded; it is not assumed negligible. Runtime
 cost follows recognition support. The radial kernel supports 25 identities away from the manifold edge; a
 broad key can support all 256. Rows keep a support cutoff (affinity below a small fraction of the site maximum
@@ -219,10 +224,11 @@ explicit keys.
 
 ### Installed choices
 
-1. Default λ6, exposed as one startup setting; ordinary-world calibration retains sharp
-   recognition with observed descendant replacement. It is not calibrated for indefinite coexistence.
+1. Default λ6, exposed as one startup setting. Earlier ordinary-world calibration used independent
+   sigmoids and does not establish the corrected law's long-term ecological behavior.
 2. Bias bounds[-9,9], mutation scale9×physicalMutationScale; weights use physicalMutationScale.
-3. Relative support cutoff1e-4 with the existing sparse operators and occupancy limits.
+3. One unbound state plus256 competing chemical states; relative support cutoff1e-4 with the
+   existing sparse operators and occupancy limits. Pruning does not redistribute recognition.
 4. Adhesion retains its existing normalized compatibility composition, using compiled keyed membranes.
 5. Inspector/atlas show native compiled profiles and susceptibility. Color/census/history use the
    explicitly labeled strongest recognized identity; actual transfers remain separate from capabilities.

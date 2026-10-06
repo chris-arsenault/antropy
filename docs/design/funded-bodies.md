@@ -168,8 +168,8 @@ step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
 P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
 Default behavioral probability/scale is0.0015/0.08; physical probability/scale is0.1/0.12.
 V52 recognition keys have eight weights in[-1,1] and bias in[-9,9]; their scales are respectively
-physicalMutationScale and9 times that scale. One common sigmoid steepness controls all seventeen
-sites. Keyed alleles do not mutate unused recognition coordinates. Exact reflection centers and
+physicalMutationScale and9 times that scale. One common competitive binding steepness controls
+all seventeen sites. Keyed alleles do not mutate unused recognition coordinates. Exact reflection centers and
 diagnostic radial coordinates multiply scale by the existing specificity radius R.
 Scalar neural and twenty-four investment loci retain independent opportunities.
 Each of eight exact reflection-center pairs (plus seventeen diagnostic radial pairs when enabled)

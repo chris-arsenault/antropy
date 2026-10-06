@@ -15,6 +15,10 @@ pub mod ancestry;
 pub mod binding;
 mod binding_observation;
 #[cfg(test)]
+mod key_competition_physics_tests;
+#[cfg(test)]
+mod key_competition_tests;
+#[cfg(test)]
 mod keyed_binding_tests;
 mod recognition_observation;
 mod recognition_probe;
