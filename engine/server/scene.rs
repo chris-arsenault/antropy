@@ -36,7 +36,7 @@ impl Scene {
             scene.markers.insert(m.id, m.attributes().map(f32::to_bits));
         });
         scene.prepare_solar(w, window);
-        for (sample_index, sample) in b.field.chunks_exact(8).enumerate() {
+        for (sample_index, sample) in b.field.as_chunks::<8>().0.iter().enumerate() {
             let node = window.node(w, sample_index);
             for (lane, value) in sample.iter().enumerate() {
                 let value = match lane {
