@@ -20,13 +20,23 @@ fn fixture() -> Runtime {
     )
     .unwrap()
 }
+fn unpack(bytes: &[u8]) -> (Vec<u8>, serde_json::Value) {
+    use std::io::Read;
+    let mut raw = Vec::new();
+    flate2::read::GzDecoder::new(bytes)
+        .read_to_end(&mut raw)
+        .unwrap();
+    let length = u32::from_le_bytes(raw[8..12].try_into().unwrap()) as usize;
+    let metadata = serde_json::from_slice(&raw[16..16 + length]).unwrap();
+    (raw, metadata)
+}
 
 #[test]
 fn common_projection_is_shared_and_does_not_advance_world() {
     let mut r = fixture();
     let before = r.world.snapshot().unwrap();
     let p = r.publish(vec![ViewKey::default(); 16], 0.).unwrap();
-    assert_eq!(p.frames.len(), 1);
+    assert_eq!(p.scenes.len(), 1);
     assert_eq!(p.projections, 1);
     let mut keys = vec![ViewKey::default(); 31];
     keys.push(ViewKey {
@@ -34,7 +44,7 @@ fn common_projection_is_shared_and_does_not_advance_world() {
         ..ViewKey::default()
     });
     let next = r.publish(keys, 0.).unwrap();
-    assert_eq!(next.frames.len(), 2);
+    assert_eq!(next.scenes.len(), 2);
     assert_eq!(p.terrain.as_ptr(), next.terrain.as_ptr());
     assert_eq!(p.terrain_revision, next.terrain_revision);
     assert!(p.terrain.len() <= 32 + 256 * 256 * 16);
@@ -44,15 +54,21 @@ fn common_projection_is_shared_and_does_not_advance_world() {
     );
     assert_eq!(before, r.world.snapshot().unwrap());
     assert_eq!(p.status["summary"]["tick"], 0);
-    let bytes = p.frames.values().next().unwrap();
-    assert_eq!(
-        u32::from_le_bytes(bytes[44..48].try_into().unwrap()),
-        p.terrain_revision
-    );
-    assert_eq!(
-        u32::from_le_bytes(bytes[0..4].try_into().unwrap()),
-        0x42545250
-    );
+    let key = ViewKey::default();
+    let (packet, baseline) = super::wire::encode(&p, key, 0, false, None).unwrap();
+    let (shared, _) = super::wire::encode(&p, key, 0, false, None).unwrap();
+    assert_eq!(packet.as_ptr(), shared.as_ptr());
+    let (_, first) = unpack(&packet);
+    assert_eq!(first["terrainRevision"], p.terrain_revision);
+    let (packet, _) = super::wire::encode(&next, key, 0, false, Some(&baseline)).unwrap();
+    let (raw, delta) = unpack(&packet);
+    assert!(raw.len() < 1024);
+    assert!(delta["definition"].is_null());
+    assert!(delta["status"]["history"].is_null());
+    assert!(delta["status"]["population"].is_null());
+    assert_eq!(delta["base"], p.sequence);
+    assert_eq!(delta["reset"], false);
+    assert_eq!(u32::from_le_bytes(raw[12..16].try_into().unwrap()), 0);
 }
 #[test]
 fn controls_apply_between_ticks_and_restart_replaces_generation() {
@@ -155,6 +171,7 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
     let mut rejected = false;
     let mut frames = 0;
     let mut terrains = 0;
+    let mut last_sequence = 0;
     tokio::time::timeout(Duration::from_secs(5), async {
         while let Some(Ok(message)) = active.next().await {
             match message {
@@ -165,13 +182,15 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
                     }
                 }
                 Message::Binary(b) => {
-                    if u32::from_le_bytes(b[..4].try_into().unwrap()) == 0x42545452 {
+                    let (raw, metadata) = unpack(&b);
+                    if u32::from_le_bytes(raw[12..16].try_into().unwrap()) > 0 {
                         terrains += 1;
-                        continue;
                     }
                     assert_eq!(terrains, 1);
-                    let tick = u32::from_le_bytes(b[16..20].try_into().unwrap());
-                    let seq = u32::from_le_bytes(b[12..16].try_into().unwrap());
+                    let tick = metadata["tick"].as_u64().unwrap();
+                    let seq = metadata["sequence"].as_u64().unwrap();
+                    assert_eq!(metadata["base"], last_sequence);
+                    last_sequence = seq;
                     if let Some(before) = first {
                         assert!(tick > before);
                     } else {
@@ -203,9 +222,9 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
     assert_eq!(frames, 3);
     assert_eq!(terrains, 1);
     let publication = host.publications.borrow().clone();
-    assert_eq!(publication.frames.len(), 1);
+    assert_eq!(publication.scenes.len(), 1);
     assert!(publication.status["running"] == true);
-    // The unacknowledged consumer receives one static terrain and one dynamic frame.
+    // The unacknowledged consumer receives only its initial combined publication.
     let mut slow_frames = 0;
     let _ = tokio::time::timeout(Duration::from_millis(100), async {
         while let Some(Ok(message)) = slow.next().await {
@@ -215,7 +234,7 @@ async fn socket_spectators_share_world_and_slow_viewer_cannot_stall_it() {
         }
     })
     .await;
-    assert_eq!(slow_frames, 2);
+    assert_eq!(slow_frames, 1);
     let tick = host.publications.borrow().status["summary"]["tick"]
         .as_u64()
         .unwrap();
@@ -241,9 +260,9 @@ fn cropped_display_preserves_seam_neighbors_and_bounds_grid_work() {
     let window = key.window(&r.world);
     assert!(window.contains(&r.world, 23.9, 3., 1.));
     let p = r.publish(vec![key], 0.).unwrap();
-    assert_eq!(p.frames.len(), 1);
-    let bytes = p.frames.values().next().unwrap();
-    assert!(bytes.len() < 65536 * 32 + 4096);
+    assert_eq!(p.scenes.len(), 1);
+    let scene = p.scenes.values().next().unwrap();
+    assert!(scene.raw_bytes() < 65536 * 32 + 4096);
 }
 
 #[test]
@@ -268,7 +287,7 @@ fn publication_cost_envelope() {
                     r.world.step();
                     if viewers > 0 && tick % 25 == 0 {
                         let p = r.publish(keys.clone(), 0.).unwrap();
-                        bytes += p.frames.values().map(|b| b.len()).sum::<usize>();
+                        bytes += p.scenes.values().map(|s| s.raw_bytes()).sum::<usize>();
                         projections = p.projections;
                         publications += 1;
                     }

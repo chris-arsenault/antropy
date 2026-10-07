@@ -1,6 +1,6 @@
 # Browser and native server execution
 
-**Status:** Current reference — browser 1/4-thread execution, the native server World, its volume persistence and the public spectator route.
+**Status:** Current reference — browser 1/4-thread execution, the native server World, its volume persistence and the public spectator route. Incremental protocol v3 publication through CI/CD was authorized October 7, 2026.
 
 The same Biotropy UI can run a local world using one or four compute threads, or observe a
 native World running independently on a server. Execution selection starts a new local world
@@ -79,9 +79,10 @@ The phenotype observer is not part of a checkpoint and is reconfigured as for a 
 [Server management](server-management.md) documents the operator save/list/load/delete API.
 
 `/health` returns the current generation, publication sequence, tick/population, throughput,
-viewer count and projection count. It contains no private cellular state. `/stream` is the
-version-1 JSON WebSocket endpoint, with version-2 binary display packets referencing a separately
-identified static terrain packet. Protocol generations and view revisions reject stale state;
+viewer count and projection count. It contains no private cellular state. `/stream` accepts
+JSON commands and sends gzip-compressed version-3 incremental scene publications. A publication
+carries changes against its acknowledged base sequence, with terrain and definition on initial
+synchronization. Protocol generations, base sequences and view revisions reject stale state;
 uncertain commands are never automatically replayed after reconnect.
 
 The independent [HTTP management API](server-management.md) exposes authenticated status/config,
@@ -91,16 +92,33 @@ compatible with the WebSocket protocol.
 
 ## Observation cost and access
 
-World stepping happens once. Common status and matching display selections are encoded once
-per half-second publication and shared across sockets. Each viewer has an independent
+World stepping happens once. Matching scene selections share read-only preparation, and matching
+baseline/view revisions share encoded packets. Publication retains the half-second clock. Each viewer has an independent
 acknowledgement, a bounded request queue and local camera controls. A stalled viewer receives
 no accumulating stream of old frames. Network bytes still scale with the number of viewers.
 
-Native projections contain cell/source display records and eight derived field lanes, never
-the physical 256-chemical grid or population-wide genomes. Large-world views use snapped,
-padded windows, with bounded display sampling density and visible periodic cell records.
-Physical mesh resolution is unaffected. Client packets stay in the renderer worker; React
+The native transport sends changed organism/marker attributes, removals and changed environmental
+samples rather than the renderer's packed float buffers. Sparse bitwise differences preserve
+sample values. Sunlight uses a static separable spatial basis, three changing phase rotations
+and local optical inputs; the browser composes light and weathering from those shared equations.
+No physical 256-chemical grid or population-wide genomes leave the server. Large-world views use
+snapped, padded windows with the existing sampling density and periodic membership.
+Physical mesh resolution is unaffected. The browser worker assembles the renderer's arrays locally; React
 receives bounded reduced observations through the existing ownership guards.
+
+Status sends changed sections. Charts retain samples by tick and append new/replaced points;
+thinning removes omitted samples. Reconnect or world replacement sends the bounded initial
+state once. View changes reset the selected scene while retaining the observation baseline.
+The server retains one unacknowledged publication per viewer and coalesces missed publications
+against the last acknowledged base. There is no aggregate output quota or refresh slowdown.
+
+Hidden tabs disconnect their spectator socket, cancel reconnect timers and reject uncertain
+pending commands. Visible tabs establish a fresh connection and baseline without replaying
+controls. This only suspends observation; the native world keeps stepping. Local browser
+execution retains its existing visibility/save behavior.
+
+[Bounded transport results](incremental-spectator-results.md) record the measured reduction
+and the unresolved 1 GB/day target. Server and browser must deploy together for protocol v3.
 
 The default landscape combines conductance ground, elevation contours, received-light shade,
 translucent chemistry and seasonal reservoir bands. Static terrain is a separate projection

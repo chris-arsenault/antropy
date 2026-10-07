@@ -11,11 +11,15 @@ mod management_store;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod management_tests;
 #[cfg(not(target_arch = "wasm32"))]
+mod observation_delta;
+#[cfg(not(target_arch = "wasm32"))]
 mod observations;
 #[cfg(not(target_arch = "wasm32"))]
 mod persistence;
 #[cfg(not(target_arch = "wasm32"))]
 mod runtime;
+#[cfg(not(target_arch = "wasm32"))]
+mod scene;
 #[cfg(not(target_arch = "wasm32"))]
 mod socket;
 #[cfg(not(target_arch = "wasm32"))]
@@ -24,6 +28,10 @@ mod store;
 mod store_tests;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests;
+#[cfg(not(target_arch = "wasm32"))]
+mod wire;
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod wire_tests;
 
 #[cfg(target_arch = "wasm32")]
 fn main() {}

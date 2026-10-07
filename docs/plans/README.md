@@ -32,6 +32,7 @@ No active plan is listed here. Open research questions remain with their design 
 
 | Plan | Scope | Sulion |
 | --- | --- | --- |
+| [Incremental spectator transport](INCREMENTAL-SPECTATOR-PLAN.md) | Acknowledged scene/status deltas, worker reconstruction and hidden-tab disconnect; [bounded size/reconstruction results](../incremental-spectator-results.md). No aggregate quotas; publication authorized October 7 through CI/CD; 1 GB/day remains unestablished | `3767c107-7a6d-4e21-88d5-dcfb01e8312f` |
 | [Rugged chemical ecology](RUGGED-ECOLOGY-PLAN.md) | Local v52 implementation and ordinary-world tuning; [inherited reproductive function and neighbor consequences](../rugged-ecology-results.md) through renewals/replacement. Shared default6; no publication/deployment | `ab2dbd97-c26c-48b9-8f02-a20966ed7dbc` |
 | [Rugged interaction causal iteration](RUGGED-INTERACTION-ITERATION.md) | Local v52 held-light and single-locus diagnostics; [constructed shared-world result](../rugged-community-results.md) links exported intermediate to funded growth, parent-key failure and competition-free harm. No publication/deployment | `a48f005f-102f-491a-bd79-f5a8a67ecca8` |
 | [Rugged ordinary calibration](RUGGED-ORDINARY-CALIBRATION.md) | Local v52 ordinary mutation produces binding jumps; [actual descendant attribution](../rugged-ordinary-calibration-results.md) isolates a changed chemical dependency. Keep lambda3; no production parameter change/publication/deployment | `0a0243c7-b056-4d89-b16b-49b7e7c81b5f` |

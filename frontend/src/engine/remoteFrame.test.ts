@@ -1,33 +1,38 @@
 import { expect, it } from "vitest";
-import { decodeDisplay, decodeTerrain, isTerrainPacket } from "./remoteFrame";
+import { RemoteScene, decodeTerrain, isTerrainPacket } from "./remoteFrame";
 import { executionMode, remoteEndpoint } from "./executionMode";
+import { scenePacket } from "./testing/remotePacket";
 
-it("borrows display slices from one packet and rejects malformed geometry", () => {
-  const staticPacket = new ArrayBuffer(48);
-  const staticHeader = new Uint32Array(staticPacket, 0, 8);
-  staticHeader.set([0x42545452, 1, 3, 7, 1, 1, 4, 0]);
-  const terrain = decodeTerrain(staticPacket);
-  expect(isTerrainPacket(staticPacket)).toBe(true);
-  expect(terrain.values.buffer).toBe(staticPacket);
-  const packet = new ArrayBuffer(64 + (12 + 8 + 12) * 4);
-  const header = new Uint32Array(packet, 0, 12);
-  header.set([0x42545250, 2, 3, 4, 500, 0, 1, 1, 12, 8, 12, 7]);
-  new Float32Array(packet, 48, 4).set([0, 0, 2, 2]);
-  const frame = decodeDisplay(packet, terrain);
-  expect(frame.terrain).toBe(terrain);
-  expect(() => decodeDisplay(packet, null)).toThrow("Missing terrain");
-  expect(() => decodeDisplay(packet, { ...terrain, revision: 8 })).toThrow("Missing terrain");
-  expect(() => decodeDisplay(packet, { ...terrain, generation: 4 })).toThrow("Missing terrain");
-  expect(frame.tick).toBe(500);
-  expect(frame.count).toBe(1);
-  expect(frame.field.buffer).toBe(packet);
-  expect(frame.cells.buffer).toBe(packet);
-  expect(frame.markers.buffer).toBe(packet);
-  header[9] = 10;
-  expect(() => decodeDisplay(packet, terrain)).toThrow("layout");
-  expect(() => decodeDisplay(new ArrayBuffer(4), terrain)).toThrow("bounds");
-  staticHeader[4] = 257;
-  expect(() => decodeTerrain(staticPacket)).toThrow("layout");
+it("assembles renderer buffers locally and rejects missing, stale or malformed baselines", () => {
+  const scene = new RemoteScene();
+  const { frame } = scene.receive(scenePacket());
+  expect(frame.field).toEqual(new Float32Array(8));
+  expect(frame.terrain.revision).toBe(7);
+  expect(
+    scene.receive(scenePacket({ sequence: 3, base: 1, reset: false, definition: null })).frame
+      .sequence
+  ).toBe(3);
+  expect(() => scene.receive(scenePacket({ sequence: 4, base: 2, reset: false }))).toThrow(
+    "baseline"
+  );
+  expect(() => new RemoteScene().receive(scenePacket({ base: 1, reset: false }))).toThrow(
+    "initialization"
+  );
+  expect(() => new RemoteScene().receive(scenePacket({ reset: false }))).toThrow("initialization");
+  expect(() => new RemoteScene().receive(scenePacket({}, new Uint8Array(1)))).toThrow("Truncated");
+  expect(() => new RemoteScene().receive(scenePacket({}, new Uint8Array(21)))).toThrow("Trailing");
+  expect(() => new RemoteScene().receive(scenePacket({ nx: 0 }))).toThrow("geometry");
+  expect(() => new RemoteScene().receive(new ArrayBuffer(4))).toThrow("bounds");
+});
+
+it("validates static terrain identity and dimensions", () => {
+  const packet = new ArrayBuffer(48);
+  const header = new Uint32Array(packet, 0, 8);
+  header.set([0x42545452, 1, 3, 7, 1, 1, 4, 0]);
+  expect(isTerrainPacket(packet)).toBe(true);
+  expect(decodeTerrain(packet).values.buffer).toBe(packet);
+  header[4] = 257;
+  expect(() => decodeTerrain(packet)).toThrow("layout");
   expect(() => decodeTerrain(new ArrayBuffer(4))).toThrow("bounds");
 });
 

@@ -4,6 +4,7 @@ import { Engine } from "./client";
 import { Session } from "./session";
 import { type Message, type Request } from "./protocol";
 import { chemicalLayers, initialChemicalDisplay } from "./chemicalDisplay";
+import { scenePacket } from "./testing/remotePacket";
 
 const transport = vi.hoisted(() => ({
   receive: (_data: string | ArrayBuffer) => {},
@@ -11,6 +12,7 @@ const transport = vi.hoisted(() => ({
   open: () => {},
   call: vi.fn(async () => null),
   draw: vi.fn(() => ({ tick: 0, uploadedBytes: 32 })),
+  active: vi.fn(),
 }));
 vi.mock("./remoteConnection", () => ({
   RemoteConnection: class {
@@ -30,6 +32,7 @@ vi.mock("./remoteConnection", () => ({
       transport.open();
     }
     call = transport.call;
+    setActive = transport.active;
   },
 }));
 vi.mock("./renderer", () => ({
@@ -44,7 +47,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-it("publishes remote status through the existing budget and keeps binary frames inside the worker", async () => {
+it("publishes incremental status through the existing budget and renders scene data inside the worker", async () => {
   const bytes = new Uint8Array(readFileSync("public/antropy-engine.wasm"));
   const session = new Session(await Engine.load(bytes), {
     width: 24,
@@ -64,24 +67,16 @@ it("publishes remote status through the existing budget and keeps binary frames 
   } as MessageEvent<Request>);
   const status = session.status();
   status.execution = { location: "server", threads: 32, operator: false, connected: true };
-  transport.receive(JSON.stringify({ kind: "sample", revision: 0, operator: false }));
   transport.receive(
-    JSON.stringify({
-      kind: "publication",
-      version: 1,
-      generation: 1,
-      sequence: 1,
+    scenePacket({
       definition: session.definition,
-      status,
+      status: {
+        ...status,
+        history: { keep: [], append: status.history },
+        recent: { keep: [], append: status.recent },
+      },
     })
   );
-  const packet = new ArrayBuffer(96);
-  const terrain = new ArrayBuffer(48);
-  new Uint32Array(terrain, 0, 8).set([0x42545452, 1, 1, 7, 1, 1, 4, 0]);
-  transport.receive(terrain);
-  new Uint32Array(packet, 0, 12).set([0x42545250, 2, 1, 1, 0, 0, 1, 1, 0, 8, 0, 7]);
-  new Float32Array(packet, 48, 4).set([0, 0, 2, 2]);
-  transport.receive(packet);
   expect(sent.some((m) => m.kind === "definition")).toBe(true);
   const observations = sent.filter((m) => m.kind === "observation");
   expect(observations).toHaveLength(1);
@@ -90,6 +85,27 @@ it("publishes remote status through the existing budget and keeps binary frames 
   expect(JSON.stringify(sent)).not.toContain('cells":{');
   expect(sent.every((m) => !("buffer" in m))).toBe(true);
   session.world.dispose();
+});
+
+it("forwards hidden and visible state to the remote socket lifecycle", async () => {
+  const worker = {
+    postMessage: vi.fn(),
+    onmessage: null as ((e: MessageEvent<Request>) => void) | null,
+  };
+  vi.stubGlobal("self", worker);
+  await import("./remoteWorker");
+  worker.onmessage!({
+    data: {
+      id: 1,
+      op: "initialize",
+      payload: { endpoint: "ws://localhost/stream", canvas: {}, visible: false },
+    },
+  } as MessageEvent<Request>);
+  expect(transport.active).toHaveBeenLastCalledWith(false);
+  worker.onmessage!({
+    data: { id: 2, op: "visibility", payload: { visible: true } },
+  } as MessageEvent<Request>);
+  expect(transport.active).toHaveBeenLastCalledWith(true);
 });
 
 it("forwards selected reservoir inspection without publishing physical arrays", async () => {

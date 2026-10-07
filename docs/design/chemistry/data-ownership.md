@@ -64,25 +64,33 @@ pool must stop the coordinator rather than publishing partially updated physical
 ### Authorized remote execution extension
 
 The September 21 execution-mode implementation explicitly extends the transport boundary for a
-native server. The native process remains the sole physical owner. It encodes derived cell/marker
-display records and eight display-field lanes as bounded binary packets; native pointers and the
-256-chemical physical field never leave the host. A remote browser worker owns these packets and
-feeds the same WebGL renderer. It runs no physical kernel. Local browser execution continues to
+native server. The native process remains the sole physical owner. It encodes semantic organism/
+marker attribute changes, removals and bounded environmental samples; native pointers and the
+256-chemical physical field never leave the host. The remote browser worker owns a reduced scene
+cache and assembles the same WebGL renderer's buffers locally. Shared separable illumination
+uses a static spatial basis and three phase rotations, with local shade, cover and emitted work
+as optical inputs. The worker composes light and its weathering modulation, without owning any
+physical economy or advancing a kernel. Local browser execution continues to
 borrow WASM views synchronously without a network-shaped copy path.
 
 Native terrain uses one shared encoded static packet, capped at 1 MiB plus its 32-byte header,
-sent before the first dynamic display per connection/world. Dynamic binary display version 2
-references its terrain revision; the worker requires matching generation and revision. Reconnect
-and world replacement discard cached terrain. Static terrain and its first dynamic frame share
-the existing one-publication acknowledgement boundary; later frames reuse the terrain packet.
+included in initial synchronization per connection/world. Version-3 publications gzip-compress
+metadata and sparse binary attribute/sample differences in one envelope, referencing the terrain
+revision. The worker requires matching generation, terrain, scene geometry and base sequence.
+Reconnect and world replacement discard cached terrain. Initial terrain and scene share the
+one-publication acknowledgement boundary; later publications reuse that terrain.
 
-The server shares encoded common observations and matching projections across connections, with
+The server shares matching scene preparation and matching baseline/view packet encoding across connections, with
 32 viewers, 16 distinct display selections, 32 queued commands and 64 cached queries per publication
 as current ceilings. Display sampling uses padded windows at large dimensions, bounded to roughly
 65,536 nodes; this changes display detail only, never the physical mesh. A packet exceeding 16 MiB
-fails visibly rather than truncating cells. Each viewer has one unacknowledged display and at most
+fails visibly rather than truncating cells. Each viewer has one unacknowledged publication and at most
 16 pending worker requests. An unresponsive socket expires; no viewer acknowledgement stops World.
-Full independently usable updates carry generation, sequence and view revision. Reconnect does not
+Initial synchronization carries generation, sequence and view revision. Subsequent updates refer
+to the acknowledged sequence; skipping publications still compares against that base. A view
+change resets scene data while preserving status/history. Status sends changed sections, history
+uses retained ticks plus appends, and definition is sent once per world/connection. Hidden tabs
+disconnect and cancel retries; becoming visible synchronizes a new baseline. Reconnect does not
 replay controls. Common status is sampled at most twice per second while attached; without viewers,
 only scalar health is prepared. Remote charts describe sampled observation periods, with gaps when
 no one is attached, rather than inventing unattended history.
@@ -106,8 +114,9 @@ React owns display observations, never continuation state. The permitted data is
 accounting, population distributions, retained chart samples, reduced spatial summaries, and one
 explicitly selected organism's inspection. A selected-cell snapshot is a bounded observation copy,
 not a permission to export every cell's genome or recurrent state. These observations remain outside
-the render path. JSON is allowed for bounded reduced queries and explicit controls; it is forbidden
-for stepping and rendering. The complete physical arrays remain behind Rust's boundary.
+the render path. JSON is allowed for bounded reduced queries, controls and incremental scene metadata.
+Render attributes and sample changes use the binary codec; stepping never uses JSON. The complete
+physical arrays remain behind Rust's boundary.
 
 The dissolved-chemistry window receives `chemicalOverview`: Rust reduces the field into at most
 twelve `{id, amount, peak}` rows, total and other amount, present count and tick. Properties come

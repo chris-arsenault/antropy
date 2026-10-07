@@ -96,34 +96,6 @@ impl ViewKey {
     }
 }
 
-/// Independent little-endian display packet. Native pointers never cross the boundary.
-pub fn encode(b: &Buffers, sequence: u64, generation: u64, tick: u64, extent: [f32; 4]) -> Bytes {
-    let mut out = Vec::with_capacity(64 + (b.cells.len() + b.field.len() + b.markers.len()) * 4);
-    for n in [
-        0x42545250,
-        2,
-        generation as u32,
-        sequence as u32,
-        tick as u32,
-        (tick >> 32) as u32,
-        b.descriptor[6],
-        b.descriptor[7],
-        b.cells.len() as u32,
-        b.field.len() as u32,
-        b.markers.len() as u32,
-        b.terrain.revision,
-    ] {
-        out.extend(n.to_le_bytes());
-    }
-    for v in extent {
-        out.extend(v.to_le_bytes());
-    }
-    for v in b.cells.iter().chain(&b.field).chain(&b.markers) {
-        out.extend(v.to_le_bytes());
-    }
-    Bytes::from(out)
-}
-
 /// Static bounded overview, shared by all view selections and sent once per world/connection.
 pub fn encode_terrain(b: &Buffers, generation: u64) -> Bytes {
     let t = &b.terrain;

@@ -1,6 +1,7 @@
 use super::{
     display::ViewKey,
     runtime::{Host, MAX_VIEWS, Publication},
+    wire::{self, Baseline},
 };
 use axum::{
     Json,
@@ -102,9 +103,9 @@ struct Viewer {
     key: ViewKey,
     revision: u64,
     operator: bool,
-    awaiting: Option<u64>,
+    awaiting: Option<Baseline>,
+    baseline: Option<Baseline>,
     last: u64,
-    terrain_revision: u32,
 }
 impl Drop for Viewer {
     fn drop(&mut self) {
@@ -143,8 +144,12 @@ impl Viewer {
             }
             "view" => self.set_view(&request.payload),
             "ack" => {
-                if request.payload["sequence"].as_u64() == self.awaiting {
-                    self.awaiting = None;
+                if self
+                    .awaiting
+                    .as_ref()
+                    .is_some_and(|b| request.payload["sequence"].as_u64() == Some(b.sequence))
+                {
+                    self.baseline = self.awaiting.take();
                 }
                 Ok(Value::Null)
             }
@@ -181,8 +186,8 @@ async fn run(socket: WebSocket, state: State, _permit: OwnedSemaphorePermit) {
         revision: 0,
         operator: false,
         awaiting: None,
+        baseline: None,
         last: 0,
-        terrain_revision: 0,
     };
     let (mut sink, mut source) = socket.split();
     let mut publications = state.host.publications.clone();
@@ -207,23 +212,7 @@ async fn run(socket: WebSocket, state: State, _permit: OwnedSemaphorePermit) {
             changed = publications.changed(), if viewer.awaiting.is_none() => {
                 if changed.is_err() { break; }
                 let p = publications.borrow_and_update().clone();
-                if p.sequence <= viewer.last { continue; }
-                let Some(frame) = p.frames.get(&viewer.key).cloned() else { continue; };
-                let metadata = publication_metadata(&p, &viewer);
-                let common = p.common.clone();
-                let sequence = p.sequence;
-                let terrain_revision = p.terrain_revision;
-                let terrain = (viewer.terrain_revision != terrain_revision).then(|| p.terrain.clone());
-                drop(p);
-                let send = async {
-                    sink.send(Message::Text(metadata.to_string().into())).await?;
-                    sink.send(Message::Text(common)).await?;
-                    if let Some(terrain) = terrain { sink.send(Message::Binary(terrain)).await?; }
-                    sink.send(Message::Binary(frame)).await
-                };
-                if !matches!(tokio::time::timeout(Duration::from_secs(5), send).await, Ok(Ok(()))) { break; }
-                viewer.last = sequence; viewer.awaiting = Some(sequence);
-                viewer.terrain_revision = terrain_revision;
+                if send_publication(&mut viewer, p, &mut sink).await.is_err() { break; }
             }
             _ = heartbeat.tick() => {
                 if last_input.elapsed() > Duration::from_secs(30) { break; }
@@ -232,7 +221,30 @@ async fn run(socket: WebSocket, state: State, _permit: OwnedSemaphorePermit) {
         }
     }
 }
-fn publication_metadata(p: &Publication, viewer: &Viewer) -> Value {
-    json!({"kind":"sample","sequence":p.sequence,"generation":p.generation,
-        "revision":viewer.revision,"operator":viewer.operator})
+async fn send_publication(
+    viewer: &mut Viewer,
+    p: Arc<Publication>,
+    sink: &mut futures_util::stream::SplitSink<WebSocket, Message>,
+) -> Result<(), ()> {
+    if p.sequence <= viewer.last || !p.scenes.contains_key(&viewer.key) {
+        return Ok(());
+    }
+    let sequence = p.sequence;
+    let key = viewer.key;
+    let revision = viewer.revision;
+    let operator = viewer.operator;
+    let baseline = viewer.baseline.take();
+    let (packet, next) = tokio::task::spawn_blocking(move || {
+        wire::encode(&p, key, revision, operator, baseline.as_ref())
+    })
+    .await
+    .map_err(|_| ())?
+    .map_err(|_| ())?;
+    tokio::time::timeout(Duration::from_secs(5), sink.send(Message::Binary(packet)))
+        .await
+        .map_err(|_| ())?
+        .map_err(|_| ())?;
+    viewer.last = sequence;
+    viewer.awaiting = Some(next);
+    Ok(())
 }

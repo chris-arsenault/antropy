@@ -1,18 +1,13 @@
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { RemoteConnection } from "../src/engine/remoteConnection";
-import {
-  decodeDisplay,
-  decodeTerrain,
-  isTerrainPacket,
-  type RemoteTerrain,
-} from "../src/engine/remoteFrame";
+import { RemoteScene, type RemoteFrame } from "../src/engine/remoteFrame";
 
 // Registered all-off operating observation: one spectator, two hours, 128 MiB local cap.
 const output = resolve(process.argv[2]);
 mkdirSync(output, { recursive: false });
 const started = Date.now();
-let terrain: RemoteTerrain | null = null;
+const scene = new RemoteScene();
 let publication: { generation: number; status: unknown; definition: unknown } | null = null;
 let generation: number | null = null;
 let lastTick = 0;
@@ -47,16 +42,14 @@ function finish(reason: string) {
 
 function receive(data: string | ArrayBuffer) {
   if (finished) return;
-  if (typeof data === "string") {
-    receivePublication(data);
-    return;
-  }
-  if (isTerrainPacket(data)) {
-    terrain = decodeTerrain(data);
-    return;
-  }
-  const frame = decodeDisplay(data, terrain);
-  if (!publication) return finish("missing publication");
+  if (typeof data === "string") return;
+  const { frame } = scene.receive(data);
+  publication = {
+    generation: frame.generation,
+    status: scene.status,
+    definition: scene.definition,
+  };
+  connection.generation = frame.generation;
   if (generation !== null && frame.generation !== generation) return finish("world replaced");
   if (frame.tick < lastTick) return finish("tick regression");
   generation = frame.generation;
@@ -68,15 +61,7 @@ function receive(data: string | ArrayBuffer) {
   }, 5000);
 }
 
-function receivePublication(data: string) {
-  const value = JSON.parse(data);
-  if (value.kind !== "publication") return;
-  if (generation !== null && value.generation !== generation) return finish("world replaced");
-  publication = value;
-  connection.generation = value.generation;
-}
-
-function sample(frame: ReturnType<typeof decodeDisplay>) {
+function sample(frame: RemoteFrame) {
   const cells = Array.from({ length: frame.cells.length / 12 }, (_, index) => {
     const i = index * 12;
     return [frame.cells[i + 9], frame.cells[i], frame.cells[i + 1]];

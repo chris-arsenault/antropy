@@ -1,5 +1,5 @@
 use super::{
-    display::{ViewKey, encode, encode_terrain},
+    display::{ViewKey, encode_terrain},
     observations::Observations,
     persistence::Persistence,
     store::{Capture, Reason},
@@ -22,12 +22,14 @@ pub const PUBLICATION_PERIOD: Duration = Duration::from_millis(500);
 pub struct Publication {
     pub sequence: u64,
     pub generation: u64,
-    pub status: Value,
-    pub frames: BTreeMap<ViewKey, Bytes>,
+    pub status: Arc<Value>,
+    pub definition: Arc<Value>,
+    pub tick: u64,
+    pub scenes: BTreeMap<ViewKey, Arc<super::scene::Scene>>,
     pub projections: u64,
-    pub common: axum::extract::ws::Utf8Bytes,
     pub terrain: Bytes,
     pub terrain_revision: u32,
+    pub packets: Mutex<BTreeMap<super::wire::CacheKey, Bytes>>,
 }
 pub struct Command {
     pub generation: u64,
@@ -102,6 +104,7 @@ pub struct Runtime {
     queries: BTreeMap<String, Value>,
     terrain: Bytes,
     terrain_revision: u32,
+    definition: Arc<Value>,
 }
 impl Runtime {
     pub fn new(seed: u64, config: Config, threads: usize) -> Result<Self, String> {
@@ -114,6 +117,7 @@ impl Runtime {
             &json!({"op":"phenotype","action":"configure",
             "enabled":true,"highlight":false,"selection":{"kind":"all"}}),
         )?;
+        let definition = Arc::new(commands::execute(&mut world, &json!({"op":"definition"}))?);
         Ok(Self {
             world,
             running: true,
@@ -127,6 +131,7 @@ impl Runtime {
             queries: BTreeMap::new(),
             terrain: Bytes::new(),
             terrain_revision: 0,
+            definition,
         })
     }
     pub fn command(&mut self, op: &str, payload: Value) -> Result<Value, String> {
@@ -233,7 +238,6 @@ impl Runtime {
     pub fn publish(&mut self, keys: Vec<ViewKey>, throughput: f64) -> Result<Publication, String> {
         self.sequence += 1;
         self.queries.clear();
-        let definition = commands::execute(&mut self.world, &json!({"op":"definition"}))?;
         let status = self.observations.status(
             &mut self.world,
             self.running,
@@ -241,7 +245,7 @@ impl Runtime {
             throughput,
             self.threads,
         )?;
-        let mut frames = BTreeMap::new();
+        let mut scenes = BTreeMap::new();
         self.buffers.terrain.prepare(&self.world);
         if self.terrain_revision != self.buffers.terrain.revision {
             self.terrain = encode_terrain(&self.buffers, self.generation);
@@ -253,38 +257,24 @@ impl Runtime {
             .into_iter()
             .take(MAX_VIEWS)
         {
-            if frames.contains_key(&key) {
-                continue;
-            }
-            let window = key.window(&self.world);
-            self.buffers.prepare_window(
-                &self.world,
-                (key.kind, key.species, key.color, true, key.selected),
-                window,
-            )?;
-            let frame = encode(
-                &self.buffers,
-                self.sequence,
-                self.generation,
-                self.world.tick,
-                window.extent(&self.world),
-            );
-            if frame.len() > 16 * 1024 * 1024 {
+            let scene = super::scene::Scene::prepare(&self.world, &mut self.buffers, key);
+            if scene.raw_bytes() > 16 * 1024 * 1024 {
                 return Err("Display packet exceeds 16 MiB; zoom into a smaller viewport".into());
             }
-            frames.insert(key, frame);
+            scenes.insert(key, Arc::new(scene));
             self.projections += 1;
         }
-        let common = json!({"kind":"publication","version":1,"sequence":self.sequence,"generation":self.generation,"definition":definition,"status":status}).to_string().into();
         Ok(Publication {
             sequence: self.sequence,
             generation: self.generation,
-            status,
-            frames,
+            status: Arc::new(status),
+            definition: self.definition.clone(),
+            tick: self.world.tick,
+            scenes,
             projections: self.projections,
-            common,
             terrain: self.terrain.clone(),
             terrain_revision: self.terrain_revision,
+            packets: Mutex::default(),
         })
     }
 }
@@ -334,8 +324,8 @@ pub fn start(
                 let result = if keys.is_empty() {
                     runtime.sequence += 1;
                     let mut p = Publication { sequence: runtime.sequence, generation: runtime.generation, ..Default::default() };
-                    p.status = json!({"summary":{"tick":runtime.world.tick,"population":runtime.world.cells.len()},
-                        "running":runtime.running,"throughput":ticks as f64/published.elapsed().as_secs_f64(),"threads":threads});
+                    p.status = Arc::new(json!({"summary":{"tick":runtime.world.tick,"population":runtime.world.cells.len()},
+                        "running":runtime.running,"throughput":ticks as f64/published.elapsed().as_secs_f64(),"threads":threads}));
                     Ok(p)
                 } else { pool.install(|| runtime.publish(keys, ticks as f64 / published.elapsed().as_secs_f64())) };
                 match result {

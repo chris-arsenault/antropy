@@ -136,6 +136,7 @@ pub mod reservoir_coupling;
 mod reservoir_coupling_tests;
 #[cfg(test)]
 mod runtime_tests;
+pub mod scene_records;
 pub mod sensing;
 pub mod source_footprint;
 #[cfg(test)]

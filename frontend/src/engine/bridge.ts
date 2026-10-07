@@ -22,6 +22,7 @@ export class Bridge {
   private framePending = false;
   private watchdog: ReturnType<typeof setInterval> | null = null;
   private lastResponseAt = 0;
+  private removeVisibility: (() => void) | null = null;
   private state: ViewState = { definition: null, status: null, inspection: null, error: null };
   readonly getSnapshot = () => this.state;
   readonly subscribe = (listener: () => void) => {
@@ -81,6 +82,7 @@ export class Bridge {
         wasmUrl,
         threads: execution.mode === "browser4" ? 4 : 1,
         endpoint: execution.mode === "server" ? remoteEndpoint(execution.endpoint) : "",
+        visible: document.visibilityState !== "hidden",
       },
       [canvas]
     ).catch((error) => {
@@ -89,7 +91,26 @@ export class Bridge {
         this.stop();
       }
     });
+    if (execution.mode === "server") this.observeVisibility(worker);
     this.animation = requestAnimationFrame(() => this.present(worker));
+  }
+  private observeVisibility(worker: Worker) {
+    const send = (visible: boolean) => {
+      if (this.worker !== worker) return;
+      this.call("visibility", { visible }).catch((error) => {
+        if (this.worker === worker) this.update({ error: String(error) });
+      });
+    };
+    const changed = () => send(document.visibilityState !== "hidden");
+    const hide = () => send(false);
+    document.addEventListener("visibilitychange", changed);
+    window.addEventListener("pagehide", hide);
+    window.addEventListener("pageshow", changed);
+    this.removeVisibility = () => {
+      document.removeEventListener("visibilitychange", changed);
+      window.removeEventListener("pagehide", hide);
+      window.removeEventListener("pageshow", changed);
+    };
   }
   /** Presentation requests carry no physical data and never accumulate behind the worker. */
   private present(worker: Worker) {
@@ -107,6 +128,8 @@ export class Bridge {
     this.animation = requestAnimationFrame(() => this.present(worker));
   }
   stop() {
+    this.removeVisibility?.();
+    this.removeVisibility = null;
     if (this.watchdog !== null) clearInterval(this.watchdog);
     this.watchdog = null;
     cancelAnimationFrame(this.animation);

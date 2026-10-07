@@ -46,92 +46,43 @@ impl Buffers {
         self.terrain.prepare(w);
         self.cells.clear();
         self.cells.reserve(w.cells.len() * STRIDE);
-        for c in &w.cells {
-            if !window.contains(w, c.x, c.y, (c.radius(&w.config) * 3.5).max(2.)) {
-                continue;
-            }
-            let energy = (c.energy / c.energy_capacity(&w.config).max(1e-12)).clamp(0., 1.);
-            let rgb = self.colors.color(w, c, color, selected, energy);
-            self.cells.extend([
-                c.x as f32,
-                c.y as f32,
-                c.radius(&w.config) as f32,
-                c.heading as f32,
-                rgb[0],
-                rgb[1],
-                rgb[2],
-                energy as f32,
-                c.damage as f32,
-                c.id as f32,
-                u8::from(c.born > 0 && w.tick - c.born < 50) as f32,
-                w.observer
-                    .as_ref()
-                    .filter(|o| o.highlight)
-                    .map_or(-1., |o| u8::from(o.selected(c)) as f32),
-            ]);
-        }
+        crate::scene_records::organisms(w, window, &mut self.colors, color, selected, |c| {
+            self.cells.extend(c.render_record())
+        });
         self.markers.clear();
-        for cell in &w.cells {
-            let power = w.incident.emitters.get(&cell.id).copied().unwrap_or(0.);
-            let radius = 3. * w.config.optical_reach;
-            if power > 0. && window.contains(w, cell.x, cell.y, radius) {
-                let reference = w.config.optical_power_density * w.config.mesh.powi(2);
-                self.markers.extend([
-                    cell.x as f32,
-                    cell.y as f32,
-                    radius as f32,
-                    0.,
-                    1.,
-                    0.8,
-                    0.3,
-                    (power / (power + reference)) as f32,
-                    2.,
-                    -1.,
-                    0.,
-                    0.,
-                ]);
-            }
-        }
-        for s in &w.sources {
-            if !window.contains(w, s.habitat.x, s.habitat.y, s.habitat.radius * 1.25) {
-                continue;
-            }
-            let active = s.amount > 0.;
-            let recovery =
-                s.recent_recovery / (s.recent_recovery + s.amount).max(f64::MIN_POSITIVE);
-            let output = s.recent_output
-                / (s.recent_output + s.rate * w.config.mortality_memory).max(f64::MIN_POSITIVE);
-            let h = &s.habitat;
-            self.markers.extend([
-                h.x as f32,
-                h.y as f32,
-                h.radius as f32,
-                w.shade
-                    .geography
-                    .season([h.x, h.y], w.tick as f64 * w.config.dt) as f32,
-                0.6,
-                0.85,
-                0.67,
-                if active { 1. } else { 0. },
-                0.,
-                (-1. - output) as f32,
-                recovery as f32,
-                u8::from(w.config.terrain.seasons) as f32,
-            ]);
-        }
-        for e in &w.events {
-            if e.kind != "death" || w.tick.saturating_sub(e.tick) > 50 {
-                continue;
-            }
-            if let Some([x, y, r]) = e.location {
-                if !window.contains(w, x, y, r) {
-                    continue;
-                }
-                self.markers.extend([
-                    x as f32, y as f32, r as f32, 0., 1., 0.5, 0.35, 1., 1., -1., 0., 0.,
-                ]);
-            }
-        }
+        crate::scene_records::markers(w, window, |m| self.markers.extend(m.attributes()));
+        self.prepare_environment(w, kind, species, field, window);
+        self.descriptor = [
+            3,
+            (self.cells.len() / STRIDE) as u32,
+            self.cells.as_ptr() as usize as u32,
+            self.cells.len() as u32,
+            self.field.as_ptr() as usize as u32,
+            self.field.len() as u32,
+            window.nx as u32,
+            window.ny as u32,
+            w.tick as u32,
+            (w.tick >> 32) as u32,
+            self.markers.as_ptr() as usize as u32,
+            self.markers.len() as u32,
+            (self.markers.len() / STRIDE) as u32,
+            self.terrain.values.as_ptr() as usize as u32,
+            self.terrain.values.len() as u32,
+            self.terrain.nx,
+            self.terrain.ny,
+            self.terrain.revision,
+        ];
+        Ok(())
+    }
+    /// Shared read-only environmental sampling; remote transport does not prepare GPU records.
+    pub fn prepare_environment(
+        &mut self,
+        w: &World,
+        kind: u32,
+        species: usize,
+        field: bool,
+        window: crate::render_window::Window,
+    ) {
         let channels = if kind >= 5 { 8 } else { 1 };
         if field
             || self.selection != Some((kind, species))
@@ -186,19 +137,7 @@ impl Buffers {
                         if kind >= 6 {
                             0.
                         } else {
-                            crate::weathering::exposure(
-                                crate::weathering::strength(crate::weathering::signal(
-                                    std::array::from_fn(|k| {
-                                        p[4 + k] / area
-                                            + self.body_signal[i][k]
-                                            + w.field.source_signal()[i][k]
-                                    }),
-                                )),
-                                impedance,
-                                w.config.habitat_feedback,
-                                w.config.diffusion_impedance,
-                            ) as f32
-                                * light as f32
+                            self.weathering(w, i) as f32 * light as f32
                         },
                     ]);
                     continue;
@@ -213,27 +152,20 @@ impl Buffers {
             }
             self.selection = Some((kind, species));
         }
-        self.descriptor = [
-            3,
-            (self.cells.len() / STRIDE) as u32,
-            self.cells.as_ptr() as usize as u32,
-            self.cells.len() as u32,
-            self.field.as_ptr() as usize as u32,
-            self.field.len() as u32,
-            window.nx as u32,
-            window.ny as u32,
-            w.tick as u32,
-            (w.tick >> 32) as u32,
-            self.markers.as_ptr() as usize as u32,
-            self.markers.len() as u32,
-            (self.markers.len() / STRIDE) as u32,
-            self.terrain.values.as_ptr() as usize as u32,
-            self.terrain.values.len() as u32,
-            self.terrain.nx,
-            self.terrain.ny,
-            self.terrain.revision,
-        ];
-        Ok(())
+    }
+    /// Shared, light-independent local response. Presentation applies incoming light last.
+    pub fn weathering(&self, w: &World, i: usize) -> f64 {
+        let area = w.field.spacing * w.field.spacing;
+        let (_, _, p) = w.field.amounts().site(i);
+        let impedance = p[2] / area + w.field.source_load()[i];
+        crate::weathering::exposure(
+            crate::weathering::strength(crate::weathering::signal(std::array::from_fn(|k| {
+                p[4 + k] / area + self.body_signal[i][k] + w.field.source_signal()[i][k]
+            }))),
+            impedance,
+            w.config.habitat_feedback,
+            w.config.diffusion_impedance,
+        )
     }
 }
 

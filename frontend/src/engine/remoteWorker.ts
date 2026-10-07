@@ -3,13 +3,7 @@ import { ObservationPublisher } from "./observationPublisher";
 import { type Definition, type LiveStatus, type Inspection } from "./types";
 import { type Message, type Request } from "./protocol";
 import { RemoteConnection } from "./remoteConnection";
-import {
-  decodeDisplay,
-  decodeTerrain,
-  isTerrainPacket,
-  type RemoteFrame,
-  type RemoteTerrain,
-} from "./remoteFrame";
+import { RemoteScene, type RemoteFrame } from "./remoteFrame";
 
 const port = self as unknown as {
   postMessage(m: Message): void;
@@ -24,13 +18,14 @@ let inspection: Inspection | null = null;
 let selected: number | null = null;
 let view: ViewOptions | null = null;
 let frame: RemoteFrame | null = null;
-let terrain: RemoteTerrain | null = null;
+let scene = new RemoteScene();
 let revision = 0;
 let generation = 0;
 let sequence = 0;
 let acceptedRevision = 0;
 let operator = false;
 let connected = false;
+let visible = true;
 let framePending = false;
 let drawDirty = false;
 let queryPending = false;
@@ -53,15 +48,19 @@ function connectionState(value: boolean) {
   if (status?.execution) {
     status = {
       ...status,
-      error: value ? null : "Server disconnected; reconnecting. Observation history has a gap.",
+      error:
+        value || !visible
+          ? null
+          : "Server disconnected; reconnecting. Observation history has a gap.",
       execution: { ...status.execution, connected: value, operator: false },
     };
     publish();
-  } else if (!value) send({ kind: "fault", value: "Server disconnected; reconnecting…" });
+  } else if (!value && visible)
+    send({ kind: "fault", value: "Server disconnected; reconnecting…" });
 }
 function opened() {
   frame = null;
-  terrain = null;
+  scene = new RemoteScene();
   renderer.resetTerrain();
   definition = null;
   sequence = 0;
@@ -70,28 +69,17 @@ function opened() {
   sendView();
 }
 function receive(data: string | ArrayBuffer) {
-  if (typeof data !== "string") {
-    receiveBinary(data);
-    return;
-  }
-  const m = JSON.parse(data) as Record<string, unknown>;
-  if (m.kind === "sample") {
-    operator = m.operator === true;
-    acceptedRevision = Number(m.revision);
-    return;
-  }
-  if (m.kind !== "publication" || m.version !== 1) throw new Error("Incompatible server protocol");
-  receivePublication(m);
-}
-function receiveBinary(data: ArrayBuffer) {
-  if (isTerrainPacket(data)) {
-    terrain = decodeTerrain(data);
-    if (terrain.generation !== generation) throw new Error("Stale terrain identity");
-    return;
-  }
-  const next = decodeDisplay(data, terrain);
-  if (next.generation !== generation || next.sequence !== sequence)
-    throw new Error("Stale display identity");
+  if (typeof data === "string") throw new Error("Unexpected scene message");
+  const { metadata: m, replaced, frame: next } = scene.receive(data);
+  operator = m.operator;
+  acceptedRevision = m.revision;
+  generation = m.generation;
+  connection.generation = generation;
+  sequence = m.sequence;
+  if (replaced) replaceObservation();
+  updateStatus(scene.status!);
+  publish();
+  refreshQueries();
   if (acceptedRevision !== revision) {
     connection.call("ack", { sequence }).catch(() => {});
     return;
@@ -101,40 +89,25 @@ function receiveBinary(data: ArrayBuffer) {
   drawDirty = true;
   draw();
 }
-function receivePublication(m: Record<string, unknown>) {
-  const changed = generation !== m.generation;
-  const replaced = changed || !definition;
-  generation = Number(m.generation);
-  connection.generation = generation;
-  sequence = Number(m.sequence);
-  if (replaced) {
-    terrain = null;
-    renderer.resetTerrain();
-    definition = m.definition as Definition;
-    inspection = null;
-    selected = null;
-    frame = null;
-    publisher.reset();
-    send({ kind: "definition", value: definition });
-  }
-  updateStatus(m.status as LiveStatus, replaced);
-  publish();
-  refreshQueries();
+function replaceObservation() {
+  renderer.resetTerrain();
+  definition = scene.definition;
+  status = null;
+  inspection = null;
+  selected = null;
+  inspectionRevision = "";
+  frame = null;
+  publisher.reset();
+  send({ kind: "definition", value: definition! });
+  if (view) setView(view as unknown as Record<string, unknown>);
 }
-function updateStatus(incoming: LiveStatus, changed: boolean) {
-  const previous = changed ? null : status;
-  const previousWeb = previous?.chemicalWeb ?? null;
+function updateStatus(incoming: LiveStatus) {
+  const previousWeb = status?.chemicalWeb ?? null;
   status = {
     ...incoming,
-    history: reuseHistory(previous?.history ?? [], incoming.history),
-    recent: reuseHistory(previous?.recent ?? [], incoming.recent),
     chemicalWeb: webQuery ? previousWeb : null,
     execution: { ...incoming.execution!, connected, operator },
   };
-}
-function reuseHistory<T extends { tick: number }>(before: T[], incoming: T[]) {
-  const previous = new Map(before.map((p) => [p.tick, p]));
-  return incoming.map((p) => previous.get(p.tick) ?? p);
 }
 function draw() {
   if (!drawDirty) return;
@@ -168,7 +141,7 @@ async function sendView() {
   try {
     await connection.call("view", { ...view, selected: selected ?? -1, revision, ...viewport() });
   } catch (e) {
-    send({ kind: "fault", value: String(e) });
+    if (connected) send({ kind: "fault", value: String(e) });
   } finally {
     viewSending = false;
     if (viewDirty) sendView();
@@ -262,7 +235,13 @@ async function handle(r: Request): Promise<unknown> {
     case "initialize":
       renderer = new Renderer(p.canvas as OffscreenCanvas);
       connection = new RemoteConnection(String(p.endpoint), receive, connectionState, opened);
+      visible = p.visible !== false;
+      connection.setActive(visible);
       connection.connect();
+      return;
+    case "visibility":
+      visible = p.visible === true;
+      connection.setActive(visible);
       return;
     case "frame":
       return draw();

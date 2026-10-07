@@ -1,3 +1,5 @@
+import { decompressPublication } from "./remoteCompression";
+
 type Reply = { kind: "reply"; id: number } & (
   { ok: true; value: unknown } | { ok: false; error: string }
 );
@@ -15,6 +17,7 @@ export class RemoteConnection {
   private delay = 1000;
   private retry: ReturnType<typeof setTimeout> | null = null;
   private disposed = false;
+  private active = true;
   generation = 0;
   constructor(
     private readonly endpoint: string,
@@ -23,31 +26,64 @@ export class RemoteConnection {
     private readonly opened: () => void
   ) {}
   connect() {
+    if (this.disposed || !this.active || this.socket) return;
     const socket = new WebSocket(this.endpoint);
     this.socket = socket;
     socket.binaryType = "arraybuffer";
+    let incoming = Promise.resolve();
     socket.onopen = () => {
+      if (this.socket !== socket) return;
       this.delay = 1000;
       this.state(true);
       this.opened();
     };
     socket.onmessage = (e: MessageEvent<string | ArrayBuffer>) => {
-      try {
-        if (typeof e.data === "string" && this.reply(e.data)) return;
-        this.receive(e.data);
-      } catch {
-        socket.close(1002, "Invalid server publication");
-      }
+      incoming = incoming
+        .then(() => this.message(socket, e.data))
+        .catch(() => {
+          if (this.socket === socket) socket.close(1002, "Invalid server publication");
+        });
     };
     socket.onclose = () => {
       if (this.socket !== socket) return;
+      this.socket = null;
       this.failPending();
       this.state(false);
-      if (!this.disposed) {
-        this.retry = setTimeout(() => this.connect(), this.delay);
+      if (!this.disposed && this.active) {
+        this.retry = setTimeout(() => {
+          this.retry = null;
+          this.connect();
+        }, this.delay);
         this.delay = Math.min(10000, this.delay * 2);
       }
     };
+  }
+  setActive(value: boolean) {
+    if (this.disposed || this.active === value) return;
+    this.active = value;
+    if (value) {
+      this.connect();
+      return;
+    }
+    this.disconnect();
+    this.state(false);
+  }
+  private disconnect() {
+    if (this.retry) clearTimeout(this.retry);
+    this.retry = null;
+    const socket = this.socket;
+    this.socket = null;
+    socket?.close();
+    this.failPending();
+  }
+  private async message(socket: WebSocket, data: string | ArrayBuffer) {
+    if (this.socket !== socket) return;
+    if (typeof data === "string") {
+      if (!this.reply(data)) throw new Error("Unexpected server message");
+      return;
+    }
+    const publication = await decompressPublication(data);
+    if (this.socket === socket) this.receive(publication);
   }
   call<T = unknown>(op: string, payload: Record<string, unknown> = {}): Promise<T> {
     const socket = this.socket;
@@ -85,8 +121,6 @@ export class RemoteConnection {
   }
   dispose() {
     this.disposed = true;
-    if (this.retry) clearTimeout(this.retry);
-    this.socket?.close();
-    this.failPending();
+    this.disconnect();
   }
 }

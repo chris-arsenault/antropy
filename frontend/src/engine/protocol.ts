@@ -4,6 +4,7 @@ import { type ObservationDelta } from "./observationDelta";
 export type Operation =
   | "authenticate"
   | "initialize"
+  | "visibility"
   | "observed"
   | "view"
   | "chemicalWeb"

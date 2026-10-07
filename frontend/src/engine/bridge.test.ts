@@ -126,3 +126,37 @@ it("bounds presentation requests to one empty command and cancels on stop", asyn
   animate(3000);
   expect(worker.sent.filter((s) => s.request.op === "frame")).toHaveLength(2);
 });
+
+it("forwards visibility only to remote workers and removes lifecycle listeners on stop", () => {
+  vi.stubGlobal("Worker", FakeWorker);
+  const previousUrl = location.href;
+  history.replaceState({}, "", "?execution=server&server=wss://server.biotropy.ahara.io/stream");
+  const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+  const bridge = new Bridge();
+  bridge.start({} as OffscreenCanvas, "antropy-engine.wasm");
+  const worker = FakeWorker.last;
+  expect(worker.sent[0].request.payload.visible).toBe(false);
+  visibility.mockReturnValue("visible");
+  document.dispatchEvent(new Event("visibilitychange"));
+  expect(worker.sent.at(-1)!.request).toMatchObject({
+    op: "visibility",
+    payload: { visible: true },
+  });
+  window.dispatchEvent(new Event("pagehide"));
+  expect(worker.sent.at(-1)!.request).toMatchObject({
+    op: "visibility",
+    payload: { visible: false },
+  });
+  const count = worker.sent.length;
+  bridge.stop();
+  document.dispatchEvent(new Event("visibilitychange"));
+  expect(worker.sent).toHaveLength(count);
+  visibility.mockRestore();
+  history.replaceState({}, "", "?execution=browser1");
+  const local = new Bridge();
+  local.start({} as OffscreenCanvas, "antropy-engine.wasm");
+  document.dispatchEvent(new Event("visibilitychange"));
+  expect(FakeWorker.last.sent.some((s) => s.request.op === "visibility")).toBe(false);
+  local.stop();
+  history.replaceState({}, "", previousUrl);
+});
