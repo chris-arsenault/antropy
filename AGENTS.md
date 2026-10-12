@@ -155,7 +155,7 @@ population exchange (cross-pollination) and new colony founding over time. Unive
 confinement and absent exchange or founding are concerns; a near/far snapshot cannot establish
 them. Report insufficient temporal coverage as unmeasured, not absent.
 
-The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v53 uses one
+The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v54 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
@@ -235,10 +235,12 @@ V41 couples each class separately to the shared chemical response: crowding pres
 only on dissolved material; reservoirs add long-range like-charge repulsion and circle
 exclusion (finite clusters, no stored anchors); cells add compatibility-weighted contact
 adhesion that credits no work ([material coupling](docs/plans/archive/MATERIAL-COUPLING-PLAN.md)).
-Each reservoir has one evolving
-composition and a finite amount, with fixed per-site release and delayed accounted refill.
-There is no independent expiry clock or second supply mixture. Reservoirs expose their
-persistent composition at full interface whether full or empty, so emptied reservoirs keep
+Each reservoir has one finite chemical inventory and one evolving external boundary condition,
+with fixed per-site release and delayed accounted refill. V54 separates these quantities to
+prevent trace recovered deposits from rewriting all future imported batches; see the
+[refill correction](docs/design/mortality-recycling.md#october-12-correction-finite-contents-and-external-supply).
+There is no independent expiry clock or second physical reserve. Reservoirs expose their
+persistent boundary condition at full interface whether full or empty, so emptied reservoirs keep
 cohering; they supply nothing.
 Illumination composes several
 slow spatial/temporal axes into shared transformation work; it is not direct energy credited

@@ -141,6 +141,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         empty_elapsed: 0.,
         rate: s.rate,
         mixture: vec![0.; 256],
+        supply_condition: vec![0.; 256],
         footprint: vec![],
         kernel: Default::default(),
         material: Default::default(),
@@ -155,6 +156,7 @@ pub fn source(w: &mut World, v: &Value) -> Result<Value, String> {
         w.ledger.supplied += q;
         w.ledger.supplied_energy += q * w.chemistry.properties[id].potential;
     }
+    source.supply_condition.clone_from(&source.mixture);
     source.rebuild(&w.config, &w.field);
     w.sources.push(source);
     crate::source_medium::project(w);

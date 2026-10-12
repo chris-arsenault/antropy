@@ -169,6 +169,7 @@ fn binding_changes_from_repulsion_to_restoring_response_without_anchors() {
             s.mixture[0] = 0.6;
             s.mixture[136] = 0.4;
             s.amount = s.interface;
+            s.rebase_supply();
         }
         source_medium::project(&mut w);
         let v: Vec<_> = w

@@ -105,6 +105,9 @@ pub fn environment(w: &World) -> Result<(), String> {
             || s.mixture.len() != 256
             || s.mixture.iter().any(|q| !q.is_finite() || *q < 0.)
             || (s.mixture.iter().sum::<f64>() - 1.).abs() > 1e-10
+            || s.supply_condition.len() != 256
+            || s.supply_condition.iter().any(|q| !q.is_finite() || *q < 0.)
+            || (s.supply_condition.iter().sum::<f64>() - 1.).abs() > 1e-10
         {
             return Err("Invalid source state".into());
         }

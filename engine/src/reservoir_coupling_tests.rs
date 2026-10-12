@@ -22,6 +22,7 @@ fn world(positions: &[[f64; 2]], mixtures: &[&[(usize, f64)]], c: Config) -> Wor
         }
         s.rate = 0.;
         s.amount = s.interface;
+        s.rebase_supply();
     }
     source_medium::project(&mut w);
     w

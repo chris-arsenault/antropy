@@ -27,6 +27,7 @@ fn chemical_affinity_reverses_force_and_consuming_support_removes_it() {
     source.mixture.fill(0.);
     source.mixture[0] = 1.;
     source.amount = source.interface;
+    source.rebase_supply();
     let site = w.field.stencil(62.3, 63.1);
     for (s, sign) in [(0, 1.), (80, -1.)] {
         w.field = Field::new(w.config.width, w.config.height, w.config.mesh);

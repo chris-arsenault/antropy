@@ -76,6 +76,7 @@ fn source_pairs_respond_without_crowding_and_hold_at_contact() {
                 source.mixture[136] = 0.4;
                 source.amount = ratio * source.interface;
                 source.rate = 0.;
+                source.rebase_supply();
             }
             source_medium::project(&mut w);
             let before = w.held();

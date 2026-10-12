@@ -24,7 +24,7 @@ fn owner(s: &Source, chemistry: &Chemistry) -> Owner {
     let composition = if s.material.valid {
         s.material.composition
     } else {
-        crate::source_medium::composition(&s.mixture, chemistry)
+        crate::source_medium::composition(&s.supply_condition, chemistry)
     };
     Owner {
         position: [s.habitat.x, s.habitat.y],

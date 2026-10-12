@@ -133,7 +133,9 @@ three. Each keeps up to512 recent points within8 MiB, up to256 progressively coa
 within4 MiB, and up to64 detailed endings within4 MiB. Actual point counts can be lower at the
 byte limit. Extinction forces a terminal point; later empty ticks do not replace populated
 evidence. New diagnostics cannot reconstruct previously unobserved time. They remain outside
-physical checkpoint v53 and spectator/display packets.
+physical checkpoint v54 and spectator/display packets. Neighborhoods include separate top-eight
+inventory and external supply profiles; detailed ending contexts include both full local source
+profiles within the existing source and byte limits.
 
 With state storage, snapshots go to `diagnostics/ecology.json.gz` every30 wall seconds when
 changed, on world replacement/extinction, and at clean shutdown. Compression and synced atomic

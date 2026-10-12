@@ -34,8 +34,11 @@ pub struct Source {
     /// Accrued elapsed empty time in the same local supply clock, never the remaining wait.
     pub empty_elapsed: f64,
     pub rate: f64,
-    /// Inventory is amount * mixture; at zero amount this is only the supply condition.
+    /// The sole finite inventory is amount * mixture. Empty inventory owns no chemicals.
     pub mixture: Vec<f64>,
+    /// Evolving external boundary condition, not owned material or a second stock.
+    /// Admissions change inventory only; later external imports use this profile.
+    pub supply_condition: Vec<f64>,
     #[serde(skip)]
     pub footprint: Vec<(usize, f64)>,
     #[serde(skip)]
@@ -79,6 +82,7 @@ impl Source {
             wait: 0.,
             empty_elapsed: 0.,
             rate,
+            supply_condition: mixture.clone(),
             mixture,
             footprint: vec![],
             kernel: Default::default(),
@@ -128,7 +132,8 @@ impl Source {
     }
     pub fn refresh_material(&mut self, chemistry: &Chemistry) {
         self.material = crate::source_medium::Material::read(self.inventory(), chemistry);
-        self.material.composition = crate::source_medium::composition(&self.mixture, chemistry);
+        self.material.composition =
+            crate::source_medium::composition(&self.supply_condition, chemistry);
     }
     /// Serial composition of the two phases; World runs `advance_local` across reservoirs.
     pub fn advance(
@@ -185,7 +190,7 @@ impl Source {
             step.tick as f64 * c.dt,
             c.dt,
         );
-        outcome.changed = dx != 0. || dy != 0. || (self.amount > 0. && conversion[0] > 0.);
+        outcome.changed = dx != 0. || dy != 0. || conversion[0] > 0. || !self.material.valid;
         if dx != 0. || dy != 0. {
             self.habitat.x = (self.habitat.x + dx).rem_euclid(c.width);
             self.habitat.y = (self.habitat.y + dy).rem_euclid(c.height);
@@ -251,20 +256,12 @@ impl Source {
         medium: crate::reaction_medium::Medium,
         elapsed: f64,
     ) -> [f64; 3] {
-        let accounts = operators
-            .inventory_active(
-                &mut self.mixture,
-                medium,
-                elapsed,
-                f32::EPSILON as f64,
-                u64::MAX,
-            )
-            .0;
-        if accounts[0] > 0. {
-            let total: f64 = self.mixture.iter().sum();
-            for q in &mut self.mixture {
-                *q /= total;
-            }
+        // The same local operator evolves the external boundary and the finite contents.
+        // Only the latter owns material and work; boundary changes are accounted when imported.
+        let boundary = convert_profile(&mut self.supply_condition, operators, medium, elapsed);
+        let accounts = convert_profile(&mut self.mixture, operators, medium, elapsed);
+        if boundary[0] > 0. || accounts[0] > 0. {
+            self.material.valid = false;
         }
         accounts
     }
@@ -276,7 +273,7 @@ impl Source {
         c: &Config,
         chemistry: &Chemistry,
     ) -> [f64; 2] {
-        let mut incoming = self.mixture.clone();
+        let mut incoming = self.supply_condition.clone();
         if c.source_epochs.is_some() || c.source_zones.is_some() {
             incoming.fill(0.);
             let habitat = Habitat {
@@ -287,6 +284,7 @@ impl Source {
             for (&s, q) in c.source_species.iter().zip(composition(&habitat, tick, c)) {
                 incoming[s] += q;
             }
+            self.supply_condition.clone_from(&incoming);
         }
         self.allowance = c.source_lifetime * self.rate;
         let profile = incoming.clone();
@@ -310,7 +308,9 @@ impl Source {
         [self.allowance, potential]
     }
 
-    /// Mix one aggregate vector into the sole physical inventory without changing renewal.
+    /// Mix one aggregate vector into the sole physical inventory without changing renewal
+    /// or the external supply condition. In particular, an empty source cannot clone a corpse
+    /// into every future external batch.
     pub fn admit(&mut self, incoming: &[f64]) -> f64 {
         let q: f64 = incoming.iter().sum();
         if q > 0. {
@@ -328,8 +328,10 @@ impl Source {
         q
     }
 
-    /// Explicit stock replacement also declares a new nominal schedule reference.
+    /// Explicit stock replacement also declares a new nominal schedule and boundary profile.
     pub fn rebase_supply(&mut self) {
+        self.supply_condition.clone_from(&self.mixture);
+        self.material.valid = false;
         self.allowance = self.amount;
         self.pending = 0.;
         self.admission_pending = 0.;
@@ -339,6 +341,25 @@ impl Source {
         }
     }
 }
+
+fn convert_profile(
+    profile: &mut [f64],
+    operators: &crate::weathering::Operators,
+    medium: crate::reaction_medium::Medium,
+    elapsed: f64,
+) -> [f64; 3] {
+    let accounts = operators
+        .inventory_active(profile, medium, elapsed, f32::EPSILON as f64, u64::MAX)
+        .0;
+    if accounts[0] > 0. {
+        let total: f64 = profile.iter().sum();
+        for q in profile {
+            *q /= total;
+        }
+    }
+    accounts
+}
+
 pub(crate) fn composition(h: &Habitat, tick: u64, c: &Config) -> Vec<f64> {
     if let Some(zones) = &c.source_zones {
         return zones[((h.x / c.width) * zones.len() as f64) as usize].clone();

@@ -87,7 +87,7 @@ fn profile(s: &Source, chem: &Chemistry) -> [f64; 3] {
     if s.material.valid {
         s.material.composition
     } else {
-        composition(&s.mixture, chem)
+        composition(&s.supply_condition, chem)
     }
 }
 

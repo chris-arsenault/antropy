@@ -34,6 +34,7 @@ pub fn capture(w: &World, cell: &Cell) -> Value {
             "emptyElapsed":s.empty_elapsed,
             "supplyMultiplier":w.shade.geography.season([s.habitat.x,s.habitat.y],w.tick as f64*w.config.dt),
             "pending":s.pending,"admissionPending":s.admission_pending,"mixture":s.mixture,
+            "supplyCondition":s.supply_condition,
             "totalReleased":s.total_released,"recentRecovery":s.recent_recovery})
         })
         .collect();

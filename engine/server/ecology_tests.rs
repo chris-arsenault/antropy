@@ -137,6 +137,10 @@ fn large_source_sets_keep_global_evidence_and_rotate_bounded_local_detail() {
     assert_eq!(first["neighborhoods"].as_array().unwrap().len(), 256);
     assert_eq!(first["neighborhoodsOmitted"], 44);
     assert_eq!(first["global"]["sources"]["count"], 300);
+    assert_eq!(
+        first["neighborhoods"][0]["topSupplyCondition"],
+        first["neighborhoods"][0]["topMixture"]
+    );
     r.world.tick += 250;
     let next = super::ecology_sample::point(&r.world);
     assert_ne!(

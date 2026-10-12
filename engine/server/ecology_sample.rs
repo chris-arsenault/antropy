@@ -69,6 +69,9 @@ pub fn point(w: &World) -> Value {
         let mut ranked: Vec<_> = s.mixture.iter().enumerate().map(|(i,q)| (i,*q)).collect();
         ranked.sort_by(|a,b| b.1.total_cmp(&a.1).then(a.0.cmp(&b.0)));
         ranked.truncate(8);
+        let mut supply: Vec<_> = s.supply_condition.iter().enumerate().map(|(i,q)| (i,*q)).collect();
+        supply.sort_by(|a,b| b.1.total_cmp(&a.1).then(a.0.cmp(&b.0)));
+        supply.truncate(8);
         let endings = w.ecology.as_ref().and_then(|o| o.local_endings.get(&index)).copied().unwrap_or_default();
         Some(json!({"source":index,"position":[s.habitat.x,s.habitat.y],"radius":s.habitat.radius,
             "population":g.count,"biomass":g.mass,"cellEnergy":g.energy,
@@ -79,6 +82,7 @@ pub fn point(w: &World) -> Value {
             "supplyMultiplier":w.shade.geography.season([s.habitat.x,s.habitat.y],w.tick as f64*w.config.dt),
             "totalReleased":s.total_released,"recentRecovery":s.recent_recovery,
             "recentOutput":s.recent_output,"topMixture":ranked,
+            "topSupplyCondition":supply,
             "mixtureBreadth":1./s.mixture.iter().map(|q| q*q).sum::<f64>().max(1e-30)}))
     }).collect();
     json!({"at":super::ecology::now_ms(),"global":global(w),"neighborhoods":neighborhoods,

@@ -397,12 +397,13 @@ shorter-outage decision and its 2.5-fold increase in nominal mean supply.
 The world remains open. Environmental transformations now have an explicit external work
 account modulated by the composed local illumination field.
 
-Each reservoir owns one normalized composition p, material amount Q, release rate r, nominal
-batch allowance A and wait W. A and W are schedule clocks, not material owners. Actual inventory
-is Q*p. The shared public operator transforms p once
-per source update; multiply its converted amount, heat and external work by Q for the physical
-accounts. At Q=0, p remains an evolving external supply condition with zero physical work or
-material. The operator screens changes below f32::EPSILON in p, equivalent to
+Each reservoir owns normalized inventory composition p, normalized external boundary condition b,
+material amount Q, release rate r, nominal batch allowance A and wait W. A and W are schedule
+clocks, not material owners. Actual inventory is Q*p. Since v54, the shared public operator
+transforms p and b per source update; multiply p's converted amount, heat and external work by Q for the physical
+accounts. Boundary b owns no material; its potential is accounted when new supply is imported.
+At Q=0, p owns nothing while b continues evolving. The operator screens changes below
+f32::EPSILON in each profile, equivalent to
 `Q * f32::EPSILON` for the finite inventory. It retains unprocessed tiny shares. Applying the
 dissolved concentration floor times interface area would prevent useful small-owner conversions.
 
@@ -423,8 +424,8 @@ the draw occurs once per exhaustion from that source's persisted renewal stream.
 uses supply time. Available physical stock can discharge during that wait at the same ceiling.
 When the wait elapses, an import admits r*sourceLifetime and its full incoming potential,
 mixing with retained stock and resetting A to that nominal batch. Incoming zones/epochs set
-the imported profile without overwriting retained chemistry; otherwise the current evolving
-profile supplies the batch. Consume any remaining interval through release and transitions exactly once;
+the imported boundary profile without overwriting retained chemistry; otherwise evolving b
+supplies the batch. Admissions never replace b. Consume any remaining interval through release and transitions exactly once;
 release parcels retain their own mixtures if a boundary override changes the next batch.
 There is no lifetime countdown or
 forced dump. sourceLifetime denotes nominal batch duration at rate r. Initialization sets
@@ -446,11 +447,11 @@ and potential remain recorded without population-based normalization. This aggre
 does not guarantee local food availability. The earlier fixed-gap simplification imposed a shared
 minimum outage after startup depletion and caused extinction; that timing choice is superseded.
 
-Reservoir inventory projects through the same chemical interaction and impedance properties as
+The reservoir boundary projects through the same chemical interaction and impedance properties as
 field material. Its interface area is mesh area divided by the sum of squared footprint weights.
 Since the structural exposure revision, a reservoir exposes its full interface area, the
 saturation limit of Q/(1+Q/interfaceArea), with the property means of its persistent
-composition, whether it is full or empty. This is a finite interface signal, not a transfer of
+boundary b, whether it is full or empty. This is a finite interface signal, not a transfer of
 ownership: cells cannot consume held reservoir inventory. The same footprint deposits the
 signal, samples the medium and releases material. Passive velocity uses the shared chemical
 response (attraction and signed repulsion, including embodied and reservoir signals) without
@@ -500,7 +501,10 @@ recipients for every species. No overlap means ordinary local spill. Free invent
 unrecovered body chemistry enter the field; remaining usable energy becomes death heat.
 Aggregate all incoming vectors per source, then admit q with
 `Q_new=Q+q`, `p_new=(Q*p+incoming)/Q_new`. Recovery changes neither imported supply nor work,
-extends no allowance or wait, and discharges only at later ordinary source commits. Spills
+extends no allowance or wait, and discharges only at later ordinary source commits. It never
+assigns external boundary b. This v54 separation prevents trace deposits from rewriting future
+imports; the [mortality contract](../mortality-recycling.md#october-12-correction-finite-contents-and-external-supply)
+records the amplification and correction. Spills
 precede disturbance mixing. Derived membership and source carrier changes use existing spatial
 owners; no global cue enters a controller.
 

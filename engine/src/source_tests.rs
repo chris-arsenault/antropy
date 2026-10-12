@@ -39,6 +39,7 @@ fn composition_keeps_local_history_through_empty_interval_and_restore() {
     let held = w.held();
     for _ in 0..8 {
         source_medium::advance(&mut w);
+        assert_eq!(w.sources[0].mixture, w.sources[0].supply_condition);
     }
     assert_eq!(held, w.held()); // Boundary composition adds no material or work.
     assert_eq!(w.ledger.supplied, 0.);
@@ -52,6 +53,7 @@ fn composition_keeps_local_history_through_empty_interval_and_restore() {
     source_medium::advance(&mut w);
     source_medium::advance(&mut restored);
     assert_eq!(profile, w.sources[0].mixture);
+    assert_eq!(profile, w.sources[0].supply_condition);
     assert_eq!(w.snapshot().unwrap(), restored.snapshot().unwrap());
     let source = &w.sources[0];
     let total = source.amount;

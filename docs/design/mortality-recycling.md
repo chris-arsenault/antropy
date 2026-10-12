@@ -1,6 +1,6 @@
 # Mortality driven reservoir recycling
 
-**Status:** Implemented locally (v50), October 1, 2026; enabled by default with sourceRate0.1. Live server unchanged.
+**Status:** Enabled by default with sourceRate0.1. October 12 physical v54 corrects refill amplification by separating finite contents from the evolving external boundary condition.
 
 The [execution plan](../plans/MORTALITY-RECYCLING-PLAN.md) records the implementation
 milestones and source owners. [Delivery findings](../mortality-recycling-results.md) record the
@@ -50,8 +50,9 @@ becomes heat. Fission endings are separate from actual deaths.
 
 [Reservoir lifecycle](../../engine/src/source_lifecycle.rs) currently drains a finite batch at
 the site's rate and imports batches on an independent nominal exhaustion/wait clock. The
-source owns one chemical composition and one physical amount. A separate scalar allowance
-determines cycle transitions without owning material.
+source owns one finite chemical inventory. An evolving external boundary condition determines
+the composition of imported batches and the persistent exposed surface. A separate scalar
+allowance determines cycle transitions without owning material.
 
 When enabled, recovery redirects part of the dead body's existing mixture into local reservoir
 inventory. Free internal inventory and unrecovered body material still enter the field. The
@@ -156,7 +157,7 @@ p_new = (Q*p + c_j) / Q_new
 ```
 
 At q=0, keep the existing composition. All receiving events at a source aggregate before the
-commit. Source chemistry remains one stored mixture; no second reserve chemistry or corpse
+commit. Source inventory remains one stored mixture; no second physical reserve or corpse
 stock is introduced. Its ordinary transformations continue with their existing work accounts.
 Do not overwrite incoming material with the source's old chemical profile, grant ATP-like
 usable energy, or count recovery as imported supply. The dead cell's remaining usable energy
@@ -185,12 +186,45 @@ That result would require revisiting the delivery mechanism, not silently multip
 Deposits admitted after the current release phase become eligible at the next ordinary source
 commit; they must not wait for a random refill deadline or a UI observation cycle.
 
-For normal source composition policy, a fresh batch uses the current evolving composition.
+For normal source composition policy, a fresh batch uses the evolving external boundary condition.
 For optional zones/epochs, the existing policy supplies the incoming batch's profile. Mix that
 batch into retained stock rather than resetting the retained chemicals at a boundary. This is
 a necessary conservation correction once nonempty sources can receive scheduled imports.
 Initial amounts follow the same `rate*duration*(0.5+U)` law and priming fraction0.1.
 The new defaults rate0.1/duration1200 retain initial stock and its reservoir-derived priming.
+
+### October 12 correction: finite contents and external supply
+
+V50–v53 used the same normalized vector for finite contents and every future imported batch.
+At an empty source, any positive recovered deposit replaced that vector completely. In the
+constructed production-source check, a deposit of1e-9 material changed the composition of
+the next88.93-material import as much as a deposit of1 material. The transfer itself conserved
+matter; subsequent external supply amplified the compositional change without a mass bound.
+This is a confirmed mechanism, not proof that it alone caused the recovery-enabled live world's
+earlier extinction. Short matched-startup checks initially favored recovery.
+
+V54 persists two different quantities: finite contents `Q*p`, and normalized external boundary
+condition `b`. Both start with the ordinary source profile. The same local chemical operator
+evolves each vector; only `Q*p` owns material and incurs physical conversion accounts.
+An import of amount `R` contributes exactly `R*b` and its chemical potential to the external
+ledger, then mixes into the single inventory. Recovery changes `Q*p` conservatively and never
+assigns `b`. The source exposes `b` through its existing persistent interface, including while
+empty; a trace deposit cannot replace that full structural interface either. Zones and epochs
+update `b` at their ordinary refill boundary and preserve retained inventory.
+
+This supersedes the earlier requirement to represent contents and boundary with one vector.
+There is still one finite stock, no independently tuned second supply, no preferred chemical
+and no additional control. Boundary evolution is not an internal material conversion: any
+later new material and potential enter explicitly as external imports. Finite corpse chemistry
+can influence its surroundings through actual release and the existing shared medium, rather
+than being copied indefinitely. Ordinary rate ceilings, nominal clocks, wait randomness and
+the mortality response remain unchanged. Format54 rejects older physical bytes without migration.
+
+Bounded regression checks cover empty, nearly empty and full sources, deposits from1e-9 to100,
+repeated refills, componentwise conservation, unchanged external potential and timing, and restore
+with distinct inventory and boundary. Existing ecology history records both profiles separately.
+The requested few-hour live observation evaluates funded growth and replacement across ordinary
+renewals; startup growth alone does not establish sustained rescue.
 
 ## Accounts and runtime ownership
 
