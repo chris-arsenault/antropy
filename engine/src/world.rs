@@ -56,6 +56,8 @@ pub struct World {
     #[serde(skip)]
     pub observer: Option<Box<crate::phenotype::Observer>>,
     #[serde(skip)]
+    pub ecology: Option<Box<crate::ecology_observation::Observer>>,
+    #[serde(skip)]
     exchange: crate::transport::Exchange,
     #[serde(skip)]
     pub(crate) contact_cache: crate::movement::geometry::Cache,
@@ -196,6 +198,7 @@ impl World {
             field_elapsed: 0.,
             trace: None,
             observer: None,
+            ecology: None,
             exchange: Default::default(),
             contact_cache: Default::default(),
             reactions: Default::default(),
@@ -275,6 +278,9 @@ impl World {
         }
         let now = || clock.map_or(0., |f| f());
         let mut started = now();
+        if let Some(observer) = &mut self.ecology {
+            observer.before(&self.cells, self.tick);
+        }
         self.field.pressure_strength = self.config.pressure_strength;
         self.field.illumination.shade = self.shade.clone();
         self.field.attraction_length = self.config.attraction_length;
@@ -394,6 +400,11 @@ impl World {
             self.finish_cells();
         }
         self.tick += 1;
+        if let Some(observer) = &mut self.ecology {
+            for cell in &self.cells {
+                observer.capture(cell, self.tick);
+            }
+        }
         crate::lifecycle::advance(self);
         self.mortality.living = self.cells.iter().map(|c| c.mass()).sum();
         if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {

@@ -97,6 +97,7 @@ pub struct Runtime {
     pub generation: u64,
     pub speed: Option<f64>,
     pub threads: usize,
+    pub ecology: super::ecology::History,
     observations: Observations,
     buffers: Buffers,
     sequence: u64,
@@ -118,12 +119,18 @@ impl Runtime {
             "enabled":true,"highlight":false,"selection":{"kind":"all"}}),
         )?;
         let definition = Arc::new(commands::execute(&mut world, &json!({"op":"definition"}))?);
+        world.ecology = Some(Box::new(
+            antropy_engine::ecology_observation::Observer::new(&world),
+        ));
+        let mut ecology = super::ecology::History::default();
+        ecology.begin(&mut world, 1);
         Ok(Self {
             world,
             running: true,
             generation: 1,
             speed: None,
             threads,
+            ecology,
             observations: Observations::default(),
             buffers: Buffers::default(),
             sequence: 0,
@@ -141,7 +148,7 @@ impl Runtime {
             }
             "step" => {
                 self.running = false;
-                self.world.step();
+                self.step();
             }
             "speed" => {
                 self.speed = if payload["value"] == "max" {
@@ -177,8 +184,15 @@ impl Runtime {
         let mut next = Self::from_world(world, self.threads)?;
         next.generation = self.generation + 1;
         next.sequence = self.sequence;
+        self.ecology.observe(&mut self.world, true);
+        next.ecology = std::mem::take(&mut self.ecology);
+        next.ecology.begin(&mut next.world, next.generation);
         *self = next;
         Ok(())
+    }
+    pub fn step(&mut self) {
+        self.world.step();
+        self.ecology.observe(&mut self.world, false);
     }
     /// Compacts unreferenced genotypes (the existing retention rule, applied now rather than
     /// when the backlog doubles), then encodes the ordinary physical checkpoint.
@@ -290,6 +304,12 @@ pub fn start(
         .map_err(|e| e.to_string())?;
     let mut runtime =
         pool.install(|| super::persistence::initial(persistence.as_ref(), seed, config, threads))?;
+    if let Some(diagnostics) = persistence.as_ref().and_then(|p| p.diagnostics.as_ref()) {
+        runtime.ecology = super::ecology_store::load(&diagnostics.ecology_path());
+        runtime
+            .ecology
+            .begin(&mut runtime.world, runtime.generation);
+    }
     let saves = Arc::new(Semaphore::new(1));
     let owner_saves = saves.clone();
     let mut autosave = persistence
@@ -311,7 +331,7 @@ pub fn start(
             }
             let now = Instant::now();
             if runtime.running && now >= next_step {
-                pool.install(|| runtime.world.step());
+                pool.install(|| runtime.step());
                 ticks += 1;
                 if runtime.world.stop_reason.is_some() { runtime.running = false; }
                 next_step = runtime.speed.map_or(now, |s| now + Duration::from_secs_f64(1. / s));

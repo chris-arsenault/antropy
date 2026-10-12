@@ -18,6 +18,7 @@ pub struct Diagnostics {
     dir: PathBuf,
     started: Instant,
     boot: Value,
+    ecology_revision: std::sync::Mutex<Option<u64>>,
 }
 
 fn now_ms() -> u64 {
@@ -95,6 +96,7 @@ impl Diagnostics {
             dir,
             started: Instant::now(),
             boot,
+            ecology_revision: std::sync::Mutex::new(None),
         }))
     }
     /// Writes a panic record before the release build aborts; the next boot reports it.
@@ -115,6 +117,18 @@ impl Diagnostics {
     }
     pub fn uptime(&self) -> u64 {
         self.started.elapsed().as_secs()
+    }
+    pub fn ecology_path(&self) -> PathBuf {
+        self.dir.join("ecology.json.gz")
+    }
+    pub fn save_ecology(&self, history: &super::ecology::History) -> std::io::Result<()> {
+        let mut written = self.ecology_revision.lock().unwrap();
+        if written.is_some_and(|revision| revision > history.revision) {
+            return Ok(());
+        }
+        super::ecology_store::write(&self.ecology_path(), history)?;
+        *written = Some(history.revision);
+        Ok(())
     }
     /// Latest progress and memory; overwritten each heartbeat, read by the next boot.
     pub fn heartbeat(&self, progress: Value) {

@@ -22,6 +22,7 @@ import { runViability } from "./lib/viability";
 import { requireRegistration } from "./lib/longRun";
 import { runResourceEconomy } from "./numerical/resourceEconomy";
 import { runUtteranceStrategyCost } from "./numerical/utteranceStrategyCost";
+import { runServerReview } from "./lib/serverReview";
 
 async function bacteria(flags: Flags) {
   const engine = await loadEngine(),
@@ -52,6 +53,7 @@ async function bacteria(flags: Flags) {
     );
 }
 const handlers: Record<string, (flags: Flags) => Promise<unknown>> = {
+  "server-review": runServerReview,
   "utterance-strategy-cost": (f) =>
     runUtteranceStrategyCost(
       flag(f, "output", "harness/artifacts/utterance-strategy-cost"),

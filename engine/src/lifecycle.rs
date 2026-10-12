@@ -8,6 +8,7 @@ pub fn release(w: &mut World, cell: &Cell, cause: Cause) {
     release_fraction(w, cell, cause, 1.);
 }
 pub(crate) fn release_fraction(w: &mut World, cell: &Cell, cause: Cause, body_fraction: f64) {
+    crate::ecology_observation::end(w, cell, cause, body_fraction);
     let row = crate::footprint::sites(cell, &w.config, &w.field);
     for s in 0..256 {
         let q = cell.inventory.value(s) + body_fraction * cell.bound_material.value(s);
@@ -86,6 +87,9 @@ fn child(w: &mut World, parent: &Cell, offset: [f64; 2]) -> Cell {
     if let Some(o) = &mut w.observer {
         o.birth(&cell);
     }
+    if let Some(o) = &mut w.ecology {
+        o.birth(&cell, w.tick);
+    }
     if let Some(t) = &mut w.trace {
         t.life(&cell, "birth", w.tick);
     }
@@ -111,6 +115,7 @@ pub fn reproduce(w: &mut World) {
             return true;
         };
         let fission = w.config.reproduction == "fission";
+        crate::ecology_observation::end(w, cell, Cause::Division, 1.);
         let paid = cell.pay(division);
         if let Some(study) = w.trace.as_mut().and_then(|t| t.study.as_mut()) {
             study.flow(cell, "division", None, None, paid);

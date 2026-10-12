@@ -3,6 +3,14 @@ mod diagnostics;
 #[cfg(not(target_arch = "wasm32"))]
 mod display;
 #[cfg(not(target_arch = "wasm32"))]
+mod ecology;
+#[cfg(not(target_arch = "wasm32"))]
+mod ecology_sample;
+#[cfg(not(target_arch = "wasm32"))]
+mod ecology_store;
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod ecology_tests;
+#[cfg(not(target_arch = "wasm32"))]
 mod management;
 #[cfg(not(target_arch = "wasm32"))]
 mod management_owner;
@@ -144,6 +152,9 @@ async fn shutdown(host: runtime::Host) {
         match host.save(None, store::Reason::Automatic, true).await {
             Ok(meta) => eprintln!("Saved {} before shutdown", meta.id),
             Err(e) => eprintln!("Shutdown save failed: {e:?}"),
+        }
+        if let Err(e) = host.flush_ecology().await {
+            eprintln!("Shutdown ecology save failed: {e:?}");
         }
     }
     std::process::exit(0);

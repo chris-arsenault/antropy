@@ -32,6 +32,7 @@ No active plan is listed here. Open research questions remain with their design 
 
 | Plan | Scope | Sulion |
 | --- | --- | --- |
+| [Persistent ecology diagnostics](ECOLOGY-DIAGNOSTICS-PLAN.md) | Durable private supply/cost/lifecycle history, stored-checkpoint downloads and GET-only local capture; publication authorized October12 with live recovery enabled | `e969974c-d545-45a3-ba9d-330b3dc93e96`; publication `24dc7e6d-d3a5-4945-ac74-54e94d8277d2` |
 | [Incremental spectator transport](INCREMENTAL-SPECTATOR-PLAN.md) | Acknowledged scene/status deltas, worker reconstruction and hidden-tab disconnect; [bounded size/reconstruction results](../incremental-spectator-results.md). No aggregate quotas; publication authorized October 7 through CI/CD; 1 GB/day remains unestablished | `3767c107-7a6d-4e21-88d5-dcfb01e8312f` |
 | [Rugged chemical ecology](RUGGED-ECOLOGY-PLAN.md) | Local v52 implementation and ordinary-world tuning; [inherited reproductive function and neighbor consequences](../rugged-ecology-results.md) through renewals/replacement. Shared default6; no publication/deployment | `ab2dbd97-c26c-48b9-8f02-a20966ed7dbc` |
 | [Rugged interaction causal iteration](RUGGED-INTERACTION-ITERATION.md) | Local v52 held-light and single-locus diagnostics; [constructed shared-world result](../rugged-community-results.md) links exported intermediate to funded growth, parent-key failure and competition-free harm. No publication/deployment | `a48f005f-102f-491a-bd79-f5a8a67ecca8` |

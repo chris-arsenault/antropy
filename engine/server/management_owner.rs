@@ -25,6 +25,10 @@ pub struct Control {
 }
 pub enum Operation {
     Status,
+    Ecology,
+    EcologyExport {
+        permit: OwnedSemaphorePermit,
+    },
     Control(Control),
     Checkpoint {
         generation: u64,
@@ -44,6 +48,10 @@ pub enum Operation {
 }
 pub enum Reply {
     Json(Value),
+    Ecology {
+        value: Value,
+        permit: OwnedSemaphorePermit,
+    },
     Captured {
         capture: Capture,
         permit: OwnedSemaphorePermit,
@@ -99,8 +107,16 @@ fn status(r: &Runtime) -> Value {
         "threads":r.threads,"population":r.world.cells.len(),"stopReason":r.world.stop_reason})
 }
 fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
+    if let Operation::EcologyExport { permit } = operation {
+        return Ok(Reply::Ecology {
+            value: r.ecology.report(&r.world, r.generation),
+            permit,
+        });
+    }
     let generation = match &operation {
         Operation::Status => return Ok(Reply::Json(status(r))),
+        Operation::Ecology => return Ok(Reply::Json(r.ecology.report(&r.world, r.generation))),
+        Operation::EcologyExport { .. } => unreachable!(),
         Operation::Control(c) => c.generation,
         Operation::Checkpoint { generation, .. } | Operation::Load { generation, .. } => {
             *generation
@@ -144,7 +160,7 @@ fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
             r.replace(world).map_err(Error::Invalid)?;
             Ok(Reply::Json(json!({"status":status(r)})))
         }
-        Operation::Status => unreachable!(),
+        Operation::Status | Operation::Ecology | Operation::EcologyExport { .. } => unreachable!(),
     }
 }
 

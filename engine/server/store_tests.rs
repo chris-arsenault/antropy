@@ -51,6 +51,56 @@ fn capture(world: &World, reason: Reason) -> Capture {
         population: world.cells.len(),
     }
 }
+#[tokio::test]
+async fn stored_download_is_read_only_and_holds_the_shared_export_slot() {
+    let dir = Dir::new("stored-download");
+    let store = Arc::new(Store::open(&dir.0, u64::MAX).unwrap());
+    let checkpoint = capture(&world(), Reason::Manual);
+    let expected = checkpoint.raw.clone();
+    let meta = store.write(checkpoint).unwrap();
+    let (app, host) = stored_fixture(Some(TOKEN), Some(Persistence::new(store, None))).await;
+    let get = |path: String, token: Option<&str>| {
+        let mut r = Request::builder().uri(path);
+        if let Some(token) = token {
+            r = r.header("authorization", format!("Bearer {token}"));
+        }
+        app.clone().oneshot(r.body(Body::empty()).unwrap())
+    };
+    let path = format!("/api/checkpoints/{}", meta.id);
+    assert_eq!(
+        get(path.clone(), None).await.unwrap().status(),
+        StatusCode::UNAUTHORIZED
+    );
+    let before = json_body(get("/api/status".into(), Some(TOKEN)).await.unwrap()).await;
+    let response = get(path.clone(), Some(TOKEN)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(response.headers()["x-biotropy-checkpoint"], meta.id);
+    assert_eq!(response.headers()["x-biotropy-tick"], meta.tick.to_string());
+    assert_eq!(response.headers()["cache-control"], "no-store");
+    assert_eq!(host.exports.available_permits(), 0);
+    assert_eq!(
+        get(path, Some(TOKEN)).await.unwrap().status(),
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    let after = json_body(get("/api/status".into(), Some(TOKEN)).await.unwrap()).await;
+    assert_eq!(before, after);
+    let bytes = axum::body::to_bytes(response.into_body(), expected.len())
+        .await
+        .unwrap();
+    assert_eq!(bytes.as_ref(), expected.as_slice());
+    assert_eq!(host.exports.available_permits(), 0);
+    drop(bytes);
+    assert_eq!(host.exports.available_permits(), 1);
+    assert_eq!(
+        get("/api/checkpoints/missing".into(), Some(TOKEN))
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::NOT_FOUND
+    );
+    assert_eq!(host.exports.available_permits(), 1);
+}
+
 fn meta(id: &str, reason: Reason, created_at: u64, bytes: u64) -> Meta {
     Meta {
         id: id.into(),

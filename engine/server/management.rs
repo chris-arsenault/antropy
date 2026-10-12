@@ -10,7 +10,7 @@ use axum::{
     http::{StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::{delete, get, post},
+    routing::{get, post},
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -32,11 +32,15 @@ pub fn routes(state: socket::State) -> Router<socket::State> {
         .route("/control", post(control))
         .route("/checkpoint", get(checkpoint))
         .route("/diagnostics", get(diagnostics))
+        .route("/ecology", get(ecology))
         .route(
             "/checkpoints",
             get(management_store::list).post(management_store::save),
         )
-        .route("/checkpoints/{id}", delete(management_store::delete))
+        .route(
+            "/checkpoints/{id}",
+            get(management_store::download).delete(management_store::delete),
+        )
         .route("/checkpoints/{id}/load", post(management_store::load))
         .fallback(|| async { StatusCode::NOT_FOUND })
         .layer(DefaultBodyLimit::max(16 * 1024))
@@ -91,6 +95,34 @@ async fn control(
 ) -> Result<Response, Error> {
     response(state.host.manage(Operation::Control(control)).await?)
 }
+async fn ecology(State(state): State<socket::State>) -> Result<Response, Error> {
+    let permit = state
+        .host
+        .exports
+        .clone()
+        .try_acquire_owned()
+        .map_err(|_| Error::Busy)?;
+    let Reply::Ecology { mut value, permit } = state
+        .host
+        .manage(Operation::EcologyExport { permit })
+        .await?
+    else {
+        return Err(Error::Unavailable);
+    };
+    value["persistence"] = state.host.persistence.as_ref().map_or(
+        json!({"enabled":false}),|p| json!({"enabled":p.diagnostics.is_some(),
+            "intervalSeconds":super::ecology_store::SAVE_SECONDS,"lastSave":p.ecology_last.lock().unwrap().clone()}));
+    let raw = serde_json::to_vec(&value).map_err(|e| Error::Export(e.to_string()))?;
+    let bytes = Bytes::from_owner(ExportBody {
+        bytes: raw.into(),
+        _permit: permit,
+    });
+    Ok((
+        [(header::CONTENT_TYPE, "application/json")],
+        Body::from(bytes),
+    )
+        .into_response())
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct CheckpointQuery {
@@ -116,10 +148,10 @@ async fn checkpoint(
             .await?,
     )
 }
-fn response(reply: Reply) -> Result<Response, Error> {
+pub(super) fn response(reply: Reply) -> Result<Response, Error> {
     match reply {
         Reply::Json(value) => Ok(Json(value).into_response()),
-        Reply::Captured { .. } => Err(Error::Unavailable),
+        Reply::Captured { .. } | Reply::Ecology { .. } => Err(Error::Unavailable),
         Reply::Checkpoint {
             bytes,
             generation,

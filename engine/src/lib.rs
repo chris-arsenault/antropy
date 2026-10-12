@@ -61,6 +61,7 @@ pub mod cover;
 #[cfg(test)]
 mod cover_tests;
 pub mod diagnostics;
+pub mod ecology_observation;
 pub mod economy;
 mod economy_report;
 #[cfg(test)]
@@ -107,6 +108,7 @@ mod mortality_tests;
 pub mod movement;
 mod numeric;
 pub mod observation;
+pub mod observation_records;
 pub mod opportunities;
 pub mod optics;
 #[cfg(test)]

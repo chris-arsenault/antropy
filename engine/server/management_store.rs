@@ -149,6 +149,40 @@ pub async fn save(
     Ok((StatusCode::CREATED, Json(json!(meta))).into_response())
 }
 
+/// Export stored bytes without asking the owner to restore or replace its World.
+pub async fn download(
+    State(state): State<socket::State>,
+    Path(id): Path<String>,
+) -> Result<Response, Error> {
+    let store = state.host.store()?;
+    let permit = state
+        .host
+        .exports
+        .clone()
+        .try_acquire_owned()
+        .map_err(|_| Error::Busy)?;
+    // Cancellation cannot release the allocation slot while decompression is still running.
+    let (meta, raw, permit) = blocking(move || {
+        let (meta, raw) = store.read(&id)?;
+        Ok((meta, raw, permit))
+    })
+    .await?;
+    let mut response = super::management::response(Reply::Checkpoint {
+        bytes: raw.into(),
+        generation: meta.generation,
+        tick: meta.tick,
+        permit,
+    })?;
+    response
+        .headers_mut()
+        .insert("x-biotropy-checkpoint", meta.id.parse().unwrap());
+    response.headers_mut().insert(
+        "x-biotropy-version",
+        meta.version.to_string().parse().unwrap(),
+    );
+    Ok(response)
+}
+
 pub async fn load(
     State(state): State<socket::State>,
     Path(id): Path<String>,

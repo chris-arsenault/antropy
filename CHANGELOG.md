@@ -2,6 +2,17 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-12 — Persistent ecology diagnostics and live recovery
+
+- Added read-only downloads of stored checkpoints without replacing the running world.
+- Native startup now collects bounded private food-supply, paid-flow, reproduction, death
+  and recovery evidence without spectators, persists it across restarts and retains collapse
+  evidence while empty environmental time continues. Physical checkpoint v53 is unchanged.
+- Added `pnpm harness server-review` for bounded local operator captures, with optional
+  retained living checkpoint download. See [server management](docs/server-management.md).
+- Restarted the extinct seed27 server world with mortality recovery enabled and saved the
+  new configuration for deployment restore. Other run settings remain as configured.
+
 ## 2026-10-02 — Sustaining configuration applied to the server
 
 - Restarted the extinct server world with ordinary seed27 and the delivered full-batch defaults:

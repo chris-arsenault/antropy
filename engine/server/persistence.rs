@@ -20,6 +20,7 @@ pub struct Persistence {
     pub last: Arc<Mutex<Value>>,
     /// Restart evidence on the same volume; absent in tests that only exercise the store.
     pub diagnostics: Option<Arc<super::diagnostics::Diagnostics>>,
+    pub ecology_last: Arc<Mutex<Value>>,
 }
 impl Persistence {
     pub fn new(store: Arc<Store>, interval: Option<Duration>) -> Self {
@@ -28,6 +29,7 @@ impl Persistence {
             interval,
             last: Arc::new(Mutex::new(Value::Null)),
             diagnostics: None,
+            ecology_last: Arc::new(Mutex::new(Value::Null)),
         }
     }
     /// Records one save attempt: `Ok` carries the stored record, `Err` the failure.
@@ -77,20 +79,28 @@ pub struct Autosave {
     last: Instant,
     beat: Option<Instant>,
     saved: Option<(u64, u64)>,
+    ecology: Option<super::ecology_store::Writer>,
 }
 impl Autosave {
     pub fn new(persistence: Persistence, runtime: &Runtime) -> Self {
+        let ecology = persistence.diagnostics.as_ref().map(|d| {
+            super::ecology_store::Writer::new(d.clone(), persistence.ecology_last.clone())
+        });
         Self {
             persistence,
             last: Instant::now(),
             beat: None,
             saved: Some((runtime.generation, runtime.world.tick)),
+            ecology,
         }
     }
     /// Captures on the owner thread when due; compression and disk writes run on their own
     /// thread holding the single save slot. An unchanged paused world is not saved again.
     /// The diagnostic heartbeat runs on its own minute timer, independent of saving.
     pub fn poll(&mut self, runtime: &mut Runtime, saves: &Arc<Semaphore>) {
+        if let Some(ecology) = &mut self.ecology {
+            ecology.poll(runtime);
+        }
         if let Some(d) = &self.persistence.diagnostics
             && self
                 .beat
