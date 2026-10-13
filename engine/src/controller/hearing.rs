@@ -7,7 +7,7 @@ pub fn filtered(mut channels: [f32; CHANNELS], c: &crate::config::Config) -> [f3
     if !c.active_features().vocalization || !c.listening {
         return [0.; CHANNELS];
     }
-    for (component, row) in channels.chunks_exact_mut(3).enumerate() {
+    for (component, row) in channels.as_chunks_mut::<3>().0.iter_mut().enumerate() {
         if !c.hearing_content && component > 0 {
             row.fill(0.);
         }
