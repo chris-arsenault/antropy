@@ -1,5 +1,14 @@
 # Composed artificial chemistry runtime
 
+V55 adds prospective live operator controls at completed physiology boundaries. Runtime gates
+preserve funded bodies; startup organ ablations retain their existing allocation semantics.
+Reflex/strategic learning controls independently gate paid plasticity and birth-local assimilation;
+their expense counters partition existing learning cost. Context/gain controls remove those
+reflex influences while slow inference retains its cost. Speech/listening participation and
+content/bearing masks preserve the existing once-only carrier and information-only accounts.
+The [management contract](../../server-management.md#live-settings-and-checkpoint-comparisons)
+owns patch/readback and rewind behavior; no experiment scheduler or new biological reward is added.
+
 **Status:** Current contract — the artificial laws, accounts and checkpoint format of the installed runtime (updated September 30, 2026).
 
 This contract governs the fresh implementation under
@@ -495,9 +504,15 @@ sourceGap coupling. Recovery is enabled by default. The
 [bounded feeding checks](../../mortality-recycling-results.md) establish actual material delivery
 and funded growth while preserving a negative survivor-lifetime result; sourceGap remains600.
 
-When enabled, each dead cell routes f times its actual bound mixture to intersecting reservoir
+V55 also stores sparse physical-time histories at fixed material nodes using body footprint
+weights and existing region ownership. A source samples them through its current footprint,
+then applies the same h/f law. `mortalityLocal=true` selects this local response by default;
+false selects the corrected global baseline. Growth elsewhere cannot cancel isolated local loss.
+Lazy exact decay, current living support and complete batch impulses use the same tau.
+
+When enabled, each dead cell routes recipient-specific f times its actual bound mixture to intersecting reservoir
 footprints, weighting by `sum_node(cell_weight*source_weight)` and normalizing once across
-recipients for every species. No overlap means ordinary local spill. Free inventory and
+recipients for every species, before applying each bounded response. No overlap means ordinary local spill. Free inventory and
 unrecovered body chemistry enter the field; remaining usable energy becomes death heat.
 Aggregate all incoming vectors per source, then admit q with
 `Q_new=Q+q`, `p_new=(Q*p+incoming)/Q_new`. Recovery changes neither imported supply nor work,

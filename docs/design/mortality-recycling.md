@@ -1,5 +1,10 @@
 # Mortality driven reservoir recycling
 
+V55 adds default-on source-local severity using fixed spatial physical-time histories.
+The [local extension](local-mortality-feeding.md#delivered-local-law) specifies support,
+single-donor accounting, live global-baseline ablation and bounded delivery evidence.
+The v54 separation of finite inventory and external supply remains unchanged.
+
 **Status:** Enabled by default with sourceRate0.1. October 12 physical v54 corrects refill amplification by separating finite contents from the evolving external boundary condition.
 
 The [execution plan](../plans/MORTALITY-RECYCLING-PLAN.md) records the implementation
@@ -223,8 +228,20 @@ the mortality response remain unchanged. Format54 rejects older physical bytes w
 Bounded regression checks cover empty, nearly empty and full sources, deposits from1e-9 to100,
 repeated refills, componentwise conservation, unchanged external potential and timing, and restore
 with distinct inventory and boundary. Existing ecology history records both profiles separately.
-The requested few-hour live observation evaluates funded growth and replacement across ordinary
-renewals; startup growth alone does not establish sustained rescue.
+The October 12–13 deployment and three-hour live observation used ordinary seed27 founders,
+the same effective operating configuration, corrected keys and enabled recovery. Photoreception,
+cover, emission, vocalization and strategy were disabled. At tick 80,000 the corrected world had
+8,239 cells versus 208 at tick 80,007 in the previous recovery-enabled run. The three-hour endpoint
+was tick 126,263 with 11,258 cells; growth replaced 100.19% of dead-body losses over the final hour.
+This supports improved early replacement through ordinary renewals, not a uniquely isolated
+explanation of the lifetime difference. The observation ends before the previous collapse at
+tick 394,603 and cannot establish lasting rescue or the usefulness of the disabled features.
+Both deployments passed CI; the fixture-only follow-up restored the populated continuing world.
+
+Local observation provenance is `frontend/harness/artifacts/recovery-fix-20261012-*`, including
+the baseline, half-hour captures, `m180` endpoint and minute status log. The post-follow-up capture
+is `frontend/harness/artifacts/recovery-fix-20261013-final-deployed/`. Generated data remains ignored;
+the [local feeding direction](local-mortality-feeding.md) records the remaining design questions.
 
 ## Accounts and runtime ownership
 

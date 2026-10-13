@@ -341,12 +341,13 @@ async fn operator_saves_lists_loads_and_deletes_stored_worlds() {
         &app,
         "POST",
         &format!("/api/checkpoints/{id}/load"),
-        Some(json!({"generation":1})),
+        Some(json!({"generation":1,"running":false})),
     )
     .await;
     assert_eq!(loaded.status(), StatusCode::OK);
     let loaded = json_body(loaded).await;
     assert_eq!(loaded["status"]["generation"], 2);
+    assert_eq!(loaded["status"]["running"], false);
     assert_eq!(loaded["status"]["tick"], saved["tick"]);
     assert_eq!(loaded["checkpoint"]["id"], id);
     let deleted = call(&app, "DELETE", &format!("/api/checkpoints/{id}"), None).await;

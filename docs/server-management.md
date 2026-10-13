@@ -1,5 +1,21 @@
 # Native server HTTP management
 
+Local mortality response is enabled by default in v55. Live `mortalityLocal=false` restores
+the corrected global response for comparison. Source inspection reports local severity and
+the selected response; global totals remain diagnostics. This switch changes neither finite
+inventory nor the external supply profile.
+
+Live optical fields include `geographicShade`, `opticalColumn`, `opticalReach` and
+`opticalPowerDensity`; changes refresh derived exposure at the completed boundary and preserve
+film material. `shadeStrength` and terrain generation require a fresh world. Selected-cell
+optical inspection includes deposition, replacement and emission bounds, not a profit estimate.
+
+Live `speech` and `listening` separate event production from reception. `hearingContent=false`
+withholds signed bit moments but retains activity; `hearingBearing=false` withholds directional
+moments. These information interventions keep body investment and paid events. Startup
+`features.vocalization=false` removes both organs. Use the focused patches in `config/` for
+communication, learning and context comparisons; `activity-on.json` restores delivered controls.
+
 **Status:** Current reference — authenticated LAN-only `/api` for status, controls, diagnostics and stored checkpoints on the native server.
 
 The native server exposes management independently of `/stream`. Requests share the existing
@@ -53,6 +69,8 @@ restart increments it. A stale generation returns HTTP 409 without applying the 
 | `step` | `{}` | Pause and advance one complete tick |
 | `speed` | `{"value":"max"}` or a value of 1, 10, 30, 60, 120 | Set the target tick rate |
 | `restart` | `{"seed":28,"config":{}}` | Replace the world with the selected seed/config and start running |
+| `configure` | `{"patch":{"mortalityRecovery":false},"revision":0}` | Validate and apply a live patch at a completed physiology boundary; optional `preview:true` validates without changing state |
+| `runControls` | `{}` | Effective participation, configuration revision, pending patch and bounded change history |
 | `task` | Existing task command payload | Apply the existing operator task control |
 | `phenotype` | Existing phenotype action payload | Apply run-level selection, highlighting or cohort controls |
 
@@ -62,11 +80,69 @@ For example, a pause body is:
 {"generation":1,"op":"running","payload":{"value":false}}
 ```
 
-Config uses the engine's existing camelCase fields. Omitted fields take engine defaults, not
+Restart config uses the engine's existing camelCase fields. Omitted fields take engine defaults, not
 values from the running world. To change selected settings, read `status.config`, edit that
-object and send it with `restart`. Configuration changes start a new world; this API does not
-mutate physical parameters mid-run. Invalid restart configuration leaves the old world intact.
+object and send it with `restart`. Structural/birth-compiled changes require that explicit
+operation. Invalid restart configuration leaves the old world intact.
 Restart resets speed to maximum and returns its new generation and tick zero before stepping.
+
+### Live settings and checkpoint comparisons
+
+Live patches merge over current effective settings. `GET /api/status` includes `runControls`:
+the supported `liveFields`, current revision, effective activity, pending complete config
+and the most recent 64 applied changes. Unknown fields and structural edits fail atomically.
+Each effective revision begins a native ecology segment. Resident flow windows expose their own
+`fromTick`; a window crossing a segment's start contains both settings and must not be attributed
+entirely to the new setting. Apply equivalent patches in both checkpoint arms when comparing
+information effects so controller-cache invalidation is matched as well as physical state.
+Pass the last observed revision to reject stale config edits as well as stale generations.
+Patches apply before the next base step whose previous physiology interval is complete.
+When paused mid-interval, the validated patch remains visibly pending until ordinary stepping
+completes that interval. No elapsed work is reinterpreted and no extra ticks occur in the request.
+Check effective/pending readback rather than assuming acceptance means immediate application.
+
+`reflexLearning` and `strategicLearning` independently gate each layer's plasticity and paid
+learning under the existing `learning` policy. `learningRetention` still controls birth-local
+transmission for enabled layers; disabled layers do not assimilate private traces at birth.
+Expense channels `reflexLearning` and
+`strategicLearning` partition the existing `learning` total; they are not additional debits.
+`strategicContext` gates direct slow-context inputs to reflex inference, and `strategicGain`
+gates its learning-rate influence. Both leave slow history and inference active for comparisons
+at their ordinary cost; whole-layer `activity.strategy=false` is a separate intervention.
+
+The five `activity` booleans gate runtime photoreception, cover building, emission,
+vocalization/hearing and strategy independently. They intersect the startup `features`.
+Live activity changes preserve genetic capacities, physical body material and its maintenance;
+a startup-disabled organ cannot be created by enabling its activity. Strategy-off removes its
+influence and extra costs while restoring neutral-rate reflex learning. Existing cover and
+recovered inventory retain their physical effects. `mortalityRecovery=false` stops future
+death-derived admission without changing external refill or removing stored recovered chemistry.
+
+Stored load accepts `{"generation":N,"running":false}` to restore into a paused world.
+Omitting `running` retains the existing resume behavior. Load restores saved effective settings,
+pending changes and revision, and returns a new generation before any further ticks.
+Physical format v55 carries runtime participation and bounded configuration history; earlier
+physical formats remain incompatible, without migration.
+
+The existing client supports these primitives without another service or experiment scheduler:
+
+```bash
+with-cred -- python3 frontend/harness/native_run.py --save-point
+with-cred -- python3 frontend/harness/native_run.py --set mortalityRecovery=false --preview
+with-cred -- python3 frontend/harness/native_run.py --set mortalityRecovery=false
+with-cred -- python3 frontend/harness/native_run.py --running true
+with-cred -- pnpm --dir frontend harness server-review --checkpoint none
+with-cred -- python3 frontend/harness/native_run.py --running false
+with-cred -- python3 frontend/harness/native_run.py --load CHECKPOINT_ID
+with-cred -- python3 frontend/harness/native_run.py --set mortalityRecovery=true
+```
+
+The helper defaults to live changes; `--apply restart` explicitly selects a new world.
+Use `--config config/activity-off.json` or `activity-on.json` for runtime group patches.
+`--output` optionally retains requested/effective settings and responses in a new local
+capture directory. Save-point output identifies the manual checkpoint. No-argument invocation
+reads status. Reuse ordinary pause/run/inspection for the chosen observation period and preserve
+each variant's observations before rewinding; no exact tick horizon is imposed.
 
 For an explicit request to tune or stabilize the world, selecting configurations and restarting
 unsuitable or empty runs are already authorized. The user does not require old-world preservation
@@ -181,7 +257,8 @@ kept until deleted; a ninth manual save returns 507. Automatic checkpoints expir
 byte budget.
 
 Load reads and decompresses on a blocking thread, then restores between ticks. Like `restart`,
-it increments the generation, sets maximum speed and runs; stale generations return 409. Only a
+it increments the generation and sets maximum speed; `running:false` keeps it paused.
+Stale generations return 409. Only a
 checkpoint whose recorded physical format matches the server can load; others return 400 and
 remain listed with `compatible: false` until deleted. Unknown ids return 404. Stored ids contain
 only lowercase letters, digits and hyphens.

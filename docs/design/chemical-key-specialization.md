@@ -1,7 +1,7 @@
 # Chemical keys and broad processing
 
-**Status:** Exploratory ecology direction. October6 corrects the installed binding law's
-universal-saturation defect; sustained ecological differentiation remains unestablished.
+**Status:** Exploratory ecology direction. October 13, 2026 disposition incorporates the
+October 6 binding correction; sustained ecological differentiation remains unestablished.
 
 Continue investigating the consequences of inherited chemical keys. The user's specific
 concern is that cells generally process broad chemical mixtures, contrary to the expected
@@ -9,6 +9,13 @@ sharply different relationships to shared chemistry. The installed
 [rugged interaction](rugged-interaction.md) now uses the
 [finite binding partition](../key-binding-correction.md) selected by the October6 correction.
 The broader ecological investigation does not assign roles, change mutation or require a campaign.
+
+October 13 adds selected-cell `chemicalRelationships` inspection: finite-site breadth, funded
+enzyme union and gross per-chemical transfer/processing histories. A bounded ordinary-World
+succession check shows exported136 changing a neighbor's cue, paid uptake and processing;
+receiver import136 is 0.077278 against 0.000006 with export held and 0.001627 with response held.
+The [execution record](../plans/CONDITIONAL-ECOLOGY-PLAN.md#execution-expansions) distinguishes
+this causal dependency from net community surplus, unique transfer provenance and evolved roles.
 
 ## Intended consequence
 
@@ -51,6 +58,28 @@ Local provenance is `frontend/harness/artifacts/live-full-20261004/`, ticks
 and limits. Raw data remains local and optional on fresh checkouts. Reproduce the follow-up with
 `python frontend/harness/artifacts/live-full-20261004/followup-questions.py` when those artifacts exist.
 
+## Corrected law and the current question
+
+The [October 6 correction](../key-binding-correction.md), `0e9ecee`, changed a model equation
+that failed the intended finite specialization tradeoff. It was not a mismatch between the
+old independent-sigmoid implementation and its written law. Positive bias could give every
+identity nearly full affinity, including broad membrane protection. The shared competing
+partition now bounds the sum at one per site. Bias controls occupancy against the unbound state;
+weights control relative preference. A saturated uniform site divides its affinity into 1/256
+per identity instead of recognizing all 256 at full strength.
+
+That closes universal full-strength recognition as an unexplained failure. It does not forbid
+broad processing: multiple selective sites, passive exchange and retained private cycles can
+still produce a broad aggregate. The corrected four-genotype comparison establishes distinct
+paid access and reciprocal sign epistasis in net biomass return, not evolved complementary roles.
+Earlier food-chain, neighborhood and intake findings retain their independent-sigmoid law;
+they cannot establish the corrected partition's ecological consequences retroactively.
+
+The [v54 reservoir correction](mortality-recycling.md#october-12-correction-finite-contents-and-external-supply)
+also changes the interpretation of a changing diet. Corpse deposits no longer rewrite every
+future external refill. Compare recognition and expression under recorded finite contents and
+external supply profiles before attributing a changed chemical opportunity to mutation alone.
+
 ## Competing explanations and investigation
 
 - **What the breadth measures.** Separate per-site compiled recognition, funded capacities,
@@ -60,8 +89,9 @@ and limits. Raw data remains local and optional on fresh checkouts. Reproduce th
   is generalist recognition, a composition of selective routes, or an accounting description
   of cycling before changing its mathematics.
 - **Accessible inheritance.** Examine how the shared mutation law and key representation move
-  weights and biases, whether active rows become broadly saturated, and whether narrow useful
-  relationships are accessible and retained through births. A changed key in unused machinery
+  relative preference and total occupancy, and whether narrow useful relationships are accessible
+  and retained through births. Positive bias can no longer erase preference by saturating every
+  identity at full strength. A changed key in unused machinery
   is not an expressed ecological change. Do not presume mutation is the cause of colony loss.
 - **Physical returns and tradeoffs.** Determine what broad uptake, protection and private
   conversion actually gain and cost under the existing capacity/occupancy laws. Ask whether
@@ -80,13 +110,22 @@ and limits. Raw data remains local and optional on fresh checkouts. Reproduce th
 
 ## Design decisions and evidence
 
+October 13 execution adds the read-only `chemicalRelationships` query for a selected living
+cell. It separates per-site affinity/stock, funded and requested enzyme support unions,
+and lifetime gross import/export/consumption/production. The histories include cycling and
+re-imports and are not an external diet or molecular transfer certificate. A current-partition
+120-tick producer/export/receiver-response check establishes a paid behavioral feedback path;
+the [execution expansion](../plans/CONDITIONAL-ECOLOGY-PLAN.md#execution-expansions) preserves
+its comparison and limits. No new binding law, mutation distribution or assigned role follows.
+
 Start with existing captures and resource budgets. Choose a bounded comparison that can
 distinguish the explanations above, using actual expressed genotypes and shared physical
 conditions. A matched key restoration can isolate an inherited consequence; ordinary paid
 uptake, net returns, neighbor consequences and replacement determine its significance.
 Neither a binding curve nor a long population census substitutes for that causal chain.
 
-Complete the design only after identifying the relationship that needs correction. Any selected
+The universal-binding correction is delivered; any further revision needs a separately identified
+missing relationship. Complete the remaining ecological design on that basis. Any selected
 revision must extend the shared mathematical architecture with few controls, preserve exact
 finite transformations, paid material/work accounts and birth-fixed chemical capabilities,
 and retain local controller information and Rust ownership. Do not prelabel food, waste or

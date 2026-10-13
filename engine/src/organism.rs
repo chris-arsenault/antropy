@@ -86,6 +86,8 @@ pub struct Flows {
     pub maintenance: f64,
     pub motors: f64,
     pub learning: f64,
+    pub reflex_learning: f64,
+    pub strategic_learning: f64,
     pub transport: f64,
     pub reaction_heat: f64,
     pub growth: f64,

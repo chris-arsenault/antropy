@@ -66,6 +66,7 @@ pub fn point(w: &World) -> Value {
     let neighborhoods: Vec<_> = groups.iter().cycle().skip(offset).take(total_groups.min(MAX_NEIGHBORHOODS)).filter_map(|(index,g)| {
         let index = *index;
         let s = w.sources.get(index)?;
+        let recovery=antropy_engine::recovery_observation::source(w,index).ok()?;
         let mut ranked: Vec<_> = s.mixture.iter().enumerate().map(|(i,q)| (i,*q)).collect();
         ranked.sort_by(|a,b| b.1.total_cmp(&a.1).then(a.0.cmp(&b.0)));
         ranked.truncate(8);
@@ -82,6 +83,8 @@ pub fn point(w: &World) -> Value {
             "supplyMultiplier":w.shade.geography.season([s.habitat.x,s.habitat.y],w.tick as f64*w.config.dt),
             "totalReleased":s.total_released,"recentRecovery":s.recent_recovery,
             "recentOutput":s.recent_output,"topMixture":ranked,
+            "localMortalitySeverity":recovery["localSeverity"],
+            "mortalityResponse":recovery["response"],
             "topSupplyCondition":supply,
             "mixtureBreadth":1./s.mixture.iter().map(|q| q*q).sum::<f64>().max(1e-30)}))
     }).collect();

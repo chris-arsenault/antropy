@@ -28,12 +28,12 @@ interface is added.
 From the repository root, after CI/CD has deployed the controls:
 
 ```bash
-with-cred -- python3 frontend/harness/native_run.py --config config/explorations-off.json --output frontend/harness/artifacts/explorations-off-NEW
+with-cred -- python3 frontend/harness/native_run.py --apply restart --config config/explorations-off.json --output frontend/harness/artifacts/explorations-off-NEW
 ```
 
-The helper preserves the running world's seed and complete effective config before merging
+The helper's explicit restart mode preserves the running world's seed and complete effective config before merging
 the patch. To restart with one feature restored, use the same helper with an override, for
-example `--set features.strategy=true`, and a new local output directory. It records the
+example `--apply restart --set features.strategy=true`, and a new local output directory. It records the
 requested and effective settings and never retries an uncertain operator command. Other
 installations provide `BIOTROPY_TOKEN` through their ordinary environment.
 

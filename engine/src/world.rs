@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 54;
+pub const VERSION: u32 = 55;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -29,6 +29,7 @@ pub struct World {
     pub seed: u64,
     pub tick: u64,
     pub config: Config,
+    pub run_control: crate::run_control::State,
     pub rng: Random,
     pub environment_rng: Random,
     pub genetic_rng: Random,
@@ -40,6 +41,7 @@ pub struct World {
     pub cells: Vec<Cell>,
     pub sources: Vec<Source>,
     pub mortality: crate::mortality::History,
+    pub local_mortality: crate::mortality_local::State,
     #[serde(skip)]
     pub(crate) recovery_recipients: crate::mortality_recovery::Recipients,
     pub patch_centers: Vec<[f64; 2]>,
@@ -196,6 +198,8 @@ impl World {
             events: vec![],
             stop_reason: None,
             field_elapsed: 0.,
+            run_control: Default::default(),
+            local_mortality: Default::default(),
             trace: None,
             observer: None,
             ecology: None,
@@ -214,6 +218,9 @@ impl World {
         world.ledger.initial_material = m;
         world.ledger.initial_energy = e;
         crate::source_medium::project(&mut world);
+        world
+            .local_mortality
+            .sync(world.cells.iter(), &world.config, &world.field, 0.);
         Ok(world)
     }
     pub fn held(&self) -> (f64, f64) {
@@ -275,6 +282,9 @@ impl World {
         let mut stages = [0.; 12];
         if self.stop_reason.is_some() {
             return stages;
+        }
+        if self.field_elapsed == 0. {
+            crate::run_control::commit(self);
         }
         let now = || clock.map_or(0., |f| f());
         let mut started = now();
@@ -385,6 +395,12 @@ impl World {
             self.physiology(self.field_elapsed, &signals);
             let grown = self.cells.iter().map(|c| c.flows.grown).sum();
             self.mortality.grow(grown, self.config.mortality_memory);
+            self.local_mortality.grow(
+                &self.cells,
+                &self.config,
+                &self.field,
+                (self.tick + 1) as f64 * self.config.dt,
+            );
             stages[9] = covered - started;
             stages[10] = lit - covered;
             stages[11] = now() - lit;
@@ -407,6 +423,12 @@ impl World {
         }
         crate::lifecycle::advance(self);
         self.mortality.living = self.cells.iter().map(|c| c.mass()).sum();
+        self.local_mortality.sync(
+            self.cells.iter(),
+            &self.config,
+            &self.field,
+            self.tick as f64 * self.config.dt,
+        );
         if let Some(o) = self.observer.as_mut().filter(|o| o.active()) {
             o.finish(self.tick);
         }
@@ -553,6 +575,9 @@ impl World {
             return Err("Unsupported physical checkpoint version".into());
         }
         self.config.validate()?;
+        crate::run_control::validate(self)?;
+        self.local_mortality
+            .validate(&self.field, self.tick as f64 * self.config.dt)?;
         self.chemistry.validate()?;
         self.field.validate()?;
         self.field.validate_reductions(&self.chemistry)?;

@@ -113,6 +113,35 @@ async fn http_management_requires_auth_even_without_a_stream() {
 }
 
 #[tokio::test]
+async fn live_configuration_changes_the_same_world_and_rejects_structural_edits() {
+    let (app, _) = fixture(Some(TOKEN)).await;
+    let response = control(
+        &app,
+        1,
+        "configure",
+        json!({"revision":0,"patch":{"mortalityRecovery":false}}),
+    )
+    .await;
+    assert_eq!(response.status(), StatusCode::OK);
+    let result = json_body(response).await;
+    assert_eq!(result["status"]["generation"], 1);
+    assert_eq!(result["status"]["tick"], 0);
+    assert_eq!(result["status"]["config"]["mortalityRecovery"], false);
+    assert_eq!(result["status"]["runControls"]["revision"], 1);
+    let rejected = control(
+        &app,
+        1,
+        "configure",
+        json!({"patch":{"width":32.,"mortalityRecovery":true}}),
+    )
+    .await;
+    assert_eq!(rejected.status(), StatusCode::BAD_REQUEST);
+    let status = json_body(request(&app, "/api/status", None, Some(TOKEN)).await).await;
+    assert_eq!(status["config"]["mortalityRecovery"], false);
+    assert_eq!(status["config"]["width"], 24.);
+}
+
+#[tokio::test]
 async fn http_controls_are_atomic_and_reject_stale_generations() {
     let (app, _) = fixture(Some(TOKEN)).await;
     let before = json_body(request(&app, "/api/status", None, Some(TOKEN)).await).await;

@@ -70,7 +70,7 @@ pub struct Delivery {
 impl Delivery {
     pub fn advance(&mut self, cells: &mut [Cell], c: &Config, tick: u64) {
         self.events.clear();
-        if !c.features.vocalization {
+        if !c.active_features().vocalization {
             for cell in cells {
                 cell.brain.pending_speech = None;
                 cell.brain.hearing = Default::default();
@@ -78,9 +78,17 @@ impl Delivery {
             return;
         }
         for cell in cells.iter_mut() {
-            if let Some(event) = emit(cell, c, tick) {
+            if !c.speech {
+                cell.brain.pending_speech = None;
+            } else if let Some(event) = emit(cell, c, tick) {
                 self.events.push(event);
             }
+        }
+        if !c.listening {
+            for cell in cells {
+                cell.brain.hearing = Default::default();
+            }
+            return;
         }
         if self.events.is_empty() {
             return;

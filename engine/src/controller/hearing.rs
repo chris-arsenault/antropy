@@ -2,6 +2,22 @@
 use serde::{Deserialize, Serialize};
 pub const CHANNELS: usize = 27;
 
+/// Information interventions retain receiver body and the speaker's paid event.
+pub fn filtered(mut channels: [f32; CHANNELS], c: &crate::config::Config) -> [f32; CHANNELS] {
+    if !c.active_features().vocalization || !c.listening {
+        return [0.; CHANNELS];
+    }
+    for (component, row) in channels.chunks_exact_mut(3).enumerate() {
+        if !c.hearing_content && component > 0 {
+            row.fill(0.);
+        }
+        if !c.hearing_bearing {
+            row[1..].fill(0.);
+        }
+    }
+    channels
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Hearing {
     pub pending: [f64; CHANNELS],

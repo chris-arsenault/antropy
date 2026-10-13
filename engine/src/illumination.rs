@@ -14,6 +14,7 @@ pub struct Illumination {
     key: Option<(u64, u64, [f64; 4])>,
     modulation: [f64; 2],
     contrast: f64,
+    ignore_geographic_shade: bool,
 }
 
 pub fn phases(seed: u64, seconds: f64, periods: [f64; 3]) -> [f64; 3] {
@@ -38,6 +39,7 @@ pub fn response(x: [f64; 2], y: [f64; 2], modulation: [f64; 2], contrast: f64) -
 impl Illumination {
     pub fn prepare(&mut self, seed: u64, tick: u64, c: &Config, nx: usize, ny: usize) {
         self.contrast = c.illumination_contrast;
+        self.ignore_geographic_shade = !c.geographic_shade;
         if self.contrast == 0. {
             self.key = None;
             return;
@@ -90,7 +92,13 @@ impl Illumination {
         } else {
             (-tau).exp()
         };
-        self.shade.apply(node, self.sun(node)) * transmission
+        let sun = self.sun(node);
+        let incident = if self.ignore_geographic_shade {
+            sun
+        } else {
+            self.shade.apply(node, sun)
+        };
+        incident * transmission
     }
 
     pub fn node(&self, node: usize) -> f64 {
@@ -130,7 +138,8 @@ pub fn inspect(w: &crate::world::World, cell: &crate::organism::Cell) -> serde_j
     }
     serde_json::json!({"solar":values[0],"emitted":values[1],
         "terrainTransmission":values[2],"coverTransmission":values[3],
-        "paidPower":w.incident.emitters.get(&cell.id).copied().unwrap_or(0.)})
+        "paidPower":w.incident.emitters.get(&cell.id).copied().unwrap_or(0.),
+        "budget":crate::optical_budget::cell(w, cell)})
 }
 
 fn observer(w: &crate::world::World) -> Illumination {

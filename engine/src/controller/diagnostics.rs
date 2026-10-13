@@ -20,6 +20,49 @@ pub fn authored(logits: Vec<f32>, response: Option<(usize, usize, f32)>) -> Resu
     Ok(g)
 }
 
+/// Several declared cue/output paths use separate ordinary hidden units.
+pub fn authored_responses(
+    logits: Vec<f32>,
+    responses: &[(usize, usize, f32)],
+) -> Result<Genome, String> {
+    if responses.len() > HIDDEN {
+        return Err("Too many diagnostic responses".into());
+    }
+    let mut g = authored(logits, None)?;
+    for (hidden, &(input, output, gain)) in responses.iter().enumerate() {
+        if input >= INPUTS || output >= TOTAL_OUTPUTS || !gain.is_finite() || gain.abs() > 16. {
+            return Err("Invalid diagnostic response".into());
+        }
+        g.weights[hidden * INPUTS + input] = 1.;
+        g.weights[OUTPUT + output * HIDDEN + hidden] = gain;
+    }
+    validate(&g)?;
+    Ok(g)
+}
+
+/// Fixed capacity-fixture variation; callers do not inspect the controller representation.
+pub fn strategic_responses(
+    g: &mut Genome,
+    responses: &[(usize, usize, f32)],
+) -> Result<(), String> {
+    if responses.len() > strategic::HIDDEN {
+        return Err("Too many strategic responses".into());
+    }
+    g.strategy.weights.fill(0.);
+    for (hidden, &(input, output, gain)) in responses.iter().enumerate() {
+        if input >= strategic::INPUTS
+            || output >= strategic::OUTPUTS
+            || !gain.is_finite()
+            || gain.abs() > 16.
+        {
+            return Err("Invalid strategic response".into());
+        }
+        g.strategy.weights[hidden * strategic::INPUTS + input] = 3.;
+        g.strategy.weights[strategic::OUTPUT + output * strategic::HIDDEN + hidden] = gain;
+    }
+    validate(g)
+}
+
 /// Fixed capacity-fixture variation; callers do not inspect the controller representation.
 pub fn perturb_weights(genome: &mut Genome, rng: &mut Random) {
     mutate_vector(&mut genome.weights, rng, 0.1, 0.03, 16.);

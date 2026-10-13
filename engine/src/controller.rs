@@ -24,7 +24,7 @@ pub mod hearing;
 mod heredity;
 pub mod observation;
 pub mod strategic;
-pub use heredity::{assimilate, express, genome_distance, mutate, recombine};
+pub use heredity::{assimilate, assimilate_layers, express, genome_distance, mutate, recombine};
 mod learning;
 mod prepared;
 mod weights;
@@ -243,7 +243,7 @@ pub fn combine<T: Clone>(a: &[T], b: &[T], rng: &mut Random, kind: &str) -> Vec<
 }
 /// Read-only RMS acquired change over the recurrent weights, excluding inherited weights.
 pub fn acquired_rms(g: &Genome, state: &State, config: &Config) -> f64 {
-    if config.learning != "plastic" {
+    if !config.reflex_plastic() {
         return 0.;
     }
     let mean = current_traces(state)

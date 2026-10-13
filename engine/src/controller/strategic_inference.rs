@@ -35,7 +35,7 @@ pub fn evaluate(g: &Genome, state: &mut State, c: &Config, paid: bool) {
 
 fn infer(g: &Genome, state: &mut State, c: &Config, paid: bool) {
     let program = g.weights.strategic_program();
-    let plastic = c.learning == "plastic";
+    let plastic = c.strategic_plastic();
     let alpha = if plastic { g.plasticity[0].abs() } else { 0. };
     let mut next = [0.; HIDDEN];
     program.input.apply(

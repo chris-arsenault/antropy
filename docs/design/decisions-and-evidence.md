@@ -1,6 +1,6 @@
 # Design decisions and evidence
 
-This is the decision record for the current [work order](README.md), through physical v48. The
+This is the decision record for the current [work order](README.md), through physical v54. The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
 original versions, controls and failures. Completed implementation does not guarantee a
 particular evolved community. Execution records remain in the [plan archive](../plans/README.md).
@@ -398,6 +398,39 @@ was missing from the initial delivery. A bounded comparison at the same rate0.1 
 uptake and growth when full batches were retained; sourceLifetime is now1200 rather than600.
 The [startup correction](../mortality-startup-correction.md) records the evidence and limits.
 The existing extinct state and earlier incompatible saves remain preserved.
+
+### October 12–13: recovery contents cannot rewrite external supply
+
+The [v54 correction](mortality-recycling.md#october-12-correction-finite-contents-and-external-supply),
+`c8404bd`, replaces the earlier one-vector constraint with one finite inventory and an evolving
+external boundary condition that owns no material. Previously, any positive corpse deposit into
+an empty reservoir could replace the chemistry of every later external batch and its full
+persistent interface. Conservative admission alone did not bound that future amplification.
+Recovered chemistry now changes finite contents only; future imports and their potential remain
+explicitly external, with nominal timing unchanged. This is a delivered ownership correction,
+not a local severity mechanism, food reset, new supply control or second physical stock.
+
+The earlier finite-food survival result involved no external refill; future-batch amplification
+does not explain that negative finding. The corrected three-hour live observation shows improved
+early replacement but stops before the previous collapse. [Local mortality feeding](local-mortality-feeding.md)
+retains global masking, delivery and survivor-return questions against this corrected baseline.
+
+## Chemical-key finite binding correction — October 6
+
+The [binding correction](../key-binding-correction.md), `0e9ecee`, replaces independent sigmoids
+with one competing partition per site, including an unbound state. Positive bias had allowed
+near-universal full-strength recognition and protection. The old code followed its equation;
+the equation failed the intended finite specialization tradeoff. Total affinity now cannot
+exceed one, bias controls binding strength and weights retain relative preference. The same
+operator applies to all keyed consumers without a breadth penalty or mutation-law change.
+
+Bounded physical checks establish distinct paid access and reciprocal sign epistasis in funded
+net biomass return. They do not establish evolved complementary roles. Earlier food-chain and
+ordinary-neighborhood findings retain their independent-sigmoid law, even though the correction
+did not change checkpoint layout. [Chemical keys and broad processing](chemical-key-specialization.md)
+now separates this resolved defect from the remaining ecological investigation. The
+[directions registry](directions.md#corrected-mechanisms-and-evidence-baselines--october-13)
+also records the startup, actuator-feedback and experimental-condition corrections.
 
 ## Operational limits and remaining direction
 

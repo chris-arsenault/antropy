@@ -1,5 +1,14 @@
 # Directional cell utterances
 
+V55 adds live `speech` and `listening` participation controls and `hearingContent`/`hearingBearing`
+information masks. Speech-off removes optional event expense; listening-off discards arrivals.
+Content-off retains activity but removes signed-bit moments; bearing-off removes directional
+moments. Runtime controls preserve funded organs and upkeep; startup vocalization removal still
+removes both organs. Masks apply to both reflex reception and reported slow hearing history.
+The carrier, exactly-once impulses, frozen arrival, self-exclusion and birth/reset rules below
+are unchanged. The [usefulness record](vocalization-and-strategy-usefulness.md#delivered-paths-and-limits)
+preserves a physical material-return path and its negative full-investment comparison with silence.
+
 **Status:** Implemented locally with the [strategic controller](strategic-controller.md), physical v49, October 1. The running v48 world is unchanged.
 
 Design specification, September 24, 2026; selected for local delivery October 1.

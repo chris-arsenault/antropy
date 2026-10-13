@@ -71,6 +71,13 @@ impl History {
 }
 pub fn rebase(w: &mut World) {
     w.mortality = History::new(w.cells.iter().map(|c| c.mass()).sum());
+    w.local_mortality = Default::default();
+    w.local_mortality.sync(
+        w.cells.iter(),
+        &w.config,
+        &w.field,
+        w.tick as f64 * w.config.dt,
+    );
 }
 
 #[cfg(test)]

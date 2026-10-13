@@ -32,6 +32,8 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         .and_then(Value::as_str)
         .ok_or("Missing operation")?
     {
+        "configure" => crate::run_control::configure(w, v),
+        "runControls" => Ok(crate::run_control::status(w)),
         "step" => {
             let count = v.get("count").and_then(Value::as_u64).unwrap_or(1);
             if count > 10000 {
@@ -51,6 +53,7 @@ pub fn execute(w: &mut World, v: &Value) -> Result<Value, String> {
         "habitatSample" => Ok(crate::trace::habitat(w)),
         "summary" => Ok(observation::summary(w)),
         "bindingBudget" => crate::binding_observation::budget(w, v),
+        "chemicalRelationships" => crate::chemical_relationships::observe(w, number(v, "cell")?),
         "recognitionProbe" => crate::recognition_probe::run(w, v),
         "chemicalOverview" => Ok(crate::chemical_observation::overview(w)),
         "phenotype" => crate::phenotype_commands::execute(w, v),

@@ -48,7 +48,7 @@ pub fn advance(w: &mut World) {
 /// in this interval. A recovery cell requests a footprint-weighted amount from each node;
 /// a common node fraction handles contention without priority or producer identity.
 pub fn exchange(w: &mut World, sites: &[crate::footprint::Row], dt: f64) {
-    if !w.config.features.cover {
+    if !w.config.active_features().cover {
         return;
     }
     let c = &w.config;

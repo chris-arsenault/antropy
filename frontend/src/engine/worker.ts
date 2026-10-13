@@ -320,6 +320,18 @@ const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => un
     inspection.invalidate();
     publish();
   },
+  configure(p) {
+    const result = requireSession().world.command("configure", p);
+    inspection.invalidate();
+    publish();
+    return result;
+  },
+  runControls() {
+    return requireSession().world.command("runControls", {});
+  },
+  chemicalRelationships(p) {
+    return requireSession().world.command("chemicalRelationships", p);
+  },
 };
 async function handle(request: Request): Promise<unknown> {
   if (request.op === "initialize") return initialize(request.payload);

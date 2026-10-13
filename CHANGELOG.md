@@ -2,6 +2,21 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-13 — Conditional ecology and live comparisons
+
+- Added atomic live operator configuration with validated previews, effective readback,
+  boundary application and persisted intervention context. Structural changes require an explicit
+  restart. Stored checkpoints can load paused for shared-start feature comparisons.
+- Added default-on local mortality severity using fixed spatial physical-time histories;
+  recovered chemistry remains finite and cannot rewrite future external supply.
+- Added independent learning-layer, strategic context/gain, geographic exposure, speech/listening
+  and message content/bearing controls, plus live optical settings and investment bounds.
+- Added finite chemical-relationship inspection and bounded ordinary-operator checks for
+  succession, allocation, paid memory, useful cover information and returned message material.
+  Historical negative shelter, lamp and survival findings remain explicit.
+- Physical checkpoints use v55 without migration. The user authorized publication through the
+  normal pipeline and a fresh server world for this format cutover.
+
 ## 2026-10-12 — Persistent ecology diagnostics and live recovery
 
 - Added read-only downloads of stored checkpoints without replacing the running world.

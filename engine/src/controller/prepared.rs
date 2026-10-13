@@ -105,7 +105,7 @@ fn advance_with(
     publication: (Option<u64>, u128),
 ) -> Action {
     let (owner, channels) = publication;
-    let plastic = c.learning == "plastic";
+    let plastic = c.reflex_plastic();
     if state
         .epoch
         .as_ref()
@@ -119,9 +119,7 @@ fn advance_with(
         let span = remaining.min(epoch.tau - epoch.elapsed);
         epoch.elapsed += span;
         if plastic && learn {
-            epoch.flow.paid_elapsed += span
-                * c.features
-                    .reflex_learning_gain(state.strategy.learning_gain);
+            epoch.flow.paid_elapsed += span * c.reflex_gain(state.strategy.learning_gain);
         }
         remaining -= span;
         if epoch.elapsed + 1e-12 >= epoch.tau {
@@ -150,7 +148,7 @@ fn initialize(g: &Genome, inputs: &[f32], state: &mut State, c: &Config, owner: 
     state.epoch = Some(Epoch {
         owner,
         tau: c.physiology_interval,
-        plastic: c.learning == "plastic",
+        plastic: c.reflex_plastic(),
         inputs: inputs.to_vec(),
         integral: vec![0.; INPUTS],
         sampled: vec![0.; INPUTS],
@@ -169,15 +167,20 @@ fn evaluate(g: &Genome, inputs: &[f32], state: &mut State, genuine: bool, c: &Co
     epoch.flow.apply(&mut state.traces, &epoch.hidden);
     let mut values = [0.; INPUTS];
     values.copy_from_slice(inputs);
-    if !c.features.photoreception {
+    if !c.active_features().photoreception {
         values[LIGHT_INPUT..LIGHT_INPUT + 4].fill(0.);
     }
-    values[HEARING_INPUT..CONTEXT_INPUT].copy_from_slice(&if genuine && c.features.vocalization {
+    let heard = if genuine {
         state.hearing.consume()
     } else {
         [0.; hearing::CHANNELS]
-    });
-    if !c.features.strategy {
+    };
+    let heard = hearing::filtered(heard, c);
+    if genuine {
+        state.hearing.last = heard;
+    }
+    values[HEARING_INPUT..CONTEXT_INPUT].copy_from_slice(&heard);
+    if !c.active_features().strategy || !c.strategic_context {
         values[CONTEXT_INPUT..].fill(0.);
     }
     values[34] = state.task as f32 / 255.;
@@ -232,16 +235,16 @@ fn evaluate(g: &Genome, inputs: &[f32], state: &mut State, genuine: bool, c: &Co
     epoch.preparations += 1;
     state.hidden.copy_from_slice(&next);
     let mut action = decode(&logits, state);
-    if !c.features.cover {
+    if !c.active_features().cover {
         action.cover = 0.;
     }
-    if !c.features.emission {
+    if !c.active_features().emission {
         action.emission = 0.;
     }
-    if !c.features.vocalization {
+    if !c.active_features().vocalization || !c.speech {
         action.speech_effort = 0.;
     }
-    if genuine && c.features.vocalization {
+    if genuine && c.active_features().vocalization && c.speech {
         state.pending_speech = Some((action.speech, action.speech_effort));
     }
     state.epoch.as_mut().unwrap().action = action;

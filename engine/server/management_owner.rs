@@ -44,6 +44,7 @@ pub enum Operation {
     Load {
         generation: u64,
         raw: Vec<u8>,
+        running: bool,
     },
 }
 pub enum Reply {
@@ -104,7 +105,8 @@ impl Request {
 fn status(r: &Runtime) -> Value {
     json!({"generation":r.generation,"tick":r.world.tick,"seed":r.world.seed,
         "config":r.world.config,"running":r.running,"speed":r.speed,
-        "threads":r.threads,"population":r.world.cells.len(),"stopReason":r.world.stop_reason})
+        "threads":r.threads,"population":r.world.cells.len(),"stopReason":r.world.stop_reason,
+        "runControls":antropy_engine::run_control::status(&r.world)})
 }
 fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
     if let Operation::EcologyExport { permit } = operation {
@@ -136,6 +138,9 @@ fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
                     | "restart"
                     | "task"
                     | "strategyAblation"
+                    | "configure"
+                    | "runControls"
+                    | "chemicalRelationships"
                     | "phenotype"
             ) {
                 return Err(Error::Invalid("Unsupported management operation".into()));
@@ -155,9 +160,10 @@ fn execute(r: &mut Runtime, operation: Operation) -> Result<Reply, Error> {
             capture: r.capture(reason).map_err(Error::Export)?,
             permit,
         }),
-        Operation::Load { raw, .. } => {
+        Operation::Load { raw, running, .. } => {
             let world = World::restore(&raw).map_err(Error::Invalid)?;
             r.replace(world).map_err(Error::Invalid)?;
+            r.running = running;
             Ok(Reply::Json(json!({"status":status(r)})))
         }
         Operation::Status | Operation::Ecology | Operation::EcologyExport { .. } => unreachable!(),

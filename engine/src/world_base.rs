@@ -94,23 +94,22 @@ fn control(cell: &mut Cell, g: &Compiled, c: &Config) {
         crate::sensing::observe_physiology(cell, g, c);
     }
     crate::sensing::observe_base(cell, c);
-    cell.inputs[crate::controller::CONTEXT_INPUT..].copy_from_slice(&if c.features.strategy {
-        cell.brain.strategy.displayed()
-    } else {
-        [0.; 4]
-    });
-    let cost = if c.learning == "plastic" {
-        c.plasticity_cost
-            * c.dt
-            * cell.body[0]
-            * c.features
-                .reflex_learning_gain(cell.brain.strategy.learning_gain)
+    cell.inputs[crate::controller::CONTEXT_INPUT..].copy_from_slice(
+        &if c.active_features().strategy && c.strategic_context {
+            cell.brain.strategy.displayed()
+        } else {
+            [0.; 4]
+        },
+    );
+    let cost = if c.reflex_plastic() {
+        c.plasticity_cost * c.dt * cell.body[0] * c.reflex_gain(cell.brain.strategy.learning_gain)
     } else {
         0.
     };
     let learn = cell.energy >= cost;
     let paid = if learn { cell.pay(cost) } else { 0. };
     cell.flows.learning += paid;
+    cell.flows.reflex_learning += paid;
     cell.action = crate::controller::act_published(
         &g.chromosome.behavior,
         &cell.inputs,

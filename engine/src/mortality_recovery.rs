@@ -42,24 +42,53 @@ pub fn batch(w: &mut World, mut deaths: Vec<(Cell, Cause)>, reference: f64) {
     }
     deaths.sort_unstable_by_key(|(cell, _)| cell.id);
     let amount = deaths.iter().map(|(cell, _)| cell.mass()).sum();
-    let fraction = w.mortality.deaths(amount, reference, &w.config);
+    let global_fraction = w.mortality.deaths(amount, reference, &w.config);
+    let now = w.tick as f64 * w.config.dt;
+    w.local_mortality.sync(
+        w.cells.iter().chain(deaths.iter().map(|(cell, _)| cell)),
+        &w.config,
+        &w.field,
+        now,
+    );
+    w.local_mortality.deaths(
+        deaths.iter().map(|(cell, _)| cell),
+        &w.config,
+        &w.field,
+        now,
+    );
+    let fractions: Vec<_> = w
+        .sources
+        .iter()
+        .map(|source| {
+            if w.config.mortality_local {
+                w.local_mortality
+                    .sample(&source.footprint, &w.config, &w.field, now)
+                    .response(&w.config)
+            } else {
+                global_fraction
+            }
+        })
+        .collect();
     let mut recipients = std::mem::take(&mut w.recovery_recipients);
-    if fraction > 0. {
+    if w.config.mortality_recovery {
         recipients.prepare(w);
     }
     let mut incoming = BTreeMap::<usize, Vec<f64>>::new();
     for (cell, cause) in deaths {
         let row = crate::footprint::sites(&cell, &w.config, &w.field);
-        let weights = if fraction > 0. {
+        let weights = if w.config.mortality_recovery {
             recipients.weights(&row)
         } else {
             BTreeMap::new()
         };
-        let recovered = if weights.is_empty() { 0. } else { fraction };
+        let recovered: f64 = weights
+            .iter()
+            .map(|(source, weight)| weight * fractions[*source])
+            .sum();
         for (source, weight) in weights {
             let vector = incoming.entry(source).or_insert_with(|| vec![0.; 256]);
             for (s, q) in vector.iter_mut().enumerate() {
-                *q += cell.bound_material.value(s) * recovered * weight;
+                *q += cell.bound_material.value(s) * fractions[source] * weight;
             }
         }
         w.mortality.recovered += cell.mass() * recovered;
@@ -74,6 +103,8 @@ pub fn batch(w: &mut World, mut deaths: Vec<(Cell, Cause)>, reference: f64) {
     w.recovery_recipients = recipients;
     crate::source_medium::project_current(w);
     w.mortality.living = w.cells.iter().map(|c| c.mass()).sum();
+    w.local_mortality
+        .sync(w.cells.iter(), &w.config, &w.field, now);
 }
 
 /// Declared research mortality, unlike an ordinary explicit removal/replacement.

@@ -1,0 +1,20 @@
+{
+  "mortalityRecovery": true,
+  "mortalityLocal": true,
+  "geographicShade": true,
+  "speech": true,
+  "listening": true,
+  "hearingContent": true,
+  "hearingBearing": true,
+  "reflexLearning": true,
+  "strategicLearning": true,
+  "strategicContext": true,
+  "strategicGain": true,
+  "activity": {
+    "photoreception": true,
+    "cover": true,
+    "emission": true,
+    "vocalization": true,
+    "strategy": true
+  }
+}

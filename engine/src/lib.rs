@@ -42,6 +42,7 @@ pub mod chemical_operators;
 pub mod chemical_products;
 pub mod chemical_profiles;
 mod chemical_projection;
+pub mod chemical_relationships;
 pub mod chemical_roles;
 #[cfg(test)]
 mod chemical_roles_tests;
@@ -51,6 +52,8 @@ pub mod climate;
 #[cfg(test)]
 mod climate_tests;
 pub mod commands;
+#[cfg(test)]
+mod communication_return_tests;
 pub mod config;
 pub mod configuration;
 pub mod contact_exchange;
@@ -61,6 +64,12 @@ pub mod cover;
 #[cfg(test)]
 mod cover_tests;
 pub mod diagnostics;
+#[cfg(test)]
+mod ecology_composition_tests;
+#[cfg(test)]
+mod ecology_direction_tests;
+#[cfg(test)]
+mod ecology_memory_tests;
 pub mod ecology_observation;
 pub mod economy;
 mod economy_report;
@@ -102,6 +111,7 @@ mod medium_response;
 mod medium_response_tests;
 pub mod metabolism;
 pub mod mortality;
+pub mod mortality_local;
 pub mod mortality_recovery;
 #[cfg(test)]
 mod mortality_tests;
@@ -110,6 +120,9 @@ mod numeric;
 pub mod observation;
 pub mod observation_records;
 pub mod opportunities;
+pub mod optical_budget;
+#[cfg(test)]
+mod optical_return_tests;
 pub mod optics;
 #[cfg(test)]
 mod optics_tests;
@@ -136,6 +149,7 @@ pub mod render_window;
 pub mod reservoir_coupling;
 #[cfg(test)]
 mod reservoir_coupling_tests;
+pub mod run_control;
 #[cfg(test)]
 mod runtime_tests;
 pub mod scene_records;

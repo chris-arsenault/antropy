@@ -26,7 +26,12 @@ negative results without treating one unsuccessful fixture as automatic grounds 
 
 ## Active plans
 
-No active plan is listed here. Open research questions remain with their design owners.
+| Plan | Scope | Sulion |
+| --- | --- | --- |
+| [Conditional specialization and local coordination](CONDITIONAL-ECOLOGY-PLAN.md) | All eight milestones implemented and checked locally; authorized fresh-world publication and completion tracked in Sulion. Live settings/rewind, local recovery and conditional chemical/optical/message paths preserve negative investment findings. | `0fcb0412-e105-4318-a943-08d4cb894782` |
+
+Open research questions remain with their design owners. A pending delivery outline does not
+establish a selected runtime equation or an implemented ecological consequence.
 
 ## Local deliveries
 

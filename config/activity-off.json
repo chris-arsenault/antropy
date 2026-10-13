@@ -1,0 +1,10 @@
+{
+  "mortalityRecovery": false,
+  "activity": {
+    "photoreception": false,
+    "cover": false,
+    "emission": false,
+    "vocalization": false,
+    "strategy": false
+  }
+}

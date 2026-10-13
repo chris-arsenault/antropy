@@ -20,6 +20,8 @@ pub struct Disturbance {
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct Config {
     pub features: crate::features::Features,
+    /// Runtime participation; unlike startup features this never reallocates a funded body.
+    pub activity: crate::features::Features,
     pub chemistry_seed: u64,
     pub width: f64,
     pub height: f64,
@@ -38,6 +40,8 @@ pub struct Config {
     pub source_lifetime: f64,
     pub source_gap: f64,
     pub mortality_recovery: bool,
+    /// Source-footprint local response; false retains the corrected global baseline.
+    pub mortality_local: bool,
     /// Physical model seconds of exponential loss history.
     pub mortality_memory: f64,
     pub mortality_half_response: f64,
@@ -94,6 +98,11 @@ pub struct Config {
     pub environmental_work: f64,
     pub illumination_contrast: f64,
     pub shade_strength: f64,
+    pub geographic_shade: bool,
+    pub speech: bool,
+    pub listening: bool,
+    pub hearing_content: bool,
+    pub hearing_bearing: bool,
     pub terrain: crate::terrain_config::TerrainConfig,
     pub optical_column: f64,
     pub optical_reach: f64,
@@ -126,6 +135,10 @@ pub struct Config {
     pub crossover: String,
     pub reproduction: String,
     pub learning: String,
+    pub reflex_learning: bool,
+    pub strategic_learning: bool,
+    pub strategic_context: bool,
+    pub strategic_gain: bool,
     pub plasticity_cost: f64,
     pub learning_retention: f64,
 }
@@ -134,6 +147,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             features: Default::default(),
+            activity: Default::default(),
             chemistry_seed: 101,
             width: 720.,
             height: 540.,
@@ -151,6 +165,7 @@ impl Default for Config {
             source_lifetime: 1200.,
             source_gap: 600.,
             mortality_recovery: true,
+            mortality_local: true,
             mortality_memory: 60.,
             mortality_half_response: 0.25,
             source_drift: 1.,
@@ -200,6 +215,11 @@ impl Default for Config {
             environmental_work: crate::transformation_work::DEFAULT_STRENGTH,
             illumination_contrast: 0.8,
             shade_strength: 0.8,
+            geographic_shade: true,
+            speech: true,
+            listening: true,
+            hearing_content: true,
+            hearing_bearing: true,
             terrain: Default::default(),
             optical_column: 0.1,
             optical_reach: 2.,
@@ -230,6 +250,10 @@ impl Default for Config {
             crossover: "uniform".into(),
             reproduction: "fission".into(),
             learning: "plastic".into(),
+            reflex_learning: true,
+            strategic_learning: true,
+            strategic_context: true,
+            strategic_gain: true,
             plasticity_cost: 0.002,
             learning_retention: 1.,
         }

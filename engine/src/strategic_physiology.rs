@@ -2,7 +2,7 @@
 use crate::{config::Config, controller::strategic, genetics::Compiled, organism::Cell};
 
 pub fn capture(cell: &mut Cell, g: &Compiled, c: &Config, tick: u64, start: [f64; 2]) {
-    if !c.features.strategy {
+    if !c.active_features().strategy {
         return;
     }
     crate::strategic_local::self_readings(cell, c, tick);
@@ -22,7 +22,7 @@ pub fn capture(cell: &mut Cell, g: &Compiled, c: &Config, tick: u64, start: [f64
         );
         remaining -= span;
         if cell.brain.strategy.elapsed + 1e-12 >= strategic::interval(c) {
-            let cost = if c.learning == "plastic" {
+            let cost = if c.strategic_plastic() {
                 cell.body[0] * c.plasticity_cost * c.physiology_interval
             } else {
                 0.
@@ -31,6 +31,7 @@ pub fn capture(cell: &mut Cell, g: &Compiled, c: &Config, tick: u64, start: [f64
             if paid {
                 let spent = cell.pay(cost);
                 cell.flows.learning += spent;
+                cell.flows.strategic_learning += spent;
                 cell.brain.strategy.integral[0] -=
                     spent * strategic::interval(c) / cell.energy_capacity(c).max(1e-30);
             }

@@ -81,6 +81,7 @@ through renewals. It remains running. Tuning requests authorize restarts without
 
 | Direction                                                              | Document                                                                                                     |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Swarm intelligence: chemical stigmergy, conditional allocation, declining returns and useful communication | [Four proposed directions](design/swarm-intelligence-directions.md) |
 | Local mortality feeding; consequential death-to-feeding cycle, probably through a local term | [Exploratory direction](design/local-mortality-feeding.md) |
 | Chemical keys and broad processing; investigate distinct inherited chemical relationships | [Exploratory direction](design/chemical-key-specialization.md) |
 | Light, shade and emission usefulness; actual design incomplete         | [Open direction](design/light-usefulness.md)                                                                  |
@@ -262,6 +263,7 @@ Historical indexes remain in the archive; they are not additional work queues.
 - [Local mortality feeding](backlog.md#backlog-local-mortality-feeding)
 - [Rugged chemical interaction: surprising mutations and co-located roles](backlog.md#backlog-rugged-interaction)
 - [Chemical keys and broad processing](backlog.md#backlog-chemical-key-specialization)
+- [Swarm intelligence and local coordination](backlog.md#backlog-swarm-intelligence)
 - [Requirements migrated from earlier plans](backlog.md#backlog-plan-carryover)
 - [Evolutionary questions](backlog.md#backlog-evolutionary-questions)
 - [Conditional extensions](backlog.md#backlog-conditional-extensions)

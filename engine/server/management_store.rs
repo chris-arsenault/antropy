@@ -22,6 +22,17 @@ pub struct Generation {
     generation: u64,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LoadRequest {
+    generation: u64,
+    #[serde(default = "resume")]
+    running: bool,
+}
+fn resume() -> bool {
+    true
+}
+
 impl From<StoreError> for Error {
     fn from(e: StoreError) -> Self {
         match e {
@@ -186,7 +197,7 @@ pub async fn download(
 pub async fn load(
     State(state): State<socket::State>,
     Path(id): Path<String>,
-    Json(body): Json<Generation>,
+    Json(body): Json<LoadRequest>,
 ) -> Result<Response, Error> {
     let store = state.host.store()?;
     let (meta, raw) = blocking(move || store.read(&id)).await?;
@@ -201,6 +212,7 @@ pub async fn load(
         .manage(Operation::Load {
             generation: body.generation,
             raw,
+            running: body.running,
         })
         .await?
     else {

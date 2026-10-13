@@ -1,5 +1,14 @@
 # Current design and work order
 
+October 13 local v55 delivery adds atomic live configuration, persisted effective controls and
+paused checkpoint rewind for feature comparisons. Local mortality severity now uses fixed
+spatial histories by default. Independent learning, context/gain, geographic exposure and
+speech/listening/content/bearing controls compose with existing paid operators. The
+[execution plan](../plans/CONDITIONAL-ECOLOGY-PLAN.md#execution-expansions) records bounded
+chemical succession, conditional allocation, memory, optical and returned-message-material
+opportunities, including negative investment limits. These authored diagnostics do not establish
+evolved coordination or long-term rescue. V55 publication uses the authorized fresh-world cutover.
+
 Plans track implementation and deployment. Agents own appropriate automatic testing within the
 work; verification, human acceptance and continuing observation are not plan stages or closure
 gates. The [September 30 disposition](../plans/README.md) closes stale delivery queues and
@@ -13,10 +22,23 @@ comparing research directions. It records accepted pruning quantization, expecte
 proximity, the questions about inter-colony exchange and new colony founding, and the
 approximately 30-tick/s goal at 2,000 cells with its current low priority.
 
+October 12–13 physical v54 corrects [mortality refill amplification](mortality-recycling.md#october-12-correction-finite-contents-and-external-supply),
+deployed as `c8404bd` with diagnostic fixture correction `0cecaa3`. Recovered body material
+changes finite reservoir contents, never the independently weathered external supply profile.
+The three-hour continuing-world observation shows improved early replacement, not established
+long-term rescue. Recovery and corrected keys were enabled; optical machinery, vocalization
+and strategic control remained disabled in that operating comparison.
+
+The [corrected evidence baselines](directions.md#corrected-mechanisms-and-evidence-baselines--october-13)
+connect fixed defects to the directions they originally motivated. In particular, distinguish
+the startup-stock regression, future-refill amplification and universal-binding defect from
+still-open questions about local mortality distress, specialization and useful control.
+
 October6 corrects inherited keys to use [one finite binding partition](../key-binding-correction.md)
 across chemical identities and an unbound state. Positive bias can increase binding strength
 but cannot grant full recognition and protection to every chemical. The correction preserves
-the shared mutation law, all seventeen consumers and the selected all-off operating configuration.
+the shared mutation law and all seventeen consumers; the all-off operating configuration was
+retained at that delivery, before the later recovery-enabled comparison.
 
 October5 physical v53 adds native run-start switches for optional optical machinery,
 vocalization and strategic control. The [four-exploration ablation](../exploration-ablation.md)
@@ -27,7 +49,8 @@ October2 local physical v52 enables inherited [complementarity recognition](rugg
 for ordinary founders, descendants, sensing, transport, enzymes and membranes. Compiled profiles
 and susceptibility are observable in the inspector/atlas; strongest-identity summaries replace
 obsolete recognition coordinates. The [delivery comparison](../rugged-interaction-results.md)
-records bounded full-space and ordinary-world findings. The live v50 world is unchanged.
+records bounded full-space and ordinary-world findings. The then-live v50 world was unchanged
+by that local delivery; the server now runs v54.
 
 October3 [causal iteration](../rugged-community-results.md) demonstrates constructed cross-feeding
 and genotype-dependent harm from the same intermediate. Subsequent
@@ -60,7 +83,7 @@ ordinary-founder comparison. The October2 [operating tuning](../mortality-config
 applies full batches to the native server under the user's explicit restart authorization. The earlier
 reservoir-storage proposal is not a dependency.
 
-The operating comparison reached30,252 ticks with472 living cells. Its late interval had1594
+The October2 operating comparison reached30,252 ticks with472 living cells. Its late interval had1594
 divisions and1591 deaths, rather than continued starvation collapse. Keep rate0.1/T1200/G600
 with recovery enabled and leave the selected world running; no extra configuration trials were needed.
 
@@ -213,7 +236,7 @@ remains historical evidence.
 
 ## Installed runtime
 
-Physical v46 uses sparse chemical owners in persistent 8×8 regions and one finite shared
+Physical v54 retains v46's sparse chemical owners in persistent 8×8 regions and one finite shared
 circle-overlap law for pressure, isotropic sensing and funded material exchange. Direct chemical
 composition and physiological neural recurrence retain owner-published inputs. The earlier
 single-thread investigation ended below its throughput target. Shared-memory execution
@@ -303,7 +326,7 @@ changes improved it; this historical diagnosis is not the current work order.
 | [Directional cell utterances](cell-utterances.md)                                                             | Local v49 delivery: paid bytes, coarse listener-relative bearing, funded inheritance and exactly-once hearing                                                                                                      |
 | [Strategic controller](strategic-controller.md)                                                               | Local v49 delivery: slow learned history, local rhythms, contact display, inherited context and paid learning gain                                                                                                 |
 | [Rugged chemical interaction](rugged-interaction.md) | Local v52 complementarity enabled in ordinary startup; [ecological consequences and tuning](../rugged-ecology-results.md), [initial findings](../rugged-interaction-results.md), [research paper](kauffman-landscapes-research.md) |
-| [Mortality recycling](mortality-recycling.md) | Local v50 delivery, enabled by default with sourceRate0.1; [findings](../mortality-recycling-results.md) |
+| [Mortality recycling](mortality-recycling.md) | Deployed v54, enabled by default with sourceRate0.1/lifetime1200; [corrected ownership and observation](mortality-recycling.md#october-12-correction-finite-contents-and-external-supply), earlier [findings](../mortality-recycling-results.md) |
 | [Material habitats](../material-habitats.md)                                                                  | Two-scale binding, retention, renewal, public chemistry and bounded evidence                                                                                                                                       |
 | [Experimentation](experimentation.md)                                                                         | Small proof points, diagnostic comparisons and limits of inference                                                                                                                                                 |
 | [Population observation](population-observation.md)                                                           | Families, traits, grouping conventions and retained history                                                                                                                                                        |
@@ -334,9 +357,11 @@ body capacities directly at current biomass, including four chemical receptors, 
 one to eight enzyme programs, core, motor, storage and [photoreception](../photoreception.md); there
 is no construction or retirement. The light sensor uses the same embodied sampling and
 funded response law; no automatic light-seeking behavior is supplied. Physical
-checkpoints use v52; the outer observation package remains v11. Local delivery rejects older
-physical formats without migration; the live server now runs v50. Its initial world starved;
-the [startup correction](../mortality-startup-correction.md) records the lower-rate batch correction.
+checkpoints use v54; the outer observation package remains v11. Older physical formats are
+rejected without migration; the live server also runs v54. The first v50 world starved;
+the [startup correction](../mortality-startup-correction.md) records the lower-rate batch correction,
+and [v54 supply ownership](mortality-recycling.md#october-12-correction-finite-contents-and-external-supply)
+prevents recovered contents from replacing future external supply chemistry.
 The default area is 5.0625 times the previous 320 × 240 world, with the same aspect ratio,
 mesh and founder count. The initial landscape now has 35 regions and 240 reservoirs, five times
 the preceding counts. The area expansion retained local spread and reservoir sizes rather than
@@ -362,9 +387,11 @@ is an acceptance criterion. Do not seed a diagnostic or evolved winner into the 
 
 The [resource-economy model](chemistry/resource-economy.md) governs current supply calibration:
 delivery-aware source selection, mean renewal gap 600 model seconds and washout 0.001/second.
-Batch duration remains 600 seconds. The [extinction correction](../extinction-correction.md)
-shortens outages while preserving initial funding; nominal ongoing supply increases 2.5-fold.
-It calculates budgets and a spatial reference without advancing organisms. Short checks show
+Batch duration is 1200 seconds at rate 0.1, preserving full batches and reservoir-derived priming.
+The earlier [extinction correction](../extinction-correction.md) shortened outages at the former
+rate0.2/T600 configuration; its 2.5-fold supply increase describes that historical comparison.
+The [resource model](chemistry/resource-economy.md) calculates current budgets and a spatial
+reference without advancing organisms. Earlier short checks show
 repeated local reproduction and both ordinary starting colonies reproducing; a weak isolated
 site still fails. This prepares an evolutionary opportunity, not an evolved community.
 
@@ -372,14 +399,49 @@ site still fails. This prepares an evolutionary opportunity, not an evolved comm
 
 ## Next decisions
 
+Use the [corrected mechanism baseline](directions.md#corrected-mechanisms-and-evidence-baselines--october-13)
+when developing these proposals. Fixed refill amplification and universal full-strength binding
+are not outstanding design tasks. Their removal does not settle local distress, complementary
+roles, useful light, memory or communication; historical negative results retain their original laws.
+
+The October 13 revision of the [conditional ecology plan](../plans/CONDITIONAL-ECOLOGY-PLAN.md)
+preserves the eight recent directions and their corrected evidence baselines. It begins with
+chemical relationships, stigmergy and conditional allocation; strategic memory has an independent
+milestone, followed by persistence and habitat transitions. Local recovery is independent of
+that sequence. Optical investments and paid communication retain separate cost and return
+questions. All eight implementation milestones are pending; only planning is authorized.
+Existing design owners retain mathematical authority. Local/global mortality composition remains
+unselected, while dynamic terrain and reservoir buffering remain explicitly deferred under the
+plan's scope assumption.
+
+Every milestone also ships its [configuration and investigation controls](../plans/CONDITIONAL-ECOLOGY-PLAN.md#configuration-and-rapid-investigation-controls):
+independent feature switches, relevant shared settings, quick live patches where physically
+valid, explicit fresh-world changes, effective-config readback and persisted intervention
+context. These are planned extensions of the existing operator/config paths, delivered with
+each feature rather than deferred to final integration.
+
+The planned [server comparison workflow](../plans/CONDITIONAL-ECOLOGY-PLAN.md#server-save-points-rewind-and-stable-feature-comparisons)
+reuses stored checkpoints, run/pause and inspection, adding paused rewind and live feature
+changes so an agent can compare variants from the same save point without deployment.
+Observation windows follow the research question; no exact-step execution machinery is needed.
+It is part of the early shared operator support, not an experiment launched by this planning work.
+
+The October 11 [swarm intelligence directions](swarm-intelligence-directions.md) apply research
+on environmental feedback to chemical succession, experience-dependent allocation, recovery
+from declining returns and useful communication. The write-up recommends starting with funded
+chemical stigmergy and conditional activity through existing control. It connects the proposals
+to the chemical-key and strategy usefulness owners; it selects no runtime revision, campaign
+or change to the current operating configuration.
+
 The October 5 review opens two exploratory directions:
 [local mortality feeding](local-mortality-feeding.md), to make death-derived feeding more
 consequential during local declines, probably through a local term; and
 [chemical keys and broad processing](chemical-key-specialization.md), to investigate why
 ordinary cells broadly process mixtures instead of expressing the expected distinct inherited
-chemical relationships. Both designs remain incomplete. Local/global recovery composition,
-delivery changes and any chemical-law revision are unresolved; the existing runtime remains
-the baseline. These records select no experiment campaign or implementation.
+chemical relationships. Both ecological designs remain incomplete. Local/global recovery composition
+and any further delivery changes are unresolved. The finite binding partition and v54 supply
+ownership are delivered corrections, not unselected alternatives. These records select no
+additional experiment campaign or implementation.
 
 The October 2 review opens two usefulness directions:
 [light, shade and emission](light-usefulness.md), and

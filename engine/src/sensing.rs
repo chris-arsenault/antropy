@@ -58,7 +58,7 @@ fn readings(cell: &Cell, c: &Config, field: &Field) -> [[f64; 3]; 5] {
     std::array::from_fn(|slot| {
         let stock = if slot == 4 { PHOTO_STOCK } else { 3 + slot };
         if cell.body[stock] == 0.
-            || (slot == 4 && !c.features.photoreception)
+            || (slot == 4 && !c.active_features().photoreception)
             || (slot < 4 && cell.chemistry().inward[slot] == 1.)
         {
             return [0.; 3];

@@ -112,8 +112,23 @@ impl Genotype {
         let mut acquired = self.chromosomes.clone();
         if c.learning == "plastic" {
             for a in &mut acquired {
-                a.behavior =
-                    controller::assimilate(&a.behavior, expressed, state, c.learning_retention);
+                a.behavior = controller::assimilate_layers(
+                    &a.behavior,
+                    expressed,
+                    state,
+                    [
+                        if c.reflex_learning {
+                            c.learning_retention
+                        } else {
+                            0.
+                        },
+                        if c.strategic_learning {
+                            c.learning_retention
+                        } else {
+                            0.
+                        },
+                    ],
+                );
             }
         }
         let learned =

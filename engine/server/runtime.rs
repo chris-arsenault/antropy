@@ -143,6 +143,20 @@ impl Runtime {
     }
     pub fn command(&mut self, op: &str, payload: Value) -> Result<Value, String> {
         match op {
+            "configure" | "runControls" => {
+                self.queries.clear();
+                let revision = self.world.run_control.revision;
+                let result = self.query(op, payload)?;
+                if revision != self.world.run_control.revision {
+                    self.ecology.begin(&mut self.world, self.generation);
+                    self.definition = Arc::new(commands::execute(
+                        &mut self.world,
+                        &json!({"op":"definition"}),
+                    )?);
+                }
+                self.queries.clear();
+                return Ok(result);
+            }
             "running" => {
                 self.running = payload["value"].as_bool().ok_or("Invalid running state")?;
             }
@@ -172,7 +186,11 @@ impl Runtime {
                 self.query(op, payload)?;
                 self.queries.clear();
             }
-            "pick" | "inspectSelected" | "inspectReservoir" | "chemicalWeb" => {
+            "pick"
+            | "inspectSelected"
+            | "inspectReservoir"
+            | "chemicalWeb"
+            | "chemicalRelationships" => {
                 return self.query(op, payload);
             }
             _ => return Err("Operation is not available on the server".into()),
@@ -191,7 +209,15 @@ impl Runtime {
         Ok(())
     }
     pub fn step(&mut self) {
+        let revision = self.world.run_control.revision;
         self.world.step();
+        if revision != self.world.run_control.revision {
+            self.queries.clear();
+            if let Ok(value) = commands::execute(&mut self.world, &json!({"op":"definition"})) {
+                self.definition = Arc::new(value);
+            }
+            self.ecology.begin(&mut self.world, self.generation);
+        }
         self.ecology.observe(&mut self.world, false);
     }
     /// Compacts unreferenced genotypes (the existing retention rule, applied now rather than

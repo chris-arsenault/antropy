@@ -127,6 +127,8 @@ impl Ledger {
             maintenance,
             motors,
             learning,
+            reflex_learning,
+            strategic_learning,
             transport,
             reaction_heat,
             growth,

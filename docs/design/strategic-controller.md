@@ -250,6 +250,21 @@ These are ordinary implementation work, recorded in a results document:
 
 ## Implementation choices
 
+October 13 execution adds live `strategicContext` and `strategicGain` switches.
+The first gates direct context inputs to the reflex layer; the second restores neutral
+reflex learning gain while leaving slow inference and history active. These retain costs
+for matched influence comparisons. `activity.strategy=false` instead removes the whole
+slow layer's influence and extra costs. `strategicLearning` independently gates its paid
+plasticity and acquired-weight contribution at birth; copied strategic state remains distinct.
+
+A bounded current-law interruption comparison uses previously paid uptake history to sustain
+processing of retained fuel after its external cue vanishes. The context-on arm captures
+0.272136 additional work versus 0.000324 in the matched context-off arm over 16 ticks;
+the context-off cell exhausts its reserves. Both begin at the same physical/private snapshot.
+This is a constructed available return, not evolved anticipation or a general memory optimum.
+The [execution expansion](../plans/CONDITIONAL-ECOLOGY-PLAN.md#execution-expansions) retains
+the intervention, costs and evidence limits.
+
 The private byte remains reflex-owned and strategic read-only. Speaking has separate explicit
 byte outputs. The complete reflex layout is 83 inputs, 24 hidden units and 28 outputs.
 Physical format v49 advances once for both features, without migration. The previously running

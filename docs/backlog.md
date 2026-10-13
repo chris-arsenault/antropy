@@ -42,7 +42,7 @@ It is insufficient as the primary answer to the narrow useful replenishment rang
 
 ## Mortality driven reservoir recycling
 
-**Status:** Locally delivered v50, October 1; recovery enabled by default, sourceRate0.1. Long-term ecological benefit remains a research question, not a delivery gate.
+**Status:** Deployed v54, October 12–13; recovery enabled by default, sourceRate0.1/lifetime1200. Refill amplification is fixed; long-term ecological benefit remains a research question, not a delivery gate.
 
 [Mortality recycling](design/mortality-recycling.md) targets the lower supply boundary with
 a normally weak, nonlinear recovery of dead body material into nearby reservoirs during
@@ -56,19 +56,27 @@ The [delivery findings](mortality-recycling-results.md) show conserved delivery 
 growth but shorter survivor life in both mirrored placements. The
 [execution plan](plans/MORTALITY-RECYCLING-PLAN.md) is locally delivered; useful supply-range
 widening and evolved dispersal remain unmeasured. No additional mechanism or campaign is selected.
+The [startup correction](mortality-startup-correction.md) retains full batches at the lower
+release ceiling. The [v54 ownership correction](design/mortality-recycling.md#october-12-correction-finite-contents-and-external-supply)
+prevents trace corpse deposits from replacing every future external refill's chemistry.
+The finite-food negative comparison had no external refill, so that amplification path does
+not explain away its result. The corrected live observation improves early replacement;
+it does not establish survival beyond the earlier collapse horizon.
 
 <a id="backlog-local-mortality-feeding"></a>
 
 ## Local mortality feeding
 
-**Status:** Exploratory direction, October 5 — design remains to be completed.
+**Status:** Local v55 response delivered October 13; long-term survivor benefit remains research.
 
 The [local mortality feeding direction](design/local-mortality-feeding.md) records the user's
-request for a more consequential death-to-feeding cycle, probably with a local term. The current
-global loss signal can be masked by growth elsewhere; local recipient routing alone does not
-address that limitation. Design local distress, conservative delivery and useful survivor access
-together, judged through paid feeding, growth and replacement. Local/global composition and
-delivery changes remain open; the installed mortality mechanism remains the baseline.
+request for a more consequential death-to-feeding cycle. V55 selects source-local severity
+through fixed spatial histories, preserves conservative delivery and records actual paid survivor
+intake. The global baseline remains an explicit live ablation. Longer survival and replacement
+benefit remain unestablished; locality alone does not certify rescue. Use [the corrected baseline](design/local-mortality-feeding.md#fixed-defects-and-the-current-question):
+global masking was not repaired by separating finite inventory from external supply, and the
+earlier collapses do not isolate it as the cause. Increasing recovery must not substitute for
+the delivered ownership correction.
 
 <a id="backlog-dynamic-terrain"></a>
 
@@ -124,7 +132,7 @@ consumption of living structure and larger reaction arity. No evolutionary campa
 
 ## Light ecology: shelter, emission and conditional activity
 
-**Status:** Open usefulness direction, October 2 — actual design remains to be completed.
+**Status:** Local optical controls and conditional paths delivered October 13; sustained investment return remains research.
 The v42 implementation (September 25) and its plan are closed.
 
 The [light ecology design](design/light-ecology.md) owns the installed shade, overhead film and
@@ -185,14 +193,16 @@ heard activity and byte diversity use the shared history transform. The
 
 ## Vocalization and strategic controller usefulness
 
-**Status:** Open research direction, October 2 — actual design remains to be completed.
+**Status:** Local memory/communication paths and controls delivered October 13; evolved usefulness remains research.
 
 The [joint usefulness direction](design/vocalization-and-strategy-usefulness.md) asks what paid
 messages add beyond existing local cues, what can repay a speaker's costs, and when slow history,
 inherited context and paid learning improve reflex decisions. Overnight v50 observation showed
 activity but did not identify those returns. The direction owns the unresolved information,
 timing, representation, coupling and cost decisions; the installed utterance and strategic
-controller specifications above remain the baseline. No revision or campaign is selected yet.
+controller specifications above remain the baseline. M2 establishes a priced history opportunity;
+M6 establishes actionable content and returned material, but silence outperforms speech in that
+fixture. Independent controls permit further bounded comparisons without a deployment.
 
 <a id="backlog-rugged-interaction"></a>
 
@@ -207,7 +217,9 @@ limit; the [research paper](design/kauffman-landscapes-research.md) derives requ
 rugged-landscape theory: reciprocal sign epistasis, one shared ruggedness control, neutral
 networks with abrupt borders, and unchanged accounts, algebra and mutation law. The selected
 law replaces radial recognition with an additive per-bit binding energy between genetic
-keys and identity bits, passed through a sigmoid with one shared steepness λ. Ordinary startup
+keys and identity bits, compiled through one competing binding partition with an unbound state
+and shared steepness λ. The [October6 correction](key-binding-correction.md) replaces independent
+sigmoids that allowed positive bias to grant universal full-strength recognition. Ordinary startup
 uses keys; the [delivery findings](rugged-interaction-results.md) distinguish available capabilities,
 actual physical expression and unestablished ecological outcomes. No long campaign is selected.
 The October3 [causal iteration](rugged-community-results.md) establishes a constructed shared-world
@@ -228,10 +240,30 @@ the governing criteria.
 
 The [chemical-key direction](design/chemical-key-specialization.md) records the user's concern
 that ordinary cells process broad mixtures instead of the expected distinct relationships to
-shared chemistry. Investigate active recognition, composed private cycles, mutation accessibility,
+shared chemistry. Universal full-strength binding is fixed; the [remaining question](design/chemical-key-specialization.md#corrected-law-and-the-current-question)
+concerns finite-site specialization and broad composed metabolism. Earlier independent-sigmoid
+results retain their historical law. Investigate active recognition, composed private cycles, mutation accessibility,
 physical tradeoffs, controller expression and neighbor consequences. Assess inherited returns
 through replacement; different keys or intake alone do not establish complementary roles.
 No narrowing rule, breadth penalty, mutation revision or campaign is selected.
+
+<a id="backlog-swarm-intelligence"></a>
+
+## Swarm intelligence and local coordination
+
+**Status:** Four conditional paths and operator controls delivered locally October 13; ecological exploitation remains research.
+
+The [swarm intelligence write-up](design/swarm-intelligence-directions.md) develops chemical
+stigmergy and metabolic succession, experience-dependent allocation within inherited capacities,
+recovery from declining returns, and communication beyond local chemical cues. Each direction
+identifies existing shared operations, unresolved design decisions and a bounded comparison
+that could distinguish explanations. Chemical stigmergy coupled to conditional allocation is
+the recommended starting point.
+
+The chemical-key and vocalization/strategy usefulness directions retain ownership of their
+respective revisions. Preserve independent reproduction, local paid information, birth-fixed
+chemical capabilities and shared material/work accounts. Colony roles and cooperation rewards
+are not selected mechanisms.
 
 <a id="backlog-plan-carryover"></a>
 
