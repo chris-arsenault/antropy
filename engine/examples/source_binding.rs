@@ -161,6 +161,7 @@ fn set_pair(w: &mut World, distance: f64, ratio: f64, second: usize, empty: bool
         if !empty || j == 0 {
             s.amount = ratio * s.interface;
         }
+        s.rebase_supply();
     }
     source_medium::project(w);
 }
@@ -280,6 +281,7 @@ fn cluster_curves() -> Vec<Value> {
                         if j > 0 || !empty_center {
                             s.amount = s.interface;
                         }
+                        s.rebase_supply();
                     }
                     source_medium::project(&mut w);
                     if sigma > 0. {
