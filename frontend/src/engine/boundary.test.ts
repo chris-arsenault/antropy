@@ -109,6 +109,24 @@ it("applies live comparison controls and restores them through the WASM boundary
   }
 });
 
+it("keeps Session configuration current after immediate and restored pending patches", async () => {
+  const session = new Session(await Engine.load(bytes), compact);
+  try {
+    session.configure({ patch: { speech: false } });
+    expect(session.definition.config.speech).toBe(false);
+    session.step();
+    session.configure({ patch: { speech: true } });
+    expect(session.definition.config.speech).toBe(false);
+    await session.restore(await session.export());
+    expect(session.definition.config.speech).toBe(false);
+    for (let i = 0; i < 4; i++) session.step();
+    expect(session.definition.config.speech).toBe(true);
+    validateAccounts(session.world.command<Summary>("summary"));
+  } finally {
+    session.world.dispose();
+  }
+});
+
 it("borrows render storage and refreshes world and chemical selection without changing physics", async () => {
   const engine = await Engine.load(bytes);
   const a = engine.create(101, compact),

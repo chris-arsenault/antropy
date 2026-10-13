@@ -7,6 +7,7 @@ import { type Message, type Request } from "./protocol";
 import { SelectedObservation } from "./selectedObservation";
 import { ObservationPublisher } from "./observationPublisher";
 import { HealthRecorder } from "./runtimeHealth";
+import { type Definition } from "./types";
 
 const port = self as unknown as {
   postMessage(message: Message): void;
@@ -23,6 +24,7 @@ let lastDraw = 0,
   fieldDirty = true,
   drawPending = false;
 const send = (message: Message) => port.postMessage(message);
+let publishedDefinition: Definition | null = null;
 const inspection = new SelectedObservation();
 const health = new HealthRecorder();
 const work = { simulationMs: 0, renderMs: 0, observationMs: 0, frames: 0, skippedFrames: 0 };
@@ -37,6 +39,10 @@ function requireSession() {
 }
 function publish() {
   if (!session) return;
+  if (publishedDefinition !== session.definition) {
+    publishedDefinition = session.definition;
+    send({ kind: "definition", value: publishedDefinition });
+  }
   const started = performance.now();
   publisher.publish(() => {
     const current = requireSession();
@@ -155,17 +161,15 @@ async function initialize(payload: Record<string, unknown>) {
       publishSafely();
     }
   });
-  send({ kind: "definition", value: session.definition });
   publish();
   loop();
 }
 function replacement() {
-  const current = requireSession();
+  requireSession();
   selected = null;
   fieldDirty = true;
   if (view) view = { ...view, selected: -1 };
   publisher.reset();
-  send({ kind: "definition", value: current.definition });
   publish();
   draw(performance.now());
 }
@@ -321,7 +325,7 @@ const controls: Partial<Record<Request["op"], (p: Record<string, unknown>) => un
     publish();
   },
   configure(p) {
-    const result = requireSession().world.command("configure", p);
+    const result = requireSession().configure(p);
     inspection.invalidate();
     publish();
     return result;

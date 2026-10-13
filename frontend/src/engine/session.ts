@@ -28,6 +28,7 @@ export class Session {
   private measuredTicks = 0;
   private throughput = 0;
   private revision = 0;
+  private pendingLiveConfig = false;
 
   constructor(
     readonly engine: Engine,
@@ -47,6 +48,17 @@ export class Session {
     }
     this.running = running;
     this.pacer = createPacer(this.speed, performance.now());
+  }
+  configure(payload: Record<string, unknown>) {
+    const result = this.world.command<{ controls: { pending: Record<string, unknown> | null } }>(
+      "configure",
+      payload
+    );
+    if (payload.preview !== true) {
+      this.pendingLiveConfig = result.controls.pending !== null;
+      if (!this.pendingLiveConfig) this.definition = this.world.command("definition");
+    }
+    return result;
   }
   setSpeed(speed: Speed) {
     this.speed = speed;
@@ -85,6 +97,15 @@ export class Session {
   step() {
     this.recordExecution();
     const result = this.world.step();
+    if (this.pendingLiveConfig) {
+      const controls = this.world.command<{ pending: Record<string, unknown> | null }>(
+        "runControls"
+      );
+      if (controls.pending === null) {
+        this.pendingLiveConfig = false;
+        this.definition = this.world.command("definition");
+      }
+    }
     if (result.tick % 25 === 0) this.sample();
     return result;
   }
@@ -186,11 +207,13 @@ export class Session {
     this.replace(next, this.newObservation());
   }
   private replace(next: EngineWorld, observation: ObservationState) {
-    let definition: Definition, population: LiveStatus["population"];
+    let definition: Definition, population: LiveStatus["population"], pendingLiveConfig: boolean;
     const phenotypes = new PhenotypeObservation();
     phenotypes.enabled = this.phenotypes.enabled;
     try {
       definition = next.command<Definition>("definition");
+      pendingLiveConfig =
+        next.command<{ pending: Record<string, unknown> | null }>("runControls").pending !== null;
       population =
         observation.spatial.tick < 0 ? observe(next, observation.spatial) : currentPopulation(next);
       phenotypes.restore(next, observation.pin ?? null);
@@ -204,6 +227,7 @@ export class Session {
     this.world = next;
     this.chemicals = null;
     this.definition = definition;
+    this.pendingLiveConfig = pendingLiveConfig;
     this.observation = observation;
     this.population = population;
     this.phenotypes = phenotypes;

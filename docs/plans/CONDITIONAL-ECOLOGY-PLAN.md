@@ -1147,3 +1147,12 @@ plus106 frontend tests, lint, formatting, type, storage, documentation and Terra
 Three existing operational Rust tests remain ignored. Both WASM variants and the production build
 pass. Existing lint and unstable WASM atomics warnings remain. V55 boundary and Python artifact
 consumers now recognize the current format while physical restore rejects earlier bytes.
+
+M7 browser prerequisite, Sulion `9b2391b0-1b5c-4fff-8f11-030c9a161dbf`: effective live configuration
+also refreshes the browser Session definition and is published once per changed definition.
+Only an outstanding pending patch polls bounded controls during ordinary stepping; the scalar
+hot step API remains allocation-free. Restore recovers that pending monitoring state. The actual
+Session check covers immediate change, paused export/restore of a deferred change and subsequent
+boundary application. Ordinary bodies and physical clocks remain owned by the same World.
+Steps: Session/worker readback `bf09f4af-5aa2-4edd-8665-0c6476dd7cf2`, then consumer check/publication
+`ad3f31f7-58ad-4f69-8ca9-109c7ea0bc01`. The new Session test raises the frontend total to107.
