@@ -49,6 +49,11 @@ it("blocks bulk and harness exports in the browser engine while permitting reduc
   const before = world.snapshot();
   const inspection = world.command("inspectReservoir", { source: 0 });
   expect(JSON.stringify(inspection).length).toBeLessThan(1024);
+  const relationships = world.command("chemicalRelationships", { cell: 1 });
+  expect(JSON.stringify(relationships).length).toBeLessThan(16 * 1024);
+  const controls = world.command("runControls");
+  expect(JSON.stringify(controls).length).toBeLessThan(2 * 1024 * 1024);
+  world.command("configure", { patch: { speech: false }, preview: true });
   expect(world.snapshot()).toEqual(before);
   expect(world.render().cells.buffer).toBe(world.render().field.buffer);
   const restored = engine.restore(world.snapshot());

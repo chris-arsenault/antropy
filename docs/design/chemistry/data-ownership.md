@@ -5,6 +5,10 @@ fixed-node mortality histories in the sole Rust World and physical checkpoint. S
 readings and optical/chemical investment reports are bounded reductions. They do not export
 physical field/population frames to React or introduce a second state owner. Native paused
 rewind replaces the World on its existing owner thread before stepping can resume.
+The browser guard permits explicit `configure`, bounded `runControls` and selected-cell
+`chemicalRelationships`. Config/history replies use the existing 2 MiB definition-size ceiling;
+chemical relationships retain the ordinary 16 KiB reduced-reply ceiling. Bulk frames, whole
+field exports and harness interventions remain forbidden.
 
 **Status:** Current contract — Rust/WASM owns physical state; the owning worker renders borrowed views; changes require an explicit user decision.
 

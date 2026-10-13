@@ -110,7 +110,7 @@ it("applies live comparison controls and restores them through the WASM boundary
 });
 
 it("keeps Session configuration current after immediate and restored pending patches", async () => {
-  const session = new Session(await Engine.load(bytes), compact);
+  const session = new Session(await Engine.load(bytes, true), compact);
   try {
     session.configure({ patch: { speech: false } });
     expect(session.definition.config.speech).toBe(false);

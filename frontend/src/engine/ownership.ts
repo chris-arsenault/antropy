@@ -5,6 +5,9 @@ const BROWSER_COMMANDS = new Set([
   "summary",
   "chemicalOverview",
   "chemicalWeb",
+  "chemicalRelationships",
+  "configure",
+  "runControls",
   "phenotype",
   "stepStatus",
   "census",
@@ -24,6 +27,7 @@ export function checkBrowserCommand(op: string, payload: Record<string, unknown>
 export function browserReplyLimit(op: string) {
   if (op === "census") return 16 * 1024 * 1024;
   if (op === "definition") return 2 * 1024 * 1024;
+  if (op === "configure" || op === "runControls") return 2 * 1024 * 1024;
   if (op === "inspectSelected") return 256 * 1024;
   return 16 * 1024;
 }
