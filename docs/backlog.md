@@ -251,14 +251,17 @@ No narrowing rule, breadth penalty, mutation revision or campaign is selected.
 
 ## Swarm intelligence and local coordination
 
-**Status:** Four conditional paths and operator controls delivered locally October 13; ecological exploitation remains research.
+**Status:** V56 experience-dependent response implemented locally October14. V55 controls and
+constructed paths did not deliver all four research mechanisms. Spatial commitment/abandonment,
+evolved collective succession and sustainable communication remain open.
 
 The [swarm intelligence write-up](design/swarm-intelligence-directions.md) develops chemical
 stigmergy and metabolic succession, experience-dependent allocation within inherited capacities,
 recovery from declining returns, and communication beyond local chemical cues. Each direction
 identifies existing shared operations, unresolved design decisions and a bounded comparison
-that could distinguish explanations. Chemical stigmergy coupled to conditional allocation is
-the recommended starting point.
+that could distinguish explanations. The [allocation repair](plans/SWARM-ALLOCATION-PLAN.md)
+adds an actual shared paid response update, with physical specialization/replacement and
+negative fixtures. It does not relabel inherited diversity as experience-driven specialization.
 
 The chemical-key and vocalization/strategy usefulness directions retain ownership of their
 respective revisions. Preserve independent reproduction, local paid information, birth-fixed

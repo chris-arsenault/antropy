@@ -152,6 +152,7 @@ fn affine_trace_flow_composes_with_zero_decay_and_saturation() {
         gain: [0.1; HIDDEN],
         offset: [-0.3; HIDDEN],
         paid_elapsed: 1.2,
+        ..Default::default()
     };
     flow.decay[0] = 0.;
     flow.offset[0] = 1.;

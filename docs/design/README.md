@@ -1,5 +1,15 @@
 # Current design and work order
 
+October14 local physical v56 implements a specific swarm mechanism:
+[activity-dependent output plasticity](controller.md#learning-and-module-boundary).
+One paid update reinforces accepted participation and relaxes inactivity across existing
+actuator ports, with default-on startup, an independent live switch, bounded inspection and
+birth/checkpoint semantics. Identical-genotype history comparisons, chemical-created response,
+participant-loss replacement and withdrawal checks establish physical consequences and costs.
+The [allocation plan](../plans/SWARM-ALLOCATION-PLAN.md) preserves negative fixtures.
+This corrects the earlier substitution of authored reflexes and operator controls for
+experience-driven allocation; it does not claim an implemented habitat-transition system.
+
 October 13 local v55 delivery adds atomic live configuration, persisted effective controls and
 paused checkpoint rewind for feature comparisons. Local mortality severity now uses fixed
 spatial histories by default. Independent learning, context/gain, geographic exposure and
@@ -409,29 +419,30 @@ preserves the eight recent directions and their corrected evidence baselines. It
 chemical relationships, stigmergy and conditional allocation; strategic memory has an independent
 milestone, followed by persistence and habitat transitions. Local recovery is independent of
 that sequence. Optical investments and paid communication retain separate cost and return
-questions. All eight implementation milestones are pending; only planning is authorized.
-Existing design owners retain mathematical authority. Local/global mortality composition remains
-unselected, while dynamic terrain and reservoir buffering remain explicitly deferred under the
-plan's scope assumption.
+questions. V55 delivered controls, local mortality severity and constructed existing paths.
+Its static allocation and in-place switching checks did not implement experience-driven
+specialization or habitat transitions. V56 adds the explicit allocation mechanism above.
+Existing design owners retain mathematical authority; dynamic terrain and reservoir buffering
+remain deferred.
 
 Every milestone also ships its [configuration and investigation controls](../plans/CONDITIONAL-ECOLOGY-PLAN.md#configuration-and-rapid-investigation-controls):
 independent feature switches, relevant shared settings, quick live patches where physically
 valid, explicit fresh-world changes, effective-config readback and persisted intervention
-context. These are planned extensions of the existing operator/config paths, delivered with
-each feature rather than deferred to final integration.
+context. These operator/config paths were delivered in v55.
 
-The planned [server comparison workflow](../plans/CONDITIONAL-ECOLOGY-PLAN.md#server-save-points-rewind-and-stable-feature-comparisons)
+The delivered [server comparison workflow](../plans/CONDITIONAL-ECOLOGY-PLAN.md#server-save-points-rewind-and-stable-feature-comparisons)
 reuses stored checkpoints, run/pause and inspection, adding paused rewind and live feature
 changes so an agent can compare variants from the same save point without deployment.
 Observation windows follow the research question; no exact-step execution machinery is needed.
-It is part of the early shared operator support, not an experiment launched by this planning work.
+It is shared operator support, distinct from implementing a research mechanism.
 
 The October 11 [swarm intelligence directions](swarm-intelligence-directions.md) apply research
 on environmental feedback to chemical succession, experience-dependent allocation, recovery
 from declining returns and useful communication. The write-up recommends starting with funded
 chemical stigmergy and conditional activity through existing control. It connects the proposals
-to the chemical-key and strategy usefulness owners; it selects no runtime revision, campaign
-or change to the current operating configuration.
+to the chemical-key and strategy usefulness owners. October14 selects and implements the
+explicit shared response operator above rather than treating existing RNN expressiveness as
+delivery of the experience-dependent allocation direction.
 
 The October 5 review opens two exploratory directions:
 [local mortality feeding](local-mortality-feeding.md), to make death-derived feeding more

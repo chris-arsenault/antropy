@@ -25,6 +25,7 @@ mod heredity;
 pub mod observation;
 pub mod strategic;
 pub use heredity::{assimilate, assimilate_layers, express, genome_distance, mutate, recombine};
+pub mod allocation;
 mod learning;
 mod prepared;
 mod weights;
@@ -78,6 +79,7 @@ pub struct Genome {
 pub struct State {
     pub hidden: Vec<f32>,
     pub traces: Vec<f32>,
+    pub allocation: [f32; allocation::CHANNELS],
     pub task: u8,
     pub last_energy: Option<f32>,
     pub hearing: hearing::Hearing,
@@ -119,6 +121,7 @@ impl Default for State {
         Self {
             hidden: vec![0.; HIDDEN],
             traces: vec![0.; HIDDEN * HIDDEN],
+            allocation: [0.; allocation::CHANNELS],
             task: 0,
             last_energy: None,
             hearing: Default::default(),
@@ -127,6 +130,18 @@ impl Default for State {
             epoch: None,
         }
     }
+}
+pub fn reflex_learning_rate(gain: f64, c: &Config) -> f64 {
+    c.reflex_gain(gain) * allocation::learning_multiplier(c)
+}
+
+pub fn upkeep_multiplier(c: &Config) -> f64 {
+    strategic::upkeep_multiplier(c)
+        + if c.activity_reinforcement && c.reflex_plastic() {
+            allocation::CHANNELS as f64 / PARAMETERS as f64
+        } else {
+            0.
+        }
 }
 pub fn seed() -> Genome {
     let mut w = vec![0.; PARAMETERS];

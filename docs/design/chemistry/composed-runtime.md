@@ -250,6 +250,33 @@ For held coefficients write this as `dH/dL=beta-lambda*H`; then
 with the continuous `beta*L` limit at lambda=0. The base trace matrix and paid-time epoch
 persist together. Inspection and birth-local assimilation read the current analytic value.
 Learning charges actual base-step duration; withholding payment cannot advance its clock.
+
+Physical v56 adds activity-dependent output plasticity. The fourteen existing accepted-activity
+readings form one signed vector `r_j=a_j/(abs(a_j)+C_j)`. They correspond to four transporter,
+eight enzyme, builder and emitter output ports. Private response state obeys
+`dz_j/dL=eta*(r_j-z_j)`, with the same inherited `eta=abs(p1)` and actually paid reflex time L.
+For held readings the exact update is `z'=r+(z-r)*exp(-eta*L)`; targets and paid elapsed time
+persist with the ordinary trace epoch. Thus successful participation reinforces its direction,
+zero accepted activity relaxes the response, and an unfunded request cannot reinforce itself.
+The controller adds `3*abs(alpha)*z_j` to the corresponding inherited output bias before the
+same incoming-strength normalization and action decoding. Three is the existing neural drive
+budget, not a new activity-specific gain. Combined inherited/acquired bias contributes its
+absolute strength once to that row's budget. All chemical identities use the same operation.
+
+`activityReinforcement` is default-on and live-configurable. Off removes the acquired bias and
+its incremental expense while retaining private state; static or disabled reflex learning also
+removes influence and stops its paid clock. Added learning expense is `14/(24*24)` of the
+existing reflex learning price; inference upkeep adds `14/3292` of reflex controller upkeep.
+Both use existing prices and accounts. At birth the permitted acquired bias assimilates once
+into the daughter's inherited output bias, followed by private-response reset. No parent or
+shared genotype is rewritten. Physical v56 persists response state without migrating v55.
+
+Local chemical production, depletion and shared donor competition supply and change the
+stimulus. No task demand variable, role assignment, reward or global target is added.
+This operator reinforces performance; it does not estimate an action's marginal value.
+Its specialization and replacement consequences require physical opportunities and do not
+follow from nonzero response state alone.
+
 Receptor and energy baselines also relax in physical time, so changing preparation frequency
 does not itself grant faster adaptation or learning. These equations intentionally replace
 one-neural-update-per-invocation semantics; trajectory matching is not an objective.

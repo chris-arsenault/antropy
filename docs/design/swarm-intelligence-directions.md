@@ -1,9 +1,11 @@
 # Swarm intelligence design directions
 
-**Status:** Conditional paths and operator controls delivered locally October 13, 2026.
-The [execution plan](../plans/CONDITIONAL-ECOLOGY-PLAN.md#execution-expansions) records current-law
-chemical succession, metabolic alternatives, paid history and message-return checks, with limits.
-Evolved coordination, sustained cooperation and inter-colony founding remain research questions.
+**Status:** V56 experience-dependent allocation implemented locally October 14, 2026.
+The [allocation plan](../plans/SWARM-ALLOCATION-PLAN.md) records the shared response operator,
+physical specialization, replacement and relaxation. October13 delivered controls, local
+recovery and constructed paths through existing mechanisms; that did not implement the book's
+experience-dependent allocation or spatial commitment/abandonment systems. Evolved coordination,
+sustained cooperation and inter-colony founding remain research questions.
 
 Develop conditional specialization and coordination through actions that change local
 opportunities. Antropy already supplies chemical transformations, contested material access,
@@ -26,7 +28,9 @@ efforts; recognition and donor allocation determine accepted transfers; exact ch
 determine products and work. Changed surroundings supply later receptor readings. This
 composition already permits feedback between cells without a separate coordination layer.
 
-Private experience acts through the existing bounded neural trace law and recurrent state.
+Private experience acts through bounded recurrent traces and v56 activity-dependent output
+bias. The latter is an explicit shared performance-reinforcement operator, not a claim that
+generic recurrent expressiveness already supplies experience-dependent specialization.
 When enabled, the slow strategic layer supplies held context and learning gain using the same
 neural operator. It changes activity within inherited capacities. Body proportions and complete
 chemical capabilities remain fixed genetically at birth; these directions do not restore
@@ -87,25 +91,30 @@ redirect activity when the local mixture or energetic consequence changes. Speci
 would describe conditional behavior within a genotype's repertoire, alongside inherited
 differences between genotypes.
 
-Use the existing recurrent state, private plasticity and, where enabled, strategic context.
-Realized actuator activity supplies execution feedback relative to capacity, but it is not a
-measurement of marginal benefit. Energy changes also combine several simultaneous causes.
-Blindly reinforcing the most active enzyme could therefore preserve wasteful cycling. The
-design question is whether the current shared learning law and available history connect a
-relevant chemical cue to a change in effort that improves funded return.
+**Selected mechanism:** Fourteen acquired output biases follow one bounded affine update
+from actual accepted actuator activity, using the existing inherited reflex learning rate and
+magnitude. Participation strengthens later responsiveness; inactivity relaxes it. Chemical
+production, depletion and competition create or remove the material stimuli. The same law
+covers all transporter, enzyme, builder and emitter ports; it assigns no chemical/task meaning.
+It operates inside ordinary neural inference and its row budget, with paid state, default-on
+startup, birth-local assimilation/reset and checkpoint continuation. The
+[composed law](chemistry/composed-runtime.md#prepared-execution-and-physical-time) owns the equations.
 
-**Design decisions:** Choose a physical situation where the same inherited repertoire supports
-two differently valuable allocations as conditions change. Establish what an immediate reflex
-can infer and what requires experience. Separate recurrence, learned traces and slow context
-before selecting any revision; adding per-enzyme threshold dynamics would duplicate control
-without resolving the benefit question.
+The operator reinforces performance, not marginal benefit: wasteful cycles can also reinforce
+themselves. Price actual intake, conversion, maintenance, learning and action expenses before
+calling participation useful. Inward sensing can expose unprocessed private substrate after
+uptake has removed an external cue; an outward-only failure must not be labeled a learning defect.
 
-**Discriminating comparison:** Change supply once in a bounded single-cell fixture with two
-usable routes. Compare a responsive controller with a diagnostic intervention that holds the
-candidate adaptive state fixed while retaining the same physical capacities and accounting
-for control costs. Measure cue, effort, accepted conversion and net return before and after
-the change. A constructed successful response establishes an available opportunity; inheritance
-and evolutionary discovery are separate questions.
+**Delivered comparisons:** Identical genotypes with different physical activity histories
+express opposite metabolic allocations under matched present conditions; reinforcement-off
+abolishes the difference. Participant removal increases the remaining cell's processing, and
+reinforcement improves accepted consumption and usable return over its matched ablation.
+Product export also creates acquired recipient responsiveness. Finite withdrawal relaxes the
+response instead of retaining an indefinitely fixed commitment. The
+[execution record](../plans/SWARM-ALLOCATION-PLAN.md#m1-expansion-and-bounded-registration)
+retains the negative low-cue and outward-only cases, actual costs and the distinction between
+incremental return and sustaining a whole cell. These are implemented mechanisms and bounded
+physical consequences, not evolved division of labor or proof of stable community roles.
 
 The [controller](controller.md), [strategic controller](strategic-controller.md) and
 [strategy usefulness direction](vocalization-and-strategy-usefulness.md) retain ownership of

@@ -141,6 +141,19 @@ zero. These are mutable alleles. Biomass growth and division have no constructio
 
 ## Learning and module boundary
 
+Physical v56 adds fourteen controller-owned acquired output biases, driven by the existing
+accepted actuator readings. One paid affine update reinforces actual participation and relaxes
+with inactivity; requested but unaccepted activity earns no reinforcement. The same heritable
+rate and magnitude apply to all ports. Acquired and inherited bias share the ordinary incoming
+row budget. The [governing law](chemistry/composed-runtime.md#prepared-execution-and-physical-time)
+specifies the exact update and incremental work prices. `activityReinforcement` is default-on,
+independently live-configurable and observable in selected-cell private inspection. Off retains
+private state; static/reflex-learning-off removes influence and freezes its paid clock.
+Birth-local assimilation adds the permitted bias to offspring once, then clears the private
+response. Body capacities remain birth-fixed. The
+[delivery plan](../plans/SWARM-ALLOCATION-PLAN.md) records actual history-dependent allocation,
+product-created response, replacement and relaxation, including negative physical fixtures.
+
 Inference uses Wrecurrent + abs(alpha)×H. Paid bounded trace updates depend on pre/post activity,
 the four receptor changes and energy-fill change. Static learning disables new trace effects,
 updates and assimilation. Retention zero disables transmission while leaving private plasticity

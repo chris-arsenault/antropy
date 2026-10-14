@@ -261,7 +261,7 @@ pub fn upkeep_multiplier(c: &Config) -> f64 {
 }
 pub fn learning_rate(gain: f64, c: &Config) -> f64 {
     (if c.reflex_plastic() {
-        c.reflex_gain(gain)
+        super::reflex_learning_rate(gain, c)
     } else {
         0.
     }) + if c.active_features().strategy && c.strategic_plastic() {

@@ -22,7 +22,13 @@ fn actions_are_held_while_learning_is_paid_between_material_boundaries() {
     for _ in 0..2 {
         let before = w.cells.iter().find(|c| c.id == id).unwrap();
         let hidden = before.brain.hidden.clone();
-        let learning = w.config.plasticity_cost * w.config.dt * before.body[0];
+        let learning = w.config.plasticity_cost
+            * w.config.dt
+            * before.body[0]
+            * crate::controller::reflex_learning_rate(
+                before.brain.strategy.learning_gain,
+                &w.config,
+            );
         w.step();
         let cell = w.cells.iter().find(|c| c.id == id).unwrap();
         assert!(cell.brain.epoch.is_some());

@@ -1,8 +1,12 @@
 # Conditional specialization and local coordination
 
-**Status:** All eight milestones implemented and checked locally October 13, 2026.
-The user explicitly authorized pipeline publication with a fresh v55 world; deployment progress
-and completion are tracked in the Sulion root below. Constructed checks left the prior world intact.
+**Status:** V55 controls, local mortality recovery and constructed existing paths delivered
+through the pipeline October13. October14 corrects the broader delivery claim: M1's static
+reflex did not implement experience-dependent allocation, and M3's in-place substrate switch
+did not implement habitat transitions. The [allocation repair](SWARM-ALLOCATION-PLAN.md) adds
+a concrete shared activity-dependent mechanism. Spatial discovery/abandonment and evolved
+collective organization remain outside that delivered result. Historical findings below retain
+their original conditions and limits. The user authorized a fresh v55 world at that publication.
 
 **Sulion root:** `0fcb0412-e105-4318-a943-08d4cb894782`.
 

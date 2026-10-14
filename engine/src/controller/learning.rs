@@ -8,6 +8,8 @@ pub(super) struct Flow {
     pub gain: [f32; HIDDEN],
     pub offset: [f32; HIDDEN],
     pub paid_elapsed: f64,
+    pub allocation_target: [f32; super::allocation::CHANNELS],
+    pub allocation_rate: f64,
 }
 
 pub(super) fn modulation(g: &Genome, inputs: &[f32], baseline: f32) -> f32 {
@@ -47,6 +49,14 @@ impl Flow {
                 self.paid_elapsed,
             );
         }
+    }
+    pub fn apply_allocation(&self, state: &mut [f32; super::allocation::CHANNELS]) {
+        super::allocation::advance(
+            state,
+            &self.allocation_target,
+            self.paid_elapsed,
+            self.allocation_rate,
+        );
     }
 }
 

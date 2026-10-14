@@ -1,18 +1,25 @@
 //! Controller-owned hereditary operations apply the shared mutation law to both layers.
 use super::*;
 pub fn assimilate(allele: &Genome, expressed: &Genome, state: &State, retention: f64) -> Genome {
-    assimilate_layers(allele, expressed, state, [retention; 2])
+    assimilate_layers(allele, expressed, state, [retention; 3])
 }
 pub fn assimilate_layers(
     allele: &Genome,
     expressed: &Genome,
     state: &State,
-    retention: [f64; 2],
+    retention: [f64; 3],
 ) -> Genome {
     let mut child = allele.clone();
     for (i, h) in current_traces(state).iter().enumerate() {
         child.weights[RECURRENT + i] = (child.weights[RECURRENT + i]
             + retention[0] as f32 * expressed.plasticity[0].abs() * h)
+            .clamp(-16., 16.);
+    }
+    let observed = observed_state(state);
+    for (i, value) in observed.allocation.iter().enumerate() {
+        let bias = OUTPUT_BIAS + allocation::ports(i).1;
+        child.weights[bias] = (child.weights[bias]
+            + retention[2] as f32 * allocation::gain(expressed) * value)
             .clamp(-16., 16.);
     }
     child.strategy = allele

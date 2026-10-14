@@ -11,6 +11,7 @@ pub const LIVE: &[&str] = &[
     "mortalityHalfResponse",
     "learning",
     "reflexLearning",
+    "activityReinforcement",
     "strategicLearning",
     "strategicContext",
     "strategicGain",

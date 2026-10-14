@@ -104,6 +104,13 @@ Check effective/pending readback rather than assuming acceptance means immediate
 `reflexLearning` and `strategicLearning` independently gate each layer's plasticity and paid
 learning under the existing `learning` policy. `learningRetention` still controls birth-local
 transmission for enabled layers; disabled layers do not assimilate private traces at birth.
+V56 `activityReinforcement` independently gates accepted-activity output plasticity, its
+acquired bias, incremental work price and birth-local contribution. Off retains private
+response state for later re-enable. Its rate and magnitude use the existing inherited reflex
+plasticity alleles; there is no per-chemical or per-program operator setting. Use
+`config/activity-reinforcement-off.json` for a shared-checkpoint ablation and inspect effective
+`runControls` before attributing a window to the change. All runtime switches preserve funded
+bodies. Physical v56 cannot load v55 checkpoints and does not migrate them.
 Expense channels `reflexLearning` and
 `strategicLearning` partition the existing `learning` total; they are not additional debits.
 `strategicContext` gates direct slow-context inputs to reflex inference, and `strategicGain`

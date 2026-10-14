@@ -14,6 +14,14 @@ export interface ControlView {
   strategicInputs: number[];
   hearing: number[];
   pendingHearing: number[];
+  activityReinforcement: {
+    state: number[];
+    bias: number[];
+    ports: [number, number][];
+    enabled: boolean;
+    rate: number;
+    gain: number;
+  };
 }
 
 export interface CellAction {

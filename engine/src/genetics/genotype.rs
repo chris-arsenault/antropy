@@ -127,6 +127,11 @@ impl Genotype {
                         } else {
                             0.
                         },
+                        if c.reflex_learning && c.activity_reinforcement {
+                            c.learning_retention
+                        } else {
+                            0.
+                        },
                     ],
                 );
             }

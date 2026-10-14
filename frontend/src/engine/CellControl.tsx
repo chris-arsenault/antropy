@@ -2,6 +2,7 @@ import { type Bridge } from "./bridge";
 import { type Inspection } from "./types";
 import { Table, numberText as n } from "./Table";
 import { STRATEGIC_INPUTS, CONTEXT_COLUMNS, HEARING_COLUMNS, INPUT_COLUMNS } from "./controlLabels";
+import { CellAllocation } from "./CellAllocation";
 
 export function CellControl({
   inspection: p,
@@ -17,7 +18,8 @@ export function CellControl({
   if (!cell || !control) return null;
   return (
     <details open>
-      <summary>Speech and strategic control</summary>
+      <summary>Experience, speech and strategic control</summary>
+      <CellAllocation cell={cell} control={control} />
       <p>
         Mouth {n(cell.body[22])} · ear {n(cell.body[23])}. Last neural proposal: byte{" "}
         {cell.action.speech}, effort {n(cell.action.speechEffort)}. This tick:{" "}

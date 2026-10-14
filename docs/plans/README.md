@@ -26,9 +26,8 @@ negative results without treating one unsuccessful fixture as automatic grounds 
 
 ## Active plans
 
-| Plan | Scope | Sulion |
-| --- | --- | --- |
-| [Conditional specialization and local coordination](CONDITIONAL-ECOLOGY-PLAN.md) | All eight milestones implemented and checked locally; authorized fresh-world publication and completion tracked in Sulion. Live settings/rewind, local recovery and conditional chemical/optical/message paths preserve negative investment findings. | `0fcb0412-e105-4318-a943-08d4cb894782` |
+No active implementation plans. The v56 allocation change is delivered locally; a fresh-world
+publication decision is separate from its implementation.
 
 Open research questions remain with their design owners. A pending delivery outline does not
 establish a selected runtime equation or an implemented ecological consequence.
@@ -37,6 +36,8 @@ establish a selected runtime equation or an implemented ecological consequence.
 
 | Plan | Scope | Sulion |
 | --- | --- | --- |
+| [Experience-dependent swarm allocation](SWARM-ALLOCATION-PLAN.md) | Shared paid response, physical specialization/replacement, durable live control and bounded inspection; full CI/build passed. Fresh-world publication is separate. | `c7bca4cb-ee6e-41e1-bd23-a5d30fcde529` |
+| [Conditional specialization and local coordination](CONDITIONAL-ECOLOGY-PLAN.md) | Deployed v55 controls, local recovery and constructed existing paths. October14 corrects the claim of complete swarm mechanisms; allocation has a separate repair and habitat transitions remain open. | `0fcb0412-e105-4318-a943-08d4cb894782` |
 | [Persistent ecology diagnostics](ECOLOGY-DIAGNOSTICS-PLAN.md) | Durable private supply/cost/lifecycle history, stored-checkpoint downloads and GET-only local capture; publication authorized October12 with live recovery enabled | `e969974c-d545-45a3-ba9d-330b3dc93e96`; publication `24dc7e6d-d3a5-4945-ac74-54e94d8277d2` |
 | [Incremental spectator transport](INCREMENTAL-SPECTATOR-PLAN.md) | Acknowledged scene/status deltas, worker reconstruction and hidden-tab disconnect; [bounded size/reconstruction results](../incremental-spectator-results.md). No aggregate quotas; publication authorized October 7 through CI/CD; 1 GB/day remains unestablished | `3767c107-7a6d-4e21-88d5-dcfb01e8312f` |
 | [Rugged chemical ecology](RUGGED-ECOLOGY-PLAN.md) | Local v52 implementation and ordinary-world tuning; [inherited reproductive function and neighbor consequences](../rugged-ecology-results.md) through renewals/replacement. Shared default6; no publication/deployment | `ab2dbd97-c26c-48b9-8f02-a20966ed7dbc` |

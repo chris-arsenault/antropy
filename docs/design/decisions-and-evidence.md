@@ -1,11 +1,33 @@
 # Design decisions and evidence
 
-This is the decision record for the current [work order](README.md), through physical v54. The
+This is the decision record for the current [work order](README.md), through physical v56. The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
 original versions, controls and failures. Completed implementation does not guarantee a
 particular evolved community. Execution records remain in the [plan archive](../plans/README.md).
 The [design directions registry](directions.md) lists every direction with its status.
 Superseded entries stay in place with a dated note.
+
+## Experience-dependent allocation — October 14
+
+The v55 swarm delivery overclaimed implementation: static authored allocation and in-place
+substrate switching established existing paths, not experience-driven specialization or spatial
+commitment/abandonment. Generic RNN expressiveness was insufficient reason to retain the old
+learning law as the complete research application.
+
+V56 selects one bounded, paid activity-dependent output-bias operator within the existing
+controller. It uses shared inherited learning rate/magnitude, signed accepted activity, the
+ordinary neural row budget and explicit birth-local assimilation/reset. Chemistry owns local
+demand; no task labels, group reward or extra chemical law is introduced. The
+[composed runtime](chemistry/composed-runtime.md#prepared-execution-and-physical-time)
+owns its equations and incremental price.
+
+The [allocation delivery](../plans/SWARM-ALLOCATION-PLAN.md) distinguishes actual acquired
+allocation from immediate reflexes, product-created responsiveness, participant-loss replacement
+and inactivity relaxation. Replacement improves usable return against its reinforcement-off
+comparison. Negative low-cue and outward-only conditions remain negative; unprocessed private
+material requires available inward information in the selected replacement fixture. These checks
+do not establish evolved roles, spatial route discovery, sustained cooperation or communication
+profit. Those questions are not silently counted as delivered by this mechanism.
 
 ## Computable chemistry and mathematical structure
 

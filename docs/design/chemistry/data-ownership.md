@@ -1,5 +1,10 @@
 # Immutable data ownership and sharing contract
 
+V56 acquired activity-response biases and their unfinished paid epoch remain controller-owned
+Rust state in the physical checkpoint. The fourteen responses and their derived biases are
+available only through existing bounded selected-cell private inspection. No population-sized
+private frame, new observer transport or second owner is introduced.
+
 V55 keeps effective/pending runtime configuration, bounded intervention history and sparse
 fixed-node mortality histories in the sole Rust World and physical checkpoint. Source-local
 readings and optical/chemical investment reports are bounded reductions. They do not export

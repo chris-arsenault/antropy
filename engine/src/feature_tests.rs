@@ -127,10 +127,20 @@ fn strategy_off_removes_its_upkeep_and_reserve_without_removing_speech() {
     let cell = &w.cells[0];
     let maintenance = crate::organism::maintenance_rate(&cell.body, 0., 0., &w.config);
     assert!(
-        (maintenance - cell.mass() * w.config.maintenance - w.config.controller_cost).abs() < 1e-12
+        (maintenance
+            - cell.mass() * w.config.maintenance
+            - w.config.controller_cost * controller::upkeep_multiplier(&w.config))
+        .abs()
+            < 1e-12
     );
-    assert_eq!(controller::strategic::learning_rate(0., &w.config), 1.);
-    assert_eq!(controller::strategic::learning_rate(2., &w.config), 1.);
+    assert_eq!(
+        controller::strategic::learning_rate(0., &w.config),
+        controller::reflex_learning_rate(1., &w.config)
+    );
+    assert_eq!(
+        controller::strategic::learning_rate(2., &w.config),
+        controller::reflex_learning_rate(1., &w.config)
+    );
     w.cells[0].brain.pending_speech = Some((0, 1.));
     crate::utterances::Delivery::default().advance(&mut w.cells, &w.config, 0);
     assert!(w.cells[0].flows.speech_work > 0.);

@@ -205,3 +205,5 @@ mod world_validation;
 mod binding_tests;
 #[cfg(test)]
 mod birth_capabilities_tests;
+#[cfg(test)]
+mod swarm_allocation_tests;

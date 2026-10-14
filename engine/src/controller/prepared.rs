@@ -40,6 +40,7 @@ pub fn observed_state(state: &State) -> State {
 pub fn materialize(state: &mut State) {
     if let Some(epoch) = state.epoch.take() {
         epoch.flow.apply(&mut state.traces, &epoch.hidden);
+        epoch.flow.apply_allocation(&mut state.allocation);
     }
 }
 
@@ -165,6 +166,7 @@ fn initialize(g: &Genome, inputs: &[f32], state: &mut State, c: &Config, owner: 
 fn evaluate(g: &Genome, inputs: &[f32], state: &mut State, genuine: bool, c: &Config) {
     let epoch = state.epoch.as_mut().unwrap();
     epoch.flow.apply(&mut state.traces, &epoch.hidden);
+    epoch.flow.apply_allocation(&mut state.allocation);
     let mut values = [0.; INPUTS];
     values.copy_from_slice(inputs);
     if !c.active_features().photoreception {
@@ -224,10 +226,27 @@ fn evaluate(g: &Genome, inputs: &[f32], state: &mut State, genuine: bool, c: &Co
         &g.weights[OUTPUT_BIAS..],
         &mut logits,
     );
-    for (value, strength) in logits.iter_mut().zip(program.output_strength) {
-        *value = bounded_drive(*value, strength);
+    let acquired = allocation::project(g, state, c);
+    for (i, ((value, strength), bias)) in logits
+        .iter_mut()
+        .zip(program.output_strength)
+        .zip(acquired)
+        .enumerate()
+    {
+        let inherited = g.weights[OUTPUT_BIAS + i];
+        *value = bounded_drive(
+            *value + bias,
+            strength - inherited.abs() + (inherited + bias).abs(),
+        );
     }
+    let epoch = state.epoch.as_mut().unwrap();
     epoch.flow.prepare(g, &next, modulation);
+    epoch.flow.allocation_target = allocation::targets(&values);
+    epoch.flow.allocation_rate = if c.activity_reinforcement {
+        g.plasticity[1].abs() as f64
+    } else {
+        0.
+    };
     epoch.hidden.copy_from_slice(&state.hidden);
     epoch.elapsed = 0.;
     epoch.integral.fill(0.);
@@ -258,6 +277,10 @@ pub fn validate_state(state: &State) -> Result<(), String> {
             .is_some_and(|(_, effort)| !effort.is_finite() || !(0. ..=1.).contains(&effort))
         || state.hidden.len() != HIDDEN
         || state.traces.len() != HIDDEN * HIDDEN
+        || state
+            .allocation
+            .iter()
+            .any(|v| !v.is_finite() || v.abs() > 1.)
         || state
             .hidden
             .iter()
@@ -294,6 +317,12 @@ pub fn validate_state(state: &State) -> Result<(), String> {
                 .iter()
                 .chain(&e.flow.offset)
                 .any(|v| !v.is_finite())
+            || !e.flow.allocation_rate.is_finite()
+            || !(0. ..=1.).contains(&e.flow.allocation_rate)
+            || e.flow
+                .allocation_target
+                .iter()
+                .any(|v| !v.is_finite() || v.abs() > 1.)
             || [
                 action.swim,
                 action.turn,

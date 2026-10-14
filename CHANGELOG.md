@@ -2,6 +2,21 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-14 — Experience-dependent swarm allocation
+
+- Added default-on, paid activity-dependent output plasticity: accepted participation changes
+  future responsiveness through one bounded update across transport, enzymes, building and
+  emission; inactivity relaxes response and unfunded requests cannot reinforce themselves.
+- Added independent live `activityReinforcement` control, bounded private inspection, checkpoint
+  persistence and once-only birth-local bias assimilation followed by private-state reset.
+  Added work prices derive from the existing learning and controller parameter counts.
+- Physical checks distinguish acquired specialization from fixed reflexes, product-created
+  response, participant-loss replacement and relaxation. Replacement improves paid net return;
+  sparse matched-cue whole-cell margins remain negative. Failed outward-only sensing is retained.
+- Corrected the earlier swarm delivery claims: v55 delivered controls, local recovery and
+  constructed existing paths, not experience-driven specialization or habitat transitions.
+- Physical checkpoints use v56 without migration; local delivery does not replace the live world.
+
 ## 2026-10-13 — Conditional ecology and live comparisons
 
 - Added atomic live operator configuration with validated previews, effective readback,

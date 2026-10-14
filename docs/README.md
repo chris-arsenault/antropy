@@ -81,7 +81,7 @@ through renewals. It remains running. Tuning requests authorize restarts without
 
 | Direction                                                              | Document                                                                                                     |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Swarm intelligence: chemical stigmergy, conditional allocation, declining returns and useful communication | [Four proposed directions](design/swarm-intelligence-directions.md) |
+| Swarm intelligence: chemical stigmergy, experience-dependent allocation, declining returns and useful communication | [Directions and delivered allocation mechanism](design/swarm-intelligence-directions.md), [allocation repair](plans/SWARM-ALLOCATION-PLAN.md) |
 | Local mortality feeding; consequential death-to-feeding cycle, probably through a local term | [Exploratory direction](design/local-mortality-feeding.md) |
 | Chemical keys and broad processing; investigate distinct inherited chemical relationships | [Exploratory direction](design/chemical-key-specialization.md) |
 | Light, shade and emission usefulness; actual design incomplete         | [Open direction](design/light-usefulness.md)                                                                  |

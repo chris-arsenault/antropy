@@ -274,7 +274,7 @@ pub fn maintenance_rate(body: &Body, damage: f64, age: f64, c: &Config) -> f64 {
     let mass = body.iter().sum::<f64>();
     (1. + damage)
         * (mass * c.maintenance * aging_multiplier(body, age, c)
-            + c.controller_cost * crate::controller::strategic::upkeep_multiplier(c))
+            + c.controller_cost * crate::controller::upkeep_multiplier(c))
 }
 
 #[cfg(test)]

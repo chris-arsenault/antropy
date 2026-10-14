@@ -7,6 +7,7 @@
   "hearingContent": true,
   "hearingBearing": true,
   "reflexLearning": true,
+  "activityReinforcement": true,
   "strategicLearning": true,
   "strategicContext": true,
   "strategicGain": true,

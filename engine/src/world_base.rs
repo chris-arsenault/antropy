@@ -102,7 +102,10 @@ fn control(cell: &mut Cell, g: &Compiled, c: &Config) {
         },
     );
     let cost = if c.reflex_plastic() {
-        c.plasticity_cost * c.dt * cell.body[0] * c.reflex_gain(cell.brain.strategy.learning_gain)
+        c.plasticity_cost
+            * c.dt
+            * cell.body[0]
+            * crate::controller::reflex_learning_rate(cell.brain.strategy.learning_gain, c)
     } else {
         0.
     };
