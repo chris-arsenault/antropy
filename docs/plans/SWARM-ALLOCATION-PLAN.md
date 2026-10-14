@@ -1,7 +1,7 @@
 # Experience-dependent swarm allocation
 
-Status: implemented and checked locally, October 14, 2026. Fresh-world publication awaits
-the separate cutover decision; the continuing v55 server has not been changed.
+Status: implemented and checked locally, October 14, 2026. The user authorized commit,
+push through the normal pipeline and a fresh v56 server world on October 14.
 Sulion root: `c7bca4cb-ee6e-41e1-bd23-a5d30fcde529`.
 
 ## Outcome and decisions
@@ -26,8 +26,8 @@ assimilation into inherited output bias. An independent live switch removes its 
 incremental expense while retaining state. The existing learning switch freezes all private
 plasticity. Price added learned biases by their count relative to the existing recurrent
 weights and inference parameters, using existing work prices rather than a new free process.
-Physical format changes without migration. Local implementation is authorized; a fresh-world
-publication decision must be resolved before replacing the current live world.
+Physical format changes without migration. The authorized publication replaces the v55 world
+with a fresh v56 world through the normal pipeline.
 
 ## Milestones
 
@@ -131,8 +131,8 @@ existing activation preset; provide its single-field ablation. Update physical-f
 the controller and governing law, work-order/direction/backlog/plan indexes and changelog.
 Correct the prior blanket delivery claim while preserving its deployed controls and historical
 negative findings. Required `make ci`, both WASM variants, production build and a final owned
-diff review cover this integration. A publication replacing the v55 world remains a separate
-user decision; no migration or direct deployment is permitted.
+diff review cover this integration. Publication replacing the v55 world requires separate
+authorization, granted October 14; no migration or direct deployment is permitted.
 
 Selected-cell inspection now displays accepted activity, acquired response and neural bias in
 the existing browser inspector. It materializes a read-only copy of unfinished paid state;
@@ -146,6 +146,15 @@ pass. The final matched-physical-state fixture also passes its explicit preparat
 interval-account comparisons. Lint warnings and the unstable WASM atomics warning remain.
 Owned changes preserve the four preexisting unrelated untracked files. No live configuration,
 checkpoint load, server restart or external publication occurred during local implementation.
+
+## Authorized publication
+
+Sulion `6d1100c2-cbf3-4994-ab7c-589d423bf897` tracks publication of implementation commit
+`9498208` and this authorization record through the shared CI/CD pipeline. Confirm the native
+server starts a fresh v56 world, retains default-on activity reinforcement and saves a compatible
+checkpoint. Normal startup seeds the configured world when no same-format checkpoint exists;
+do not restart that fresh world again. Keep older checkpoints without migration. Pipeline and
+live startup results belong to the Sulion record; no long ecology campaign is required.
 
 ## Prior delivery disposition
 

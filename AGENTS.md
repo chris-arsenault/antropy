@@ -171,8 +171,9 @@ by `activityReinforcement`. Actual accepted participation reinforces responsiven
 relaxes it. Biases share the neural row budget, assimilate once at birth and reset privately.
 The [allocation repair](docs/plans/SWARM-ALLOCATION-PLAN.md) records physical specialization,
 replacement and negative fixtures, correcting the earlier substitution of authored reflexes for
-experience-driven allocation. The continuing live world remains v55 until a fresh v56 cutover
-is authorized; do not migrate checkpoints. Spatial commitment/abandonment remains open.
+experience-driven allocation. The user authorized the fresh v56 cutover through the normal
+pipeline on October 14; publication is tracked in that plan. Do not migrate checkpoints.
+Spatial commitment/abandonment remains open.
 
 Native run-start `features` switches independently disable photoreception, cover building,
 emission, vocalization and strategic control. Disabled organs have zero body allocation;

@@ -15,7 +15,8 @@ All notable user-visible changes are recorded here.
   sparse matched-cue whole-cell margins remain negative. Failed outward-only sensing is retained.
 - Corrected the earlier swarm delivery claims: v55 delivered controls, local recovery and
   constructed existing paths, not experience-driven specialization or habitat transitions.
-- Physical checkpoints use v56 without migration; local delivery does not replace the live world.
+- Physical checkpoints use v56 without migration. The user authorized publication through the
+  normal pipeline and a fresh server world on October 14.
 
 ## 2026-10-13 — Conditional ecology and live comparisons
 
