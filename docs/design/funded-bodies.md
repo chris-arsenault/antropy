@@ -166,7 +166,15 @@ reflection into 1–8. An inactive genetic record is available for duplication i
 All mutations use the same heavy-tail law: for signed uniform u, the proposed scalar
 step is b×u/(1−|u|), where b=0.67448975×scale. Its absolute median is b and
 P(|step|>d)=b/(b+d). Stable period reduction handles extreme draws before reflection.
-Default behavioral probability/scale is0.0015/0.08; physical probability/scale is0.1/0.12.
+Default behavioral probability/scale is0.0015/0.08; physical probability/scale is(1/206)/0.12.
+The October22 calibration prices the installed keyed representation's206 physical mutation
+opportunities per haploid birth:24 body records,153 key coordinates,16 center coordinates,
+8 angles,4 inward-sensing records and1 program-count opportunity. It averages one physical
+opportunity per daughter, rather than20.6 at the former0.1 probability. Some records are dormant
+and an attempted count mutation can retain its count; this is a mutation-input budget, not a
+guarantee of one changed phenotype or offspring viability. Per-coordinate probability semantics,
+heavy-tailed displacement and the possibility of large innovations remain unchanged. Existing
+saved configurations retain their explicit probability; the default affects newly created worlds.
 V52 recognition keys have eight weights in[-1,1] and bias in[-9,9]; their scales are respectively
 physicalMutationScale and9 times that scale. One common competitive binding steepness controls
 all seventeen sites. Keyed alleles do not mutate unused recognition coordinates. Exact reflection centers and

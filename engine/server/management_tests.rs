@@ -119,7 +119,9 @@ async fn live_configuration_changes_the_same_world_and_rejects_structural_edits(
         &app,
         1,
         "configure",
-        json!({"revision":0,"patch":{"mortalityRecovery":false}}),
+        json!({"revision":0,"patch":{"mortalityRecovery":false,
+            "physicalMutationRate":0.02,"physicalMutationScale":0.1,
+            "mutationRate":0.001,"mutationScale":0.1}}),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -127,6 +129,10 @@ async fn live_configuration_changes_the_same_world_and_rejects_structural_edits(
     assert_eq!(result["status"]["generation"], 1);
     assert_eq!(result["status"]["tick"], 0);
     assert_eq!(result["status"]["config"]["mortalityRecovery"], false);
+    assert_eq!(result["status"]["config"]["physicalMutationRate"], 0.02);
+    assert_eq!(result["status"]["config"]["physicalMutationScale"], 0.1);
+    assert_eq!(result["status"]["config"]["mutationRate"], 0.001);
+    assert_eq!(result["status"]["config"]["mutationScale"], 0.1);
     assert_eq!(result["status"]["runControls"]["revision"], 1);
     let rejected = control(
         &app,

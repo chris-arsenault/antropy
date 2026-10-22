@@ -116,7 +116,7 @@ fn chemical_export_changes_a_neighbor_reading_and_paid_response() {
     let e = receiver(&held_export);
     let r = receiver(&held_response);
     println!(
-        "succession receiver: imports136 active={} exportHeld={} responseHeld={} effort={} / {} / {} cue={} / {}; total work={} expenses={}",
+        "succession receiver: imports136 active={} exportHeld={} responseHeld={} effort={} / {} / {} cue={} / {}; total work={} operatingExpenses={} totalHeat={}",
         a.chemical_flows.imported.value(136),
         e.chemical_flows.imported.value(136),
         r.chemical_flows.imported.value(136),
@@ -126,6 +126,19 @@ fn chemical_export_changes_a_neighbor_reading_and_paid_response() {
         a.inputs[0],
         e.inputs[0],
         active.ledger.flows.captured,
+        {
+            let f = &active.ledger.flows;
+            f.maintenance
+                + f.motors
+                + f.transport
+                + f.repair
+                + f.learning
+                + f.growth
+                + f.cover_work
+                + f.speech_work
+                + f.emission
+                + active.ledger.division_heat
+        },
         active.ledger.heat()
     );
     assert!(a.chemical_flows.imported.value(136) > e.chemical_flows.imported.value(136));

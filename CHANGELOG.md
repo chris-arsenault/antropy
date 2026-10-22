@@ -2,6 +2,20 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-22 — Preserve physical adaptations through reproduction
+
+- Calibrated ordinary physical mutation probability to1/206, averaging one mutation opportunity
+  per daughter in the keyed haploid representation instead of20.6. Behavioral mutation,
+  private learning, inherited learning and heavy-tailed physical step sizes remain active.
+- Matched late-world comparisons isolate physical mutation load as a contributor to failed
+  population replacement. The nonzero candidate retains paid growth and reproduction through
+  the bounded renewal comparison; weeks-long persistence remains an operating question.
+- Existing checkpoints/configurations keep their recorded settings. An operator restart can
+  select the new probability without migration, automatic reseeding or a checkpoint-format change.
+- Mutation probabilities and scales can also change prospectively through the existing live
+  configuration API. Living genomes and funded bodies stay intact; only future births use the
+  new settings, allowing an evolved checkpoint to continue under the correction.
+
 ## 2026-10-14 — Experience-dependent swarm allocation
 
 - Added default-on, paid activity-dependent output plasticity: accepted participation changes

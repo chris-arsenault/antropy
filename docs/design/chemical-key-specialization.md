@@ -17,7 +17,30 @@ receiver import136 is 0.077278 against 0.000006 with export held and 0.001627 wi
 The [execution record](../plans/CONDITIONAL-ECOLOGY-PLAN.md#execution-expansions) distinguishes
 this causal dependency from net community surplus, unique transfer provenance and evolved roles.
 
+## October14 ordinary-cell intervention
+
+The [checkpoint analysis](../plans/CHECKPOINT-ANALYSIS-PLAN.md#structural-starts-and-priced-mechanism-cases)
+selects a typical-energy mature cell with funded active transporter0, then restores one changed
+coordinate from its retained immutable haploid founder. The evolved coordinate increases measured
+uptake by about 0.6%, but both versions starve at exactly the same tick with no offspring.
+Complete pinned expense windows and four distance-selected neighbor traces retain the small
+physical consequences. Per-arm physical endpoints match the earlier sparse recording exactly.
+This is a consequential recognition change with a negative survival/reproduction result in
+the selected case, not evidence for a breadth tax or an inaccessible specialization law.
+
 ## Intended consequence
+
+The [October16 causal follow-up](../plans/CHECKPOINT-ANALYSIS-PLAN.md#october16-causal-findings)
+now establishes an individual consequence in a later ordinary neighborhood. Cell19753422
+starves at8.6 seconds; silencing enzyme3 hastens starvation to2.2 seconds. Changing only one
+enzyme-key weight instead reallocates finite recognition toward profitable chemistry and keeps
+the cell alive for80 seconds, with paid growth and positive funded work. At the common8-second
+sample it processes7.6 times more8 with equal maintenance expense. Neither version converts0
+during that interval: unused recognition capacity, rather than actual uphill spending, matters
+in this case. This is a diagnostic allele, not observed selection or complementary community
+formation. The earlier typical-cell restoration remains negative. A second cell's genuinely
+paid uphill sink is separately rescued by silencing one enzyme; broad shutdown is not a shared
+solution to both cases.
 
 Inherited chemical differences should sometimes produce qualitatively different ways of
 living in shared surroundings: gaining a usable substrate, losing protection, changing waste

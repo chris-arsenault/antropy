@@ -210,6 +210,37 @@ fn rss() -> Result<u64> {
         .parse::<u64>()?
         * 1024)
 }
+fn founder_value(w: &World, index: usize, family: &str, slot: usize, locus: usize) -> Result<f64> {
+    let founder = w
+        .genomes
+        .get(&w.cells[index].lineage)
+        .ok_or("Founder genotype unavailable")?;
+    if founder.parent.is_some() {
+        return Err("Lineage does not identify a retained founder genotype".into());
+    }
+    if founder.chromosomes.len() != 1 || w.genomes[&w.cells[index].genome].chromosomes.len() != 1 {
+        return Err("Founder-coordinate restoration requires a haploid cell and founder".into());
+    }
+    let keys = founder.chromosomes[0]
+        .chemistry
+        .keys
+        .as_ref()
+        .ok_or("Founder is not keyed")?;
+    let key = match family {
+        "receptors" => keys.receptors.get(slot),
+        "transporters" => keys.transporters.get(slot),
+        "enzymes" => keys.enzymes.get(slot),
+        "membrane" if slot == 0 => Some(&keys.membrane),
+        _ => None,
+    }
+    .ok_or("Invalid founder recognition site")?;
+    if locus == 8 {
+        Ok(key.bias)
+    } else {
+        Ok(*key.weights.get(locus).ok_or("Invalid founder locus")?)
+    }
+}
+
 fn fork(root: &Path, args: &[String]) -> Result<()> {
     if args.len() != 6 {
         return Err("Expected CHECKPOINT CELL FAMILY SLOT LOCUS VALUE".into());
@@ -223,7 +254,11 @@ fn fork(root: &Path, args: &[String]) -> Result<()> {
         .ok_or("Selected cell is no longer alive")?;
     let slot: usize = args[3].parse()?;
     let locus: usize = args[4].parse()?;
-    let value: f64 = args[5].parse()?;
+    let value: f64 = if args[5] == "founder" {
+        founder_value(&baseline, index, &args[2], slot, locus)?
+    } else {
+        args[5].parse()?
+    };
     if !value.is_finite() || locus > 8 {
         return Err("Invalid scalar intervention".into());
     }
@@ -292,7 +327,8 @@ fn fork(root: &Path, args: &[String]) -> Result<()> {
     save(
         &root.join("budget.json"),
         &json!({"source":args[0],"cell":id,"family":args[2],
-        "slot":slot,"locus":locus,"restoredValue":value,"privateStatePreserved":true,
+        "slot":slot,"locus":locus,"restoredValue":value,"alleleSource":args[5],
+        "privateStatePreserved":true,
         "mutation":false,"privateLearning":"unchanged","inheritedLearning":false,"budgets":budgets}),
     )?;
     println!("Counterfactual budgets saved: {}", root.display());

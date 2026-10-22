@@ -3,7 +3,10 @@ use super::*;
 #[test]
 fn specificity_scaled_inheritance_reaches_product_neighborhoods_without_special_targets() {
     let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
-    let config = crate::config::Config::default();
+    let config = crate::config::Config {
+        physical_mutation_rate: 0.1,
+        ..Default::default()
+    };
     for (a, b) in [(0, 138), (119, 187), (15, 240)] {
         let mut original =
             crate::genetics::Machinery::seed(&chemistry, &chemistry.source_species());
@@ -146,7 +149,10 @@ fn realized_pair_changes_report_bounds_separately_from_proposals() {
 
 #[test]
 fn machinery_mutation_preserves_pair_rate_and_replays_without_touching_disabled_rng() {
-    let c = crate::config::Config::default();
+    let c = crate::config::Config {
+        physical_mutation_rate: 0.1,
+        ..Default::default()
+    };
     let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
     let original = crate::genetics::Machinery::seed(&chemistry, &[0, 17]);
     let mut rng = Random::new(101);

@@ -35,6 +35,16 @@ or rewrite of the supply condition. Intake also includes ordinary spill, so it i
 corpse-to-survivor attribution. This establishes a delivery opportunity, not improved lifetime
 or long-term rescue; the earlier negative lifetime result remains negative.
 
+## October14 ordinary-world comparison
+
+The [checkpoint analysis](../plans/CHECKPOINT-ANALYSIS-PLAN.md#matched-live-controls)
+compares local, global and disabled recovery from the same mature all-on v56 state. Local
+admission is 169.827 material against 1.893 under global severity and zero when disabled.
+Recovery-off and global recovery retain more net biomass over the short window while their
+registered operating remainder is lower. Admission therefore responds strongly to locality,
+but this does not establish better lifespan, rescue or a preferred recovery setting. Existing
+finite-food lifetime negatives and inventory/external-boundary ownership remain controlling.
+
 ## Intended consequence
 
 Deaths near a declining colony should create finite, usable local feeding opportunities

@@ -142,3 +142,35 @@ susceptibility and machinery, rather than an explicit same/different-phenotype r
 The [research design](design/cell-interaction-research.md) owns proposed shared operations,
 conditional damaged-membrane access, accounting constraints and future bounded checks.
 This hypothesis does not advance that work ahead of ecology/climate or authorize a campaign.
+
+## H5 — Physical mutation load can erase viable inherited function
+
+**Raised by:** the user's repeated-extinction repair request, October22,2026.
+**Status:** supported as a contributor in a matched late-world comparison; weeks-long persistence
+remains unestablished. This concerns mutation frequency, independently of H1's requirement that
+large changes remain accessible.
+
+The v56 world repeatedly recovers population while losing occupied reservoir neighborhoods,
+then goes extinct at tick2,524,755. Its final parent still divides; both daughters starve within
+19 model seconds and change13 and10 recognition sites respectively. Extinction alone does not
+establish that selection favors maladaptation. The represented genome receives an expected20.6
+physical mutation opportunities per haploid birth at the old per-coordinate probability0.1.
+Useful inherited combinations can be disrupted across multiple sites before selection acts.
+
+From the same329-cell late checkpoint,600-model-second controls end at114 cells in reference,
+267 with all new mutation off,260 with physical mutation alone off, and136 with birth assimilation
+off. Ordinary behavioral mutation and paid private learning remain active in the physical-only
+control. At3,600 model seconds, a nonzero physical probability1/206 ends with526 cells versus101
+in reference,6,423 versus3,169 divisions, and4,118.5 versus1,323.8 funded biomass growth. The
+selected branch has197 more living cells than it started with; reference loses228. These are
+one checkpoint's trajectories, not independent ecological replicates or a complete cause of
+every earlier extinction.
+
+The selected default averages one physical opportunity per daughter in the current keyed
+representation. It changes neither the common heavy-tail magnitude law nor the possibility of
+large recognition and transformation innovations. Existing saved configurations retain their
+settings; prospective operator patches affect only future births. No frozen evolution, survivor
+promotion, assigned chemical role, automatic reseeding or free material/work is introduced.
+The [execution registration](plans/CHECKPOINT-ANALYSIS-PLAN.md#october22-sustained-evolution-repair-registration)
+owns the comparison and its limits. Resource accessibility, environmental change and unmeasured
+long-run population exchange remain possible additional constraints.

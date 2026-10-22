@@ -77,6 +77,44 @@ fn pending_patch_and_revision_survive_a_mid_interval_checkpoint() {
 }
 
 #[test]
+fn mutation_patch_preserves_living_genotypes_and_changes_only_future_births() {
+    let mut w = crate::diagnostics::nutrition(0.8, 2., true, false);
+    w.config.learning_retention = 0.;
+    let parent = w.genomes[&w.cells[0].genome].clone();
+    let bodies: Vec<_> = w.cells.iter().map(|c| c.body).collect();
+    let held = w.held();
+    let rng = (w.rng.0, w.genetic_rng.0, w.environment_rng.0);
+    assert!(configure(&mut w, &json!({"patch":{"physicalMutationRate":1.1}})).is_err());
+    configure(
+        &mut w,
+        &json!({"patch":{"mutationRate":0.,"physicalMutationRate":1.,
+        "mutationScale":0.08,"physicalMutationScale":0.12}}),
+    )
+    .unwrap();
+    assert_eq!(w.genomes[&parent.id].chromosomes, parent.chromosomes);
+    assert_eq!(w.cells.iter().map(|c| c.body).collect::<Vec<_>>(), bodies);
+    assert_eq!(w.held(), held);
+    assert_eq!((w.rng.0, w.genetic_rng.0, w.environment_rng.0), rng);
+    let mass = w.cells[0].mass();
+    let doubled = w.cells[0].body.map(|q| q * 2.);
+    w.cells[0].set_fixture_body(doubled);
+    w.cells[0].energy = 1.;
+    crate::lifecycle::reproduce(&mut w);
+    assert_eq!(w.cells.len(), 2);
+    for cell in &w.cells {
+        assert_ne!(w.genomes[&cell.genome].chromosomes, parent.chromosomes);
+        assert!((cell.mass() - mass).abs() < 1e-12);
+    }
+    assert_eq!(
+        World::restore(&w.snapshot().unwrap())
+            .unwrap()
+            .config
+            .physical_mutation_rate,
+        1.
+    );
+}
+
+#[test]
 fn live_off_on_restores_participation_without_refitting_genetics() {
     let mut w = world();
     let ids: Vec<_> = w.cells.iter().map(|c| c.genome).collect();

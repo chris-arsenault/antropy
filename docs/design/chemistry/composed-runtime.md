@@ -293,6 +293,13 @@ stored and can accumulate into active support. Gross attempts, including self-pr
 share each frozen substrate; simultaneous products and positive work cannot finance the
 same application's reservations. Installed product identities and group actions are unchanged.
 
+The diagnostic `flows.captured` counter is positive work only:
+`sum(a_es*max(y_es,0))`. The usable reserve receives the signed sum `sum(a_es*y_es)`;
+accepted uphill spending is their difference, `sum(a_es*max(-y_es,0))`. Subtracting ordinary
+operating fees from `captured` therefore leaves a gross remainder, not net usable return.
+Account for uphill spending and overflow/death heat, and retain actual reserve/material changes.
+Reaction heat already belongs to each conversion's work balance and is not subtracted twice.
+
 One immutable paired numerical layout serves ordinary execution and borrowed diagnostic
 row views. Accepted rows reduce their contiguous products into shared per-species scratch;
 each touched chemical receives one net material update and one gross-history update.

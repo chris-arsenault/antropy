@@ -33,6 +33,12 @@ fresh-world publication is tracked in Sulion `6d1100c2-cbf3-4994-ab7c-589d423bf8
 Open research questions remain with their design owners. A pending delivery outline does not
 establish a selected runtime equation or an implemented ecological consequence.
 
+## Analysis protocols
+
+| Plan | Scope | Status |
+| --- | --- | --- |
+| [Checkpoint-based design and feature analysis](CHECKPOINT-ANALYSIS-PLAN.md) | Matched checkpoint interventions, feature/direction coverage and causal returns | October14 screen/replacement work complete; October16 six-arm follow-up separates a paid uphill sink, selective recognition and material-gated division. Executions `3997a677-b068-4478-a168-5abcdc6c465f`, `ca409593-80a3-400a-bd4b-2ab8242b1251`; individual results and limits explicit. |
+
 ## Local deliveries
 
 | Plan | Scope | Sulion |

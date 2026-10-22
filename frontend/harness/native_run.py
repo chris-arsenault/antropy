@@ -7,6 +7,25 @@ import urllib.request
 from pathlib import Path
 
 
+class Operator:
+    """One authenticated request path; uncertain writes are never retried."""
+
+    def __init__(self, base="http://192.168.66.3:8095"):
+        self.base = base
+        self.headers = {"Authorization": "Bearer " + os.environ["BIOTROPY_TOKEN"]}
+
+    def request(self, path, body=None):
+        data = None if body is None else json.dumps(body).encode()
+        req = urllib.request.Request(self.base + path, data=data, headers={
+            **self.headers, "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=35) as response:
+            return json.load(response)
+
+    def control(self, generation, op, payload):
+        return self.request("/api/control", {
+            "generation": generation, "op": op, "payload": payload})
+
+
 def merge(target, patch):
     for key, value in patch.items():
         if isinstance(value, dict) and isinstance(target.get(key), dict):
@@ -52,14 +71,7 @@ def main():
         parser.error("preview cannot save, load or change running state")
     if args.seed is not None and args.apply != "restart":
         parser.error("--seed requires --apply restart")
-    headers = {"Authorization": "Bearer " + os.environ["BIOTROPY_TOKEN"]}
-
-    def request(path, body=None):
-        data = None if body is None else json.dumps(body).encode()
-        req = urllib.request.Request(args.base + path, data=data, headers={
-            **headers, "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=35) as response:
-            return json.load(response)
+    request = Operator(args.base).request
 
     before = request("/api/status")
     active_generation = before["generation"]

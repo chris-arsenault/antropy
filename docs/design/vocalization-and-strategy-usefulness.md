@@ -40,6 +40,21 @@ retain funded bodies and their upkeep. Existing interference, periodic geometry,
 continuation and newborn reset tests remain authoritative. No larger alphabet, relay, trust label
 or hidden identity was introduced. Diagnostic responses are not ordinary founder policies.
 
+## October14 ordinary-world comparison
+
+The [checkpoint analysis](../plans/CHECKPOINT-ANALYSIS-PLAN.md#matched-live-controls)
+rewinds the same mature v56 world for independent speech, listening, content, bearing, context,
+gain, learning and whole-layer controls. Speech/content/listening removals reduce short-window
+retained biomass and usable reserve; bearing removal has little net biomass effect. These are
+ordinary population-level information consequences, not identified speaker profits or symbols.
+The constructed full-investment result favoring silence remains negative.
+
+Strategic gain reduces paid learning expense relative to neutral gain, and its interaction with
+reinforcement is nonadditive. Frozen masks establish private-byte, recurrent-state and contact-
+display influence under matched physical state and noise. Copied-state lifecycle return and
+learned anticipation remain unmeasured. Positive capture counters exclude uphill spending,
+and large gross operating remainders mostly overflow; they cannot serve as strategic fitness.
+
 ## Purpose
 
 Make paid vocalization and slow strategic control useful sources of conditional behavior.

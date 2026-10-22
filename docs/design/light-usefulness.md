@@ -37,6 +37,21 @@ Live `geographicShade`, `opticalColumn`, `opticalReach` and `opticalPowerDensity
 exposure at a completed physiology boundary, preserve physical film, and persist through saves.
 The existing independent activity switches remove sensing, building and emission participation.
 
+## October14 ordinary-world comparison
+
+The [checkpoint analysis](../plans/CHECKPOINT-ANALYSIS-PLAN.md#replacement-and-temporal-coverage)
+separates geographic attenuation, sensing, cover activity and emission in an all-on mature
+population. Removing geographic shade improves retained biomass and usable reserves at two
+saved states through replacement and actual source renewals. This effect is accompanied by
+additional externally funded chemical work; mature nominal material imports are identical.
+Much of the remaining usable work overflows, so capture is not payer profit. The result does
+not overturn the chemistry-specific cover opportunity or establish full shelter replacement return.
+
+Paid emission costs 132.108 work against 0.010801 recaptured emitted work in the short mature
+reference. Emission-off improves retained biomass/reserve in that comparison. Its information
+return to the paying cell or descendants remains unestablished. Ordinary startup stays enabled;
+this result selects a question about use and return, not automatic feature removal.
+
 ## Purpose
 
 Make illumination, shade and cell-paid emission consequential choices whose usefulness depends

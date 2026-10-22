@@ -101,6 +101,13 @@ When paused mid-interval, the validated patch remains visibly pending until ordi
 completes that interval. No elapsed work is reinterpreted and no extra ticks occur in the request.
 Check effective/pending readback rather than assuming acceptance means immediate application.
 
+`mutationRate`, `mutationScale`, `physicalMutationRate` and `physicalMutationScale` are
+prospective live settings: they affect future births, preserving every existing genotype,
+funded body and current chemical capability. They use the same atomic validation, completed
+physiology boundary, revision history and checkpoint persistence as other live settings.
+This permits correcting mutation load on a restored evolved population without a fresh-world
+restart. No adaptation is retroactively applied to living cells.
+
 `reflexLearning` and `strategicLearning` independently gate each layer's plasticity and paid
 learning under the existing `learning` policy. `learningRetention` still controls birth-local
 transmission for enabled layers; disabled layers do not assimilate private traces at birth.
@@ -111,6 +118,9 @@ plasticity alleles; there is no per-chemical or per-program operator setting. Us
 `config/activity-reinforcement-off.json` for a shared-checkpoint ablation and inspect effective
 `runControls` before attributing a window to the change. All runtime switches preserve funded
 bodies. Physical v56 cannot load v55 checkpoints and does not migrate them.
+Reinforcement also requires the plastic reflex policy: `reflexLearning=false` or
+`learning="static"` disables its influence/update even when `activityReinforcement=true`.
+An allocation-only paid-learning policy is not currently expressible by these controls.
 Expense channels `reflexLearning` and
 `strategicLearning` partition the existing `learning` total; they are not additional debits.
 `strategicContext` gates direct slow-context inputs to reflex inference, and `strategicGain`
@@ -150,6 +160,21 @@ Use `--config config/activity-off.json` or `activity-on.json` for runtime group 
 capture directory. Save-point output identifies the manual checkpoint. No-argument invocation
 reads status. Reuse ordinary pause/run/inspection for the chosen observation period and preserve
 each variant's observations before rewinding; no exact tick horizon is imposed.
+
+For a bounded paired screen, `checkpoint_compare.py` restores the same ordinary saved anchor
+before each selected arm, sends an explicit unchanged-value reference patch, settles pending
+configuration through existing stepping, and retains ledger intervals and operator captures
+before rewind. It restores and resumes the anchor after a successful batch:
+
+```bash
+with-cred -- python3 frontend/harness/checkpoint_compare.py --anchor CHECKPOINT_ID --arms reference reinforcement-off --seconds 120 --output frontend/harness/artifacts/NEW_COMPARISON
+```
+
+The helper is an operator client, with local artifact and exposure limits; it adds no endpoint
+or scheduler. Auth/transport failures stop the batch, and uncertain writes are never retried.
+Inspect current status after a failed batch. The [analysis protocol and findings](plans/CHECKPOINT-ANALYSIS-PLAN.md)
+document sham handling, information/control composition, native restored studies and the
+limits of interpreting a short population comparison.
 
 For an explicit request to tune or stabilize the world, selecting configurations and restarting
 unsuitable or empty runs are already authorized. The user does not require old-world preservation

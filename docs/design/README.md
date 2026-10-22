@@ -1,5 +1,15 @@
 # Current design and work order
 
+October22 [sustained-evolution repair](../hypothesis-log.md#h5--physical-mutation-load-can-erase-viable-inherited-function)
+isolates excessive physical mutation input as a contributor to failed replacement. The keyed
+haploid representation receives about20.6 physical opportunities per birth at the former0.1
+probability. A matched nonzero1/206 branch ends a3,600-second renewal comparison at526 cells
+versus101 in reference, with ordinary behavioral mutation, paid learning and assimilation on.
+New-world defaults now average one physical opportunity per daughter while preserving the
+shared heavy-tail magnitude law. Existing mutation rates/scales also support prospective live
+patches: living genomes, funded capacities and chemistry remain unchanged. Continue the evolved
+world under the selected rate; no reseeding system or guarantee of weeks-long survival is added.
+
 October14 local physical v56 implements a specific swarm mechanism:
 [activity-dependent output plasticity](controller.md#learning-and-module-boundary).
 One paid update reinforces accepted participation and relaxes inactivity across existing
@@ -9,6 +19,25 @@ participant-loss replacement and withdrawal checks establish physical consequenc
 The [allocation plan](../plans/SWARM-ALLOCATION-PLAN.md) preserves negative fixtures.
 This corrects the earlier substitution of authored reflexes and operator controls for
 experience-driven allocation; it does not claim an implemented habitat-transition system.
+
+October14 [checkpoint analysis](../plans/CHECKPOINT-ANALYSIS-PLAN.md#october14-execution-findings)
+executes all19 config contrasts, context clamp, a gain interaction,30 structural starts,
+six saved-world replacement replays and a typical-cell ancestor-key intervention. Reinforcement
+favors retained stocks at both anchors while its operating-remainder effect varies. Generic
+reflex-learning cost, strong geographic exposure effects and ordinary message-content
+consequences are separated from mechanism availability. Positive captured work excludes uphill
+spending and much of the remainder overflows; neither proves payer return. The next recommended
+design separates paid allocation learning from recurrent plasticity using existing clock/gain.
+No additional ecological mechanism or automatic disablement is implemented by this analysis.
+
+October16 [causal follow-up](../plans/CHECKPOINT-ANALYSIS-PLAN.md#october16-causal-findings)
+identifies two different failures in ordinary captured cells: a paid uphill enzyme sink and
+finite recognition poorly allocated to profitable substrates. Silencing one enzyme rescues
+the first cell but kills the second sooner; changing one key weight instead keeps the second
+alive with paid growth. Nearly full-energy, full-size cells at both saved times are blocked by
+division material, not work. Prioritize conditional activity among chemically differentiated
+inherited programs and actual payer returns; lower generic learning cost alone does not resolve
+these constraints. No new runtime law or ordinary-startup disablement is selected by these cases.
 
 October 13 local v55 delivery adds atomic live configuration, persisted effective controls and
 paused checkpoint rewind for feature comparisons. Local mortality severity now uses fixed

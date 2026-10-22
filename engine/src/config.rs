@@ -243,7 +243,9 @@ impl Default for Config {
             motor_efficiency: 0.5,
             mutation_rate: 0.0015,
             mutation_scale: 0.08,
-            physical_mutation_rate: 0.1,
+            // One expected physical mutation opportunity per keyed haploid birth:
+            // 24 body + 17*9 recognition + 16 centers + 8 angles + 4 inward + 1 count.
+            physical_mutation_rate: 1. / 206.,
             physical_mutation_scale: 0.12,
             mutation_kind: "gaussian".into(),
             ploidy: "haploid".into(),

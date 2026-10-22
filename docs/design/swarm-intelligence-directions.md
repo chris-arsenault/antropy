@@ -20,7 +20,35 @@ Antropy's cells reproduce independently; a benefit to a neighborhood does not au
 repay the cell that produces it. Cooperation, competition, eavesdropping and withdrawal are all
 possible consequences. Homeostasis remains a valid outcome.
 
+## October14 ordinary-world comparisons
+
+The [checkpoint analysis](../plans/CHECKPOINT-ANALYSIS-PLAN.md#october14-execution-findings)
+executes the independent controls, current-law causal fixtures and two saved-world replacement
+comparisons. Reinforcement favors retained biomass and usable reserves at both anchors; its
+operating-remainder effect and sampled descendant counts vary. Full reflex-learning removal
+improves short-window retained stocks even though reinforcement alone has a favorable incremental
+price. The current policy cannot retain allocation learning while disabling recurrent plasticity.
+Separating those paid paths with the existing clock/gain is the next recommended design;
+the allocation-only combination's ecological benefit is untested.
+
+Chemical export causes recipient response in the physical fixture, but its complete operating
+expense exceeds even positive captured work. Ordinary content/listening removals have adverse
+short stock consequences; full speaker payback and evolved conventions remain unestablished.
+Linked paths record motion and replacement, with insufficient food-edge/whole-habitat occupancy
+coverage for exchange or founding. No spatial commitment/abandonment system is claimed delivered.
+
 ## Common mathematical and physical basis
+
+The [October16 causal follow-up](../plans/CHECKPOINT-ANALYSIS-PLAN.md#october16-causal-findings)
+separates useful effort from chemical selectivity in ordinary captured cells. Silencing one
+enzyme prevents observed starvation in one cell but accelerates it in another. In the latter,
+one inherited recognition-weight edit preserves useful conversion and changes starvation into
+paid growth over the bounded window. Accepted participation is therefore not a sufficient
+usefulness criterion, and whole-enzyme effort cannot choose between the substrates recognized
+inside that program. Prioritize conditional allocation among chemically differentiated inherited
+programs, measuring actual accepted transfers and retained/funded work. Cheaper generic learning
+alone does not address those relationships. These are individual causal results; stigmergic
+coordination, evolved specialization and spatial commitment retain their separate questions.
 
 Use the existing local chemical mixture, inherited recognition and transformation profiles,
 funded body capacities, neural state and action-effort vector. The controller selects bounded

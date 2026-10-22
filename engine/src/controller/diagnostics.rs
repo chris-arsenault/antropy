@@ -68,6 +68,20 @@ pub fn perturb_weights(genome: &mut Genome, rng: &mut Random) {
     mutate_vector(&mut genome.weights, rng, 0.1, 0.03, 16.);
 }
 
+/// A diagnostic lesion of one enzyme's output row, retaining every other inherited connection.
+/// The negative drive exceeds the maximum positive acquired allocation bias.
+pub fn silence_enzyme(base: &Genome, slot: usize) -> Result<Genome, String> {
+    if slot >= crate::organism::MAX_ENZYMES {
+        return Err("Invalid enzyme slot".into());
+    }
+    let mut altered = base.clone();
+    let output = ACTIVITY + slot;
+    altered.weights[OUTPUT + output * HIDDEN..OUTPUT + (output + 1) * HIDDEN].fill(0.);
+    altered.weights[OUTPUT_BIAS + output] = -16.;
+    validate(&altered)?;
+    Ok(altered)
+}
+
 #[derive(Clone, Default, Deserialize)]
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct Changes {
@@ -148,6 +162,26 @@ pub fn change(base: &Genome, c: &Changes) -> Result<Genome, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn enzyme_lesion_preserves_other_actions_despite_maximum_allocation() {
+        let mut base = seed();
+        base.plasticity[0] = 1.;
+        let altered = silence_enzyme(&base, 2).unwrap();
+        let state = State {
+            allocation: [1.; allocation::CHANNELS],
+            ..State::default()
+        };
+        let c = Config::default();
+        let mut original = act(&base, &[0.3; INPUTS], &mut state.clone(), &c, false);
+        let actual = act(&altered, &[0.3; INPUTS], &mut state.clone(), &c, false);
+        assert_eq!(actual.activity[2], 0.);
+        original.activity[2] = 0.;
+        assert_eq!(
+            serde_json::to_value(actual).unwrap(),
+            serde_json::to_value(original).unwrap()
+        );
+        assert!(silence_enzyme(&base, 8).is_err());
+    }
     #[test]
     fn authored_effort_uses_kernel_activation_without_changing_parent() {
         let original = seed();
