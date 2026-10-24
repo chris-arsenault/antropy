@@ -271,15 +271,15 @@ pub fn learning_rate(gain: f64, c: &Config) -> f64 {
     }
 }
 
-pub fn seed_state(seed: u64) -> super::State {
-    let mut state = super::State::default();
+pub fn seed_state(g: &super::Genome, seed: u64) -> super::State {
+    let mut state = super::create_state(g);
     state.strategy.noise = Random::new(seed);
     state
 }
-pub fn daughter(parent: &super::State, seed: u64) -> super::State {
+pub fn daughter(g: &super::Genome, parent: &super::State, seed: u64) -> super::State {
     super::State {
         strategy: parent.strategy.child(seed),
-        ..super::State::default()
+        ..super::create_state(g)
     }
 }
 

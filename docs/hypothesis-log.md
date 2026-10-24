@@ -174,3 +174,42 @@ promotion, assigned chemical role, automatic reseeding or free material/work is 
 The [execution registration](plans/CHECKPOINT-ANALYSIS-PLAN.md#october22-sustained-evolution-repair-registration)
 owns the comparison and its limits. Resource accessibility, environmental change and unmeasured
 long-run population exchange remain possible additional constraints.
+
+## H6 — Activity assimilation permanently amplifies inherited output bias
+
+**Raised by:** the user's October24 correction that the goal is indefinite evolving persistence,
+not a longer extinction horizon. **Status:** a directional inheritance defect is reproduced and
+corrected in physical v57; its share of whole-world extinction remains unresolved.
+
+The October22 change adjusted physical mutation probability. It did not repair this mechanism.
+V56 adds each permitted acquired actuator bias to an ordinary neural output weight at birth.
+Private response relaxes when activity stops, but the earlier additions are now immutable
+genotype values and cannot relax. Enzyme activity is nonnegative, so its repeated assimilation
+pushes inherited bias upward even without random mutation or evidence of useful return.
+This can persistently favor costly processing and reduce conditional control. Accepted activity
+is participation, not a measure of benefit; the selected uphill-loss cases from October16 remain
+relevant consequences rather than evidence that every uphill reaction is waste.
+A live v56 reinforcement ablation could remove current private influence but could not remove
+ancestral additions already stored in ordinary weights. Those earlier contrasts therefore do
+not isolate the mechanism's complete inherited history.
+
+The retained final21 ending records of the extinct v56 world have enzyme-policy bias median14.21
+across168 stored slots, including inactive slots; two active biases of the final dividing parent
+are at16. This is a selected terminal history, not a prevalence estimate or an isolated causal
+intervention. A controller regression separates the mechanism from ecology:32 identical paid
+activity/birth cycles with no mutation move an initially zero policy bias to16 in v56. Inactivity
+cannot remove it in descendants. No world advancement is needed to reproduce the defect.
+
+V57 stores the assimilated responsiveness separately in the immutable birth genotype. New private
+response starts at that bounded vector and follows the existing paid affine update. Birth copies
+the retained current response instead of adding it to ordinary policy weights. Repeated identical
+experience converges to the same response, and withdrawal removes the inherited response through
+ordinary paid relaxation. Diploid expression, recombination, common behavioral mutation, enzyme
+program changes, physical birth and checkpoint persistence include the vector. No new reward,
+successful-mutant filter, population repair, resource multiplier or independent control is added.
+Recurrent plasticity and its separate assimilation remain unchanged.
+
+The regression first fails against v56 with actual bias16 versus expected0. After correction it
+covers repeated births and withdrawal; physical fission/budding checks preserve material and work
+while transmitting responsiveness without rewriting policy. The goal is a repair of a known
+directional failure, not a declaration of indefinite survival from another finite trajectory.

@@ -1,5 +1,14 @@
 # Current design and work order
 
+October24 physical v57 corrects a directional inheritance defect in activity reinforcement.
+V56 repeatedly added use-dependent response into ordinary output weights; inactivity could
+relax private response but could not remove ancestral additions. A zero-mutation regression
+reproduces an initially zero enzyme-policy bias reaching16 after32 repeated birth/experience
+cycles. The [inheritance correction](../hypothesis-log.md#h6--activity-assimilation-permanently-amplifies-inherited-output-bias)
+keeps a separate bounded birth-genotype response that remains reversible under the same paid
+learning flow. Mutation settings, resource supply, costs and default-on features are unchanged.
+This repairs an identified mechanism; it does not identify every contribution to past collapse.
+
 October22 [sustained-evolution repair](../hypothesis-log.md#h5--physical-mutation-load-can-erase-viable-inherited-function)
 isolates excessive physical mutation input as a contributor to failed replacement. The keyed
 haploid representation receives about20.6 physical opportunities per birth at the former0.1

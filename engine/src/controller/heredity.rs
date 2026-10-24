@@ -17,10 +17,9 @@ pub fn assimilate_layers(
     }
     let observed = observed_state(state);
     for (i, value) in observed.allocation.iter().enumerate() {
-        let bias = OUTPUT_BIAS + allocation::ports(i).1;
-        child.weights[bias] = (child.weights[bias]
-            + retention[2] as f32 * allocation::gain(expressed) * value)
-            .clamp(-16., 16.);
+        let acquired = value - expressed.responsiveness[i];
+        child.responsiveness[i] =
+            (allele.responsiveness[i] + retention[2] as f32 * acquired).clamp(-1., 1.);
     }
     child.strategy = allele
         .strategy
@@ -37,7 +36,14 @@ pub fn mutate(g: &mut Genome, rng: &mut Random, c: &Config) -> bool {
         1.,
     );
     let strategy = c.features.strategy && g.strategy.mutate(rng, c);
-    weights || plasticity || strategy
+    let responsiveness = mutate_vector(
+        &mut g.responsiveness,
+        rng,
+        c.mutation_rate,
+        c.mutation_scale,
+        1.,
+    );
+    weights || plasticity || strategy || responsiveness
 }
 pub fn express(a: &Genome, b: &Genome) -> Genome {
     let mean = |x: &[f32], y: &[f32]| {
@@ -49,6 +55,7 @@ pub fn express(a: &Genome, b: &Genome) -> Genome {
     Genome {
         weights: mean(&a.weights, &b.weights).into(),
         plasticity: mean(&a.plasticity, &b.plasticity),
+        responsiveness: std::array::from_fn(|i| (a.responsiveness[i] + b.responsiveness[i]) * 0.5),
         strategy: strategic::Genome::express(&a.strategy, &b.strategy),
     }
 }
@@ -56,6 +63,9 @@ pub fn recombine(a: &Genome, b: &Genome, rng: &mut Random, kind: &str) -> Genome
     Genome {
         weights: combine(&a.weights, &b.weights, rng, kind).into(),
         plasticity: combine(&a.plasticity, &b.plasticity, rng, kind),
+        responsiveness: combine(&a.responsiveness, &b.responsiveness, rng, kind)
+            .try_into()
+            .unwrap(),
         strategy: if rng.unit() < 0.5 {
             a.strategy.clone()
         } else {
@@ -67,15 +77,23 @@ pub fn genome_distance(a: &Genome, b: &Genome) -> f64 {
     (a.weights
         .iter()
         .chain(&a.plasticity)
+        .chain(&a.responsiveness)
         .chain(a.strategy.values())
         .zip(
             b.weights
                 .iter()
                 .chain(&b.plasticity)
+                .chain(&b.responsiveness)
                 .chain(b.strategy.values()),
         )
         .map(|(x, y)| (*x as f64 - *y as f64).powi(2))
         .sum::<f64>()
-        / (PARAMETERS + 11 + strategic::PARAMETERS + 11 + strategic::HIDDEN + 2) as f64)
+        / (PARAMETERS
+            + 11
+            + allocation::CHANNELS
+            + strategic::PARAMETERS
+            + 11
+            + strategic::HIDDEN
+            + 2) as f64)
         .sqrt()
 }

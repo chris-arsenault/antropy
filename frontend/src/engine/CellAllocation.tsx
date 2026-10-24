@@ -18,13 +18,21 @@ export function CellAllocation({ cell, control }: { cell: CellState; control: Co
       <p>
         Accepted activity reinforces response while learning is paid; inactivity relaxes it. Shared
         rate {n(learned.rate)} per paid model second, bias gain {n(learned.gain)}. These tendencies
-        do not measure an action’s benefit.
+        do not measure an action’s benefit. Inherited response remains able to relax; it does not
+        accumulate into the underlying neural weights.
       </p>
       <Table
-        columns={["Actuator", "Accepted activity", "Response state", "Acquired bias"]}
+        columns={[
+          "Actuator",
+          "Accepted activity",
+          "Inherited response",
+          "Current response",
+          "Bias",
+        ]}
         rows={learned.ports.map(([input], i) => [
           LABELS[i],
           n(cell.inputs[input]),
+          n(learned.inherited?.[i] ?? 0),
           n(learned.state[i]),
           n(learned.bias[i]),
         ])}

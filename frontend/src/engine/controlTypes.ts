@@ -16,6 +16,7 @@ export interface ControlView {
   pendingHearing: number[];
   activityReinforcement: {
     state: number[];
+    inherited: number[];
     bias: number[];
     ports: [number, number][];
     enabled: boolean;

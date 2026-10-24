@@ -127,6 +127,7 @@ requirements while retaining ordinary growth, reproduction and basal metabolism 
 | Behavioral weights and plasticity genes | Immutable inherited genotype | Chromosomes, assimilation, crossover and mutation |
 | Investments and chemical alleles | Immutable birth genotype | Current chromosomes, crossover and mutation |
 | Acquired recurrent traces | Paid bounded local updates | Retained delta enters offspring baseline weights |
+| Acquired actuator responsiveness | Paid bounded response to accepted activity | V57 copies retained response into a bounded birth-genotype vector; it remains reversible in the newborn |
 | Hidden state, byte, contacts and receptor baseline | Individual experience | Private state resets; receptors initialize locally |
 | Heading and local division axis | Physical orientation | Independent uniform newborn headings and one uniformly drawn division axis |
 | Age | Time since the existing birth tick | Newborn age zero; a budding parent keeps its age |
@@ -145,6 +146,14 @@ A budding parent keeps its own experience without repeatedly assimilating into i
 Default retention is one. This explicit artificial inheritance rule is not a claim about
 bacterial genetic memory, and its adaptive usefulness in the new chemistry remains open.
 Static learning and zero retained learning are distinct interventions.
+
+V57 keeps actuator responsiveness separate from ordinary neural weights. Birth-local assimilation
+copies the retained current response, rather than adding its bias into the underlying policy.
+The newborn's response starts at its expressed birth vector and continues the same paid
+activity/inactivity update. This removes v56's one-way accumulation across generations without
+disabling learning or mutation. Fourteen bounded chromosomal values use the existing behavioral
+mutation and recombination laws; they create no material or work. Recurrent assimilation remains
+the existing separate rule above.
 
 <a id="bodies-policy-composition-and-mutation"></a>
 

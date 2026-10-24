@@ -14,7 +14,7 @@ mod physiology;
 #[cfg(test)]
 #[path = "world_restore_tests.rs"]
 mod restore_tests;
-pub const VERSION: u32 = 56;
+pub const VERSION: u32 = 57;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     pub tick: u64,
@@ -165,7 +165,10 @@ impl World {
                 ended: crate::ancestry::ALIVE,
                 cause: crate::ancestry::Cause::Alive,
             });
-            cell.brain = crate::controller::strategic::seed_state(environment_rng.next_u64());
+            cell.brain = crate::controller::strategic::seed_state(
+                &compiled.chromosome.behavior,
+                environment_rng.next_u64(),
+            );
             cells.push(cell);
         }
         let next_cell = cells.len() as u64 + 1;

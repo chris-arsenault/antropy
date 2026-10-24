@@ -132,7 +132,7 @@ impl Cell {
             inventory: inventory.into(),
             energy: c.founder_energy,
             damage: 0.,
-            brain: State::default(),
+            brain: crate::controller::create_state(&compiled.chromosome.behavior),
             receptors: [0.; 4],
             inward_receptors: [0.; 4],
             photoreceptor: 0.,

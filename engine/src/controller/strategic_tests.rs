@@ -54,7 +54,7 @@ fn both_layers_assimilate_once_and_strategic_chromosome_changes_distance() {
         controller::genome_distance(&g, &controller::assimilate(&g, &g, &state, 0.)),
         0.
     );
-    let daughter = daughter(&state, 123);
+    let daughter = daughter(&child, &state, 123);
     assert!(daughter.strategy.traces.iter().all(|v| *v == 0.));
     let child_again = controller::assimilate(&child, &child, &daughter, 1.);
     assert_eq!(controller::genome_distance(&child, &child_again), 0.);

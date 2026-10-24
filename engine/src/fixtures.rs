@@ -90,7 +90,10 @@ pub fn install(w: &mut World, value: &Value) -> Result<Value, String> {
         c.x = a.x;
         c.y = a.y;
         c.heading = a.heading;
-        c.brain = controller::strategic::seed_state(environmental.next_u64());
+        c.brain = controller::strategic::seed_state(
+            &g.compiled.as_ref().unwrap().chromosome.behavior,
+            environmental.next_u64(),
+        );
         if f.mature {
             let funded = fund(c, g, w)?;
             built += funded.0;

@@ -427,7 +427,14 @@ fn intervene(w: &mut World, v: &Value) -> Result<Value, String> {
             w.genomes.insert(g.id, g);
         }
         if v.get("resetMemory").and_then(Value::as_bool) == Some(true) {
-            cell.brain = crate::controller::State::default();
+            cell.brain = crate::controller::create_state(
+                &w.genomes[&cell.genome]
+                    .compiled
+                    .as_ref()
+                    .unwrap()
+                    .chromosome
+                    .behavior,
+            );
         }
         let compiled = w.genomes[&cell.genome].compiled.as_ref().unwrap();
         sensing::initialize(&mut cell, compiled, &w.config, &w.field);
@@ -541,7 +548,10 @@ fn load_program_fixture(
             rng.unit() * std::f64::consts::TAU,
         );
         cell.energy = cell.energy_capacity(&w.config);
-        cell.brain = crate::controller::strategic::seed_state(w.environment_rng.next_u64());
+        cell.brain = crate::controller::strategic::seed_state(
+            &g.compiled.as_ref().unwrap().chromosome.behavior,
+            w.environment_rng.next_u64(),
+        );
         cell.inventory.fill(0.001);
         if dense {
             cell.damage = 0.5;

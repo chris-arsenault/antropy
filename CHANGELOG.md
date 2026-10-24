@@ -2,6 +2,21 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-10-24 — Keep inherited activity response reversible
+
+- Fixed a directional inheritance defect: repeated activity assimilation permanently added
+  output bias across generations, while inactivity could relax only the private additions.
+  The same experience could therefore drive inherited activity toward saturation without
+  requiring a mutation or a useful return.
+- Birth now transmits a separate bounded responsiveness vector. It continues the same paid
+  activity/relaxation law in the newborn and leaves ordinary policy weights intact. Mutation,
+  chemical tradeoffs, resource supply and action costs remain active with unchanged settings.
+- Added regressions for repeated birth/withdrawal, conservative physical reproduction and
+  checkpointed response. The inspector distinguishes inherited from current responsiveness.
+- Physical checkpoint v57 persists the new birth vector without migrating older formats.
+  This repairs a mechanism that can undermine adaptation; it does not establish that every
+  previous extinction has the same cause or guarantee a particular ecosystem trajectory.
+
 ## 2026-10-22 — Preserve physical adaptations through reproduction
 
 - Calibrated ordinary physical mutation probability to1/206, averaging one mutation opportunity

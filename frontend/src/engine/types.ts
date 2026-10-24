@@ -174,7 +174,7 @@ export interface Genotype {
   learned: number;
   mutated: boolean;
   chromosomes: {
-    behavior: { weights: number[]; plasticity: number[] };
+    behavior: { weights: number[]; plasticity: number[]; responsiveness: number[] };
     physical: number[];
     chemistry: import("./bindingTypes").Machinery;
   }[];

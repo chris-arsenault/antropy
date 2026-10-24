@@ -62,7 +62,11 @@ fn child(w: &mut World, parent: &Cell, offset: [f64; 2]) -> Cell {
     crate::physiology::express(&mut cell, compiled);
     cell.born = w.tick;
     cell.generation += 1;
-    cell.brain = controller::strategic::daughter(&parent.brain, w.environment_rng.next_u64());
+    cell.brain = controller::strategic::daughter(
+        &compiled.chromosome.behavior,
+        &parent.brain,
+        w.environment_rng.next_u64(),
+    );
     cell.action = controller::Action::default();
     cell.contacts = [0.; 4];
     cell.activity = Default::default();

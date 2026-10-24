@@ -149,8 +149,11 @@ row budget. The [governing law](chemistry/composed-runtime.md#prepared-execution
 specifies the exact update and incremental work prices. `activityReinforcement` is default-on,
 independently live-configurable and observable in selected-cell private inspection. Off retains
 private state; static/reflex-learning-off removes influence and freezes its paid clock.
-Birth-local assimilation adds the permitted bias to offspring once, then clears the private
-response. Body capacities remain birth-fixed. The
+V57 birth-local assimilation copies the permitted current response into a separate bounded
+chromosomal `responsiveness` vector. A newborn expresses that vector as its initial response;
+paid inactivity can relax it, and repeated experience does not accumulate into ordinary output
+weights. This corrects v56's irreversible bias additions. Reflex recurrent traces, byte and
+pending hearing reset at birth. Body capacities remain birth-fixed. The
 [delivery plan](../plans/SWARM-ALLOCATION-PLAN.md) records actual history-dependent allocation,
 product-created response, replacement and relaxation, including negative physical fixtures.
 

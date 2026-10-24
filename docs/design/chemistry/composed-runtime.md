@@ -267,9 +267,25 @@ absolute strength once to that row's budget. All chemical identities use the sam
 its incremental expense while retaining private state; static or disabled reflex learning also
 removes influence and stops its paid clock. Added learning expense is `14/(24*24)` of the
 existing reflex learning price; inference upkeep adds `14/3292` of reflex controller upkeep.
-Both use existing prices and accounts. At birth the permitted acquired bias assimilates once
-into the daughter's inherited output bias, followed by private-response reset. No parent or
-shared genotype is rewritten. Physical v56 persists response state without migrating v55.
+Both use existing prices and accounts. Physical v57 corrects birth transmission: each chromosome
+stores a separate bounded responsiveness vector rho, and birth assimilation uses
+`rho_child=clip(rho_allele+learningRetention*(z_parent-rho_expressed),-1,1)` when permitted.
+Thus no new experience or zero retention preserves the allele; full retention in the ordinary
+haploid case copies the current response. New private response starts at the expressed
+birth vector and then follows the same paid affine flow. The inherited neural output weights
+are not changed by this operator. Repeating the same experience across generations therefore
+approaches the same response instead of adding another bias on every birth; inactivity can
+remove an inherited response. Recurrent traces, private byte and pending hearing still reset.
+Diploid expression averages the vector, ordinary recombination transmits its values, and the
+existing behavioral mutation law acts on its bounded coordinates. Enzyme duplication/deletion
+moves/removes the corresponding response along with its neural ports. No parent or shared
+genotype is rewritten. Physical v57 persists the vector without migrating v56.
+
+The v56 implementation added `3*abs(alpha)*z_parent` to ordinary output bias at every birth.
+Private relaxation could not remove those earlier additions. Since enzyme accepted activity
+is nonnegative, this supplied a directional hereditary bias even with random mutation disabled;
+it did not depend on whether the accepted reaction repaid its cost. The corrected representation
+preserves performance reinforcement without permanently rewriting the conditional policy.
 
 Local chemical production, depletion and shared donor competition supply and change the
 stimulus. No task demand variable, role assignment, reward or global target is added.

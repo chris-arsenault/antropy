@@ -33,6 +33,7 @@ pub fn speech(g: &mut Genome, byte: u8, effort: f32) {
     }
 }
 pub fn duplicate(g: &mut Genome, source: usize, destination: usize) {
+    g.responsiveness[4 + destination] = g.responsiveness[4 + source];
     let (from, to) = (activity_input(source), activity_input(destination));
     for h in 0..HIDDEN {
         let value = g.weights[h * INPUTS + from] * 0.5;
@@ -46,6 +47,7 @@ pub fn duplicate(g: &mut Genome, source: usize, destination: usize) {
     g.weights[OUTPUT_BIAS + to] = g.weights[OUTPUT_BIAS + from];
 }
 pub fn remove(g: &mut Genome, slot: usize) {
+    g.responsiveness[4 + slot] = 0.;
     for h in 0..HIDDEN {
         g.weights[h * INPUTS + activity_input(slot)] = 0.;
     }
@@ -57,6 +59,7 @@ pub fn remove(g: &mut Genome, slot: usize) {
 pub(crate) fn permute(g: &Genome, order: [usize; crate::organism::MAX_ENZYMES]) -> Genome {
     let mut result = g.clone();
     for (to, from) in order.into_iter().enumerate() {
+        result.responsiveness[4 + to] = g.responsiveness[4 + from];
         for h in 0..HIDDEN {
             result.weights[h * INPUTS + activity_input(to)] =
                 g.weights[h * INPUTS + activity_input(from)];

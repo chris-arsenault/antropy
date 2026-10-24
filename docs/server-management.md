@@ -117,7 +117,10 @@ response state for later re-enable. Its rate and magnitude use the existing inhe
 plasticity alleles; there is no per-chemical or per-program operator setting. Use
 `config/activity-reinforcement-off.json` for a shared-checkpoint ablation and inspect effective
 `runControls` before attributing a window to the change. All runtime switches preserve funded
-bodies. Physical v56 cannot load v55 checkpoints and does not migrate them.
+bodies. Physical v57 stores bounded birth-assimilated actuator responsiveness separately from
+ordinary neural weights. It cannot load v56 checkpoints and does not migrate them; publication
+therefore starts a fresh ordinary server world when no compatible checkpoint exists. The live
+`activityReinforcement` control gates the same inherited/current response and its paid updates.
 Reinforcement also requires the plastic reflex policy: `reflexLearning=false` or
 `learning="static"` disables its influence/update even when `activityReinforcement=true`.
 An allocation-only paid-learning policy is not currently expressible by these controls.

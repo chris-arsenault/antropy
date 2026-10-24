@@ -70,12 +70,20 @@ pub fn replace(w: &mut World, v: &Value) -> Result<Value, String> {
     }
     for i in 0..w.cells.len() {
         let mut cell = w.cells[i].clone();
-        cell.brain = controller::State::default();
+        cell.brain = controller::create_state(
+            &w.genomes[&cell.genome]
+                .compiled
+                .as_ref()
+                .unwrap()
+                .chromosome
+                .behavior,
+        );
         if cell.lineage == r.lineage
             && let Some(g) = r.genotypes.get(&cell.genome)
         {
             cell.genome = g.id;
             let capabilities = g.compiled.as_ref().unwrap();
+            cell.brain = controller::create_state(&capabilities.chromosome.behavior);
             crate::physiology::express(&mut cell, capabilities);
             sensing::initialize(&mut cell, capabilities, &w.config, &w.field);
             crate::ancestry::get_mut(&mut w.ancestry, cell.id)

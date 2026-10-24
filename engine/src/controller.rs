@@ -72,6 +72,8 @@ pub fn squash(x: f32) -> f32 {
 pub struct Genome {
     pub weights: WeightStore,
     pub plasticity: Vec<f32>,
+    /// Birth-assimilated responsiveness; it remains reversible under the paid learning flow.
+    pub responsiveness: [f32; allocation::CHANNELS],
     pub strategy: strategic::Genome,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -182,6 +184,7 @@ pub fn seed() -> Genome {
     Genome {
         weights: w.into(),
         plasticity: vec![0.1, 0.02, 1., 0., 0., 0., 1., 1., 0., 0., 1.],
+        responsiveness: [0.; allocation::CHANNELS],
         strategy: strategic::Genome::seed(),
     }
 }
@@ -201,6 +204,7 @@ pub fn diagnostic(logits: [f32; OUTPUTS], response: Option<(usize, usize, f32)>)
     let mut genome = Genome {
         weights: vec![0.; PARAMETERS].into(),
         plasticity: vec![0.; 11],
+        responsiveness: [0.; allocation::CHANNELS],
         strategy: strategic::Genome::seed(),
     };
     programs::seed_requests(&mut genome.weights);
@@ -214,6 +218,13 @@ pub fn diagnostic(logits: [f32; OUTPUTS], response: Option<(usize, usize, f32)>)
 }
 pub fn act(g: &Genome, inputs: &[f32], state: &mut State, config: &Config, learn: bool) -> Action {
     prepared::advance(g, inputs, state, config, learn, None)
+}
+/// New private state expresses only the bounded response assimilated into this birth genotype.
+pub fn create_state(g: &Genome) -> State {
+    State {
+        allocation: g.responsiveness,
+        ..State::default()
+    }
 }
 fn decode(logits: &[f32], state: &mut State) -> Action {
     if logits[4] >= 0. {
@@ -274,6 +285,9 @@ pub fn validate(g: &Genome) -> Result<(), String> {
         || g.plasticity.len() != 11
         || g.weights.iter().any(|x| !x.is_finite() || x.abs() > 16.)
         || g.plasticity.iter().any(|x| !x.is_finite() || x.abs() > 1.)
+        || g.responsiveness
+            .iter()
+            .any(|x| !x.is_finite() || x.abs() > 1.)
     {
         return Err("Invalid controller genome".into());
     }

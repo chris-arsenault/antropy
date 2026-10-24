@@ -18,6 +18,7 @@ pub fn inspect(g: &Genome, state: &State, c: &Config) -> Value {
         "neighbors":&s.extra[22..26],"neighborCoverage":s.extra[26],
         "strategicInputs":s.inputs,"hearing":state.hearing.last,"pendingHearing":pending,
         "activityReinforcement":{"state":state.allocation,
+            "inherited":g.responsiveness,
             "bias":(0..super::allocation::CHANNELS).map(|i|
                 allocation_bias[super::allocation::ports(i).1]).collect::<Vec<_>>(),
             "ports":(0..super::allocation::CHANNELS).map(super::allocation::ports).collect::<Vec<_>>(),

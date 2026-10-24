@@ -155,7 +155,7 @@ population exchange (cross-pollination) and new colony founding over time. Unive
 confinement and absent exchange or founding are concerns; a near/far snapshot cannot establish
 them. Report insufficient temporal coverage as unmeasured, not absent.
 
-The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v56 uses one
+The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v57 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
@@ -168,7 +168,10 @@ v54 checkpoints remain incompatible; the authorized v55 publication starts a fre
 
 V56 adds shared paid activity-dependent output plasticity, default-on and independently controlled
 by `activityReinforcement`. Actual accepted participation reinforces responsiveness; inactivity
-relaxes it. Biases share the neural row budget, assimilate once at birth and reset privately.
+relaxes it. Biases share the neural row budget. V57 corrects the v56 inheritance ratchet:
+birth assimilation copies bounded responsiveness into a separate genotype vector, and the
+newborn expresses that vector as reversible private response. It never adds actuator response
+into ordinary policy weights. Recurrent traces still reset. See the [inheritance finding](docs/hypothesis-log.md#h6--activity-assimilation-permanently-amplifies-inherited-output-bias).
 The [allocation repair](docs/plans/SWARM-ALLOCATION-PLAN.md) records physical specialization,
 replacement and negative fixtures, correcting the earlier substitution of authored reflexes for
 experience-driven allocation. The user authorized the fresh v56 cutover through the normal
@@ -208,7 +211,8 @@ programs, builder, emitter): accepted effect against full-effort capacity.
 V49 adds funded mouths/ears, once-only directional byte impulses and a 61×8×5 strategic RNN
 on an eight-physiology-interval clock. It reads own history, present local rhythms and contact
 displays; held context and paid learning gain affect only the reflex layer. Strategic memory
-copies at birth; newborn reflex memory, private byte and pending hearing reset. No language,
+copies at birth; newborn reflex recurrent traces, private byte and pending hearing reset.
+V57 actuator response initializes from its separately assimilated birth-genotype vector. No language,
 signaling reward or dispersal policy is seeded. V50 adds mortality-driven local reservoir
 recovery, independent nominal refill allowance and conservative retained-stock mixing. Recovery
 is enabled by default with sourceRate=0.1, reduced from0.2. Tau=60 model seconds,
