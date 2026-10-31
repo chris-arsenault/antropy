@@ -155,11 +155,14 @@ population exchange (cross-pollination) and new colony founding over time. Unive
 confinement and absent exchange or founding are concerns; a near/far snapshot cannot establish
 them. Report insufficient temporal coverage as unmeasured, not absent.
 
-The [current work order](docs/design/README.md) owns priorities. Locally delivered physical checkpoint v57 uses one
+The [current work order](docs/design/README.md) owns priorities. Physical checkpoint v58 uses one
 Rust/WASM World in a worker, with mesh-2 fields on a periodic 720 × 540 XY plane. Seed27 starts
 paused with 48 cells of four mutable founder types across two colonies and 240 finite renewing
 reservoirs across 35 uneven regions. Chemistry seed101 supplies the initial 0→128→136→8→0 circuit, initial reservoir
-mixtures 0/136 and finite priming. These IDs have no special role in subsequent laws.
+mixtures 0/136 and finite priming. Startup-only `founderCircuit` configures all four founder
+substrate/product pairs, exact enzyme actions, initial cellular material and finite byproduct
+priming together; `sourceSpecies` independently selects reservoir chemistry. The default
+circuit remains unchanged. These IDs have no special role in subsequent laws.
 
 V55 adds atomic live patch/readback and paused checkpoint rewind, independent paid learning/context
 controls, source-local mortality severity, optical settings and speech/listening/content/bearing

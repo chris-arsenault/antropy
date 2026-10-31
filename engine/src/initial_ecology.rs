@@ -2,6 +2,10 @@
 use crate::{config::Config, genetics, organism::Cell, world::World};
 pub const CIRCUIT: [usize; 4] = [0, 128, 136, 8];
 
+#[cfg(test)]
+#[path = "initial_ecology_tests.rs"]
+mod tests;
+
 /// Initial byproducts only; their later replenishment must come from ordinary conversions.
 pub fn prime(
     sources: &[crate::sources::Source],
@@ -11,7 +15,7 @@ pub fn prime(
 ) {
     for source in sources {
         // The existing priming fraction sets a finite initial concentration at the footprint.
-        for s in [128, 8] {
+        for s in [c.founder_circuit[1], c.founder_circuit[3]] {
             for &(n, w) in &source.footprint {
                 field.add(
                     n,
@@ -25,8 +29,8 @@ pub fn prime(
 }
 
 pub fn fund(cell: &mut Cell, c: &Config, role: usize) {
-    let from = CIRCUIT[role % 4];
-    let to = CIRCUIT[(role + 1) % 4];
+    let from = c.founder_circuit[role % 4];
+    let to = c.founder_circuit[(role + 1) % 4];
     let input = 0.4349583333333333 / 0.8;
     cell.inventory.fill(0.);
     cell.inventory.set(from, c.founder_inventory * input);

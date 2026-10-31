@@ -86,6 +86,20 @@ object and send it with `restart`. Structural/birth-compiled changes require tha
 operation. Invalid restart configuration leaves the old world intact.
 Restart resets speed to maximum and returns its new generation and tick zero before stepping.
 
+`founderCircuit` is a startup-only array of four chemical identities, defaulting to
+`[0,128,136,8]`. Consecutive entries define the four founder types' substrate/product
+pairs, recognition targets and exact enzyme transformations. The same array supplies initial
+free/bound cellular material and finite priming of entries 1 and 3. `sourceSpecies`
+independently specifies reservoir contents and incoming supply. For example,
+`config/alternative-founder-chemistry.json` selects circuit `[17,81,85,21]` and reservoirs
+`[17,85]`, seeding no material of identities 0 or 128. Ordinary transformations may produce
+either identity later. Apply this patch with `native_run.py --config ... --apply restart`;
+it cannot change an existing world's birth chemistry through a live patch.
+
+Physical v58 persists the startup circuit and rejects older physical formats without
+migration. Publishing v58 starts a fresh server world when no compatible save exists;
+apply the desired full restart configuration through the operator API after publication.
+
 ### Live settings and checkpoint comparisons
 
 Live patches merge over current effective settings. `GET /api/status` includes `runControls`:

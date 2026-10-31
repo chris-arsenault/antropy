@@ -25,6 +25,7 @@ export interface EngineConfig extends Record<string, unknown> {
   opticalPowerDensity: number;
   habitatFeedback: boolean;
   founders: number;
+  founderCircuit: [number, number, number, number];
   chemistrySeed: number;
   sourceCount: number;
   sourceRate: number;

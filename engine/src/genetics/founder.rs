@@ -6,7 +6,7 @@ use crate::{
 
 pub fn circuit(c: &crate::config::Config, chemistry: &Chemistry, index: usize) -> super::Genotype {
     use super::{Enzyme, Target, Transporter};
-    let species = [0, 128, 136, 8];
+    let species = c.founder_circuit;
     let from = Target::species(species[index % 4]);
     let to = Target::species(species[(index + 1) % 4]);
     let mut g = super::Genotype::seed(c, chemistry);
@@ -19,13 +19,16 @@ pub fn circuit(c: &crate::config::Config, chemistry: &Chemistry, index: usize) -
             let p = if i < 2 { from } else { to };
             Transporter { x: p.x, y: p.y }
         });
-        a.chemistry.enzymes = [Enzyme {
-            x: from.x,
-            y: from.y,
-            center_x: if index.is_multiple_of(2) { 4. } else { 0. },
-            center_y: if index.is_multiple_of(2) { 0. } else { 4. },
-            angle: 0.,
-        }; crate::organism::MAX_ENZYMES];
+        let mut enzyme = Enzyme::between(from.point(), to.point());
+        // An unchanged coordinate needs the identity axis, not a reflection of other
+        // coordinates. This also preserves the default founders' exact action alleles.
+        if from.x == to.x {
+            enzyme.center_x = 0.;
+        }
+        if from.y == to.y {
+            enzyme.center_y = 0.;
+        }
+        a.chemistry.enzymes = [enzyme; crate::organism::MAX_ENZYMES];
         if !c.radial_founders {
             a.chemistry.keys = Some(crate::binding::Keys::founders(&a.chemistry));
         }

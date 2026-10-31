@@ -1,5 +1,13 @@
 # Current design and work order
 
+October 31 physical v58 adds startup-only `founderCircuit` configuration. One four-identity
+cycle determines founder recognition, exact enzyme actions, initial free/bound material and
+finite byproduct priming; the existing `sourceSpecies` selects reservoir chemistry. Defaults
+retain the original circuit and actions. The alternative run configuration selects
+17→81→85→21→17 with reservoirs 17/85, without seeding 0 or 128; later chemistry remains
+unrestricted. See [server management](../server-management.md). The additional persisted
+configuration requires v58 checkpoints, with no migration of the preceding world.
+
 October24 physical v57 corrects a directional inheritance defect in activity reinforcement.
 V56 repeatedly added use-dependent response into ordinary output weights; inactivity could
 relax private response but could not remove ancestral additions. A zero-mutation regression

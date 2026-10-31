@@ -29,6 +29,8 @@ pub struct Config {
     pub dt: f64,
     pub physiology_interval: f64,
     pub founders: usize,
+    /// Startup-only chemical cycle shared by founder machinery, material and priming.
+    pub founder_circuit: [usize; 4],
     pub max_ancestry_records: usize,
     pub source_count: usize,
     pub landscape_region_spacing: f64,
@@ -156,6 +158,7 @@ impl Default for Config {
             dt: 0.2,
             physiology_interval: 0.8,
             founders: 48,
+            founder_circuit: crate::initial_ecology::CIRCUIT,
             max_ancestry_records: 2000000,
             source_count: 240,
             landscape_region_spacing: (720_f64 * 540. / 35.).sqrt(),
@@ -399,6 +402,7 @@ impl Config {
             || self.landscape_region_count() > 10000
             || self.source_count > 10000
             || self.source_species.iter().any(|s| *s >= 256)
+            || self.founder_circuit.iter().any(|s| *s >= 256)
         {
             return Err("Invalid physical or operating limits".into());
         }
