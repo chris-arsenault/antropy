@@ -91,8 +91,8 @@ Restart resets speed to maximum and returns its new generation and tick zero bef
 pairs, recognition targets and exact enzyme transformations. The same array supplies initial
 free/bound cellular material and finite priming of entries 1 and 3. `sourceSpecies`
 independently specifies reservoir contents and incoming supply. For example,
-`config/alternative-founder-chemistry.json` selects circuit `[17,81,85,21]` and reservoirs
-`[17,85]`, seeding no material of identities 0 or 128. Ordinary transformations may produce
+`config/alternative-founder-chemistry.json` selects circuit `[1,129,137,9]` and reservoirs
+`[1,137]`, seeding no material of identities 0 or 128. Ordinary transformations may produce
 either identity later. Apply this patch with `native_run.py --config ... --apply restart`;
 it cannot change an existing world's birth chemistry through a live patch.
 

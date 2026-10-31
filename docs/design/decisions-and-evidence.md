@@ -1,11 +1,37 @@
 # Design decisions and evidence
 
-This is the decision record for the current [work order](README.md), through physical v56. The
+This is the decision record for the current [work order](README.md), through physical v58. The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
 original versions, controls and failures. Completed implementation does not guarantee a
 particular evolved community. Execution records remain in the [plan archive](../plans/README.md).
 The [design directions registry](directions.md) lists every direction with its status.
 Superseded entries stay in place with a dated note.
+
+## Alternative starting chemistry — October 31
+
+The user requested removing identities 0 and 128 completely from initial material, with
+different reservoirs and founder enzymes. V58 coordinates founder recognition, exact actions,
+cellular free/bound material and finite priming through `founderCircuit`; reservoir contents
+and incoming supply use `sourceSpecies`. This changes initial conditions without banning
+later production of either identity or changing runtime laws.
+
+The first seed 27 trial used circuit 17→81→85→21→17 and reservoirs 17/85. It paid for uptake,
+reactions and growth but all 48 founders starved before any division; the last died at tick
+14,606. At the tick 1,888 checkpoint, most survivors had nearly full usable energy but little
+free inventory, and only one had reached division size. Positive analytical processing
+margins therefore did not establish a founding population capable of replacement. No offspring
+existed to mutate, so this result cannot describe an evolutionary preference for identities
+0 or 128. Both remained absent from dissolved material at that checkpoint.
+
+The selected replacement is circuit 1→129→137→9→1 with reservoirs 1/137. Its chemical
+properties are closer to the original circuit, while recognition targets and the vertical
+enzyme actions differ. It also starts with exactly zero material of identities 0 and 128.
+All other operating settings, including mutation, costs, supply quantities, terrain, learning
+and feature participation, remain unchanged. At tick 4,233 it had six divisions, twelve deaths
+and 42 living cells, with ordinary external reservoir refills underway. This establishes
+initial reproduction under the replacement chemistry, not sustained viability or a later
+chemical attractor. The live run continues; raw records remain local under
+`frontend/harness/artifacts/alternative-chemistry-20261031/`.
 
 ## Experience-dependent allocation — October 14
 

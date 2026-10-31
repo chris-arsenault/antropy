@@ -4,9 +4,12 @@ October 31 physical v58 adds startup-only `founderCircuit` configuration. One fo
 cycle determines founder recognition, exact enzyme actions, initial free/bound material and
 finite byproduct priming; the existing `sourceSpecies` selects reservoir chemistry. Defaults
 retain the original circuit and actions. The alternative run configuration selects
-17→81→85→21→17 with reservoirs 17/85, without seeding 0 or 128; later chemistry remains
+1→129→137→9→1 with reservoirs 1/137, without seeding 0 or 128; later chemistry remains
 unrestricted. See [server management](../server-management.md). The additional persisted
 configuration requires v58 checkpoints, with no migration of the preceding world.
+The first 17→81→85→21→17 trial died before reproducing; the
+[decision record](decisions-and-evidence.md#alternative-starting-chemistry--october-31)
+retains that negative result and the reason for the closer replacement.
 
 October24 physical v57 corrects a directional inheritance defect in activity reinforcement.
 V56 repeatedly added use-dependent response into ordinary output weights; inactivity could
