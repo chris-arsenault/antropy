@@ -9,7 +9,8 @@ The v59 repair separates inherited binding strength from chemical preference, ad
 demonstrated barrier to secondary-food use while preserving finite capacity, founder profiles,
 mutation and prices. `bindingIndependentStrength` is enabled by default with a startup ablation.
 Measured input-work accounts distinguish usable capture, uphill spending and external drive
-from throughput. Local delivery checks pass; pipeline publication is in progress. Constructed
+from throughput. Published as `238db80` through normal CI/CD, with a fresh 32/168 server world
+and a compatible v59 checkpoint. Constructed
 waste-fed growth does not establish an evolved secondary economy. See the
 [decision record](decisions-and-evidence.md#binding-strength-and-secondary-food--november-3).
 

@@ -74,6 +74,10 @@ JSON path select the zero-tick local opportunity budget. Registrations, raw outp
 negative arms and checkpoints remain ignored under `frontend/harness/artifacts/secondary-economy-*`.
 Local implementation and authorized normal-pipeline delivery are tracked in the
 [repair plan](../plans/SUSTAINING-CHEMICAL-ECONOMY-PLAN.md).
+Publication `238db80` completed through the normal pipeline. Live readback confirms a fresh
+32/168 v59 world with the repair and ordinary features enabled, nonzero mutation and a durable
+compatible checkpoint. The deployed public chemical window returns the new input-work accounts.
+This operational delivery does not establish evolved secondary-food adoption.
 
 ## Alternative starting chemistry — October 31
 

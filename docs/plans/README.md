@@ -26,10 +26,7 @@ negative results without treating one unsuccessful fixture as automatic grounds 
 
 ## Active plans
 
-The [sustaining chemical economy repair plan](SUSTAINING-CHEMICAL-ECONOMY-PLAN.md),
-Sulion `4bc73211-ab2a-4b41-8907-aa6f68d10396`, is planned with four pending implementation
-phases. It addresses constraints on sustaining waste reuse and cell-modified reservoir supply;
-reaction-output novelty is not its outcome. Execution has not started.
+The sustaining chemical economy repair is delivered; its entry below records the completed scope.
 
 The v56 allocation change is delivered locally. Its authorized
 fresh-world publication is tracked in Sulion `6d1100c2-cbf3-4994-ab7c-589d423bf897` and the
@@ -48,6 +45,7 @@ establish a selected runtime equation or an implemented ecological consequence.
 
 | Plan | Scope | Sulion |
 | --- | --- | --- |
+| [Sustaining chemical economy repair](SUSTAINING-CHEMICAL-ECONOMY-PLAN.md) | Deployed v59 as `238db80`: separates binding strength from preference, preserves finite capacity, adds input-work reductions and leaves the selected 32/168 world running. Constructed sustaining waste use passes; ordinary evolved adoption remains unestablished. | `4bc73211-ab2a-4b41-8907-aa6f68d10396` |
 | [Experience-dependent swarm allocation](SWARM-ALLOCATION-PLAN.md) | Shared paid response, physical specialization/replacement, durable live control and bounded inspection; full CI/build passed. Fresh-world publication authorized October14. | `c7bca4cb-ee6e-41e1-bd23-a5d30fcde529`; publication `6d1100c2-cbf3-4994-ab7c-589d423bf897` |
 | [Conditional specialization and local coordination](CONDITIONAL-ECOLOGY-PLAN.md) | Deployed v55 controls, local recovery and constructed existing paths. October14 corrects the claim of complete swarm mechanisms; allocation has a separate repair and habitat transitions remain open. | `0fcb0412-e105-4318-a943-08d4cb894782` |
 | [Persistent ecology diagnostics](ECOLOGY-DIAGNOSTICS-PLAN.md) | Durable private supply/cost/lifecycle history, stored-checkpoint downloads and GET-only local capture; publication authorized October12 with live recovery enabled | `e969974c-d545-45a3-ba9d-330b3dc93e96`; publication `24dc7e6d-d3a5-4945-ac74-54e94d8277d2` |

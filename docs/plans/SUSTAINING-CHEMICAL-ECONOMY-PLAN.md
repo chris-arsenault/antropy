@@ -1,7 +1,8 @@
 # Sustaining chemical economy repair
 
-**Status:** Execution authorized November 3, 2026; physical opportunity, reservoir diagnosis
-and recognition-access repair complete locally. Integration checks pass; pipeline delivery pending.
+**Status:** Implementation and authorized deployment completed November 3, 2026. Physical v59
+is published as `238db80`; the selected 32/168 world is running with the repair enabled and a
+durable v59 save. Ordinary evolved secondary feeding was not observed in the bounded comparison.
 **Sulion:** `4bc73211-ab2a-4b41-8907-aa6f68d10396`.
 
 ## Outcome and controlling corrections
@@ -232,3 +233,11 @@ The user subsequently authorized execution of every phase on November 3, includi
 implementation, bounded experiments, live configuration and normal pipeline delivery. Read
 `sulion plan current` and its source material on resume. Close delivery work when it lands,
 keeping ecological outcomes distinct from implementation status.
+
+Delivery used the [normal CI/CD pipeline](https://github.com/chris-arsenault/antropy/actions/runs/41678490020).
+The live operator readback confirms the 32→160→168→40→32 circuit, 32/168 supply, ordinary
+nonzero mutation, enabled features and `bindingIndependentStrength=true`. A compatible manual
+checkpoint retains that configuration; one obsolete v53 manual save was deleted to free a slot.
+The public measured chemical window exposes the new input-work reductions and classifies all
+four starting identities correctly. This closes implementation and delivery, not the ecological
+question of whether significant evolved populations will sustain themselves on secondary food.
