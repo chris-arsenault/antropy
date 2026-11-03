@@ -5,6 +5,10 @@ is published as `238db80`; the selected 32/168 world is running with the repair 
 durable v59 save. Ordinary evolved secondary feeding was not observed in the bounded comparison.
 **Sulion:** `4bc73211-ab2a-4b41-8907-aa6f68d10396`.
 
+**Delivery follow-on:** `dd823206-43aa-432c-8013-3c35864186d6` is repairing a stale public-query
+cache found during final readback. The chemistry repair above is deployed; observation delivery
+remains open until this same-format server fix is published and confirmed.
+
 ## Outcome and controlling corrections
 
 Identify and repair what prevents cells from creating and exploiting a sustaining chemical
@@ -241,3 +245,11 @@ checkpoint retains that configuration; one obsolete v53 manual save was deleted 
 The public measured chemical window exposes the new input-work reductions and classifies all
 four starting identities correctly. This closes implementation and delivery, not the ecological
 question of whether significant evolved populations will sustain themselves on secondary food.
+
+The later final query returned the earlier tick4,751 window while authenticated status had
+advanced past24,000. Read-only query caching expired during ordinary display publication but
+not the cheap no-viewer health path. The follow-on repair expires the existing cache at both
+publication paths, preserving same-publication request sharing and headless execution cost.
+No new physical format, chemistry change or fresh-world cutover is required. Repeated public
+queries must advance after a publication boundary with no persistent viewer; a regression also
+checks unchanged physical state and no generated display scenes.

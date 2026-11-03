@@ -32,6 +32,26 @@ fn unpack(bytes: &[u8]) -> (Vec<u8>, serde_json::Value) {
 }
 
 #[test]
+fn headless_publication_expires_inspection_queries_without_building_scenes() {
+    let mut r = fixture();
+    let query = json!({"mode":"measured","focus":null,"offset":0});
+    let first = r.command("chemicalWeb", query.clone()).unwrap();
+    assert_eq!(first["tick"], 0);
+    r.step();
+    // Requests still coalesce within a publication, including between owner steps.
+    assert_eq!(r.command("chemicalWeb", query.clone()).unwrap(), first);
+    let before = r.world.snapshot().unwrap();
+    let publication = r.publish_health(30.);
+    assert!(publication.scenes.is_empty());
+    assert_eq!(publication.projections, 0);
+    assert_eq!(publication.status["summary"]["tick"], 1);
+    let fresh = r.command("chemicalWeb", query.clone()).unwrap();
+    assert_eq!(fresh["tick"], 1);
+    assert_eq!(r.command("chemicalWeb", query).unwrap(), fresh);
+    assert_eq!(r.world.snapshot().unwrap(), before);
+}
+
+#[test]
 fn common_projection_is_shared_and_does_not_advance_world() {
     let mut r = fixture();
     let before = r.world.snapshot().unwrap();

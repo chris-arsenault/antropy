@@ -12,6 +12,8 @@ All notable user-visible changes are recorded here.
 - Measured chemical activity now reports usable capture, uphill spending and external drive by
   reaction input, including starting/nonstarting totals. These accounts do not establish diet
   benefit or waste provenance by themselves.
+- Fixed read-only chemistry/inspection replies remaining cached indefinitely when no persistent
+  spectator caused a display publication. Headless health publication now expires the same cache.
 - A matched constructed waste consumer funds growth and reproduction under the correction;
   the coupled, producer-off and enzyme-off controls fail. Ordinary evolved waste-fed populations
   and advantageous reservoir modification remain unestablished.

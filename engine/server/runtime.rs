@@ -275,6 +275,20 @@ impl Runtime {
         }
         Ok(value)
     }
+    /// Headless publication has the same query lifetime without preparing a display census.
+    pub fn publish_health(&mut self, throughput: f64) -> Publication {
+        self.sequence += 1;
+        self.queries.clear();
+        Publication {
+            sequence: self.sequence,
+            generation: self.generation,
+            status: Arc::new(
+                json!({"summary":{"tick":self.world.tick,"population":self.world.cells.len()},
+                "running":self.running,"throughput":throughput,"threads":self.threads}),
+            ),
+            ..Default::default()
+        }
+    }
     pub fn publish(&mut self, keys: Vec<ViewKey>, throughput: f64) -> Result<Publication, String> {
         self.sequence += 1;
         self.queries.clear();
@@ -346,43 +360,66 @@ pub fn start(
     let (commands, mut receiver) = mpsc::channel::<Request>(32);
     let views = Arc::new(Mutex::new(BTreeMap::<u64, ViewKey>::new()));
     let demand = views.clone();
-    std::thread::Builder::new().name("world-owner".into()).spawn(move || {
-        let mut published = Instant::now();
-        let mut ticks = 0;
-        let mut next_step = Instant::now();
-        loop {
-            for _ in 0..4 {
-                let Ok(c) = receiver.try_recv() else { break; };
-                pool.install(|| c.execute(&mut runtime));
-            }
-            let now = Instant::now();
-            if runtime.running && now >= next_step {
-                pool.install(|| runtime.step());
-                ticks += 1;
-                if runtime.world.stop_reason.is_some() { runtime.running = false; }
-                next_step = runtime.speed.map_or(now, |s| now + Duration::from_secs_f64(1. / s));
-            } else { std::thread::sleep(Duration::from_millis(2)); }
-            if let Some(a) = autosave.as_mut() { a.poll(&mut runtime, &owner_saves); }
-            if published.elapsed() >= PUBLICATION_PERIOD {
-                let sample_at = Instant::now();
-                let keys = demand.lock().unwrap().values().copied().collect::<Vec<_>>();
-                // Health is cheap without viewers; no census or presentation work then.
-                let result = if keys.is_empty() {
-                    runtime.sequence += 1;
-                    let mut p = Publication { sequence: runtime.sequence, generation: runtime.generation, ..Default::default() };
-                    p.status = Arc::new(json!({"summary":{"tick":runtime.world.tick,"population":runtime.world.cells.len()},
-                        "running":runtime.running,"throughput":ticks as f64/published.elapsed().as_secs_f64(),"threads":threads}));
-                    Ok(p)
-                } else { pool.install(|| runtime.publish(keys, ticks as f64 / published.elapsed().as_secs_f64())) };
-                match result {
-                    Ok(p) => { sender.send_replace(Arc::new(p)); }
-                    Err(e) => { eprintln!("Publication failed: {e}"); }
+    std::thread::Builder::new()
+        .name("world-owner".into())
+        .spawn(move || {
+            let mut published = Instant::now();
+            let mut ticks = 0;
+            let mut next_step = Instant::now();
+            loop {
+                for _ in 0..4 {
+                    let Ok(c) = receiver.try_recv() else {
+                        break;
+                    };
+                    pool.install(|| c.execute(&mut runtime));
                 }
-                published = sample_at; ticks = 0;
+                let now = Instant::now();
+                if runtime.running && now >= next_step {
+                    pool.install(|| runtime.step());
+                    ticks += 1;
+                    if runtime.world.stop_reason.is_some() {
+                        runtime.running = false;
+                    }
+                    next_step = runtime
+                        .speed
+                        .map_or(now, |s| now + Duration::from_secs_f64(1. / s));
+                } else {
+                    std::thread::sleep(Duration::from_millis(2));
+                }
+                if let Some(a) = autosave.as_mut() {
+                    a.poll(&mut runtime, &owner_saves);
+                }
+                if published.elapsed() >= PUBLICATION_PERIOD {
+                    let sample_at = Instant::now();
+                    let keys = demand.lock().unwrap().values().copied().collect::<Vec<_>>();
+                    // Health is cheap without viewers; no census or presentation work then.
+                    let result = if keys.is_empty() {
+                        Ok(
+                            runtime
+                                .publish_health(ticks as f64 / published.elapsed().as_secs_f64()),
+                        )
+                    } else {
+                        pool.install(|| {
+                            runtime.publish(keys, ticks as f64 / published.elapsed().as_secs_f64())
+                        })
+                    };
+                    match result {
+                        Ok(p) => {
+                            sender.send_replace(Arc::new(p));
+                        }
+                        Err(e) => {
+                            eprintln!("Publication failed: {e}");
+                        }
+                    }
+                    published = sample_at;
+                    ticks = 0;
+                }
+                if receiver.is_closed() {
+                    break;
+                }
             }
-            if receiver.is_closed() { break; }
-        }
-    }).map_err(|e| e.to_string())?;
+        })
+        .map_err(|e| e.to_string())?;
     Ok(Host {
         commands,
         exports: Arc::new(Semaphore::new(1)),
