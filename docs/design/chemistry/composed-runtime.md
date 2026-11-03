@@ -691,20 +691,26 @@ by `sqrt(paid/requested)`. The same work-rate function prices growth reserves an
 
 ## Local recognition and paid operators
 
-Ordinary recognition uses an inherited eight-weight key and bias at each site. The October6
-correction replaces independent per-identity sigmoids with competing binding states:
-`E(s)=sum_j k_j*beta_j(s)+b`, `Z=1+sum_t exp(lambda*E(t))`,
-`A(s)=exp(lambda*E(s))/Z`. The unit term represents the unbound state; all256 chemical states
-share one site's recognition, so `sum_s A(s)<=1`. Identity-bit spins beta are in {-1,1},
-weights in[-1,1], bias in[-9,9] and shared lambda6. Bias changes total binding strength;
-relative chemical preference depends on the weights. Broad binding therefore divides finite
-recognition instead of creating universal full-strength protection or access. The bound
-partition factors exactly as `exp(lambda*b)*product_j(2*cosh(lambda*k_j))` over the complete
-eight-bit alphabet. Log-domain evaluation prevents overflow at allowed extremes. A relative
+Ordinary recognition uses an inherited eight-weight key and bias at each site. V59 separates
+the occupied fraction from conditional chemical preference:
+`P(s)=sum_j k_j*beta_j(s)`, `Z_k=sum_t exp(lambda*P(t))=product_j(2*cosh(lambda*k_j))`,
+`Z_ref=(2*cosh(lambda))^8`, `F=sigmoid(lambda*b+log(Z_ref))`,
+`A(s)=F*exp(lambda*P(s))/Z_k`.
+The unbound fraction is `1-F`; all256 chemical states share the occupied fraction, so
+`sum_s A(s)=F<=1`. Identity-bit spins beta are in {-1,1}, weights in[-1,1], bias in[-9,9]
+and shared lambda6. Bias controls total binding strength independently of preference weights.
+The reference partition comes from the unit-weight domain endpoints; it preserves the existing
+founder profiles and adds no tuned constant. Broad binding still divides finite recognition
+instead of granting universal full-strength protection or access. Log-domain evaluation
+prevents overflow at allowed extremes. The startup-only `bindingIndependentStrength=false`
+ablation uses `Z_ref=Z_k`, recovering the October6 coupled partition. That law made preference
+reshaping also change total strength, requiring compensating bias mutations. A relative
 row cutoff1e-4 removes small coefficients without redistributing their capacity; sparse rows
 compile once at birth. Ordinary occupancy and paid operators still govern actual throughput.
-No extra charge or chemical role is assigned. The [correction record](../../key-binding-correction.md)
-owns the diagnosis, bounded physical comparison and limits.
+No extra charge or chemical role is assigned. The [October correction](../../key-binding-correction.md)
+preserves the original finite-capacity repair; the
+[current decision record](../decisions-and-evidence.md#binding-strength-and-secondary-food--november-3)
+owns the v59 correction and its limits.
 The explicit `radialFounders` startup ablation retains max(0,1-distance²/R²)², R=3,
 without edge normalization. Existing genotypes always use their own stored representation.
 Product mixtures preserve unit-sum material weights. Keyed recognition shares at most one

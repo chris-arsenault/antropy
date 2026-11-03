@@ -3,6 +3,12 @@
 Status: Implemented locally, with bounded physical comparisons and repository checks.
 Sulion plan `2e20a7a4-9e4e-4c2b-a3e9-529b94a6f230`.
 
+November 3 v59 preserves this finite-capacity correction but normalizes preference separately
+from total strength. The coupled partition below remains the historical comparison and an
+explicit startup ablation; the [composed runtime](design/chemistry/composed-runtime.md#local-recognition-and-paid-operators)
+owns the current law. Its [decision record](design/decisions-and-evidence.md#binding-strength-and-secondary-food--november-3)
+retains the diagnosed access barrier and sustaining constructed comparison.
+
 ## Recovered goals and defect
 
 The September30 user discussion requests occasional drastic positive or negative mutation

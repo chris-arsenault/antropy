@@ -19,6 +19,59 @@ fn funded(world: &crate::world::World) -> Cell {
 }
 
 #[test]
+fn input_work_records_actual_positive_and_uphill_acceptance_without_changing_physics() {
+    let mut world = crate::initial_ecology::probe(2, false).unwrap();
+    let mut executor = Executor::default();
+    let mut cell = funded(&world);
+    cell.flows = Default::default();
+    let mut control = cell.clone();
+    let mut interval = crate::phenotype_activity::Interval::new(0);
+    let initial = cell.energy;
+    executor.react_interval(
+        &mut cell,
+        &world.config,
+        &world.chemistry,
+        0.8,
+        false,
+        Some((&mut interval, 7)),
+        [0.; 2],
+    );
+    executor.react(
+        &mut control,
+        &world.config,
+        &world.chemistry,
+        0.8,
+        false,
+        [0.; 2],
+    );
+    assert_eq!(
+        serde_json::to_value(&cell).unwrap(),
+        serde_json::to_value(&control).unwrap()
+    );
+    let f = &interval.groups[0];
+    assert!(f.reaction_spent.iter().sum::<f64>() > 0.);
+    assert!(
+        (f.reaction_captured.iter().sum::<f64>()
+            - f.reaction_spent.iter().sum::<f64>()
+            - (cell.energy - initial))
+            .abs()
+            < 1e-12
+    );
+    for group in &interval.groups {
+        assert_eq!(group.reaction_captured, f.reaction_captured);
+        assert_eq!(group.reaction_spent, f.reaction_spent);
+    }
+    world.cells[0] = cell;
+    interval.reset(1);
+    assert!(
+        interval
+            .groups
+            .iter()
+            .all(|g| g.reaction_spent.iter().all(|v| *v == 0.))
+    );
+}
+
+#[test]
 fn joint_donors_and_work_remain_funded_across_interval_sizes() {
     let world = crate::initial_ecology::probe(1, true).unwrap();
     let mut executor = Executor::default();

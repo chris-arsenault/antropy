@@ -26,7 +26,12 @@ negative results without treating one unsuccessful fixture as automatic grounds 
 
 ## Active plans
 
-No active implementation plans. The v56 allocation change is delivered locally. Its authorized
+The [sustaining chemical economy repair plan](SUSTAINING-CHEMICAL-ECONOMY-PLAN.md),
+Sulion `4bc73211-ab2a-4b41-8907-aa6f68d10396`, is planned with four pending implementation
+phases. It addresses constraints on sustaining waste reuse and cell-modified reservoir supply;
+reaction-output novelty is not its outcome. Execution has not started.
+
+The v56 allocation change is delivered locally. Its authorized
 fresh-world publication is tracked in Sulion `6d1100c2-cbf3-4994-ab7c-589d423bf897` and the
 [allocation plan](SWARM-ALLOCATION-PLAN.md#authorized-publication).
 

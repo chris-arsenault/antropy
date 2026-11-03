@@ -34,6 +34,15 @@ fn partial_live_patch_is_atomic_and_preserves_funded_bodies() {
         .is_err()
     );
     assert!(w.config.mortality_recovery);
+    assert!(
+        configure(
+            &mut w,
+            &json!({"patch":{"bindingIndependentStrength":false}})
+        )
+        .unwrap_err()
+        .contains("fresh-world restart")
+    );
+    assert!(w.config.binding_independent_strength);
     configure(
         &mut w,
         &json!({"patch":{"activity":{"strategy":false},"mortalityRecovery":false}}),

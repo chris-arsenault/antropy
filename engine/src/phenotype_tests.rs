@@ -36,6 +36,15 @@ fn actual_flows_reconcile_without_changing_physical_continuation() {
         f.ledger.flows.captured,
         w.ledger.flows.captured - before.flows.captured
     );
+    assert!((f.reaction_captured.iter().sum::<f64>() - f.ledger.flows.captured).abs() < 1e-12);
+    assert!(
+        (f.reaction_external.iter().sum::<f64>()
+            - f.ledger.flows.external_work
+            - f.ledger.flows.recycled_work)
+            .abs()
+            < 1e-12
+    );
+    let captured = f.ledger.flows.captured;
     let report = execute(&mut w, &json!({"op":"phenotype","action":"report"})).unwrap();
     assert!(report.to_string().len() < 16384);
     assert_eq!(report["groups"][0], report["groups"][1]);
@@ -51,6 +60,14 @@ fn actual_flows_reconcile_without_changing_physical_continuation() {
     assert!(web.to_string().len() < 16384);
     assert_eq!(web["window"]["end"], 60);
     assert!(web["pairs"].as_u64().unwrap() > 0);
+    let work = &web["activity"]["inputWork"];
+    assert!(
+        (work["starting"]["captured"].as_f64().unwrap()
+            + work["nonstarting"]["captured"].as_f64().unwrap()
+            - captured)
+            .abs()
+            < 1e-12
+    );
     assert_eq!(w.snapshot().unwrap(), control.snapshot().unwrap());
 }
 

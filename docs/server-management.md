@@ -172,6 +172,20 @@ with-cred -- python3 frontend/harness/native_run.py --set mortalityRecovery=true
 ```
 
 The helper defaults to live changes; `--apply restart` explicitly selects a new world.
+V59's `bindingIndependentStrength` defaults to true and selects the shared recognition
+normalization. It is startup-only because changing compiled recognition would refit living
+cells. Use `--set bindingIndependentStrength=false --apply restart` for the coupled comparison;
+the existing API rejects a live patch atomically. Checkpoint rewind restores the selected
+configuration. Formats preceding v59 are not migrated.
+
+Measured `chemicalWeb` and phenotype activity include `inputWork`: captured usable work,
+uphill spending and external transformation input by substrate, plus exact starting/nonstarting
+totals relative to the configured founder circuit and initial supply species. Listed chemical
+rows remain top-eight reductions with an explicit remainder. External work includes solar and
+allocated paid optical input; it is not an additional usable-work credit. Subtracting uphill
+spending still leaves maintenance, transport, repair and other expenses to account for.
+These fields identify processing returns, not unique molecule provenance or a sustaining diet.
+
 Use `--config config/activity-off.json` or `activity-on.json` for runtime group patches.
 `--output` optionally retains requested/effective settings and responses in a new local
 capture directory. Save-point output identifies the manual checkpoint. No-argument invocation

@@ -10,6 +10,7 @@ export interface EngineConfig extends Record<string, unknown> {
   dt: number;
   physiologyInterval: number;
   bindingLambda: number;
+  bindingIndependentStrength: boolean;
   radialFounders: boolean;
   agingTime: number;
   weatheringRate: number;

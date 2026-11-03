@@ -4,6 +4,13 @@ const TRAIT_COUNTS = new Set([7, PHENOTYPE_TRAITS.length]);
 export function checkActivity(a: Activity | null | undefined) {
   if (a && (a.imports.rows.length > 8 || a.exports.rows.length > 8))
     throw new Error("Material activity exceeds eight displayed species per direction");
+  const work = a?.inputWork;
+  if (
+    work &&
+    (work.startingIdentities.length > 256 ||
+      [work.captured, work.spent, work.external].some((flow) => flow.rows.length > 8))
+  )
+    throw new Error("Reaction input work exceeds bounded chemical reductions");
 }
 export function checkPhenotypeBudget(report: PhenotypeReport | null | undefined) {
   if (!report) return;

@@ -25,6 +25,7 @@ pub struct EnzymeOperator {
 #[derive(Clone, Debug)]
 pub struct Operators {
     scales: [f64; 2],
+    independent_strength: bool,
     configuration: Arc<Machinery>,
     pub receptors: [Arc<Vec<Affinity>>; 4],
     pub transporters: [Arc<Vec<Affinity>>; 4],
@@ -34,7 +35,9 @@ pub struct Operators {
 }
 fn recognition(m: &Machinery, site: usize, point: [f64; 2], c: &Config) -> Vec<Affinity> {
     match &m.keys {
-        Some(keys) => keys.site(site).compile(c.binding_lambda),
+        Some(keys) => keys
+            .site(site)
+            .compile_with(c.binding_lambda, c.binding_independent_strength),
         None => chemistry::compile_affinity(point, c.affinity_radius),
     }
 }
@@ -136,6 +139,7 @@ impl Operators {
         let profile = profile(&membrane, chemistry);
         Self {
             scales: [c.affinity_radius, c.binding_lambda],
+            independent_strength: c.binding_independent_strength,
             configuration: Arc::new(m.clone()),
             receptors: std::array::from_fn(|i| {
                 Arc::new(recognition(m, i, m.receptors[i].point(), c))
@@ -172,7 +176,9 @@ impl Operators {
         c: &Config,
         chemistry: &Chemistry,
     ) {
-        if self.scales != [c.affinity_radius, c.binding_lambda] {
+        if self.scales != [c.affinity_radius, c.binding_lambda]
+            || self.independent_strength != c.binding_independent_strength
+        {
             *self = Self::compile(after, c, chemistry);
             return;
         }

@@ -41,25 +41,44 @@ impl Key {
     }
 
     pub fn affinity(&self, species: usize, lambda: f64) -> f64 {
-        (lambda * self.score(species) - self.log_partition(lambda))
+        self.affinity_with(species, lambda, true)
+    }
+
+    /// Conditional chemical preference factors over the complete bit alphabet.
+    fn preference_partition(&self, lambda: f64) -> f64 {
+        self.weights.iter().fold(0., |sum, w| {
+            let z = (lambda * w).abs();
+            sum + z + (-2. * z).exp().ln_1p()
+        })
+    }
+
+    fn normalization(&self, lambda: f64, independent: bool) -> f64 {
+        let preference = self.preference_partition(lambda);
+        // Unit-magnitude weights are the domain's maximally selective reference, not
+        // a separate tuning constant. This preserves the existing founder profiles.
+        let reference = self.weights.len() as f64 * (lambda + (-2. * lambda).exp().ln_1p());
+        let bound = lambda * self.bias + if independent { reference } else { preference };
+        let log_occupied = bound.min(0.) - (-bound.abs()).exp().ln_1p();
+        preference - log_occupied
+    }
+
+    pub fn affinity_with(&self, species: usize, lambda: f64, independent: bool) -> f64 {
+        (lambda * (self.score(species) - self.bias) - self.normalization(lambda, independent))
             .min(0.)
             .exp()
     }
 
-    /// One unbound state and 256 competing identities share one site's capacity.
-    /// The complete bit alphabet factors the bound partition into eight two-state sums.
-    fn log_partition(&self, lambda: f64) -> f64 {
-        let bound = self.weights.iter().fold(lambda * self.bias, |sum, w| {
-            let z = (lambda * w).abs();
-            sum + z + (-2. * z).exp().ln_1p()
-        });
-        bound.max(0.) + (-bound.abs()).exp().ln_1p()
+    pub fn compile(&self, lambda: f64) -> Vec<Affinity> {
+        self.compile_with(lambda, true)
     }
 
-    pub fn compile(&self, lambda: f64) -> Vec<Affinity> {
-        let partition = self.log_partition(lambda);
-        let values: [f64; 256] =
-            std::array::from_fn(|s| (lambda * self.score(s) - partition).min(0.).exp());
+    pub fn compile_with(&self, lambda: f64, independent: bool) -> Vec<Affinity> {
+        let partition = self.normalization(lambda, independent);
+        let values: [f64; 256] = std::array::from_fn(|s| {
+            (lambda * (self.score(s) - self.bias) - partition)
+                .min(0.)
+                .exp()
+        });
         let cutoff = values.iter().copied().fold(0., f64::max) * SUPPORT_FRACTION;
         values
             .into_iter()

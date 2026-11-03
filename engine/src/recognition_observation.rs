@@ -56,7 +56,8 @@ pub fn report(g: &Compiled, c: &Config) -> Value {
         susceptibility[a.species] -= (1. - c.susceptibility_floor) * a.value;
     }
     json!({"kind":if m.keys.is_some() {"complementarity"} else {"radial"},
-        "lambda":c.binding_lambda,"sites":sites,"susceptibility":susceptibility.as_slice()})
+        "lambda":c.binding_lambda,"independentStrength":c.binding_independent_strength,
+        "sites":sites,"susceptibility":susceptibility.as_slice()})
 }
 
 #[cfg(test)]

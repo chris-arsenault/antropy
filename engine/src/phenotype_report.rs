@@ -46,11 +46,11 @@ impl Group {
         self.light += light;
         self.count += 1;
     }
-    fn report(self, flux: Option<&Flux>) -> Value {
+    fn report(self, flux: Option<&Flux>, config: &crate::config::Config) -> Value {
         json!({"count":self.count,"actual":self.actual.map(distribution),
             "target":self.target.map(distribution),
             "illumination":if self.count == 0 { None } else { Some(self.light / self.count as f64) },
-            "activity":flux.map(activity)})
+            "activity":flux.map(|f| activity(f, config))})
     }
 }
 
@@ -76,8 +76,25 @@ fn species(values: &[f64; 256]) -> Value {
     json!({"rows":rows,"total":total,"other":(total-shown).max(0.)})
 }
 
-pub fn activity(f: &Flux) -> Value {
+pub fn activity(f: &Flux, config: &crate::config::Config) -> Value {
+    let mut starting = config.founder_circuit.to_vec();
+    starting.extend(&config.source_species);
+    starting.sort_unstable();
+    starting.dedup();
+    let work = |secondary: bool| {
+        let sum = |values: &[f64; 256]| {
+            (0..256)
+                .filter(|s| starting.contains(s) != secondary)
+                .map(|s| values[s])
+                .sum::<f64>()
+        };
+        json!({"captured":sum(&f.reaction_captured),"spent":sum(&f.reaction_spent),
+            "external":sum(&f.reaction_external)})
+    };
     json!({"imports":species(&f.imports),"exports":species(&f.exports),
+        "inputWork":{"startingIdentities":starting,"starting":work(false),"nonstarting":work(true),
+            "captured":species(&f.reaction_captured),"spent":species(&f.reaction_spent),
+            "external":species(&f.reaction_external)},
         "flows":f.ledger.flows,"overflow":f.ledger.overflow_heat,
         "division":f.ledger.division_heat,"organismSeconds":f.organism_seconds})
 }
@@ -102,7 +119,7 @@ pub fn report(w: &World) -> Value {
     }
     let mut index = 0;
     let reports = groups.map(|group| {
-        let result = group.report(o.active().then_some(&o.interval().groups[index]));
+        let result = group.report(o.active().then_some(&o.interval().groups[index]), &w.config);
         index += 1;
         result
     });
@@ -141,6 +158,6 @@ pub fn web(w: &World, query: &crate::chemical_roles::Query) -> Value {
         .collect();
     json!({"tick":w.tick,"population":w.cells.len(),"assigned":0,"unassigned":0,
         "mode":"measured","focus":query.focus,"offset":offset,"pairs":pairs,
-        "rows":rows,"sources":crate::chemical_roles::source_species(w),"activity":flux.map(activity),
+        "rows":rows,"sources":crate::chemical_roles::source_species(w),"activity":flux.map(|f| activity(f, &w.config)),
         "window":w.observer.as_ref().map(|o| o.coverage(w.config.dt))})
 }

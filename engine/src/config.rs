@@ -64,6 +64,8 @@ pub struct Config {
     pub affinity_radius: f64,
     /// Shared complementarity steepness in logits per binding-score unit.
     pub binding_lambda: f64,
+    /// Birth-compiled preference changes preserve total binding strength at fixed bias.
+    pub binding_independent_strength: bool,
     /// Explicit diagnostic startup ablation; ecology founders carry inherited keys.
     pub radial_founders: bool,
     pub movement_impedance: f64,
@@ -185,6 +187,7 @@ impl Default for Config {
             habitat_feedback: true,
             affinity_radius: 3.,
             binding_lambda: 6.,
+            binding_independent_strength: true,
             radial_founders: true,
             movement_impedance: 0.5,
             diffusion_impedance: 1.,

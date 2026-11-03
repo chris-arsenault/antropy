@@ -20,6 +20,14 @@ export interface SpeciesFlow {
 export interface Activity {
   imports: SpeciesFlow;
   exports: SpeciesFlow;
+  inputWork: {
+    startingIdentities: number[];
+    starting: { captured: number; spent: number; external: number };
+    nonstarting: { captured: number; spent: number; external: number };
+    captured: SpeciesFlow;
+    spent: SpeciesFlow;
+    external: SpeciesFlow;
+  };
   flows: Flows;
   overflow: number;
   division: number;

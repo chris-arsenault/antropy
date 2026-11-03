@@ -2,10 +2,11 @@
 
 **Status:** Complementarity is integrated in ordinary native/browser startup at all seventeen
 sites. The October6 [binding correction](../key-binding-correction.md) replaces independent
-sigmoids with competing binding states. Earlier v52 [delivery](../plans/RUGGED-INTERACTION-PLAN.md)
+sigmoids with competing binding states; v59 additionally separates binding strength from
+chemical preference, preserving finite capacity and founder profiles. Earlier v52 [delivery](../plans/RUGGED-INTERACTION-PLAN.md)
 and [simulation comparisons](../rugged-interaction-results.md) describe the superseded law.
-The live server's selected four-group ablation has keys disabled; this correction does not
-change that operating configuration. The
+The current [repair plan](../plans/SUSTAINING-CHEMICAL-ECONOMY-PLAN.md) addresses access to
+sustaining nonstarting inputs; historical role fixtures do not establish that outcome. The
 [research paper](kauffman-landscapes-research.md) supplies the literature and analysis.
 
 The [chemical-consequence follow-up](../chemical-consequence-results.md) failed its funded
@@ -129,18 +130,23 @@ Write identity `s = 16x + y` as eight bits `(x3 x2 x1 x0 y3 y2 y1 y0)` and map e
 weights `κ_j ∈ [−1, 1]` and a bias `b`. Its binding energy and affinity for identity s are
 
 ```text
-E(s) = Σ_j κ_j β_j(s) + b
-Z = 1 + Σ_t exp(λ E(t))
-A(s) = exp(λ E(s)) / Z
+P(s) = Σ_j κ_j β_j(s)
+Z_k = Σ_t exp(λ P(t)) = product_j(2 cosh(λ κ_j))
+Z_ref = (2 cosh(λ))^8
+F = sigmoid(λ b + log(Z_ref))
+A(s) = F exp(λ P(s)) / Z_k
 ```
 
-The unit term is the unbound state. All256 bound states share one capacity, so
-`sum_s A(s)<=1`. λ is the single shared ruggedness control. One full-weight bit mismatch
+The unbound fraction is `1-F`. All256 bound states share the occupied fraction, so
+`sum_s A(s)=F<=1`. λ is the single shared ruggedness control. One full-weight bit mismatch
 changes relative binding weight by `exp(-2λ)`. Weight sign selects a preferred bit value;
 magnitude sets its importance. Bias changes total binding against the unbound state while
-preserving the relative preferences. Strong positive bias cannot erase those preferences.
-The bound partition factors into `exp(λb)*product_j(2*cosh(λκ_j))`; stable logarithms evaluate
-it once per compiled key, without live nonlinear per-species work.
+preserving the relative preferences; weight changes now preserve that total strength as well.
+Strong positive bias cannot erase preferences. The reference is the partition at unit-magnitude
+weights, derived from their bounded domain, preserving founder profiles. Stable logarithms
+evaluate both partitions once per compiled key without live nonlinear per-species work.
+`bindingIndependentStrength=false` is a startup ablation using `Z_ref=Z_k`, which recovers the
+older coupling between preference magnitude and occupied fraction. It is not a live refit.
 
 A(s) replaces the radial kernel `k_a(s)` wherever the runtime compiles recognition rows:
 

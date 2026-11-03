@@ -6,6 +6,28 @@ Open hypotheses raised while observing the simulation. Entries preserve the ques
 evidence; they are not accepted explanations, implementation specifications or automatic experiment
 orders. Append findings and decisions without erasing the original hypothesis.
 
+## H7 — Preference mutations can erase binding strength before secondary use pays
+
+**Raised:** November 3, 2026, during the user's sustaining chemical economy repair.
+**Status:** coupling reproduced and corrected in v59; its contribution to ordinary populations'
+continued starting-input dependence remains unresolved.
+
+The competing binding partition made total occupied fraction depend on preference-weight
+magnitudes as well as bias. Founder weights start at domain endpoints, so initial magnitude
+changes reduce that contribution to strength. Reshaping recognition could therefore remove
+functional capacity unless strength mutated in compensation, independently of the intended
+tradeoff of sharing finite capacity across chemicals. At lambda6/bias-7, eight magnitudes0.75
+give total binding0.002475 versus0.99753 at unit magnitude.
+
+V59 separates conditional chemical preference from the occupied fraction using the shared
+factorized partition and unit-weight reference. Common-law weight mutations preserve total
+strength at fixed bias. The matched constructed waste consumer now funds growth and division;
+coupled, donor-off and enzyme-off controls starve. A bounded ordinary-start renewal comparison
+retains funded reproduction, without demonstrating an evolved secondary economy. Mutation,
+prices and supply remain unchanged. The [decision record](design/decisions-and-evidence.md#binding-strength-and-secondary-food--november-3)
+owns the conditions, negative findings and limits. This finding does not settle H2 or establish
+that all viable consumer combinations are accessible or selectively advantageous.
+
 ## Disposition update — September 30
 
 V43 replaced machinery construction and

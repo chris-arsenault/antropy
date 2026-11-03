@@ -34,6 +34,7 @@ export interface RecognitionSite {
 export interface RecognitionProfile {
   kind: "complementarity" | "radial";
   lambda: number;
+  independentStrength: boolean;
   sites: RecognitionSite[];
   susceptibility: number[];
 }

@@ -104,10 +104,13 @@ fn single_locus(w: &World, v: &Value) -> Result<Value, String> {
             after.mutate_locus(locus, &mut rng, &w.config);
             let active = site < 8 || site == 16 || compiled.chromosome.chemistry.programs[site - 8];
             let profile = |key: crate::binding::Key| {
-                key.compile(w.config.binding_lambda)
-                    .iter()
-                    .map(|a| [a.species as f64, a.value])
-                    .collect::<Vec<_>>()
+                key.compile_with(
+                    w.config.binding_lambda,
+                    w.config.binding_independent_strength,
+                )
+                .iter()
+                .map(|a| [a.species as f64, a.value])
+                .collect::<Vec<_>>()
             };
             json!({"site":site,"locus":locus,"active":active,"before":before,"after":after,
             "affinityBefore":profile(before),"affinityAfter":profile(after)})

@@ -35,6 +35,13 @@ impl Executor {
                 *sum += amount * value;
             }
             energy[3] += amount * r.energy[0].max(0.);
+            if let Some((interval, mask)) = observer.as_mut() {
+                interval.each(*mask, |g| {
+                    g.reaction_captured[r.substrate] += amount * r.energy[0].max(0.);
+                    g.reaction_spent[r.substrate] += amount * (-r.energy[0]).max(0.);
+                    g.reaction_external[r.substrate] += amount * r.energy[2];
+                });
+            }
             if record {
                 self.work.routes.push((r.slot, r.row, amount));
             }

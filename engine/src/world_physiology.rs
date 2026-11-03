@@ -142,6 +142,11 @@ impl World {
                         to.reaction(key / 256, key % 256, from.routes[key]);
                     }
                     to.ledger.overflow_heat += from.ledger.overflow_heat;
+                    for s in 0..256 {
+                        to.reaction_captured[s] += from.reaction_captured[s];
+                        to.reaction_spent[s] += from.reaction_spent[s];
+                        to.reaction_external[s] += from.reaction_external[s];
+                    }
                 }
             }
         }

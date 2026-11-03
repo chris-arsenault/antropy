@@ -55,6 +55,15 @@ fn partitioned_world_preserves_funding_observations_and_checkpoint_boundaries() 
         for (&x, &y) in a.routes.iter().zip(&b.routes) {
             assert!((x - y).abs() < 1e-8);
         }
+        for (x, y) in [
+            (&a.reaction_captured, &b.reaction_captured),
+            (&a.reaction_spent, &b.reaction_spent),
+            (&a.reaction_external, &b.reaction_external),
+        ] {
+            for (x, y) in x.iter().zip(y) {
+                assert!((x - y).abs() < 1e-8);
+            }
+        }
         assert!((a.ledger.overflow_heat - b.ledger.overflow_heat).abs() < 1e-8);
     }
 }

@@ -21,12 +21,102 @@ fn competing_states_match_the_explicit_partition_and_share_finite_capacity() {
             let weights: Vec<_> = (0..256).map(|s| (lambda * key.score(s)).exp()).collect();
             let partition = 1. + weights.iter().sum::<f64>();
             for (s, weight) in weights.iter().enumerate() {
-                assert!((key.affinity(s, lambda) - weight / partition).abs() < 1e-13);
+                assert!((key.affinity_with(s, lambda, false) - weight / partition).abs() < 1e-13);
             }
             assert!(total(&key, lambda) <= 1. + 1e-13);
             assert!(key.compile(lambda).iter().map(|a| a.value).sum::<f64>() <= 1. + 1e-13);
         }
     }
+}
+
+#[test]
+fn preference_changes_do_not_destroy_binding_strength_or_grant_extra_capacity() {
+    let parent = Key::target([0., 0.]);
+    for lambda in [0.25, 3., 6., 64.] {
+        for magnitude in [0., 0.25, 0.5, 0.75, 0.88, 1.] {
+            let altered = Key {
+                weights: [-magnitude; 8],
+                ..parent
+            };
+            assert!((total(&altered, lambda) - total(&parent, lambda)).abs() < 1e-12);
+        }
+        for species in 0..256 {
+            assert!(
+                (parent.affinity(species, lambda) - parent.affinity_with(species, lambda, false))
+                    .abs()
+                    < 1e-13
+            );
+        }
+    }
+    let intermediate = Key {
+        weights: [-0.75; 8],
+        ..parent
+    };
+    let old: f64 = (0..256)
+        .map(|s| intermediate.affinity_with(s, 6., false))
+        .sum();
+    assert!(old < 0.003);
+    assert!(total(&intermediate, 6.) > 0.99);
+    // A changed preference redistributes the fixed occupied share, including to new inputs.
+    assert!(intermediate.affinity(128, 6.) > parent.affinity(128, 6.));
+}
+
+#[test]
+fn ordinary_preference_mutations_preserve_strength_without_compensating_bias_mutations() {
+    let config = Config::ecology();
+    let mut rng = Random::new(27);
+    let mut key = Key::target([0., 0.]);
+    let original = key;
+    let occupied = total(&key, config.binding_lambda);
+    for event in 0..128 {
+        key.mutate_locus(event % 8, &mut rng, &config);
+        assert_eq!(key.bias, original.bias);
+        assert!((total(&key, config.binding_lambda) - occupied).abs() < 1e-12);
+    }
+    assert_ne!(key.weights, original.weights);
+    assert!(
+        key.compile(config.binding_lambda).len() > original.compile(config.binding_lambda).len()
+    );
+}
+
+#[test]
+fn strength_ablation_recompiles_all_consumers_and_persists_as_startup_configuration() {
+    let mut config = Config::ecology();
+    let chemistry = crate::chemistry::Chemistry::new(101).unwrap();
+    let mut g = crate::genetics::Genotype::seed(&config, &chemistry);
+    let key = Key {
+        weights: [-0.75; 8],
+        bias: -7.,
+    };
+    let keys = g.chromosomes[0].chemistry.keys.as_mut().unwrap();
+    keys.receptors.fill(key);
+    keys.transporters.fill(key);
+    keys.enzymes.fill(key);
+    keys.membrane = key;
+    g.compile(&config, &chemistry);
+    let before = g.compiled.as_ref().unwrap().operators.clone();
+    config.binding_independent_strength = false;
+    g.compile(&config, &chemistry);
+    let after = &g.compiled.as_ref().unwrap().operators;
+    assert!(!std::sync::Arc::ptr_eq(&before.membrane, &after.membrane));
+    assert!(before.transporters[0][0].value > 100. * after.transporters[0][0].value);
+    assert!(
+        before.enzymes[0].conversions.get(0).binding
+            > 100. * after.enzymes[0].conversions.get(0).binding
+    );
+    let w = crate::world::World::new(
+        27,
+        Config {
+            width: 24.,
+            height: 24.,
+            founders: 4,
+            source_count: 4,
+            ..config
+        },
+    )
+    .unwrap();
+    let restored = crate::world::World::restore(&w.snapshot().unwrap()).unwrap();
+    assert!(!restored.config.binding_independent_strength);
 }
 
 #[test]
@@ -58,7 +148,12 @@ fn binding_strength_changes_total_binding_without_erasing_chemical_preferences()
     strong.bias = 9.;
     let odds = |key: &Key| key.affinity(0, 6.) / key.affinity(128, 6.);
     assert!((odds(&weak) / odds(&strong) - 1.).abs() < 1e-13);
-    assert!(total(&weak, 6.) < 0.001);
+    let narrow_weak = Key {
+        weights: [-1.; 8],
+        bias: weak.bias,
+    };
+    assert!((total(&weak, 6.) - total(&narrow_weak, 6.)).abs() < 1e-13);
+    assert!(total(&strong, 6.) > 100. * total(&weak, 6.));
     assert!(total(&strong, 6.) > 0.999);
 }
 

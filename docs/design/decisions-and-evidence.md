@@ -1,11 +1,79 @@
 # Design decisions and evidence
 
-This is the decision record for the current [work order](README.md), through physical v58. The
+This is the decision record for the current [work order](README.md), through physical v59. The
 [composed runtime](chemistry/composed-runtime.md) owns equations; linked studies retain their
 original versions, controls and failures. Completed implementation does not guarantee a
 particular evolved community. Execution records remain in the [plan archive](../plans/README.md).
 The [design directions registry](directions.md) lists every direction with its status.
 Superseded entries stay in place with a dated note.
+
+## Binding strength and secondary food — November 3
+
+The user clarified the outcome: cells should create and exploit sustaining nonstarting inputs
+through waste reuse or altered reservoir supply. Different reaction products and improved
+extraction from original food do not answer that question. The prior November 3 processing
+comparison remains a benefit result, but was wrongly emphasized as progress on that outcome.
+
+The finite-site partition coupled chemical preference to total binding strength. At lambda6
+and founder bias-7, reducing all eight preference magnitudes from1 to0.75 changed the total
+occupied fraction from0.99753 to0.002475. A preference intermediate therefore required a
+compensating bias change to preserve functional binding, in addition to sharing finite capacity
+among its recognized chemicals. The design described strength and preference as separate roles
+but the implemented coordinates did not separate them. This is a demonstrated access barrier,
+not an established sole cause of founder-food dependence.
+
+V59 normalizes conditional preference separately from occupied fraction. The reference partition
+is derived from the unit-weight domain endpoints, preserving existing founder profiles. Bias
+controls total occupied fraction; weights redistribute it. Broad recognition still divides one
+finite capacity, including protection, and incurs all ordinary physical consequences. All
+seventeen sites share the same law. The common heavy-tail mutation, supply, costs, exact enzyme
+actions and body accounting are unchanged. The startup-only `bindingIndependentStrength=false`
+ablation retains the coupled law. Compiled sharing/invalidation and all physical consumers use
+the selected mode; its persisted configuration requires v59 checkpoints without migration.
+
+In the matched constructed two-cell world, the producer converts0→136 and the recipient uses
+136→128. Both have ordinary paid actions, identical role-zero bound packets, empty initial free
+inventory and initial usable work0.5; only chemical0 is supplied in a finite pulse. The recipient
+has preference magnitudes0.75 at unchanged bias-7. At200 model seconds, normalized recognition
+leaves three recipient descendants with net biomass+6.065 and net funded work+5.775. The
+coupled recipient starves at43 seconds with no growth. Producer-conversion-off and
+recipient-enzyme-off controls also starve. This isolates a sustaining consequence for a
+constructed preference intermediate. It does not demonstrate that ordinary evolution discovers
+the complete recipient or a persistent secondary economy. Different stopping times are retained;
+the sustaining claim does not come from comparing unequal lifetime uptake totals.
+
+A frozen public-operator comparison omits only the cell-body chemical contribution to a168
+reservoir's medium while preserving body material, source stock, load and light. Held inventory
+and future boundary change differently, with closed physical accounts. The effect is small in
+this four-founder context and establishes no sustaining beneficiary advantage. Current-world
+budgets also find substantial nonstarting material already available, poorly matched by most
+cells' import and enzyme capabilities. No additional reservoir law or amplified deposit feedback
+is selected. The repair addresses secondary access; advantageous evolved reservoir modification
+remains unestablished.
+
+The matched ordinary seed27 comparison retains the32/168 recipe, ordinary mutation, learning,
+terrain, costs and all features. After3,600 model seconds, covering two nominal batch-plus-wait
+durations, the repaired arm has29 cells,74 divisions and93 deaths; the coupled arm has4 cells,
+10 divisions and54 deaths. These are one pair of histories whose later random opportunities
+diverge, not independent replicates or proof of long-term replacement. Neither arm goes extinct
+or fails physical validation. They do not establish evolved waste feeding.
+At this endpoint neither arm's living cells records any nonstarting-substrate conversion;
+the observed reproduction improvement is not secondary-food adoption.
+
+Existing phenotype and chemical-web windows now attribute accepted usable capture, uphill
+spending and external transformation work to reaction substrates. Starting/nonstarting totals
+use the resolved founder circuit and source species together. These are work flows, not unique
+molecule provenance, fuel-only chemical potential, net profit after every expense, or proof of
+cross-feeding. Existing expense, growth, overflow and descendant observations remain necessary
+for a sustaining claim. The new reductions are bounded and outside physical serialization.
+
+Reproduction uses `cargo run --release --manifest-path engine/Cargo.toml --example
+secondary_economy -- probe NEW_LOCAL_DIRECTORY`, `reservoir NEW_LOCAL_DIRECTORY`, or
+`ordinary config/alternative-founder-chemistry-4.json NEW_LOCAL_DIRECTORY`. A checkpoint and new
+JSON path select the zero-tick local opportunity budget. Registrations, raw outputs, original
+negative arms and checkpoints remain ignored under `frontend/harness/artifacts/secondary-economy-*`.
+Local implementation and authorized normal-pipeline delivery are tracked in the
+[repair plan](../plans/SUSTAINING-CHEMICAL-ECONOMY-PLAN.md).
 
 ## Alternative starting chemistry — October 31
 
@@ -32,6 +100,151 @@ and 42 living cells, with ordinary external reservoir refills underway. This est
 initial reproduction under the replacement chemistry, not sustained viability or a later
 chemical attractor. The live run continues; raw records remain local under
 `frontend/harness/artifacts/alternative-chemistry-20261031/`.
+
+### Next matched recipe — November 3
+
+The 1/137 world continued to tick 1,518,084 with about 12,800 cells. In the latest
+completed reaction window, 137↔9 carried 76.4% of accepted conversion and 1↔129 carried
+21.4%; together these pairs carried 97.8%. Naturally produced 128 supplied 4.1% of uptake,
+while 128→0 carried only 0.004% of conversion. These observations support dependence on
+the seeded chemical economy over an inevitable return to 0/128. A reversal between the
+two seeded pairs does not establish substantial differentiation beyond that economy.
+
+The next comparison uses `config/alternative-founder-chemistry-2.json`: circuit
+255→175→164→244→255 and reservoirs 255/164, with seed 27 and chemistry seed 101.
+All four identities differ from both preceding viable recipes. The recipe moves recognition
+and enzyme actions farther across chemical space, including a fast-diffusing, high-impedance
+source at 255. Supply amounts, terrain, costs, learning, mutation and feature participation
+remain unchanged. The user explicitly does not require old-world or save preservation.
+
+The question remains whether later chemistry follows the seeded economy or converges on
+the previously dominant identities. Competing explanations are seed dependence, intrinsic
+attraction to the old chemistry, and inability of the new startup to fund replacement.
+Calculate zero-tick founder material/work budgets before restart, then check ordinary uptake,
+growth and division with all evolution enabled. The predicted initial chain is import of
+matched material, paid conversion, growth and offspring; failure before offspring remains a
+startup result rather than evidence about evolved chemical preference. If startup establishes,
+leave this world running for the next chemical comparison rather than extending the old trial.
+Generated budgets and operator captures remain local under
+`frontend/harness/artifacts/chemistry-comparison-20261103/`.
+
+The zero-tick budget gives positive conditional processing margins for three of four founder
+types and confirms no seeded material of identities 0 or 128. The operator restarted the
+live world into generation 2 with only `founderCircuit` and `sourceSpecies` changed. At tick
+1,532 it had 39 cells, one division, ten deaths and 42.05 material units of funded growth.
+By tick 7,276 it had 17 cells, eight divisions and 39 starvation deaths, with 12,392.84
+material units supplied through refills. No further divisions occurred between sampled ticks
+4,500 and 7,250. This was a weak startup with reproduction, not sustained replacement.
+The world subsequently went extinct at tick 27,983; the following comparison supersedes it.
+
+### Continuing selection and evolutionary departure — November 3
+
+The user requested continuing until a sustaining chemistry and a measured comparison with
+its founding chemistry are available. Startup positivity alone and repeated requests for
+more investigation do not fulfill this outcome. Preserve unsuccessful trials, replace empty
+worlds and leave the selected populated world running; old-save preservation is not required.
+
+The 255/164 trial ended at tick 27,983 after 79 divisions and 127 deaths. Late retained
+255-processing cells faced little usable substrate, abundant unprocessed 164 and accumulated
+175 occupying enzyme machinery. Frozen operator probes isolate product inhibition, but do
+not establish a rescue through a lifetime. The optimistic import-proportional budget remained
+positive for 24 of 35 retained 255-processing starvation records. This budget omits passive
+exchange, actual retained products and repair; it must not select a sustaining recipe alone.
+
+The next candidate is 255→127→119→247→255 with reservoirs 255/119. Its adjacent
+identities differ by one recognition bit, preserving the previous viable recipes' immediate
+recognition adjacency while changing the chemical identities and transformation locations.
+All other operating settings remain unchanged. Calculate budgets first, then measure ordinary
+material retention, paid growth, replacement and supply renewal. If this candidate fails,
+select the next matched recipe from the measured failure rather than increasing supply or
+lowering mutation to make it pass.
+
+The competing evolutionary outcomes are confinement to the seeded reaction economy, acquisition
+of additional substrates/products while retaining seed dependence, and substantial replacement
+of the founding chemistry. Record accepted reaction amounts and imports over completed windows,
+including ended cells, alongside birth-compiled recognition and transformation changes in
+reproducing descendants. Possible routes and genotype counts alone do not establish departure.
+Use observed population and biomass replacement through ordinary renewals to choose a populated
+run, then continue it far enough to obtain a concrete chemical result. Bound individual offline
+jobs by elapsed time and retain partial results; those bounds control investigation cost rather
+than define ecological success. Generated data remains local under
+`frontend/harness/artifacts/chemistry-evolution-20261103/`.
+
+The 255/119 live trial went extinct at tick 26,467 after seven divisions and 55 deaths.
+Its full one-bit adjacency therefore did not suffice for startup viability. The next matched
+recipe is `config/alternative-founder-chemistry-4.json`: 32→160→168→40→32 with
+reservoirs 32/168. Chemical 32 has low impedance and low stress; its founder's conditional
+processing margin is larger than the failed 255 founder's. This motivates the candidate,
+without treating that margin as a survival prediction. Ordinary physical laws, supply amounts,
+mutation and features remain unchanged. An offline copy records every complete reaction window
+and regular descendant chemistry censuses while the live world continues separately. This is
+a same-start continuation, not an independent-seed replicate. A second offline recipe,
+2→130→138→10→2 with reservoirs 2/138, also funds repeated replacement, but the selected
+live world remains 32/168; do not attribute the second recipe's measurements to that world.
+
+#### Result: inherited processing changes, persistent fuel dependence
+
+The live 32/168 world reaches tick 70,518 with 528 cells, 3,224 divisions and 2,744 deaths.
+Across the retained tick 61,500–70,500 interval it has 1,476 divisions versus 1,286 deaths,
+with ordinary refills continuing. In the completed live tick 80,000–80,250 reaction window,
+about 57.2% of accepted reaction activity makes products outside the starting four identities.
+The main flows are 32→160 at 41.55%, 32→177 at 21.77% and 32→212 at 13.37%.
+The returned top rows cover all but 0.0028% of reaction amount; even assigning that entire
+remainder to unlisted substrates leaves at most 0.0028% processing substrates outside the
+seeded identities. Neither 0 nor 128 appears in the returned rows. Thus the expressed
+transformation chemistry has departed substantially while fuel remains strongly anchored.
+
+The offline continuation first records 32→212 in the tick 21,250–21,500 window and
+32→177 in the tick 22,500–22,750 window. Neither route exists in the founders. At tick
+40,000, every one of 101 cells inherits a program whose strongest route is 32→212, and
+98 also inherit 32→177; no founder cells remain. The whole-cell strongest-route label still
+says 32→160 for all 101 cells, hiding their other programs and the measured changed flows.
+By tick 60,000 the population reaches generation 50, with 309 carriers of both derived
+programs. These are inherited transformation changes and accepted flows, not merely possible
+new routes. Individual program funding varies with the evolved body.
+
+A matched offline comparison starts from the same tick 60,000 neighborhood and all 309
+carriers. The reference preserves their evolved transformations. The other arm restores only
+the center/angle parameters of enzyme programs 1 and 2 to the 32-processing founder's values.
+Bodies, bound/free material, usable work, private state, recognition and all neighbors initially
+match; inference invalidation matches. Further mutation and birth assimilation are frozen
+equally, while ordinary paid private learning and physical costs continue. After 800 ticks
+(160 model seconds), the evolved cohort has 299 survivors, 53 divisions and 63 deaths;
+the reverted cohort has 268 survivors, 25 divisions and 66 deaths. Net funded work is +65.52
+versus −4.01. Net biomass change is −11.09 versus −92.56. Both arms pass physical validation.
+This demonstrates a present neighborhood benefit from the two derived transformations together;
+it does not assign the gain separately to each transformation or establish independent new diets.
+
+A preceding median-energy single-carrier comparison finds no biomass or funded-work advantage
+over 400 ticks: the cell is below division size but material-limited, and extra captured work
+overflows. Retain this negative rather than treating all additional capture as payer benefit.
+The population comparison includes growth and replacement across heterogeneous carriers and
+finds consequences the one-cell sample does not. All causal arms use offline copies; the live
+world retains ordinary nonzero mutation, assimilation, learning and feature participation.
+
+The offline observation job stops at its declared 1,200-wall-second budget, tick 84,868,
+with 632 cells, 5,211 divisions and 4,627 deaths; it does not reach its 100,000-tick job
+target. All completed 250-tick windows and the final checkpoint remain local. The unselected
+2/138 copy is stopped after the main question is answered, with its last complete sample at
+tick 54,000 and 515 cells; do not label that comparison extinct or complete to its original
+target. No offline job remains running.
+
+The final live readback is generation 4, tick 95,422, with 413 cells and no stop reason.
+The adjacent ecology capture has approximately 7,746 divisions and 7,384 deaths. Population
+fluctuates: its latest retained tick 87,000–95,250 interval has 1,500 divisions versus
+1,605 deaths, from 525 to 420 cells. This operating world remains populated through repeated
+refills and replacement; no claim of indefinite stability follows from that observation.
+Only the founder circuit and reservoir identities changed from the preceding operating config.
+
+To reproduce the method, start seed 27 from the captured resolved config with
+`config/alternative-founder-chemistry-4.json`, retain ordinary evolution and collect complete
+phenotype observer windows every 250 ticks. Preserve the physical neighborhood when comparing
+derived programs with founder transformations. The local causal registration identifies the
+tick-60,000 carrier cohort and its controls; its original `latest.bin` input path was a rolling
+observation checkpoint and now points to the later endpoint. Recreate the anchor from the
+retained tick-zero checkpoint before repeating that comparison; do not substitute the current
+endpoint and claim an identical paired result. Read all active enzyme programs and measured
+flows rather than classifying cells only by their strongest route.
 
 ## Experience-dependent allocation — October 14
 

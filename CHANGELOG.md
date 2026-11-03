@@ -2,6 +2,20 @@
 
 All notable user-visible changes are recorded here.
 
+## 2026-11-03 — Preserve binding strength while chemical preferences evolve
+
+- Separated occupied binding capacity from chemical preference at all seventeen inherited
+  recognition sites. Changing preference no longer requires a compensating strength mutation;
+  broad recognition still divides finite capacity. Founder profiles and physical prices remain.
+- Added default-on `bindingIndependentStrength`, with a startup-only ablation through existing
+  configuration/restart controls, and v59 checkpoints without migration.
+- Measured chemical activity now reports usable capture, uphill spending and external drive by
+  reaction input, including starting/nonstarting totals. These accounts do not establish diet
+  benefit or waste provenance by themselves.
+- A matched constructed waste consumer funds growth and reproduction under the correction;
+  the coupled, producer-off and enzyme-off controls fail. Ordinary evolved waste-fed populations
+  and advantageous reservoir modification remain unestablished.
+
 ## 2026-10-24 — Keep inherited activity response reversible
 
 - Fixed a directional inheritance defect: repeated activity assimilation permanently added

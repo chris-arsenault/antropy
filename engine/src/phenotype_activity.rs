@@ -10,6 +10,10 @@ pub struct Flux {
     pub touched: Vec<usize>,
     pub imports: [f64; 256],
     pub exports: [f64; 256],
+    /// Accepted usable work and spending, attributed to the actual reaction substrate.
+    pub reaction_captured: [f64; 256],
+    pub reaction_spent: [f64; 256],
+    pub reaction_external: [f64; 256],
     pub ledger: Ledger,
     pub organism_seconds: f64,
 }
@@ -20,6 +24,9 @@ impl Default for Flux {
             touched: vec![],
             imports: [0.; 256],
             exports: [0.; 256],
+            reaction_captured: [0.; 256],
+            reaction_spent: [0.; 256],
+            reaction_external: [0.; 256],
             ledger: Ledger::default(),
             organism_seconds: 0.,
         }
@@ -32,6 +39,9 @@ impl Flux {
         }
         self.imports.fill(0.);
         self.exports.fill(0.);
+        self.reaction_captured.fill(0.);
+        self.reaction_spent.fill(0.);
+        self.reaction_external.fill(0.);
         self.ledger = Ledger::default();
         self.organism_seconds = 0.;
     }
