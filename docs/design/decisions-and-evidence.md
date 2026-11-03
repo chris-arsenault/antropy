@@ -79,6 +79,13 @@ Publication `238db80` completed through the normal pipeline. Live readback confi
 compatible checkpoint. The deployed public chemical window returns the new input-work accounts.
 This operational delivery does not establish evolved secondary-food adoption.
 
+Final readback exposed a server observation defect: headless health publications did not expire
+the read-only query cache. Server patch `f9f3a52` applies the existing publication lifetime to
+that path without preparing display scenes or changing physics. After normal deployment, short
+queries advance from tick 116,332 to 116,851. The later 50-model-second window attributes about
+0.002% of captured work to nonstarting inputs. This remains negligible use, not a sustaining
+secondary economy; the cache correction makes the negative observation current.
+
 ## Alternative starting chemistry — October 31
 
 The user requested removing identities 0 and 128 completely from initial material, with

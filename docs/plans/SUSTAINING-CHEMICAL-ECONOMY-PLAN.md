@@ -5,9 +5,9 @@ is published as `238db80`; the selected 32/168 world is running with the repair 
 durable v59 save. Ordinary evolved secondary feeding was not observed in the bounded comparison.
 **Sulion:** `4bc73211-ab2a-4b41-8907-aa6f68d10396`.
 
-**Delivery follow-on:** `dd823206-43aa-432c-8013-3c35864186d6` is repairing a stale public-query
-cache found during final readback. The chemistry repair above is deployed; observation delivery
-remains open until this same-format server fix is published and confirmed.
+**Delivery follow-on:** `dd823206-43aa-432c-8013-3c35864186d6` completed the stale public-query
+cache repair found during final readback. Server patch `f9f3a52` is deployed; short queries now
+refresh across headless publications while preserving the selected populated world.
 
 ## Outcome and controlling corrections
 
@@ -250,6 +250,10 @@ The later final query returned the earlier tick4,751 window while authenticated 
 advanced past24,000. Read-only query caching expired during ordinary display publication but
 not the cheap no-viewer health path. The follow-on repair expires the existing cache at both
 publication paths, preserving same-publication request sharing and headless execution cost.
-No new physical format, chemistry change or fresh-world cutover is required. Repeated public
-queries must advance after a publication boundary with no persistent viewer; a regression also
-checks unchanged physical state and no generated display scenes.
+No new physical format, chemistry change or fresh-world cutover is required. The regression
+checks unchanged physical state and no generated display scenes. Patch `f9f3a52` passed CI and
+deployed through the [normal pipeline](https://github.com/chris-arsenault/antropy/actions/runs/41682251581).
+After deployment, separate short public queries returned ticks 116,332 and 116,851 with advancing
+completed windows and no persistent viewer. Operator readback retained the 32/168 configuration,
+enabled repair and running populated world. The latter window attributes only about 0.002% of
+captured work to nonstarting inputs; fresh observation does not establish secondary-food adoption.
